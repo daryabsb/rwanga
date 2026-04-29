@@ -22,3 +22,4 @@ whitenoise
 pytest
 pytest-django
 requests
+Pillow
