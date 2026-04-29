@@ -1,15 +1,3 @@
-{# ════════════════════════════════════════════════════════
-   RWANGA — _modal.html
-   Generic modal shell. Content loaded via HTMX into
-   #rw-modal-container. Closed via hx-on or JS.
-
-   Usage in view:
-     return render(request, 'components/_modal.html', {
-         'title': 'زیادکردنی لێدان',
-         'body_template': 'shots/_shot_form.html',
-         'size': 'lg',  # sm | md | lg | xl
-     })
-   ════════════════════════════════════════════════════════ #}
 {% load i18n %}
 
 {# Modal backdrop + shell — appended to body via HTMX OOB #}

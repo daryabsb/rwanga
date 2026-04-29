@@ -1,13 +1,3 @@
-{# ════════════════════════════════════════════════════════
-   RWANGA — scripts/upload.html
-   Script upload + AI breakdown trigger.
-   After upload: Celery task queued, WebSocket streams progress.
-
-   Context:
-     project       — Project instance
-     existing_script — Script|None
-     active_jobs   — QuerySet[AIJob] currently running
-   ════════════════════════════════════════════════════════ #}
 {% extends "base.html" %}
 {% load static i18n %}
 

@@ -1,18 +1,3 @@
-{# ════════════════════════════════════════════════════════
-   RWANGA — projects/scene_view.html
-   The core production screen. One scene, all modules.
-   Tabbed interface — each tab loads via HTMX.
-
-   Context:
-     project       — Project instance
-     scene         — Scene instance
-     active_tab    — 'overview'|'shots'|'storyboard'|'floorplan'|
-                     'schedule'|'lighting'|'sound'|'props'|
-                     'wardrobe'|'continuity'
-     scene_list    — QuerySet of Scene (for panel)
-     prev_scene    — Scene|None
-     next_scene    — Scene|None
-   ════════════════════════════════════════════════════════ #}
 {% extends "base.html" %}
 {% load static i18n %}
 

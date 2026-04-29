@@ -1,16 +1,3 @@
-{# ════════════════════════════════════════════════════
-   _ai_progress.html
-   Real-time AI job status — connected via WebSocket.
-   Rendered server-side when a Celery task is queued.
-   Updated client-side via RWJobSocket.updateProgress().
-
-   Context:
-     job      — AIJob model instance
-     job.id   — UUID
-     job.type — 'breakdown' | 'storyboard' | 'floorplan' | 'schedule'
-     job.step — current human-readable step label
-     job.progress — 0–100
-   ════════════════════════════════════════════════════ #}
 {% load i18n %}
 <div class="rw-ai-progress" data-job-id="{{ job.id }}"
      data-refresh-url="{% url 'ai_engine:job_result' job.id %}"

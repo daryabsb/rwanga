@@ -1,4 +1,6 @@
+from django.conf import settings
 from django.contrib import admin
+from django.conf.urls.static import static
 from django.urls import include, path
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from rest_framework.permissions import AllowAny
@@ -34,3 +36,8 @@ urlpatterns = [
     path("notifications/", include("src.notifications.urls")),
     path("progress/", include("src.progress.urls")),
 ]
+
+if settings.DEBUG:
+    if getattr(settings, "STATICFILES_DIRS", None):
+        urlpatterns += static(settings.STATIC_URL, document_root=settings.STATICFILES_DIRS[0])
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
