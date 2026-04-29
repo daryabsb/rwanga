@@ -1,29 +1,65 @@
+{# ════════════════════════════════════════════════════════
+   RWANGA — base.html
+   Every page extends this. Provides:
+   - Bootstrap 5 RTL (swaps to LTR when LANGUAGE_BIDI=False)
+   - Sidebar rail
+   - Top navigation
+   - Toast container
+   - WebSocket + HTMX init
+   Context vars expected:
+     request.user, active_project (optional), active_section (optional)
+   ════════════════════════════════════════════════════════ #}
 {% load static i18n %}
 <!DOCTYPE html>
-<html lang="{{ LANGUAGE_CODE|default:'en' }}"
+<html lang="{{ LANGUAGE_CODE|default:'ku' }}"
       dir="{% if LANGUAGE_BIDI %}rtl{% else %}ltr{% endif %}"
       data-theme="dark"
       data-bs-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{% block title %}Rwanga{% endblock %}</title>
+  <title>{% block title %}ڕوانگە{% endblock %} — ڕوانگە</title>
+  <meta name="description" content="{% block meta_description %}پلاتفۆرمی پێش‌بەرهەمهێنانی فیلمی کوردی{% endblock %}">
+
+  {# Bootstrap 5 — single stylesheet, handles RTL/LTR via dir attribute on <html> #}
   <link rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
         integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
         crossorigin="anonymous">
+
+  {# Rwanga design system — overrides BS5 #}
   <link rel="stylesheet" href="{% static 'css/rwanga.css' %}">
+
   {% block extra_css %}{% endblock %}
 </head>
-<body class="{% block body_class %}{% endblock %}">
-<div class="rw-toast-container" id="rw-toasts"></div>
+
+<body data-project-id="{{ active_project.id|default:'' }}"
+      class="{% block body_class %}{% endblock %}">
+
+{# ── Toast container (populated by rwanga.js / HTMX OOB swaps) ── #}
+<div class="rw-toast-container" id="rw-toasts"
+     hx-swap-oob="true"></div>
+
+{# ── App shell ── #}
 <div class="rw-app">
+
+  {# ── ICON RAIL ── first in DOM = rightmost in RTL, leftmost in LTR #}
   {% include "components/_sidebar.html" %}
+
+  {# ── MAIN AREA ── #}
   <div class="rw-main">
+
+    {# ── TOP NAV ── #}
     {% include "components/_topnav.html" %}
+
+    {# ── PAGE CONTENT ── #}
     {% block content %}{% endblock %}
-  </div>
-</div>
+
+  </div>{# /rw-main #}
+
+</div>{# /rw-app #}
+
+{# ── SCRIPTS ── #}
 <script src="https://unpkg.com/htmx.org@1.9.12"
         integrity="sha384-ujb1lZYygJmzgSwoxRggbCHObe+dDcq5UHv/A6dIyBteLz/1ARQE+2Z0kXCK7/e"
         crossorigin="anonymous"></script>
@@ -31,6 +67,12 @@
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc4s9bIOgUxi8T/jzmU89ADe8NaFVDjoCKJgZfBN3Hk"
         crossorigin="anonymous"></script>
 <script src="{% static 'js/rwanga.js' %}"></script>
+{% block floorplan_js %}{% endblock %}
 {% block extra_js %}{% endblock %}
+
+{# HTMX config: push CSRF header on every request #}
+<meta name="htmx-config" content='{"defaultSwapStyle":"outerHTML"}'>
+{% csrf_token %}
+
 </body>
 </html>

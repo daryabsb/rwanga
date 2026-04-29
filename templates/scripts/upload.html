@@ -1,0 +1,143 @@
+{# ════════════════════════════════════════════════════════
+   RWANGA — scripts/upload.html
+   Script upload + AI breakdown trigger.
+   After upload: Celery task queued, WebSocket streams progress.
+
+   Context:
+     project       — Project instance
+     existing_script — Script|None
+     active_jobs   — QuerySet[AIJob] currently running
+   ════════════════════════════════════════════════════════ #}
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "بارکردنی دەستنووس" %} — {{ project.title }}{% endblock %}
+
+{% block content %}
+<div style="flex:1;overflow-y:auto;background:var(--rw-bg)">
+
+  {% include "components/_breadcrumb.html" with
+     crumbs=crumbs
+     current=_("بارکردنی دەستنووس") %}
+
+  <div style="padding:var(--rw-pad-lg);max-width:720px">
+
+    <h1 style="font-size:26px;font-weight:700;margin-bottom:8px">{% trans "دەستنووسەکەت بار بکە" %}</h1>
+    <p style="color:var(--rw-text-2);font-size:14px;margin-bottom:var(--rw-pad-lg);line-height:1.7">
+      {% trans "دوای بارکردن، AI بە خۆی دەستنووسەکە دادەشکێنێت:" %}
+      {% trans "دیمەنەکان، کەسایەتییەکان، شوێنەکان، کەلوپەل، جلوبەرگ، و کاتی شاشە." %}
+      {% trans "دەرهێنەر دواتر ئەنجامەکە پشکنی و چاکی دەکاتەوە." %}
+    </p>
+
+    {# Active AI jobs #}
+    <div id="rw-ai-status">
+      {% for job in active_jobs %}
+        {% include "components/_ai_progress.html" with job=job %}
+      {% endfor %}
+    </div>
+
+    {% if existing_script %}
+    {# ── Existing script — show replace option ── #}
+    <div class="rw-card" style="margin-bottom:var(--rw-pad-md);border-inline-start:4px solid var(--rw-amber)">
+      <div class="rw-card-title">{% trans "دەستنووسی ئێستا" %}</div>
+      <div style="display:flex;align-items:center;gap:16px">
+        <span style="font-size:32px">📄</span>
+        <div>
+          <div style="font-size:14px;font-weight:600">{{ existing_script.filename }}</div>
+          <div style="font-size:12px;color:var(--rw-text-2)">
+            {{ existing_script.scene_count }} {% trans "دیمەن" %} ·
+            {{ existing_script.created_at|date:"Y/m/d" }}
+          </div>
+        </div>
+        <div style="margin-inline-start:auto;display:flex;gap:8px">
+          <a href="{% url 'scripts:breakdown' project.pk %}" class="rw-btn rw-btn-ghost">
+            {% trans "بینینی داڕشتن" %}
+          </a>
+          <button class="rw-btn rw-btn-ai"
+                  hx-post="{% url 'ai_engine:rerun_breakdown' existing_script.pk %}"
+                  hx-target="#rw-ai-status">
+            🤖 {% trans "داڕشتنی دووبارە" %}
+          </button>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    {# ── Upload zone ── #}
+    <form method="post"
+          enctype="multipart/form-data"
+          action="{% url 'scripts:upload' project.pk %}"
+          id="rw-upload-form"
+          hx-post="{% url 'scripts:upload' project.pk %}"
+          hx-target="#rw-ai-status"
+          hx-encoding="multipart/form-data"
+          hx-indicator="#rw-upload-spinner">
+      {% csrf_token %}
+
+      <div class="rw-upload-zone"
+           id="rw-upload-zone"
+           onclick="document.getElementById('rw-file-input').click()"
+           ondragover="event.preventDefault();this.classList.add('drag-over')"
+           ondragleave="this.classList.remove('drag-over')"
+           ondrop="event.preventDefault();this.classList.remove('drag-over');
+                   document.getElementById('rw-file-input').files=event.dataTransfer.files;
+                   document.getElementById('rw-upload-form').submit()">
+        <div class="rw-upload-icon" id="rw-upload-spinner">
+          <span class="htmx-indicator" style="font-size:40px;display:none">⟳</span>
+          <span class="htmx-default">📄</span>
+        </div>
+        <div class="rw-upload-title" id="rw-upload-filename">
+          {% trans "دەستنووسەکەت لێرە بکێشە" %}
+        </div>
+        <div class="rw-upload-sub">
+          {% trans "یان کلیک بکە بۆ هەڵبژاردن لە کۆمپیوتەرەکەت" %}
+        </div>
+        <div class="rw-upload-formats">
+          <span class="rw-format-chip">Final Draft .fdx</span>
+          <span class="rw-format-chip">Fountain .fountain</span>
+          <span class="rw-format-chip">.pdf</span>
+          <span class="rw-format-chip">Word .docx</span>
+        </div>
+      </div>
+
+      <input type="file"
+             id="rw-file-input"
+             name="script_file"
+             accept=".fdx,.fountain,.pdf,.docx"
+             style="display:none"
+             onchange="
+               document.getElementById('rw-upload-filename').textContent = this.files[0]?.name || '';
+               document.getElementById('rw-upload-form').dispatchEvent(new Event('submit'))">
+
+    </form>
+
+    {# ── What AI does ── #}
+    <div style="margin-top:var(--rw-pad-lg)">
+      <div class="rw-section-hdr">{% trans "AI چی دەکات" %}</div>
+      {% for item in ai_steps %}
+      <div style="display:flex;gap:16px;padding:16px 0;border-bottom:1px solid var(--rw-border-2)">
+        <span style="font-size:22px;width:32px;flex-shrink:0">{{ item.icon }}</span>
+        <div>
+          <div style="font-size:14px;font-weight:600;margin-bottom:4px">{{ item.title }}</div>
+          <div style="font-size:12px;color:var(--rw-text-2);line-height:1.6">{{ item.desc }}</div>
+        </div>
+      </div>
+      {% empty %}
+      <div style="display:flex;gap:16px;padding:16px 0;border-bottom:1px solid var(--rw-border-2)">
+        <span style="font-size:22px;width:32px">🎬</span>
+        <div><div style="font-size:14px;font-weight:600;margin-bottom:4px">{% trans "دیمەن و کەسایەتی" %}</div><div style="font-size:12px;color:var(--rw-text-2)">{% trans "هەموو دیمەنەکان، کەسایەتییەکان، و شوێنەکان دادەشکێنرێن." %}</div></div>
+      </div>
+      <div style="display:flex;gap:16px;padding:16px 0;border-bottom:1px solid var(--rw-border-2)">
+        <span style="font-size:22px;width:32px">🏷</span>
+        <div><div style="font-size:14px;font-weight:600;margin-bottom:4px">{% trans "داڕشتنی خۆکار" %}</div><div style="font-size:12px;color:var(--rw-text-2)">{% trans "کەلوپەل، جلوبەرگ، SFX، VFX خۆکار دەناسرێتەوە." %}</div></div>
+      </div>
+      <div style="display:flex;gap:16px;padding:16px 0">
+        <span style="font-size:22px;width:32px">📅</span>
+        <div><div style="font-size:14px;font-weight:600;margin-bottom:4px">{% trans "کاتی شاشە" %}</div><div style="font-size:12px;color:var(--rw-text-2)">{% trans "کاتی تاقمینی هەر دیمەنێک لە بنەماوەی پرسیار کرا." %}</div></div>
+      </div>
+      {% endfor %}
+    </div>
+
+  </div>
+</div>
+{% endblock %}

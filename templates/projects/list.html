@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Projects" %}{% endblock %}
+
+{% block content %}
+<div id="rw-content" class="rw-dash-body">
+  <section class="rw-mod-section">
+    <header class="rw-sec-head">
+      <h2 class="rw-sec-title">{% trans "Projects" %}</h2>
+    </header>
+    <div class="rw-sec-modules">
+      {% for project in projects %}
+      <a href="{% url 'projects:dashboard' project.pk %}" class="rw-mod-card">
+        <span class="rw-mod-icon">⊞</span>
+        <span class="rw-mod-name">{{ project.title }}</span>
+      </a>
+      {% empty %}
+      <a href="{% url 'projects:create_wizard' %}" class="rw-mod-card">
+        <span class="rw-mod-icon">＋</span>
+        <span class="rw-mod-name">{% trans "Create Project" %}</span>
+      </a>
+      {% endfor %}
+    </div>
+  </section>
+</div>
+{% endblock %}

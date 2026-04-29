@@ -1,0 +1,10 @@
+{% for item in scene_list %}
+<li class="rw-scene-item {% if scene and item.pk == scene.pk %}active{% endif %}">
+  <a href="{% url 'projects:scene' project.pk item.pk %}">
+    <span class="rw-scene-num">{{ item.number }}</span>
+    <span class="rw-scene-title-sm">{{ item.title|default:"Scene" }}</span>
+  </a>
+</li>
+{% empty %}
+<li class="rw-scene-item">{% load i18n %}{% trans "No scenes yet" %}</li>
+{% endfor %}
