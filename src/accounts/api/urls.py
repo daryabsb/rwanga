@@ -7,9 +7,11 @@ from src.accounts.api.views import (
     ProjectMembershipViewSet,
     SignupProfileViewSet,
     StudioViewSet,
+    UserViewSet,
 )
 
 router = DefaultRouter()
+router.register("users", UserViewSet, basename="user")
 router.register("studios", StudioViewSet, basename="studio")
 router.register("memberships", ProjectMembershipViewSet, basename="membership")
 router.register("consultants", ConsultantProfileViewSet, basename="consultant")

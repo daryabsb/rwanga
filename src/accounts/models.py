@@ -1,9 +1,36 @@
-import uuid
-
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.conf import settings
 from django.db import models
 
+from src.accounts.managers import UserManager
 from src.core.models import BaseModel
+
+
+class User(PermissionsMixin, AbstractBaseUser):
+    email = models.EmailField(max_length=255, unique=True)
+    name = models.CharField(max_length=255, null=True, blank=True)
+    terms = models.BooleanField(default=False)
+    image = models.ImageField(upload_to="users/images/", null=True, blank=True, default="user.png")
+    pin = models.SmallIntegerField(default=1699)
+    is_active = models.BooleanField(default=True)
+    is_staff = models.BooleanField(default=False)
+    must_change_password_on_first_login = models.BooleanField(default=False)
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    objects = UserManager()
+
+    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = []
+
+    class Meta:
+        ordering = ["-created"]
+
+    def __str__(self):
+        return self.email
+
+    def get_full_name(self):
+        return self.name or self.email
 
 
 class Studio(BaseModel):
@@ -36,7 +63,12 @@ class ProjectMembership(BaseModel):
         EDITOR = "editor", "Editor"
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    project_id = models.UUIDField(default=uuid.uuid4, db_index=True)
+    project = models.ForeignKey(
+        "projects.Project",
+        on_delete=models.CASCADE,
+        related_name="memberships",
+        db_constraint=False,
+    )
     role_type = models.CharField(max_length=32, choices=RoleType.choices)
     department_role = models.CharField(max_length=32, choices=DepartmentRole.choices, blank=True)
     review_scope = models.CharField(max_length=64, blank=True)
@@ -63,7 +95,12 @@ class ProjectConsultantAssignment(BaseModel):
         ACTIVE = "active", "Active"
         COMPLETED = "completed", "Completed"
 
-    project_id = models.UUIDField(default=uuid.uuid4, db_index=True)
+    project = models.ForeignKey(
+        "projects.Project",
+        on_delete=models.CASCADE,
+        related_name="consultant_assignments",
+        db_constraint=False,
+    )
     consultant = models.ForeignKey(ConsultantProfile, on_delete=models.CASCADE, related_name="assignments")
     assigned_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True

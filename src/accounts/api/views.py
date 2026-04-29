@@ -6,6 +6,7 @@ from src.accounts.api.serializers import (
     ProjectMembershipSerializer,
     SignupProfileSerializer,
     StudioSerializer,
+    UserSerializer,
 )
 from src.accounts.models import (
     ConsultantProfile,
@@ -13,7 +14,14 @@ from src.accounts.models import (
     ProjectMembership,
     SignupProfile,
     Studio,
+    User,
 )
+
+
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [permissions.AllowAny]
 
 
 class StudioViewSet(viewsets.ModelViewSet):

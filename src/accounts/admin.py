@@ -6,8 +6,10 @@ from src.accounts.models import (
     ProjectMembership,
     SignupProfile,
     Studio,
+    User,
 )
 
+admin.site.register(User)
 admin.site.register(Studio)
 admin.site.register(ProjectMembership)
 admin.site.register(ConsultantProfile)

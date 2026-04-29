@@ -4,10 +4,16 @@ from src.accounts.models import (
     ProjectMembership,
     SignupProfile,
     Studio,
+    User,
 )
 
 
 class AccountsService:
+    @staticmethod
+    def create_user(**kwargs):
+        password = kwargs.pop("password", None)
+        return User.objects.create_user(password=password, **kwargs)
+
     @staticmethod
     def create_studio(**kwargs):
         return Studio.objects.create(**kwargs)

@@ -4,3 +4,6 @@ from django.apps import AppConfig
 class CoreConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
     name = "src.core"
+
+    def ready(self):
+        import src.core.management  # noqa: F401
