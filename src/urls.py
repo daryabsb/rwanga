@@ -26,6 +26,7 @@ urlpatterns = [
     path("api/v1/projects/", include("src.projects.api.urls")),
     path("api/v1/progress/", include("src.progress.api.urls")),
     path("accounts/", include("src.accounts.urls")),
+    path("accounts/", include("allauth.urls")),
     path("projects/", include("src.projects.urls")),
     path("scripts/", include("src.scripts.urls")),
     path("shots/", include("src.shots.urls")),

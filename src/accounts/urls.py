@@ -1,5 +1,4 @@
-from allauth.account.forms import LoginForm
-from django.conf import settings as django_settings
+from allauth.account.views import LoginView as AllauthLoginView
 from django.contrib.auth import logout
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
@@ -9,24 +8,8 @@ from django.views import View
 app_name = "accounts"
 
 
-class LoginView(View):
-    def get(self, request):
-        if request.user.is_authenticated:
-            return redirect(request.GET.get("next") or django_settings.LOGIN_REDIRECT_URL)
-        return render(request, "accounts/login.html")
-
-    def post(self, request):
-        data = request.POST.copy()
-        if data.get("email") and not data.get("login"):
-            data["login"] = data["email"]
-        login_form = LoginForm(data=data, request=request)
-        if login_form.is_valid():
-            return login_form.login(
-                request,
-                redirect_url=data.get("next") or request.GET.get("next") or django_settings.LOGIN_REDIRECT_URL,
-            )
-        error = "; ".join(login_form.non_field_errors()) or "Invalid login credentials."
-        return render(request, "accounts/login.html", {"error": error}, status=400)
+class LoginView(AllauthLoginView):
+    template_name = "accounts/login.html"
 
 
 class RegisterView(View):
