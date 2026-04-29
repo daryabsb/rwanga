@@ -1,0 +1,7 @@
+{% load i18n %}
+<aside class="rw-rail" role="navigation" aria-label="{% trans 'Main navigation' %}">
+  <a href="{% url 'projects:dashboard' %}" class="rw-rail-logo" title="Rwanga">ڕ</a>
+  <a href="{% url 'projects:dashboard' %}" class="rw-rail-icon active" title="{% trans 'Projects' %}">⊞</a>
+  <div class="rw-rail-sep"></div>
+  <button class="rw-rail-theme js-theme-toggle" onclick="RW.themeToggle()" title="{% trans 'Toggle theme' %}">☀</button>
+</aside>

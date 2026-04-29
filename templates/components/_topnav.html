@@ -1,0 +1,15 @@
+{% load i18n %}
+<nav class="rw-topnav" role="navigation" aria-label="{% trans 'Project navigation' %}">
+  {% if active_project %}
+  <a href="{% url 'projects:workspace' active_project.id %}" class="rw-topnav-project">
+    <div class="rw-project-thumb">🎬</div>
+    <span class="rw-project-name">{{ active_project.title }}</span>
+  </a>
+  <div class="rw-section-tabs" role="tablist">
+    <a class="rw-sec-tab active" href="{% url 'projects:workspace' active_project.id %}">{% trans "Workspace" %}</a>
+    <a class="rw-sec-tab" href="{% url 'projects:scene-list' active_project.id %}">{% trans "Scenes" %}</a>
+  </div>
+  {% endif %}
+  <div class="rw-topnav-spacer"></div>
+  <div class="rw-topnav-end"></div>
+</nav>

@@ -7,13 +7,13 @@ from src.projects.services import ProjectsService
 class ProjectsDashboardView(View):
     def get(self, request):
         projects = ProjectsService.list_projects()
-        return render(request, "projects/dashboard.html", {"projects": projects})
+        return render(request, "projects/dashboard.html", {"projects": projects, "active_project": None})
 
 
 class ProjectWorkspaceView(View):
     def get(self, request, project_id):
         project = ProjectsService.get_project(project_id)
-        return render(request, "projects/workspace.html", {"project": project})
+        return render(request, "projects/workspace.html", {"project": project, "active_project": project})
 
 
 class ProjectSceneListView(View):
@@ -23,5 +23,5 @@ class ProjectSceneListView(View):
         return render(
             request,
             "projects/scene_list.html",
-            {"project": project, "scenes": scenes},
+            {"project": project, "scenes": scenes, "active_project": project, "active_scene": scenes.first()},
         )

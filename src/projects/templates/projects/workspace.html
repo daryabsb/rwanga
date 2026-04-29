@@ -1,15 +1,25 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ project.title }} Workspace</title>
-</head>
-<body>
-    <h1>{{ project.title }}</h1>
-    <p>Studio: {{ project.studio.name }}</p>
-    <p>Owner: {{ project.owner.email }}</p>
-    <p>Status: {{ project.status }}</p>
-    <a href="/projects/{{ project.id }}/scenes/">Open Scenes</a>
-</body>
-</html>
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{{ project.title }}{% endblock %}
+
+{% block content %}
+<div id="rw-content" class="rw-dash-body" style="padding:var(--rw-pad-lg)">
+  <div class="rw-proj-header">
+    <div class="rw-proj-cover">🎬</div>
+    <div>
+      <h1 class="rw-proj-title">{{ project.title }}</h1>
+      <div class="rw-proj-sub">
+        <span>{{ project.studio.name }}</span>
+        <span>{{ project.scenes.count }} {% trans "Scenes" %}</span>
+      </div>
+    </div>
+  </div>
+  <div class="rw-sec-modules" style="margin-top:20px">
+    <a href="{% url 'projects:scene-list' project.id %}" class="rw-mod-card">
+      <span class="rw-mod-icon">≡</span>
+      <span class="rw-mod-name">{% trans "Scene List" %}</span>
+    </a>
+  </div>
+</div>
+{% endblock %}
