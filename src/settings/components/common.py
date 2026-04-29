@@ -24,8 +24,6 @@ THIRD_PARTY_APPS = [
     "django_celery_results",
     "allauth",
     "allauth.account",
-    "allauth.socialaccount",
-    "allauth.socialaccount.providers.google",
     "corsheaders",
 ]
 

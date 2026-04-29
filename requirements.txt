@@ -21,3 +21,4 @@ django-cors-headers
 whitenoise
 pytest
 pytest-django
+requests
