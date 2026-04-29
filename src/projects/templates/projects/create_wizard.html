@@ -1,3 +1,4 @@
+
 {% extends "base.html" %}
 {% load static i18n %}
 
@@ -6,7 +7,7 @@
 {% block content %}
 <div style="flex:1;overflow-y:auto;background:var(--rw-bg)">
 
-  {# ── Wizard step bar ── #}
+  
   <div class="rw-wizard-steps">
     {% with steps=wizard_steps %}
     {% for s in steps %}
@@ -18,11 +19,11 @@
     {% endwith %}
   </div>
 
-  {# ── Wizard content ── #}
+  
   <div class="rw-wizard-content" id="rw-wizard-body">
 
     {% if step == 1 %}
-    {# STEP 1 — Basics #}
+    
     <h2 style="font-size:22px;font-weight:700;margin-bottom:var(--rw-pad-md)">{% trans "بنەڕەتەکانی پڕۆژە" %}</h2>
     <form id="rw-wizard-form"
           hx-post="{% url 'projects:create_step' 1 %}"
@@ -55,7 +56,7 @@
     </form>
 
     {% elif step == 2 %}
-    {# STEP 2 — Script Upload #}
+    
     <h2 style="font-size:22px;font-weight:700;margin-bottom:8px">{% trans "بارکردنی دەستنووس" %}</h2>
     <p style="color:var(--rw-text-2);margin-bottom:var(--rw-pad-md);font-size:14px">
       {% trans "AI بە خۆی دەستنووسەکە دادەشکێنێت — دیمەن، کەسایەتی، شوێن، و کەلوپەل دەناسێتەوە." %}
@@ -98,7 +99,7 @@
     </div>
 
     {% elif step == 3 %}
-    {# STEP 3 — Module Selection #}
+    
     <h2 style="font-size:22px;font-weight:700;margin-bottom:8px">{% trans "مۆدیولەکان چالاک بکە" %}</h2>
     <p style="color:var(--rw-text-2);margin-bottom:var(--rw-pad-md);font-size:14px">
       {% trans "دواتر دەتوانیت بگۆڕیت." %}
@@ -127,7 +128,7 @@
     </form>
 
     {% elif step == 4 %}
-    {# STEP 4 — Team Invites #}
+    
     <h2 style="font-size:22px;font-weight:700;margin-bottom:8px">{% trans "تیمەکەت بانگ بکە" %}</h2>
     <p style="color:var(--rw-text-2);margin-bottom:var(--rw-pad-md);font-size:14px">
       {% trans "ئارەزووی نییە — دواتر دەتوانیت زیاد بکەی." %}
@@ -151,7 +152,7 @@
     </form>
     {% endif %}
 
-    {# ── Wizard footer nav ── #}
+    
     <div style="display:flex;justify-content:space-between;margin-top:var(--rw-pad-lg);padding-top:var(--rw-pad-md);border-top:1px solid var(--rw-border)">
       {% if step > 1 %}
       <button class="rw-btn rw-btn-ghost"
@@ -174,6 +175,6 @@
       {% endif %}
     </div>
 
-  </div>{# /wizard-content #}
+  </div>
 </div>
 {% endblock %}

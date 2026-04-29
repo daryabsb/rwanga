@@ -1,3 +1,4 @@
+
 {% load i18n %}
 <div class="rw-ai-progress" data-job-id="{{ job.id }}"
      data-refresh-url="{% url 'ai_engine:job_result' job.id %}"
@@ -22,7 +23,7 @@
 
 </div>
 
-{# Result placeholder — filled by WebSocket on completion #}
+
 <div id="rw-ai-result-{{ job.id }}"></div>
 
 <style>

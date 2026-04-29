@@ -1,6 +1,7 @@
+
 {% load i18n %}
 
-{# Modal backdrop + shell — appended to body via HTMX OOB #}
+
 <div class="rw-modal-backdrop" id="rw-modal-container"
      onclick="if(event.target===this) rwCloseModal()"
      hx-swap-oob="innerHTML:#rw-modal-container">
@@ -48,7 +49,7 @@ document.addEventListener('keydown', e => {
 });
 </script>
 
-{# Size overrides #}
+
 <style>
 .rw-modal-sm { max-width: 380px; }
 .rw-modal-lg { max-width: 720px; }

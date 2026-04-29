@@ -10,12 +10,12 @@ class SchedulingIndexView(View):
         project = get_object_or_404(Project, id=project_pk)
         return render(
             request,
-            "shared/module_placeholder.html",
+            "stub.html",
             {
                 "project": project,
                 "active_project": project,
                 "active_section": "p",
-                "title": "Scheduling",
+                "stub_name": "Scheduling",
                 "icon": "📅",
                 "subtitle": "Scheduling board placeholder.",
             },
@@ -27,12 +27,12 @@ class StripboardView(View):
         project = get_object_or_404(Project, id=project_pk)
         return render(
             request,
-            "shared/module_placeholder.html",
+            "stub.html",
             {
                 "project": project,
                 "active_project": project,
                 "active_section": "p",
-                "title": "Stripboard",
+                "stub_name": "Stripboard",
                 "icon": "≡",
                 "subtitle": "Stripboard placeholder.",
             },
@@ -44,12 +44,12 @@ class CallSheetsView(View):
         project = get_object_or_404(Project, id=project_pk)
         return render(
             request,
-            "shared/module_placeholder.html",
+            "stub.html",
             {
                 "project": project,
                 "active_project": project,
                 "active_section": "sh",
-                "title": "Call sheets",
+                "stub_name": "Call sheets",
                 "icon": "📋",
                 "subtitle": "Call sheet module placeholder.",
             },

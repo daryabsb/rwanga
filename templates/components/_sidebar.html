@@ -1,10 +1,11 @@
+
 {% load i18n %}
 <aside class="rw-rail" role="navigation" aria-label="{% trans 'ناڤیگەیشنی سەرەکی' %}">
 
-  {# Brand mark — links to studio dashboard #}
+  
   <a href="{% url 'projects:list' %}" class="rw-rail-logo" title="ڕوانگە">ڕ</a>
 
-  {# Global nav icons #}
+  
   <a href="{% url 'projects:list' %}"
      class="rw-rail-icon {% if request.resolver_match.app_name == 'projects' and not active_project %}active{% endif %}"
      title="{% trans 'پڕۆژەکان' %}">
@@ -33,7 +34,7 @@
 
   <div class="rw-rail-spacer"></div>
 
-  {# Notification bell — badge populated via WebSocket OOB swap #}
+  
   <button class="rw-rail-icon" style="position:relative" title="{% trans 'ئاگادارکردنەوەکان' %}"
           hx-get="{% url 'notifications:panel' %}"
           hx-target="#rw-notif-panel"
@@ -43,7 +44,7 @@
           {% if unread_count == 0 %}style="display:none"{% endif %}></span>
   </button>
 
-  {# Theme toggle #}
+  
   <button class="rw-rail-theme js-theme-toggle"
           onclick="RW.themeToggle()"
           title="{% trans 'گۆڕینی شێوازی ڕووکار' %}">☀</button>

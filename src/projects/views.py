@@ -1,16 +1,13 @@
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, render
-from django.template.loader import render_to_string
 from django.views import View
 
 from src.projects.models import Project, Scene
-from src.projects.services import ProjectsService
 
 
 class ProjectListView(View):
     def get(self, request):
-        projects = ProjectsService.list_projects()
-        return render(request, "projects/list.html", {"projects": projects, "active_project": None})
+        return render(request, "stub.html", {"stub_name": "Projects"})
 
 
 class ProjectCreateWizardView(View):
@@ -44,11 +41,11 @@ class ProjectSettingsView(View):
         project = get_object_or_404(Project, id=pk)
         return render(
             request,
-            "shared/module_placeholder.html",
+            "stub.html",
             {
                 "project": project,
                 "active_project": project,
-                "title": "Project settings",
+                "stub_name": "Project settings",
                 "icon": "⚙",
                 "subtitle": "Settings panel will be wired to project services.",
             },
@@ -57,9 +54,7 @@ class ProjectSettingsView(View):
 
 class ProjectSceneListPartialView(View):
     def get(self, request, pk):
-        project = get_object_or_404(Project, id=pk)
-        scenes = Scene.objects.filter(project=project).order_by("number")
-        return render(request, "projects/_scene_list.html", {"project": project, "scene_list": scenes})
+        return HttpResponse("")
 
 
 class ProjectSceneView(View):
@@ -94,7 +89,10 @@ class ProjectSceneView(View):
             "next_scene": next_scene,
             "tabs": tabs,
             "active_tab": "overview",
-            "active_tab_template": "scenes/tabs/overview.html",
+            "active_tab_template": "components/_empty_state.html",
+            "icon": "⌛",
+            "stub_name": "Scene tab",
+            "sub": "Coming soon",
             "crumbs": [{"label": project.title, "url": project.get_absolute_url() if hasattr(project, "get_absolute_url") else ""}],
             "active_jobs": [],
         }
@@ -103,10 +101,4 @@ class ProjectSceneView(View):
 
 class ProjectSceneTabView(View):
     def get(self, request, pk, scene_pk, tab):
-        project = get_object_or_404(Project, id=pk)
-        scene = get_object_or_404(Scene, id=scene_pk, project=project)
-        allowed = {"overview", "shots", "storyboard", "floorplan", "schedule", "lighting", "sound", "props", "wardrobe", "continuity"}
-        if tab not in allowed:
-            return HttpResponse(status=404)
-        html = render_to_string(f"scenes/tabs/{tab}.html", {"project": project, "scene": scene})
-        return HttpResponse(html)
+        return HttpResponse("")

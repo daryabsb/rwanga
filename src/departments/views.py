@@ -9,12 +9,12 @@ class LightingView(View):
         project = get_object_or_404(Project, id=project_pk)
         return render(
             request,
-            "shared/module_placeholder.html",
+            "stub.html",
             {
                 "project": project,
                 "active_project": project,
                 "active_section": "sh",
-                "title": "Lighting",
+                "stub_name": "Lighting",
                 "icon": "💡",
                 "subtitle": "Lighting notes placeholder.",
             },
@@ -26,12 +26,12 @@ class SoundView(View):
         project = get_object_or_404(Project, id=project_pk)
         return render(
             request,
-            "shared/module_placeholder.html",
+            "stub.html",
             {
                 "project": project,
                 "active_project": project,
                 "active_section": "sh",
-                "title": "Sound",
+                "stub_name": "Sound",
                 "icon": "🔊",
                 "subtitle": "Sound notes placeholder.",
             },
@@ -43,12 +43,12 @@ class PropsView(View):
         project = get_object_or_404(Project, id=project_pk)
         return render(
             request,
-            "shared/module_placeholder.html",
+            "stub.html",
             {
                 "project": project,
                 "active_project": project,
                 "active_section": "sh",
-                "title": "Props",
+                "stub_name": "Props",
                 "icon": "🎭",
                 "subtitle": "Props checklist placeholder.",
             },
@@ -60,12 +60,12 @@ class WardrobeView(View):
         project = get_object_or_404(Project, id=project_pk)
         return render(
             request,
-            "shared/module_placeholder.html",
+            "stub.html",
             {
                 "project": project,
                 "active_project": project,
                 "active_section": "sh",
-                "title": "Wardrobe",
+                "stub_name": "Wardrobe",
                 "icon": "👗",
                 "subtitle": "Wardrobe workspace placeholder.",
             },
@@ -77,12 +77,12 @@ class ContinuityView(View):
         project = get_object_or_404(Project, id=project_pk)
         return render(
             request,
-            "shared/module_placeholder.html",
+            "stub.html",
             {
                 "project": project,
                 "active_project": project,
                 "active_section": "sh",
-                "title": "Continuity",
+                "stub_name": "Continuity",
                 "icon": "🔗",
                 "subtitle": "Continuity checklist placeholder.",
             },

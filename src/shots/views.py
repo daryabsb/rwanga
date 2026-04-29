@@ -10,12 +10,12 @@ class ShotListView(View):
         project = get_object_or_404(Project, id=project_pk)
         return render(
             request,
-            "shared/module_placeholder.html",
+            "stub.html",
             {
                 "project": project,
                 "active_project": project,
                 "active_section": "v",
-                "title": "Shot list",
+                "stub_name": "Shot list",
                 "icon": "🎞",
                 "subtitle": "Shot list workspace placeholder.",
             },
@@ -27,12 +27,12 @@ class StoryboardsView(View):
         project = get_object_or_404(Project, id=project_pk)
         return render(
             request,
-            "shared/module_placeholder.html",
+            "stub.html",
             {
                 "project": project,
                 "active_project": project,
                 "active_section": "v",
-                "title": "Storyboards",
+                "stub_name": "Storyboards",
                 "icon": "🖼",
                 "subtitle": "Storyboard workspace placeholder.",
             },

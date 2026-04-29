@@ -1,3 +1,4 @@
+
 {% load static i18n %}
 <!DOCTYPE html>
 <html lang="{{ LANGUAGE_CODE|default:'ku' }}"
@@ -12,7 +13,7 @@
 
   <link rel="stylesheet" href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}">
 
-  {# Rwanga design system — overrides BS5 #}
+  
   <link rel="stylesheet" href="{% static 'css/rwanga.css' %}">
 
   {% block extra_css %}{% endblock %}
@@ -21,30 +22,30 @@
 <body data-project-id="{{ active_project.id|default:'' }}"
       class="{% block body_class %}{% endblock %}">
 
-{# ── Toast container (populated by rwanga.js / HTMX OOB swaps) ── #}
+
 <div class="rw-toast-container" id="rw-toasts"
      hx-swap-oob="true"></div>
 
-{# ── App shell ── #}
+
 <div class="rw-app">
 
-  {# ── ICON RAIL ── first in DOM = rightmost in RTL, leftmost in LTR #}
+  
   {% include "components/_sidebar.html" %}
 
-  {# ── MAIN AREA ── #}
+  
   <div class="rw-main">
 
-    {# ── TOP NAV ── #}
+    
     {% include "components/_topnav.html" %}
 
-    {# ── PAGE CONTENT ── #}
+    
     {% block content %}{% endblock %}
 
-  </div>{# /rw-main #}
+  </div>
 
-</div>{# /rw-app #}
+</div>
 
-{# ── SCRIPTS ── #}
+
 <script src="https://unpkg.com/htmx.org@1.9.12"
         integrity="sha384-ujb1lZYygJmzgSwoxRggbCHObe+dDcq5UHv/A6dIyBteLz/1ARQE+2Z0kXCK7/e"
         crossorigin="anonymous"></script>
@@ -53,7 +54,7 @@
 {% block floorplan_js %}{% endblock %}
 {% block extra_js %}{% endblock %}
 
-{# HTMX config: push CSRF header on every request #}
+
 <meta name="htmx-config" content='{"defaultSwapStyle":"outerHTML"}'>
 {% csrf_token %}
 

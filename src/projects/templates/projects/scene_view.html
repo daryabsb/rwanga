@@ -1,3 +1,4 @@
+
 {% extends "base.html" %}
 {% load static i18n %}
 
@@ -6,7 +7,7 @@
 {% block content %}
 <div class="rw-scene-view" style="display:flex;flex:1;overflow:hidden" id="rw-content">
 
-  {# ── SCENE LIST PANEL ── first in flex = right in RTL #}
+  
   <aside class="rw-scene-panel">
     <div class="rw-panel-header">{% trans "دیمەنەکان" %}</div>
 
@@ -26,20 +27,20 @@
          hx-get="{% url 'projects:scene_list_partial' project.pk %}"
          hx-trigger="load"
          hx-swap="innerHTML">
-      {# Populated by HTMX on load — returns _scene_list.html partial #}
+      
     </div>
   </aside>
 
-  {# ── SCENE MAIN ── #}
+  
   <div class="rw-scene-main">
 
-    {# Breadcrumb #}
+    
     {% include "components/_breadcrumb.html" with
        crumbs=crumbs
        current=scene.number|stringformat:"s"
        location=scene.heading %}
 
-    {# Scene topbar #}
+    
     <div class="rw-scene-topbar">
       <div style="flex:1">
         <div class="rw-scene-title">
@@ -55,7 +56,7 @@
         </div>
       </div>
 
-      {# Scene prev/next nav #}
+      
       <div style="display:flex;gap:4px">
         {% if prev_scene %}
         <a href="{% url 'projects:scene' project.pk prev_scene.pk %}"
@@ -67,7 +68,7 @@
         {% endif %}
       </div>
 
-      {# AI generate — async Celery task #}
+      
       <button class="rw-btn rw-btn-ghost rw-btn-ai"
               hx-post="{% url 'ai_engine:generate_scene' scene.pk %}"
               hx-target="#rw-ai-status"
@@ -75,21 +76,21 @@
         🤖 {% trans "AI دروستکردن" %}
       </button>
 
-      {# Export scene viewer HTML #}
+      
       <a href="{% url 'exports:scene_viewer' scene.pk %}"
          class="rw-btn rw-btn-amber">
         ↗ {% trans "دەرهێنانی HTML" %}
       </a>
     </div>
 
-    {# AI job status strip #}
+    
     <div id="rw-ai-status">
       {% for job in active_jobs %}
         {% include "components/_ai_progress.html" with job=job %}
       {% endfor %}
     </div>
 
-    {# ── MODULE TABS ── #}
+    
     <div class="rw-mod-tabs" role="tablist">
       {% for tab in tabs %}
       <button class="rw-mod-tab {% if active_tab == tab.id %}active{% endif %}"
@@ -106,15 +107,15 @@
       {% endfor %}
     </div>
 
-    {# ── TAB CONTENT ── #}
+    
     <div class="rw-tab-content" id="rw-tab-content" role="tabpanel">
-      {# Initial content loaded server-side; subsequent tabs via HTMX #}
+      
       {% include active_tab_template %}
     </div>
 
-  </div>{# /rw-scene-main #}
-</div>{# /rw-scene-view #}
+  </div>
+</div>
 
-{# Modal container #}
+
 <div id="rw-modal-container"></div>
 {% endblock %}

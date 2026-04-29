@@ -9,12 +9,12 @@ class FloorPlanListView(View):
         project = get_object_or_404(Project, id=project_pk)
         return render(
             request,
-            "shared/module_placeholder.html",
+            "stub.html",
             {
                 "project": project,
                 "active_project": project,
                 "active_section": "v",
-                "title": "Floor plans",
+                "stub_name": "Floor plans",
                 "icon": "⌂",
                 "subtitle": "Floor plan list placeholder.",
             },
@@ -26,13 +26,13 @@ class FloorPlanEditorView(View):
         project = get_object_or_404(Project, id=project_pk)
         return render(
             request,
-            "shared/module_placeholder.html",
+            "stub.html",
             {
                 "project": project,
                 "floorplan_pk": pk,
                 "active_project": project,
                 "active_section": "v",
-                "title": "Floor plan editor",
+                "stub_name": "Floor plan editor",
                 "icon": "📐",
                 "subtitle": f"Editor placeholder for floor plan {pk}.",
             },

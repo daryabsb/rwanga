@@ -20,12 +20,12 @@ class ScriptBreakdownView(View):
         project = get_object_or_404(Project, id=project_pk)
         return render(
             request,
-            "shared/module_placeholder.html",
+            "stub.html",
             {
                 "project": project,
                 "active_project": project,
                 "active_section": "b",
-                "title": "Script breakdown",
+                "stub_name": "Script breakdown",
                 "icon": "🏷",
                 "subtitle": "Breakdown UI is pending Phase implementation.",
             },
@@ -36,12 +36,12 @@ class ScriptDocsView(View):
         project = get_object_or_404(Project, id=project_pk)
         return render(
             request,
-            "shared/module_placeholder.html",
+            "stub.html",
             {
                 "project": project,
                 "active_project": project,
                 "active_section": "s",
-                "title": "Project docs",
+                "stub_name": "Project docs",
                 "icon": "📄",
                 "subtitle": "Documentation workspace placeholder.",
             },
@@ -52,12 +52,12 @@ class ScriptElementsView(View):
         project = get_object_or_404(Project, id=project_pk)
         return render(
             request,
-            "shared/module_placeholder.html",
+            "stub.html",
             {
                 "project": project,
                 "active_project": project,
                 "active_section": "b",
-                "title": "Script elements",
+                "stub_name": "Script elements",
                 "icon": "◇",
                 "subtitle": "Element manager placeholder.",
             },

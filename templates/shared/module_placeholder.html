@@ -1,8 +1,0 @@
-{% extends "base.html" %}
-{% load i18n %}
-{% block title %}{{ title|default:_("Module") }}{% endblock %}
-{% block content %}
-<div id="rw-content" style="padding:var(--rw-pad-lg)">
-  {% include "components/_empty_state.html" with icon=icon title=title sub=subtitle %}
-</div>
-{% endblock %}
