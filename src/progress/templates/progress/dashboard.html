@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Progress Dashboard</title>
+</head>
+<body>
+    <h1>Progress Dashboard</h1>
+    <ul>
+        <li>Total Tasks: {{ task_count }}</li>
+        <li>Completed Tasks: {{ completed_count }}</li>
+        <li>Blocked Tasks: {{ blocked_count }}</li>
+        <li>Open Gaps: {{ open_gaps }}</li>
+    </ul>
+
+    <h2>Recent Updates</h2>
+    <ul>
+        {% for update in recent_updates %}
+        <li>
+            {% if update.task %}{{ update.task.title }}{% else %}General{% endif %}: {{ update.body }}
+        </li>
+        {% empty %}
+        <li>No updates yet.</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
