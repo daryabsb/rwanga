@@ -3,6 +3,7 @@ import os
 from typing import Any
 
 import requests
+import uvicorn
 from mcp.server.fastmcp import FastMCP
 
 
@@ -145,4 +146,5 @@ def progress_dashboard() -> str:
 
 
 if __name__ == "__main__":
-    mcp.run(transport="sse", host="0.0.0.0", port=int(os.getenv("RWANGA_MCP_PORT", "8021")))
+    port = int(os.getenv("RWANGA_MCP_PORT", "8021"))
+    uvicorn.run(mcp.sse_app(), host="0.0.0.0", port=port)
