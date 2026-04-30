@@ -147,4 +147,10 @@ def progress_dashboard() -> str:
 
 if __name__ == "__main__":
     port = int(os.getenv("RWANGA_MCP_PORT", "8021"))
-    uvicorn.run(mcp.sse_app(), host="0.0.0.0", port=port)
+    uvicorn.run(
+        mcp.sse_app(),
+        host="0.0.0.0",
+        port=port,
+        forwarded_allow_ips="*",
+        proxy_headers=True,
+    )
