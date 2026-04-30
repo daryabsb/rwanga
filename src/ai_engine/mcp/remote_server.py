@@ -5,12 +5,31 @@ from typing import Any
 import requests
 import uvicorn
 from mcp.server.fastmcp import FastMCP
+from mcp.server.transport_security import TransportSecuritySettings
 
 
 API_BASE = os.getenv("RWANGA_API_BASE", "http://localhost:8020/api/v1")
 API_TOKEN = os.getenv("RWANGA_API_TOKEN", "")
 
-mcp = FastMCP("rwanga-remote")
+mcp = FastMCP(
+    "rwanga-remote",
+    host="0.0.0.0",
+    transport_security=TransportSecuritySettings(
+        enable_dns_rebinding_protection=True,
+        allowed_hosts=[
+            "localhost:*",
+            "127.0.0.1:*",
+            "mcp.zeneon.co.uk",
+            "mcp.zeneon.co.uk:*",
+        ],
+        allowed_origins=[
+            "http://localhost:*",
+            "http://127.0.0.1:*",
+            "https://mcp.zeneon.co.uk",
+            "https://mcp.zeneon.co.uk:*",
+        ],
+    ),
+)
 
 
 def _headers() -> dict[str, str]:
