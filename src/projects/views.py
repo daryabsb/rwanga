@@ -1,5 +1,5 @@
 from django.http import HttpResponse
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.views import View
 
 from src.projects.models import Project, Scene
@@ -7,7 +7,10 @@ from src.projects.models import Project, Scene
 
 class ProjectListView(View):
     def get(self, request):
-        return render(request, "stub.html", {"stub_name": "Projects"})
+        project = Project.objects.order_by("title").first()
+        if project:
+            return redirect("projects:dashboard", pk=project.pk)
+        return render(request, "projects/create_wizard.html", {"step": 1, "project": None, "active_project": None})
 
 
 class ProjectCreateWizardView(View):
@@ -20,7 +23,8 @@ class ProjectCreateWizardView(View):
 
 class ProjectCreateStepView(View):
     def post(self, request, step):
-        return HttpResponse("")
+        next_step = step + 1 if step < 4 else 4
+        return render(request, "projects/create_wizard.html", {"step": next_step, "project": None, "active_project": None})
 
 
 class ProjectDashboardView(View):
@@ -54,7 +58,16 @@ class ProjectSettingsView(View):
 
 class ProjectSceneListPartialView(View):
     def get(self, request, pk):
-        return HttpResponse("")
+        project = get_object_or_404(Project, id=pk)
+        scenes = Scene.objects.filter(project=project).order_by("number")
+        return render(
+            request,
+            "projects/_scene_list.html",
+            {
+                "project": project,
+                "scenes": scenes,
+            },
+        )
 
 
 class ProjectSceneView(View):
@@ -101,4 +114,7 @@ class ProjectSceneView(View):
 
 class ProjectSceneTabView(View):
     def get(self, request, pk, scene_pk, tab):
-        return HttpResponse("")
+        return HttpResponse(
+            f'<div class="rw-empty-state"><h3 style="margin:0 0 8px 0">{tab.title()}</h3>'
+            '<p style="margin:0;color:var(--rw-text-2)">Module content will be connected in its phase.</p></div>'
+        )

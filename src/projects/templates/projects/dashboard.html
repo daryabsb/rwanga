@@ -1,28 +1,159 @@
 {% extends "base.html" %}
-{% load i18n %}
+{% load static i18n %}
 
-{% block title %}{% trans "Projects" %}{% endblock %}
+{% block title %}{{ project.title }}{% endblock %}
 
 {% block content %}
-<div id="rw-content" class="rw-dash-body" style="padding:var(--rw-pad-lg)">
-  <div class="rw-proj-header" style="margin-bottom:20px">
-    <div class="rw-proj-cover">🎬</div>
+<div id="rw-content">
+  <div class="rw-proj-header">
+    <div class="rw-proj-cover">
+      {% if project.cover %}
+        <img src="{{ project.cover.url }}" alt="{{ project.title }}" style="width:100%;height:100%;object-fit:cover">
+      {% else %}
+        🎬
+      {% endif %}
+    </div>
     <div>
-      <h1 class="rw-proj-title">{% trans "Projects Dashboard" %}</h1>
-      <div class="rw-proj-sub">{% trans "Choose a project workspace" %}</div>
+      <h1 class="rw-proj-title">{{ project.title }}</h1>
+      <div class="rw-proj-sub">
+        <span>{{ project.studio.name }}</span>
+        <span>{{ project.get_project_type_display }}</span>
+        <span>{{ project.scenes.count }} {% trans "دیمەن" %}</span>
+        <span>{{ project.shots_count }} {% trans "لێدان" %}</span>
+      </div>
+    </div>
+    <div style="margin-inline-start:auto;display:flex;gap:12px;align-items:center">
+      <a href="{% url 'scripts:upload' project.pk %}" class="rw-btn rw-btn-ghost">
+        + {% trans "بارکردنی دەستنووس" %}
+      </a>
+      <a href="{% url 'projects:settings' project.pk %}" class="rw-btn rw-btn-ghost rw-btn-icon">⚙</a>
     </div>
   </div>
-  <div class="rw-sec-modules">
-    {% for project in projects %}
-    <a href="{% url 'projects:workspace' project.id %}" class="rw-mod-card">
-      <span class="rw-mod-icon">⊞</span>
-      <span class="rw-mod-name">{{ project.title }}<br><small>{{ project.studio.name }}</small></span>
-    </a>
-    {% empty %}
-    <div class="rw-mod-card">
-      <span class="rw-mod-name">{% trans "No projects yet." %}</span>
-    </div>
+
+  <div id="rw-ai-status" style="padding:0 var(--rw-pad-lg)">
+    {% for job in active_jobs %}
+      {% include "components/_ai_progress.html" with job=job %}
     {% endfor %}
+  </div>
+
+  <div class="rw-dash-body" style="overflow-y:auto;flex:1">
+    <div class="rw-sec-row">
+      <div class="rw-sec-label" style="background:var(--rw-script)"
+           onclick="location.href='{% url 'scripts:index' project.pk %}'">
+        <span class="rw-sec-label-icon">✏</span>
+        <span class="rw-sec-label-text">{% trans "دەستنووس" %}</span>
+      </div>
+      <div class="rw-sec-modules">
+        <a href="{% url 'scripts:index' project.pk %}" class="rw-mod-card">
+          <span class="rw-mod-icon">📝</span>
+          <span class="rw-mod-name">{% trans "دەستنووسەکان" %}</span>
+        </a>
+        <a href="{% url 'scripts:upload' project.pk %}" class="rw-mod-card">
+          <span class="rw-mod-icon">✨</span>
+          <span class="rw-mod-name">{% trans "AI داڕشتن" %}<br><span class="rw-ai-badge">AI</span></span>
+        </a>
+        <a href="{% url 'scripts:docs' project.pk %}" class="rw-mod-card">
+          <span class="rw-mod-icon">📄</span>
+          <span class="rw-mod-name">{% trans "بەڵگەکان" %}</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="rw-sec-row">
+      <div class="rw-sec-label" style="background:var(--rw-break)"
+           onclick="location.href='{% url 'scripts:breakdown' project.pk %}'">
+        <span class="rw-sec-label-icon">🏷</span>
+        <span class="rw-sec-label-text">{% trans "داڕشتن" %}</span>
+      </div>
+      <div class="rw-sec-modules">
+        <a href="{% url 'scripts:breakdown' project.pk %}" class="rw-mod-card">
+          <span class="rw-mod-icon">🏷</span>
+          <span class="rw-mod-name">{% trans "داڕشتنی دەستنووس" %}</span>
+        </a>
+        <a href="{% url 'scheduling:stripboard' project.pk %}" class="rw-mod-card">
+          <span class="rw-mod-icon">≡</span>
+          <span class="rw-mod-name">{% trans "ستریپبۆرد" %}</span>
+        </a>
+        <a href="{% url 'scripts:elements' project.pk %}" class="rw-mod-card">
+          <span class="rw-mod-icon">◇</span>
+          <span class="rw-mod-name">{% trans "ئێلیمێنتەکان" %}</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="rw-sec-row">
+      <div class="rw-sec-label" style="background:var(--rw-vis)"
+           onclick="location.href='{% url 'shots:list' project.pk %}'">
+        <span class="rw-sec-label-icon">🎞</span>
+        <span class="rw-sec-label-text">{% trans "بینراوکردن" %}</span>
+      </div>
+      <div class="rw-sec-modules">
+        <a href="{% url 'shots:list' project.pk %}" class="rw-mod-card">
+          <span class="rw-mod-icon">≡</span>
+          <span class="rw-mod-name">{% trans "لیستی لێدانەکان" %}</span>
+        </a>
+        <a href="{% url 'shots:storyboards' project.pk %}" class="rw-mod-card">
+          <span class="rw-mod-icon">⊞</span>
+          <span class="rw-mod-name">{% trans "ستۆری‌بۆردەکان" %}</span>
+        </a>
+        <a href="{% url 'floorplans:list' project.pk %}" class="rw-mod-card">
+          <span class="rw-mod-icon">⌂</span>
+          <span class="rw-mod-name">{% trans "نەخشەی ژوور" %}<br><span class="rw-rw-exclusive">ڕوانگە ✦</span></span>
+        </a>
+      </div>
+    </div>
+
+    <div class="rw-sec-row">
+      <div class="rw-sec-label" style="background:var(--rw-plan)"
+           onclick="location.href='{% url 'scheduling:index' project.pk %}'">
+        <span class="rw-sec-label-icon">📅</span>
+        <span class="rw-sec-label-text">{% trans "ڕێنوێس" %}</span>
+      </div>
+      <div class="rw-sec-modules">
+        <a href="{% url 'scheduling:index' project.pk %}" class="rw-mod-card">
+          <span class="rw-mod-icon">📅</span>
+          <span class="rw-mod-name">{% trans "خشتەی وێنەگرتن" %}</span>
+        </a>
+        <a href="{% url 'scheduling:call_sheets' project.pk %}" class="rw-mod-card">
+          <span class="rw-mod-icon">📋</span>
+          <span class="rw-mod-name">{% trans "ئایننامەکان" %}</span>
+        </a>
+        <a href="{% url 'accounts:contacts' project.pk %}" class="rw-mod-card">
+          <span class="rw-mod-icon">◎</span>
+          <span class="rw-mod-name">{% trans "پەیوەندییەکان" %}</span>
+        </a>
+        <a href="{% url 'departments:lighting' project.pk %}" class="rw-mod-card">
+          <span class="rw-mod-icon">💡</span>
+          <span class="rw-mod-name">{% trans "ڕووناکی" %}<br><span class="rw-rw-exclusive">ڕوانگە ✦</span></span>
+        </a>
+      </div>
+    </div>
+
+    <div class="rw-sec-row">
+      <div class="rw-sec-label" style="background:var(--rw-shoot)"
+           onclick="location.href='{% url 'scheduling:call_sheets' project.pk %}'">
+        <span class="rw-sec-label-icon">🎬</span>
+        <span class="rw-sec-label-text">{% trans "وێنەگرتن" %}</span>
+      </div>
+      <div class="rw-sec-modules">
+        <a href="{% url 'locations:list' %}" class="rw-mod-card">
+          <span class="rw-mod-icon">📍</span>
+          <span class="rw-mod-name">{% trans "شوێنەکان" %}</span>
+        </a>
+        <a href="{% url 'departments:sound' project.pk %}" class="rw-mod-card">
+          <span class="rw-mod-icon">🔊</span>
+          <span class="rw-mod-name">{% trans "دەنگ" %}<br><span class="rw-rw-exclusive">ڕوانگە ✦</span></span>
+        </a>
+        <a href="{% url 'departments:wardrobe' project.pk %}" class="rw-mod-card">
+          <span class="rw-mod-icon">👗</span>
+          <span class="rw-mod-name">{% trans "جلوبەرگ" %}</span>
+        </a>
+        <a href="{% url 'departments:continuity' project.pk %}" class="rw-mod-card">
+          <span class="rw-mod-icon">🔗</span>
+          <span class="rw-mod-name">{% trans "بەردەوامی" %}<br><span class="rw-rw-exclusive">ڕوانگە ✦</span></span>
+        </a>
+      </div>
+    </div>
   </div>
 </div>
 {% endblock %}

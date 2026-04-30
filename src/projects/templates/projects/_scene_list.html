@@ -1,0 +1,9 @@
+{% load i18n %}
+{% for scene in scenes %}
+<a class="rw-scene-item" href="{% url 'projects:scene' project.pk scene.pk %}">
+  <span class="rw-scene-item-num">{{ scene.number }}</span>
+  <span class="rw-scene-item-title">{{ scene.title }}</span>
+</a>
+{% empty %}
+<div class="rw-empty">{% trans "No scenes yet" %}</div>
+{% endfor %}

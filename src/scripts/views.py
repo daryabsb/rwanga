@@ -13,7 +13,10 @@ class ScriptUploadView(View):
         project = get_object_or_404(Project, id=project_pk)
         return render(request, 'scripts/upload.html', {'project': project, 'active_project': project})
     def post(self, request, project_pk):
-        return HttpResponse('')
+        project = get_object_or_404(Project, id=project_pk)
+        if request.headers.get("HX-Request") == "true":
+            return HttpResponse('<div class="rw-empty-state"><p style="margin:0">Upload queued.</p></div>')
+        return render(request, 'scripts/upload.html', {'project': project, 'active_project': project})
 
 class ScriptBreakdownView(View):
     def get(self, request, project_pk):
