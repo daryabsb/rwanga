@@ -1,4 +1,13 @@
-from src.progress.models import GapBlocker, ProgressTask, ProgressUpdate
+from src.progress.models import (
+    AgentReport,
+    ChangeRecord,
+    DesignDecision,
+    DocumentVersion,
+    GapBlocker,
+    ProgressTask,
+    ProgressUpdate,
+    SystemDiagram,
+)
 
 
 class ProgressService:
@@ -100,3 +109,212 @@ class ProgressService:
             ],
             tests_run=["python manage.py test src.core.tests.test_models", "python manage.py check"],
         )
+
+    def get_overview(self) -> dict:
+        tasks = ProgressTask.objects.all()
+        total = tasks.count()
+        completed = tasks.filter(status=ProgressTask.Status.COMPLETED).count()
+        return {
+            "current_phase": self._detect_current_phase(),
+            "tasks": {
+                "total": total,
+                "pending": tasks.filter(status=ProgressTask.Status.PENDING).count(),
+                "in_progress": tasks.filter(status=ProgressTask.Status.IN_PROGRESS).count(),
+                "completed": completed,
+                "blocked": tasks.filter(status=ProgressTask.Status.BLOCKED).count(),
+            },
+            "gaps": {
+                "open": GapBlocker.objects.filter(status=GapBlocker.Status.OPEN).count(),
+                "critical": GapBlocker.objects.filter(
+                    status=GapBlocker.Status.OPEN, severity=GapBlocker.Severity.CRITICAL
+                ).count(),
+            },
+            "recent_updates": list(
+                ProgressUpdate.objects.order_by("-created_at")[:5].values(
+                    "id", "update_type", "body", "created_at", "task_id"
+                )
+            ),
+            "phase_completion_pct": round((completed / total * 100) if total else 0, 1),
+        }
+
+    def create_task(
+        self,
+        *,
+        title,
+        description="",
+        task_type="implementation",
+        phase="",
+        app_name=None,
+        priority="normal",
+        assigned_to=None,
+        blocked_by=None,
+    ) -> ProgressTask:
+        task = ProgressTask.objects.create(
+            title=title,
+            description=description,
+            task_type=task_type,
+            phase=phase,
+            app_name=app_name or "",
+            status=ProgressTask.Status.PENDING,
+            priority=priority,
+            assigned_to=assigned_to or "",
+        )
+        if blocked_by:
+            blockers = ProgressTask.objects.filter(pk__in=blocked_by)
+            task.blocked_by.set(blockers)
+        return task
+
+    def update_task_status(self, *, task_id, status, note=None) -> ProgressTask:
+        task = ProgressTask.objects.get(pk=task_id)
+        old_status = task.status
+        task.status = status
+        task.save(update_fields=["status", "updated_at"])
+        ProgressUpdate.objects.create(
+            task=task,
+            author="mcp-agent",
+            update_type=ProgressUpdate.UpdateType.STATUS_CHANGE,
+            body=note or f"Status changed: {old_status} -> {status}",
+        )
+        return task
+
+    def record_update(
+        self,
+        *,
+        task_id=None,
+        update_type="implementation",
+        body="",
+        files_affected=None,
+        tests_run=None,
+        author="mcp-agent",
+    ) -> ProgressUpdate:
+        task = ProgressTask.objects.get(pk=task_id) if task_id else None
+        return ProgressUpdate.objects.create(
+            task=task,
+            author=author,
+            update_type=update_type,
+            body=body,
+            files_affected=files_affected or [],
+            tests_run=tests_run or {},
+        )
+
+    def report_gap(
+        self,
+        *,
+        title,
+        description,
+        gap_type,
+        severity,
+        related_task_id=None,
+        related_app=None,
+        phase="",
+    ) -> GapBlocker:
+        task = ProgressTask.objects.get(pk=related_task_id) if related_task_id else None
+        return GapBlocker.objects.create(
+            title=title,
+            description=description,
+            gap_type=gap_type,
+            severity=severity,
+            related_task=task,
+            related_app=related_app or "",
+            phase=phase,
+            status=GapBlocker.Status.OPEN,
+        )
+
+    def submit_agent_report(
+        self,
+        *,
+        agent_name,
+        session_id,
+        report_type,
+        phase,
+        summary,
+        tasks_completed=None,
+        tasks_blocked=None,
+        gaps_found=None,
+    ) -> AgentReport:
+        report = AgentReport.objects.create(
+            agent_name=agent_name,
+            session_id=session_id,
+            report_type=report_type,
+            phase=phase,
+            summary=summary,
+        )
+        if tasks_completed:
+            report.tasks_completed.set(ProgressTask.objects.filter(pk__in=tasks_completed))
+        if tasks_blocked:
+            report.tasks_blocked.set(ProgressTask.objects.filter(pk__in=tasks_blocked))
+        if gaps_found:
+            report.gaps_found.set(GapBlocker.objects.filter(pk__in=gaps_found))
+        return report
+
+    def record_change(
+        self,
+        *,
+        task_id=None,
+        change_type="model_added",
+        app_name="",
+        description="",
+        files_changed=None,
+        diff_summary=None,
+        commit_hash=None,
+    ) -> ChangeRecord:
+        task = ProgressTask.objects.get(pk=task_id) if task_id else None
+        return ChangeRecord.objects.create(
+            task=task,
+            change_type=change_type,
+            app_name=app_name,
+            description=description,
+            files_changed=files_changed or [],
+            diff_summary=diff_summary or "",
+            commit_hash=commit_hash or "",
+        )
+
+    def record_decision(
+        self,
+        *,
+        title,
+        context,
+        decision,
+        alternatives_considered=None,
+        decided_by="",
+        phase="",
+        app_name=None,
+    ) -> DesignDecision:
+        return DesignDecision.objects.create(
+            title=title,
+            context=context,
+            decision=decision,
+            alternatives_considered=alternatives_considered or "",
+            decided_by=decided_by,
+            phase=phase,
+            app_name=app_name or "",
+            status=DesignDecision.Status.PROPOSED,
+        )
+
+    def update_diagram(
+        self,
+        *,
+        title,
+        diagram_type,
+        phase,
+        content,
+        render_format="mermaid",
+        notes=None,
+    ) -> SystemDiagram:
+        SystemDiagram.objects.filter(diagram_type=diagram_type, is_current=True).update(is_current=False)
+        return SystemDiagram.objects.create(
+            title=title,
+            diagram_type=diagram_type,
+            phase=phase,
+            content=content,
+            render_format=render_format,
+            is_current=True,
+            notes=notes or "",
+        )
+
+    def _detect_current_phase(self) -> str:
+        for phase in ["P0", "P1", "P2", "P3", "P4", "P5", "P6", "P7"]:
+            tasks = ProgressTask.objects.filter(phase=phase)
+            if tasks.exists() and tasks.exclude(status=ProgressTask.Status.COMPLETED).exists():
+                return phase
+        return "P7"
