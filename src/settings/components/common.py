@@ -17,6 +17,7 @@ DJANGO_APPS = [
 THIRD_PARTY_APPS = [
     "channels",
     "rest_framework",
+    "rest_framework.authtoken",
     "drf_spectacular",
     "django_filters",
     "django_htmx",
@@ -31,6 +32,15 @@ LOCAL_APPS = [
     "src.core",
     "src.accounts",
     "src.projects",
+    "src.scripts",
+    "src.shots",
+    "src.floorplans",
+    "src.scheduling",
+    "src.departments",
+    "src.ai_engine",
+    "src.exports",
+    "src.locations",
+    "src.notifications",
     "src.progress",
 ]
 
