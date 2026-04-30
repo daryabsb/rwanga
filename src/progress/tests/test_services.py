@@ -8,8 +8,8 @@ class ProgressServiceTests(TestCase):
         ProgressService.seed_initial_tasks()
         titles = set(ProgressService.list_task_titles())
 
-        self.assertIn("P0 foundation", titles)
-        self.assertIn("P0 core app", titles)
-        self.assertIn("P0 progress app", titles)
-        self.assertIn("P1 accounts", titles)
-        self.assertIn("P1 projects", titles)
+        self.assertGreaterEqual(len(titles), 23)
+        self.assertIn("P0.1 Clone HUD2 skeleton", titles)
+        self.assertIn("P0.12 Create initial SystemDiagram", titles)
+        self.assertIn("P1.1 Create accounts app (models, DRF, views)", titles)
+        self.assertIn("P1.11 Update Progress app", titles)

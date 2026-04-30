@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Projects" %}{% endblock %}
+
+{% block content %}
+<div id="rw-content" style="padding:var(--rw-pad-lg)">
+  <div class="rw-proj-header" style="margin-bottom:var(--rw-pad-lg)">
+    <div>
+      <h1 class="rw-proj-title">{% trans "Projects" %}</h1>
+      <p class="rw-proj-sub">{% trans "Choose a workspace to continue." %}</p>
+    </div>
+    <a href="{% url 'projects:create_wizard' %}" class="rw-btn rw-btn-primary">{% trans "Create Project" %}</a>
+  </div>
+
+  {% if projects %}
+  <div class="rw-mod-grid">
+    {% for project in projects %}
+    <a href="{% url 'projects:dashboard' project.pk %}" class="rw-mod-card">
+      <div class="rw-mod-title">{{ project.title }}</div>
+      <div class="rw-mod-sub">{{ project.slug }}</div>
+    </a>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="rw-empty-state">
+    <h3 style="margin:0 0 8px 0">{% trans "No projects yet" %}</h3>
+    <p style="margin:0;color:var(--rw-text-2)">{% trans "Start by creating your first project workspace." %}</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

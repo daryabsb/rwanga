@@ -1,3 +1,4 @@
+
 {% extends "base.html" %}
 {% load static i18n %}
 
@@ -5,6 +6,8 @@
 
 {% block content %}
 <div id="rw-content">
+
+  
   <div class="rw-proj-header">
     <div class="rw-proj-cover">
       {% if project.cover %}
@@ -30,13 +33,17 @@
     </div>
   </div>
 
+  
   <div id="rw-ai-status" style="padding:0 var(--rw-pad-lg)">
     {% for job in active_jobs %}
       {% include "components/_ai_progress.html" with job=job %}
     {% endfor %}
   </div>
 
+  
   <div class="rw-dash-body" style="overflow-y:auto;flex:1">
+
+    
     <div class="rw-sec-row">
       <div class="rw-sec-label" style="background:var(--rw-script)"
            onclick="location.href='{% url 'scripts:index' project.pk %}'">
@@ -59,6 +66,7 @@
       </div>
     </div>
 
+    
     <div class="rw-sec-row">
       <div class="rw-sec-label" style="background:var(--rw-break)"
            onclick="location.href='{% url 'scripts:breakdown' project.pk %}'">
@@ -81,6 +89,7 @@
       </div>
     </div>
 
+    
     <div class="rw-sec-row">
       <div class="rw-sec-label" style="background:var(--rw-vis)"
            onclick="location.href='{% url 'shots:list' project.pk %}'">
@@ -103,6 +112,7 @@
       </div>
     </div>
 
+    
     <div class="rw-sec-row">
       <div class="rw-sec-label" style="background:var(--rw-plan)"
            onclick="location.href='{% url 'scheduling:index' project.pk %}'">
@@ -129,6 +139,7 @@
       </div>
     </div>
 
+    
     <div class="rw-sec-row">
       <div class="rw-sec-label" style="background:var(--rw-shoot)"
            onclick="location.href='{% url 'scheduling:call_sheets' project.pk %}'">
@@ -154,6 +165,8 @@
         </a>
       </div>
     </div>
+
   </div>
 </div>
 {% endblock %}
+

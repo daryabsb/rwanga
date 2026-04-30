@@ -27,19 +27,19 @@ def logout_view(request):
 
 
 def profile(request):
-    return HttpResponse("profile")
+    return render(request, "stub.html", {"stub_name": "Profile"})
 
 
 def settings(request):
-    return HttpResponse("settings")
+    return render(request, "stub.html", {"stub_name": "Account settings"})
 
 
 def team(request):
-    return HttpResponse("team")
+    return render(request, "stub.html", {"stub_name": "Team"})
 
 
 def contacts(request, project_id):
-    return HttpResponse(f"contacts {project_id}")
+    return render(request, "stub.html", {"stub_name": f"Contacts for {project_id}"})
 
 
 def invite_row(request):

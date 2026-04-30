@@ -1,5 +1,5 @@
 from django.http import HttpResponse
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import get_object_or_404, render
 from django.views import View
 
 from src.projects.models import Project, Scene
@@ -7,10 +7,16 @@ from src.projects.models import Project, Scene
 
 class ProjectListView(View):
     def get(self, request):
-        project = Project.objects.order_by("title").first()
-        if project:
-            return redirect("projects:dashboard", pk=project.pk)
-        return render(request, "projects/create_wizard.html", {"step": 1, "project": None, "active_project": None})
+        projects = Project.objects.order_by("title")
+        return render(
+            request,
+            "projects/list.html",
+            {
+                "projects": projects,
+                "active_project": None,
+                "active_section": "h",
+            },
+        )
 
 
 class ProjectCreateWizardView(View):
