@@ -64,11 +64,30 @@ document.addEventListener('htmx:afterRequest', e => {
 
 // Swap animation
 document.addEventListener('htmx:afterSwap', e => {
+  if (e.detail.target && e.detail.target.id === 'rw-modal-container') {
+    const modalEl = e.detail.target.querySelector('.modal');
+    if (modalEl && window.bootstrap) {
+      const modal = new bootstrap.Modal(modalEl);
+      modal.show();
+      modalEl.addEventListener('hidden.bs.modal', () => {
+        e.detail.target.innerHTML = '';
+      }, { once: true });
+    }
+  }
   e.target.style.opacity = '0';
   requestAnimationFrame(() => {
     e.target.style.transition = 'opacity 0.15s ease';
     e.target.style.opacity = '1';
   });
+});
+
+document.addEventListener('htmx:afterRequest', e => {
+  if (e.detail.target && e.detail.target.id === 'rw-modal-container' && e.detail.xhr && e.detail.xhr.status === 204) {
+    const modalEl = e.detail.target.querySelector('.modal.show');
+    if (modalEl && window.bootstrap) {
+      bootstrap.Modal.getInstance(modalEl)?.hide();
+    }
+  }
 });
 
 // ── WEBSOCKET — AI JOB STATUS ────────────────────────────

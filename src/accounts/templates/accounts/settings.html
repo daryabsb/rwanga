@@ -14,6 +14,7 @@
 {% block title %}{% trans "ڕێکخستنەکان" %}{% endblock %}
 
 {% block content %}
+{% trans "???????? ??? ???? ????????? ????." as delete_account_confirm_text %}
 <div id="rw-content" style="overflow-y:auto;flex:1;padding:var(--rw-pad-lg)">
 
   {% comment %} ── Account section ── {% endcomment %}
@@ -105,7 +106,7 @@
       <div class="rw-warn-text" style="font-size:12px">{% trans "ئەمە هەژمار و هەموو داتاکانت بۆ هەمیشە دەسڕێتەوە. ئەم کارە گەڕانەوەی نییە." %}</div>
     </div>
     <button type="button" class="rw-btn" style="background:var(--rw-pink-dim);color:var(--rw-shoot);border:1px solid rgba(247,37,133,.25);flex-shrink:0"
-            onclick="if(confirm('{% trans "دڵنیایت؟ ئەم کارە گەڕانەوەی نییە." %}')) window.location='{% url 'accounts:delete_account' %}'">
+            onclick="if(confirm('{{ delete_account_confirm_text|escapejs }}')) window.location='{% url 'accounts:delete_account' %}'">
       {% trans "سڕینەوەی هەژمار" %}
     </button>
   </div>

@@ -15,37 +15,27 @@
   <div class="rw-section-tabs" role="tablist">
     <button class="rw-sec-tab {% if active_section == 's' %}active{% endif %}"
             data-s="s"
-            hx-get="{% url 'scripts:index' active_project.pk %}"
-            hx-target="#rw-content"
-            hx-push-url="true">
+            type="button" onclick="window.location.href='{% url 'scripts:index' active_project.pk %}'">
       {% trans "دەستنووس" %}
     </button>
     <button class="rw-sec-tab {% if active_section == 'b' %}active{% endif %}"
             data-s="b"
-            hx-get="{% url 'scripts:breakdown' active_project.pk %}"
-            hx-target="#rw-content"
-            hx-push-url="true">
+            type="button" onclick="window.location.href='{% url 'scripts:breakdown' active_project.pk %}'">
       {% trans "داڕشتن" %}
     </button>
     <button class="rw-sec-tab {% if active_section == 'v' %}active{% endif %}"
             data-s="v"
-            hx-get="{% url 'shots:list' active_project.pk %}"
-            hx-target="#rw-content"
-            hx-push-url="true">
+            type="button" onclick="window.location.href='{% url 'shots:list' active_project.pk %}'">
       {% trans "بینراوکردن" %}
     </button>
     <button class="rw-sec-tab {% if active_section == 'p' %}active{% endif %}"
             data-s="p"
-            hx-get="{% url 'scheduling:stripboard' active_project.pk %}"
-            hx-target="#rw-content"
-            hx-push-url="true">
+            type="button" onclick="window.location.href='{% url 'scheduling:stripboard' active_project.pk %}'">
       {% trans "ڕێنوێس" %}
     </button>
     <button class="rw-sec-tab {% if active_section == 'sh' %}active{% endif %}"
             data-s="sh"
-            hx-get="{% url 'scheduling:call_sheets' active_project.pk %}"
-            hx-target="#rw-content"
-            hx-push-url="true">
+            type="button" onclick="window.location.href='{% url 'scheduling:call_sheets' active_project.pk %}'">
       {% trans "وێنەگرتن" %}
     </button>
   </div>
@@ -101,5 +91,6 @@
 
   </div>
 </nav>
+
 
 

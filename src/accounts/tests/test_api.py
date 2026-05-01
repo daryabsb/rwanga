@@ -1,4 +1,5 @@
 from django.test import TestCase
+from rest_framework.authtoken.models import Token
 from src.accounts.models import User
 from rest_framework.test import APIClient
 
@@ -6,6 +7,9 @@ from rest_framework.test import APIClient
 class AccountsApiTests(TestCase):
     def setUp(self):
         self.client = APIClient()
+        self.user = User.objects.create_user(email="api-user@example.com", password="root", terms=True)
+        token, _ = Token.objects.get_or_create(user=self.user)
+        self.client.credentials(HTTP_AUTHORIZATION=f"Token {token.key}")
 
     def test_create_studio(self):
         payload = {"name": "Studio API", "slug": "studio-api"}

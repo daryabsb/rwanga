@@ -3,16 +3,26 @@ from django.contrib import admin
 from django.conf.urls.static import static
 from django.urls import include, path
 from django.views.generic import RedirectView
+from drf_spectacular.utils import extend_schema, inline_serializer
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework import serializers as drf_serializers
 from src.accounts.api.views import obtain_token
 
 
 class HealthAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        responses={
+            200: inline_serializer(
+                "CoreHealthResponse",
+                fields={"status": drf_serializers.CharField()},
+            )
+        }
+    )
     def get(self, request):
         return Response({"status": "ok"})
 

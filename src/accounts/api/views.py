@@ -1,9 +1,11 @@
 from django.contrib.auth import authenticate
+from drf_spectacular.utils import extend_schema, inline_serializer
 from rest_framework import permissions, status, viewsets
 from rest_framework.authtoken.models import Token
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
+from rest_framework import serializers as drf_serializers
 
 from src.accounts.api.serializers import (
     ConsultantProfileSerializer,
@@ -59,21 +61,44 @@ class SignupProfileViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
 
-@api_view(["POST"])
-@permission_classes([AllowAny])
-def obtain_token(request):
-    email = request.data.get("email", "").strip()
-    password = request.data.get("password", "")
+class ObtainTokenAPIView(APIView):
+    permission_classes = [AllowAny]
 
-    if not email or not password:
-        return Response({"error": "Email and password are required"}, status=status.HTTP_400_BAD_REQUEST)
+    @extend_schema(
+        request=inline_serializer(
+            "ObtainTokenRequest",
+            fields={
+                "email": drf_serializers.EmailField(),
+                "password": drf_serializers.CharField(),
+            },
+        ),
+        responses={
+            200: inline_serializer(
+                "ObtainTokenResponse",
+                fields={
+                    "token": drf_serializers.CharField(),
+                    "user_id": drf_serializers.CharField(),
+                    "email": drf_serializers.EmailField(),
+                },
+            )
+        },
+    )
+    def post(self, request):
+        email = request.data.get("email", "").strip()
+        password = request.data.get("password", "")
 
-    user = authenticate(request, email=email, password=password)
-    if user is None:
-        user = authenticate(request, username=email, password=password)
+        if not email or not password:
+            return Response({"error": "Email and password are required"}, status=status.HTTP_400_BAD_REQUEST)
 
-    if user is None:
-        return Response({"error": "Invalid email or password"}, status=status.HTTP_401_UNAUTHORIZED)
+        user = authenticate(request, email=email, password=password)
+        if user is None:
+            user = authenticate(request, username=email, password=password)
 
-    token, _ = Token.objects.get_or_create(user=user)
-    return Response({"token": token.key, "user_id": user.pk, "email": user.email})
+        if user is None:
+            return Response({"error": "Invalid email or password"}, status=status.HTTP_401_UNAUTHORIZED)
+
+        token, _ = Token.objects.get_or_create(user=user)
+        return Response({"token": token.key, "user_id": user.pk, "email": user.email})
+
+
+obtain_token = ObtainTokenAPIView.as_view()

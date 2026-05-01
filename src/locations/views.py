@@ -17,10 +17,42 @@ class LocationsListView(View):
 
 class LocationAddModalView(View):
     def get(self, request):
-        return HttpResponse("<div class='rw-modal'><div class='rw-card'>Add location</div></div>")
+        return HttpResponse(
+            """
+<div class="modal fade" id="addLocationModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Add location</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p class="mb-0">Location create form wiring is pending.</p>
+      </div>
+    </div>
+  </div>
+</div>
+"""
+        )
 
 
 class LocationEditModalView(View):
     def get(self, request, location_pk):
         location = get_object_or_404(Location, pk=location_pk)
-        return HttpResponse(f"<div class='rw-modal'><div class='rw-card'>Edit location: {location.name}</div></div>")
+        return HttpResponse(
+            f"""
+<div class="modal fade" id="editLocationModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Edit location: {location.name}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p class="mb-0">Location edit form wiring is pending.</p>
+      </div>
+    </div>
+  </div>
+</div>
+"""
+        )

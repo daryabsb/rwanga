@@ -48,7 +48,23 @@ class ShootDayDetailView(View):
 
 class AddDayModalView(View):
     def get(self, request, project_pk):
-        return HttpResponse("<div class='rw-modal'><div class='rw-card'>Add day modal placeholder</div></div>")
+        return HttpResponse(
+            """
+<div class="modal fade" id="addDayModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Add shoot day</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p class="mb-0">Add day form wiring is pending.</p>
+      </div>
+    </div>
+  </div>
+</div>
+"""
+        )
 
 
 class ReorderStripsView(View):
@@ -63,7 +79,23 @@ class ExportStripboardPdfView(View):
 
 class GenerateCallSheetModalView(View):
     def get(self, request, project_pk):
-        return HttpResponse("<div class='rw-modal'><div class='rw-card'>Generate call sheet</div></div>")
+        return HttpResponse(
+            """
+<div class="modal fade" id="generateCallSheetModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Generate call sheet</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p class="mb-0">Call-sheet generation form wiring is pending.</p>
+      </div>
+    </div>
+  </div>
+</div>
+"""
+        )
 
 
 class GenerateCallSheetPdfView(View):
@@ -80,5 +112,19 @@ class CallSheetDetailView(View):
     def get(self, request, project_pk, call_sheet_pk):
         call_sheet = get_object_or_404(CallSheet, pk=call_sheet_pk, shoot_day__project_id=project_pk)
         return HttpResponse(
-            f"<div class='rw-modal'><div class='rw-card'><h3>Call sheet day {call_sheet.shoot_day.day_number}</h3></div></div>"
+            f"""
+<div class="modal fade" id="callSheetDetailModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Call sheet day {call_sheet.shoot_day.day_number}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p class="mb-0">Detail preview loaded.</p>
+      </div>
+    </div>
+  </div>
+</div>
+"""
         )

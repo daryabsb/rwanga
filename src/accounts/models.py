@@ -32,6 +32,25 @@ class User(PermissionsMixin, AbstractBaseUser):
     def get_full_name(self):
         return self.name or self.email
 
+    @property
+    def nickname(self):
+        return (self.name or "").strip()
+
+    @property
+    def first_name(self):
+        full = (self.name or "").strip()
+        return full.split(" ")[0] if full else ""
+
+    @property
+    def last_name(self):
+        full = (self.name or "").strip()
+        parts = full.split(" ")
+        return " ".join(parts[1:]) if len(parts) > 1 else ""
+
+    @property
+    def phone(self):
+        return ""
+
 
 class Studio(BaseModel):
     name = models.CharField(max_length=200)

@@ -17,7 +17,10 @@ class SceneViewerView(View):
 class CallSheetExportView(View):
     def get(self, request, shoot_day_pk):
         shoot_day = get_object_or_404(ShootDay, id=shoot_day_pk)
-        pdf = ExportService().generate_call_sheet_pdf(shoot_day)
+        try:
+            pdf = ExportService().generate_call_sheet_pdf(shoot_day)
+        except Exception:
+            return HttpResponse("PDF runtime dependencies are unavailable on this host.", status=503)
         response = HttpResponse(pdf, content_type="application/pdf")
         response["Content-Disposition"] = f'inline; filename="call-sheet-day-{shoot_day.day_number}.pdf"'
         return response
@@ -26,7 +29,10 @@ class CallSheetExportView(View):
 class ShotListExportView(View):
     def get(self, request, project_pk):
         project = get_object_or_404(Project, id=project_pk)
-        pdf = ExportService().generate_shot_list_pdf(project)
+        try:
+            pdf = ExportService().generate_shot_list_pdf(project)
+        except Exception:
+            return HttpResponse("PDF runtime dependencies are unavailable on this host.", status=503)
         response = HttpResponse(pdf, content_type="application/pdf")
         response["Content-Disposition"] = f'inline; filename="shot-list-{project.slug}.pdf"'
         return response
