@@ -12,3 +12,15 @@ class Notification(BaseModel):
 
     class Meta:
         ordering = ["-created_at"]
+
+    @property
+    def notif_type(self):
+        return self.notification_type
+
+    @property
+    def is_read(self):
+        return self.read
+
+    @property
+    def action_url(self):
+        return ""

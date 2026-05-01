@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="rw-card" style="padding:16px">
+  <h2>Props</h2>
+  <div>
+    <button hx-get="?category=" hx-target="#props-list" hx-swap="innerHTML">All</button>
+    <button hx-get="?category=A" hx-target="#props-list" hx-swap="innerHTML">A</button>
+    <button hx-get="?category=B" hx-target="#props-list" hx-swap="innerHTML">B</button>
+    <button hx-get="?category=C" hx-target="#props-list" hx-swap="innerHTML">C</button>
+  </div>
+  <form hx-post="" hx-target="#props-list" hx-swap="innerHTML" method="post" enctype="multipart/form-data">{% csrf_token %}{{ form.as_p }}<button class="rw-btn rw-btn-primary" type="submit">Add</button></form>
+  <div id="props-list">{% include "departments/partials/props_list.html" %}</div>
+</div>
+{% endblock %}

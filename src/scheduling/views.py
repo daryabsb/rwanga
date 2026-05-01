@@ -3,7 +3,7 @@ from django.shortcuts import get_object_or_404, render
 from django.views import View
 
 from src.projects.models import Project
-from src.scheduling.models import ShootDay
+from src.scheduling.models import CallSheet, ShootDay
 from src.scheduling.services import SchedulingService
 
 
@@ -18,14 +18,20 @@ class StripboardView(View):
     def get(self, request, project_pk):
         project = get_object_or_404(Project, id=project_pk)
         shoot_days = SchedulingService().list_shoot_days(project=project)
-        return render(request, "scheduling/stripboard.html", {"project": project, "shoot_days": shoot_days, "active_project": project, "active_section": "p"})
+        strips = []
+        for day in shoot_days:
+            strips.append({"is_day_break": True, "day_number": day.day_number, "date": day.date, "notes": day.notes, "pk": day.pk})
+            for block in day.blocks.select_related("scene").all().order_by("order", "created_at"):
+                if block.scene_id:
+                    strips.append({"is_day_break": False, "day_number": day.day_number, "scene": block.scene})
+        return render(request, "scheduling/stripboard.html", {"project": project, "shoot_days": shoot_days, "strips": strips, "active_project": project, "active_section": "p"})
 
 
 class CallSheetsView(View):
     def get(self, request, project_pk):
         project = get_object_or_404(Project, id=project_pk)
-        shoot_days = SchedulingService().list_shoot_days(project=project)
-        return render(request, "scheduling/call_sheets.html", {"project": project, "shoot_days": shoot_days, "active_project": project, "active_section": "sh"})
+        call_sheets = CallSheet.objects.select_related("shoot_day", "location").filter(shoot_day__project=project).order_by("shoot_day__date", "shoot_day__day_number")
+        return render(request, "scheduling/call_sheets.html", {"project": project, "call_sheets": call_sheets, "active_project": project, "active_section": "sh"})
 
 
 class SchedulingOptimizeView(View):
@@ -43,3 +49,36 @@ class ShootDayDetailView(View):
 class AddDayModalView(View):
     def get(self, request, project_pk):
         return HttpResponse("<div class='rw-modal'><div class='rw-card'>Add day modal placeholder</div></div>")
+
+
+class ReorderStripsView(View):
+    def post(self, request, project_pk):
+        return HttpResponse(status=204)
+
+
+class ExportStripboardPdfView(View):
+    def get(self, request, project_pk):
+        return HttpResponse("PDF export is not available yet.", status=501)
+
+
+class GenerateCallSheetModalView(View):
+    def get(self, request, project_pk):
+        return HttpResponse("<div class='rw-modal'><div class='rw-card'>Generate call sheet</div></div>")
+
+
+class GenerateCallSheetPdfView(View):
+    def post(self, request, project_pk, call_sheet_pk):
+        return HttpResponse("PDF generated.", status=200)
+
+
+class SendCallSheetWhatsappView(View):
+    def post(self, request, project_pk, call_sheet_pk):
+        return HttpResponse(status=204)
+
+
+class CallSheetDetailView(View):
+    def get(self, request, project_pk, call_sheet_pk):
+        call_sheet = get_object_or_404(CallSheet, pk=call_sheet_pk, shoot_day__project_id=project_pk)
+        return HttpResponse(
+            f"<div class='rw-modal'><div class='rw-card'><h3>Call sheet day {call_sheet.shoot_day.day_number}</h3></div></div>"
+        )

@@ -18,11 +18,11 @@ class LoginView(AllauthLoginView):
 
 class RegisterView(View):
     def get(self, request):
-        return render(request, "accounts/login.html")
+        return render(request, "accounts/register.html")
 
 
 def magic_link(request):
-    return HttpResponse("")
+    return HttpResponse("Magic link flow is not enabled yet.", status=501)
 
 
 def logout_view(request):
@@ -31,23 +31,28 @@ def logout_view(request):
 
 
 def profile(request):
-    return render(request, "stub.html", {"stub_name": "Profile"})
+    return render(request, "accounts/profile.html")
 
 
 def settings(request):
-    return render(request, "stub.html", {"stub_name": "Account settings"})
+    return render(request, "accounts/settings.html")
 
 
 def team(request):
-    return render(request, "stub.html", {"stub_name": "Team"})
+    return render(request, "accounts/team.html")
 
 
 def contacts(request, project_id):
-    return render(request, "stub.html", {"stub_name": f"Contacts for {project_id}"})
+    return render(request, "accounts/contacts.html", {"project_id": project_id})
 
 
 def invite_row(request):
     return render(request, "accounts/_invite_row.html")
+
+
+def invite_modal(request):
+    return HttpResponse("<div class='rw-modal'><div class='rw-card'>Invite member</div></div>")
+
 
 def accept_invite(request, pk):
     return redirect("projects:list")
@@ -55,6 +60,15 @@ def accept_invite(request, pk):
 
 def decline_invite(request, pk):
     return redirect("projects:list")
+
+
+def delete_account(request):
+    if not request.user.is_authenticated:
+        return redirect("accounts:login")
+    user = request.user
+    logout(request)
+    user.delete()
+    return redirect("accounts:login")
 
 
 urlpatterns = [
@@ -68,6 +82,8 @@ urlpatterns = [
     path("team/", team, name="team"),
     path("contacts/<uuid:project_id>/", contacts, name="contacts"),
     path("invite-row/", invite_row, name="invite_row"),
+    path("invite-modal/", invite_modal, name="invite_modal"),
     path("invites/<uuid:pk>/accept/", accept_invite, name="accept_invite"),
     path("invites/<uuid:pk>/decline/", decline_invite, name="decline_invite"),
+    path("delete-account/", delete_account, name="delete_account"),
 ]

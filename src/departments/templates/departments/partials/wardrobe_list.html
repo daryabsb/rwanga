@@ -1,0 +1,4 @@
+{% for character, items in grouped.items %}
+<div class="rw-card" style="margin-top:8px;padding:8px"><strong>{{ character.name }}</strong>
+<ul>{% for item in items %}<li>{{ item.outfit_name }} (Scene {{ item.scene.number }})</li>{% endfor %}</ul></div>
+{% empty %}<p>No wardrobe items.</p>{% endfor %}

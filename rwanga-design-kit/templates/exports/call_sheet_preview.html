@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="ku" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ئایننامە — میوانێکی نادیار — ڕۆژی 3</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --rw-bg: #FFFFFF; --rw-surface: #F7F7FA; --rw-border: #DCDCE8;
+  --rw-text: #0F0F12; --rw-text-2: #5C5C70; --rw-text-3: #A0A0B8;
+  --rw-amber: #9A5520; --rw-pink: #F72585; --rw-vis: #007A6E;
+  --rw-font: 'Cairo','Noto Sans Arabic',Arial,sans-serif;
+  --rw-font-en: 'Inter','Helvetica Neue',Arial,sans-serif;
+}
+@page { size: A4 portrait; margin: 14mm 12mm 18mm 12mm; }
+*,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 11pt; }
+body { font-family: var(--rw-font); color: var(--rw-text); background: var(--rw-bg); line-height: 1.5; direction: rtl; max-width: 210mm; margin: 0 auto; padding: 14mm; }
+.en, bdi, .mono { font-family: var(--rw-font-en); direction: ltr; unicode-bidi: isolate; }
+
+/* HEADER */
+.rw-header { border-bottom: 3pt solid var(--rw-pink); padding-bottom: 10pt; margin-bottom: 14pt; }
+.rw-header-top { display: table; width: 100%; margin-bottom: 10pt; }
+.rw-header-logo-cell { display: table-cell; vertical-align: middle; width: 56pt; }
+.rw-header-info-cell { display: table-cell; vertical-align: middle; padding-inline-start: 12pt; }
+.rw-header-right-cell { display: table-cell; vertical-align: middle; text-align: end; width: 110pt; }
+.rw-logo-mark { display: inline-block; width: 48pt; height: 48pt; background: var(--rw-pink); color: #fff; font-family: var(--rw-font); font-size: 22pt; font-weight: 700; text-align: center; line-height: 48pt; }
+.rw-logo-name { font-family: var(--rw-font); font-size: 8pt; font-weight: 700; color: var(--rw-text-2); text-transform: uppercase; letter-spacing: 1.2pt; margin-top: 3pt; }
+.rw-project-title { font-size: 17pt; font-weight: 700; color: var(--rw-text); line-height: 1.2; }
+.rw-project-sub { font-size: 9.5pt; color: var(--rw-text-2); margin-top: 2pt; }
+.rw-day-badge { display: inline-block; background: var(--rw-pink); color: #fff; font-family: var(--rw-font-en); font-size: 22pt; font-weight: 700; width: 52pt; height: 52pt; text-align: center; line-height: 52pt; }
+.rw-day-label { font-size: 8pt; color: var(--rw-text-3); text-align: center; margin-top: 3pt; text-transform: uppercase; letter-spacing: 0.8pt; }
+
+/* CALL HERO */
+.rw-call-hero { background: var(--rw-surface); border: 2pt solid var(--rw-pink); padding: 14pt 20pt; margin-bottom: 14pt; display: table; width: 100%; }
+.rw-call-hero-left { display: table-cell; vertical-align: middle; }
+.rw-call-hero-right { display: table-cell; vertical-align: middle; text-align: end; }
+.rw-call-label { font-size: 9pt; font-weight: 700; color: var(--rw-pink); text-transform: uppercase; letter-spacing: 1.2pt; margin-bottom: 4pt; }
+.rw-call-time { font-family: var(--rw-font-en); font-size: 36pt; font-weight: 700; color: var(--rw-pink); line-height: 1; direction: ltr; }
+.rw-call-date { font-size: 11pt; color: var(--rw-text-2); margin-top: 4pt; }
+.rw-weather-icon { font-size: 22pt; line-height: 1; }
+.rw-weather-desc { font-size: 10pt; color: var(--rw-text-2); margin-top: 2pt; }
+.rw-weather-temp { font-family: var(--rw-font-en); font-size: 13pt; font-weight: 700; color: var(--rw-text); }
+
+/* SECTIONS */
+.rw-section { margin-bottom: 14pt; page-break-inside: avoid; }
+.rw-section-title { font-size: 8pt; font-weight: 700; color: var(--rw-text-3); text-transform: uppercase; letter-spacing: 1.2pt; padding-bottom: 4pt; border-bottom: 1pt solid var(--rw-border); margin-bottom: 8pt; }
+
+/* LOCATION */
+.rw-location-table { display: table; width: 100%; border: 1pt solid var(--rw-border); background: var(--rw-surface); }
+.rw-location-main { display: table-cell; vertical-align: top; padding: 10pt 14pt; width: 70%; }
+.rw-location-qr { display: table-cell; vertical-align: middle; width: 80pt; text-align: center; border-inline-start: 1pt solid var(--rw-border); padding: 10pt; }
+.rw-loc-name { font-size: 13pt; font-weight: 700; color: var(--rw-text); margin-bottom: 4pt; }
+.rw-loc-address { font-size: 10pt; color: var(--rw-text-2); margin-bottom: 6pt; line-height: 1.5; }
+.rw-loc-link { font-family: var(--rw-font-en); font-size: 8.5pt; color: var(--rw-amber); direction: ltr; display: inline-block; }
+.rw-qr-box { width: 60pt; height: 60pt; border: 1pt dashed var(--rw-border); display: inline-flex; align-items: center; justify-content: center; font-family: var(--rw-font-en); font-size: 9pt; font-weight: 700; color: var(--rw-text-3); }
+.rw-qr-label { font-size: 7pt; color: var(--rw-text-3); margin-top: 4pt; }
+
+/* TABLE */
+.rw-table { width: 100%; border-collapse: collapse; font-size: 10pt; }
+.rw-table th { background: var(--rw-surface); border: 1pt solid var(--rw-border); padding: 6pt 10pt; text-align: start; font-size: 8pt; font-weight: 700; color: var(--rw-text-3); text-transform: uppercase; letter-spacing: 0.8pt; }
+.rw-table td { border: 1pt solid var(--rw-border); padding: 8pt 10pt; vertical-align: top; font-size: 10pt; color: var(--rw-text); }
+.rw-table tr:nth-child(even) td { background: var(--rw-surface); }
+.rw-table tr.rw-tr-break td { background: #FFF8F0; color: var(--rw-text-2); font-style: italic; font-size: 9pt; }
+.rw-scene-chip { display: inline-block; background: var(--rw-amber); color: #fff; font-family: var(--rw-font-en); font-size: 8.5pt; font-weight: 700; padding: 1pt 6pt; }
+.rw-int-ext { display: inline-block; border: 1pt solid var(--rw-border); font-family: var(--rw-font-en); font-size: 8pt; font-weight: 700; color: var(--rw-text-2); padding: 0pt 4pt; margin-inline-start: 4pt; }
+.rw-cast-name { font-weight: 700; color: var(--rw-text); }
+.rw-cast-role { font-size: 9pt; color: var(--rw-text-2); margin-top: 2pt; }
+.rw-cast-calltime { font-family: var(--rw-font-en); font-weight: 700; color: var(--rw-pink); font-size: 11pt; direction: ltr; }
+
+/* CREW NOTE */
+.rw-crew-note { display: table; width: 100%; border: 1pt solid var(--rw-border); margin-bottom: 6pt; }
+.rw-crew-note-dept { display: table-cell; vertical-align: top; width: 90pt; padding: 8pt 12pt; background: var(--rw-surface); border-inline-end: 1pt solid var(--rw-border); font-size: 9pt; font-weight: 700; color: var(--rw-text-2); text-transform: uppercase; letter-spacing: 0.6pt; }
+.rw-crew-note-body { display: table-cell; vertical-align: top; padding: 8pt 12pt; font-size: 10pt; color: var(--rw-text); line-height: 1.6; }
+
+/* FOOTER */
+.rw-footer { margin-top: 20pt; padding-top: 8pt; border-top: 1pt solid var(--rw-border); display: table; width: 100%; font-size: 8pt; color: var(--rw-text-3); }
+.rw-footer-left { display: table-cell; vertical-align: middle; }
+.rw-footer-right { display: table-cell; vertical-align: middle; text-align: end; }
+.rw-footer-brand { font-weight: 700; color: var(--rw-pink); }
+</style>
+</head>
+<body>
+
+<!-- LETTERHEAD -->
+<div class="rw-header">
+  <div class="rw-header-top">
+    <div class="rw-header-logo-cell">
+      <div class="rw-logo-mark">ڕ</div>
+      <div class="rw-logo-name">ڕوانگە</div>
+    </div>
+    <div class="rw-header-info-cell">
+      <div class="rw-project-title">میوانێکی نادیار</div>
+      <div class="rw-project-sub">فیلمی کورت — ستودیۆی سەروەر مهەدین</div>
+    </div>
+    <div class="rw-header-right-cell">
+      <div class="rw-day-badge">3</div>
+      <div class="rw-day-label">ڕۆژی وێنەگرتن</div>
+    </div>
+  </div>
+</div>
+
+<!-- GENERAL CALL TIME -->
+<div class="rw-call-hero">
+  <div class="rw-call-hero-left">
+    <div class="rw-call-label">کاتی گشتی</div>
+    <div class="rw-call-time"><bdi>06:30</bdi></div>
+    <div class="rw-call-date"><bdi>یەکشەممە، ١٢ی مایس ٢٠٢٦</bdi></div>
+  </div>
+  <div class="rw-call-hero-right">
+    <div class="rw-weather-icon">⛅</div>
+    <div class="rw-weather-temp"><bdi>22°C</bdi></div>
+    <div class="rw-weather-desc">هەوای خۆش، کەمێک هەور</div>
+  </div>
+</div>
+
+<!-- LOCATION -->
+<div class="rw-section">
+  <div class="rw-section-title">شوێن</div>
+  <div class="rw-location-table">
+    <div class="rw-location-main">
+      <div class="rw-loc-name">خانووی باخچەی گوڵ — مانتای بازاڕی سووق</div>
+      <div class="rw-loc-address">شەقامی ١٧، نزیک بازاری گەڕەکی سەرچەم، سلێمانی</div>
+      <div class="rw-loc-link"><bdi>maps.google.com/?q=35.5614,45.4322</bdi></div>
+    </div>
+    <div class="rw-location-qr">
+      <div class="rw-qr-box">QR</div>
+      <div class="rw-qr-label">نەخشە</div>
+    </div>
+  </div>
+</div>
+
+<!-- SCHEDULE -->
+<div class="rw-section">
+  <div class="rw-section-title">خشتەی ڕۆژ</div>
+  <table class="rw-table">
+    <thead>
+      <tr>
+        <th style="width:60pt">کات</th>
+        <th style="width:48pt">ماوە</th>
+        <th style="width:52pt">دیمەن</th>
+        <th>بابەت</th>
+        <th>کەسایەتی</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="en">06:30</span></td>
+        <td><span class="en">30min</span></td>
+        <td>—</td>
+        <td>ئامادەکردنی ئامێرەکان و ڕووناکی</td>
+        <td style="font-size:9.5pt;color:var(--rw-text-2)">تەکنیکی</td>
+      </tr>
+      <tr>
+        <td><span class="en">07:00</span></td>
+        <td><span class="en">45min</span></td>
+        <td><span class="rw-scene-chip">12</span><span class="rw-int-ext">INT</span></td>
+        <td>
+          ژووری خواردن — ئامادەکردنی A
+          <div style="font-size:8.5pt;color:var(--rw-text-2);margin-top:3pt;font-style:italic">لێدانەکانی 12.1 تا 12.4</div>
+        </td>
+        <td style="font-size:9.5pt;color:var(--rw-text-2)">ناڵی، گەشە</td>
+      </tr>
+      <tr>
+        <td><span class="en">07:45</span></td>
+        <td><span class="en">60min</span></td>
+        <td><span class="rw-scene-chip">12</span><span class="rw-int-ext">INT</span></td>
+        <td>ژووری خواردن — ئامادەکردنی B و C</td>
+        <td style="font-size:9.5pt;color:var(--rw-text-2)">ناڵی، گەشە، هەواڵبەر</td>
+      </tr>
+      <tr class="rw-tr-break">
+        <td><span class="en">09:00</span></td>
+        <td><span class="en">15min</span></td>
+        <td>—</td>
+        <td>پشوو — چای و خواردنی سەرەتا</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td><span class="en">09:15</span></td>
+        <td><span class="en">90min</span></td>
+        <td><span class="rw-scene-chip">12</span><span class="rw-int-ext">INT</span></td>
+        <td>
+          بەشی دووەمی دیمەن — ئامادەکردنی D و E
+          <div style="font-size:8.5pt;color:var(--rw-text-2);margin-top:3pt;font-style:italic">دیالۆگی سەرەکی</div>
+        </td>
+        <td style="font-size:9.5pt;color:var(--rw-text-2)">ناڵی، گەشە</td>
+      </tr>
+      <tr class="rw-tr-break">
+        <td><span class="en">10:45</span></td>
+        <td><span class="en">60min</span></td>
+        <td>—</td>
+        <td>پشووی ناوەڕاست — خواردن</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td><span class="en">11:45</span></td>
+        <td><span class="en">120min</span></td>
+        <td><span class="rw-scene-chip">14</span><span class="rw-int-ext">EXT</span></td>
+        <td>دەرەوەی خانوو — بەشی کۆتایی</td>
+        <td style="font-size:9.5pt;color:var(--rw-text-2)">ناڵی، هەواڵبەر</td>
+      </tr>
+      <tr>
+        <td><span class="en">13:45</span></td>
+        <td><span class="en">30min</span></td>
+        <td>—</td>
+        <td>کۆکردنەوەی ئامێرەکان</td>
+        <td>—</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- CAST CALLS -->
+<div class="rw-section">
+  <div class="rw-section-title">کاتی گەیشتنی کەسایەتیەکان</div>
+  <table class="rw-table">
+    <thead>
+      <tr>
+        <th>کەسایەتی</th>
+        <th>ئەکتەر / ئەکترێس</th>
+        <th style="width:70pt">کاتی گەیشتن</th>
+        <th>تێبینی</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><div class="rw-cast-name">ناڵی</div></td>
+        <td><div class="rw-cast-role">سەروەر ئەحمەد</div></td>
+        <td><div class="rw-cast-calltime"><bdi>06:00</bdi></div></td>
+        <td style="font-size:9.5pt;color:var(--rw-text-2)">جل و بەرگی تایبەت — سووت و تاری</td>
+      </tr>
+      <tr>
+        <td><div class="rw-cast-name">گەشە</div></td>
+        <td><div class="rw-cast-role">هانا کەریم</div></td>
+        <td><div class="rw-cast-calltime"><bdi>06:15</bdi></div></td>
+        <td style="font-size:9.5pt;color:var(--rw-text-2)">پرووی ئەندامکردن بکرێت</td>
+      </tr>
+      <tr>
+        <td><div class="rw-cast-name">هەواڵبەر</div></td>
+        <td><div class="rw-cast-role">ئاکام یوسف</div></td>
+        <td><div class="rw-cast-calltime"><bdi>07:30</bdi></div></td>
+        <td style="font-size:9.5pt;color:var(--rw-text-2)">تەنها بۆ ئامادەکردنی B</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- CREW NOTES -->
+<div class="rw-section">
+  <div class="rw-section-title">تێبینیەکانی بەشەکان</div>
+  <div class="rw-crew-note">
+    <div class="rw-crew-note-dept">ڕووناکی</div>
+    <div class="rw-crew-note-body">کتێبی ڕووناکی دیمەنی ١٢ پێویستی بە گۆڕینی ڕووناکی دوو ئامادەکردن هەیە. ٢٧٠٠K بۆ ئامادەکردنی A و C، ٥٦٠٠K بۆ ئامادەکردنی B. بایدن فرێمی ٤ پێویستی بە لێدانی دۆزینەوەی بیوکاری هەیە.</div>
+  </div>
+  <div class="rw-crew-note">
+    <div class="rw-crew-note-dept">دەنگ</div>
+    <div class="rw-crew-note-body">باپیشکی کاری سەرەکیی دیمەن. ژووری خواردن دەنگی هاوچەرخ دەدات — سووڕمەی ئامێری تازەبووکردنەوە پێویستە. بارەی دەنگ ٤٢dB.</div>
+  </div>
+  <div class="rw-crew-note">
+    <div class="rw-crew-note-dept">تایبەتمەندی</div>
+    <div class="rw-crew-note-body">مەسەلەی مایدەی گوڵ لازمە. ئەو بۆرییە تازەیەی کە لەم هەفتەیەدا سیفاریش کراوە لەبەردەم دیمەن بگەیێتە وێنەگرتن.</div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="rw-footer">
+  <div class="rw-footer-left">
+    دروستکراوە لە <span class="rw-footer-brand">ڕوانگە</span> — پلاتفۆرمی پێشبەرهەمهێنانی سینەمای کوردی
+  </div>
+  <div class="rw-footer-right">
+    <bdi>2026-05-01 09:14</bdi>
+  </div>
+</div>
+
+</body>
+</html>

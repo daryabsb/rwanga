@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="rw-card" style="padding:16px">
+  <h2>Continuity</h2>
+  <div>
+    <button hx-get="?direction=" hx-target="#continuity-list" hx-swap="innerHTML">All</button>
+    <button hx-get="?direction=in" hx-target="#continuity-list" hx-swap="innerHTML">In</button>
+    <button hx-get="?direction=out" hx-target="#continuity-list" hx-swap="innerHTML">Out</button>
+  </div>
+  <form hx-post="" hx-target="#continuity-list" hx-swap="innerHTML" method="post">{% csrf_token %}{{ form.as_p }}<button class="rw-btn rw-btn-primary" type="submit">Add</button></form>
+  <div id="continuity-list">{% include "departments/partials/continuity_list.html" %}</div>
+</div>
+{% endblock %}

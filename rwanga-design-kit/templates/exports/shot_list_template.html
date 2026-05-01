@@ -1,0 +1,560 @@
+{# ════════════════════════════════════════════════════════
+   RWANGA — exports/shot_list_template.html
+   Shot list PDF — rendered via WeasyPrint to A4 landscape.
+   Printed reference for DP / camera team.
+
+   Context:
+     project       — Project instance
+     scenes        — QuerySet[Scene] with prefetched shots + setups
+     generated_at  — datetime string
+   ════════════════════════════════════════════════════════ #}
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE|default:'ku' }}"
+      dir="{% if LANGUAGE_BIDI %}rtl{% else %}ltr{% endif %}">
+<head>
+<meta charset="UTF-8">
+<title>{% trans "لیستی لێدانەکان" %} — {{ project.title }}</title>
+<style>
+/* ── DESIGN TOKENS (print-safe light theme) ── */
+:root {
+  --rw-bg:       #FFFFFF;
+  --rw-surface:  #F7F7FA;
+  --rw-surface-2:#EEEEF6;
+  --rw-border:   #DCDCE8;
+  --rw-text:     #0F0F12;
+  --rw-text-2:   #5C5C70;
+  --rw-text-3:   #A0A0B8;
+  --rw-amber:    #9A5520;
+  --rw-pink:     #F72585;
+  --rw-break:    #1E3FAF;
+  --rw-vis:      #007A6E;
+  --rw-font:     'Cairo', 'Noto Sans Arabic', Arial, sans-serif;
+  --rw-font-en:  'Inter', 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* ── PAGE SETUP — Landscape A4 ── */
+@page {
+  size: A4 landscape;
+  margin: 10mm 12mm 16mm 12mm;
+  @bottom-left {
+    content: "ڕوانگە — " string(project-title);
+    font-family: 'Cairo', Arial, sans-serif;
+    font-size: 7.5pt;
+    color: #A0A0B8;
+  }
+  @bottom-right {
+    content: counter(page) " / " counter(pages);
+    font-family: 'Inter', Arial, sans-serif;
+    font-size: 7.5pt;
+    color: #A0A0B8;
+  }
+}
+
+/* ── RESET ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 10pt; }
+body {
+  font-family: var(--rw-font);
+  color: var(--rw-text);
+  background: var(--rw-bg);
+  line-height: 1.4;
+  direction: {% if LANGUAGE_BIDI %}rtl{% else %}ltr{% endif %};
+}
+
+/* LTR for technical data */
+.en, bdi, .mono {
+  font-family: var(--rw-font-en);
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+/* ── HEADER ── */
+.rw-header {
+  display: table;
+  width: 100%;
+  border-bottom: 2.5pt solid var(--rw-pink);
+  padding-bottom: 8pt;
+  margin-bottom: 12pt;
+}
+.rw-header-logo-cell {
+  display: table-cell;
+  vertical-align: middle;
+  width: 46pt;
+}
+.rw-header-info-cell {
+  display: table-cell;
+  vertical-align: middle;
+  padding-inline-start: 10pt;
+}
+.rw-header-right-cell {
+  display: table-cell;
+  vertical-align: middle;
+  text-align: end;
+}
+
+.rw-logo-mark {
+  display: inline-block;
+  width: 38pt;
+  height: 38pt;
+  background: var(--rw-pink);
+  color: #fff;
+  font-family: var(--rw-font);
+  font-size: 17pt;
+  font-weight: 700;
+  text-align: center;
+  line-height: 38pt;
+}
+
+.rw-project-title {
+  font-size: 15pt;
+  font-weight: 700;
+  color: var(--rw-text);
+  string-set: project-title content();
+  line-height: 1.2;
+}
+.rw-project-sub {
+  font-size: 9pt;
+  color: var(--rw-text-2);
+  margin-top: 2pt;
+}
+
+.rw-doc-label {
+  font-size: 9pt;
+  font-weight: 700;
+  color: var(--rw-text-3);
+  text-transform: uppercase;
+  letter-spacing: 1pt;
+}
+.rw-doc-meta {
+  font-size: 8.5pt;
+  color: var(--rw-text-3);
+  margin-top: 3pt;
+}
+
+/* ── SCENE GROUP HEADER ── */
+.rw-scene-group {
+  margin-bottom: 0;
+  page-break-inside: avoid;
+}
+
+.rw-scene-hdr {
+  display: table;
+  width: 100%;
+  background: var(--rw-text);
+  color: #fff;
+  padding: 7pt 10pt;
+  margin-top: 14pt;
+}
+.rw-scene-hdr:first-of-type { margin-top: 0; }
+
+.rw-scene-hdr-left  { display: table-cell; vertical-align: middle; }
+.rw-scene-hdr-right { display: table-cell; vertical-align: middle; text-align: end; font-size: 8.5pt; color: rgba(255,255,255,.6); }
+
+.rw-scene-num {
+  display: inline-block;
+  background: var(--rw-pink);
+  color: #fff;
+  font-family: var(--rw-font-en);
+  font-size: 11pt;
+  font-weight: 700;
+  padding: 2pt 8pt;
+  margin-inline-end: 8pt;
+  direction: ltr;
+}
+
+.rw-scene-int-ext {
+  display: inline-block;
+  border: 1pt solid rgba(255,255,255,.35);
+  font-family: var(--rw-font-en);
+  font-size: 8pt;
+  font-weight: 700;
+  color: rgba(255,255,255,.8);
+  padding: 1pt 6pt;
+  margin-inline-end: 6pt;
+}
+
+.rw-scene-name {
+  display: inline;
+  font-size: 11pt;
+  font-weight: 700;
+  color: #fff;
+}
+.rw-scene-time {
+  display: inline;
+  font-size: 9pt;
+  color: rgba(255,255,255,.6);
+  margin-inline-start: 8pt;
+}
+
+/* ── SHOT TABLE ── */
+.rw-shot-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 9.5pt;
+  margin-bottom: 0;
+}
+
+.rw-shot-table thead tr {
+  background: var(--rw-surface-2);
+}
+
+.rw-shot-table th {
+  padding: 5pt 8pt;
+  text-align: start;
+  font-size: 7.5pt;
+  font-weight: 700;
+  color: var(--rw-text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.7pt;
+  border: 1pt solid var(--rw-border);
+  white-space: nowrap;
+}
+
+.rw-shot-table td {
+  padding: 7pt 8pt;
+  border: 1pt solid var(--rw-border);
+  vertical-align: top;
+  font-size: 9.5pt;
+  color: var(--rw-text);
+  line-height: 1.5;
+}
+
+/* Alternating rows */
+.rw-shot-table tbody tr:nth-child(even) td {
+  background: var(--rw-surface);
+}
+
+/* Shot type accent — left border in RTL = inline-end */
+.rw-shot-table tbody tr.s-d { border-inline-end: 3pt solid #C9A800; }
+.rw-shot-table tbody tr.s-v { border-inline-end: 3pt solid var(--rw-text-3); }
+.rw-shot-table tbody tr.s-i { border-inline-end: 3pt solid var(--rw-break); }
+
+/* Shot number */
+.rw-shot-num {
+  font-family: var(--rw-font-en);
+  font-size: 11pt;
+  font-weight: 700;
+  color: var(--rw-amber);
+  white-space: nowrap;
+  direction: ltr;
+  display: inline-block;
+}
+
+/* Setup chip */
+.rw-setup-chip {
+  display: inline-block;
+  background: var(--rw-surface-2);
+  border: 1pt solid var(--rw-border);
+  font-family: var(--rw-font-en);
+  font-size: 8pt;
+  font-weight: 700;
+  color: var(--rw-text-2);
+  padding: 0pt 5pt;
+  margin-inline-start: 4pt;
+}
+
+/* Type badge */
+.rw-badge {
+  display: inline-block;
+  padding: 1pt 6pt;
+  font-size: 7.5pt;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4pt;
+  white-space: nowrap;
+}
+.rw-badge-d { background: rgba(201,168,0,.1); color: #7A6000; border: 1pt solid rgba(201,168,0,.3); }
+.rw-badge-v { background: var(--rw-surface-2); color: var(--rw-text-2); border: 1pt solid var(--rw-border); }
+.rw-badge-i { background: rgba(30,63,175,.08); color: var(--rw-break); border: 1pt solid rgba(30,63,175,.25); }
+
+/* Lens tag */
+.rw-lens {
+  font-family: var(--rw-font-en);
+  font-size: 9pt;
+  font-weight: 600;
+  color: var(--rw-text-2);
+  direction: ltr;
+  display: inline-block;
+}
+
+/* Description text */
+.rw-desc {
+  font-size: 9pt;
+  color: var(--rw-text-2);
+  line-height: 1.5;
+  margin-top: 2pt;
+}
+
+/* Notes */
+.rw-notes {
+  font-size: 8.5pt;
+  color: var(--rw-text-3);
+  font-style: italic;
+  margin-top: 3pt;
+  line-height: 1.5;
+}
+
+/* Column widths — landscape A4 = ~277mm usable */
+.col-shot    { width: 46pt; }
+.col-type    { width: 46pt; }
+.col-setup   { width: 34pt; }
+.col-lens    { width: 38pt; }
+.col-move    { width: 70pt; }
+.col-dur     { width: 32pt; }
+.col-desc    { /* flex */ }
+.col-notes   { width: 90pt; }
+
+/* ── SUMMARY ROW ── */
+.rw-summary-row td {
+  background: var(--rw-surface-2) !important;
+  font-size: 8.5pt;
+  color: var(--rw-text-2);
+  font-style: italic;
+  padding: 5pt 8pt;
+  border-top: 1.5pt solid var(--rw-border);
+}
+
+/* ── TOTALS FOOTER (last page) ── */
+.rw-totals {
+  margin-top: 16pt;
+  display: table;
+  width: 100%;
+  border: 1pt solid var(--rw-border);
+  background: var(--rw-surface);
+  page-break-inside: avoid;
+}
+.rw-totals-cell {
+  display: table-cell;
+  vertical-align: middle;
+  padding: 10pt 14pt;
+  border-inline-start: 1pt solid var(--rw-border);
+  text-align: center;
+}
+.rw-totals-cell:first-child { border-inline-start: none; }
+.rw-totals-val {
+  font-family: var(--rw-font-en);
+  font-size: 18pt;
+  font-weight: 700;
+  color: var(--rw-amber);
+  line-height: 1;
+  direction: ltr;
+  display: block;
+}
+.rw-totals-lbl {
+  font-size: 8pt;
+  font-weight: 700;
+  color: var(--rw-text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.8pt;
+  margin-top: 4pt;
+}
+
+/* ── DOCUMENT FOOTER ── */
+.rw-footer {
+  margin-top: 14pt;
+  padding-top: 7pt;
+  border-top: 1pt solid var(--rw-border);
+  display: table;
+  width: 100%;
+  font-size: 7.5pt;
+  color: var(--rw-text-3);
+}
+.rw-footer-left  { display: table-cell; vertical-align: middle; }
+.rw-footer-right { display: table-cell; vertical-align: middle; text-align: end; }
+.rw-footer-brand { font-weight: 700; color: var(--rw-pink); }
+
+/* ── PRINT HELPERS ── */
+.page-break { page-break-after: always; }
+.no-break   { page-break-inside: avoid; }
+
+@media screen {
+  body { max-width: 277mm; margin: 0 auto; padding: 10mm; }
+}
+</style>
+</head>
+<body>
+
+{# ── DOCUMENT HEADER ── #}
+<div class="rw-header">
+  <div class="rw-header-logo-cell">
+    <div class="rw-logo-mark">ڕ</div>
+  </div>
+  <div class="rw-header-info-cell">
+    <div class="rw-project-title">{{ project.title }}</div>
+    <div class="rw-project-sub">
+      {{ project.get_project_type_display }}
+      {% if project.studio %} — {{ project.studio.name }}{% endif %}
+    </div>
+  </div>
+  <div class="rw-header-right-cell">
+    <div class="rw-doc-label">{% trans "لیستی لێدانەکان" %}</div>
+    <div class="rw-doc-meta">
+      {% trans "بەروار:" %} <bdi>{{ generated_at }}</bdi>
+    </div>
+    {% if project.scenes.count %}
+    <div class="rw-doc-meta" style="margin-top:2pt">
+      {{ project.scenes.count }} {% trans "دیمەن" %}
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+{# ── SCENES + SHOTS ── #}
+{% for scene in scenes %}
+{% with shots=scene.shots.all %}
+{% if shots %}
+
+<div class="rw-scene-group no-break">
+
+  {# Scene group header #}
+  <div class="rw-scene-hdr">
+    <div class="rw-scene-hdr-left">
+      <span class="rw-scene-num">{{ scene.number }}</span>
+      <span class="rw-scene-int-ext">{{ scene.int_ext }}</span>
+      <span class="rw-scene-name">{{ scene.location_name }}</span>
+      <span class="rw-scene-time">— {{ scene.time_of_day }}</span>
+    </div>
+    <div class="rw-scene-hdr-right">
+      {{ shots.count }} {% trans "لێدان" %}
+      {% if scene.page_count %}
+        · <bdi>{{ scene.page_count }}</bdi> {% trans "لاپەڕە" %}
+      {% endif %}
+    </div>
+  </div>
+
+  {# Shot table #}
+  <table class="rw-shot-table">
+    <thead>
+      <tr>
+        <th class="col-shot">{% trans "لێدان" %}</th>
+        <th class="col-type">{% trans "جۆر" %}</th>
+        <th class="col-setup">{% trans "ئامادەکردن" %}</th>
+        <th class="col-lens">{% trans "لێنس" %}</th>
+        <th class="col-move">{% trans "جووڵانی کامێرا" %}</th>
+        <th class="col-dur">{% trans "ماوە" %}</th>
+        <th class="col-desc">{% trans "وەسف" %}</th>
+        <th class="col-notes">{% trans "تێبینی" %}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for shot in shots %}
+      <tr class="{% if shot.shot_type == 'dialogue' %}s-d{% elif shot.shot_type == 'insert' %}s-i{% else %}s-v{% endif %}">
+
+        {# Shot number #}
+        <td>
+          <span class="rw-shot-num">{{ shot.number }}</span>
+        </td>
+
+        {# Type badge #}
+        <td>
+          {% if shot.shot_type == 'dialogue' %}
+          <span class="rw-badge rw-badge-d">{% trans "دیالۆگ" %}</span>
+          {% elif shot.shot_type == 'insert' %}
+          <span class="rw-badge rw-badge-i">{% trans "داخڵکردن" %}</span>
+          {% else %}
+          <span class="rw-badge rw-badge-v">{% trans "بینراو" %}</span>
+          {% endif %}
+        </td>
+
+        {# Setup #}
+        <td>
+          {% if shot.setup %}
+          <span class="rw-setup-chip">{{ shot.setup.letter }}</span>
+          {% else %}—{% endif %}
+        </td>
+
+        {# Lens #}
+        <td>
+          {% if shot.lens %}
+          <span class="rw-lens">{{ shot.lens }}</span>
+          {% else %}<span style="color:var(--rw-text-3)">—</span>{% endif %}
+        </td>
+
+        {# Movement #}
+        <td>
+          {% if shot.movement %}
+          {{ shot.movement }}
+          {% else %}<span style="color:var(--rw-text-3)">—</span>{% endif %}
+        </td>
+
+        {# Duration #}
+        <td>
+          {% if shot.duration %}
+          <span class="rw-lens">{{ shot.duration }}</span>
+          {% else %}<span style="color:var(--rw-text-3)">—</span>{% endif %}
+        </td>
+
+        {# Description #}
+        <td>
+          {{ shot.style }}
+          {% if shot.description %}
+          <div class="rw-desc">{{ shot.description }}</div>
+          {% endif %}
+        </td>
+
+        {# Notes #}
+        <td>
+          {% if shot.notes %}
+          <div class="rw-notes">{{ shot.notes }}</div>
+          {% else %}<span style="color:var(--rw-text-3)">—</span>{% endif %}
+        </td>
+
+      </tr>
+      {% endfor %}
+
+      {# Scene summary row #}
+      <tr class="rw-summary-row">
+        <td colspan="8">
+          {{ shots.count }} {% trans "لێدان" %}
+          — {% trans "دیمەنی" %} {{ scene.number }}
+          {% if scene.description %}· {{ scene.description|truncatechars:80 }}{% endif %}
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+{% endif %}
+{% endwith %}
+{% endfor %}
+
+{# ── PROJECT TOTALS ── #}
+<div class="rw-totals no-break">
+  <div class="rw-totals-cell">
+    <span class="rw-totals-val">{{ project.scenes.count }}</span>
+    <div class="rw-totals-lbl">{% trans "دیمەن" %}</div>
+  </div>
+  <div class="rw-totals-cell">
+    <span class="rw-totals-val">
+      {% with total=0 %}
+      {# Django template can't sum inline — this is populated by the view #}
+      {{ total_shots|default:"—" }}
+      {% endwith %}
+    </span>
+    <div class="rw-totals-lbl">{% trans "لێدان" %}</div>
+  </div>
+  <div class="rw-totals-cell">
+    <span class="rw-totals-val">{{ total_setups|default:"—" }}</span>
+    <div class="rw-totals-lbl">{% trans "ئامادەکردن" %}</div>
+  </div>
+  <div class="rw-totals-cell">
+    <span class="rw-totals-val">{{ total_pages|default:"—" }}</span>
+    <div class="rw-totals-lbl">{% trans "لاپەڕە" %}</div>
+  </div>
+</div>
+
+{# ── DOCUMENT FOOTER ── #}
+<div class="rw-footer">
+  <div class="rw-footer-left">
+    {% trans "دروستکراوە لە" %} <span class="rw-footer-brand">ڕوانگە</span> —
+    {% trans "پلاتفۆرمی پێشبەرهەمهێنانی سینەمای کوردی" %}
+  </div>
+  <div class="rw-footer-right">
+    <bdi>{{ generated_at }}</bdi>
+  </div>
+</div>
+
+</body>
+</html>

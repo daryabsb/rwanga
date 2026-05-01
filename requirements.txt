@@ -24,3 +24,4 @@ pytest-django
 requests
 Pillow
 mcp[cli]>=1.0.0
+weasyprint

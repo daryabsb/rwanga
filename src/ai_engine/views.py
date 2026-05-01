@@ -20,6 +20,13 @@ class RerunBreakdownView(View):
         return JsonResponse({"status": "queued", "script_pk": str(script_pk), "job_id": str(job.id)})
 
 
+class RunBreakdownView(View):
+    def post(self, request, project_pk):
+        project = get_object_or_404(Project, id=project_pk)
+        job = AIJob.objects.create(project=project, type=AIJob.JobType.BREAKDOWN, status=AIJob.Status.QUEUED)
+        return JsonResponse({"status": "queued", "project_pk": str(project_pk), "job_id": str(job.id)})
+
+
 class JobResultView(View):
     def get(self, request, job_id):
         job = get_object_or_404(AIJob, id=job_id)

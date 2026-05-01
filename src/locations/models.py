@@ -13,3 +13,15 @@ class Location(BaseModel):
 
     class Meta:
         ordering = ["name"]
+
+    @property
+    def latitude(self):
+        return self.gps_lat
+
+    @property
+    def longitude(self):
+        return self.gps_lng
+
+    @property
+    def projects_count(self):
+        return 0

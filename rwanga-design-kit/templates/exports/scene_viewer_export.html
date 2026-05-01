@@ -1,0 +1,1297 @@
+{# ════════════════════════════════════════════════════════
+   RWANGA — exports/scene_viewer_export.html
+   Self-contained offline scene viewer.
+   Rule 13: ZERO external dependencies.
+   All CSS inlined. All data embedded as JSON.
+   Fonts degrade to system. Works offline on tablet/phone/laptop.
+
+   Context: embedded as JSON in <script id="rw-data">
+   See EXPORT-BRANDING-TASK.md for full schema.
+   ════════════════════════════════════════════════════════ #}
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE|default:'ku' }}"
+      dir="{% if LANGUAGE_BIDI %}rtl{% else %}ltr{% endif %}">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="{% trans 'بینەری دیمەن — ڕوانگە' %}">
+<title>{% trans "دیمەنی" %} {{ scene.number }} — {{ project.title }} — ڕوانگە</title>
+<style>
+/* ════════════════════════════════════════════════════════
+   RWANGA SCENE VIEWER — Inlined Design System
+   Self-contained: no external CSS, no CDN fonts.
+   Cairo → fallback: system Arabic/Kurdish
+   Inter → fallback: system sans
+   ════════════════════════════════════════════════════════ */
+
+/* ── TOKENS ── */
+:root {
+  --rw-bg:        #0F0F12;
+  --rw-surface:   #17171C;
+  --rw-surface-2: #1E1E26;
+  --rw-surface-3: #26262E;
+  --rw-border:    #2C2C38;
+  --rw-border-2:  #222230;
+  --rw-text:      #EDEAD8;
+  --rw-text-2:    #78788C;
+  --rw-text-3:    #40404E;
+  --rw-amber:     #D4A574;
+  --rw-amber-dim: rgba(212,165,116,.10);
+  --rw-pink:      #F72585;
+  --rw-pink-dim:  rgba(247,37,133,.10);
+  --rw-vis:       #00A896;
+  --rw-plan:      #7C3AED;
+  --rw-break:     #2D5BE3;
+  --rw-shoot:     #F72585;
+  --rw-script:    #FF6B35;
+  --rw-font:      'Cairo', 'Noto Sans Arabic', 'Segoe UI', system-ui, sans-serif;
+  --rw-font-en:   'Inter', 'Helvetica Neue', Arial, sans-serif;
+  --rw-r:         2px;
+  --rw-t:         0.12s ease;
+}
+
+/* Light mode */
+@media (prefers-color-scheme: light) {
+  :root {
+    --rw-bg:        #F7F7FA;
+    --rw-surface:   #FFFFFF;
+    --rw-surface-2: #F0F0F6;
+    --rw-surface-3: #E8E8F2;
+    --rw-border:    #DCDCE8;
+    --rw-border-2:  #EBEBF4;
+    --rw-text:      #0F0F12;
+    --rw-text-2:    #5C5C70;
+    --rw-text-3:    #A0A0B8;
+    --rw-amber:     #9A5520;
+    --rw-amber-dim: rgba(154,85,32,.08);
+  }
+}
+
+/* Force dark via class (JS toggle) */
+html.rw-dark {
+  --rw-bg:        #0F0F12;
+  --rw-surface:   #17171C;
+  --rw-surface-2: #1E1E26;
+  --rw-surface-3: #26262E;
+  --rw-border:    #2C2C38;
+  --rw-border-2:  #222230;
+  --rw-text:      #EDEAD8;
+  --rw-text-2:    #78788C;
+  --rw-text-3:    #40404E;
+  --rw-amber:     #D4A574;
+  --rw-amber-dim: rgba(212,165,116,.10);
+}
+
+html.rw-light {
+  --rw-bg:        #F7F7FA;
+  --rw-surface:   #FFFFFF;
+  --rw-surface-2: #F0F0F6;
+  --rw-surface-3: #E8E8F2;
+  --rw-border:    #DCDCE8;
+  --rw-border-2:  #EBEBF4;
+  --rw-text:      #0F0F12;
+  --rw-text-2:    #5C5C70;
+  --rw-text-3:    #A0A0B8;
+  --rw-amber:     #9A5520;
+  --rw-amber-dim: rgba(154,85,32,.08);
+}
+
+/* ── RESET ── */
+*,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 15px; }
+body {
+  font-family: var(--rw-font);
+  background: var(--rw-bg);
+  color: var(--rw-text);
+  line-height: 1.6;
+  min-height: 100vh;
+}
+a { color: var(--rw-amber); text-decoration: none; }
+button { font-family: var(--rw-font); cursor: pointer; }
+img { max-width: 100%; display: block; }
+
+.en, .mono {
+  font-family: var(--rw-font-en);
+  font-size: 0.93em;
+}
+
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--rw-border); border-radius: 2px; }
+
+/* ── TOP BAR ── */
+#rw-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--rw-surface);
+  border-bottom: 1px solid var(--rw-border);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 20px;
+  height: 52px;
+  flex-shrink: 0;
+}
+
+.rw-logo-mark {
+  width: 36px;
+  height: 36px;
+  background: var(--rw-pink);
+  color: #fff;
+  font-family: var(--rw-font);
+  font-size: 16px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.rw-topbar-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--rw-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rw-topbar-spacer { flex: 1; }
+
+.rw-topbar-btn {
+  width: 36px;
+  height: 36px;
+  background: var(--rw-surface-2);
+  border: 1px solid var(--rw-border);
+  color: var(--rw-text-2);
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--rw-r);
+  transition: color var(--rw-t), border-color var(--rw-t);
+  flex-shrink: 0;
+}
+.rw-topbar-btn:hover { color: var(--rw-text); border-color: var(--rw-text-3); }
+
+/* ── SCENE HERO ── */
+#rw-scene-hero {
+  background: var(--rw-surface);
+  border-bottom: 1px solid var(--rw-border);
+  padding: 28px 24px 20px;
+}
+
+.rw-hero-scene-num {
+  font-family: var(--rw-font-en);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--rw-pink);
+  text-transform: uppercase;
+  letter-spacing: 1.4px;
+  margin-bottom: 6px;
+}
+
+.rw-hero-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--rw-text);
+  line-height: 1.2;
+  margin-bottom: 10px;
+}
+
+.rw-hero-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.rw-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  background: var(--rw-surface-2);
+  border: 1px solid var(--rw-border);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--rw-text-2);
+  border-radius: var(--rw-r);
+}
+.rw-chip.int-ext {
+  background: var(--rw-amber-dim);
+  border-color: rgba(212,165,116,.3);
+  color: var(--rw-amber);
+  font-family: var(--rw-font-en);
+}
+
+.rw-hero-synopsis {
+  font-size: 14px;
+  color: var(--rw-text-2);
+  line-height: 1.7;
+  max-width: 720px;
+  border-inline-start: 3px solid var(--rw-border);
+  padding-inline-start: 14px;
+}
+
+/* ── STATS ROW ── */
+.rw-stats-strip {
+  display: flex;
+  border-bottom: 1px solid var(--rw-border);
+  background: var(--rw-surface);
+}
+.rw-stat-cell {
+  flex: 1;
+  padding: 16px 12px;
+  text-align: center;
+  border-inline-start: 1px solid var(--rw-border);
+}
+.rw-stat-cell:first-child { border-inline-start: none; }
+.rw-stat-val {
+  font-family: var(--rw-font-en);
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--rw-amber);
+  line-height: 1;
+  margin-bottom: 4px;
+  direction: ltr;
+}
+.rw-stat-lbl {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--rw-text-3);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* ── NAV TABS ── */
+#rw-tabs {
+  position: sticky;
+  top: 52px;
+  z-index: 90;
+  display: flex;
+  background: var(--rw-surface);
+  border-bottom: 1px solid var(--rw-border);
+  overflow-x: auto;
+  padding: 0 8px;
+}
+#rw-tabs::-webkit-scrollbar { height: 0; }
+
+.rw-tab {
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  height: 48px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--rw-text-2);
+  white-space: nowrap;
+  border: none;
+  background: none;
+  border-bottom: 3px solid transparent;
+  transition: color var(--rw-t), border-color var(--rw-t);
+}
+.rw-tab:hover { color: var(--rw-text); }
+.rw-tab.active { color: var(--rw-amber); border-bottom-color: var(--rw-amber); }
+
+/* ── TAB PANES ── */
+.rw-pane { display: none; padding: 28px 24px; }
+.rw-pane.active { display: block; }
+
+/* ── SECTION HEADER ── */
+.rw-sec-hdr {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--rw-text-3);
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  margin-bottom: 14px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--rw-border);
+}
+
+/* ── SHOT ACCORDION ── */
+.rw-shot-list { display: flex; flex-direction: column; gap: 0; }
+
+.rw-shot-item {
+  background: var(--rw-surface);
+  border: 1px solid var(--rw-border);
+  border-bottom: none;
+}
+.rw-shot-item:last-child { border-bottom: 1px solid var(--rw-border); }
+
+.rw-shot-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: background var(--rw-t);
+  user-select: none;
+}
+.rw-shot-header:hover { background: var(--rw-surface-2); }
+
+.rw-shot-header.open { background: var(--rw-surface-2); }
+
+.rw-shot-num {
+  font-family: var(--rw-font-en);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--rw-amber);
+  min-width: 40px;
+  direction: ltr;
+  flex-shrink: 0;
+}
+.rw-shot-style { font-size: 13px; font-weight: 600; color: var(--rw-text); flex: 1; }
+
+.rw-shot-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.rw-badge {
+  display: inline-block;
+  padding: 2px 7px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-radius: var(--rw-r);
+}
+.rw-badge-d { background: rgba(245,215,110,.12); color: #F5D76E; border: 1px solid rgba(245,215,110,.25); }
+.rw-badge-v { background: var(--rw-surface-3); color: var(--rw-text-2); border: 1px solid var(--rw-border); }
+.rw-badge-i { background: rgba(45,91,227,.12); color: #7FA8FF; border: 1px solid rgba(45,91,227,.25); }
+
+.rw-lens-tag {
+  font-family: var(--rw-font-en);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--rw-text-3);
+  background: var(--rw-surface-3);
+  padding: 2px 7px;
+  border: 1px solid var(--rw-border);
+  direction: ltr;
+  display: inline-block;
+}
+
+.rw-dur-tag {
+  font-family: var(--rw-font-en);
+  font-size: 11px;
+  color: var(--rw-text-3);
+  direction: ltr;
+}
+
+.rw-chevron {
+  font-size: 12px;
+  color: var(--rw-text-3);
+  flex-shrink: 0;
+  transition: transform var(--rw-t);
+}
+.rw-shot-header.open .rw-chevron { transform: rotate(90deg); }
+
+/* Shot expanded body */
+.rw-shot-body {
+  display: none;
+  padding: 16px 20px 20px;
+  border-top: 1px solid var(--rw-border-2);
+  background: var(--rw-surface-2);
+}
+.rw-shot-body.open { display: block; }
+
+.rw-shot-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.rw-field-label {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--rw-text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.9px;
+  margin-bottom: 4px;
+}
+.rw-field-val {
+  font-size: 13px;
+  color: var(--rw-text);
+  line-height: 1.6;
+}
+.rw-field-val.en {
+  font-family: var(--rw-font-en);
+  direction: ltr;
+  display: inline-block;
+}
+
+.rw-shot-desc {
+  font-size: 13px;
+  color: var(--rw-text-2);
+  line-height: 1.7;
+  margin-bottom: 14px;
+}
+
+.rw-sb-thumb {
+  aspect-ratio: 16/9;
+  background: var(--rw-surface-3);
+  border: 1px solid var(--rw-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--rw-text-3);
+  font-size: 11px;
+  font-family: var(--rw-font-en);
+  margin-top: 12px;
+  overflow: hidden;
+}
+.rw-sb-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ── FLOOR PLAN ── */
+#rw-fp-canvas {
+  width: 100%;
+  background: var(--rw-surface);
+  border: 1px solid var(--rw-border);
+  overflow: auto;
+}
+#rw-fp-canvas svg {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+
+/* ── DEPT TABS ── */
+.rw-dept-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--rw-border);
+  margin-bottom: 16px;
+  gap: 0;
+  flex-wrap: wrap;
+}
+.rw-dept-tab {
+  padding: 9px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--rw-text-2);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  transition: color var(--rw-t), border-color var(--rw-t);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.rw-dept-tab:hover { color: var(--rw-text); }
+.rw-dept-tab.active { color: var(--rw-amber); border-bottom-color: var(--rw-amber); }
+
+.rw-dept-pane { display: none; }
+.rw-dept-pane.active { display: block; }
+
+/* ── CHECKLISTS ── */
+.rw-checklist { display: flex; flex-direction: column; gap: 0; }
+.rw-check-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  background: var(--rw-surface);
+  border-bottom: 1px solid var(--rw-border-2);
+}
+.rw-check-item:last-child { border-bottom: none; }
+.rw-check-item input[type=checkbox] {
+  width: 16px;
+  height: 16px;
+  margin-top: 2px;
+  accent-color: var(--rw-amber);
+  flex-shrink: 0;
+  cursor: pointer;
+}
+.rw-ci-name { font-size: 13px; font-weight: 600; color: var(--rw-text); margin-bottom: 2px; }
+.rw-ci-note { font-size: 11px; color: var(--rw-text-2); line-height: 1.5; }
+
+/* ── LIGHTING ── */
+.rw-light-item {
+  background: var(--rw-surface);
+  border-bottom: 1px solid var(--rw-border-2);
+  padding: 12px 14px;
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+.rw-light-item:last-child { border-bottom: none; }
+.rw-light-shot {
+  font-family: var(--rw-font-en);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--rw-amber);
+  min-width: 36px;
+  flex-shrink: 0;
+  direction: ltr;
+}
+.rw-light-body { flex: 1; }
+.rw-light-note { font-size: 13px; color: var(--rw-text-2); line-height: 1.6; margin-bottom: 4px; }
+.rw-light-meta {
+  font-family: var(--rw-font-en);
+  font-size: 11px;
+  color: var(--rw-text-3);
+  direction: ltr;
+  display: inline-block;
+}
+
+/* ── WARDROBE ── */
+.rw-wc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--rw-border); margin-top: 4px; }
+.rw-wc-card {
+  background: var(--rw-surface);
+  padding: 16px;
+  border-top: 4px solid var(--rw-amber);
+}
+.rw-wc-char { font-size: 15px; font-weight: 700; color: var(--rw-text); margin-bottom: 10px; }
+.rw-wc-outfit { font-size: 13px; color: var(--rw-amber); font-weight: 600; margin-bottom: 6px; }
+.rw-wc-desc { font-size: 12px; color: var(--rw-text-2); line-height: 1.6; }
+
+/* ── SCHEDULE ── */
+.rw-sched-list { display: flex; flex-direction: column; gap: 0; }
+.rw-sched-row {
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  gap: 12px;
+  padding: 14px 16px;
+  background: var(--rw-surface);
+  border-bottom: 1px solid var(--rw-border-2);
+  align-items: start;
+}
+.rw-sched-row:last-child { border-bottom: none; }
+.rw-s-time {
+  font-family: var(--rw-font-en);
+  font-size: 11px;
+  color: var(--rw-text-3);
+  direction: ltr;
+  line-height: 1.6;
+}
+.rw-s-dur { font-weight: 700; font-size: 12px; color: var(--rw-text-2); margin-top: 2px; }
+.rw-s-title { font-size: 14px; font-weight: 700; color: var(--rw-text); margin-bottom: 3px; }
+
+/* ── OFFLINE NOTICE ── */
+.rw-offline-notice {
+  background: var(--rw-surface);
+  border: 1px solid var(--rw-border);
+  border-inline-start: 4px solid var(--rw-text-3);
+  padding: 10px 14px;
+  font-size: 11px;
+  color: var(--rw-text-3);
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+/* ── FOOTER ── */
+#rw-footer {
+  background: var(--rw-surface);
+  border-top: 1px solid var(--rw-border);
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 11px;
+  color: var(--rw-text-3);
+  flex-wrap: wrap;
+}
+.rw-footer-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  color: var(--rw-text-2);
+}
+.rw-footer-brand span { color: var(--rw-pink); }
+.rw-footer-meta { font-family: var(--rw-font-en); direction: ltr; display: inline-block; }
+
+/* ── PRINT ── */
+@media print {
+  #rw-topbar { position: static; }
+  #rw-tabs { position: static; display: flex; }
+  .rw-tab { display: none; }
+  .rw-pane { display: block !important; }
+  .rw-pane + .rw-pane { page-break-before: always; }
+  .rw-shot-body { display: block !important; }
+  #rw-footer { position: static; }
+  .rw-offline-notice { display: none; }
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 600px) {
+  .rw-hero-title { font-size: 18px; }
+  .rw-shot-grid { grid-template-columns: 1fr; }
+  .rw-wc-grid { grid-template-columns: 1fr; }
+  .rw-stats-strip { flex-wrap: wrap; }
+  .rw-stat-cell { min-width: 50%; border-bottom: 1px solid var(--rw-border); }
+  #rw-tabs { top: 48px; }
+}
+</style>
+</head>
+<body>
+
+{# ── EMBEDDED DATA (Django fills this at render time) ── #}
+<script id="rw-data" type="application/json">
+{
+  "project": {
+    "title": "{{ project.title|escapejs }}",
+    "director": "{{ project.director|default:''|escapejs }}"
+  },
+  "scene": {
+    "number": {{ scene.number }},
+    "title": "{{ scene.location_name|escapejs }}",
+    "int_ext": "{{ scene.int_ext|escapejs }}",
+    "location": "{{ scene.location_name|escapejs }}",
+    "time_of_day": "{{ scene.time_of_day|escapejs }}",
+    "synopsis": "{{ scene.description|default:''|escapejs }}"
+  },
+  "shots": [
+    {% for shot in shots %}
+    {
+      "number": "{{ shot.number|escapejs }}",
+      "type": "{{ shot.shot_type|escapejs }}",
+      "style": "{{ shot.style|escapejs }}",
+      "lens": "{{ shot.lens|default:''|escapejs }}",
+      "movement": "{{ shot.movement|default:''|escapejs }}",
+      "duration": "{{ shot.duration|default:''|escapejs }}",
+      "description": "{{ shot.description|default:''|escapejs }}",
+      "notes": "{{ shot.notes|default:''|escapejs }}",
+      "setup": "{{ shot.setup.letter|default:''|escapejs }}",
+      "storyboard_url": {% if shot.storyboard.image %}"{{ shot.storyboard.image.url|escapejs }}"{% else %}null{% endif %}
+    }{% if not forloop.last %},{% endif %}
+    {% endfor %}
+  ],
+  "floor_plan": {
+    "room_width": {{ floor_plan.room_width|default:8.0 }},
+    "room_height": {{ floor_plan.room_height|default:5.0 }},
+    "furniture": {{ floor_plan.furniture|default:"[]" }},
+    "cameras": {{ floor_plan.camera_positions|default:"[]" }},
+    "paths": {{ floor_plan.movement_paths|default:"[]" }}
+  },
+  "departments": {
+    "lighting": [
+      {% for ln in lighting_notes %}
+      {
+        "shot_number": "{{ ln.shot.number|escapejs }}",
+        "note": "{{ ln.note|escapejs }}",
+        "color_temp": "{{ ln.color_temp|default:''|escapejs }}",
+        "equipment": "{{ ln.equipment|default:''|escapejs }}"
+      }{% if not forloop.last %},{% endif %}
+      {% endfor %}
+    ],
+    "sound": [
+      {% for sn in sound_notes %}
+      {
+        "shot_number": "{{ sn.shot.number|escapejs }}",
+        "note": "{{ sn.note|escapejs }}",
+        "sound_type": "{{ sn.sound_type|escapejs }}"
+      }{% if not forloop.last %},{% endif %}
+      {% endfor %}
+    ],
+    "props": [
+      {% for prop in props %}
+      {
+        "name": "{{ prop.name|escapejs }}",
+        "category": "{{ prop.category|escapejs }}",
+        "status": "{{ prop.status|escapejs }}"
+      }{% if not forloop.last %},{% endif %}
+      {% endfor %}
+    ],
+    "wardrobe": [
+      {% for wi in wardrobe_items %}
+      {
+        "character": "{{ wi.character.name|escapejs }}",
+        "outfit": "{{ wi.outfit_name|escapejs }}",
+        "description": "{{ wi.description|escapejs }}"
+      }{% if not forloop.last %},{% endif %}
+      {% endfor %}
+    ],
+    "continuity": [
+      {% for ci in continuity_items %}
+      {
+        "direction": "{{ ci.direction|escapejs }}",
+        "description": "{{ ci.description|escapejs }}",
+        "checked": {% if ci.checked %}true{% else %}false{% endif %}
+      }{% if not forloop.last %},{% endif %}
+      {% endfor %}
+    ]
+  },
+  "schedule": [
+    {% for block in schedule_blocks %}
+    {
+      "time": "{{ block.time_start|time:'H:i'|default:''|escapejs }}",
+      "duration": "{{ block.duration|default:''|escapejs }}",
+      "title": "{{ block.title|escapejs }}"
+    }{% if not forloop.last %},{% endif %}
+    {% endfor %}
+  ],
+  "generated_at": "{{ generated_at|escapejs }}",
+  "version": {{ version|default:1 }}
+}
+</script>
+
+{# ── TOP BAR ── #}
+<header id="rw-topbar">
+  <div class="rw-logo-mark">ڕ</div>
+  <div class="rw-topbar-title" id="rw-topbar-title">
+    ڕوانگە — {{ project.title }} — {% trans "دیمەنی" %} {{ scene.number }}
+  </div>
+  <div class="rw-topbar-spacer"></div>
+  <button class="rw-topbar-btn" id="rw-theme-toggle" title="{% trans 'گۆڕینی ڕووکار' %}">☀</button>
+  <button class="rw-topbar-btn" id="rw-print-btn" title="{% trans 'چاپکردن' %}" onclick="window.print()">⎙</button>
+</header>
+
+{# ── OFFLINE NOTICE ── #}
+<div style="padding:0 24px;margin-top:16px">
+  <div class="rw-offline-notice" id="rw-offline-notice">
+    ⚠ {% trans "کۆپیی دەرخراو — لەوانەیە نوێ نەبێت. بۆ دەست بە وەشانی تازەوە بگرن بڕۆن بۆ سەکۆی ڕوانگە." %}
+  </div>
+</div>
+
+{# ── SCENE HERO ── #}
+<section id="rw-scene-hero">
+  <div class="rw-hero-scene-num">
+    ڕوانگە · {{ project.title }} · {% trans "دیمەنی" %}
+    <span class="en" dir="ltr">{{ scene.number }}</span>
+  </div>
+  <h1 class="rw-hero-title">{{ scene.int_ext }}. {{ scene.location_name }} — {{ scene.time_of_day }}</h1>
+  <div class="rw-hero-chips">
+    <span class="rw-chip int-ext">{{ scene.int_ext }}</span>
+    <span class="rw-chip">📍 {{ scene.location_name }}</span>
+    <span class="rw-chip">🕐 {{ scene.time_of_day }}</span>
+    {% if scene.page_count %}
+    <span class="rw-chip"><span class="en">{{ scene.page_count }}</span> {% trans "لاپەڕە" %}</span>
+    {% endif %}
+  </div>
+  {% if scene.description %}
+  <p class="rw-hero-synopsis">{{ scene.description }}</p>
+  {% endif %}
+</section>
+
+{# ── STATS STRIP ── #}
+<div class="rw-stats-strip">
+  <div class="rw-stat-cell">
+    <div class="rw-stat-val" id="stat-shots">{{ shots.count }}</div>
+    <div class="rw-stat-lbl">{% trans "لێدان" %}</div>
+  </div>
+  <div class="rw-stat-cell">
+    <div class="rw-stat-val" id="stat-setups">{{ scene.setups.count|default:"—" }}</div>
+    <div class="rw-stat-lbl">{% trans "ئامادەکردن" %}</div>
+  </div>
+  <div class="rw-stat-cell">
+    <div class="rw-stat-val" id="stat-props">{{ props.count|default:"—" }}</div>
+    <div class="rw-stat-lbl">{% trans "تایبەتمەندی" %}</div>
+  </div>
+  <div class="rw-stat-cell">
+    <div class="rw-stat-val" id="stat-chars">{{ scene.characters.count|default:"—" }}</div>
+    <div class="rw-stat-lbl">{% trans "کەسایەتی" %}</div>
+  </div>
+</div>
+
+{# ── MAIN TABS ── #}
+<nav id="rw-tabs" role="tablist" aria-label="{% trans 'بەشەکان' %}">
+  <button class="rw-tab active" data-pane="shots" role="tab">{% trans "لێدانەکان" %}</button>
+  <button class="rw-tab" data-pane="floorplan" role="tab">{% trans "نەخشەی زەوی" %}</button>
+  <button class="rw-tab" data-pane="departments" role="tab">{% trans "بەشەکان" %}</button>
+  <button class="rw-tab" data-pane="schedule" role="tab">{% trans "خشتە" %}</button>
+</nav>
+
+<main id="rw-main">
+
+  {# ── SHOTS PANE ── #}
+  <div class="rw-pane active" id="pane-shots" role="tabpanel">
+    <div class="rw-sec-hdr">{% trans "لیستی لێدانەکان" %} · {% trans "دیمەنی" %} {{ scene.number }}</div>
+    <div class="rw-shot-list" id="rw-shot-list">
+      {% for shot in shots %}
+      <div class="rw-shot-item" data-shot="{{ shot.number }}">
+        <div class="rw-shot-header" data-shot="{{ shot.number }}" onclick="RW.toggleShot(this)">
+          <div class="rw-shot-num" dir="ltr">{{ shot.number }}</div>
+          <div class="rw-shot-style">{{ shot.style }}</div>
+          <div class="rw-shot-meta">
+            {% if shot.shot_type == 'dialogue' %}
+            <span class="rw-badge rw-badge-d">{% trans "دیالۆگ" %}</span>
+            {% elif shot.shot_type == 'insert' %}
+            <span class="rw-badge rw-badge-i">{% trans "داخڵکردن" %}</span>
+            {% else %}
+            <span class="rw-badge rw-badge-v">{% trans "بینراو" %}</span>
+            {% endif %}
+            {% if shot.lens %}<span class="rw-lens-tag">{{ shot.lens }}</span>{% endif %}
+            {% if shot.duration %}<span class="rw-dur-tag">{{ shot.duration }}</span>{% endif %}
+          </div>
+          <span class="rw-chevron">›</span>
+        </div>
+        <div class="rw-shot-body" id="shot-body-{{ shot.number|slugify }}">
+          <div class="rw-shot-grid">
+            {% if shot.movement %}
+            <div>
+              <div class="rw-field-label">{% trans "جووڵانی کامێرا" %}</div>
+              <div class="rw-field-val">{{ shot.movement }}</div>
+            </div>
+            {% endif %}
+            {% if shot.setup %}
+            <div>
+              <div class="rw-field-label">{% trans "ئامادەکردن" %}</div>
+              <div class="rw-field-val"><span class="en" dir="ltr">{{ shot.setup.letter }}</span></div>
+            </div>
+            {% endif %}
+            {% if shot.lens %}
+            <div>
+              <div class="rw-field-label">{% trans "لێنس" %}</div>
+              <div class="rw-field-val en" dir="ltr">{{ shot.lens }}</div>
+            </div>
+            {% endif %}
+            {% if shot.duration %}
+            <div>
+              <div class="rw-field-label">{% trans "ماوە" %}</div>
+              <div class="rw-field-val en" dir="ltr">{{ shot.duration }}</div>
+            </div>
+            {% endif %}
+          </div>
+          {% if shot.description %}
+          <div class="rw-shot-desc">{{ shot.description }}</div>
+          {% endif %}
+          {% if shot.notes %}
+          <div style="background:var(--rw-amber-dim);border-inline-start:3px solid var(--rw-amber);padding:10px 14px;font-size:12px;color:var(--rw-text-2);line-height:1.6;margin-top:10px">
+            {{ shot.notes }}
+          </div>
+          {% endif %}
+          {% if shot.storyboard.image %}
+          <div class="rw-sb-thumb" style="margin-top:14px">
+            <img src="{{ shot.storyboard.image.url }}" alt="{% trans 'ستۆریبۆردی لێدانی' %} {{ shot.number }}">
+          </div>
+          {% else %}
+          <div class="rw-sb-thumb">
+            <span style="font-size:11px;font-family:var(--rw-font-en);color:var(--rw-text-3)">STORYBOARD · {{ shot.number }}</span>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+      {% empty %}
+      <div style="padding:40px;text-align:center;color:var(--rw-text-3);font-size:14px">
+        {% trans "هێشتا لێدانێک نییە" %}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  {# ── FLOOR PLAN PANE ── #}
+  <div class="rw-pane" id="pane-floorplan" role="tabpanel">
+    <div class="rw-sec-hdr">{% trans "نەخشەی زەوی و بلۆکینگ" %}</div>
+    <div id="rw-fp-canvas">
+      <svg id="rw-fp-svg" viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg"
+           style="width:100%;max-height:520px">
+        {# SVG rendered by JS from floor_plan JSON #}
+        <rect width="800" height="500" fill="var(--rw-surface-2)" rx="0"/>
+        <text x="400" y="250" text-anchor="middle" font-family="monospace"
+              font-size="14" fill="var(--rw-text-3)">{% trans "نەخشەی زەوی لە ڕێگەی JS دەکرێتەوە" %}</text>
+      </svg>
+    </div>
+    <div style="margin-top:12px;font-size:11px;color:var(--rw-text-3);line-height:1.7">
+      <span style="display:inline-block;width:14px;height:14px;background:var(--rw-amber);margin-inline-end:6px;vertical-align:middle"></span>{% trans "پۆزیشنی کامێرا" %} ·
+      <span style="display:inline-block;width:14px;height:14px;background:var(--rw-break);opacity:.4;margin-inline-start:12px;margin-inline-end:6px;vertical-align:middle"></span>{% trans "وردەکاری" %} ·
+      <span style="display:inline-block;width:14px;height:2px;background:var(--rw-vis);margin-inline-start:12px;margin-inline-end:6px;vertical-align:middle"></span>{% trans "ڕێگای جووڵانی" %}
+    </div>
+  </div>
+
+  {# ── DEPARTMENTS PANE ── #}
+  <div class="rw-pane" id="pane-departments" role="tabpanel">
+    <div class="rw-sec-hdr">{% trans "بەشەکان" %}</div>
+
+    <div class="rw-dept-tabs" role="tablist">
+      <button class="rw-dept-tab active" data-dept="lighting" onclick="RW.switchDept(this)">{% trans "ڕووناکی" %}</button>
+      <button class="rw-dept-tab" data-dept="sound" onclick="RW.switchDept(this)">{% trans "دەنگ" %}</button>
+      <button class="rw-dept-tab" data-dept="props" onclick="RW.switchDept(this)">{% trans "تایبەتمەندی" %}</button>
+      <button class="rw-dept-tab" data-dept="wardrobe" onclick="RW.switchDept(this)">{% trans "جل و بەرگ" %}</button>
+      <button class="rw-dept-tab" data-dept="continuity" onclick="RW.switchDept(this)">{% trans "بەردەوامی" %}</button>
+    </div>
+
+    {# Lighting #}
+    <div class="rw-dept-pane active" id="dept-lighting">
+      {% if lighting_notes %}
+      <div style="background:var(--rw-surface);border:1px solid var(--rw-border)">
+        {% for ln in lighting_notes %}
+        <div class="rw-light-item">
+          <div class="rw-light-shot">{{ ln.shot.number }}</div>
+          <div class="rw-light-body">
+            <div class="rw-light-note">{{ ln.note }}</div>
+            {% if ln.color_temp or ln.equipment %}
+            <span class="rw-light-meta">
+              {% if ln.color_temp %}{{ ln.color_temp }}{% endif %}
+              {% if ln.color_temp and ln.equipment %} · {% endif %}
+              {% if ln.equipment %}{{ ln.equipment }}{% endif %}
+            </span>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div style="padding:32px;text-align:center;color:var(--rw-text-3);font-size:13px">{% trans "هێشتا تێبینیی ڕووناکی نییە" %}</div>
+      {% endif %}
+    </div>
+
+    {# Sound #}
+    <div class="rw-dept-pane" id="dept-sound">
+      {% if sound_notes %}
+      <div style="background:var(--rw-surface);border:1px solid var(--rw-border)">
+        {% for sn in sound_notes %}
+        <div class="rw-light-item">
+          <div class="rw-light-shot">{{ sn.shot.number }}</div>
+          <div class="rw-light-body">
+            <div class="rw-light-note">{{ sn.note }}</div>
+            {% if sn.sound_type %}
+            <span style="font-size:10px;color:var(--rw-text-3);text-transform:uppercase;letter-spacing:.5px">{{ sn.sound_type }}</span>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div style="padding:32px;text-align:center;color:var(--rw-text-3);font-size:13px">{% trans "هێشتا تێبینیی دەنگ نییە" %}</div>
+      {% endif %}
+    </div>
+
+    {# Props #}
+    <div class="rw-dept-pane" id="dept-props">
+      {% if props %}
+      <div class="rw-checklist" style="border:1px solid var(--rw-border)">
+        {% for prop in props %}
+        <div class="rw-check-item">
+          <input type="checkbox" {% if prop.status == 'on_set' %}checked{% endif %}>
+          <div>
+            <div class="rw-ci-name">{{ prop.name }}</div>
+            <div class="rw-ci-note">
+              {{ prop.category }}
+              {% if prop.status %} ·
+              <span style="color:{% if prop.status == 'on_set' %}var(--rw-vis){% elif prop.status == 'sourced' %}var(--rw-amber){% else %}var(--rw-text-3){% endif %}">
+                {{ prop.get_status_display|default:prop.status }}
+              </span>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div style="padding:32px;text-align:center;color:var(--rw-text-3);font-size:13px">{% trans "هێشتا تایبەتمەندییەک نییە" %}</div>
+      {% endif %}
+    </div>
+
+    {# Wardrobe #}
+    <div class="rw-dept-pane" id="dept-wardrobe">
+      {% if wardrobe_items %}
+      <div class="rw-wc-grid">
+        {% for wi in wardrobe_items %}
+        <div class="rw-wc-card">
+          <div class="rw-wc-char">{{ wi.character.name }}</div>
+          <div class="rw-wc-outfit">{{ wi.outfit_name }}</div>
+          {% if wi.description %}
+          <div class="rw-wc-desc">{{ wi.description }}</div>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div style="padding:32px;text-align:center;color:var(--rw-text-3);font-size:13px">{% trans "هێشتا زانیاری جل و بەرگ نییە" %}</div>
+      {% endif %}
+    </div>
+
+    {# Continuity #}
+    <div class="rw-dept-pane" id="dept-continuity">
+      {% if continuity_items %}
+      <div class="rw-checklist" style="border:1px solid var(--rw-border)">
+        {% for ci in continuity_items %}
+        <div class="rw-check-item">
+          <input type="checkbox" {% if ci.checked %}checked{% endif %}>
+          <div>
+            <div class="rw-ci-name">{{ ci.description }}</div>
+            <div class="rw-ci-note">
+              {% if ci.direction == 'in' %}
+              <span style="color:var(--rw-vis)">↓ {% trans "بەشدارکردن" %}</span>
+              {% else %}
+              <span style="color:var(--rw-amber)">↑ {% trans "دەرچوون" %}</span>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div style="padding:32px;text-align:center;color:var(--rw-text-3);font-size:13px">{% trans "هێشتا زانیاری بەردەوامی نییە" %}</div>
+      {% endif %}
+    </div>
+
+  </div>
+
+  {# ── SCHEDULE PANE ── #}
+  <div class="rw-pane" id="pane-schedule" role="tabpanel">
+    <div class="rw-sec-hdr">{% trans "خشتەی دیمەن" %}</div>
+    {% if schedule_blocks %}
+    <div class="rw-sched-list" style="background:var(--rw-surface);border:1px solid var(--rw-border)">
+      {% for block in schedule_blocks %}
+      <div class="rw-sched-row">
+        <div>
+          {% if block.time_start %}
+          <div class="rw-s-time">{{ block.time_start|time:"H:i" }}</div>
+          {% endif %}
+          {% if block.duration %}
+          <div class="rw-s-dur">{{ block.duration }}</div>
+          {% endif %}
+        </div>
+        <div>
+          <div class="rw-s-title">{{ block.title }}</div>
+          {% if block.notes %}
+          <div style="font-size:11px;color:var(--rw-text-3);margin-top:2px;font-style:italic">{{ block.notes }}</div>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div style="padding:32px;text-align:center;color:var(--rw-text-3);font-size:13px">{% trans "هێشتا خشتەیەک نییە" %}</div>
+    {% endif %}
+  </div>
+
+</main>
+
+{# ── FOOTER ── #}
+<footer id="rw-footer">
+  <div class="rw-footer-brand">
+    <div class="rw-logo-mark" style="width:28px;height:28px;font-size:12px">ڕ</div>
+    <span><span>ڕوانگە</span> — {% trans "پلاتفۆرمی پێشبەرهەمهێنانی سینەمای کوردی" %}</span>
+  </div>
+  <div>
+    <span style="color:var(--rw-text-3)">{% trans "وەشان" %} {{ version|default:1 }} ·</span>
+    <span class="rw-footer-meta"> {{ generated_at }}</span>
+    <span style="color:var(--rw-pink);margin-inline-start:10px">● {% trans "کۆپیی دەرخراو" %}</span>
+  </div>
+</footer>
+
+<script>
+/* ════════════════════════════════════════════════════════
+   RWANGA Scene Viewer — Vanilla JS
+   No frameworks, no CDN. Works offline.
+   ════════════════════════════════════════════════════════ */
+const RW = (function () {
+
+  /* ── DATA ── */
+  let DATA = {};
+  try {
+    DATA = JSON.parse(document.getElementById('rw-data').textContent);
+  } catch (e) {
+    console.warn('RW: data parse error', e);
+  }
+
+  /* ── THEME ── */
+  const html = document.documentElement;
+
+  function initTheme() {
+    const saved = localStorage.getItem('rw-viewer-theme');
+    const dark = saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    setTheme(dark ? 'dark' : 'light');
+  }
+
+  function setTheme(mode) {
+    html.classList.toggle('rw-dark',  mode === 'dark');
+    html.classList.toggle('rw-light', mode === 'light');
+    const btn = document.getElementById('rw-theme-toggle');
+    if (btn) btn.textContent = mode === 'dark' ? '☀' : '☾';
+    localStorage.setItem('rw-viewer-theme', mode);
+  }
+
+  function toggleTheme() {
+    const isDark = html.classList.contains('rw-dark');
+    setTheme(isDark ? 'light' : 'dark');
+  }
+
+  /* ── MAIN TABS ── */
+  function initTabs() {
+    document.querySelectorAll('#rw-tabs .rw-tab').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        const paneId = this.dataset.pane;
+        document.querySelectorAll('#rw-tabs .rw-tab').forEach(function (b) { b.classList.remove('active'); });
+        document.querySelectorAll('#rw-main .rw-pane').forEach(function (p) { p.classList.remove('active'); });
+        this.classList.add('active');
+        const pane = document.getElementById('pane-' + paneId);
+        if (pane) {
+          pane.classList.add('active');
+          if (paneId === 'floorplan') renderFloorPlan();
+        }
+        localStorage.setItem('rw-viewer-tab', paneId);
+      });
+    });
+
+    /* Restore last tab */
+    const saved = localStorage.getItem('rw-viewer-tab');
+    if (saved) {
+      const btn = document.querySelector('#rw-tabs .rw-tab[data-pane="' + saved + '"]');
+      if (btn) btn.click();
+    }
+  }
+
+  /* ── DEPT TABS ── */
+  function switchDept(btn) {
+    const deptId = btn.dataset.dept;
+    document.querySelectorAll('.rw-dept-tab').forEach(function (b) { b.classList.remove('active'); });
+    document.querySelectorAll('.rw-dept-pane').forEach(function (p) { p.classList.remove('active'); });
+    btn.classList.add('active');
+    const pane = document.getElementById('dept-' + deptId);
+    if (pane) pane.classList.add('active');
+  }
+
+  /* ── SHOT ACCORDION ── */
+  function toggleShot(header) {
+    const shotNum = header.dataset.shot;
+    const bodyId = 'shot-body-' + shotNum.replace(/\./g, '-');
+    const body = document.getElementById(bodyId);
+    if (!body) return;
+    const isOpen = body.classList.contains('open');
+    body.classList.toggle('open', !isOpen);
+    header.classList.toggle('open', !isOpen);
+  }
+
+  /* ── FLOOR PLAN RENDERER ── */
+  function renderFloorPlan() {
+    const fp = DATA.floor_plan;
+    if (!fp) return;
+
+    const svgEl = document.getElementById('rw-fp-svg');
+    if (!svgEl) return;
+
+    const PX_PER_M = 72;
+    const W = fp.room_width  * PX_PER_M;
+    const H = fp.room_height * PX_PER_M;
+    const PAD = 32;
+    const VW = W + PAD * 2;
+    const VH = H + PAD * 2;
+
+    svgEl.setAttribute('viewBox', '0 0 ' + VW + ' ' + VH);
+
+    /* Colour tokens (CSS vars don't resolve in SVG attrs safely across engines) */
+    const C = {
+      bg:       '#17171C',
+      surface2: '#1E1E26',
+      border:   '#2C2C38',
+      text:     '#EDEAD8',
+      text3:    '#40404E',
+      amber:    '#D4A574',
+      blue:     '#2D5BE3',
+      green:    '#00A896',
+      pink:     '#F72585',
+    };
+
+    /* Build SVG string */
+    let svg = '';
+
+    /* Background */
+    svg += '<rect x="0" y="0" width="' + VW + '" height="' + VH + '" fill="' + C.bg + '"/>';
+
+    /* Room outline */
+    svg += '<rect x="' + PAD + '" y="' + PAD + '" width="' + W + '" height="' + H + '"'
+         + ' fill="' + C.surface2 + '" stroke="' + C.border + '" stroke-width="2"/>';
+
+    /* Grid lines */
+    svg += '<g stroke="' + C.border + '" stroke-width="0.5" opacity="0.4">';
+    for (let x = PAD; x <= PAD + W; x += PX_PER_M) {
+      svg += '<line x1="' + x + '" y1="' + PAD + '" x2="' + x + '" y2="' + (PAD + H) + '"/>';
+    }
+    for (let y = PAD; y <= PAD + H; y += PX_PER_M) {
+      svg += '<line x1="' + PAD + '" y1="' + y + '" x2="' + (PAD + W) + '" y2="' + y + '"/>';
+    }
+    svg += '</g>';
+
+    /* Furniture */
+    (fp.furniture || []).forEach(function (f) {
+      const fx = PAD + f.x * PX_PER_M;
+      const fy = PAD + f.y * PX_PER_M;
+      const fw = (f.w || 1) * PX_PER_M;
+      const fh = (f.h || 0.6) * PX_PER_M;
+      svg += '<rect x="' + fx + '" y="' + fy + '" width="' + fw + '" height="' + fh + '"'
+           + ' fill="' + C.blue + '" opacity="0.25" stroke="' + C.blue + '" stroke-width="1"/>';
+      if (f.label) {
+        svg += '<text x="' + (fx + fw / 2) + '" y="' + (fy + fh / 2 + 4) + '"'
+             + ' text-anchor="middle" font-family="monospace" font-size="10" fill="' + C.text + '" opacity="0.7">'
+             + escSvg(f.label) + '</text>';
+      }
+    });
+
+    /* Movement paths */
+    (fp.paths || []).forEach(function (path) {
+      if (!path.points || path.points.length < 2) return;
+      const pts = path.points.map(function (p) {
+        return (PAD + p.x * PX_PER_M) + ',' + (PAD + p.y * PX_PER_M);
+      }).join(' ');
+      svg += '<polyline points="' + pts + '" fill="none"'
+           + ' stroke="' + C.green + '" stroke-width="2" stroke-dasharray="6,4" opacity="0.7"/>';
+    });
+
+    /* Camera positions */
+    (fp.cameras || []).forEach(function (cam) {
+      const cx = PAD + cam.x * PX_PER_M;
+      const cy = PAD + cam.y * PX_PER_M;
+      /* Camera body */
+      svg += '<circle cx="' + cx + '" cy="' + cy + '" r="10"'
+           + ' fill="' + C.amber + '" opacity="0.9"/>';
+      /* Label */
+      svg += '<text x="' + cx + '" y="' + (cy + 4) + '"'
+           + ' text-anchor="middle" font-family="monospace" font-size="9" font-weight="700"'
+           + ' fill="#0F0F12">' + escSvg(cam.letter || '') + '</text>';
+      /* Aim line */
+      if (cam.target_x !== undefined && cam.target_y !== undefined) {
+        const tx = PAD + cam.target_x * PX_PER_M;
+        const ty = PAD + cam.target_y * PX_PER_M;
+        svg += '<line x1="' + cx + '" y1="' + cy + '" x2="' + tx + '" y2="' + ty + '"'
+             + ' stroke="' + C.amber + '" stroke-width="1.5" opacity="0.5" stroke-dasharray="4,3"/>';
+      }
+    });
+
+    /* Room dimension labels */
+    svg += '<text x="' + (PAD + W / 2) + '" y="' + (PAD + H + 20) + '"'
+         + ' text-anchor="middle" font-family="monospace" font-size="10" fill="' + C.text3 + '">'
+         + fp.room_width + 'm</text>';
+    svg += '<text x="' + (PAD - 14) + '" y="' + (PAD + H / 2) + '"'
+         + ' text-anchor="middle" font-family="monospace" font-size="10" fill="' + C.text3 + '"'
+         + ' transform="rotate(-90,' + (PAD - 14) + ',' + (PAD + H / 2) + ')">'
+         + fp.room_height + 'm</text>';
+
+    svgEl.innerHTML = svg;
+  }
+
+  function escSvg(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  /* ── INIT ── */
+  function init() {
+    initTheme();
+    initTabs();
+
+    const themeBtn = document.getElementById('rw-theme-toggle');
+    if (themeBtn) themeBtn.addEventListener('click', toggleTheme);
+  }
+
+  document.addEventListener('DOMContentLoaded', init);
+
+  /* Public API */
+  return {
+    toggleShot: toggleShot,
+    switchDept: switchDept,
+  };
+
+}());
+</script>
+
+</body>
+</html>

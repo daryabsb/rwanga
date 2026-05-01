@@ -6,7 +6,7 @@ from src.scripts.services import ScriptsService
 
 class ScriptViewSet(viewsets.ModelViewSet):
     serializer_class = ScriptSerializer
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         project_id = self.kwargs.get("project_id") or self.request.query_params.get("project")
@@ -24,7 +24,7 @@ class ScriptViewSet(viewsets.ModelViewSet):
 
 class ScriptElementViewSet(viewsets.ModelViewSet):
     serializer_class = ScriptElementSerializer
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         project_id = self.kwargs.get("project_id")

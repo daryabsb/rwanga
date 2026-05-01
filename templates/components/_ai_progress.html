@@ -1,5 +1,6 @@
 
 {% load i18n %}
+{% if job and job.id %}
 <div class="rw-ai-progress" data-job-id="{{ job.id }}"
      data-refresh-url="{% url 'ai_engine:job_result' job.id %}"
      data-refresh-target="#rw-ai-result-{{ job.id }}"
@@ -29,4 +30,5 @@
 <style>
 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 </style>
+{% endif %}
 

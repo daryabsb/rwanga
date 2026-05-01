@@ -12,7 +12,7 @@ from src.projects.services import ProjectsService
 
 class ProjectViewSet(viewsets.ModelViewSet):
     serializer_class = ProjectSerializer
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         return ProjectsService.list_projects()
@@ -29,7 +29,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
 
 class SceneViewSet(viewsets.ModelViewSet):
     serializer_class = SceneSerializer
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         project_id = self.kwargs.get("project_id") or self.request.query_params.get("project")
@@ -66,7 +66,7 @@ class SceneViewSet(viewsets.ModelViewSet):
 
 class CharacterViewSet(viewsets.ModelViewSet):
     serializer_class = CharacterSerializer
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         project_id = self.kwargs.get("project_id") or self.request.query_params.get("project")
@@ -95,7 +95,7 @@ class CharacterViewSet(viewsets.ModelViewSet):
 
 class LocationViewSet(viewsets.ModelViewSet):
     serializer_class = LocationSerializer
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         project_id = self.kwargs.get("project_id") or self.request.query_params.get("project")

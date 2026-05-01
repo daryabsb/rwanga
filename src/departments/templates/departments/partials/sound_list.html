@@ -1,0 +1,4 @@
+{% for scene, notes in grouped.items %}
+<div class="rw-card" style="margin-top:8px;padding:8px"><strong>Scene {{ scene.number }}</strong>
+<ul>{% for note in notes %}<li>{{ note.shot.number }} - {{ note.note }} ({{ note.sound_type }})</li>{% endfor %}</ul></div>
+{% empty %}<p>No sound notes.</p>{% endfor %}

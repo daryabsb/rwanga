@@ -1,0 +1,7 @@
+<ul>
+{% for prop in props %}
+<li>
+  <input type="checkbox" {% if prop.status != 'needed' %}checked{% endif %} hx-post="{% url 'departments:toggle_prop' project.pk prop.pk %}" hx-vals='{"checked": this.checked}' hx-swap="none"> {{ prop.name }} ({{ prop.category }}) - {{ prop.status }}
+</li>
+{% empty %}<li>No props.</li>{% endfor %}
+</ul>

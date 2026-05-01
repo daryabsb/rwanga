@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="rw-card" style="padding:16px">
+  <h2>Lighting</h2>
+  <form hx-post="" hx-target="#lighting-list" hx-swap="innerHTML" method="post">{% csrf_token %}{{ form.as_p }}<button class="rw-btn rw-btn-primary" type="submit">Add</button></form>
+  <div id="lighting-list">{% include "departments/partials/lighting_list.html" %}</div>
+</div>
+{% endblock %}

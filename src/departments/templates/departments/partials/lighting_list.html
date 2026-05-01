@@ -1,0 +1,4 @@
+{% for scene, notes in grouped.items %}
+<div class="rw-card" style="margin-top:8px;padding:8px"><strong>Scene {{ scene.number }}</strong>
+<ul>{% for note in notes %}<li>{{ note.shot.number }} - {{ note.note }} {% if note.color_temp %}({{ note.color_temp }}){% endif %}</li>{% endfor %}</ul></div>
+{% empty %}<p>No lighting notes.</p>{% endfor %}
