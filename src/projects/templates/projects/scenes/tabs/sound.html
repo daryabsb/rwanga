@@ -1,0 +1,102 @@
+{% comment %} ════════════════════════════════════════════════════════
+   RWANGA — projects/scenes/tabs/sound.html
+   Sound module tab. HTMX fragment.
+   Golden rule, track setup, critical moment notes.
+
+   Context:
+     scene            — Scene instance
+     project          — Project instance
+     sound_notes      — QuerySet[SoundNote]
+     sound_setup      — dict (track assignments, equipment)
+     critical_moments — list (timestamped critical sound cues)
+   ════════════════════════════════════════════════════════ {% endcomment %}
+{% load i18n %}
+
+<div style="padding:var(--rw-pad-lg)">
+
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--rw-pad-md)">
+    <h2 style="font-size:16px;font-weight:700">{% trans "دەنگ" %}</h2>
+    <button class="rw-btn rw-btn-ghost"
+            hx-get="{% url 'departments:add_sound_modal' project.pk scene.pk %}"
+            hx-target="#rw-modal-container" hx-swap="innerHTML">
+      + {% trans "تێبینی" %}
+    </button>
+  </div>
+
+  {% comment %} ── Golden rule reminder ── {% endcomment %}
+  <div style="display:flex;gap:12px;align-items:flex-start;padding:16px var(--rw-pad-md);background:var(--rw-amber-dim);border:1px solid rgba(212,165,116,.25);border-inline-start:4px solid var(--rw-amber);margin-bottom:var(--rw-pad-lg)">
+    <span style="font-size:16px;flex-shrink:0">🎙</span>
+    <div>
+      <div style="font-size:13px;font-weight:700;color:var(--rw-amber);margin-bottom:3px">{% trans "یاسای زێرینی دەنگ" %}</div>
+      <div style="font-size:12px;color:var(--rw-text-2);line-height:1.6">
+        {% trans "دەنگی بێدەنگی ژوور تۆمار بکە — لانیکەم ٣٠ چرکە — پێش دەستپێکردن و دوای کۆتایی کارکردن." %}
+      </div>
+    </div>
+  </div>
+
+  {% comment %} ── Track setup ── {% endcomment %}
+  {% if sound_setup %}
+  <div class="rw-card" style="margin-bottom:var(--rw-pad-lg)">
+    <div class="rw-card-title">{% trans "داماڵکاری تراک" %}</div>
+    <div class="rw-grid-2">
+      {% if sound_setup.track_1 %}
+      <div>
+        <div class="rw-field-label" dir="ltr">{% trans "تراکی" %} 1</div>
+        <div class="rw-field-val">{{ sound_setup.track_1 }}</div>
+      </div>
+      {% endif %}
+      {% if sound_setup.track_2 %}
+      <div>
+        <div class="rw-field-label" dir="ltr">{% trans "تراکی" %} 2</div>
+        <div class="rw-field-val">{{ sound_setup.track_2 }}</div>
+      </div>
+      {% endif %}
+      {% if sound_setup.equipment %}
+      <div style="grid-column:span 2">
+        <div class="rw-field-label">{% trans "ئامێری دەنگ" %}</div>
+        <div class="rw-field-val">{{ sound_setup.equipment }}</div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+
+  {% comment %} ── Sound notes list ── {% endcomment %}
+  {% if sound_notes %}
+  <div class="rw-sound-list">
+    {% for note in sound_notes %}
+    <div class="rw-sound-item">
+      <div class="rw-si-icon">
+        {% if note.sound_type == 'dialogue' %}🗣
+        {% elif note.sound_type == 'sfx' %}🔊
+        {% elif note.sound_type == 'ambience' %}🌿
+        {% elif note.sound_type == 'music' %}🎵
+        {% else %}🎙{% endif %}
+      </div>
+      <div style="flex:1">
+        <div class="rw-si-title {% if note.sound_type == 'critical' %}crit{% endif %}">
+          {% if note.shot %}{% trans "لێدانی" %} <span dir="ltr">{{ note.shot.number }}</span> — {% endif %}
+          {{ note.get_sound_type_display }}
+        </div>
+        <div class="rw-si-desc">{{ note.note }}</div>
+      </div>
+      <button class="rw-btn rw-btn-ghost" style="padding:4px 10px;font-size:11px;flex-shrink:0"
+              hx-get="{% url 'departments:edit_sound_modal' project.pk note.pk %}"
+              hx-target="#rw-modal-container" hx-swap="innerHTML">✎</button>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="rw-empty" style="padding:var(--rw-pad-xl) var(--rw-pad-md)">
+    <div class="rw-empty-icon">🔊</div>
+    <div class="rw-empty-title">{% trans "هێشتا تێبینی دەنگێک نییە" %}</div>
+    <div class="rw-empty-sub">{% trans "پێداویستییەکانی دەنگ بۆ ئەم دیمەنە تۆمار بکە" %}</div>
+    <button class="rw-btn rw-btn-primary"
+            hx-get="{% url 'departments:add_sound_modal' project.pk scene.pk %}"
+            hx-target="#rw-modal-container" hx-swap="innerHTML">
+      + {% trans "تێبینی یەکەم" %}
+    </button>
+  </div>
+  {% endif %}
+
+</div>

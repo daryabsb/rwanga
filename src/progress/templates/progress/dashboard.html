@@ -1,28 +1,133 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Progress Dashboard</title>
-</head>
-<body>
-    <h1>Progress Dashboard</h1>
-    <ul>
-        <li>Total Tasks: {{ task_count }}</li>
-        <li>Completed Tasks: {{ completed_count }}</li>
-        <li>Blocked Tasks: {{ blocked_count }}</li>
-        <li>Open Gaps: {{ open_gaps }}</li>
-    </ul>
+{% extends "base.html" %}
+{% comment %} ════════════════════════════════════════════════════════
+   RWANGA — progress/dashboard.html
+   Progress tracking dashboard. Darya's monitoring page.
 
-    <h2>Recent Updates</h2>
-    <ul>
-        {% for update in recent_updates %}
-        <li>
-            {% if update.task %}{{ update.task.title }}{% else %}General{% endif %}: {{ update.body }}
-        </li>
-        {% empty %}
-        <li>No updates yet.</li>
-        {% endfor %}
-    </ul>
-</body>
-</html>
+   Context:
+     tasks_summary   — dict {pending, in_progress, completed, blocked}
+     recent_updates  — QuerySet[ProgressUpdate] last 10
+     current_phase   — string e.g. "P1"
+     open_gaps       — QuerySet[GapBlocker] status=open
+   ════════════════════════════════════════════════════════ {% endcomment %}
+{% load static i18n progress_filters %}
+
+{% block title %}{% trans "پرۆگرەس" %}{% endblock %}
+
+{% block content %}
+<div id="rw-content" style="overflow-y:auto;flex:1;padding:var(--rw-pad-lg)">
+
+  {% comment %} ── Header ── {% endcomment %}
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--rw-pad-lg)">
+    <div>
+      <h1 style="font-size:22px;font-weight:700;margin-bottom:4px">{% trans "پرۆگرەسی پڕۆژە" %}</h1>
+      <p style="font-size:13px;color:var(--rw-text-2)">
+        {% trans "فازی ئێستا:" %}
+        <span style="color:var(--rw-amber);font-weight:700;font-family:var(--rw-font-en)">{{ current_phase }}</span>
+      </p>
+    </div>
+    <div style="display:flex;gap:8px">
+      <a href="{% url 'progress:tasks' %}" class="rw-btn rw-btn-ghost">{% trans "هەموو تاسکەکان" %}</a>
+      <a href="{% url 'progress:gaps' %}" class="rw-btn rw-btn-ghost">{% trans "گاپ و بلۆکەرەکان" %}</a>
+    </div>
+  </div>
+
+  {% comment %} ── Task stats ── {% endcomment %}
+  <div class="rw-stats" style="margin-bottom:var(--rw-pad-lg)">
+    <div class="rw-stat">
+      <div class="rw-stat-val" style="color:var(--rw-text-2)">{{ tasks_summary.pending|default:"0" }}</div>
+      <div class="rw-stat-lbl">{% trans "چاوەڕوانی" %}</div>
+    </div>
+    <div class="rw-stat">
+      <div class="rw-stat-val" style="color:var(--rw-amber)">{{ tasks_summary.in_progress|default:"0" }}</div>
+      <div class="rw-stat-lbl">{% trans "لە کارەوە" %}</div>
+    </div>
+    <div class="rw-stat">
+      <div class="rw-stat-val" style="color:var(--rw-vis)">{{ tasks_summary.completed|default:"0" }}</div>
+      <div class="rw-stat-lbl">{% trans "تەواوبوو" %}</div>
+    </div>
+    <div class="rw-stat">
+      <div class="rw-stat-val" style="color:var(--rw-shoot)">{{ tasks_summary.blocked|default:"0" }}</div>
+      <div class="rw-stat-lbl">{% trans "بلۆک" %}</div>
+    </div>
+  </div>
+
+  {% comment %} ── Open gaps / blockers ── {% endcomment %}
+  {% if open_gaps %}
+  <div class="rw-section-hdr" style="color:var(--rw-shoot)">
+    {% trans "گاپ و بلۆکەرەکانی کراوە" %} ({{ open_gaps.count }})
+  </div>
+  {% for gap in open_gaps %}
+  {% if gap.severity == 'critical' %}
+  <div class="rw-warn" style="margin-bottom:8px">
+    <span class="rw-warn-icon">⚠</span>
+    <div style="flex:1">
+      <div style="font-size:13px;font-weight:700;color:var(--rw-shoot);margin-bottom:3px">{{ gap.title }}</div>
+      <div class="rw-warn-text" style="font-size:12px">{{ gap.description|truncatechars:120 }}</div>
+      <div style="font-size:10px;color:var(--rw-text-3);margin-top:4px;font-family:var(--rw-font-en)">
+        {{ gap.gap_type }} · {{ gap.phase }}
+      </div>
+    </div>
+    <a href="{% url 'progress:gaps' %}" class="rw-btn rw-btn-ghost" style="padding:5px 12px;font-size:11px;flex-shrink:0">{% trans "بینین" %}</a>
+  </div>
+  {% else %}
+  <div class="rw-card" style="margin-bottom:8px;border-inline-start:3px solid var(--rw-amber)">
+    <div style="display:flex;align-items:flex-start;gap:12px">
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:600;color:var(--rw-text);margin-bottom:3px">{{ gap.title }}</div>
+        <div style="font-size:12px;color:var(--rw-text-2)">{{ gap.description|truncatechars:100 }}</div>
+      </div>
+      <span class="rw-badge rw-badge-v" style="font-size:9px;flex-shrink:0">{{ gap.severity }}</span>
+    </div>
+  </div>
+  {% endif %}
+  {% endfor %}
+  {% endif %}
+
+  {% comment %} ── Recent updates ── {% endcomment %}
+  <div class="rw-section-hdr" style="margin-top:var(--rw-pad-md)">{% trans "نوێترین نوێکاریەکان" %}</div>
+  <div style="background:var(--rw-surface);border:1px solid var(--rw-border)">
+    {% for update in recent_updates %}
+    <div style="display:flex;gap:16px;padding:14px var(--rw-pad-md);border-bottom:1px solid var(--rw-border-2)">
+      <div style="font-size:20px;flex-shrink:0">
+        {% if update.update_type == 'status_change' %}🔄
+        {% elif update.update_type == 'implementation' %}⚙
+        {% elif update.update_type == 'fix' %}🔧
+        {% elif update.update_type == 'note' %}📝
+        {% else %}💬{% endif %}
+      </div>
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px">
+          {% if update.task %}
+          <a href="{% url 'progress:task_detail' update.task.pk %}"
+             style="font-size:12px;font-weight:600;color:var(--rw-amber)">{{ update.task.title|truncatechars:40 }}</a>
+          {% endif %}
+          <span class="rw-badge rw-badge-v" style="font-size:9px">{{ update.get_update_type_display }}</span>
+        </div>
+        <div style="font-size:13px;color:var(--rw-text-2);line-height:1.5">{{ update.body|truncatechars:100 }}</div>
+        <div style="font-size:11px;color:var(--rw-text-3);margin-top:4px;font-family:var(--rw-font-en)" dir="ltr">
+          {{ update.created_at|date:"Y-m-d H:i" }}
+        </div>
+      </div>
+    </div>
+    {% empty %}
+    <div style="padding:var(--rw-pad-lg);text-align:center;color:var(--rw-text-3);font-size:13px">
+      {% trans "هێشتا نوێکارییەک نییە" %}
+    </div>
+    {% endfor %}
+  </div>
+
+  {% comment %} ── Quick links ── {% endcomment %}
+  <div class="rw-section-hdr" style="margin-top:var(--rw-pad-lg)">{% trans "بەستنەرەکانی خێرا" %}</div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1px;background:var(--rw-border);border:1px solid var(--rw-border)">
+    <a href="{% url 'progress:tasks' %}" style="text-decoration:none"><div style="background:var(--rw-surface);padding:var(--rw-pad-md);text-align:center"><div style="font-size:11px;font-weight:600;color:var(--rw-text-2)">{% trans "تاسکەکان" %}</div></div></a>
+    <a href="{% url 'progress:updates' %}" style="text-decoration:none"><div style="background:var(--rw-surface);padding:var(--rw-pad-md);text-align:center"><div style="font-size:11px;font-weight:600;color:var(--rw-text-2)">{% trans "نوێکاریەکان" %}</div></div></a>
+    <a href="{% url 'progress:gaps' %}" style="text-decoration:none"><div style="background:var(--rw-surface);padding:var(--rw-pad-md);text-align:center"><div style="font-size:11px;font-weight:600;color:var(--rw-text-2)">{% trans "گاپەکان" %}</div></div></a>
+    <a href="{% url 'progress:decisions' %}" style="text-decoration:none"><div style="background:var(--rw-surface);padding:var(--rw-pad-md);text-align:center"><div style="font-size:11px;font-weight:600;color:var(--rw-text-2)">{% trans "بڕیارەکان" %}</div></div></a>
+    <a href="{% url 'progress:agent_reports' %}" style="text-decoration:none"><div style="background:var(--rw-surface);padding:var(--rw-pad-md);text-align:center"><div style="font-size:11px;font-weight:600;color:var(--rw-text-2)">{% trans "ڕاپۆرتی ئەیجەنت" %}</div></div></a>
+    <a href="{% url 'progress:changelog' %}" style="text-decoration:none"><div style="background:var(--rw-surface);padding:var(--rw-pad-md);text-align:center"><div style="font-size:11px;font-weight:600;color:var(--rw-text-2)">{% trans "گۆڕانکاری" %}</div></div></a>
+    <a href="{% url 'progress:diagrams' %}" style="text-decoration:none"><div style="background:var(--rw-surface);padding:var(--rw-pad-md);text-align:center"><div style="font-size:11px;font-weight:600;color:var(--rw-text-2)">{% trans "دیئاگرامەکان" %}</div></div></a>
+    <a href="{% url 'progress:docs' %}" style="text-decoration:none"><div style="background:var(--rw-surface);padding:var(--rw-pad-md);text-align:center"><div style="font-size:11px;font-weight:600;color:var(--rw-text-2)">{% trans "بەڵگەکان" %}</div></div></a>
+  </div>
+
+</div>
+{% endblock %}

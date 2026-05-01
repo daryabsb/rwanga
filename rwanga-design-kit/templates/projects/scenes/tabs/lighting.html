@@ -1,0 +1,91 @@
+{% comment %} ════════════════════════════════════════════════════════
+   RWANGA — projects/scenes/tabs/lighting.html
+   Lighting module tab. HTMX fragment.
+   Color temperature bar + per-shot lighting notes grid.
+
+   Context:
+     scene          — Scene instance
+     project        — Project instance
+     lighting_notes — QuerySet[LightingNote] for shots in this scene
+     color_temps    — list of {shot_num, temp_k, label, color_hex}
+   ════════════════════════════════════════════════════════ {% endcomment %}
+{% load i18n %}
+
+<div style="padding:var(--rw-pad-lg)">
+
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--rw-pad-md)">
+    <h2 style="font-size:16px;font-weight:700">{% trans "ڕووناکی" %}</h2>
+    <button class="rw-btn rw-btn-ghost"
+            hx-get="{% url 'departments:add_lighting_modal' project.pk scene.pk %}"
+            hx-target="#rw-modal-container" hx-swap="innerHTML">
+      + {% trans "تێبینی" %}
+    </button>
+  </div>
+
+  {% comment %} ── Color temperature bar ── {% endcomment %}
+  {% if color_temps %}
+  <div class="rw-card" style="margin-bottom:var(--rw-pad-lg)">
+    <div class="rw-card-title">{% trans "گەرمی ڕەنگی ژوورەکە" %}</div>
+    <div class="rw-ct-bar">
+      {% for ct in color_temps %}
+      <div class="rw-ct-seg" style="background:{{ ct.color_hex }};flex:{{ ct.weight|default:1 }}"
+           title="{{ ct.shot_num }} — {{ ct.temp_k }}K">
+        <span dir="ltr">{{ ct.temp_k }}K</span>
+      </div>
+      {% endfor %}
+    </div>
+    <div style="display:flex;gap:var(--rw-pad-md);margin-top:8px;flex-wrap:wrap">
+      {% for ct in color_temps %}
+      <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--rw-text-3)">
+        <span style="width:10px;height:10px;background:{{ ct.color_hex }};flex-shrink:0"></span>
+        <span dir="ltr">{{ ct.shot_num }}</span>
+        <span>{{ ct.label }}</span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  {% comment %} ── Per-shot lighting notes ── {% endcomment %}
+  {% if lighting_notes %}
+  <div class="rw-light-grid">
+    {% for note in lighting_notes %}
+    <div class="rw-light-card">
+      <div class="rw-light-num">
+        {% trans "لێدانی" %} <span dir="ltr">{{ note.shot.number }}</span>
+        {% if note.shot.setup %} · {{ note.shot.setup.letter }}{% endif %}
+      </div>
+      {% if note.color_temp %}
+      <div style="font-size:10px;color:var(--rw-amber);margin-bottom:6px;font-family:var(--rw-font-en)" dir="ltr">
+        {{ note.color_temp }}
+      </div>
+      {% endif %}
+      <div class="rw-light-note">{{ note.note }}</div>
+      {% if note.equipment %}
+      <div style="margin-top:8px;font-size:11px;color:var(--rw-text-3);border-top:1px solid var(--rw-border-2);padding-top:8px">
+        <span style="text-transform:uppercase;letter-spacing:.7px;font-size:9px;font-weight:700;margin-inline-end:6px">{% trans "ئامێر" %}</span>
+        {{ note.equipment }}
+      </div>
+      {% endif %}
+      <div style="margin-top:8px">
+        <button class="rw-btn rw-btn-ghost" style="padding:4px 10px;font-size:11px"
+                hx-get="{% url 'departments:edit_lighting_modal' project.pk note.pk %}"
+                hx-target="#rw-modal-container" hx-swap="innerHTML">✎</button>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="rw-empty" style="padding:var(--rw-pad-xl) var(--rw-pad-md)">
+    <div class="rw-empty-icon">💡</div>
+    <div class="rw-empty-title">{% trans "هێشتا تێبینی ڕووناکییەک نییە" %}</div>
+    <div class="rw-empty-sub">{% trans "بۆ هەر لێدانێک تێبینی ڕووناکی زیاد بکە" %}</div>
+    <button class="rw-btn rw-btn-primary"
+            hx-get="{% url 'departments:add_lighting_modal' project.pk scene.pk %}"
+            hx-target="#rw-modal-container" hx-swap="innerHTML">
+      + {% trans "تێبینی یەکەم" %}
+    </button>
+  </div>
+  {% endif %}
+
+</div>

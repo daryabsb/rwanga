@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% comment %} ════════════════════════════════════════════════════════
+   RWANGA — progress/gaps.html
+   Open gaps and blockers list.
+
+   Context:
+     gaps     — QuerySet[GapBlocker]
+     filters  — dict: severity, status, gap_type
+   ════════════════════════════════════════════════════════ {% endcomment %}
+{% load static i18n %}
+
+{% block title %}{% trans "گاپ و بلۆکەرەکان" %} — Progress{% endblock %}
+
+{% block content %}
+<div id="rw-content" style="overflow-y:auto;flex:1;padding:var(--rw-pad-lg)">
+
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--rw-pad-md)">
+    <h1 style="font-size:20px;font-weight:700">{% trans "گاپ و بلۆکەرەکان" %}</h1>
+    <a href="{% url 'progress:dashboard' %}" class="rw-btn rw-btn-ghost">← {% trans "داشبۆرد" %}</a>
+  </div>
+
+  {% comment %} ── Filters ── {% endcomment %}
+  <div style="display:flex;gap:var(--rw-pad-sm);flex-wrap:wrap;margin-bottom:var(--rw-pad-md)">
+    <select class="rw-form-input" name="severity" style="width:auto;padding:8px 14px;font-size:12px"
+            hx-get="{% url 'progress:gaps' %}" hx-target="#rw-gaps-list" hx-swap="innerHTML" hx-trigger="change" hx-include="[name='status'],[name='gap_type']">
+      <option value="">{% trans "هەموو گرنگی" %}</option>
+      <option value="critical" {% if filters.severity == 'critical' %}selected{% endif %}>{% trans "سەرەکی" %}</option>
+      <option value="major"    {% if filters.severity == 'major'    %}selected{% endif %}>{% trans "گەورە" %}</option>
+      <option value="minor"    {% if filters.severity == 'minor'    %}selected{% endif %}>{% trans "بچووک" %}</option>
+    </select>
+    <select class="rw-form-input" name="status" style="width:auto;padding:8px 14px;font-size:12px"
+            hx-get="{% url 'progress:gaps' %}" hx-target="#rw-gaps-list" hx-swap="innerHTML" hx-trigger="change" hx-include="[name='severity'],[name='gap_type']">
+      <option value="">{% trans "هەموو بارودۆخ" %}</option>
+      <option value="open"     {% if filters.status == 'open'     %}selected{% endif %}>{% trans "کراوە" %}</option>
+      <option value="resolved" {% if filters.status == 'resolved' %}selected{% endif %}>{% trans "چارەسەرکراوە" %}</option>
+      <option value="deferred" {% if filters.status == 'deferred' %}selected{% endif %}>{% trans "دواخراوە" %}</option>
+    </select>
+  </div>
+
+  {% comment %} ── Gaps list ── {% endcomment %}
+  <div id="rw-gaps-list">
+    {% for gap in gaps %}
+    {% if gap.severity == 'critical' %}
+    <div class="rw-warn" style="margin-bottom:var(--rw-pad-sm)">
+      <span class="rw-warn-icon">🚫</span>
+      <div style="flex:1">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+          <span style="font-size:14px;font-weight:700;color:var(--rw-shoot)">{{ gap.title }}</span>
+          <span class="rw-badge" style="background:var(--rw-pink-dim);color:var(--rw-shoot);border:1px solid rgba(247,37,133,.25);font-size:9px">{% trans "سەرەکی" %}</span>
+          <span class="rw-badge rw-badge-v" style="font-family:var(--rw-font-en);font-size:9px">{{ gap.gap_type }}</span>
+          <span style="font-size:11px;color:var(--rw-text-3);font-family:var(--rw-font-en)" dir="ltr">{{ gap.phase }}</span>
+        </div>
+        <div class="rw-warn-text" style="font-size:12px">{{ gap.description }}</div>
+        {% if gap.related_task %}
+        <div style="margin-top:6px">
+          <a href="{% url 'progress:task_detail' gap.related_task.pk %}"
+             style="font-size:11px;color:var(--rw-text-3)">{% trans "تاسکی پەیوەندیدار:" %} {{ gap.related_task.title }}</a>
+        </div>
+        {% endif %}
+        {% if gap.resolution %}
+        <div style="margin-top:6px;font-size:12px;color:var(--rw-vis)">✓ {{ gap.resolution }}</div>
+        {% endif %}
+      </div>
+    </div>
+    {% else %}
+    <div class="rw-card" style="margin-bottom:8px;border-inline-start:3px solid {% if gap.severity == 'major' %}var(--rw-amber){% else %}var(--rw-border){% endif %}">
+      <div style="display:flex;align-items:flex-start;gap:12px">
+        <div style="flex:1">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap">
+            <span style="font-size:13px;font-weight:700;color:var(--rw-text)">{{ gap.title }}</span>
+            <span class="rw-badge rw-badge-v" style="font-size:9px">{{ gap.get_severity_display }}</span>
+            <span class="rw-badge rw-badge-v" style="font-family:var(--rw-font-en);font-size:9px">{{ gap.gap_type }}</span>
+            <span style="font-size:11px;color:var(--rw-amber);font-family:var(--rw-font-en)">{{ gap.phase }}</span>
+          </div>
+          <p style="font-size:12px;color:var(--rw-text-2);line-height:1.5">{{ gap.description }}</p>
+          {% if gap.resolution %}
+          <div style="margin-top:6px;font-size:12px;color:var(--rw-vis)">✓ {{ gap.resolution }}</div>
+          {% endif %}
+        </div>
+        <span class="rw-badge {% if gap.status == 'open' %}rw-badge-d{% elif gap.status == 'resolved' %}rw-badge-v{% else %}rw-badge-i{% endif %}" style="font-size:9px;flex-shrink:0">
+          {{ gap.get_status_display }}
+        </span>
+      </div>
+    </div>
+    {% endif %}
+    {% empty %}
+    {% include "components/_empty_state.html" with icon="✓" title=_("گاپ یان بلۆکەر نییە") sub=_("هەموو گاپ و بلۆکەرەکان لێرە دەردەکەون") %}
+    {% endfor %}
+  </div>
+
+</div>
+{% endblock %}

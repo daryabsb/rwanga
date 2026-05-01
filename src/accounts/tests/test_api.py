@@ -1,4 +1,5 @@
 from django.test import TestCase
+from src.accounts.models import User
 from rest_framework.test import APIClient
 
 
@@ -14,3 +15,15 @@ class AccountsApiTests(TestCase):
     def test_list_studios(self):
         response = self.client.get("/api/v1/accounts/studios/")
         self.assertEqual(response.status_code, 200)
+
+    def test_obtain_token_with_valid_credentials(self):
+        user = User.objects.create_user(email="root@root.com", password="root", terms=True)
+        response = self.client.post(
+            "/api/v1/auth/token/",
+            {"email": "root@root.com", "password": "root"},
+            format="json",
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("token", response.data)
+        self.assertEqual(response.data["user_id"], user.pk)
+        self.assertEqual(response.data["email"], "root@root.com")

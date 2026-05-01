@@ -1,4 +1,4 @@
-{# ════════════════════════════════════════════════════════
+{% comment %} ════════════════════════════════════════════════════════
    RWANGA — projects/scene_view.html
    The core production screen. One scene, all modules.
    Tabbed interface — each tab loads via HTMX.
@@ -12,7 +12,7 @@
      scene_list    — QuerySet of Scene (for panel)
      prev_scene    — Scene|None
      next_scene    — Scene|None
-   ════════════════════════════════════════════════════════ #}
+   ════════════════════════════════════════════════════════ {% endcomment %}
 {% extends "base.html" %}
 {% load static i18n %}
 
@@ -21,7 +21,7 @@
 {% block content %}
 <div class="rw-scene-view" style="display:flex;flex:1;overflow:hidden" id="rw-content">
 
-  {# ── SCENE LIST PANEL ── first in flex = right in RTL #}
+  {% comment %} ── SCENE LIST PANEL ── first in flex = right in RTL {% endcomment %}
   <aside class="rw-scene-panel">
     <div class="rw-panel-header">{% trans "دیمەنەکان" %}</div>
 
@@ -41,20 +41,20 @@
          hx-get="{% url 'projects:scene_list_partial' project.pk %}"
          hx-trigger="load"
          hx-swap="innerHTML">
-      {# Populated by HTMX on load — returns _scene_list.html partial #}
+      {% comment %} Populated by HTMX on load — returns _scene_list.html partial {% endcomment %}
     </div>
   </aside>
 
-  {# ── SCENE MAIN ── #}
+  {% comment %} ── SCENE MAIN ── {% endcomment %}
   <div class="rw-scene-main">
 
-    {# Breadcrumb #}
+    {% comment %} Breadcrumb {% endcomment %}
     {% include "components/_breadcrumb.html" with
        crumbs=crumbs
        current=scene.number|stringformat:"s"
        location=scene.heading %}
 
-    {# Scene topbar #}
+    {% comment %} Scene topbar {% endcomment %}
     <div class="rw-scene-topbar">
       <div style="flex:1">
         <div class="rw-scene-title">
@@ -70,7 +70,7 @@
         </div>
       </div>
 
-      {# Scene prev/next nav #}
+      {% comment %} Scene prev/next nav {% endcomment %}
       <div style="display:flex;gap:4px">
         {% if prev_scene %}
         <a href="{% url 'projects:scene' project.pk prev_scene.pk %}"
@@ -82,7 +82,7 @@
         {% endif %}
       </div>
 
-      {# AI generate — async Celery task #}
+      {% comment %} AI generate — async Celery task {% endcomment %}
       <button class="rw-btn rw-btn-ghost rw-btn-ai"
               hx-post="{% url 'ai_engine:generate_scene' scene.pk %}"
               hx-target="#rw-ai-status"
@@ -90,21 +90,21 @@
         🤖 {% trans "AI دروستکردن" %}
       </button>
 
-      {# Export scene viewer HTML #}
+      {% comment %} Export scene viewer HTML {% endcomment %}
       <a href="{% url 'exports:scene_viewer' scene.pk %}"
          class="rw-btn rw-btn-amber">
         ↗ {% trans "دەرهێنانی HTML" %}
       </a>
     </div>
 
-    {# AI job status strip #}
+    {% comment %} AI job status strip {% endcomment %}
     <div id="rw-ai-status">
       {% for job in active_jobs %}
         {% include "components/_ai_progress.html" with job=job %}
       {% endfor %}
     </div>
 
-    {# ── MODULE TABS ── #}
+    {% comment %} ── MODULE TABS ── {% endcomment %}
     <div class="rw-mod-tabs" role="tablist">
       {% for tab in tabs %}
       <button class="rw-mod-tab {% if active_tab == tab.id %}active{% endif %}"
@@ -121,15 +121,15 @@
       {% endfor %}
     </div>
 
-    {# ── TAB CONTENT ── #}
+    {% comment %} ── TAB CONTENT ── {% endcomment %}
     <div class="rw-tab-content" id="rw-tab-content" role="tabpanel">
-      {# Initial content loaded server-side; subsequent tabs via HTMX #}
+      {% comment %} Initial content loaded server-side; subsequent tabs via HTMX {% endcomment %}
       {% include active_tab_template %}
     </div>
 
-  </div>{# /rw-scene-main #}
-</div>{# /rw-scene-view #}
+  </div>{% comment %} /rw-scene-main {% endcomment %}
+</div>{% comment %} /rw-scene-view {% endcomment %}
 
-{# Modal container #}
+{% comment %} Modal container {% endcomment %}
 <div id="rw-modal-container"></div>
 {% endblock %}

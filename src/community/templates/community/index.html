@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="rw-card">
+  <h2>Community Sessions</h2>
+  <ul>
+    {% for session in sessions %}<li>{{ session.title }}</li>{% empty %}<li>No sessions</li>{% endfor %}
+  </ul>
+</div>
+{% endblock %}

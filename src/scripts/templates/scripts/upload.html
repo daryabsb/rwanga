@@ -1,5 +1,14 @@
-
 {% extends "base.html" %}
+{% comment %} ════════════════════════════════════════════════════════
+   RWANGA — scripts/upload.html
+   Script upload + AI breakdown trigger.
+   After upload: Celery task queued, WebSocket streams progress.
+
+   Context:
+     project       — Project instance
+     existing_script — Script|None
+     active_jobs   — QuerySet[AIJob] currently running
+   ════════════════════════════════════════════════════════ {% endcomment %}
 {% load static i18n %}
 
 {% block title %}{% trans "بارکردنی دەستنووس" %} — {{ project.title }}{% endblock %}
@@ -20,7 +29,7 @@
       {% trans "دەرهێنەر دواتر ئەنجامەکە پشکنی و چاکی دەکاتەوە." %}
     </p>
 
-    
+    {% comment %} Active AI jobs {% endcomment %}
     <div id="rw-ai-status">
       {% for job in active_jobs %}
         {% include "components/_ai_progress.html" with job=job %}
@@ -28,7 +37,7 @@
     </div>
 
     {% if existing_script %}
-    
+    {% comment %} ── Existing script — show replace option ── {% endcomment %}
     <div class="rw-card" style="margin-bottom:var(--rw-pad-md);border-inline-start:4px solid var(--rw-amber)">
       <div class="rw-card-title">{% trans "دەستنووسی ئێستا" %}</div>
       <div style="display:flex;align-items:center;gap:16px">
@@ -54,7 +63,7 @@
     </div>
     {% endif %}
 
-    
+    {% comment %} ── Upload zone ── {% endcomment %}
     <form method="post"
           enctype="multipart/form-data"
           action="{% url 'scripts:upload' project.pk %}"
@@ -102,7 +111,7 @@
 
     </form>
 
-    
+    {% comment %} ── What AI does ── {% endcomment %}
     <div style="margin-top:var(--rw-pad-lg)">
       <div class="rw-section-hdr">{% trans "AI چی دەکات" %}</div>
       {% for item in ai_steps %}
@@ -132,4 +141,3 @@
   </div>
 </div>
 {% endblock %}
-

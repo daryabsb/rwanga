@@ -180,6 +180,22 @@ If you think you need React/Vue/Svelte, you're doing it wrong.
 ### Rule 15: WhatsApp Is Core Infrastructure
 Call sheet delivery via Twilio WhatsApp API is not optional. PDF call sheets must render well on phone screens.
 
+### Rule 15b: Design-Kit Templates Are FINISHED — Copy, Don't Create
+The `rwanga-design-kit/templates/` folder contains **production-ready Django templates**. They are NOT references, NOT specs, NOT examples. They are the actual files.
+```
+CORRECT:
+  cp rwanga-design-kit/templates/base.html → templates/base.html
+  cp rwanga-design-kit/templates/projects/dashboard.html → src/projects/templates/projects/dashboard.html
+
+WRONG:
+  Create a new base.html "inspired by" the design kit
+  Route Django to read from the design-kit folder
+  Scaffold placeholder templates that replace design-kit templates
+```
+If a design-kit template references a URL name that doesn't exist yet, create a **stub view returning a stub template** — do NOT create a new template to replace the design-kit one.
+
+If a page has NO design-kit template (e.g., a new admin page), THEN you may create one — but it must extend `base.html` and use the same design tokens (`rwanga.css`).
+
 ### Rule 16: Update Progress App Before Moving On
 Every implementation step must be recorded in the Progress app:
 - Task started → update ProgressTask to "in_progress"

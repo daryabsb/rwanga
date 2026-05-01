@@ -24,6 +24,7 @@ class ProgressTaskViewSet(viewsets.ModelViewSet):
     queryset = ProgressTask.objects.all()
     serializer_class = ProgressTaskSerializer
     permission_classes = [permissions.AllowAny]
+    filterset_fields = ["status", "phase", "priority", "app_name"]
 
 
 class ProgressUpdateViewSet(viewsets.ModelViewSet):

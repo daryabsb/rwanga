@@ -1,4 +1,4 @@
-{# ════════════════════════════════════════════════════
+{% comment %} ════════════════════════════════════════════════════
    _toast.html  — OOB swapped via HTMX from Django views
    In views.py: render to string, return in HX-Trigger header
    OR: use hx-swap-oob="beforeend:#rw-toasts"
@@ -12,7 +12,7 @@
    Then include in response via OOB swap.
 
    Types: success | error | info | warning
-   ════════════════════════════════════════════════════ #}
+   ════════════════════════════════════════════════════ {% endcomment %}
 <div class="rw-toast {{ type|default:'info' }}"
      hx-swap-oob="beforeend:#rw-toasts"
      x-data

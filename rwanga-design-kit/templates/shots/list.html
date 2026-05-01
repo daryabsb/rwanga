@@ -1,0 +1,114 @@
+{% comment %} ════════════════════════════════════════════════════════
+   RWANGA — shots/list.html
+   Project-wide shot list — all scenes, all shots, filterable.
+
+   Context:
+     project        — Project instance
+     shots          — QuerySet[Shot] (all scenes)
+     filters        — dict: current filter state
+     active_section — 'v'
+   ════════════════════════════════════════════════════════ {% endcomment %}
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "لیستی لێدانەکان" %} — {{ project.title }}{% endblock %}
+
+{% block content %}
+<div id="rw-content" style="overflow-y:auto;flex:1">
+
+  {% include "components/_breadcrumb.html" with project=project current=_("لیستی لێدانەکان") %}
+
+  <div style="padding:var(--rw-pad-lg)">
+
+    {% comment %} ── Header ── {% endcomment %}
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--rw-pad-md)">
+      <div>
+        <h1 style="font-size:20px;font-weight:700;margin-bottom:4px">{% trans "لیستی لێدانەکان" %}</h1>
+        <p style="font-size:13px;color:var(--rw-text-2)">{{ shots.count }} {% trans "لێدان" %} / {{ project.scenes.count }} {% trans "دیمەن" %}</p>
+      </div>
+      <div style="display:flex;gap:8px">
+        <a href="{% url 'shots:export_pdf' project.pk %}" class="rw-btn rw-btn-ghost">
+          ↗ {% trans "PDF" %}
+        </a>
+      </div>
+    </div>
+
+    {% comment %} ── Filters ── {% endcomment %}
+    <div style="display:flex;gap:var(--rw-pad-sm);flex-wrap:wrap;align-items:center;margin-bottom:var(--rw-pad-md)">
+      <div class="rw-filter-row" style="margin-bottom:0">
+        <button class="rw-f-btn {% if not filters.type or filters.type == 'all' %}active{% endif %}"
+                hx-get="{% url 'shots:list' project.pk %}?type=all{% if filters.scene %}&scene={{ filters.scene }}{% endif %}"
+                hx-target="#rw-shot-list" hx-swap="innerHTML">{% trans "هەموو جۆر" %}</button>
+        <button class="rw-f-btn {% if filters.type == 'dialogue' %}active{% endif %}"
+                hx-get="{% url 'shots:list' project.pk %}?type=dialogue{% if filters.scene %}&scene={{ filters.scene }}{% endif %}"
+                hx-target="#rw-shot-list" hx-swap="innerHTML">{% trans "دیالۆگ" %}</button>
+        <button class="rw-f-btn {% if filters.type == 'visual' %}active{% endif %}"
+                hx-get="{% url 'shots:list' project.pk %}?type=visual{% if filters.scene %}&scene={{ filters.scene }}{% endif %}"
+                hx-target="#rw-shot-list" hx-swap="innerHTML">{% trans "بینراو" %}</button>
+        <button class="rw-f-btn {% if filters.type == 'insert' %}active{% endif %}"
+                hx-get="{% url 'shots:list' project.pk %}?type=insert{% if filters.scene %}&scene={{ filters.scene }}{% endif %}"
+                hx-target="#rw-shot-list" hx-swap="innerHTML">{% trans "داخڵکردن" %}</button>
+      </div>
+
+      {% comment %} Scene filter {% endcomment %}
+      <select class="rw-form-input" style="width:auto;padding:8px 14px;font-size:12px"
+              hx-get="{% url 'shots:list' project.pk %}"
+              hx-target="#rw-shot-list" hx-swap="innerHTML"
+              hx-trigger="change"
+              name="scene">
+        <option value="">{% trans "هەموو دیمەن" %}</option>
+        {% for scene in project.scenes.all %}
+        <option value="{{ scene.pk }}" {% if filters.scene == scene.pk|stringformat:"s" %}selected{% endif %}>
+          {% trans "دیمەنی" %} {{ scene.number }} — {{ scene.location_name }}
+        </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    {% comment %} ── Shot table ── {% endcomment %}
+    <div id="rw-shot-list">
+      {% if shots %}
+      <table class="rw-shot-table">
+        <thead>
+          <tr>
+            <th>{% trans "گرتە" %}</th>
+            <th>{% trans "دیمەن" %}</th>
+            <th>{% trans "جۆر" %}</th>
+            <th>{% trans "شێوازی لێدان" %}</th>
+            <th>{% trans "لێنس" %}</th>
+            <th>{% trans "ماوە" %}</th>
+            <th>{% trans "ئامادەکردن" %}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for shot in shots %}
+          <tr class="rw-shot-row {% if shot.shot_type == 'dialogue' %}s-d{% elif shot.shot_type == 'insert' %}s-i{% else %}s-v{% endif %}"
+              onclick="location.href='{% url 'projects:scene' project.pk shot.scene_id %}?tab=shots'">
+            <td><span class="rw-shot-num">{{ shot.number }}</span><span class="rw-setup-chip">{{ shot.setup.letter|default:"—" }}</span></td>
+            <td>
+              <a href="{% url 'projects:scene' project.pk shot.scene_id %}?tab=shots"
+                 style="font-size:12px;color:var(--rw-text-2)">
+                {{ shot.scene.int_ext }}. {{ shot.scene.location_name }}
+              </a>
+            </td>
+            <td>
+              {% if shot.shot_type == 'dialogue' %}<span class="rw-badge rw-badge-d">{% trans "دیالۆگ" %}</span>
+              {% elif shot.shot_type == 'insert' %}<span class="rw-badge rw-badge-i">{% trans "داخڵکردن" %}</span>
+              {% else %}<span class="rw-badge rw-badge-v">{% trans "بینراو" %}</span>{% endif %}
+            </td>
+            <td>{{ shot.style }}</td>
+            <td><span class="mono" dir="ltr">{{ shot.lens|default:"—" }}</span></td>
+            <td><span class="mono" dir="ltr">{{ shot.duration|default:"—" }}</span></td>
+            <td style="font-size:11px;color:var(--rw-amber)">{{ shot.setup.letter|default:"—" }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      {% include "components/_empty_state.html" with icon="🎯" title=_("هیچ لێدانێک نەدۆزرایەوە") sub=_("فلتەر دەستکاری بکە یان لێدانی نوێ زیاد بکە") %}
+      {% endif %}
+    </div>
+
+  </div>
+</div>
+{% endblock %}

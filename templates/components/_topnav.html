@@ -78,13 +78,13 @@
 
     
     <span style="font-size:12px;color:var(--rw-text-2);white-space:nowrap">
-      {{ request.user.studio.name|default:request.user.get_full_name }}
+      {% if request.user.is_authenticated %}{{ request.user.studio.name|default:request.user.get_full_name }}{% else %}Guest{% endif %}
     </span>
 
     
     <div class="dropdown">
       <button class="rw-avatar" data-bs-toggle="dropdown" aria-expanded="false">
-        {{ request.user.first_name|first|upper }}{{ request.user.last_name|first|upper }}
+        {% if request.user.is_authenticated %}{{ request.user.first_name|first|upper }}{{ request.user.last_name|first|upper }}{% else %}G{% endif %}
       </button>
       <ul class="dropdown-menu dropdown-menu-end" style="background:var(--rw-surface);border:1px solid var(--rw-border);border-radius:var(--rw-r)">
         <li><a class="dropdown-item" href="{% url 'accounts:profile' %}" style="color:var(--rw-text);font-size:13px">{% trans "پرۆفایل" %}</a></li>
@@ -101,4 +101,5 @@
 
   </div>
 </nav>
+
 

@@ -79,7 +79,7 @@ The design-kit templates reference URL names that may not have views yet. For EA
 Create ONE stub template:
 
 ```html
-{# templates/stub.html #}
+{% comment %} templates/stub.html {% endcomment %}
 {% extends "base.html" %}
 {% block content %}
 <div id="rw-content" style="padding:var(--rw-pad-lg)">

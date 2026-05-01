@@ -32,16 +32,19 @@ LOCAL_APPS = [
     "src.core",
     "src.accounts",
     "src.projects",
+    "src.reviews",
     "src.scripts",
     "src.shots",
     "src.floorplans",
     "src.scheduling",
     "src.departments",
     "src.ai_engine",
+    "src.realtime",
     "src.exports",
     "src.locations",
     "src.notifications",
     "src.progress",
+    "src.community",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS

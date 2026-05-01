@@ -1,4 +1,8 @@
-
+{% comment %} ════════════════════════════════════════════════════════
+   RWANGA — accounts/login.html
+   Email/password + magic link. Standalone page (no sidebar).
+   Context: form, magic_link_form, error
+   ════════════════════════════════════════════════════════ {% endcomment %}
 {% load static i18n %}
 <!DOCTYPE html>
 <html lang="{{ LANGUAGE_CODE|default:'ku' }}"
@@ -17,7 +21,7 @@
 <div class="rw-auth-page">
   <div class="rw-auth-box">
 
-    
+    {% comment %} Brand {% endcomment %}
     <div class="rw-auth-logo">ڕ</div>
     <h1 class="rw-auth-title">{% trans "بەخێربێیت بۆ ڕوانگە" %}</h1>
     <p class="rw-auth-sub">{% trans "پلاتفۆرمی پێش‌بەرهەمهێنانی فیلمی کوردی. لە دەستنووسەوە بۆ شاشە." %}</p>
@@ -29,7 +33,7 @@
     </div>
     {% endif %}
 
-    
+    {% comment %} ── Magic link (primary) ── {% endcomment %}
     <form method="post" action="{% url 'accounts:magic_link' %}"
           hx-post="{% url 'accounts:magic_link' %}"
           hx-target="#rw-auth-feedback"
@@ -52,12 +56,12 @@
 
     <div class="rw-auth-divider">{% trans "یان" %}</div>
 
-    
+    {% comment %} ── Email + password ── {% endcomment %}
     <form method="post" action="{% url 'accounts:login' %}">
       {% csrf_token %}
       <label class="rw-form-label" for="id_login_email">{% trans "ئیمەیڵ" %}</label>
       <input class="rw-form-input" type="email" id="id_login_email"
-             name="email" placeholder="name@studio.com" autocomplete="email">
+             name="login" placeholder="name@studio.com" autocomplete="email">
       <label class="rw-form-label" for="id_password">{% trans "پاسوۆرد" %}</label>
       <input class="rw-form-input" type="password" id="id_password"
              name="password" autocomplete="current-password">
@@ -71,7 +75,7 @@
       <a href="{% url 'accounts:register' %}" style="color:var(--rw-amber)">{% trans "ستودیۆ دروست بکە" %}</a>
     </p>
 
-    
+    {% comment %} Theme toggle {% endcomment %}
     <div style="text-align:center;margin-top:var(--rw-pad-lg)">
       <button class="js-theme-toggle" onclick="RW.themeToggle()"
               style="background:none;border:none;color:var(--rw-text-3);font-size:18px;cursor:pointer">☀</button>
@@ -84,4 +88,5 @@
 <script src="https://unpkg.com/htmx.org@1.9.12" crossorigin="anonymous"></script>
 </body>
 </html>
+
 

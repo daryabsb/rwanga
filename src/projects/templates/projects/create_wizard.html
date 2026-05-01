@@ -1,5 +1,16 @@
-
 {% extends "base.html" %}
+{% comment %} ════════════════════════════════════════════════════════
+   RWANGA — projects/create_wizard.html
+   4-step project creation wizard.
+   Steps: 1=Basics, 2=Script Upload, 3=Modules, 4=Team
+   Each step submits via HTMX and swaps only the wizard body.
+
+   Context:
+     step        — 1|2|3|4
+     form        — WizardStepForm for current step
+     project     — Project (available from step 2 onward)
+     wizard_data — session data
+   ════════════════════════════════════════════════════════ {% endcomment %}
 {% load static i18n %}
 
 {% block title %}{% trans "پڕۆژەی نوێ" %}{% endblock %}
@@ -7,7 +18,7 @@
 {% block content %}
 <div style="flex:1;overflow-y:auto;background:var(--rw-bg)">
 
-  
+  {% comment %} ── Wizard step bar ── {% endcomment %}
   <div class="rw-wizard-steps">
     {% with steps=wizard_steps %}
     {% for s in steps %}
@@ -19,11 +30,11 @@
     {% endwith %}
   </div>
 
-  
+  {% comment %} ── Wizard content ── {% endcomment %}
   <div class="rw-wizard-content" id="rw-wizard-body">
 
     {% if step == 1 %}
-    
+    {% comment %} STEP 1 — Basics {% endcomment %}
     <h2 style="font-size:22px;font-weight:700;margin-bottom:var(--rw-pad-md)">{% trans "بنەڕەتەکانی پڕۆژە" %}</h2>
     <form id="rw-wizard-form"
           hx-post="{% url 'projects:create_step' 1 %}"
@@ -56,7 +67,7 @@
     </form>
 
     {% elif step == 2 %}
-    
+    {% comment %} STEP 2 — Script Upload {% endcomment %}
     <h2 style="font-size:22px;font-weight:700;margin-bottom:8px">{% trans "بارکردنی دەستنووس" %}</h2>
     <p style="color:var(--rw-text-2);margin-bottom:var(--rw-pad-md);font-size:14px">
       {% trans "AI بە خۆی دەستنووسەکە دادەشکێنێت — دیمەن، کەسایەتی، شوێن، و کەلوپەل دەناسێتەوە." %}
@@ -99,7 +110,7 @@
     </div>
 
     {% elif step == 3 %}
-    
+    {% comment %} STEP 3 — Module Selection {% endcomment %}
     <h2 style="font-size:22px;font-weight:700;margin-bottom:8px">{% trans "مۆدیولەکان چالاک بکە" %}</h2>
     <p style="color:var(--rw-text-2);margin-bottom:var(--rw-pad-md);font-size:14px">
       {% trans "دواتر دەتوانیت بگۆڕیت." %}
@@ -128,7 +139,7 @@
     </form>
 
     {% elif step == 4 %}
-    
+    {% comment %} STEP 4 — Team Invites {% endcomment %}
     <h2 style="font-size:22px;font-weight:700;margin-bottom:8px">{% trans "تیمەکەت بانگ بکە" %}</h2>
     <p style="color:var(--rw-text-2);margin-bottom:var(--rw-pad-md);font-size:14px">
       {% trans "ئارەزووی نییە — دواتر دەتوانیت زیاد بکەی." %}
@@ -152,7 +163,7 @@
     </form>
     {% endif %}
 
-    
+    {% comment %} ── Wizard footer nav ── {% endcomment %}
     <div style="display:flex;justify-content:space-between;margin-top:var(--rw-pad-lg);padding-top:var(--rw-pad-md);border-top:1px solid var(--rw-border)">
       {% if step > 1 %}
       <button class="rw-btn rw-btn-ghost"
@@ -175,7 +186,6 @@
       {% endif %}
     </div>
 
-  </div>
+  </div>{% comment %} /wizard-content {% endcomment %}
 </div>
 {% endblock %}
-

@@ -1,0 +1,11 @@
+{% load i18n %}
+<div class="rw-card">
+  <h3>{% trans "Inline Comments" %}</h3>
+  <ul>
+    {% for comment in comments %}
+      <li>{{ comment.body }}</li>
+    {% empty %}
+      <li>{% trans "No comments" %}</li>
+    {% endfor %}
+  </ul>
+</div>

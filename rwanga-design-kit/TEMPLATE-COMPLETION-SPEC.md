@@ -90,13 +90,13 @@ All new templates MUST use your established design system. Here's a quick refere
 
 ### Template Header Format
 ```
-{# ════════════════════════════════════════════════════════
+{% comment %} ════════════════════════════════════════════════════════
    RWANGA — <app>/<template_name>.html
    <One-line description>
 
    Context:
      <variable>   — <Type> <description>
-   ════════════════════════════════════════════════════════ #}
+   ════════════════════════════════════════════════════════ {% endcomment %}
 ```
 
 ---

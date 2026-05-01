@@ -1,9 +1,9 @@
-{# ════════════════════════════════════════════════════
+{% comment %} ════════════════════════════════════════════════════
    _breadcrumb.html
    Context: crumbs = list of {label, url} dicts
             current = current page label
    Usage: {% include "components/_breadcrumb.html" with crumbs=crumbs current=scene.heading %}
-   ════════════════════════════════════════════════════ #}
+   ════════════════════════════════════════════════════ {% endcomment %}
 <div class="rw-breadcrumb" aria-label="breadcrumb">
   {% for crumb in crumbs %}
     <a href="{{ crumb.url }}" class="rw-crumb-back">← {{ crumb.label }}</a>

@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% comment %} ════════════════════════════════════════════════════════
+   RWANGA — locations/list.html
+   Location management with Leaflet.js map.
+   Global — not project-scoped.
+
+   Context:
+     locations  — QuerySet[Location]
+   ════════════════════════════════════════════════════════ {% endcomment %}
+{% load static i18n %}
+
+{% block title %}{% trans "شوێنەکان" %}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+{% endblock %}
+
+{% block content %}
+<div id="rw-content" style="display:flex;flex:1;overflow:hidden">
+
+  {% comment %} ── Map panel (top / left depending on layout) ── {% endcomment %}
+  <div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+
+    {% comment %} Toolbar {% endcomment %}
+    <div style="height:56px;background:var(--rw-surface);border-bottom:1px solid var(--rw-border);display:flex;align-items:center;padding:0 var(--rw-pad-md);gap:12px;flex-shrink:0">
+      <h1 style="font-size:18px;font-weight:700;flex:1">{% trans "شوێنەکان" %}</h1>
+      <button class="rw-btn rw-btn-primary"
+              hx-get="{% url 'locations:add_modal' %}"
+              hx-target="#rw-modal-container" hx-swap="innerHTML">
+        + {% trans "شوێنی نوێ" %}
+      </button>
+    </div>
+
+    {% comment %} Map {% endcomment %}
+    <div id="rw-map" style="flex:1;min-height:300px;background:var(--rw-surface-2)"></div>
+
+  </div>
+
+  {% comment %} ── Locations list panel ── {% endcomment %}
+  <aside style="width:320px;background:var(--rw-surface);border-inline-start:1px solid var(--rw-border);display:flex;flex-direction:column;flex-shrink:0;overflow:hidden">
+    <div style="padding:var(--rw-pad-sm) var(--rw-pad-md);border-bottom:1px solid var(--rw-border)">
+      <input type="search"
+             placeholder="{% trans 'گەڕان...' %}"
+             style="width:100%;background:var(--rw-surface-2);border:1px solid var(--rw-border);color:var(--rw-text);font-family:var(--rw-font);font-size:13px;padding:9px 12px;outline:none"
+             hx-get="{% url 'locations:list' %}"
+             hx-target="#rw-location-list" hx-swap="innerHTML"
+             hx-trigger="input changed delay:300ms" name="q">
+    </div>
+    <div id="rw-location-list" style="flex:1;overflow-y:auto">
+      {% if locations %}
+      {% for loc in locations %}
+      <div class="rw-scene-item" id="loc-card-{{ loc.pk }}"
+           onclick="RW.focusLocation({{ loc.pk }}, {{ loc.latitude|default:'null' }}, {{ loc.longitude|default:'null' }})">
+        <div style="font-size:20px;flex-shrink:0">📍</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13px;font-weight:700;color:var(--rw-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ loc.name }}</div>
+          {% if loc.address %}
+          <div style="font-size:11px;color:var(--rw-text-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ loc.address }}</div>
+          {% endif %}
+          {% if loc.projects_count %}
+          <div style="font-size:10px;color:var(--rw-amber);margin-top:2px">
+            {{ loc.projects_count }} {% trans "پڕۆژە" %}
+          </div>
+          {% endif %}
+        </div>
+        <button class="rw-btn rw-btn-ghost" style="padding:4px 10px;font-size:11px;flex-shrink:0"
+                onclick="event.stopPropagation()"
+                hx-get="{% url 'locations:edit_modal' loc.pk %}"
+                hx-target="#rw-modal-container" hx-swap="innerHTML">✎</button>
+      </div>
+      {% endfor %}
+      {% else %}
+      <div class="rw-empty" style="padding:var(--rw-pad-lg)">
+        <div class="rw-empty-icon">📍</div>
+        <div class="rw-empty-title" style="font-size:14px">{% trans "شوێنێک نییە" %}</div>
+        <div class="rw-empty-sub" style="font-size:12px">{% trans "شوێنی یەکەم زیاد بکە" %}</div>
+      </div>
+      {% endif %}
+    </div>
+  </aside>
+
+</div>
+
+<div id="rw-modal-container"></div>
+
+{% block extra_js %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV/XN/WLs=" crossorigin=""></script>
+<script>
+(function() {
+  const map = L.map('rw-map', { zoomControl: true }).setView([36.19, 44.01], 8);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors'
+  }).addTo(map);
+
+  const markers = {};
+  {% for loc in locations %}
+  {% if loc.latitude and loc.longitude %}
+  markers[{{ loc.pk }}] = L.marker([{{ loc.latitude }}, {{ loc.longitude }}])
+    .addTo(map)
+    .bindPopup('<strong>{{ loc.name|escapejs }}</strong>{% if loc.address %}<br>{{ loc.address|escapejs }}{% endif %}');
+  {% endif %}
+  {% endfor %}
+
+  window.RW = window.RW || {};
+  RW.focusLocation = function(pk, lat, lng) {
+    document.querySelectorAll('.rw-scene-item').forEach(el => el.classList.remove('active'));
+    const card = document.getElementById('loc-card-' + pk);
+    if (card) card.classList.add('active');
+    if (lat && lng && markers[pk]) {
+      map.setView([lat, lng], 14);
+      markers[pk].openPopup();
+    }
+  };
+})();
+</script>
+{% endblock %}
+{% endblock %}

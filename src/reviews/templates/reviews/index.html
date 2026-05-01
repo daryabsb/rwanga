@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Reviews" %}{% endblock %}
+{% block content %}
+<div class="rw-card">
+  <h2>{% trans "Reviews" %}</h2>
+  <ul>
+    {% for review in reviews %}
+      <li>{{ review.id }} - {{ review.get_status_display }}</li>
+    {% empty %}
+      <li>{% trans "No reviews yet." %}</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock %}

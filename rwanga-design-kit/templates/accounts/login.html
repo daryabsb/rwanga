@@ -1,8 +1,8 @@
-{# ════════════════════════════════════════════════════════
+{% comment %} ════════════════════════════════════════════════════════
    RWANGA — accounts/login.html
    Email/password + magic link. Standalone page (no sidebar).
    Context: form, magic_link_form, error
-   ════════════════════════════════════════════════════════ #}
+   ════════════════════════════════════════════════════════ {% endcomment %}
 {% load static i18n %}
 <!DOCTYPE html>
 <html lang="{{ LANGUAGE_CODE|default:'ku' }}"
@@ -21,7 +21,7 @@
 <div class="rw-auth-page">
   <div class="rw-auth-box">
 
-    {# Brand #}
+    {% comment %} Brand {% endcomment %}
     <div class="rw-auth-logo">ڕ</div>
     <h1 class="rw-auth-title">{% trans "بەخێربێیت بۆ ڕوانگە" %}</h1>
     <p class="rw-auth-sub">{% trans "پلاتفۆرمی پێش‌بەرهەمهێنانی فیلمی کوردی. لە دەستنووسەوە بۆ شاشە." %}</p>
@@ -33,7 +33,7 @@
     </div>
     {% endif %}
 
-    {# ── Magic link (primary) ── #}
+    {% comment %} ── Magic link (primary) ── {% endcomment %}
     <form method="post" action="{% url 'accounts:magic_link' %}"
           hx-post="{% url 'accounts:magic_link' %}"
           hx-target="#rw-auth-feedback"
@@ -56,7 +56,7 @@
 
     <div class="rw-auth-divider">{% trans "یان" %}</div>
 
-    {# ── Email + password ── #}
+    {% comment %} ── Email + password ── {% endcomment %}
     <form method="post" action="{% url 'accounts:login' %}">
       {% csrf_token %}
       <label class="rw-form-label" for="id_login_email">{% trans "ئیمەیڵ" %}</label>
@@ -75,7 +75,7 @@
       <a href="{% url 'accounts:register' %}" style="color:var(--rw-amber)">{% trans "ستودیۆ دروست بکە" %}</a>
     </p>
 
-    {# Theme toggle #}
+    {% comment %} Theme toggle {% endcomment %}
     <div style="text-align:center;margin-top:var(--rw-pad-lg)">
       <button class="js-theme-toggle" onclick="RW.themeToggle()"
               style="background:none;border:none;color:var(--rw-text-3);font-size:18px;cursor:pointer">☀</button>

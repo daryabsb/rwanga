@@ -1,1 +1,1 @@
-websocket_urlpatterns = []
+from src.realtime.routing import websocket_urlpatterns

@@ -32,3 +32,10 @@ class ScriptElement(BaseModel):
 
     class Meta:
         ordering = ["order", "created_at"]
+
+
+class Breakdown(BaseModel):
+    script = models.ForeignKey(Script, on_delete=models.CASCADE, related_name="breakdowns")
+    category = models.CharField(max_length=64)
+    item_name = models.CharField(max_length=255)
+    details = models.JSONField(default=dict, blank=True)

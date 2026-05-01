@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% comment %} ════════════════════════════════════════════════════════
+   RWANGA — progress/diagrams.html
+   System diagrams viewer — Mermaid or SVG.
+
+   Context:
+     current_diagram — SystemDiagram (is_current=True)
+     all_diagrams    — QuerySet[SystemDiagram]
+   ════════════════════════════════════════════════════════ {% endcomment %}
+{% load static i18n %}
+
+{% block title %}{% trans "دیئاگرامەکان" %} — Progress{% endblock %}
+
+{% block extra_css %}
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div id="rw-content" style="display:flex;flex:1;overflow:hidden">
+
+  {% comment %} ── Diagram selector ── {% endcomment %}
+  <aside style="width:220px;background:var(--rw-surface);border-inline-start:1px solid var(--rw-border);display:flex;flex-direction:column;flex-shrink:0">
+    <div style="padding:var(--rw-pad-md) var(--rw-pad-sm) var(--rw-pad-xs);font-size:10px;font-weight:700;color:var(--rw-text-3);text-transform:uppercase;letter-spacing:1.2px;border-bottom:1px solid var(--rw-border)">
+      {% trans "دیئاگرامەکان" %}
+    </div>
+    <div style="flex:1;overflow-y:auto;padding:8px 0">
+      {% for diagram in all_diagrams %}
+      <div class="rw-scene-item {% if diagram.is_current %}active{% endif %}"
+           hx-get="{% url 'progress:diagram_detail' diagram.pk %}"
+           hx-target="#rw-diagram-content" hx-swap="innerHTML">
+        <div style="flex:1;min-width:0">
+          <div class="rw-sc-loc">{{ diagram.title }}</div>
+          <div class="rw-sc-time" style="font-family:var(--rw-font-en)">
+            {{ diagram.diagram_type }} · {{ diagram.phase }}
+            {% if diagram.is_current %} · {% trans "ئێستا" %}{% endif %}
+          </div>
+        </div>
+      </div>
+      {% empty %}
+      <div style="padding:var(--rw-pad-md);text-align:center;color:var(--rw-text-3);font-size:12px">
+        {% trans "دیئاگرامێک نییە" %}
+      </div>
+      {% endfor %}
+    </div>
+  </aside>
+
+  {% comment %} ── Diagram content ── {% endcomment %}
+  <div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+    <div style="height:56px;background:var(--rw-surface);border-bottom:1px solid var(--rw-border);display:flex;align-items:center;padding:0 var(--rw-pad-md);gap:12px;flex-shrink:0">
+      <h1 style="font-size:18px;font-weight:700;flex:1">
+        {% if current_diagram %}{{ current_diagram.title }}{% else %}{% trans "دیئاگرامەکان" %}{% endif %}
+      </h1>
+      <a href="{% url 'progress:dashboard' %}" class="rw-btn rw-btn-ghost">← {% trans "داشبۆرد" %}</a>
+    </div>
+
+    <div id="rw-diagram-content" style="flex:1;overflow:auto;padding:var(--rw-pad-lg)">
+      {% if current_diagram %}
+      <div class="rw-card">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:var(--rw-pad-md)">
+          <span class="rw-badge rw-badge-v" style="font-family:var(--rw-font-en);font-size:9px">{{ current_diagram.diagram_type }}</span>
+          <span class="rw-badge" style="font-family:var(--rw-font-en);font-size:9px;background:var(--rw-amber-dim);color:var(--rw-amber);border:1px solid rgba(212,165,116,.25)">{{ current_diagram.phase }}</span>
+          <span style="font-size:11px;color:var(--rw-text-3);font-family:var(--rw-font-en)" dir="ltr">{{ current_diagram.created_at|date:"Y-m-d" }}</span>
+        </div>
+        {% if current_diagram.notes %}
+        <p style="font-size:13px;color:var(--rw-text-2);margin-bottom:var(--rw-pad-md)">{{ current_diagram.notes }}</p>
+        {% endif %}
+        {% if current_diagram.render_format == 'mermaid' %}
+        <div class="mermaid" style="background:var(--rw-surface-2);padding:var(--rw-pad-md)">{{ current_diagram.content }}</div>
+        {% else %}
+        <div style="background:var(--rw-surface-2);padding:var(--rw-pad-md);overflow:auto">
+          {{ current_diagram.content|safe }}
+        </div>
+        {% endif %}
+      </div>
+      {% else %}
+      {% include "components/_empty_state.html" with icon="◈" title=_("هێشتا دیئاگرامێک نییە") sub=_("دیئاگرامەکانی سیستەم لێرە دەردەکەون") %}
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+
+{% block extra_js %}
+<script>
+  mermaid.initialize({ startOnLoad: true, theme: 'dark', darkMode: true });
+</script>
+{% endblock %}
+{% endblock %}

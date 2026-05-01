@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% comment %} ════════════════════════════════════════════════════════
+   RWANGA — progress/task_detail.html
+   Individual task — updates, dependencies, change records.
+
+   Context:
+     task       — ProgressTask instance
+     updates    — QuerySet[ProgressUpdate] linked to this task
+     blocked_by — QuerySet[ProgressTask] (M2M)
+     changes    — QuerySet[ChangeRecord] linked to this task
+   ════════════════════════════════════════════════════════ {% endcomment %}
+{% load static i18n %}
+
+{% block title %}{{ task.title }} — Progress{% endblock %}
+
+{% block content %}
+<div id="rw-content" style="overflow-y:auto;flex:1;padding:var(--rw-pad-lg)">
+
+  {% comment %} ── Breadcrumb ── {% endcomment %}
+  <div style="margin-bottom:var(--rw-pad-lg)">
+    <a href="{% url 'progress:tasks' %}" style="font-size:13px;color:var(--rw-amber)">← {% trans "تاسکەکان" %}</a>
+  </div>
+
+  {% comment %} ── Task header ── {% endcomment %}
+  <div class="rw-card" style="margin-bottom:var(--rw-pad-lg)">
+    <div style="display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap">
+      <div style="flex:1;min-width:0">
+        <h1 style="font-size:20px;font-weight:700;margin-bottom:8px">{{ task.title }}</h1>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+          <span class="rw-badge" style="font-family:var(--rw-font-en);font-size:10px;background:var(--rw-amber-dim);color:var(--rw-amber);border:1px solid rgba(212,165,116,.25)">{{ task.phase }}</span>
+          {% if task.app_name %}<span class="rw-badge rw-badge-v" style="font-family:var(--rw-font-en);font-size:10px">{{ task.app_name }}</span>{% endif %}
+          {% if task.task_type %}<span class="rw-badge rw-badge-v" style="font-size:10px">{{ task.task_type }}</span>{% endif %}
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        {% comment %} Status badge {% endcomment %}
+        {% if task.status == 'completed' %}
+        <span class="rw-badge" style="background:rgba(0,168,150,.12);color:var(--rw-vis);border:1px solid rgba(0,168,150,.25);padding:6px 14px">{% trans "تەواوبوو" %}</span>
+        {% elif task.status == 'in_progress' %}
+        <span class="rw-badge" style="background:var(--rw-amber-dim);color:var(--rw-amber);border:1px solid rgba(212,165,116,.25);padding:6px 14px">{% trans "لە کارەوە" %}</span>
+        {% elif task.status == 'blocked' %}
+        <span class="rw-badge" style="background:var(--rw-pink-dim);color:var(--rw-shoot);border:1px solid rgba(247,37,133,.25);padding:6px 14px">{% trans "بلۆک" %}</span>
+        {% else %}
+        <span class="rw-badge rw-badge-v" style="padding:6px 14px">{% trans "چاوەڕوانی" %}</span>
+        {% endif %}
+        <button class="rw-btn rw-btn-ghost"
+                hx-get="{% url 'progress:update_task_status_modal' task.pk %}"
+                hx-target="#rw-modal-container" hx-swap="innerHTML">{% trans "گۆڕینی بارودۆخ" %}</button>
+      </div>
+    </div>
+    {% if task.description %}
+    <p style="font-size:14px;color:var(--rw-text-2);line-height:1.7;margin-top:var(--rw-pad-sm)">{{ task.description }}</p>
+    {% endif %}
+  </div>
+
+  {% comment %} ── Blocked by ── {% endcomment %}
+  {% if blocked_by %}
+  <div class="rw-section-hdr">{% trans "دوای ئەم تاسکانەوە" %}</div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:var(--rw-pad-lg)">
+    {% for dep in blocked_by %}
+    <a href="{% url 'progress:task_detail' dep.pk %}"
+       style="padding:8px 14px;background:var(--rw-surface);border:1px solid var(--rw-border);font-size:12px;color:var(--rw-text-2);text-decoration:none">
+      {{ dep.title }}
+      {% if dep.status == 'completed' %}<span style="color:var(--rw-vis)"> ✓</span>{% endif %}
+    </a>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <div class="rw-grid-2">
+
+    {% comment %} ── Updates timeline ── {% endcomment %}
+    <div>
+      <div class="rw-section-hdr">{% trans "نوێکاریەکان" %}</div>
+      <div style="background:var(--rw-surface);border:1px solid var(--rw-border)">
+        {% for update in updates %}
+        <div style="display:flex;gap:12px;padding:14px var(--rw-pad-md);border-bottom:1px solid var(--rw-border-2)">
+          <div style="font-size:18px;flex-shrink:0">
+            {% if update.update_type == 'status_change' %}🔄
+            {% elif update.update_type == 'implementation' %}⚙
+            {% elif update.update_type == 'fix' %}🔧
+            {% else %}📝{% endif %}
+          </div>
+          <div style="flex:1">
+            <div style="display:flex;gap:8px;align-items:center;margin-bottom:4px">
+              <span class="rw-badge rw-badge-v" style="font-size:9px">{{ update.get_update_type_display }}</span>
+              <span style="font-size:11px;color:var(--rw-text-3);font-family:var(--rw-font-en)" dir="ltr">{{ update.created_at|date:"Y-m-d H:i" }}</span>
+            </div>
+            <p style="font-size:13px;color:var(--rw-text-2);line-height:1.6">{{ update.body }}</p>
+            {% if update.files_affected %}
+            <div style="margin-top:6px;font-size:11px;color:var(--rw-text-3);font-family:var(--rw-font-en)" dir="ltr">
+              {% for f in update.files_affected %}{{ f }}{% if not forloop.last %}, {% endif %}{% endfor %}
+            </div>
+            {% endif %}
+          </div>
+        </div>
+        {% empty %}
+        <div style="padding:var(--rw-pad-md);text-align:center;color:var(--rw-text-3);font-size:13px">{% trans "هێشتا نوێکارییەک نییە" %}</div>
+        {% endfor %}
+      </div>
+    </div>
+
+    {% comment %} ── Change records ── {% endcomment %}
+    <div>
+      <div class="rw-section-hdr">{% trans "تۆماری گۆڕانکاری" %}</div>
+      <div style="background:var(--rw-surface);border:1px solid var(--rw-border)">
+        {% for change in changes %}
+        <div style="padding:14px var(--rw-pad-md);border-bottom:1px solid var(--rw-border-2)">
+          <div style="display:flex;gap:8px;align-items:center;margin-bottom:4px">
+            <span class="rw-badge rw-badge-v" style="font-family:var(--rw-font-en);font-size:9px">{{ change.change_type }}</span>
+            <span style="font-size:11px;color:var(--rw-amber);font-family:var(--rw-font-en)">{{ change.app_name }}</span>
+          </div>
+          <p style="font-size:12px;color:var(--rw-text-2);line-height:1.5;margin-bottom:4px">{{ change.description }}</p>
+          {% if change.commit_hash %}
+          <code style="font-size:10px;color:var(--rw-text-3);font-family:var(--rw-font-en)" dir="ltr">{{ change.commit_hash|slice:":8" }}</code>
+          {% endif %}
+          <div style="font-size:11px;color:var(--rw-text-3);margin-top:4px;font-family:var(--rw-font-en)" dir="ltr">{{ change.created_at|date:"Y-m-d H:i" }}</div>
+        </div>
+        {% empty %}
+        <div style="padding:var(--rw-pad-md);text-align:center;color:var(--rw-text-3);font-size:13px">{% trans "هێشتا گۆڕانکارییەک نییە" %}</div>
+        {% endfor %}
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<div id="rw-modal-container"></div>
+{% endblock %}

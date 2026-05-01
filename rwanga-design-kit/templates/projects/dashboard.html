@@ -1,4 +1,4 @@
-{# ════════════════════════════════════════════════════════
+{% comment %} ════════════════════════════════════════════════════════
    RWANGA — projects/dashboard.html
    The project home. Module grid organised by section.
    Extends base.html.
@@ -8,7 +8,7 @@
      active_section  — 's'|'b'|'v'|'p'|'sh' (optional)
      recent_activity — QuerySet of ActivityLog
      shoot_days      — QuerySet of ShootDay
-   ════════════════════════════════════════════════════════ #}
+   ════════════════════════════════════════════════════════ {% endcomment %}
 {% extends "base.html" %}
 {% load static i18n %}
 
@@ -17,7 +17,7 @@
 {% block content %}
 <div id="rw-content">
 
-  {# ── Project header ── #}
+  {% comment %} ── Project header ── {% endcomment %}
   <div class="rw-proj-header">
     <div class="rw-proj-cover">
       {% if project.cover %}
@@ -43,17 +43,17 @@
     </div>
   </div>
 
-  {# ── AI progress (shown when a job is running) ── #}
+  {% comment %} ── AI progress (shown when a job is running) ── {% endcomment %}
   <div id="rw-ai-status" style="padding:0 var(--rw-pad-lg)">
     {% for job in active_jobs %}
       {% include "components/_ai_progress.html" with job=job %}
     {% endfor %}
   </div>
 
-  {# ── Module grid ── #}
+  {% comment %} ── Module grid ── {% endcomment %}
   <div class="rw-dash-body" style="overflow-y:auto;flex:1">
 
-    {# ── دەستنووس (Script) ── #}
+    {% comment %} ── دەستنووس (Script) ── {% endcomment %}
     <div class="rw-sec-row">
       <div class="rw-sec-label" style="background:var(--rw-script)"
            onclick="location.href='{% url 'scripts:index' project.pk %}'">
@@ -76,7 +76,7 @@
       </div>
     </div>
 
-    {# ── داڕشتن (Breakdown) ── #}
+    {% comment %} ── داڕشتن (Breakdown) ── {% endcomment %}
     <div class="rw-sec-row">
       <div class="rw-sec-label" style="background:var(--rw-break)"
            onclick="location.href='{% url 'scripts:breakdown' project.pk %}'">
@@ -99,7 +99,7 @@
       </div>
     </div>
 
-    {# ── بینراوکردن (Visualize) ── #}
+    {% comment %} ── بینراوکردن (Visualize) ── {% endcomment %}
     <div class="rw-sec-row">
       <div class="rw-sec-label" style="background:var(--rw-vis)"
            onclick="location.href='{% url 'shots:list' project.pk %}'">
@@ -122,7 +122,7 @@
       </div>
     </div>
 
-    {# ── ڕێنوێس (Plan) ── #}
+    {% comment %} ── ڕێنوێس (Plan) ── {% endcomment %}
     <div class="rw-sec-row">
       <div class="rw-sec-label" style="background:var(--rw-plan)"
            onclick="location.href='{% url 'scheduling:index' project.pk %}'">
@@ -149,7 +149,7 @@
       </div>
     </div>
 
-    {# ── وێنەگرتن (Shoot) ── #}
+    {% comment %} ── وێنەگرتن (Shoot) ── {% endcomment %}
     <div class="rw-sec-row">
       <div class="rw-sec-label" style="background:var(--rw-shoot)"
            onclick="location.href='{% url 'scheduling:call_sheets' project.pk %}'">
@@ -176,6 +176,6 @@
       </div>
     </div>
 
-  </div>{# /dash-body #}
-</div>{# /rw-content #}
+  </div>{% comment %} /dash-body {% endcomment %}
+</div>{% comment %} /rw-content {% endcomment %}
 {% endblock %}

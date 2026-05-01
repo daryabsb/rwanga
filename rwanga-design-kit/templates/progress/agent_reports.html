@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% comment %} ════════════════════════════════════════════════════════
+   RWANGA — progress/agent_reports.html
+   Agent session reports.
+
+   Context:
+     reports — QuerySet[AgentReport]
+   ════════════════════════════════════════════════════════ {% endcomment %}
+{% load static i18n %}
+
+{% block title %}{% trans "ڕاپۆرتی ئەیجەنت" %} — Progress{% endblock %}
+
+{% block content %}
+<div id="rw-content" style="overflow-y:auto;flex:1;padding:var(--rw-pad-lg)">
+
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--rw-pad-lg)">
+    <h1 style="font-size:20px;font-weight:700">{% trans "ڕاپۆرتی ئەیجەنت" %}</h1>
+    <a href="{% url 'progress:dashboard' %}" class="rw-btn rw-btn-ghost">← {% trans "داشبۆرد" %}</a>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:var(--rw-pad-sm)">
+    {% for report in reports %}
+    <details style="background:var(--rw-surface);border:1px solid var(--rw-border)">
+      <summary style="display:flex;align-items:center;gap:12px;padding:16px var(--rw-pad-md);cursor:pointer;list-style:none">
+
+        {% comment %} Report type indicator {% endcomment %}
+        <div style="width:8px;height:8px;border-radius:50%;flex-shrink:0;background:{% if report.report_type == 'phase_completion' %}var(--rw-vis){% elif report.report_type == 'blocker' %}var(--rw-shoot){% else %}var(--rw-amber){% endif %}"></div>
+
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;flex-wrap:wrap">
+            <span style="font-size:13px;font-weight:700;color:var(--rw-text);font-family:var(--rw-font-en)">{{ report.agent_name }}</span>
+            <span class="rw-badge rw-badge-v" style="font-size:9px">{{ report.get_report_type_display }}</span>
+            <span class="rw-badge" style="font-family:var(--rw-font-en);font-size:9px;background:var(--rw-amber-dim);color:var(--rw-amber);border:1px solid rgba(212,165,116,.25)">{{ report.phase }}</span>
+          </div>
+          <div style="font-size:12px;color:var(--rw-text-2)">{{ report.summary|truncatechars:80 }}</div>
+        </div>
+
+        <div style="display:flex;gap:16px;flex-shrink:0;font-size:11px;color:var(--rw-text-3);text-align:center">
+          <div>
+            <div style="font-size:16px;font-weight:700;color:var(--rw-vis);font-family:var(--rw-font-en)">{{ report.tasks_completed.count }}</div>
+            <div>{% trans "تەواو" %}</div>
+          </div>
+          <div>
+            <div style="font-size:16px;font-weight:700;color:var(--rw-shoot);font-family:var(--rw-font-en)">{{ report.tasks_blocked.count }}</div>
+            <div>{% trans "بلۆک" %}</div>
+          </div>
+          <div>
+            <div style="font-size:16px;font-weight:700;color:var(--rw-amber);font-family:var(--rw-font-en)">{{ report.gaps_found.count }}</div>
+            <div>{% trans "گاپ" %}</div>
+          </div>
+        </div>
+
+        <div style="font-size:11px;color:var(--rw-text-3);font-family:var(--rw-font-en);flex-shrink:0" dir="ltr">
+          {{ report.created_at|date:"Y-m-d H:i" }}
+        </div>
+        <span style="color:var(--rw-text-3);font-size:16px;flex-shrink:0">▾</span>
+      </summary>
+
+      <div style="padding:var(--rw-pad-md);background:var(--rw-surface-2);border-top:1px solid var(--rw-border)">
+        <div class="rw-field-label" style="margin-bottom:8px">{% trans "پوختەی سیشن" %}</div>
+        <p style="font-size:13px;color:var(--rw-text-2);line-height:1.7;margin-bottom:var(--rw-pad-md)">{{ report.summary }}</p>
+
+        {% if report.session_id %}
+        <div style="font-size:11px;color:var(--rw-text-3);font-family:var(--rw-font-en)" dir="ltr">
+          Session: {{ report.session_id }}
+        </div>
+        {% endif %}
+
+        <div class="rw-grid-2" style="margin-top:var(--rw-pad-sm)">
+          {% if report.tasks_completed.exists %}
+          <div>
+            <div class="rw-field-label">{% trans "تاسکی تەواوبوو" %}</div>
+            {% for t in report.tasks_completed.all %}
+            <div style="font-size:12px;color:var(--rw-vis);padding:3px 0">✓ {{ t.title }}</div>
+            {% endfor %}
+          </div>
+          {% endif %}
+          {% if report.tasks_blocked.exists %}
+          <div>
+            <div class="rw-field-label">{% trans "تاسکی بلۆک" %}</div>
+            {% for t in report.tasks_blocked.all %}
+            <div style="font-size:12px;color:var(--rw-shoot);padding:3px 0">✕ {{ t.title }}</div>
+            {% endfor %}
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </details>
+    {% empty %}
+    {% include "components/_empty_state.html" with icon="🤖" title=_("هێشتا ڕاپۆرتێک نییە") sub=_("ڕاپۆرتەکانی ئەیجەنت لێرە دەردەکەون") %}
+    {% endfor %}
+  </div>
+
+</div>
+{% endblock %}

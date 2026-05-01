@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% comment %} ════════════════════════════════════════════════════════
+   RWANGA — progress/decisions.html
+   Design decision log.
+
+   Context:
+     decisions — QuerySet[DesignDecision]
+     filters   — dict: phase, status
+   ════════════════════════════════════════════════════════ {% endcomment %}
+{% load static i18n progress_filters %}
+
+{% block title %}{% trans "بڕیارە دیزاینەکان" %} — Progress{% endblock %}
+
+{% block content %}
+<div id="rw-content" style="overflow-y:auto;flex:1;padding:var(--rw-pad-lg)">
+
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--rw-pad-md)">
+    <h1 style="font-size:20px;font-weight:700">{% trans "بڕیارە دیزاینەکان" %}</h1>
+    <a href="{% url 'progress:dashboard' %}" class="rw-btn rw-btn-ghost">← {% trans "داشبۆرد" %}</a>
+  </div>
+
+  {% comment %} ── Filters ── {% endcomment %}
+  <div style="display:flex;gap:var(--rw-pad-sm);margin-bottom:var(--rw-pad-md);flex-wrap:wrap">
+    <select class="rw-form-input" name="phase" style="width:auto;padding:8px 14px;font-size:12px"
+            hx-get="{% url 'progress:decisions' %}" hx-target="#rw-decisions-list" hx-swap="innerHTML" hx-trigger="change" hx-include="[name='status']">
+      <option value="">{% trans "هەموو فاز" %}</option>
+      {% for p in "P0,P1,P2,P3,P4,P5,P6,P7"|split:"," %}
+      <option value="{{ p }}" {% if filters.phase == p %}selected{% endif %}>{{ p }}</option>
+      {% endfor %}
+    </select>
+    <select class="rw-form-input" name="status" style="width:auto;padding:8px 14px;font-size:12px"
+            hx-get="{% url 'progress:decisions' %}" hx-target="#rw-decisions-list" hx-swap="innerHTML" hx-trigger="change" hx-include="[name='phase']">
+      <option value="">{% trans "هەموو بارودۆخ" %}</option>
+      <option value="proposed"   {% if filters.status == 'proposed'   %}selected{% endif %}>{% trans "پێشنیازکراوە" %}</option>
+      <option value="approved"   {% if filters.status == 'approved'   %}selected{% endif %}>{% trans "پەسەندکراوە" %}</option>
+      <option value="superseded" {% if filters.status == 'superseded' %}selected{% endif %}>{% trans "ئەوەزکراوە" %}</option>
+    </select>
+  </div>
+
+  {% comment %} ── Decisions ── {% endcomment %}
+  <div id="rw-decisions-list" style="display:flex;flex-direction:column;gap:0;background:var(--rw-surface);border:1px solid var(--rw-border)">
+    {% for decision in decisions %}
+    <details style="border-bottom:1px solid var(--rw-border-2)">
+      <summary style="display:flex;align-items:center;gap:12px;padding:16px var(--rw-pad-md);cursor:pointer;list-style:none;transition:background var(--rw-t)">
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px">
+            <span style="font-size:14px;font-weight:700;color:var(--rw-text)">{{ decision.title }}</span>
+            <span class="rw-badge" style="font-family:var(--rw-font-en);font-size:9px;background:var(--rw-amber-dim);color:var(--rw-amber);border:1px solid rgba(212,165,116,.25)">{{ decision.phase }}</span>
+            {% if decision.app_name %}<span class="rw-badge rw-badge-v" style="font-family:var(--rw-font-en);font-size:9px">{{ decision.app_name }}</span>{% endif %}
+          </div>
+          <div style="font-size:11px;color:var(--rw-text-3)">
+            {% trans "بڕیاردەر:" %} {{ decision.decided_by }} ·
+            <span style="font-family:var(--rw-font-en)" dir="ltr">{{ decision.created_at|date:"Y-m-d" }}</span>
+          </div>
+        </div>
+        {% if decision.status == 'approved' %}
+        <span class="rw-badge" style="background:rgba(0,168,150,.12);color:var(--rw-vis);border:1px solid rgba(0,168,150,.25);font-size:9px;flex-shrink:0">{% trans "پەسەندکراوە" %}</span>
+        {% elif decision.status == 'proposed' %}
+        <span class="rw-badge" style="background:var(--rw-amber-dim);color:var(--rw-amber);border:1px solid rgba(212,165,116,.25);font-size:9px;flex-shrink:0">{% trans "پێشنیازکراوە" %}</span>
+        {% else %}
+        <span class="rw-badge rw-badge-v" style="font-size:9px;flex-shrink:0">{% trans "ئەوەزکراوە" %}</span>
+        {% endif %}
+        <span style="color:var(--rw-text-3);font-size:16px;flex-shrink:0">▾</span>
+      </summary>
+      <div style="padding:0 var(--rw-pad-md) var(--rw-pad-md);background:var(--rw-surface-2)">
+        <div class="rw-grid-2" style="gap:var(--rw-pad-md)">
+          <div>
+            <div class="rw-field-label">{% trans "چوارچێوە" %}</div>
+            <div class="rw-field-val" style="font-size:12px;line-height:1.7">{{ decision.context }}</div>
+          </div>
+          <div>
+            <div class="rw-field-label">{% trans "بڕیار" %}</div>
+            <div class="rw-field-val" style="font-size:12px;line-height:1.7;color:var(--rw-text)">{{ decision.decision }}</div>
+          </div>
+        </div>
+        {% if decision.alternatives_considered %}
+        <div style="margin-top:var(--rw-pad-sm)">
+          <div class="rw-field-label">{% trans "هەڵبژاردنەکانی تری بەلای کەوتبوو" %}</div>
+          <div class="rw-field-val" style="font-size:12px;line-height:1.7">{{ decision.alternatives_considered }}</div>
+        </div>
+        {% endif %}
+      </div>
+    </details>
+    {% empty %}
+    <div style="padding:var(--rw-pad-xl);text-align:center;color:var(--rw-text-3);font-size:13px">{% trans "هێشتا بڕیارێک نییە" %}</div>
+    {% endfor %}
+  </div>
+
+</div>
+{% endblock %}
