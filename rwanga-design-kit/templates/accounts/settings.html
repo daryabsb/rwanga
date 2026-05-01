@@ -1,5 +1,4 @@
-{% extends "base.html" %}
-{% comment %}   ════════════════════════════════════════════════════════
+{# ════════════════════════════════════════════════════════
    RWANGA — accounts/settings.html
    Account + studio settings. Edit profile, change password, danger zone.
 
@@ -8,7 +7,8 @@
      studio       — Studio instance
      user_form    — User edit form
      studio_form  — Studio edit form
-   ════════════════════════════════════════════════════════ {% endcomment %}
+   ════════════════════════════════════════════════════════ #}
+{% extends "base.html" %}
 {% load static i18n %}
 
 {% block title %}{% trans "ڕێکخستنەکان" %}{% endblock %}
@@ -16,7 +16,7 @@
 {% block content %}
 <div id="rw-content" style="overflow-y:auto;flex:1;padding:var(--rw-pad-lg)">
 
-  {% comment %} ── Account section ── {% endcomment %}
+  {# ── Account section ── #}
   <div class="rw-section-hdr">{% trans "هەژمار" %}</div>
   <form method="post" action="{% url 'accounts:settings' %}#account">
     {% csrf_token %}
@@ -52,7 +52,7 @@
     </div>
   </form>
 
-  {% comment %} ── Studio section ── {% endcomment %}
+  {# ── Studio section ── #}
   <div class="rw-section-hdr">{% trans "ستودیۆ" %}</div>
   <form method="post" action="{% url 'accounts:settings' %}#studio" enctype="multipart/form-data">
     {% csrf_token %}
@@ -96,7 +96,7 @@
     </div>
   </form>
 
-  {% comment %} ── Danger zone ── {% endcomment %}
+  {# ── Danger zone ── #}
   <div class="rw-section-hdr" style="color:var(--rw-shoot)">{% trans "ناوچەی مەترسیدار" %}</div>
   <div class="rw-warn">
     <span class="rw-warn-icon">⚠</span>

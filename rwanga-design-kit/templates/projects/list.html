@@ -1,4 +1,4 @@
-{% comment %} ════════════════════════════════════════════════════════
+{# ════════════════════════════════════════════════════════
    RWANGA — projects/list.html
    Studio lobby — the first page after login.
    Pick which project workspace to enter.
@@ -7,7 +7,7 @@
      owned_projects   — QuerySet[Project] owned by user's studio
      member_projects  — QuerySet[Project] where user has ProjectMembership
      invitations      — QuerySet[ProjectMembership] pending (accepted_at=None)
-   ════════════════════════════════════════════════════════ {% endcomment %}
+   ════════════════════════════════════════════════════════ #}
 {% extends "base.html" %}
 {% load static i18n %}
 
@@ -16,7 +16,7 @@
 {% block content %}
 <div id="rw-content" style="overflow-y:auto;flex:1">
 
-  {% comment %} ── Page header ── {% endcomment %}
+  {# ── Page header ── #}
   <div style="padding:var(--rw-pad-lg) var(--rw-pad-lg) var(--rw-pad-md);background:var(--rw-surface);border-bottom:1px solid var(--rw-border);display:flex;align-items:center;gap:var(--rw-pad-md)">
     <div>
       <h1 style="font-size:24px;font-weight:700;margin-bottom:4px">{% trans "ستودیۆ" %}</h1>
@@ -29,7 +29,7 @@
 
   <div style="padding:var(--rw-pad-lg)">
 
-    {% comment %} ── Pending invitations ── {% endcomment %}
+    {# ── Pending invitations ── #}
     {% if invitations %}
     <div style="margin-bottom:var(--rw-pad-lg)">
       <div class="rw-section-hdr">{% trans "بانگهێشتنامەکان" %}</div>
@@ -57,7 +57,7 @@
     </div>
     {% endif %}
 
-    {% comment %} ── Owned projects ── {% endcomment %}
+    {# ── Owned projects ── #}
     <div class="rw-section-hdr">{% trans "پڕۆژەکانی من" %}</div>
     {% if owned_projects %}
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1px;background:var(--rw-border);border:1px solid var(--rw-border);margin-bottom:var(--rw-pad-lg)">
@@ -84,7 +84,7 @@
       </a>
       {% endfor %}
 
-      {% comment %} New project card {% endcomment %}
+      {# New project card #}
       <a href="{% url 'projects:create_wizard' %}" style="text-decoration:none;display:block">
         <div style="background:var(--rw-surface);cursor:pointer;transition:background var(--rw-t);height:100%;min-height:120px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;color:var(--rw-text-3);padding:var(--rw-pad-md)">
           <div style="font-size:36px;opacity:.3">+</div>
@@ -96,7 +96,7 @@
     {% include "components/_empty_state.html" with icon="🎬" title=_("هێشتا پڕۆژەت نییە") sub=_("یەکەمین پڕۆژەی فیلمیت دروست بکە") cta_text=_("دەستپێکردن") cta_url="projects:create_wizard" %}
     {% endif %}
 
-    {% comment %} ── Member projects ── {% endcomment %}
+    {# ── Member projects ── #}
     {% if member_projects %}
     <div class="rw-section-hdr">{% trans "پڕۆژەکانی تیم" %}</div>
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1px;background:var(--rw-border);border:1px solid var(--rw-border)">

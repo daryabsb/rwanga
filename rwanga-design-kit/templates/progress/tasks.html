@@ -1,11 +1,11 @@
-{% comment %} ════════════════════════════════════════════════════════
+{# ════════════════════════════════════════════════════════
    RWANGA — progress/tasks.html
    Full task list with filters.
 
    Context:
      tasks    — QuerySet[ProgressTask]
      filters  — dict: phase, status, app_name, priority
-   ════════════════════════════════════════════════════════ {% endcomment %}
+   ════════════════════════════════════════════════════════ #}
 {% extends "base.html" %}
 {% load static i18n %}
 
@@ -19,7 +19,7 @@
     <a href="{% url 'progress:dashboard' %}" class="rw-btn rw-btn-ghost">← {% trans "داشبۆرد" %}</a>
   </div>
 
-  {% comment %} ── Filters ── {% endcomment %}
+  {# ── Filters ── #}
   <div style="display:flex;gap:var(--rw-pad-sm);flex-wrap:wrap;margin-bottom:var(--rw-pad-md)">
     <select class="rw-form-input" name="phase" style="width:auto;padding:8px 14px;font-size:12px"
             hx-get="{% url 'progress:tasks' %}" hx-target="#rw-tasks-table" hx-swap="innerHTML" hx-trigger="change" hx-include="[name='status'],[name='app_name'],[name='priority']">
@@ -51,7 +51,7 @@
            hx-trigger="input changed delay:400ms" hx-include="[name='phase'],[name='status'],[name='priority']">
   </div>
 
-  {% comment %} ── Task table ── {% endcomment %}
+  {# ── Task table ── #}
   <div id="rw-tasks-table">
     <div style="background:var(--rw-surface);border:1px solid var(--rw-border)">
       <table style="width:100%;border-collapse:collapse">

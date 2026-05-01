@@ -1,11 +1,11 @@
-{% extends "base.html" %}
-{% comment %} ════════════════════════════════════════════════════════
+{# ════════════════════════════════════════════════════════
    RWANGA — progress/changelog.html
    Change record timeline.
 
    Context:
      changes — QuerySet[ChangeRecord]
-   ════════════════════════════════════════════════════════ {% endcomment %}
+   ════════════════════════════════════════════════════════ #}
+{% extends "base.html" %}
 {% load static i18n %}
 
 {% block title %}{% trans "تۆماری گۆڕانکاری" %} — Progress{% endblock %}
@@ -22,7 +22,7 @@
     {% for change in changes %}
     <div style="display:flex;gap:16px;padding:16px var(--rw-pad-md);border-bottom:1px solid var(--rw-border-2)">
 
-      {% comment %} Change type color strip {% endcomment %}
+      {# Change type color strip #}
       <div style="width:4px;flex-shrink:0;background:{% if change.change_type == 'model_added' %}var(--rw-vis){% elif change.change_type == 'model_modified' %}var(--rw-amber){% elif change.change_type == 'migration_run' %}var(--rw-plan){% elif change.change_type == 'dependency_added' %}var(--rw-break){% else %}var(--rw-border){% endif %};border-radius:2px"></div>
 
       <div style="flex:1;min-width:0">

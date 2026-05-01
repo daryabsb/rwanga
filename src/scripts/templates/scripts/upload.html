@@ -16,9 +16,7 @@
 {% block content %}
 <div style="flex:1;overflow-y:auto;background:var(--rw-bg)">
 
-  {% include "components/_breadcrumb.html" with
-     crumbs=crumbs
-     current=_("بارکردنی دەستنووس") %}
+  {% include "components/_breadcrumb.html" with project=project current=_("بارکردنی دەستنووس") %}
 
   <div style="padding:var(--rw-pad-lg);max-width:720px">
 

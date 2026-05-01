@@ -1,6 +1,6 @@
 # STABILIZATION ROUND 2 — Remaining Fixes
 
-> **Context:** Round 1 (STABILIZATION-TASK.md) is mostly complete. Priority 00, 0, 1 (partial), 3, 5, and 6 are done. This file contains ONLY the remaining work. Read `CLAUDE.md` first, then execute everything here.
+> **Context:** Round 1 (STABILIZATION-TASK.md) is mostly complete. Priority 00, 0, 1 (partial), 3, 5, and 6 are done. This file contains ONLY the remaining work. Read `rwanga-design-kit/specs/CLAUDE.md` first, then execute everything here.
 
 > **Mode: NON-STOP.** Fix everything. Update Progress after every fix.
 
@@ -16,7 +16,7 @@ Three scripts pages are still stubs showing "coming soon." Replace each with the
 - `/scripts/<pk>/elements/` → copy `rwanga-design-kit/templates/scripts/elements.html`, render element list with type filters (character, location, prop, wardrobe, vehicle, etc.)
 - `/scripts/<pk>/docs/` → copy `rwanga-design-kit/templates/scripts/docs.html`, render script versions and attached documents
 
-Each view must pass real context from the database. Check `BACKEND_SPEC.md` for expected context variables. If no ScriptElements exist yet for a script, show an empty state — NOT "coming soon."
+Each view must pass real context from the database. Check `rwanga-design-kit/specs/BACKEND_SPEC.md` for expected context variables. If no ScriptElements exist yet for a script, show an empty state — NOT "coming soon."
 
 **Test:** Navigate to each URL with a valid script PK. Must return 200 with real template, not a stub.
 

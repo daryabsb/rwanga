@@ -1,4 +1,4 @@
-{% comment %} ════════════════════════════════════════════════════════
+{# ════════════════════════════════════════════════════════
    RWANGA — projects/scenes/tabs/wardrobe.html
    Wardrobe module tab. HTMX fragment.
    Per-character outfit cards with top-colour border.
@@ -8,7 +8,7 @@
      project         — Project instance
      characters      — QuerySet[Character] in scene
      wardrobe_items  — QuerySet[WardrobeItem] grouped by character
-   ════════════════════════════════════════════════════════ {% endcomment %}
+   ════════════════════════════════════════════════════════ #}
 {% load i18n %}
 
 <div style="padding:var(--rw-pad-lg)">
@@ -24,7 +24,7 @@
 
   {% if wardrobe_items %}
 
-  {% comment %} Character colour palette — cycle through section colours {% endcomment %}
+  {# Character colour palette — cycle through section colours #}
   {% with char_colors="var(--rw-break),var(--rw-plan),var(--rw-vis),var(--rw-script),var(--rw-shoot)" %}
 
   <div class="rw-wardrobe-grid">
@@ -62,7 +62,7 @@
       </div>
       {% endif %}{% endfor %}
 
-      {% comment %} Add outfit button for this character {% endcomment %}
+      {# Add outfit button for this character #}
       <button class="rw-btn rw-btn-ghost" style="width:100%;justify-content:center;font-size:12px"
               hx-get="{% url 'departments:add_wardrobe_modal' project.pk scene.pk %}?character={{ character.pk }}"
               hx-target="#rw-modal-container" hx-swap="innerHTML">

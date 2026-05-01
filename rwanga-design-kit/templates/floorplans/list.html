@@ -1,5 +1,4 @@
-{% extends "base.html" %}
-{% comment %} ════════════════════════════════════════════════════════
+{# ════════════════════════════════════════════════════════
    RWANGA — floorplans/list.html
    All floor plans for the project.
 
@@ -7,7 +6,8 @@
      project        — Project instance
      floorplans     — QuerySet[FloorPlan]
      active_section — 'v'
-   ════════════════════════════════════════════════════════ {% endcomment %}
+   ════════════════════════════════════════════════════════ #}
+{% extends "base.html" %}
 {% load static i18n %}
 
 {% block title %}{% trans "نەخشەکانی ژوور" %} — {{ project.title }}{% endblock %}
@@ -33,7 +33,7 @@
          style="text-decoration:none;display:block">
         <div style="background:var(--rw-surface);cursor:pointer;transition:background var(--rw-t);padding:0">
 
-          {% comment %} SVG thumbnail preview {% endcomment %}
+          {# SVG thumbnail preview #}
           <div style="aspect-ratio:16/9;background:var(--rw-surface-2);display:flex;align-items:center;justify-content:center;border-bottom:1px solid var(--rw-border);overflow:hidden;position:relative">
             {% if fp.svg_preview %}
             <img src="{{ fp.svg_preview }}" style="width:100%;height:100%;object-fit:cover">
@@ -52,7 +52,7 @@
             {% endif %}
           </div>
 
-          {% comment %} Metadata {% endcomment %}
+          {# Metadata #}
           <div style="padding:var(--rw-pad-sm) var(--rw-pad-md)">
             <div style="font-size:13px;font-weight:700;color:var(--rw-text);margin-bottom:4px">
               {% trans "دیمەنی" %} {{ fp.scene.number }} — {{ fp.scene.int_ext }}. {{ fp.scene.location_name }}

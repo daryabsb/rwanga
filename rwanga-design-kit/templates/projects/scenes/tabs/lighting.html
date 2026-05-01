@@ -1,4 +1,4 @@
-{% comment %} ════════════════════════════════════════════════════════
+{# ════════════════════════════════════════════════════════
    RWANGA — projects/scenes/tabs/lighting.html
    Lighting module tab. HTMX fragment.
    Color temperature bar + per-shot lighting notes grid.
@@ -8,7 +8,7 @@
      project        — Project instance
      lighting_notes — QuerySet[LightingNote] for shots in this scene
      color_temps    — list of {shot_num, temp_k, label, color_hex}
-   ════════════════════════════════════════════════════════ {% endcomment %}
+   ════════════════════════════════════════════════════════ #}
 {% load i18n %}
 
 <div style="padding:var(--rw-pad-lg)">
@@ -22,7 +22,7 @@
     </button>
   </div>
 
-  {% comment %} ── Color temperature bar ── {% endcomment %}
+  {# ── Color temperature bar ── #}
   {% if color_temps %}
   <div class="rw-card" style="margin-bottom:var(--rw-pad-lg)">
     <div class="rw-card-title">{% trans "گەرمی ڕەنگی ژوورەکە" %}</div>
@@ -46,7 +46,7 @@
   </div>
   {% endif %}
 
-  {% comment %} ── Per-shot lighting notes ── {% endcomment %}
+  {# ── Per-shot lighting notes ── #}
   {% if lighting_notes %}
   <div class="rw-light-grid">
     {% for note in lighting_notes %}

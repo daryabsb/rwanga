@@ -1,4 +1,4 @@
-{% comment %} ════════════════════════════════════════════════════════
+{# ════════════════════════════════════════════════════════
    RWANGA — scheduling/stripboard.html
    Full stripboard — industry-standard schedule visualisation.
    Each scene is a coloured draggable strip.
@@ -7,7 +7,7 @@
      project        — Project instance
      strips         — ordered list of scenes + day breaks
      active_section — 'p'
-   ════════════════════════════════════════════════════════ {% endcomment %}
+   ════════════════════════════════════════════════════════ #}
 {% extends "base.html" %}
 {% load static i18n %}
 
@@ -16,7 +16,7 @@
 {% block content %}
 <div id="rw-content" style="overflow-y:auto;flex:1">
 
-  {% comment %} ── Toolbar ── {% endcomment %}
+  {# ── Toolbar ── #}
   <div style="height:56px;background:var(--rw-surface);border-bottom:1px solid var(--rw-border);display:flex;align-items:center;padding:0 var(--rw-pad-md);gap:12px;flex-shrink:0;position:sticky;top:0;z-index:10">
     {% include "components/_breadcrumb.html" with project=project current=_("ستریپبۆرد") inline=True %}
     <div style="flex:1"></div>
@@ -35,7 +35,7 @@
     </a>
   </div>
 
-  {% comment %} ── Column headers ── {% endcomment %}
+  {# ── Column headers ── #}
   <div style="display:grid;grid-template-columns:40px 48px 56px 1fr auto auto;gap:0;background:var(--rw-surface-2);border-bottom:2px solid var(--rw-border);padding:10px var(--rw-pad-md);position:sticky;top:56px;z-index:9">
     <div style="font-size:9px;font-weight:700;color:var(--rw-text-3);text-transform:uppercase;letter-spacing:.9px">{% trans "ڕۆژ" %}</div>
     <div style="font-size:9px;font-weight:700;color:var(--rw-text-3);text-transform:uppercase;letter-spacing:.9px">{% trans "دیمەن" %}</div>
@@ -45,12 +45,12 @@
     <div style="font-size:9px;font-weight:700;color:var(--rw-text-3);text-transform:uppercase;letter-spacing:.9px">{% trans "کەسایەتی" %}</div>
   </div>
 
-  {% comment %} ── Strips ── {% endcomment %}
+  {# ── Strips ── #}
   <div id="rw-stripboard" style="padding:0 var(--rw-pad-md)">
     {% for strip in strips %}
 
     {% if strip.is_day_break %}
-    {% comment %} ── Day break marker ── {% endcomment %}
+    {# ── Day break marker ── #}
     <div style="display:grid;grid-template-columns:40px 1fr;gap:12px;align-items:center;padding:16px 0 8px;border-top:2px solid var(--rw-border);margin-top:8px"
          data-strip-id="{{ strip.pk }}" data-type="day_break">
       <div style="font-size:11px;font-weight:700;color:var(--rw-shoot);text-align:center">{{ strip.day_number }}</div>
@@ -65,7 +65,7 @@
       </div>
     </div>
     {% else %}
-    {% comment %} ── Scene strip ── {% endcomment %}
+    {# ── Scene strip ── #}
     {% with int_col="var(--rw-break)" ext_col="var(--rw-vis)" %}
     <div class="rw-strip-row"
          data-strip-id="{{ strip.scene.pk }}" data-type="scene"

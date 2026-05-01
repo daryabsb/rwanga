@@ -1,4 +1,4 @@
-{% comment %} ════════════════════════════════════════════════════════
+{# ════════════════════════════════════════════════════════
    RWANGA — projects/scenes/tabs/sound.html
    Sound module tab. HTMX fragment.
    Golden rule, track setup, critical moment notes.
@@ -9,7 +9,7 @@
      sound_notes      — QuerySet[SoundNote]
      sound_setup      — dict (track assignments, equipment)
      critical_moments — list (timestamped critical sound cues)
-   ════════════════════════════════════════════════════════ {% endcomment %}
+   ════════════════════════════════════════════════════════ #}
 {% load i18n %}
 
 <div style="padding:var(--rw-pad-lg)">
@@ -23,7 +23,7 @@
     </button>
   </div>
 
-  {% comment %} ── Golden rule reminder ── {% endcomment %}
+  {# ── Golden rule reminder ── #}
   <div style="display:flex;gap:12px;align-items:flex-start;padding:16px var(--rw-pad-md);background:var(--rw-amber-dim);border:1px solid rgba(212,165,116,.25);border-inline-start:4px solid var(--rw-amber);margin-bottom:var(--rw-pad-lg)">
     <span style="font-size:16px;flex-shrink:0">🎙</span>
     <div>
@@ -34,7 +34,7 @@
     </div>
   </div>
 
-  {% comment %} ── Track setup ── {% endcomment %}
+  {# ── Track setup ── #}
   {% if sound_setup %}
   <div class="rw-card" style="margin-bottom:var(--rw-pad-lg)">
     <div class="rw-card-title">{% trans "داماڵکاری تراک" %}</div>
@@ -61,7 +61,7 @@
   </div>
   {% endif %}
 
-  {% comment %} ── Sound notes list ── {% endcomment %}
+  {# ── Sound notes list ── #}
   {% if sound_notes %}
   <div class="rw-sound-list">
     {% for note in sound_notes %}

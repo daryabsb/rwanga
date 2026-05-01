@@ -1,11 +1,11 @@
-{% comment %} ════════════════════════════════════════════════════════
+{# ════════════════════════════════════════════════════════
    RWANGA — progress/gaps.html
    Open gaps and blockers list.
 
    Context:
      gaps     — QuerySet[GapBlocker]
      filters  — dict: severity, status, gap_type
-   ════════════════════════════════════════════════════════ {% endcomment %}
+   ════════════════════════════════════════════════════════ #}
 {% extends "base.html" %}
 {% load static i18n %}
 
@@ -19,7 +19,7 @@
     <a href="{% url 'progress:dashboard' %}" class="rw-btn rw-btn-ghost">← {% trans "داشبۆرد" %}</a>
   </div>
 
-  {% comment %} ── Filters ── {% endcomment %}
+  {# ── Filters ── #}
   <div style="display:flex;gap:var(--rw-pad-sm);flex-wrap:wrap;margin-bottom:var(--rw-pad-md)">
     <select class="rw-form-input" name="severity" style="width:auto;padding:8px 14px;font-size:12px"
             hx-get="{% url 'progress:gaps' %}" hx-target="#rw-gaps-list" hx-swap="innerHTML" hx-trigger="change" hx-include="[name='status'],[name='gap_type']">
@@ -37,7 +37,7 @@
     </select>
   </div>
 
-  {% comment %} ── Gaps list ── {% endcomment %}
+  {# ── Gaps list ── #}
   <div id="rw-gaps-list">
     {% for gap in gaps %}
     {% if gap.severity == 'critical' %}

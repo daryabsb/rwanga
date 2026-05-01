@@ -1,5 +1,4 @@
-{% extends "base.html" %}
-{% comment %} ════════════════════════════════════════════════════════
+{# ════════════════════════════════════════════════════════
    RWANGA — accounts/profile.html
    User profile — info, studio, memberships.
 
@@ -7,7 +6,8 @@
      user         — User instance
      studio       — Studio instance
      memberships  — QuerySet[ProjectMembership] user's active memberships
-   ════════════════════════════════════════════════════════ {% endcomment %}
+   ════════════════════════════════════════════════════════ #}
+{% extends "base.html" %}
 {% load static i18n %}
 
 {% block title %}{% trans "پرۆفایل" %}{% endblock %}
@@ -15,7 +15,7 @@
 {% block content %}
 <div id="rw-content" style="overflow-y:auto;flex:1;padding:var(--rw-pad-lg)">
 
-  {% comment %} ── User info card ── {% endcomment %}
+  {# ── User info card ── #}
   <div class="rw-section-hdr">{% trans "زانیاری هەژمار" %}</div>
   <div class="rw-card" style="display:flex;align-items:center;gap:var(--rw-pad-md)">
     <div class="rw-avatar" style="width:72px;height:72px;font-size:26px;flex-shrink:0">
@@ -35,7 +35,7 @@
     </a>
   </div>
 
-  {% comment %} ── Studio info card ── {% endcomment %}
+  {# ── Studio info card ── #}
   {% if studio %}
   <div class="rw-section-hdr">{% trans "ستودیۆ" %}</div>
   <div class="rw-card">
@@ -58,7 +58,7 @@
   </div>
   {% endif %}
 
-  {% comment %} ── Project memberships ── {% endcomment %}
+  {# ── Project memberships ── #}
   <div class="rw-section-hdr">{% trans "ئەندامێتی پڕۆژەکان" %}</div>
   {% if memberships %}
   <div style="background:var(--rw-surface);border:1px solid var(--rw-border)">

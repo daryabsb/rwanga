@@ -1,15 +1,15 @@
-{% comment %} ════════════════════════════════════════════════════════
+{# ════════════════════════════════════════════════════════
    RWANGA — components/_sidebar.html
    Icon rail — always dark, survives theme switch.
    Context: request.user, active_section (s/b/v/p/sh)
-   ════════════════════════════════════════════════════════ {% endcomment %}
+   ════════════════════════════════════════════════════════ #}
 {% load i18n %}
 <aside class="rw-rail" role="navigation" aria-label="{% trans 'ناڤیگەیشنی سەرەکی' %}">
 
-  {% comment %} Brand mark — links to studio dashboard {% endcomment %}
+  {# Brand mark — links to studio dashboard #}
   <a href="{% url 'projects:list' %}" class="rw-rail-logo" title="ڕوانگە">ڕ</a>
 
-  {% comment %} Global nav icons {% endcomment %}
+  {# Global nav icons #}
   <a href="{% url 'projects:list' %}"
      class="rw-rail-icon {% if request.resolver_match.app_name == 'projects' and not active_project %}active{% endif %}"
      title="{% trans 'پڕۆژەکان' %}">
@@ -38,7 +38,7 @@
 
   <div class="rw-rail-spacer"></div>
 
-  {% comment %} Notification bell — badge populated via WebSocket OOB swap {% endcomment %}
+  {# Notification bell — badge populated via WebSocket OOB swap #}
   <button class="rw-rail-icon" style="position:relative" title="{% trans 'ئاگادارکردنەوەکان' %}"
           hx-get="{% url 'notifications:panel' %}"
           hx-target="#rw-notif-panel"
@@ -48,7 +48,7 @@
           {% if unread_count == 0 %}style="display:none"{% endif %}></span>
   </button>
 
-  {% comment %} Theme toggle {% endcomment %}
+  {# Theme toggle #}
   <button class="rw-rail-theme js-theme-toggle"
           onclick="RW.themeToggle()"
           title="{% trans 'گۆڕینی شێوازی ڕووکار' %}">☀</button>

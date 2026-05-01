@@ -1,11 +1,11 @@
-{% comment %} ════════════════════════════════════════════════════════
+{# ════════════════════════════════════════════════════════
    RWANGA — progress/diagrams.html
    System diagrams viewer — Mermaid or SVG.
 
    Context:
      current_diagram — SystemDiagram (is_current=True)
      all_diagrams    — QuerySet[SystemDiagram]
-   ════════════════════════════════════════════════════════ {% endcomment %}
+   ════════════════════════════════════════════════════════ #}
 {% extends "base.html" %}
 {% load static i18n %}
 
@@ -18,7 +18,7 @@
 {% block content %}
 <div id="rw-content" style="display:flex;flex:1;overflow:hidden">
 
-  {% comment %} ── Diagram selector ── {% endcomment %}
+  {# ── Diagram selector ── #}
   <aside style="width:220px;background:var(--rw-surface);border-inline-start:1px solid var(--rw-border);display:flex;flex-direction:column;flex-shrink:0">
     <div style="padding:var(--rw-pad-md) var(--rw-pad-sm) var(--rw-pad-xs);font-size:10px;font-weight:700;color:var(--rw-text-3);text-transform:uppercase;letter-spacing:1.2px;border-bottom:1px solid var(--rw-border)">
       {% trans "دیئاگرامەکان" %}
@@ -44,7 +44,7 @@
     </div>
   </aside>
 
-  {% comment %} ── Diagram content ── {% endcomment %}
+  {# ── Diagram content ── #}
   <div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
     <div style="height:56px;background:var(--rw-surface);border-bottom:1px solid var(--rw-border);display:flex;align-items:center;padding:0 var(--rw-pad-md);gap:12px;flex-shrink:0">
       <h1 style="font-size:18px;font-weight:700;flex:1">

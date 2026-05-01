@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Notifications" %}{% endblock %}
+{% block content %}
+<div id="rw-content" style="overflow-y:auto;flex:1;padding:var(--rw-pad-lg)">
+  <h1 style="font-size:20px;font-weight:700;margin-bottom:var(--rw-pad-md)">{% trans "Notifications" %}</h1>
+  <div style="background:var(--rw-surface);border:1px solid var(--rw-border)">
+    {% for notif in notifications %}
+    <a href="{{ notif.action_url|default:'#' }}" style="display:flex;gap:12px;padding:14px 16px;border-bottom:1px solid var(--rw-border-2);text-decoration:none;color:inherit;{% if not notif.is_read %}background:var(--rw-amber-dim){% endif %}">
+      <div style="font-size:18px">🔔</div>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:{% if not notif.is_read %}700{% else %}400{% endif %}">{{ notif.message }}</div>
+        <div style="font-size:11px;color:var(--rw-text-3)">{{ notif.created_at|timesince }} ago</div>
+      </div>
+    </a>
+    {% empty %}
+    <div style="padding:var(--rw-pad-lg);text-align:center;color:var(--rw-text-3)">{% trans "No notifications." %}</div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

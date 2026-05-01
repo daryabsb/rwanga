@@ -1,4 +1,4 @@
-{% comment %} ════════════════════════════════════════════════════════
+{# ════════════════════════════════════════════════════════
    RWANGA — progress/task_detail.html
    Individual task — updates, dependencies, change records.
 
@@ -7,7 +7,7 @@
      updates    — QuerySet[ProgressUpdate] linked to this task
      blocked_by — QuerySet[ProgressTask] (M2M)
      changes    — QuerySet[ChangeRecord] linked to this task
-   ════════════════════════════════════════════════════════ {% endcomment %}
+   ════════════════════════════════════════════════════════ #}
 {% extends "base.html" %}
 {% load static i18n %}
 
@@ -16,12 +16,12 @@
 {% block content %}
 <div id="rw-content" style="overflow-y:auto;flex:1;padding:var(--rw-pad-lg)">
 
-  {% comment %} ── Breadcrumb ── {% endcomment %}
+  {# ── Breadcrumb ── #}
   <div style="margin-bottom:var(--rw-pad-lg)">
     <a href="{% url 'progress:tasks' %}" style="font-size:13px;color:var(--rw-amber)">← {% trans "تاسکەکان" %}</a>
   </div>
 
-  {% comment %} ── Task header ── {% endcomment %}
+  {# ── Task header ── #}
   <div class="rw-card" style="margin-bottom:var(--rw-pad-lg)">
     <div style="display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap">
       <div style="flex:1;min-width:0">
@@ -33,7 +33,7 @@
         </div>
       </div>
       <div style="display:flex;gap:8px;align-items:center">
-        {% comment %} Status badge {% endcomment %}
+        {# Status badge #}
         {% if task.status == 'completed' %}
         <span class="rw-badge" style="background:rgba(0,168,150,.12);color:var(--rw-vis);border:1px solid rgba(0,168,150,.25);padding:6px 14px">{% trans "تەواوبوو" %}</span>
         {% elif task.status == 'in_progress' %}
@@ -53,7 +53,7 @@
     {% endif %}
   </div>
 
-  {% comment %} ── Blocked by ── {% endcomment %}
+  {# ── Blocked by ── #}
   {% if blocked_by %}
   <div class="rw-section-hdr">{% trans "دوای ئەم تاسکانەوە" %}</div>
   <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:var(--rw-pad-lg)">
@@ -69,7 +69,7 @@
 
   <div class="rw-grid-2">
 
-    {% comment %} ── Updates timeline ── {% endcomment %}
+    {# ── Updates timeline ── #}
     <div>
       <div class="rw-section-hdr">{% trans "نوێکاریەکان" %}</div>
       <div style="background:var(--rw-surface);border:1px solid var(--rw-border)">
@@ -100,7 +100,7 @@
       </div>
     </div>
 
-    {% comment %} ── Change records ── {% endcomment %}
+    {# ── Change records ── #}
     <div>
       <div class="rw-section-hdr">{% trans "تۆماری گۆڕانکاری" %}</div>
       <div style="background:var(--rw-surface);border:1px solid var(--rw-border)">

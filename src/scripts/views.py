@@ -55,7 +55,7 @@ class ScriptBreakdownView(View):
                     "int_ext": details.get("int_ext", ""),
                 }
             )
-        breakdown = {"scene_count": scene_count, **buckets}
+        breakdown = {"scene_count": scene_count, "fx_count": len(buckets["sfx"]) + len(buckets["vfx"]), **buckets}
         return render(
             request,
             "scripts/breakdown.html",

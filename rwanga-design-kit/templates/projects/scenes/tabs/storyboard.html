@@ -1,4 +1,4 @@
-{% comment %} ════════════════════════════════════════════════════════
+{# ════════════════════════════════════════════════════════
    RWANGA — projects/scenes/tabs/storyboard.html
    Storyboard grid tab. HTMX fragment.
    Upload images, associate with shots, Sortable.js reorder.
@@ -7,12 +7,12 @@
      scene              — Scene instance
      project            — Project instance
      storyboard_frames  — QuerySet[StoryboardFrame] with linked shots
-   ════════════════════════════════════════════════════════ {% endcomment %}
+   ════════════════════════════════════════════════════════ #}
 {% load i18n %}
 
 <div style="padding:var(--rw-pad-lg)">
 
-  {% comment %} ── Header actions ── {% endcomment %}
+  {# ── Header actions ── #}
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--rw-pad-md)">
     <div style="font-size:13px;color:var(--rw-text-2)">
       {{ storyboard_frames.count }} {% trans "فریم" %}

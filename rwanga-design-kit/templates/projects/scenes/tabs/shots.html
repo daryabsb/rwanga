@@ -1,4 +1,4 @@
-{% comment %} ════════════════════════════════════════════════════════
+{# ════════════════════════════════════════════════════════
    RWANGA — projects/scenes/tabs/shots.html
    Shot list tab. HTMX fragment. Inline-editable table.
 
@@ -8,12 +8,12 @@
      shots        — QuerySet[Shot] ordered by `order`
      setups       — QuerySet[Setup]
      filter_type  — current filter string (optional)
-   ════════════════════════════════════════════════════════ {% endcomment %}
+   ════════════════════════════════════════════════════════ #}
 {% load i18n %}
 
 <div style="padding:var(--rw-pad-lg)">
 
-  {% comment %} ── Filter bar ── {% endcomment %}
+  {# ── Filter bar ── #}
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--rw-pad-md)">
     <div class="rw-filter-row" style="margin-bottom:0">
       <button class="rw-f-btn {% if not filter_type or filter_type == 'all' %}active{% endif %}"
@@ -45,7 +45,7 @@
   </div>
 
   {% if shots %}
-  {% comment %} ── Shot table ── {% endcomment %}
+  {# ── Shot table ── #}
   <table class="rw-shot-table" id="rw-shot-list" data-sortable>
     <thead>
       <tr>
@@ -60,7 +60,7 @@
     </thead>
     <tbody id="rw-shots-tbody">
       {% for shot in shots %}
-      {% comment %} Row class based on type {% endcomment %}
+      {# Row class based on type #}
       <tr class="rw-shot-row {% if shot.shot_type == 'dialogue' %}s-d{% elif shot.shot_type == 'insert' %}s-i{% else %}s-v{% endif %}"
           data-shot-id="{{ shot.pk }}"
           onclick="RW.toggleShotExp('{{ shot.pk }}')">
@@ -87,7 +87,7 @@
           {% else %}—{% endif %}
         </td>
       </tr>
-      {% comment %} Expanded detail row {% endcomment %}
+      {# Expanded detail row #}
       <tr class="rw-exp-row" id="rw-exp-{{ shot.pk }}">
         <td colspan="7">
           <div class="rw-exp-grid">
@@ -126,7 +126,7 @@
     </tbody>
   </table>
 
-  {% comment %} Sortable init {% endcomment %}
+  {# Sortable init #}
   <script>
     if (typeof Sortable !== 'undefined') {
       Sortable.create(document.getElementById('rw-shots-tbody'), {

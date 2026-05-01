@@ -517,3 +517,157 @@ AgentReport.objects.create(
 ## Summary
 
 7 priorities (00 through 6), ~28 specific fixes. HTMX navigation + modals + form saves first (most visible), then security, then crashes, then stubs, then API cleanup, then mobile UX, then progress sync, then exports wiring. Every page in Rwanga must return 200 and show real content. Every form must save to the database. Zero "coming soon" pages. Zero 500 errors. Zero unauthenticated API access. This is the last cleanup before the system goes into real use.
+
+---
+
+## ROUND 2 — Additional Issues Found During Testing
+
+> These were discovered during live testing AFTER Priority 00 was completed. Execute these after completing priorities 0–6 above, or interleave them where they fit naturally.
+
+### R2.1 — Notification panel is not dismissible + full-page rendering broken
+
+**Two separate bugs:**
+
+**Bug A — Dropdown won't close:** The notification bell opens a dropdown/panel overlay, but clicking outside it or pressing X does NOT close it. Only a full page refresh removes it. This is likely because the panel is inserted via HTMX and the dismiss handler (click-outside or close button) is not wired.
+
+**Fix:** The notification panel must use the same modal system from Priority 00.2, OR use a Bootstrap offcanvas/dropdown with proper dismiss behavior. If it's a custom panel:
+```javascript
+// In rwanga.js — close notification panel on outside click
+document.addEventListener('click', function(e) {
+    var panel = document.getElementById('notification-panel');
+    var bell = document.getElementById('notification-bell');
+    if (panel && !panel.contains(e.target) && !bell.contains(e.target)) {
+        panel.remove();  // or panel.classList.add('d-none')
+    }
+});
+```
+
+**Bug B — `/notifications/` full page is broken:** Navigating to `rwanga.zeneon.co.uk/notifications/` renders the notification panel content at the bottom-left of a blank white page with no base.html chrome (no sidebar, no topnav, no styling). The view is either returning a partial template that doesn't extend base.html, or the notifications list view doesn't exist and falls through to the panel partial.
+
+**Fix:** Create a proper full-page notifications view that extends `base.html`:
+- Copy `rwanga-design-kit/templates/notifications/panel.html` as the partial (for the dropdown)
+- Create `notifications/list.html` extending `base.html` for the full-page view at `/notifications/`
+- The full-page view should list all notifications with read/unread status, timestamps, and links to relevant objects
+
+**Test:** Click bell → panel opens → click X or outside → panel closes. Click "ھەموو ئاگادارکردنەوەکان ببینە" → navigates to `/notifications/` → renders full page with sidebar and topnav.
+
+### R2.2 — Bootstrap 5 loading from CDN instead of locally (CSS load order conflict)
+
+**Symptom:** BS5 loads from a CDN `<link>` tag, and it loads AFTER `rwanga.css`. This causes: fonts not loading correctly, style conflicts where BS5 overrides Rwanga design tokens, and Cairo font not applying consistently.
+
+**Fix:** Bundle Bootstrap 5 locally:
+
+1. Download `bootstrap.min.css` and `bootstrap.bundle.min.js` (and `bootstrap.rtl.min.css` for RTL) into `static/vendor/bootstrap/`
+2. In `base.html`, load Bootstrap CSS BEFORE rwanga.css:
+```html
+<!-- Load order matters: BS5 first, then Rwanga overrides -->
+<link rel="stylesheet" href="{% static 'vendor/bootstrap/bootstrap.rtl.min.css' %}">
+<link rel="stylesheet" href="{% static 'css/rwanga.css' %}">
+```
+3. Load Bootstrap JS locally too:
+```html
+<script src="{% static 'vendor/bootstrap/bootstrap.bundle.min.js' %}"></script>
+```
+4. Remove ALL CDN `<link>` and `<script>` tags for Bootstrap.
+
+**Why this matters:** CDN loading is unreliable on the Cloudflare tunnel (slow, sometimes blocked), and load order determines which styles win. Rwanga's design tokens MUST override Bootstrap defaults, so rwanga.css must come second.
+
+**Test:** Disconnect from internet → load any page → Bootstrap styling still works. Cairo font renders on first load, no FOUC (flash of unstyled content).
+
+### R2.3 — Projects page shows self-invitation with placeholder accept/reject
+
+**Symptom:** On the projects list (`/projects/`), there's an invitation bar showing "میوانێکی نادیار — Crew — Super Admin's Studio" with "قبووڵکردن" (Accept) and "ڕەتکردنەوە" (Reject) buttons. The logged-in user IS the studio owner — they shouldn't see an invitation to their own studio. The buttons are placeholders with no action.
+
+**Fix — two parts:**
+
+1. **Filter out self-invitations:** In the projects list view, exclude invitations where the invited user is already a member or owner of the studio:
+```python
+# In the view that builds the invitation queryset:
+invitations = StudioInvitation.objects.filter(
+    email=request.user.email,
+    status='pending'
+).exclude(
+    studio__owner=request.user  # don't show self-invitations
+).exclude(
+    studio__memberships__user=request.user  # don't show if already member
+)
+```
+
+2. **Wire the accept/reject buttons:** If invitations ARE shown to the right user, the buttons must POST:
+```html
+<form method="post" action="{% url 'accounts:accept_invitation' invitation.pk %}">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-primary">قبووڵکردن</button>
+</form>
+<form method="post" action="{% url 'accounts:reject_invitation' invitation.pk %}">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-outline-secondary">ڕەتکردنەوە</button>
+</form>
+```
+
+Create the accept/reject views if they don't exist. Accept should add the user to `Studio.memberships` and delete the invitation. Reject should delete the invitation.
+
+**Test:** As studio owner, `/projects/` should NOT show any self-invitation. Create a test invitation for a different email → that user sees it with working buttons.
+
+### R2.4 — User dropdown not opening (desktop AND mobile)
+
+**Symptom:** The user avatar/name dropdown in the topnav does NOT open on click — not on mobile, not on desktop. This was thought to be mobile-only but affects all viewports.
+
+**Root cause candidates:**
+
+1. **Bootstrap JS not loaded** (covered in R2.2 — if BS5 JS is CDN and fails to load, no dropdowns work)
+2. **Missing `data-bs-toggle="dropdown"`** on the trigger element
+3. **HTMX intercepting the click** — if the dropdown trigger has any `hx-*` attribute, HTMX might be eating the click before Bootstrap processes it
+4. **JavaScript error blocking execution** — check browser console for errors on page load
+
+**Fix — verify this exact markup on the user dropdown trigger:**
+```html
+<a class="nav-link dropdown-toggle" href="#" role="button"
+   data-bs-toggle="dropdown" aria-expanded="false"
+   id="userDropdown">
+    <!-- avatar + name -->
+</a>
+<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+    <li><a class="dropdown-item" href="/accounts/profile/">پرۆفایل</a></li>
+    <li><a class="dropdown-item" href="/accounts/settings/">ڕێکخستنەکان</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><a class="dropdown-item" href="/accounts/logout/">دەرچوون</a></li>
+</ul>
+```
+
+Critical checklist:
+- `data-bs-toggle="dropdown"` MUST be present on the trigger
+- NO `hx-get`, `hx-post`, or `hx-boost` on the trigger or its parent
+- `bootstrap.bundle.min.js` MUST be loaded (not just `bootstrap.min.js` — the bundle includes Popper.js which dropdowns require)
+- The trigger and menu must be siblings inside a `.dropdown` wrapper
+
+**Test:** Click user avatar → dropdown opens with profile/settings/logout links. Click outside → dropdown closes. Test on both desktop (1920px) and mobile (375px).
+
+### R2.5 — Reviews and Community sections need frontend
+
+**These are the "our review" and "community" sections you mentioned.**
+
+**Reviews** — The backend exists (BibleReview, ReviewDecision, InlineComment, ReviewBatch models + full API). But there's no design-kit template and no functional frontend. Create a minimal but real UI:
+
+- `/reviews/` (or `/projects/<pk>/reviews/`) — list of BibleReview records for the current project
+- Each review shows: title, status badge (proposed/locked/rejected), created date, assigned reviewer
+- Click a review → detail view showing ReviewDecision items with approve/reject/comment controls
+- InlineComment panel on the side (or below) showing threaded comments on each decision
+
+**Community** — Same situation. Backend has ReviewSession, CommunityReview, VoteRecord, CommunityNote, CommunityConfig. Create:
+
+- `/community/` (or `/projects/<pk>/community/`) — list of ReviewSession records
+- Each session shows: title, status (draft/open/closed), vote count, date range
+- Click a session → detail view with vote tallies, community notes
+
+Both pages must extend `base.html`, use Rwanga design tokens, and support RTL. They don't need to be elaborate — functional CRUD with the real data is enough.
+
+### R2 Validation
+
+After Round 2, verify:
+- Notification bell opens AND closes without page refresh
+- `/notifications/` renders a full styled page
+- Bootstrap works offline (no CDN dependency)
+- No self-invitations shown on projects page
+- User dropdown opens on desktop and mobile
+- `/reviews/` and `/community/` render real data (or empty states if no records exist)

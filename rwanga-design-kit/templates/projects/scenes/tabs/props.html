@@ -1,4 +1,4 @@
-{% comment %} ════════════════════════════════════════════════════════
+{# ════════════════════════════════════════════════════════
    RWANGA — projects/scenes/tabs/props.html
    Props checklist tab. HTMX fragment.
    Categorised A/B/C, HTMX checkbox toggles.
@@ -7,7 +7,7 @@
      scene    — Scene instance
      project  — Project instance
      props    — QuerySet[Prop] categorised (A/B/C)
-   ════════════════════════════════════════════════════════ {% endcomment %}
+   ════════════════════════════════════════════════════════ #}
 {% load i18n %}
 
 <div style="padding:var(--rw-pad-lg)">
@@ -23,7 +23,7 @@
 
   {% if props %}
 
-  {% comment %} ── Category A — Critical ── {% endcomment %}
+  {# ── Category A — Critical ── #}
   {% with cat_a=props|dictsort:"category"|slice_by_category:"A" %}
   {% if cat_a %}
   <span class="rw-cat-label rw-cat-a">A — {% trans "سەرەکی" %}</span>
@@ -51,7 +51,7 @@
   {% endif %}
   {% endwith %}
 
-  {% comment %} ── Category B — Important ── {% endcomment %}
+  {# ── Category B — Important ── #}
   <span class="rw-cat-label rw-cat-b">B — {% trans "گرنگ" %}</span>
   <div class="rw-checklist" style="border:1px solid var(--rw-border);margin-bottom:var(--rw-pad-md)">
     {% for prop in props %}{% if prop.category == 'B' %}
@@ -72,7 +72,7 @@
     {% for prop in props %}{% if prop.category == 'B' %}{% else %}{% endif %}{% endfor %}
   </div>
 
-  {% comment %} ── Category C — Background ── {% endcomment %}
+  {# ── Category C — Background ── #}
   <span class="rw-cat-label rw-cat-c">C — {% trans "پاشخانە" %}</span>
   <div class="rw-checklist" style="border:1px solid var(--rw-border)">
     {% for prop in props %}{% if prop.category == 'C' %}

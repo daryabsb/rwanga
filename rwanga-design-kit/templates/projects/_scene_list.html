@@ -1,4 +1,4 @@
-{% comment %} ════════════════════════════════════════════════════════
+{# ════════════════════════════════════════════════════════
    RWANGA — projects/_scene_list.html
    HTMX partial — scene list panel content.
    Swapped into #rw-scene-list on load and filter changes.
@@ -7,11 +7,11 @@
      scenes       — QuerySet[Scene]
      active_scene — Scene instance (current)
      group_by     — bool (group by location when True)
-   ════════════════════════════════════════════════════════ {% endcomment %}
+   ════════════════════════════════════════════════════════ #}
 {% load i18n %}
 
 {% if group_by %}
-  {% comment %} ── Grouped by location ── {% endcomment %}
+  {# ── Grouped by location ── #}
   {% regroup scenes by location_name as location_groups %}
   {% for group in location_groups %}
   <div class="rw-scene-grp-label">{{ group.grouper }}</div>
@@ -34,7 +34,7 @@
   {% endfor %}
 
 {% else %}
-  {% comment %} ── Flat list ── {% endcomment %}
+  {# ── Flat list ── #}
   {% for scene in scenes %}
   <a href="{% url 'projects:scene' scene.project_id scene.pk %}"
      style="text-decoration:none;display:block">

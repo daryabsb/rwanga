@@ -1,5 +1,4 @@
-{% extends "base.html" %}
-{% comment %} ════════════════════════════════════════════════════════
+{# ════════════════════════════════════════════════════════
    RWANGA — accounts/team.html
    Studio team management. All crew + reviewers across projects.
 
@@ -7,7 +6,8 @@
      studio       — Studio instance
      members      — QuerySet[ProjectMembership] grouped by project
      invitations  — QuerySet[ProjectMembership] pending (accepted_at=None)
-   ════════════════════════════════════════════════════════ {% endcomment %}
+   ════════════════════════════════════════════════════════ #}
+{% extends "base.html" %}
 {% load static i18n %}
 
 {% block title %}{% trans "تیمی ستودیۆ" %}{% endblock %}
@@ -15,7 +15,7 @@
 {% block content %}
 <div id="rw-content" style="overflow-y:auto;flex:1;padding:var(--rw-pad-lg)">
 
-  {% comment %} ── Header ── {% endcomment %}
+  {# ── Header ── #}
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--rw-pad-lg)">
     <div>
       <h1 style="font-size:22px;font-weight:700;margin-bottom:4px">{% trans "تیمی ستودیۆ" %}</h1>
@@ -29,7 +29,7 @@
     </button>
   </div>
 
-  {% comment %} ── Filter bar ── {% endcomment %}
+  {# ── Filter bar ── #}
   <div class="rw-filter-row" style="margin-bottom:var(--rw-pad-md)">
     <button class="rw-f-btn active"
             hx-get="{% url 'accounts:team' %}?filter=all"
@@ -42,7 +42,7 @@
             hx-target="#rw-team-table" hx-swap="innerHTML">{% trans "پێداچوونەوەکار" %}</button>
   </div>
 
-  {% comment %} ── Members table ── {% endcomment %}
+  {# ── Members table ── #}
   <div id="rw-team-table">
     <div style="background:var(--rw-surface);border:1px solid var(--rw-border)">
       <table style="width:100%;border-collapse:collapse">
@@ -102,7 +102,7 @@
     </div>
   </div>
 
-  {% comment %} ── Pending invitations ── {% endcomment %}
+  {# ── Pending invitations ── #}
   {% if invitations %}
   <div class="rw-section-hdr" style="margin-top:var(--rw-pad-lg)">{% trans "بانگهێشتنامەی چاوەڕوان" %}</div>
   <div style="background:var(--rw-surface);border:1px solid var(--rw-border)">

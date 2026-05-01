@@ -1,4 +1,4 @@
-{% comment %} ════════════════════════════════════════════════════════
+{# ════════════════════════════════════════════════════════
    RWANGA — notifications/panel.html
    HTMX partial — notification dropdown panel.
    Loaded into sidebar when bell icon is clicked.
@@ -6,12 +6,12 @@
    Context:
      notifications — QuerySet[Notification] recent
      unread_count  — int
-   ════════════════════════════════════════════════════════ {% endcomment %}
+   ════════════════════════════════════════════════════════ #}
 {% load i18n %}
 
 <div style="position:fixed;inset-inline-start:var(--rw-rail-w);bottom:80px;width:360px;max-height:480px;background:var(--rw-surface);border:1px solid var(--rw-border);display:flex;flex-direction:column;z-index:200;overflow:hidden">
 
-  {% comment %} ── Header ── {% endcomment %}
+  {# ── Header ── #}
   <div style="padding:var(--rw-pad-sm) var(--rw-pad-md);border-bottom:1px solid var(--rw-border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
     <div style="display:flex;align-items:center;gap:8px">
       <span style="font-size:13px;font-weight:700;color:var(--rw-text)">{% trans "ئاگادارکردنەوەکان" %}</span>
@@ -32,7 +32,7 @@
     </div>
   </div>
 
-  {% comment %} ── Notifications feed ── {% endcomment %}
+  {# ── Notifications feed ── #}
   <div style="flex:1;overflow-y:auto">
     {% if notifications %}
     {% for notif in notifications %}
@@ -41,7 +41,7 @@
        hx-post="{% url 'notifications:mark_read' notif.pk %}"
        hx-swap="none">
 
-      {% comment %} Icon by type {% endcomment %}
+      {# Icon by type #}
       <div style="font-size:20px;flex-shrink:0;padding-top:2px">
         {% if notif.notif_type == 'ai_complete' %}🤖
         {% elif notif.notif_type == 'invite' %}✉
@@ -60,7 +60,7 @@
         </div>
       </div>
 
-      {% comment %} Unread indicator {% endcomment %}
+      {# Unread indicator #}
       {% if not notif.is_read %}
       <div style="width:8px;height:8px;background:var(--rw-shoot);border-radius:50%;flex-shrink:0;margin-top:6px"></div>
       {% endif %}
@@ -75,7 +75,7 @@
     {% endif %}
   </div>
 
-  {% comment %} ── Footer ── {% endcomment %}
+  {# ── Footer ── #}
   <div style="padding:var(--rw-pad-sm) var(--rw-pad-md);border-top:1px solid var(--rw-border);flex-shrink:0;text-align:center">
     <a href="{% url 'notifications:list' %}" style="font-size:12px;color:var(--rw-amber)">
       {% trans "هەموو ئاگادارکردنەوەکان ببینە" %} →

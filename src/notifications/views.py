@@ -15,7 +15,7 @@ class NotificationsPanelView(View):
         except DatabaseError:
             notifications = []
             unread_count = 0
-        return render(request, "notifications/panel.html", {"notifications": notifications, "unread_count": unread_count})
+        return render(request, "notifications/_panel.html", {"notifications": notifications, "unread_count": unread_count})
 
 
 class NotificationsListView(View):
@@ -26,7 +26,11 @@ class NotificationsListView(View):
         except DatabaseError:
             notifications = []
             unread_count = 0
-        return render(request, "notifications/panel.html", {"notifications": notifications, "unread_count": unread_count})
+        return render(
+            request,
+            "notifications/list.html",
+            {"notifications": notifications, "unread_count": unread_count, "active_section": "p"},
+        )
 
 
 class MarkAllReadView(View):
@@ -37,7 +41,7 @@ class MarkAllReadView(View):
             notifications = NotificationService().for_user(user=request.user) if request.user.is_authenticated else []
         except DatabaseError:
             notifications = []
-        return render(request, "notifications/panel.html", {"notifications": notifications, "unread_count": 0})
+        return render(request, "notifications/_panel.html", {"notifications": notifications, "unread_count": 0})
 
 
 class MarkReadView(View):

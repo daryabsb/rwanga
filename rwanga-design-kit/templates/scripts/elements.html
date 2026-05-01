@@ -1,4 +1,4 @@
-{% comment %} ════════════════════════════════════════════════════════
+{# ════════════════════════════════════════════════════════
    RWANGA — scripts/elements.html
    All script elements — browsable, filterable list.
 
@@ -6,7 +6,7 @@
      project        — Project instance
      elements       — dict keyed by type: characters, locations, props, sfx, vfx
      active_section — 'b'
-   ════════════════════════════════════════════════════════ {% endcomment %}
+   ════════════════════════════════════════════════════════ #}
 {% extends "base.html" %}
 {% load static i18n %}
 
@@ -23,7 +23,7 @@
       <h1 style="font-size:20px;font-weight:700">{% trans "ئێلیمێنتەکان" %}</h1>
     </div>
 
-    {% comment %} ── Filter bar ── {% endcomment %}
+    {# ── Filter bar ── #}
     <div class="rw-filter-row" style="margin-bottom:var(--rw-pad-lg)">
       <button class="rw-f-btn active" id="filter-all"
               hx-get="{% url 'scripts:elements' project.pk %}?type=all"
@@ -51,7 +51,7 @@
               onclick="setFilter(this)">{% trans "ئەفێکتی بینراو" %}</button>
     </div>
 
-    {% comment %} ── Elements body ── {% endcomment %}
+    {# ── Elements body ── #}
     <div id="rw-elements-body">
 
       {% if elements.characters %}

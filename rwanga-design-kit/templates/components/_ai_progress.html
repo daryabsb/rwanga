@@ -1,4 +1,4 @@
-{% comment %} ════════════════════════════════════════════════════
+{# ════════════════════════════════════════════════════
    _ai_progress.html
    Real-time AI job status — connected via WebSocket.
    Rendered server-side when a Celery task is queued.
@@ -10,7 +10,7 @@
      job.type — 'breakdown' | 'storyboard' | 'floorplan' | 'schedule'
      job.step — current human-readable step label
      job.progress — 0–100
-   ════════════════════════════════════════════════════ {% endcomment %}
+   ════════════════════════════════════════════════════ #}
 {% load i18n %}
 <div class="rw-ai-progress" data-job-id="{{ job.id }}"
      data-refresh-url="{% url 'ai_engine:job_result' job.id %}"
@@ -35,7 +35,7 @@
 
 </div>
 
-{% comment %} Result placeholder — filled by WebSocket on completion {% endcomment %}
+{# Result placeholder — filled by WebSocket on completion #}
 <div id="rw-ai-result-{{ job.id }}"></div>
 
 <style>

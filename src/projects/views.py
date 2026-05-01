@@ -30,6 +30,8 @@ class ProjectListView(View):
                     is_active=True,
                     accepted_at__isnull=True,
                 )
+                .exclude(project__owner=request.user)
+                .exclude(project__memberships__user=request.user, project__memberships__accepted_at__isnull=False)
                 .select_related("project", "project__studio")
                 .order_by("-created_at")
             )
@@ -196,15 +198,48 @@ class ProjectDashboardView(View):
 class ProjectSettingsView(View):
     def get(self, request, pk):
         project = get_object_or_404(Project, id=pk)
+        members = ProjectMembership.objects.filter(project=project, is_active=True).select_related("user")
         return render(
             request,
-            "stub.html",
+            "projects/settings.html",
+            {
+                "project": project,
+                "members": members,
+                "active_project": project,
+                "active_section": "v",
+            },
+        )
+
+    def post(self, request, pk):
+        project = get_object_or_404(Project, id=pk)
+        if not request.user.is_authenticated:
+            return HttpResponseRedirect(reverse("accounts:login"))
+        if project.owner_id != request.user.id:
+            return HttpResponseRedirect(reverse("projects:settings", args=[project.pk]))
+        project.title = (request.POST.get("title") or project.title).strip() or project.title
+        status = (request.POST.get("status") or project.status).strip()
+        project.status = status or project.status
+        logline = (request.POST.get("logline") or "").strip()
+        if logline:
+            project.synopsis = logline
+        project.save(update_fields=["title", "status", "synopsis", "updated_at"])
+        return HttpResponseRedirect(reverse("projects:settings", args=[project.pk]))
+
+
+class ProjectDeleteView(View):
+    def get(self, request, pk):
+        project = get_object_or_404(Project, id=pk)
+        if request.user.is_authenticated and project.owner_id == request.user.id:
+            project.delete()
+            return HttpResponseRedirect(reverse("projects:list"))
+        return render(
+            request,
+            "projects/settings.html",
             {
                 "project": project,
                 "active_project": project,
-                "stub_name": "Project settings",
-                "icon": "⚙",
-                "subtitle": "Settings panel will be wired to project services.",
+                "members": ProjectMembership.objects.filter(project=project, is_active=True).select_related("user"),
+                "active_section": "v",
             },
         )
 
@@ -264,7 +299,7 @@ class ProjectSceneView(View):
             "active_tab_template": tab_template,
             "icon": "⌛",
             "stub_name": "Scene tab",
-            "sub": "Coming soon",
+            "sub": "No data yet",
             "crumbs": [{"label": project.title, "url": project.get_absolute_url() if hasattr(project, "get_absolute_url") else ""}],
             "active_jobs": [],
         }

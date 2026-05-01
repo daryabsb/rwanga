@@ -54,7 +54,7 @@
         <div class="rw-stat-lbl">{% trans "کەلوپەل" %}</div>
       </div>
       <div class="rw-stat">
-        <div class="rw-stat-val">{{ breakdown.sfx|length|add:breakdown.vfx|length }}</div>
+        <div class="rw-stat-val">{{ breakdown.fx_count|default:"0" }}</div>
         <div class="rw-stat-lbl">{% trans "دەنگ / VFX" %}</div>
       </div>
     </div>

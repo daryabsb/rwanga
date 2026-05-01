@@ -1,4 +1,4 @@
-{% comment %} ════════════════════════════════════════════════════════
+{# ════════════════════════════════════════════════════════
    RWANGA — scripts/breakdown.html
    Script breakdown — AI-extracted elements per scene.
 
@@ -6,7 +6,7 @@
      project        — Project instance
      breakdown      — dict: {characters, locations, props, sfx, vfx, scene_count}
      active_section — 'b'
-   ════════════════════════════════════════════════════════ {% endcomment %}
+   ════════════════════════════════════════════════════════ #}
 {% extends "base.html" %}
 {% load static i18n %}
 
@@ -19,7 +19,7 @@
 
   <div style="padding:var(--rw-pad-lg)">
 
-    {% comment %} ── Header ── {% endcomment %}
+    {# ── Header ── #}
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--rw-pad-lg)">
       <div>
         <h1 style="font-size:20px;font-weight:700;margin-bottom:4px">{% trans "داڕشتنی دەستنووس" %}</h1>
@@ -35,7 +35,7 @@
       </div>
     </div>
 
-    {% comment %} ── Stats ── {% endcomment %}
+    {# ── Stats ── #}
     <div class="rw-stats" style="margin-bottom:var(--rw-pad-lg)">
       <div class="rw-stat">
         <div class="rw-stat-val">{{ breakdown.scene_count|default:"0" }}</div>
@@ -61,7 +61,7 @@
 
     {% if breakdown %}
 
-    {% comment %} ── Characters ── {% endcomment %}
+    {# ── Characters ── #}
     {% if breakdown.characters %}
     <div class="rw-section-hdr">{% trans "کەسایەتییەکان" %}</div>
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1px;background:var(--rw-border);border:1px solid var(--rw-border);margin-bottom:var(--rw-pad-lg)">
@@ -79,7 +79,7 @@
     </div>
     {% endif %}
 
-    {% comment %} ── Locations ── {% endcomment %}
+    {# ── Locations ── #}
     {% if breakdown.locations %}
     <div class="rw-section-hdr">{% trans "شوێنەکان" %}</div>
     <div style="background:var(--rw-surface);border:1px solid var(--rw-border);margin-bottom:var(--rw-pad-lg)">
@@ -97,7 +97,7 @@
     </div>
     {% endif %}
 
-    {% comment %} ── Props ── {% endcomment %}
+    {# ── Props ── #}
     {% if breakdown.props %}
     <div class="rw-section-hdr">{% trans "کەلوپەلەکان" %}</div>
     <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:var(--rw-pad-lg)">
@@ -110,7 +110,7 @@
     </div>
     {% endif %}
 
-    {% comment %} ── SFX ── {% endcomment %}
+    {# ── SFX ── #}
     {% if breakdown.sfx %}
     <div class="rw-section-hdr">{% trans "ئەفێکتی دەنگ" %}</div>
     <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:var(--rw-pad-lg)">
@@ -120,7 +120,7 @@
     </div>
     {% endif %}
 
-    {% comment %} ── VFX ── {% endcomment %}
+    {# ── VFX ── #}
     {% if breakdown.vfx %}
     <div class="rw-section-hdr">{% trans "ئەفێکتی بینراو" %}</div>
     <div style="display:flex;flex-wrap:wrap;gap:8px">

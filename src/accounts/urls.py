@@ -2,6 +2,7 @@ from allauth.account.views import LoginView as AllauthLoginView
 from django.conf import settings as django_settings
 from django.contrib import messages
 from django.contrib.auth import logout
+from django.utils import timezone
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import path
@@ -144,11 +145,31 @@ def cancel_invite(request, pk):
 
 
 def accept_invite(request, pk):
+    if request.method == "POST" and request.user.is_authenticated:
+        membership = get_object_or_404(
+            ProjectMembership.objects.select_related("project"),
+            pk=pk,
+            user=request.user,
+            is_active=True,
+        )
+        membership.accepted_at = timezone.now()
+        membership.save(update_fields=["accepted_at", "updated_at"])
     return redirect("projects:list")
 
 
 def decline_invite(request, pk):
+    if request.method == "POST" and request.user.is_authenticated:
+        membership = get_object_or_404(ProjectMembership, pk=pk, user=request.user, is_active=True)
+        membership.delete()
     return redirect("projects:list")
+
+
+def accept_invitation(request, pk):
+    return accept_invite(request, pk)
+
+
+def reject_invitation(request, pk):
+    return decline_invite(request, pk)
 
 
 def delete_account(request):
@@ -177,5 +198,7 @@ urlpatterns = [
     path("invites/<uuid:pk>/cancel/", cancel_invite, name="cancel_invite"),
     path("invites/<uuid:pk>/accept/", accept_invite, name="accept_invite"),
     path("invites/<uuid:pk>/decline/", decline_invite, name="decline_invite"),
+    path("invitations/<uuid:pk>/accept/", accept_invitation, name="accept_invitation"),
+    path("invitations/<uuid:pk>/reject/", reject_invitation, name="reject_invitation"),
     path("delete-account/", delete_account, name="delete_account"),
 ]

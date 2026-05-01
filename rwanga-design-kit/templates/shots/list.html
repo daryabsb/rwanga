@@ -1,4 +1,4 @@
-{% comment %} ════════════════════════════════════════════════════════
+{# ════════════════════════════════════════════════════════
    RWANGA — shots/list.html
    Project-wide shot list — all scenes, all shots, filterable.
 
@@ -7,7 +7,7 @@
      shots          — QuerySet[Shot] (all scenes)
      filters        — dict: current filter state
      active_section — 'v'
-   ════════════════════════════════════════════════════════ {% endcomment %}
+   ════════════════════════════════════════════════════════ #}
 {% extends "base.html" %}
 {% load static i18n %}
 
@@ -20,7 +20,7 @@
 
   <div style="padding:var(--rw-pad-lg)">
 
-    {% comment %} ── Header ── {% endcomment %}
+    {# ── Header ── #}
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--rw-pad-md)">
       <div>
         <h1 style="font-size:20px;font-weight:700;margin-bottom:4px">{% trans "لیستی لێدانەکان" %}</h1>
@@ -33,7 +33,7 @@
       </div>
     </div>
 
-    {% comment %} ── Filters ── {% endcomment %}
+    {# ── Filters ── #}
     <div style="display:flex;gap:var(--rw-pad-sm);flex-wrap:wrap;align-items:center;margin-bottom:var(--rw-pad-md)">
       <div class="rw-filter-row" style="margin-bottom:0">
         <button class="rw-f-btn {% if not filters.type or filters.type == 'all' %}active{% endif %}"
@@ -50,7 +50,7 @@
                 hx-target="#rw-shot-list" hx-swap="innerHTML">{% trans "داخڵکردن" %}</button>
       </div>
 
-      {% comment %} Scene filter {% endcomment %}
+      {# Scene filter #}
       <select class="rw-form-input" style="width:auto;padding:8px 14px;font-size:12px"
               hx-get="{% url 'shots:list' project.pk %}"
               hx-target="#rw-shot-list" hx-swap="innerHTML"
@@ -65,7 +65,7 @@
       </select>
     </div>
 
-    {% comment %} ── Shot table ── {% endcomment %}
+    {# ── Shot table ── #}
     <div id="rw-shot-list">
       {% if shots %}
       <table class="rw-shot-table">

@@ -1,4 +1,4 @@
-{% comment %} ════════════════════════════════════════════════════════
+{# ════════════════════════════════════════════════════════
    RWANGA — projects/settings.html
    Project metadata, team management, danger zone.
 
@@ -6,7 +6,7 @@
      project   — Project instance
      form      — Project edit form
      members   — QuerySet[ProjectMembership]
-   ════════════════════════════════════════════════════════ {% endcomment %}
+   ════════════════════════════════════════════════════════ #}
 {% extends "base.html" %}
 {% load static i18n %}
 
@@ -19,7 +19,7 @@
 
   <div style="padding:var(--rw-pad-lg)">
 
-    {% comment %} ── Project info ── {% endcomment %}
+    {# ── Project info ── #}
     <div class="rw-section-hdr">{% trans "زانیاری پڕۆژە" %}</div>
     <form method="post" action="{% url 'projects:settings' project.pk %}" enctype="multipart/form-data">
       {% csrf_token %}
@@ -84,7 +84,7 @@
       </div>
     </form>
 
-    {% comment %} ── Team ── {% endcomment %}
+    {# ── Team ── #}
     <div class="rw-section-hdr">{% trans "تیمی پڕۆژە" %}</div>
     <div style="background:var(--rw-surface);border:1px solid var(--rw-border);margin-bottom:var(--rw-pad-lg)">
       {% for m in members %}
@@ -112,7 +112,7 @@
       </div>
     </div>
 
-    {% comment %} ── Danger zone ── {% endcomment %}
+    {# ── Danger zone ── #}
     <div class="rw-section-hdr" style="color:var(--rw-shoot)">{% trans "ناوچەی مەترسیدار" %}</div>
     <div class="rw-warn">
       <span class="rw-warn-icon">⚠</span>

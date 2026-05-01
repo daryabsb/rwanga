@@ -1,11 +1,11 @@
-{% extends "base.html" %}
-{% comment %} ════════════════════════════════════════════════════════
+{# ════════════════════════════════════════════════════════
    RWANGA — progress/agent_reports.html
    Agent session reports.
 
    Context:
      reports — QuerySet[AgentReport]
-   ════════════════════════════════════════════════════════ {% endcomment %}
+   ════════════════════════════════════════════════════════ #}
+{% extends "base.html" %}
 {% load static i18n %}
 
 {% block title %}{% trans "ڕاپۆرتی ئەیجەنت" %} — Progress{% endblock %}
@@ -23,7 +23,7 @@
     <details style="background:var(--rw-surface);border:1px solid var(--rw-border)">
       <summary style="display:flex;align-items:center;gap:12px;padding:16px var(--rw-pad-md);cursor:pointer;list-style:none">
 
-        {% comment %} Report type indicator {% endcomment %}
+        {# Report type indicator #}
         <div style="width:8px;height:8px;border-radius:50%;flex-shrink:0;background:{% if report.report_type == 'phase_completion' %}var(--rw-vis){% elif report.report_type == 'blocker' %}var(--rw-shoot){% else %}var(--rw-amber){% endif %}"></div>
 
         <div style="flex:1;min-width:0">

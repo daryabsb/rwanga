@@ -1,5 +1,4 @@
-{% extends "base.html" %}
-{% comment %} ════════════════════════════════════════════════════════
+{# ════════════════════════════════════════════════════════
    RWANGA — progress/dashboard.html
    Progress tracking dashboard. Darya's monitoring page.
 
@@ -8,7 +7,8 @@
      recent_updates  — QuerySet[ProgressUpdate] last 10
      current_phase   — string e.g. "P1"
      open_gaps       — QuerySet[GapBlocker] status=open
-   ════════════════════════════════════════════════════════ {% endcomment %}
+   ════════════════════════════════════════════════════════ #}
+{% extends "base.html" %}
 {% load static i18n %}
 
 {% block title %}{% trans "پرۆگرەس" %}{% endblock %}
@@ -16,7 +16,7 @@
 {% block content %}
 <div id="rw-content" style="overflow-y:auto;flex:1;padding:var(--rw-pad-lg)">
 
-  {% comment %} ── Header ── {% endcomment %}
+  {# ── Header ── #}
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--rw-pad-lg)">
     <div>
       <h1 style="font-size:22px;font-weight:700;margin-bottom:4px">{% trans "پرۆگرەسی پڕۆژە" %}</h1>
@@ -31,7 +31,7 @@
     </div>
   </div>
 
-  {% comment %} ── Task stats ── {% endcomment %}
+  {# ── Task stats ── #}
   <div class="rw-stats" style="margin-bottom:var(--rw-pad-lg)">
     <div class="rw-stat">
       <div class="rw-stat-val" style="color:var(--rw-text-2)">{{ tasks_summary.pending|default:"0" }}</div>
@@ -51,7 +51,7 @@
     </div>
   </div>
 
-  {% comment %} ── Open gaps / blockers ── {% endcomment %}
+  {# ── Open gaps / blockers ── #}
   {% if open_gaps %}
   <div class="rw-section-hdr" style="color:var(--rw-shoot)">
     {% trans "گاپ و بلۆکەرەکانی کراوە" %} ({{ open_gaps.count }})
@@ -83,7 +83,7 @@
   {% endfor %}
   {% endif %}
 
-  {% comment %} ── Recent updates ── {% endcomment %}
+  {# ── Recent updates ── #}
   <div class="rw-section-hdr" style="margin-top:var(--rw-pad-md)">{% trans "نوێترین نوێکاریەکان" %}</div>
   <div style="background:var(--rw-surface);border:1px solid var(--rw-border)">
     {% for update in recent_updates %}
@@ -116,7 +116,7 @@
     {% endfor %}
   </div>
 
-  {% comment %} ── Quick links ── {% endcomment %}
+  {# ── Quick links ── #}
   <div class="rw-section-hdr" style="margin-top:var(--rw-pad-lg)">{% trans "بەستنەرەکانی خێرا" %}</div>
   <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1px;background:var(--rw-border);border:1px solid var(--rw-border)">
     {% for item in "tasks,updates,gaps,decisions,agent_reports,changelog,diagrams,docs"|split:"," %}

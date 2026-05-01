@@ -1,4 +1,4 @@
-{% comment %} ════════════════════════════════════════════════════════
+{# ════════════════════════════════════════════════════════
    RWANGA — projects/scenes/tabs/overview.html
    Scene overview tab — default tab. HTMX fragment.
 
@@ -9,12 +9,12 @@
      setup_count  — int
      screen_time  — string e.g. "2:30"
      characters   — QuerySet[Character] in this scene
-   ════════════════════════════════════════════════════════ {% endcomment %}
+   ════════════════════════════════════════════════════════ #}
 {% load i18n %}
 
 <div style="padding:var(--rw-pad-lg)">
 
-  {% comment %} ── Stats ── {% endcomment %}
+  {# ── Stats ── #}
   <div class="rw-stats" style="margin-bottom:var(--rw-pad-lg)">
     <div class="rw-stat">
       <div class="rw-stat-val">{{ shot_count }}</div>
@@ -34,7 +34,7 @@
     </div>
   </div>
 
-  {% comment %} ── Scene info ── {% endcomment %}
+  {# ── Scene info ── #}
   <div class="rw-grid-2" style="margin-bottom:var(--rw-pad-lg)">
     <div class="rw-card" style="margin-bottom:0">
       <div class="rw-card-title">{% trans "شوێن" %}</div>
@@ -63,7 +63,7 @@
     </div>
   </div>
 
-  {% comment %} ── Description ── {% endcomment %}
+  {# ── Description ── #}
   {% if scene.description %}
   <div class="rw-card">
     <div class="rw-card-title">{% trans "وەسف" %}</div>
@@ -71,7 +71,7 @@
   </div>
   {% endif %}
 
-  {% comment %} ── Script text ── {% endcomment %}
+  {# ── Script text ── #}
   {% if scene.script_text %}
   <div class="rw-card">
     <div class="rw-card-title">{% trans "دەستنووس" %}</div>
@@ -79,7 +79,7 @@
   </div>
   {% endif %}
 
-  {% comment %} ── Quick actions ── {% endcomment %}
+  {# ── Quick actions ── #}
   <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:var(--rw-pad-sm)">
     <button class="rw-btn rw-btn-ghost"
             hx-get="{% url 'projects:scene_tab' project.pk scene.pk 'shots' %}"

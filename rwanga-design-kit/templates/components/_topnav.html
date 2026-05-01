@@ -1,13 +1,13 @@
-{% comment %} ════════════════════════════════════════════════════════
+{# ════════════════════════════════════════════════════════
    RWANGA — components/_topnav.html
    Context: active_project, active_section, request.user
    Sections: s=script, b=breakdown, v=visualize, p=plan, sh=shoot
-   ════════════════════════════════════════════════════════ {% endcomment %}
+   ════════════════════════════════════════════════════════ #}
 {% load i18n %}
 <nav class="rw-topnav" role="navigation" aria-label="{% trans 'ناڤیگەیشنی پڕۆژە' %}">
 
   {% if active_project %}
-  {% comment %} Project identity {% endcomment %}
+  {# Project identity #}
   <a href="{% url 'projects:dashboard' active_project.pk %}" class="rw-topnav-project">
     <div class="rw-project-thumb"
          style="{% if active_project.cover %}background-image:url({{ active_project.cover.url }});background-size:cover{% endif %}">
@@ -15,7 +15,7 @@
     <span class="rw-project-name">{{ active_project.title }}</span>
   </a>
 
-  {% comment %} Section tabs {% endcomment %}
+  {# Section tabs #}
   <div class="rw-section-tabs" role="tablist">
     <button class="rw-sec-tab {% if active_section == 's' %}active{% endif %}"
             data-s="s"
@@ -59,7 +59,7 @@
 
   <div class="rw-topnav-end">
 
-    {% comment %} AI action button — context-aware, shown when on a scene view {% endcomment %}
+    {# AI action button — context-aware, shown when on a scene view #}
     {% if active_scene %}
     <button class="rw-btn rw-btn-ghost rw-btn-ai"
             hx-post="{% url 'ai_engine:generate_scene' active_scene.pk %}"
@@ -70,7 +70,7 @@
     </button>
     {% endif %}
 
-    {% comment %} Export scene viewer — only on scene pages {% endcomment %}
+    {# Export scene viewer — only on scene pages #}
     {% if active_scene %}
     <a href="{% url 'exports:scene_viewer' active_scene.pk %}"
        class="rw-btn rw-btn-amber">
@@ -80,12 +80,12 @@
 
     <div style="width:1px;height:24px;background:var(--rw-border);flex-shrink:0"></div>
 
-    {% comment %} Studio name {% endcomment %}
+    {# Studio name #}
     <span style="font-size:12px;color:var(--rw-text-2);white-space:nowrap">
       {{ request.user.studio.name|default:request.user.get_full_name }}
     </span>
 
-    {% comment %} User avatar + dropdown {% endcomment %}
+    {# User avatar + dropdown #}
     <div class="dropdown">
       <button class="rw-avatar" data-bs-toggle="dropdown" aria-expanded="false">
         {{ request.user.first_name|first|upper }}{{ request.user.last_name|first|upper }}
@@ -98,7 +98,7 @@
       </ul>
     </div>
 
-    {% comment %} Theme toggle (topnav version) {% endcomment %}
+    {# Theme toggle (topnav version) #}
     <button class="rw-btn-icon rw-btn js-theme-toggle"
             onclick="RW.themeToggle()"
             title="{% trans 'گۆڕینی شێوازی ڕووکار' %}">☀</button>

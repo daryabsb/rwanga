@@ -1,12 +1,12 @@
-{% extends "base.html" %}
-{% comment %} ════════════════════════════════════════════════════════
+{# ════════════════════════════════════════════════════════
    RWANGA — accounts/contacts.html
    Project-scoped crew contact directory.
 
    Context:
      project   — Project instance
      members   — QuerySet[ProjectMembership] for this project
-   ════════════════════════════════════════════════════════ {% endcomment %}
+   ════════════════════════════════════════════════════════ #}
+{% extends "base.html" %}
 {% load static i18n %}
 
 {% block title %}{% trans "پەیوەندییەکان" %} — {{ project.title }}{% endblock %}
@@ -18,7 +18,7 @@
 
   <div style="padding:var(--rw-pad-lg)">
 
-    {% comment %} ── Header ── {% endcomment %}
+    {# ── Header ── #}
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--rw-pad-lg)">
       <div>
         <h1 style="font-size:20px;font-weight:700;margin-bottom:4px">{% trans "تیمی پڕۆژە" %}</h1>
@@ -31,7 +31,7 @@
       </button>
     </div>
 
-    {% comment %} ── Group by department ── {% endcomment %}
+    {# ── Group by department ── #}
     {% regroup members by department_role as dept_groups %}
     {% for group in dept_groups %}
     <div class="rw-section-hdr">{{ group.grouper|default:_("بێ بەش") }}</div>

@@ -1,9 +1,27 @@
 {% extends "base.html" %}
+{% load i18n %}
 {% block content %}
-<div class="rw-card">
-  <h2>Community Sessions</h2>
-  <ul>
-    {% for session in sessions %}<li>{{ session.title }}</li>{% empty %}<li>No sessions</li>{% endfor %}
-  </ul>
+<div id="rw-content" style="overflow-y:auto;flex:1;padding:var(--rw-pad-lg)">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--rw-pad-md)">
+    <h1 style="font-size:20px;font-weight:700;margin:0">{% trans "Community Sessions" %}</h1>
+  </div>
+  {% if sessions %}
+  <div style="background:var(--rw-surface);border:1px solid var(--rw-border)">
+    {% for session in sessions %}
+    <a href="{% url 'community:detail' session.pk %}" style="display:flex;justify-content:space-between;gap:12px;padding:14px 16px;border-bottom:1px solid var(--rw-border-2);text-decoration:none;color:inherit">
+      <div>
+        <div style="font-weight:700">{{ session.title }}</div>
+        <div style="font-size:12px;color:var(--rw-text-2)">{{ session.created_at|date:"Y-m-d" }}</div>
+      </div>
+      <div style="text-align:end">
+        <span class="rw-badge {% if session.status == 'open' %}rw-badge-g{% elif session.status == 'closed' %}rw-badge-d{% else %}rw-badge-a{% endif %}">{{ session.status }}</span>
+        <div style="font-size:11px;color:var(--rw-text-3);margin-top:4px">{{ session.contents.count }} items</div>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+  {% else %}
+  {% include "components/_empty_state.html" with icon="🧩" title=_("No sessions") sub=_("Create sessions in API/admin then review here.") %}
+  {% endif %}
 </div>
 {% endblock %}

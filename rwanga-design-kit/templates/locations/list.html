@@ -1,12 +1,12 @@
-{% extends "base.html" %}
-{% comment %} ════════════════════════════════════════════════════════
+{# ════════════════════════════════════════════════════════
    RWANGA — locations/list.html
    Location management with Leaflet.js map.
    Global — not project-scoped.
 
    Context:
      locations  — QuerySet[Location]
-   ════════════════════════════════════════════════════════ {% endcomment %}
+   ════════════════════════════════════════════════════════ #}
+{% extends "base.html" %}
 {% load static i18n %}
 
 {% block title %}{% trans "شوێنەکان" %}{% endblock %}
@@ -19,10 +19,10 @@
 {% block content %}
 <div id="rw-content" style="display:flex;flex:1;overflow:hidden">
 
-  {% comment %} ── Map panel (top / left depending on layout) ── {% endcomment %}
+  {# ── Map panel (top / left depending on layout) ── #}
   <div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
 
-    {% comment %} Toolbar {% endcomment %}
+    {# Toolbar #}
     <div style="height:56px;background:var(--rw-surface);border-bottom:1px solid var(--rw-border);display:flex;align-items:center;padding:0 var(--rw-pad-md);gap:12px;flex-shrink:0">
       <h1 style="font-size:18px;font-weight:700;flex:1">{% trans "شوێنەکان" %}</h1>
       <button class="rw-btn rw-btn-primary"
@@ -32,12 +32,12 @@
       </button>
     </div>
 
-    {% comment %} Map {% endcomment %}
+    {# Map #}
     <div id="rw-map" style="flex:1;min-height:300px;background:var(--rw-surface-2)"></div>
 
   </div>
 
-  {% comment %} ── Locations list panel ── {% endcomment %}
+  {# ── Locations list panel ── #}
   <aside style="width:320px;background:var(--rw-surface);border-inline-start:1px solid var(--rw-border);display:flex;flex-direction:column;flex-shrink:0;overflow:hidden">
     <div style="padding:var(--rw-pad-sm) var(--rw-pad-md);border-bottom:1px solid var(--rw-border)">
       <input type="search"

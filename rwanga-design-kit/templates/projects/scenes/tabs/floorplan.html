@@ -1,4 +1,4 @@
-{% comment %} ════════════════════════════════════════════════════════
+{# ════════════════════════════════════════════════════════
    RWANGA — projects/scenes/tabs/floorplan.html
    Floor plan editor tab. HTMX fragment.
    SVG canvas rendered client-side from JSON via floorplan-editor.js.
@@ -7,14 +7,14 @@
      scene      — Scene instance
      project    — Project instance
      floorplan  — FloorPlan instance or None
-   ════════════════════════════════════════════════════════ {% endcomment %}
+   ════════════════════════════════════════════════════════ #}
 {% load static i18n %}
 
 <div style="padding:var(--rw-pad-lg)">
 
   {% if floorplan %}
 
-  {% comment %} ── Toolbar ── {% endcomment %}
+  {# ── Toolbar ── #}
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--rw-pad-sm)">
     <div class="rw-fp-controls">
       <button class="rw-fp-btn active" id="fp-tool-select" onclick="FP.setTool('select',this)">{% trans "هەڵبژاردن" %}</button>
@@ -38,7 +38,7 @@
     </div>
   </div>
 
-  {% comment %} ── Canvas ── {% endcomment %}
+  {# ── Canvas ── #}
   <div class="rw-fp-wrap" style="position:relative">
     <svg id="rw-fp-canvas"
          data-floor-plan-id="{{ floorplan.pk }}"
@@ -50,17 +50,17 @@
          viewBox="0 0 800 560"
          style="width:100%;height:auto;display:block;cursor:crosshair"
          aria-label="{% trans 'نەخشەی ژووری دیمەن' %}">
-      {% comment %} Rendered by floorplan-editor.js {% endcomment %}
+      {# Rendered by floorplan-editor.js #}
     </svg>
   </div>
 
-  {% comment %} ── Properties panel ── {% endcomment %}
+  {# ── Properties panel ── #}
   <div id="rw-fp-props" style="display:none;margin-top:var(--rw-pad-sm);background:var(--rw-surface);border:1px solid var(--rw-border);padding:var(--rw-pad-md)">
     <div class="rw-card-title">{% trans "تایبەتمەندییەکان" %}</div>
     <div id="rw-fp-props-content"></div>
   </div>
 
-  {% comment %} ── Room dimensions ── {% endcomment %}
+  {# ── Room dimensions ── #}
   <div style="margin-top:var(--rw-pad-sm);display:flex;gap:var(--rw-pad-md);align-items:center">
     <div>
       <label class="rw-form-label" for="fp-room-w">{% trans "پانی ژوور (م)" %}</label>
@@ -80,7 +80,7 @@
   </div>
 
   {% else %}
-  {% comment %} ── Empty state ── {% endcomment %}
+  {# ── Empty state ── #}
   <div class="rw-empty">
     <div class="rw-empty-icon">⌂</div>
     <div class="rw-empty-title">{% trans "هێشتا نەخشەی ژوور نییە" %}</div>

@@ -1,4 +1,4 @@
-{% comment %} ════════════════════════════════════════════════════════
+{# ════════════════════════════════════════════════════════
    RWANGA — scheduling/call_sheets.html
    Call sheet list — view, download PDF, send via WhatsApp.
 
@@ -6,7 +6,7 @@
      project        — Project instance
      call_sheets    — QuerySet[CallSheet]
      active_section — 'sh'
-   ════════════════════════════════════════════════════════ {% endcomment %}
+   ════════════════════════════════════════════════════════ #}
 {% extends "base.html" %}
 {% load static i18n %}
 
@@ -36,13 +36,13 @@
       {% for cs in call_sheets %}
       <div style="display:flex;align-items:center;gap:16px;padding:18px var(--rw-pad-md);border-bottom:1px solid var(--rw-border-2)">
 
-        {% comment %} Day indicator {% endcomment %}
+        {# Day indicator #}
         <div style="width:56px;height:56px;flex-shrink:0;background:{% if cs.shoot_day.day_number <= 3 %}var(--rw-script){% else %}var(--rw-break){% endif %};display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px">
           <div style="font-size:18px;font-weight:700;color:#fff;font-family:var(--rw-font-en)">{{ cs.shoot_day.day_number }}</div>
           <div style="font-size:8px;font-weight:700;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:.5px">{% trans "ڕۆژ" %}</div>
         </div>
 
-        {% comment %} Details {% endcomment %}
+        {# Details #}
         <div style="flex:1;min-width:0">
           <div style="font-size:14px;font-weight:700;color:var(--rw-text);margin-bottom:4px">
             {% trans "ئایننامەی ڕۆژی" %} {{ cs.shoot_day.day_number }}
@@ -67,7 +67,7 @@
           {% endif %}
         </div>
 
-        {% comment %} Actions {% endcomment %}
+        {# Actions #}
         <div style="display:flex;gap:8px;flex-shrink:0">
           {% if cs.pdf %}
           <a href="{{ cs.pdf.url }}" target="_blank" class="rw-btn rw-btn-ghost" style="padding:7px 14px;font-size:12px">

@@ -1,13 +1,4 @@
 {% extends "base.html" %}
-{% comment %} ════════════════════════════════════════════════════════
-   RWANGA — projects/settings.html
-   Project metadata, team management, danger zone.
-
-   Context:
-     project   — Project instance
-     form      — Project edit form
-     members   — QuerySet[ProjectMembership]
-   ════════════════════════════════════════════════════════ {% endcomment %}
 {% load static i18n %}
 
 {% block title %}{% trans "ڕێکخستنەکان" %} — {{ project.title }}{% endblock %}
@@ -131,3 +122,4 @@
 
 <div id="rw-modal-container"></div>
 {% endblock %}
+

@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Review Detail" %}{% endblock %}
+{% block content %}
+<div id="rw-content" style="overflow-y:auto;flex:1;padding:var(--rw-pad-lg)">
+  <h1 style="font-size:20px;font-weight:700;margin-bottom:var(--rw-pad-md)">{{ review.project.title }} v{{ review.version }}</h1>
+  {% if decisions %}
+  <div style="display:flex;flex-direction:column;gap:12px">
+    {% for decision in decisions %}
+    <div class="rw-card" style="margin:0">
+      <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start">
+        <div>
+          <div style="font-weight:700">{{ decision.topic }}</div>
+          <div style="font-size:12px;color:var(--rw-text-2)">{{ decision.decision_text }}</div>
+        </div>
+        <span class="rw-badge {% if decision.status == 'proposed' %}rw-badge-a{% elif decision.status == 'locked' %}rw-badge-g{% else %}rw-badge-d{% endif %}">{{ decision.get_status_display }}</span>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <form method="post" action="{% url 'reviews:decision_action' decision.pk 'approve' %}">
+          {% csrf_token %}
+          <button class="rw-btn rw-btn-primary" type="submit">Approve</button>
+        </form>
+        <form method="post" action="{% url 'reviews:decision_action' decision.pk 'reject' %}">
+          {% csrf_token %}
+          <button class="rw-btn rw-btn-ghost" type="submit">Reject</button>
+        </form>
+      </div>
+      <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--rw-border)">
+        <div style="font-size:12px;font-weight:700;margin-bottom:8px">Comments</div>
+        {% for item in decision.inline_comments %}
+        <div style="font-size:12px;margin-bottom:6px">{{ item.author.get_full_name|default:item.author.email }}: {{ item.body }}</div>
+        {% endfor %}
+        <form method="post" action="{% url 'reviews:decision_comment' decision.pk %}">
+          {% csrf_token %}
+          <textarea name="body" class="rw-form-input" rows="2" placeholder="Add comment"></textarea>
+          <button class="rw-btn rw-btn-ghost" type="submit" style="margin-top:8px">Reply</button>
+        </form>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  {% include "components/_empty_state.html" with icon="💬" title=_("No decisions yet.") sub=_("Add review decisions in API/admin.") %}
+  {% endif %}
+</div>
+{% endblock %}
