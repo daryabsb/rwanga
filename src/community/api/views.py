@@ -52,9 +52,12 @@ class CommunitySessionByProjectAPIView(APIView):
         return Response(ReviewSessionSerializer(sessions, many=True).data)
 
     def post(self, request, project_id):
-        serializer = ReviewSessionSerializer(data=request.data)
+        payload = request.data.copy()
+        payload["project"] = str(project_id)
+        payload["created_by"] = request.user.id
+        serializer = ReviewSessionSerializer(data=payload)
         serializer.is_valid(raise_exception=True)
-        serializer.save(project_id=project_id, created_by=request.user)
+        serializer.save()
         return Response(serializer.data, status=201)
 
 
@@ -63,7 +66,14 @@ class CommunitySessionDetailByProjectAPIView(APIView):
 
     def get(self, request, project_id, id):
         session = get_object_or_404(ReviewSession, project_id=project_id, id=id)
-        return Response(ReviewSessionSerializer(session).data)
+        payload = ReviewSessionSerializer(session).data
+        payload["content"] = SessionContentSerializer(session.contents.order_by("order", "created_at"), many=True).data
+        payload["participants"] = ReviewSessionParticipantSerializer(session.participants.select_related("user"), many=True).data
+        payload["comments"] = SessionCommentSerializer(
+            SessionComment.objects.filter(session_content__session=session).select_related("author", "session_content"),
+            many=True,
+        ).data
+        return Response(payload)
 
     def patch(self, request, project_id, id):
         session = get_object_or_404(ReviewSession, project_id=project_id, id=id)
@@ -79,7 +89,12 @@ class CommunityInviteAPIView(APIView):
     def post(self, request, id):
         session = get_object_or_404(ReviewSession, id=id)
         user_id = request.data.get("user_id")
-        user = request.user.__class__.objects.filter(id=user_id).first()
+        email = (request.data.get("email") or "").strip()
+        user = None
+        if user_id:
+            user = request.user.__class__.objects.filter(id=user_id).first()
+        elif email:
+            user = request.user.__class__.objects.filter(email=email).first()
         if user:
             participant = CommunityService.invite_participant(session=session, user=user, invited_by=request.user)
             return Response(ReviewSessionParticipantSerializer(participant).data, status=201)
@@ -94,9 +109,11 @@ class CommunitySessionCommentsAPIView(APIView):
         return Response(SessionCommentSerializer(comments, many=True).data)
 
     def post(self, request, id):
+        session = get_object_or_404(ReviewSession, id=id)
         serializer = SessionCommentSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.save(author=request.user)
+        content = get_object_or_404(SessionContent, id=serializer.validated_data["session_content"].id, session=session)
+        serializer.save(author=request.user, session_content=content)
         return Response(serializer.data, status=201)
 
 
@@ -111,3 +128,14 @@ class CommunityCommentReactAPIView(APIView):
             defaults={"reaction_type": request.data.get("reaction_type", "agree")},
         )
         return Response(SessionReactionSerializer(reaction).data, status=201)
+
+
+class CommunitySessionContentAPIView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, id):
+        session = get_object_or_404(ReviewSession, id=id)
+        serializer = SessionContentSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(session=session)
+        return Response(serializer.data, status=201)

@@ -9,6 +9,7 @@ from src.reviews.api.views import (
     ReviewDecisionByReviewAPIView,
     ReviewDecisionDetailByReviewAPIView,
     ReviewDecisionViewSet,
+    SceneEvaluationByReviewAPIView,
     SceneEvaluationViewSet,
 )
 
@@ -23,5 +24,6 @@ urlpatterns = [
     path("bible/<uuid:project_id>/<uuid:id>/", BibleReviewDetailByProjectAPIView.as_view(), name="bible-detail-by-project"),
     path("decisions/<uuid:review_id>/", ReviewDecisionByReviewAPIView.as_view(), name="decisions-by-review"),
     path("decisions/<uuid:review_id>/<uuid:id>/", ReviewDecisionDetailByReviewAPIView.as_view(), name="decision-detail-by-review"),
+    path("evaluations/<uuid:review_id>/", SceneEvaluationByReviewAPIView.as_view(), name="evaluations-by-review"),
     path("", include(router.urls)),
 ]
