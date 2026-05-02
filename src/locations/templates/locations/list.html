@@ -48,35 +48,7 @@
              hx-trigger="input changed delay:300ms" name="q">
     </div>
     <div id="rw-location-list" style="flex:1;overflow-y:auto">
-      {% if locations %}
-      {% for loc in locations %}
-      <div class="rw-scene-item" id="loc-card-{{ loc.pk }}"
-           onclick="RW.focusLocation({{ loc.pk }}, {{ loc.latitude|default:'null' }}, {{ loc.longitude|default:'null' }})">
-        <div style="font-size:20px;flex-shrink:0">📍</div>
-        <div style="flex:1;min-width:0">
-          <div style="font-size:13px;font-weight:700;color:var(--rw-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ loc.name }}</div>
-          {% if loc.address %}
-          <div style="font-size:11px;color:var(--rw-text-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ loc.address }}</div>
-          {% endif %}
-          {% if loc.projects_count %}
-          <div style="font-size:10px;color:var(--rw-amber);margin-top:2px">
-            {{ loc.projects_count }} {% trans "پڕۆژە" %}
-          </div>
-          {% endif %}
-        </div>
-        <button class="rw-btn rw-btn-ghost" style="padding:4px 10px;font-size:11px;flex-shrink:0"
-                onclick="event.stopPropagation()"
-                hx-get="{% url 'locations:edit_modal' loc.pk %}"
-                hx-target="#rw-modal-container" hx-swap="innerHTML">✎</button>
-      </div>
-      {% endfor %}
-      {% else %}
-      <div class="rw-empty" style="padding:var(--rw-pad-lg)">
-        <div class="rw-empty-icon">📍</div>
-        <div class="rw-empty-title" style="font-size:14px">{% trans "شوێنێک نییە" %}</div>
-        <div class="rw-empty-sub" style="font-size:12px">{% trans "شوێنی یەکەم زیاد بکە" %}</div>
-      </div>
-      {% endif %}
+      {% include "locations/_location_list.html" with locations=locations %}
     </div>
   </aside>
 

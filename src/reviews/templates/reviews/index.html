@@ -5,6 +5,10 @@
 <div id="rw-content" style="overflow-y:auto;flex:1;padding:var(--rw-pad-lg)">
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--rw-pad-md)">
     <h1 style="font-size:20px;font-weight:700;margin:0">{% trans "Reviews" %}</h1>
+    <form method="post" action="{% url 'reviews:create' %}">
+      {% csrf_token %}
+      <button class="rw-btn rw-btn-primary" type="submit">{% trans "New Review" %}</button>
+    </form>
   </div>
   {% if reviews %}
   <div style="background:var(--rw-surface);border:1px solid var(--rw-border)">
@@ -22,7 +26,7 @@
     {% endfor %}
   </div>
   {% else %}
-  {% include "components/_empty_state.html" with icon="🗂" title=_("No reviews yet.") sub=_("Create a review from API or admin, then it appears here.") %}
+  {% include "components/_empty_state.html" with icon="🗂" title=_("هیچ پێداچوونەوەیەک نییە") sub=_("پێداچوونەوەی نوێ دروست بکە") %}
   {% endif %}
 </div>
 {% endblock %}

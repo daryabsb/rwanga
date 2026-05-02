@@ -4,6 +4,28 @@
 {% block content %}
 <div id="rw-content" style="overflow-y:auto;flex:1;padding:var(--rw-pad-lg)">
   <h1 style="font-size:20px;font-weight:700;margin-bottom:var(--rw-pad-md)">{{ review.project.title }} v{{ review.version }}</h1>
+  <div class="rw-card" style="margin:0 0 var(--rw-pad-md) 0">
+    <form method="post" action="{% url 'reviews:decision_create' review.pk %}">
+      {% csrf_token %}
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        {{ decision_form.scene }}
+        {{ decision_form.topic }}
+      </div>
+      <div style="margin-top:8px">{{ decision_form.decision_text }}</div>
+      <button class="rw-btn rw-btn-primary" style="margin-top:8px" type="submit">{% trans "Add Decision" %}</button>
+    </form>
+    <form method="post" action="{% url 'reviews:evaluation_create' review.pk %}" style="margin-top:12px;padding-top:12px;border-top:1px solid var(--rw-border)">
+      {% csrf_token %}
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        {{ evaluation_form.scene }}
+        {{ evaluation_form.tension_score }}
+      </div>
+      <div style="margin-top:8px">{{ evaluation_form.analysis }}</div>
+      <div style="margin-top:8px">{{ evaluation_form.notes }}</div>
+      <div style="margin-top:8px">{{ evaluation_form.recommendations }}</div>
+      <button class="rw-btn rw-btn-ghost" style="margin-top:8px" type="submit">{% trans "Add Scene Evaluation" %}</button>
+    </form>
+  </div>
   {% if decisions %}
   <div style="display:flex;flex-direction:column;gap:12px">
     {% for decision in decisions %}
@@ -15,7 +37,9 @@
         </div>
         <span class="rw-badge {% if decision.status == 'proposed' %}rw-badge-a{% elif decision.status == 'locked' %}rw-badge-g{% else %}rw-badge-d{% endif %}">{{ decision.get_status_display }}</span>
       </div>
+      {% if decision.scene %}<div style="font-size:12px;color:var(--rw-text-3);margin-top:4px">Scene {{ decision.scene.number }}</div>{% endif %}
       <div style="display:flex;gap:8px;margin-top:8px">
+        {% if decision.status == 'proposed' %}
         <form method="post" action="{% url 'reviews:decision_action' decision.pk 'approve' %}">
           {% csrf_token %}
           <button class="rw-btn rw-btn-primary" type="submit">Approve</button>
@@ -24,6 +48,7 @@
           {% csrf_token %}
           <button class="rw-btn rw-btn-ghost" type="submit">Reject</button>
         </form>
+        {% endif %}
       </div>
       <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--rw-border)">
         <div style="font-size:12px;font-weight:700;margin-bottom:8px">Comments</div>
@@ -42,5 +67,16 @@
   {% else %}
   {% include "components/_empty_state.html" with icon="💬" title=_("No decisions yet.") sub=_("Add review decisions in API/admin.") %}
   {% endif %}
+  <div class="rw-card" style="margin-top:12px">
+    <div style="font-weight:700;margin-bottom:8px">{% trans "Scene Evaluations" %}</div>
+    {% for ev in evaluations %}
+    <div style="padding:8px 0;border-top:1px solid var(--rw-border)">
+      <div style="font-size:13px;font-weight:600">Scene {{ ev.scene.number }} · {{ ev.tension_score }}</div>
+      <div style="font-size:12px;color:var(--rw-text-2)">{{ ev.analysis }}</div>
+    </div>
+    {% empty %}
+    <div style="font-size:12px;color:var(--rw-text-2)">{% trans "No evaluations yet." %}</div>
+    {% endfor %}
+  </div>
 </div>
 {% endblock %}

@@ -2,6 +2,7 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, render
 from django.views import View
 
+from src.locations.forms import LocationCreateForm
 from src.locations.models import Location
 from src.locations.services import LocationService
 
@@ -17,23 +18,15 @@ class LocationsListView(View):
 
 class LocationAddModalView(View):
     def get(self, request):
-        return HttpResponse(
-            """
-<div class="modal fade" id="addLocationModal" tabindex="-1">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Add location</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body">
-        <p class="mb-0">Location create form wiring is pending.</p>
-      </div>
-    </div>
-  </div>
-</div>
-"""
-        )
+        return render(request, "locations/_add_modal.html", {"form": LocationCreateForm()})
+
+    def post(self, request):
+        form = LocationCreateForm(request.POST)
+        if form.is_valid():
+            form.save()
+            locations = LocationService().list_locations()
+            return render(request, "locations/_add_success_oob.html", {"locations": locations})
+        return render(request, "locations/_add_modal.html", {"form": form})
 
 
 class LocationEditModalView(View):

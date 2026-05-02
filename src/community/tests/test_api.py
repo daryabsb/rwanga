@@ -18,10 +18,10 @@ class CommunityApiTests(TestCase):
             {
                 "project": str(project.pk),
                 "title": "Session 1",
-                "session_type": "community",
+                "session_type": "screenplay",
                 "status": "draft",
                 "created_by": user.pk,
-                "visibility": "private",
+                "visibility": "invite_only",
             },
             format="json",
         )

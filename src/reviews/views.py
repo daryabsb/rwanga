@@ -5,7 +5,9 @@ from django.urls import reverse
 from django.views import View
 
 from src.projects.models import Project, Scene
+from src.reviews.forms import ReviewDecisionForm, SceneEvaluationForm
 from src.reviews.models import BibleReview, InlineComment, ReviewDecision
+from src.reviews.services import ReviewService
 
 
 class ReviewsIndexView(View):
@@ -15,10 +17,20 @@ class ReviewsIndexView(View):
         return render(request, "reviews/index.html", {"project": project, "reviews": reviews, "active_project": project, "active_section": "p"})
 
 
+class ReviewCreateView(View):
+    def post(self, request):
+        project = Project.objects.filter(owner=request.user).first()
+        if not request.user.is_authenticated or project is None:
+            return HttpResponseRedirect(reverse("accounts:login"))
+        review = ReviewService.create_review(project=project, author=request.user)
+        return HttpResponseRedirect(reverse("reviews:detail", args=[review.pk]))
+
+
 class ReviewDetailView(View):
     def get(self, request, pk):
         review = get_object_or_404(BibleReview.objects.select_related("project", "author", "author__user"), id=pk)
-        decisions = review.decisions.select_related("scene", "proposed_by")
+        decisions = review.decisions.select_related("scene", "proposed_by", "locked_by", "rejected_by")
+        evaluations = review.scene_evaluations.select_related("scene")
         ct = ContentType.objects.get_for_model(ReviewDecision)
         decision_ids = [str(d.id) for d in decisions]
         comments = InlineComment.objects.filter(content_type=ct, object_id__in=decision_ids).select_related("author", "parent")
@@ -34,6 +46,9 @@ class ReviewDetailView(View):
                 "project": review.project,
                 "review": review,
                 "decisions": decisions,
+                "evaluations": evaluations,
+                "decision_form": ReviewDecisionForm(),
+                "evaluation_form": SceneEvaluationForm(),
                 "active_project": review.project,
                 "active_section": "p",
             },
@@ -43,14 +58,11 @@ class ReviewDetailView(View):
 class ReviewDecisionStatusView(View):
     def post(self, request, pk, action):
         decision = get_object_or_404(ReviewDecision.objects.select_related("bible_review"), id=pk)
+        service = ReviewService()
         if action == "approve":
-            decision.status = ReviewDecision.Status.LOCKED
-            decision.locked_by = request.user if request.user.is_authenticated else None
-            decision.save(update_fields=["status", "locked_by", "updated_at"])
+            service.lock_decision(decision=decision, user=request.user)
         elif action == "reject":
-            decision.status = ReviewDecision.Status.REJECTED
-            decision.rejected_by = request.user if request.user.is_authenticated else None
-            decision.save(update_fields=["status", "rejected_by", "updated_at"])
+            service.reject_decision(decision=decision, user=request.user)
         return HttpResponseRedirect(reverse("reviews:detail", args=[decision.bible_review_id]))
 
 
@@ -66,6 +78,32 @@ class ReviewDecisionCommentView(View):
                 body=body,
             )
         return HttpResponseRedirect(reverse("reviews:detail", args=[decision.bible_review_id]))
+
+
+class ReviewDecisionCreateView(View):
+    def post(self, request, pk):
+        review = get_object_or_404(BibleReview.objects.select_related("project"), pk=pk)
+        form = ReviewDecisionForm(request.POST)
+        if form.is_valid() and request.user.is_authenticated:
+            ReviewService().propose_decision(
+                bible_review=review,
+                scene=form.cleaned_data.get("scene"),
+                topic=form.cleaned_data["topic"],
+                decision_text=form.cleaned_data["decision_text"],
+                user=request.user,
+            )
+        return HttpResponseRedirect(reverse("reviews:detail", args=[review.pk]))
+
+
+class SceneEvaluationCreateView(View):
+    def post(self, request, pk):
+        review = get_object_or_404(BibleReview, pk=pk)
+        form = SceneEvaluationForm(request.POST)
+        if form.is_valid():
+            evaluation = form.save(commit=False)
+            evaluation.bible_review = review
+            evaluation.save()
+        return HttpResponseRedirect(reverse("reviews:detail", args=[review.pk]))
 
 
 class SceneCommentsPartialView(View):

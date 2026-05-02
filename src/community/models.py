@@ -5,12 +5,26 @@ from src.core.models import BaseModel
 
 
 class ReviewSession(BaseModel):
+    class SessionType(models.TextChoices):
+        SCREENPLAY = "screenplay", "Screenplay"
+        BIBLE = "bible", "Bible"
+        SCENE_SELECTION = "scene_selection", "Scene Selection"
+
+    class Status(models.TextChoices):
+        DRAFT = "draft", "Draft"
+        OPEN = "open", "Open"
+        CLOSED = "closed", "Closed"
+
+    class Visibility(models.TextChoices):
+        INVITE_ONLY = "invite_only", "Invite Only"
+        PUBLIC = "public", "Public"
+
     project = models.ForeignKey("projects.Project", on_delete=models.CASCADE, related_name="review_sessions")
     title = models.CharField(max_length=255)
-    session_type = models.CharField(max_length=32, default="community")
-    status = models.CharField(max_length=20, default="draft")
+    session_type = models.CharField(max_length=32, choices=SessionType.choices, default=SessionType.SCREENPLAY)
+    status = models.CharField(max_length=20, choices=Status.choices, default=Status.DRAFT)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="created_review_sessions")
-    visibility = models.CharField(max_length=20, default="private")
+    visibility = models.CharField(max_length=20, choices=Visibility.choices, default=Visibility.INVITE_ONLY)
 
 
 class SessionContent(BaseModel):
@@ -42,6 +56,11 @@ class SessionComment(BaseModel):
 
 
 class SessionReaction(BaseModel):
+    class ReactionType(models.TextChoices):
+        AGREE = "agree", "Agree"
+        DISAGREE = "disagree", "Disagree"
+        QUESTION = "question", "Question"
+
     comment = models.ForeignKey(SessionComment, on_delete=models.CASCADE, related_name="reactions")
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="session_reactions")
-    reaction_type = models.CharField(max_length=20, default="like")
+    reaction_type = models.CharField(max_length=20, choices=ReactionType.choices, default=ReactionType.AGREE)

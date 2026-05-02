@@ -24,8 +24,8 @@ class InlineComment(BaseModel):
 class BibleReview(BaseModel):
     class Status(models.TextChoices):
         DRAFT = "draft", "Draft"
-        SUBMITTED = "submitted", "Submitted"
-        APPROVED = "approved", "Approved"
+        IN_REVIEW = "in_review", "In Review"
+        DELIVERED = "delivered", "Delivered"
 
     project = models.ForeignKey("projects.Project", on_delete=models.CASCADE, related_name="bible_reviews")
     author = models.ForeignKey("accounts.ConsultantProfile", on_delete=models.CASCADE, related_name="bible_reviews")
@@ -56,4 +56,6 @@ class ReviewDecision(BaseModel):
     status = models.CharField(max_length=16, choices=Status.choices, default=Status.PROPOSED)
     proposed_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="decisions_proposed")
     locked_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="decisions_locked")
+    locked_at = models.DateTimeField(null=True, blank=True)
     rejected_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="decisions_rejected")
+    rejected_at = models.DateTimeField(null=True, blank=True)

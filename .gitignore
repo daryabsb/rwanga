@@ -214,3 +214,5 @@ local_backup/
 
 # User-uploaded media (runtime files, not source)
 src/media/
+
+rwanga-mcp/

@@ -4,6 +4,16 @@
 <div id="rw-content" style="overflow-y:auto;flex:1;padding:var(--rw-pad-lg)">
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--rw-pad-md)">
     <h1 style="font-size:20px;font-weight:700;margin:0">{% trans "Community Sessions" %}</h1>
+    <form method="post" action="{% url 'community:create' %}" style="display:flex;gap:8px">
+      {% csrf_token %}
+      <input class="rw-form-input" name="title" placeholder="Session title" style="margin:0">
+      <select class="rw-form-input" name="session_type" style="margin:0">
+        <option value="screenplay">screenplay</option>
+        <option value="bible">bible</option>
+        <option value="scene_selection">scene_selection</option>
+      </select>
+      <button class="rw-btn rw-btn-primary" type="submit">{% trans "New Session" %}</button>
+    </form>
   </div>
   {% if sessions %}
   <div style="background:var(--rw-surface);border:1px solid var(--rw-border)">
@@ -21,7 +31,7 @@
     {% endfor %}
   </div>
   {% else %}
-  {% include "components/_empty_state.html" with icon="🧩" title=_("No sessions") sub=_("Create sessions in API/admin then review here.") %}
+  {% include "components/_empty_state.html" with icon="🧩" title=_("هیچ دانیشتنێک نییە") sub=_("دانیشتنی نوێ دروست بکە") %}
   {% endif %}
 </div>
 {% endblock %}
