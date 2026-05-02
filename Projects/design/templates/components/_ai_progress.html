@@ -1,0 +1,43 @@
+{# ════════════════════════════════════════════════════
+   _ai_progress.html
+   Real-time AI job status — connected via WebSocket.
+   Rendered server-side when a Celery task is queued.
+   Updated client-side via RWJobSocket.updateProgress().
+
+   Context:
+     job      — AIJob model instance
+     job.id   — UUID
+     job.type — 'breakdown' | 'storyboard' | 'floorplan' | 'schedule'
+     job.step — current human-readable step label
+     job.progress — 0–100
+   ════════════════════════════════════════════════════ #}
+{% load i18n %}
+<div class="rw-ai-progress" data-job-id="{{ job.id }}"
+     data-refresh-url="{% url 'ai_engine:job_result' job.id %}"
+     data-refresh-target="#rw-ai-result-{{ job.id }}"
+     id="rw-job-{{ job.id }}">
+
+  <div class="rw-ai-progress-title">
+    <span style="animation: spin 1s linear infinite; display:inline-block">⟳</span>
+    {% if job.type == 'breakdown' %}🏷 {% trans "داڕشتنی دەستنووس ئەنجامدەدات..." %}
+    {% elif job.type == 'storyboard' %}🖼 {% trans "ستۆری‌بۆرد دروستدەکرێت..." %}
+    {% elif job.type == 'floorplan' %}📐 {% trans "نەخشەی ژوور دروستدەکرێت..." %}
+    {% elif job.type == 'schedule' %}📅 {% trans "خشتە چاکدەکرێت..." %}
+    {% else %}🤖 {% trans "AI کاردەکات..." %}
+    {% endif %}
+  </div>
+
+  <div class="rw-ai-progress-bar">
+    <div class="rw-ai-progress-fill" style="width: {{ job.progress|default:5 }}%"></div>
+  </div>
+
+  <div class="rw-ai-step">{{ job.step|default:'' }}</div>
+
+</div>
+
+{# Result placeholder — filled by WebSocket on completion #}
+<div id="rw-ai-result-{{ job.id }}"></div>
+
+<style>
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+</style>

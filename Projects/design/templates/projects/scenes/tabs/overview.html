@@ -1,0 +1,100 @@
+{# ════════════════════════════════════════════════════════
+   RWANGA — projects/scenes/tabs/overview.html
+   Scene overview tab — default tab. HTMX fragment.
+
+   Context:
+     scene        — Scene instance
+     project      — Project instance
+     shot_count   — int
+     setup_count  — int
+     screen_time  — string e.g. "2:30"
+     characters   — QuerySet[Character] in this scene
+   ════════════════════════════════════════════════════════ #}
+{% load i18n %}
+
+<div style="padding:var(--rw-pad-lg)">
+
+  {# ── Stats ── #}
+  <div class="rw-stats" style="margin-bottom:var(--rw-pad-lg)">
+    <div class="rw-stat">
+      <div class="rw-stat-val">{{ shot_count }}</div>
+      <div class="rw-stat-lbl">{% trans "لێدان" %}</div>
+    </div>
+    <div class="rw-stat">
+      <div class="rw-stat-val">{{ setup_count }}</div>
+      <div class="rw-stat-lbl">{% trans "ئامادەکردن" %}</div>
+    </div>
+    <div class="rw-stat">
+      <div class="rw-stat-val" style="font-size:24px">{{ screen_time|default:"—" }}</div>
+      <div class="rw-stat-lbl">{% trans "کاتی شاشە" %}</div>
+    </div>
+    <div class="rw-stat">
+      <div class="rw-stat-val">{{ characters.count }}</div>
+      <div class="rw-stat-lbl">{% trans "کەسایەتی" %}</div>
+    </div>
+  </div>
+
+  {# ── Scene info ── #}
+  <div class="rw-grid-2" style="margin-bottom:var(--rw-pad-lg)">
+    <div class="rw-card" style="margin-bottom:0">
+      <div class="rw-card-title">{% trans "شوێن" %}</div>
+      <div style="font-size:15px;font-weight:700;color:var(--rw-text);margin-bottom:6px">
+        {{ scene.int_ext }}. {{ scene.location_name }}
+      </div>
+      <div style="font-size:13px;color:var(--rw-text-2)">{{ scene.time_of_day }}</div>
+      {% if scene.page_count %}
+      <div style="font-size:12px;color:var(--rw-text-3);margin-top:8px;font-family:var(--rw-font-en)">
+        {{ scene.page_count }} {% trans "لاپەڕە" %}
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="rw-card" style="margin-bottom:0">
+      <div class="rw-card-title">{% trans "کەسایەتییەکان" %}</div>
+      {% if characters %}
+      <div style="display:flex;flex-wrap:wrap;gap:6px">
+        {% for char in characters %}
+        <span style="padding:4px 12px;background:var(--rw-surface-2);border:1px solid var(--rw-border);font-size:12px;color:var(--rw-text-2)">{{ char.name }}</span>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div style="font-size:13px;color:var(--rw-text-3)">{% trans "کەسایەتییەک نییە" %}</div>
+      {% endif %}
+    </div>
+  </div>
+
+  {# ── Description ── #}
+  {% if scene.description %}
+  <div class="rw-card">
+    <div class="rw-card-title">{% trans "وەسف" %}</div>
+    <p style="font-size:14px;color:var(--rw-text-2);line-height:1.8">{{ scene.description }}</p>
+  </div>
+  {% endif %}
+
+  {# ── Script text ── #}
+  {% if scene.script_text %}
+  <div class="rw-card">
+    <div class="rw-card-title">{% trans "دەستنووس" %}</div>
+    <div style="font-size:13px;color:var(--rw-text-2);line-height:1.9;white-space:pre-wrap;font-family:var(--rw-font-en);direction:ltr;text-align:start">{{ scene.script_text }}</div>
+  </div>
+  {% endif %}
+
+  {# ── Quick actions ── #}
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:var(--rw-pad-sm)">
+    <button class="rw-btn rw-btn-ghost"
+            hx-get="{% url 'projects:scene_tab' project.pk scene.pk 'shots' %}"
+            hx-target="#rw-tab-content" hx-swap="innerHTML"
+            onclick="document.querySelectorAll('.rw-mod-tab').forEach((t,i)=>{t.classList.toggle('active',t.dataset.tab==='shots')})">
+      + {% trans "زیادکردنی لێدان" %}
+    </button>
+    <a href="{% url 'exports:scene_viewer' scene.pk %}" class="rw-btn rw-btn-amber">
+      ↗ {% trans "دەرهێنانی دیمەن" %}
+    </a>
+    <button class="rw-btn rw-btn-ghost"
+            hx-get="{% url 'projects:edit_scene_modal' project.pk scene.pk %}"
+            hx-target="#rw-modal-container" hx-swap="innerHTML">
+      ✎ {% trans "دەستکاریکردن" %}
+    </button>
+  </div>
+
+</div>

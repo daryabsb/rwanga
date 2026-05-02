@@ -1,0 +1,54 @@
+{# ════════════════════════════════════════════════════════
+   RWANGA — projects/_scene_list.html
+   HTMX partial — scene list panel content.
+   Swapped into #rw-scene-list on load and filter changes.
+
+   Context:
+     scenes       — QuerySet[Scene]
+     active_scene — Scene instance (current)
+     group_by     — bool (group by location when True)
+   ════════════════════════════════════════════════════════ #}
+{% load i18n %}
+
+{% if group_by %}
+  {# ── Grouped by location ── #}
+  {% regroup scenes by location_name as location_groups %}
+  {% for group in location_groups %}
+  <div class="rw-scene-grp-label">{{ group.grouper }}</div>
+  {% for scene in group.list %}
+  <a href="{% url 'projects:scene' scene.project_id scene.pk %}"
+     style="text-decoration:none;display:block">
+    <div class="rw-scene-item {% if active_scene and active_scene.pk == scene.pk %}active{% endif %}">
+      <span class="rw-sc-num">{{ scene.number }}</span>
+      <div style="flex:1;min-width:0">
+        <div class="rw-sc-loc">{{ scene.int_ext }}. {{ scene.location_name }}</div>
+        <div class="rw-sc-time">{{ scene.time_of_day }}</div>
+      </div>
+    </div>
+  </a>
+  {% endfor %}
+  {% empty %}
+  <div style="padding:var(--rw-pad-md);text-align:center;color:var(--rw-text-3);font-size:12px">
+    {% trans "هیچ دیمەنێک نەدۆزرایەوە" %}
+  </div>
+  {% endfor %}
+
+{% else %}
+  {# ── Flat list ── #}
+  {% for scene in scenes %}
+  <a href="{% url 'projects:scene' scene.project_id scene.pk %}"
+     style="text-decoration:none;display:block">
+    <div class="rw-scene-item {% if active_scene and active_scene.pk == scene.pk %}active{% endif %}">
+      <span class="rw-sc-num">{{ scene.number }}</span>
+      <div style="flex:1;min-width:0">
+        <div class="rw-sc-loc">{{ scene.int_ext }}. {{ scene.location_name }}</div>
+        <div class="rw-sc-time">{{ scene.time_of_day }}</div>
+      </div>
+    </div>
+  </a>
+  {% empty %}
+  <div style="padding:var(--rw-pad-md);text-align:center;color:var(--rw-text-3);font-size:12px">
+    {% trans "هیچ دیمەنێک نەدۆزرایەوە" %}
+  </div>
+  {% endfor %}
+{% endif %}

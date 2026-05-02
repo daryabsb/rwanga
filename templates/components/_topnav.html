@@ -57,31 +57,31 @@
     <button class="rw-sec-tab {% if active_section == 's' %}active{% endif %}"
             data-s="s"
             hx-get="{% url 'scripts:index' active_project.pk %}"
-            hx-target="#rw-content" hx-push-url="true">
+            hx-target="#rw-content" hx-select="#rw-content" hx-push-url="true">
       {% trans "دەستنووس" %}
     </button>
     <button class="rw-sec-tab {% if active_section == 'b' %}active{% endif %}"
             data-s="b"
             hx-get="{% url 'scripts:breakdown' active_project.pk %}"
-            hx-target="#rw-content" hx-push-url="true">
+            hx-target="#rw-content" hx-select="#rw-content" hx-push-url="true">
       {% trans "داڕشتن" %}
     </button>
     <button class="rw-sec-tab {% if active_section == 'v' %}active{% endif %}"
             data-s="v"
             hx-get="{% url 'shots:list' active_project.pk %}"
-            hx-target="#rw-content" hx-push-url="true">
+            hx-target="#rw-content" hx-select="#rw-content" hx-push-url="true">
       {% trans "بینراوکردن" %}
     </button>
     <button class="rw-sec-tab {% if active_section == 'p' %}active{% endif %}"
             data-s="p"
             hx-get="{% url 'scheduling:stripboard' active_project.pk %}"
-            hx-target="#rw-content" hx-push-url="true">
+            hx-target="#rw-content" hx-select="#rw-content" hx-push-url="true">
       {% trans "ڕێنوێس" %}
     </button>
     <button class="rw-sec-tab {% if active_section == 'sh' %}active{% endif %}"
             data-s="sh"
             hx-get="{% url 'scheduling:call_sheets' active_project.pk %}"
-            hx-target="#rw-content" hx-push-url="true">
+            hx-target="#rw-content" hx-select="#rw-content" hx-push-url="true">
       {% trans "وێنەگرتن" %}
     </button>
   </div>
@@ -121,14 +121,14 @@
     {{ request.user.first_name|first|upper }}{{ request.user.last_name|first|upper }}
   </button>
   <ul class="dropdown-menu dropdown-menu-end" style="background:var(--rw-surface);border:1px solid var(--rw-border);border-radius:var(--rw-r)">
-    <li><a class="dropdown-item" href="{% url 'accounts:profile' %}" style="color:var(--rw-text);font-size:13px">{% trans "???????" %}</a></li>
-    <li><a class="dropdown-item" href="{% url 'accounts:settings' %}" style="color:var(--rw-text);font-size:13px">{% trans "???????" %}</a></li>
+    <li><a class="dropdown-item" href="{% url 'accounts:profile' %}" style="color:var(--rw-text);font-size:13px">{% trans "پرۆفایل" %}</a></li>
+    <li><a class="dropdown-item" href="{% url 'accounts:settings' %}" style="color:var(--rw-text);font-size:13px">{% trans "ڕێکخستن" %}</a></li>
     <li><hr class="dropdown-divider" style="border-color:var(--rw-border)"></li>
-    <li><a class="dropdown-item" href="{% url 'accounts:logout' %}" style="color:var(--rw-text-2);font-size:13px">{% trans "???????" %}</a></li>
+    <li><a class="dropdown-item" href="{% url 'accounts:logout' %}" style="color:var(--rw-text-2);font-size:13px">{% trans "دەرچوون" %}</a></li>
   </ul>
 </div>
 {% else %}
-<a class="rw-btn rw-btn-ghost" href="{% url 'accounts:login' %}">{% trans "????????????" %}</a>
+<a class="rw-btn rw-btn-ghost" href="{% url 'accounts:login' %}">{% trans "چوونەژوورەوە" %}</a>
 {% endif %}<button class="rw-btn-icon rw-btn js-theme-toggle"
             onclick="RW.themeToggle()"
             title="{% trans 'گۆڕینی شێوازی ڕووکار' %}">☀</button>

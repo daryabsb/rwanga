@@ -1,0 +1,122 @@
+{# ════════════════════════════════════════════════════════
+   RWANGA — projects/list.html
+   Studio lobby — the first page after login.
+   Pick which project workspace to enter.
+
+   Context:
+     owned_projects   — QuerySet[Project] owned by user's studio
+     member_projects  — QuerySet[Project] where user has ProjectMembership
+     invitations      — QuerySet[ProjectMembership] pending (accepted_at=None)
+   ════════════════════════════════════════════════════════ #}
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "پڕۆژەکان" %}{% endblock %}
+
+{% block content %}
+<div id="rw-content" style="overflow-y:auto;flex:1">
+
+  {# ── Page header ── #}
+  <div style="padding:var(--rw-pad-lg) var(--rw-pad-lg) var(--rw-pad-md);background:var(--rw-surface);border-bottom:1px solid var(--rw-border);display:flex;align-items:center;gap:var(--rw-pad-md)">
+    <div>
+      <h1 style="font-size:24px;font-weight:700;margin-bottom:4px">{% trans "ستودیۆ" %}</h1>
+      <p style="font-size:13px;color:var(--rw-text-2)">{% trans "پڕۆژەکانت هەڵبژێرە یان پڕۆژەی نوێ دروست بکە" %}</p>
+    </div>
+    <a href="{% url 'projects:create_wizard' %}" class="rw-btn rw-btn-primary" style="margin-inline-start:auto">
+      + {% trans "پڕۆژەی نوێ" %}
+    </a>
+  </div>
+
+  <div style="padding:var(--rw-pad-lg)">
+
+    {# ── Pending invitations ── #}
+    {% if invitations %}
+    <div style="margin-bottom:var(--rw-pad-lg)">
+      <div class="rw-section-hdr">{% trans "بانگهێشتنامەکان" %}</div>
+      {% for inv in invitations %}
+      <div class="rw-warn" style="background:var(--rw-amber-dim);border-color:rgba(212,165,116,.3);border-inline-start-color:var(--rw-amber)">
+        <span class="rw-warn-icon" style="color:var(--rw-amber)">✉</span>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:700;color:var(--rw-text)">{{ inv.project.title }}</div>
+          <div style="font-size:12px;color:var(--rw-text-2);margin-top:2px">
+            {% trans "ڕۆڵ:" %} {{ inv.get_role_type_display }} — {{ inv.project.studio.name }}
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <form method="post" action="{% url 'accounts:accept_invite' inv.pk %}">
+            {% csrf_token %}
+            <button type="submit" class="rw-btn rw-btn-amber" style="padding:7px 16px;font-size:12px">{% trans "قبووڵکردن" %}</button>
+          </form>
+          <form method="post" action="{% url 'accounts:decline_invite' inv.pk %}">
+            {% csrf_token %}
+            <button type="submit" class="rw-btn rw-btn-ghost" style="padding:7px 16px;font-size:12px">{% trans "ڕەتکردنەوە" %}</button>
+          </form>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    {# ── Owned projects ── #}
+    <div class="rw-section-hdr">{% trans "پڕۆژەکانی من" %}</div>
+    {% if owned_projects %}
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1px;background:var(--rw-border);border:1px solid var(--rw-border);margin-bottom:var(--rw-pad-lg)">
+      {% for project in owned_projects %}
+      <a href="{% url 'projects:dashboard' project.pk %}" style="text-decoration:none;display:block">
+        <div class="rw-card" style="margin:0;cursor:pointer;transition:background var(--rw-t);height:100%">
+          <div style="display:flex;gap:16px;align-items:flex-start">
+            <div style="width:56px;height:56px;flex-shrink:0;background:var(--rw-script);display:flex;align-items:center;justify-content:center;font-size:24px">
+              {% if project.cover %}<img src="{{ project.cover.url }}" style="width:100%;height:100%;object-fit:cover">{% else %}🎬{% endif %}
+            </div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:15px;font-weight:700;color:var(--rw-text);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ project.title }}</div>
+              <div style="font-size:12px;color:var(--rw-text-2);margin-bottom:8px">{{ project.get_project_type_display }}</div>
+              <div style="display:flex;gap:16px;font-size:11px;color:var(--rw-text-3)">
+                <span>{{ project.scenes.count }} {% trans "دیمەن" %}</span>
+                <span>{{ project.updated_at|timesince }} {% trans "پێش" %}</span>
+              </div>
+            </div>
+          </div>
+          {% if project.logline %}
+          <p style="font-size:12px;color:var(--rw-text-2);margin-top:12px;line-height:1.6;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">{{ project.logline }}</p>
+          {% endif %}
+        </div>
+      </a>
+      {% endfor %}
+
+      {# New project card #}
+      <a href="{% url 'projects:create_wizard' %}" style="text-decoration:none;display:block">
+        <div style="background:var(--rw-surface);cursor:pointer;transition:background var(--rw-t);height:100%;min-height:120px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;color:var(--rw-text-3);padding:var(--rw-pad-md)">
+          <div style="font-size:36px;opacity:.3">+</div>
+          <div style="font-size:13px;font-weight:600">{% trans "پڕۆژەی نوێ دروست بکە" %}</div>
+        </div>
+      </a>
+    </div>
+    {% else %}
+    {% include "components/_empty_state.html" with icon="🎬" title=_("هێشتا پڕۆژەت نییە") sub=_("یەکەمین پڕۆژەی فیلمیت دروست بکە") cta_text=_("دەستپێکردن") cta_url="projects:create_wizard" %}
+    {% endif %}
+
+    {# ── Member projects ── #}
+    {% if member_projects %}
+    <div class="rw-section-hdr">{% trans "پڕۆژەکانی تیم" %}</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1px;background:var(--rw-border);border:1px solid var(--rw-border)">
+      {% for project in member_projects %}
+      <a href="{% url 'projects:dashboard' project.pk %}" style="text-decoration:none;display:block">
+        <div class="rw-card" style="margin:0;cursor:pointer;transition:background var(--rw-t)">
+          <div style="display:flex;gap:16px;align-items:flex-start">
+            <div style="width:48px;height:48px;flex-shrink:0;background:var(--rw-break);display:flex;align-items:center;justify-content:center;font-size:20px">🎬</div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:14px;font-weight:700;color:var(--rw-text);margin-bottom:4px">{{ project.title }}</div>
+              <div style="font-size:12px;color:var(--rw-text-2)">{{ project.studio.name }}</div>
+              <div style="font-size:11px;color:var(--rw-text-3);margin-top:6px">{{ project.scenes.count }} {% trans "دیمەن" %}</div>
+            </div>
+          </div>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+  </div>
+</div>
+{% endblock %}

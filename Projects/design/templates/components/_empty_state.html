@@ -1,0 +1,31 @@
+{# ════════════════════════════════════════════════════
+   _empty_state.html
+   Usage: {% include "components/_empty_state.html" with
+            icon="📋"
+            title="هیچ لێدانێک نییە"
+            sub="یەکەم لێدان زیاد بکە بۆ دەستپێکردن"
+            cta_label="+ زیادکردنی لێدان"
+            cta_url=add_url
+            cta_htmx=True %}
+   ════════════════════════════════════════════════════ #}
+{% load i18n %}
+<div class="rw-empty">
+  {% if icon %}<div class="rw-empty-icon">{{ icon }}</div>{% endif %}
+  <div class="rw-empty-title">{{ title }}</div>
+  {% if sub %}<div class="rw-empty-sub">{{ sub }}</div>{% endif %}
+  {% if cta_label %}
+    {% if cta_htmx %}
+    <button class="rw-btn rw-btn-primary"
+            hx-get="{{ cta_url }}"
+            hx-target="#rw-modal-container"
+            hx-swap="innerHTML"
+            style="margin-top:8px">
+      {{ cta_label }}
+    </button>
+    {% else %}
+    <a href="{{ cta_url }}" class="rw-btn rw-btn-primary" style="margin-top:8px">
+      {{ cta_label }}
+    </a>
+    {% endif %}
+  {% endif %}
+</div>

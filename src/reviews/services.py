@@ -21,13 +21,25 @@ class ReviewService:
 
     @staticmethod
     def create_review(*, project, author):
+        if project.bible_status == "final":
+            raise ValueError("Bible is final and cannot be reviewed again")
         if not ProjectMembership.objects.filter(project=project, user=author, is_active=True).exists() and project.owner_id != author.id:
             raise PermissionDenied("Author must be a project member")
         consultant = ConsultantProfile.objects.filter(user=author, is_active=True).first()
         if consultant is None:
             consultant = ConsultantProfile.objects.create(user=author, is_active=True)
         version = (BibleReview.objects.filter(project=project).order_by("-version").values_list("version", flat=True).first() or 0) + 1
-        return BibleReview.objects.create(project=project, author=consultant, status=BibleReview.Status.DRAFT, version=version)
+        review = BibleReview.objects.create(
+            project=project,
+            author=consultant,
+            status=BibleReview.Status.DRAFT,
+            version=version,
+            content=project.canonical_bible or {},
+            bible_snapshot_version=project.bible_version,
+        )
+        project.bible_status = "in_review"
+        project.save(update_fields=["bible_status", "updated_at"])
+        return review
 
     def propose_decision(self, *, bible_review, scene, topic, decision_text, user):
         is_member = ProjectMembership.objects.filter(project=bible_review.project, user=user, is_active=True).exists()
@@ -67,6 +79,40 @@ class ReviewService:
             proposed_by=user,
             reproposed_from=original_decision,
         )
+
+    @staticmethod
+    def deliver_review(*, review, delivered_by):
+        project = review.project
+        if project.bible_status == "final":
+            raise ValueError("Bible is already final")
+        project.canonical_bible = review.content if isinstance(review.content, dict) else {"text": review.content}
+        project.bible_version = (project.bible_version or 0) + 1
+        project.bible_status = "draft"
+        project.save(update_fields=["canonical_bible", "bible_version", "bible_status", "updated_at"])
+        review.status = BibleReview.Status.DELIVERED
+        review.save(update_fields=["status", "updated_at"])
+        return review
+
+    @staticmethod
+    def finalize_bible(*, project, finalized_by):
+        active_reviews = BibleReview.objects.filter(project=project).exclude(status__in=[BibleReview.Status.DELIVERED, BibleReview.Status.DRAFT])
+        if active_reviews.exists():
+            raise ValueError("There are active reviews")
+        project.bible_status = "final"
+        project.bible_finalized_at = timezone.now()
+        project.bible_finalized_by = finalized_by
+        project.save(update_fields=["bible_status", "bible_finalized_at", "bible_finalized_by", "updated_at"])
+        return project
+
+    @staticmethod
+    def set_bible_from_content(*, project, content, set_by=None):
+        if project.bible_status == "final":
+            raise ValueError("Bible is already final")
+        project.canonical_bible = content if isinstance(content, dict) else {"text": content}
+        project.bible_version = (project.bible_version or 0) + 1
+        project.bible_status = "draft"
+        project.save(update_fields=["canonical_bible", "bible_version", "bible_status", "updated_at"])
+        return project
 
     def reject_decision(self, *, decision, user, reason=""):
         if not self._is_director(user, decision.bible_review.project):

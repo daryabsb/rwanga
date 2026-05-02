@@ -1,6 +1,9 @@
 from rest_framework import permissions, status, viewsets
+from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
+from src.projects.models import Project
 from src.projects.api.serializers import (
     CharacterSerializer,
     LocationSerializer,
@@ -8,6 +11,7 @@ from src.projects.api.serializers import (
     SceneSerializer,
 )
 from src.projects.services import ProjectsService
+from src.reviews.services import ReviewService
 
 
 class ProjectViewSet(viewsets.ModelViewSet):
@@ -25,6 +29,49 @@ class ProjectViewSet(viewsets.ModelViewSet):
 
     def perform_destroy(self, instance):
         ProjectsService.delete_project(instance)
+
+
+class ProjectBibleView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, pk):
+        project = get_object_or_404(Project, pk=pk)
+        return Response(
+            {
+                "canonical_bible": project.canonical_bible,
+                "bible_version": project.bible_version,
+                "bible_status": project.bible_status,
+                "bible_finalized_at": project.bible_finalized_at,
+                "bible_finalized_by": str(project.bible_finalized_by_id) if project.bible_finalized_by_id else None,
+            }
+        )
+
+    def put(self, request, pk):
+        project = get_object_or_404(Project, pk=pk)
+        content = request.data.get("content", {})
+        try:
+            ReviewService.set_bible_from_content(project=project, content=content, set_by=request.user)
+        except ValueError as exc:
+            return Response({"detail": str(exc)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {
+                "canonical_bible": project.canonical_bible,
+                "bible_version": project.bible_version,
+                "bible_status": project.bible_status,
+            }
+        )
+
+
+class FinalizeBibleView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, pk):
+        project = get_object_or_404(Project, pk=pk)
+        try:
+            ReviewService.finalize_bible(project=project, finalized_by=request.user)
+        except ValueError as exc:
+            return Response({"detail": str(exc)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"status": project.bible_status, "bible_version": project.bible_version})
 
 
 class SceneViewSet(viewsets.ModelViewSet):

@@ -31,6 +31,7 @@ class BibleReview(BaseModel):
     author = models.ForeignKey("accounts.ConsultantProfile", on_delete=models.CASCADE, related_name="bible_reviews")
     status = models.CharField(max_length=16, choices=Status.choices, default=Status.DRAFT)
     version = models.PositiveIntegerField(default=1)
+    bible_snapshot_version = models.PositiveIntegerField(default=0)
     content = models.JSONField(default=dict, blank=True)
 
 

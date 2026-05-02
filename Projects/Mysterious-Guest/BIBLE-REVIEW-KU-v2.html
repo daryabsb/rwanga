@@ -1,0 +1,1121 @@
+<!DOCTYPE html>
+<html lang="ku" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>میوانێکی نادیار — شیکاری دڵەڕاوکێ — چاک ٢</title>
+<style>
+:root {
+  --bg: #0f0f0f;
+  --surface: #1a1a1a;
+  --surface2: #222;
+  --border: #333;
+  --text: #e0e0e0;
+  --text-dim: #888;
+  --amber: #D4A574;
+  --amber-dim: #8a6a42;
+  --red: #c0392b;
+  --red-dim: #7b241c;
+  --green: #27ae60;
+  --green-dim: #1e8449;
+  --blue: #2980b9;
+  --yellow: #f39c12;
+  --purple: #8e44ad;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Noto Sans Arabic', 'Segoe UI', 'Tahoma', sans-serif;
+  line-height: 1.9;
+  padding: 2rem;
+  max-width: 1100px;
+  margin: 0 auto;
+  direction: rtl;
+}
+h1, h2, h3 { font-weight: 700; }
+h1 { font-size: 2rem; color: var(--amber); margin-bottom: 0.3rem; }
+h2 { font-size: 1.4rem; color: var(--amber); margin: 2.5rem 0 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+h3 { font-size: 1.1rem; color: var(--text); margin-bottom: 0.5rem; }
+.subtitle { color: var(--text-dim); font-size: 1rem; margin-bottom: 0.3rem; }
+.meta { color: var(--text-dim); font-size: 0.85rem; margin-bottom: 2rem; }
+
+/* ===== TAB NAVIGATION ===== */
+.tab-nav {
+  display: flex;
+  gap: 0;
+  border-bottom: 2px solid var(--border);
+  margin-bottom: 2rem;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.tab-btn {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  padding: 0.8rem 1.5rem;
+  font-family: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  white-space: nowrap;
+  transition: color 0.2s, border-color 0.2s;
+}
+.tab-btn:hover { color: var(--text); }
+.tab-btn.active { color: var(--amber); border-bottom-color: var(--amber); }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+.exec-box {
+  background: var(--surface);
+  border-right: 3px solid var(--amber);
+  border-left: none;
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+  border-radius: 4px 0 0 4px;
+}
+.exec-box p { margin-bottom: 0.8rem; }
+.exec-box p:last-child { margin-bottom: 0; }
+
+.arc-container {
+  background: var(--surface);
+  padding: 1.5rem;
+  border-radius: 4px;
+  margin: 1.5rem 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  direction: ltr;
+}
+.arc-bar {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 120px;
+  padding-bottom: 1.5rem;
+  position: relative;
+  min-width: 500px;
+}
+.arc-bar .bar {
+  flex: 1;
+  min-width: 10px;
+  border-radius: 2px 2px 0 0;
+  position: relative;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.arc-bar .bar:hover { opacity: 0.8; }
+.arc-bar .bar .label {
+  position: absolute;
+  bottom: -1.4rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.55rem;
+  color: var(--text-dim);
+}
+.arc-bar .bar .score-label {
+  position: absolute;
+  top: -1.2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.55rem;
+  color: var(--text-dim);
+  display: none;
+}
+.arc-bar .bar:hover .score-label { display: block; }
+.arc-legend {
+  display: flex;
+  gap: 1.5rem;
+  margin-top: 1rem;
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  direction: rtl;
+  flex-wrap: wrap;
+}
+.arc-legend span::before {
+  content: '';
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  margin-left: 4px;
+  vertical-align: middle;
+}
+.arc-legend .leg-high::before { background: var(--green); }
+.arc-legend .leg-mid::before { background: var(--yellow); }
+.arc-legend .leg-low::before { background: var(--red); }
+
+.thread {
+  background: var(--surface);
+  border-radius: 4px;
+  padding: 1.2rem;
+  margin: 1rem 0;
+}
+.thread-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin-bottom: 0.8rem;
+}
+.thread-title.shrubi { color: var(--yellow); }
+.thread-title.phone { color: var(--blue); }
+.thread-title.door { color: var(--purple); }
+.thread-title.sofa { color: var(--red); }
+.thread-title.ai-thread { color: var(--green); }
+.thread-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.thread-step {
+  background: var(--surface2);
+  padding: 0.4rem 0.7rem;
+  border-radius: 3px;
+  font-size: 0.82rem;
+  border-right: 2px solid var(--border);
+  border-left: none;
+}
+.thread-step .sc { font-weight: 700; color: var(--amber); margin-left: 0.3rem; }
+
+.scene-card {
+  background: var(--surface);
+  border-radius: 4px;
+  margin: 1.2rem 0;
+  overflow: hidden;
+}
+.scene-header {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.8rem 1rem;
+  background: var(--surface2);
+  cursor: pointer;
+  user-select: none;
+}
+.scene-num {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--amber);
+  min-width: 2rem;
+  text-align: center;
+}
+.scene-title {
+  flex: 1;
+  font-size: 0.85rem;
+  font-weight: 400;
+  min-width: 0;
+}
+.scene-badges {
+  display: flex;
+  gap: 0.3rem;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+.badge {
+  font-size: 0.65rem;
+  padding: 0.15rem: 0.45rem;
+  border-radius: 2px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.badge.bomb { background: var(--red-dim); color: #f5b7b1; }
+.badge.ticking { background: var(--yellow); color: #000; }
+.badge.gap-badge { background: #555; color: #ccc; }
+.badge.pivot { background: var(--amber-dim); color: var(--amber); }
+
+.scene-body {
+  padding: 1.2rem;
+  display: none;
+  border-top: 1px solid var(--border);
+}
+.scene-card.open .scene-body { display: block; }
+
+.scene-row {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  gap: 0.3rem 1rem;
+  margin-bottom: 0.7rem;
+  font-size: 0.88rem;
+}
+.scene-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-dim);
+  padding-top: 0.15rem;
+}
+.scene-label.bomb-label { color: var(--red); }
+.scene-label.gap-label { color: var(--yellow); }
+.scene-val { color: var(--text); }
+
+.creative-note {
+  background: rgba(39, 174, 96, 0.08);
+  border-right: 2px solid var(--green);
+  border-left: none;
+  padding: 0.6rem 0.8rem;
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  border-radius: 3px 0 0 3px;
+}
+.creative-note .attr { color: var(--green); font-size: 0.75rem; font-weight: 700; }
+
+.rec-card {
+  background: var(--surface);
+  border-right: 3px solid var(--amber);
+  border-left: none;
+  padding: 1.2rem;
+  margin: 1rem 0;
+  border-radius: 4px 0 0 4px;
+}
+.rec-card h3 { color: var(--amber); font-size: 1rem; margin-bottom: 0.5rem; }
+.rec-card p { font-size: 0.9rem; margin-bottom: 0.5rem; }
+.rec-card .impact { font-size: 0.8rem; color: var(--text-dim); }
+
+.act-divider {
+  text-align: center;
+  margin: 2.5rem 0 1.5rem;
+  position: relative;
+}
+.act-divider::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--border);
+}
+.act-divider span {
+  background: var(--bg);
+  padding: 0 1.5rem;
+  position: relative;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--amber);
+}
+
+.controls {
+  display: flex;
+  gap: 0.5rem;
+  margin: 1rem 0;
+  flex-wrap: wrap;
+}
+.btn {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 0.4rem 0.8rem;
+  border-radius: 3px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  font-family: inherit;
+}
+.btn:hover { background: var(--border); }
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 0.8rem;
+  margin: 1.5rem 0;
+}
+.stat-box {
+  background: var(--surface);
+  padding: 0.8rem;
+  border-radius: 4px;
+  text-align: center;
+}
+.stat-num {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--amber);
+}
+.stat-label {
+  font-size: 0.72rem;
+  color: var(--text-dim);
+}
+
+/* Conversation */
+.conv-session {
+  margin: 1.5rem 0;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.conv-session-header {
+  background: var(--surface2);
+  padding: 0.8rem 1rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: var(--amber);
+  user-select: none;
+}
+.conv-session-body {
+  display: none;
+  padding: 1rem;
+  background: var(--surface);
+}
+.conv-session.open .conv-session-body { display: block; }
+.conv-msg {
+  margin-bottom: 1.2rem;
+  padding-bottom: 1.2rem;
+  border-bottom: 1px solid var(--border);
+}
+.conv-msg:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+.conv-who {
+  font-size: 0.75rem;
+  font-weight: 700;
+  margin-bottom: 0.4rem;
+}
+.conv-who.darya { color: var(--amber); }
+.conv-who.ai { color: var(--green); }
+.conv-text { font-size: 0.85rem; line-height: 1.8; }
+.conv-text strong { color: var(--text); }
+.conv-text em { color: var(--amber); font-style: normal; }
+.conv-locked {
+  display: inline-block;
+  background: var(--green-dim);
+  color: #a9dfbf;
+  font-size: 0.65rem;
+  padding: 0.1rem 0.4rem;
+  border-radius: 2px;
+  font-weight: 700;
+  margin-right: 0.3rem;
+}
+
+/* Locked Decisions */
+.decision-card {
+  background: var(--surface);
+  border-right: 3px solid var(--green);
+  border-left: none;
+  padding: 1rem 1.2rem;
+  margin: 0.8rem 0;
+  border-radius: 4px 0 0 4px;
+}
+.decision-card h4 {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--green);
+  margin-bottom: 0.4rem;
+}
+.decision-card p { font-size: 0.85rem; margin-bottom: 0.3rem; }
+
+/* ===== MOBILE ===== */
+@media (max-width: 768px) {
+  body { padding: 1rem 0.8rem; }
+  h1 { font-size: 1.5rem; }
+  h2 { font-size: 1.2rem; margin: 2rem 0 0.8rem; }
+  .tab-btn { padding: 0.6rem 1rem; font-size: 0.78rem; }
+  .scene-header { padding: 0.6rem 0.8rem; gap: 0.5rem; }
+  .scene-num { font-size: 1.1rem; min-width: 1.8rem; }
+  .scene-title { font-size: 0.78rem; }
+  .scene-body { padding: 0.8rem; }
+  .scene-row { grid-template-columns: 90px 1fr; font-size: 0.82rem; }
+  .exec-box { padding: 1rem; }
+  .exec-box p { font-size: 0.88rem; }
+  .rec-card { padding: 1rem; }
+  .rec-card p { font-size: 0.82rem; }
+  .thread { padding: 0.8rem; }
+  .thread-step { font-size: 0.72rem; }
+  .stats-grid { grid-template-columns: repeat(3, 1fr); gap: 0.5rem; }
+  .stat-num { font-size: 1.4rem; }
+  .stat-label { font-size: 0.6rem; }
+  .controls { gap: 0.4rem; }
+  .btn { padding: 0.35rem 0.6rem; font-size: 0.7rem; }
+  .arc-bar { height: 90px; }
+  .badge { font-size: 0.55rem; }
+  .creative-note { font-size: 0.8rem; }
+  .conv-text { font-size: 0.8rem; }
+  .decision-card { padding: 0.8rem; }
+}
+
+@media (max-width: 420px) {
+  body { padding: 0.6rem; }
+  h1 { font-size: 1.3rem; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .scene-header { flex-wrap: wrap; }
+  .scene-badges { width: 100%; margin-top: 0.3rem; }
+  .tab-btn { padding: 0.5rem 0.7rem; font-size: 0.72rem; }
+}
+
+@media print {
+  body { background: #fff; color: #000; padding: 1rem; }
+  .scene-body { display: block !important; }
+  .scene-card { break-inside: avoid; }
+  .controls, .tab-nav { display: none; }
+  .tab-content { display: block !important; }
+  h1, h2, .scene-num { color: #333; }
+  .exec-box, .thread, .rec-card, .creative-note, .decision-card { border-color: #999; }
+}
+</style>
+</head>
+<body>
+
+<h1>میوانێکی نادیار — شیکاری دڵەڕاوکێ</h1>
+<div class="subtitle">چاوخشاندنەوەی چاکی دووەم — شیکاری بنچینەکان</div>
+<div class="meta">ئامادەکردنی: دەریا ئیبراهیم و AI · ڤێرژنی ٢.٠ · نیسان ٢٠٢٦ · بۆ گەنگەشە پێش چاوپێکەوتن لەگەڵ سەروەر</div>
+
+<!-- ===== TAB ===== -->
+<div class="tab-nav">
+  <button class="tab-btn active" onclick="switchTab('review')">چاوخشاندنەوە</button>
+  <button class="tab-btn" onclick="switchTab('decisions')">بڕیارە داخراوەکان</button>
+  <button class="tab-btn" onclick="switchTab('conversation')">گەنگەشەکەمان</button>
+</div>
+
+<!-- ============================================================ -->
+<!-- TAB 1: چاوخشاندنەوە -->
+<!-- ============================================================ -->
+<div class="tab-content active" id="tab-review">
+
+<h2>بڕیارەکە</h2>
+
+<div class="exec-box">
+<p>ئەم سیناریۆیە <strong>سیستەمێکی کۆنترۆڵکراوە بە یەک درزی بنەڕەتییەوە</strong>. بزوێنەرەکە — ژنێکی مردوو لە قەنەفەیەکدا کاتێک هاوڕێکان لەسەری دائەنیشن، تفەنگی چیکۆڤ پڕ کراوە بە شەکر، هەموو فیلمەکە خەیاڵی دەروونی پیاوێک بووە — ئەمانە زۆر شازن. ئەمانە لەگەڵ <em>Rope</em> و <em>The Invisible Guest</em> و باشترینەکانی هیچکۆک لە یەک ئاستن.</p>
+
+<p>دزەکە لە ئەکت ٢A (دیمەن ١٢–١٨) دایە. بەرهەمهێنەر لە شتێکدا ڕاستە: بەشی ماڵەکە درێژ هەست پێ ئەکرێت. بەڵام هاندانی بەرهەمهێنەر بۆ <em>بڕین</em> هەڵەیە. کێشەکە درێژی نییە — کێشەکە ئەوەیە <strong>هیچ هێڵی مەترسی چالاکێک لەکاتی نزیکبوونەوەی هەستییەکاندا نییە</strong>. پەیوەندییەکە دروست ئەبێت، بەڵام هیچ ئەنجامی تیکتاکداری بەستراو بە ڕەفتار نییە. بە زمانی هیچکۆک: نانی ئێوارەیەکی خۆشمان پیشاندا بەبینەرەکان، بەڵام بۆمبی ژێر مێزەکەمان پیشان نەدا.</p>
+
+<p>چارەسەرەکە کورت کردنەوە نییە. چارەسەرەکە <strong>نایەکسانی زانیارییە</strong> — و <strong>دیمەنەکان ئەبێت دوو کاری هاوکات بکەن</strong>: هەر بیتێکی هەستیار ئەبێت هاوکات مەترسی زیاد بکات. بەبێ ئەم تێکەڵکردنە، فیلمەکە هەوڵ ئەدات لە هەمان کاتدا نزیکایەتیی هەستیار و دڵەڕاوکێ بێت بەبێ ئەوەی ئەم دووکیان تێکەڵ بکات.</p>
+
+<p><strong>بینەر ئەبێت پێش ناوەڕاست فیلمەکە زیرەکتر بێت لە نالی.</strong> ئێستا: بینەر = نالی ← دڵەڕاوکێ لاواز. چاکسازی: بینەر > نالی ← گرژی داخ ئەبێت.</p>
+
+<p><strong>ژانری داخراو:</strong> ئەمە <em>دڵەڕاوکێی دەروونی</em>یە، نەک درامای پەیوەندییەکان. هەموو بڕیارێک لێرەوە — ئەکتەرەکان، خێرایی، دیزاینی دەنگ، ڕیتمی مۆنتاژ — لەم جیاوازییە دەرئەچێت.</p>
+</div>
+
+<div class="stats-grid">
+  <div class="stat-box"><div class="stat-num">٤٣</div><div class="stat-label">کۆی دیمەنەکان</div></div>
+  <div class="stat-box"><div class="stat-num">٢٦</div><div class="stat-label">بۆمب هەیە</div></div>
+  <div class="stat-box"><div class="stat-num">٩</div><div class="stat-label">کەلێنی دڵەڕاوکێ</div></div>
+  <div class="stat-box"><div class="stat-num">٥</div><div class="stat-label">ڕیسمانی چیکۆڤ</div></div>
+  <div class="stat-box"><div class="stat-num">٣</div><div class="stat-label">چاکسازی سەرەکی</div></div>
+  <div class="stat-box"><div class="stat-num">١</div><div class="stat-label">وەرچەرخانی دابەزاند</div></div>
+</div>
+
+<!-- ============ شیکاری بنەڕەتی ============ -->
+<h2>شیکاری بنەڕەتی</h2>
+
+<div class="exec-box" style="border-right-color: var(--purple);">
+<p><strong>سیستەمەکە:</strong> ئەم سیناریۆیە چەندین مەترسی نهێنی لەخۆ ئەگرێت کە لە قۆناغی جیاوازی چیرۆکدا چالاک ئەبن. لەگەڵ ئەوەی مەترسی نهێنی زۆر هەن، هەر بەشێک ئەبێت یەک «بۆمب»ی سەرەکی بۆ بینەر لە پێشەوە بگرێت.</p>
+
+<p><strong>ئەکت ١ (د١–١١):</strong> بۆمبی سەرەکی بارودۆخی شاراوەی گەشەیە — لە ڕێگەی شرووبییەکان و ڕەفتاری خۆی چێنراوە. بینەر ئەبێت ئەوە بگرێت کە نالی تێنەگات.</p>
+
+<p><strong>ئەکت ٢A (د١٢–١٨):</strong> بۆمبی سەرەکی ئەبێت شرووبییەکان بن — هەر جارێک گەشە شەکر ئەخوات، بینەر ئەترسێت. ئێستا ئەم بۆمبە پڕ کراوە بەڵام بۆ ئاگاداری بینەر تەقینەوە نەکردووە. ئەمە درزە بنەڕەتییەکەیە.</p>
+
+<p><strong>ئەکت ٢B (د١٩–٢٩):</strong> بۆمبی سەرەکی قەنەفەکەیە. هیچکۆکی تەواو. تەواو کارئەکات.</p>
+
+<p><strong>ئەکت ٣ (د٣٠–٤٣):</strong> بۆمبی سەرەکی دەروونی نالییە — توانای ئەوەی کە ئەنجامە فاجعەکارییەکان خەیاڵ بکات. وەرچەرخانەکە تەقینەوەکەیە.</p>
+
+<p><strong>کەموکوڕی بنچینەیی نالی:</strong> نالی متمانە بە ڕاستی ناکات — متمانە بە تەفسیری ناوبژیوانکراو ئەکات. فاجعەکە ئەوە نییە کە نالی بڕیاری هەڵە ئەدات — ئەوەیە کە ناتوانێت بڕیارێک بدات بەبێ ناوبژیوان. ئەمە هەموو شتێک ڕوون ئەکاتەوە: بەکارهێنانی AI، پارانۆیا، خوڵی خەیاڵ، شکستی لە کردار دروستدا.</p>
+
+<p><strong>ڕۆڵی AI:</strong> AI نە دوژمنی بابەتییە. AI نە بۆشاییشە. AI <em>بزوێنەرێکی بڕیاردانی بێلەمە کە کەموکوڕی نالی چالاک ئەکات</em>. بەرگری لە بڕیاری خراپ لائەبات. نالی بەرەو بدترین هەڵبژاردنەکانی بەبێ لەم دەبات. فاجعەکە ئەوەیە AI تەواو ئەو شتە ئەکات کە بۆی دیزاین کراوە: وەڵامی لۆژیکی بدات بەبێ دانایی هەستیار.</p>
+</div>
+
+<!-- ============ کەوانەی دڵەڕاوکێ ============ -->
+<h2>کەوانەی دڵەڕاوکێ — ٤٣ دیمەن</h2>
+<p style="font-size:0.85rem; color:var(--text-dim); margin-bottom:0.8rem;">
+بەرزایی = نمرەی گرژی (١–١٠). ڕەنگ = کوالیتی: سەوز = بۆمب چالاکە، زەرد = گرژی هەیە بەڵام ناچالاکە، سوور = کەلێن. ماوس/پەنجە ببەرە سەری.
+</p>
+
+<div class="arc-container">
+<div class="arc-bar" id="arcBar"></div>
+<div class="arc-legend">
+  <span class="leg-high">بۆمبی بەهێز</span>
+  <span class="leg-mid">گرژی هەیە</span>
+  <span class="leg-low">کەلێنی دڵەڕاوکێ</span>
+</div>
+</div>
+
+<!-- ============ ڕیسمانەکانی چیکۆڤ ============ -->
+<h2>ڕیسمانەکانی چیکۆڤ — بەدواداچوونی فتیلەکان</h2>
+<p style="font-size:0.85rem; color:var(--text-dim); margin-bottom:1rem;">
+پێنج شت/ڕەفتار لە سەرەتاوە دانراون و لە دواییدا کاریان هەیە. هەر یەکێکیان فتیلێکە.
+</p>
+
+<div class="thread">
+  <div class="thread-title shrubi">🍬 شیرینی شرووبی — چەکی کوشتن شاراوە لەبەرچاو</div>
+  <div class="thread-steps">
+    <div class="thread-step"><span class="sc">د٧</span> گەشە ئەڵێت ساڵانێکە شرووبی نەخواردووە، زۆر تامەزرۆیە</div>
+    <div class="thread-step"><span class="sc">د١٢</span> شیرینییەکان لە ماڵەکە دیارن</div>
+    <div class="thread-step"><span class="sc">د١٦</span> گەشە زۆر ئەخوات — ئەسەمایێت، پێئەکەنێت، ئاردی لەسەر دەموچاوی</div>
+    <div class="thread-step"><span class="sc">د٢١</span> نازی شرووبی و ئاردی ماوەی سەر مێزەکە ئەبینێت</div>
+    <div class="thread-step"><span class="sc">د٤٠</span> <strong>ئەنجام:</strong> جەڵتەی دڵ لە شەکرە. شرووبییەکە کوشتی.</div>
+  </div>
+  <div class="creative-note" style="margin-top:0.8rem;">
+    <div class="attr">⚡ جەختکردن لەسەر ڕەفتار، نەک زانیاری</div>
+    شرووبییەکان ئێستا هاوسەنگن. کێشە ڕاستەقینەکە ڕوونی نییە بەڵکو بارودۆخی هەستیاری خواردنەکەیە. نابێت وەک ئاماژە هەست پێ بکرێت — ئەبێت وەک ئازادبوون، خۆشحاڵی، ئاسوودەیی هەست پێ بکرێت. کاتێک گەشە شیرینییەکان ئەخوات لە ساتێکی کردنەوەی دڵدا، بینەر <em>هەستەکە</em> بیر ئەکەوێتەوە نەک ڕاستییەکە. پاشان کاتێک هۆکاری مەرگ ئاشکرا ئەبێت، بیرنامەکەن «ئاها، ئاماژەکە» — بیردەکەنەوە «ئاها، ئەو ساتە جوانە کوشتی.» ئەوە وێرانکەرە.
+  </div>
+</div>
+
+<div class="thread">
+  <div class="thread-title phone">📱 مۆبایلی گەشە — ڕیسمانی ژیانی هەڵهاتوو</div>
+  <div class="thread-steps">
+    <div class="thread-step"><span class="sc">د٧</span> بە نهێنی سەیری نامەکان ئەکات، نایانکاتەوە</div>
+    <div class="thread-step"><span class="sc">د٧</span> مۆبایلەکەی ئەکوژێنێتەوە</div>
+    <div class="thread-step"><span class="sc">د٨</span> لە ئۆتۆمبێلەکە دانابەزێت — ئەترسێت کەس بیبینێت</div>
+    <div class="thread-step"><span class="sc">د١٦</span> نالی داوا ئەکات مۆبایلەکەی ببینێت</div>
+    <div class="thread-step"><span class="sc">د١٧</span> نالی سەیری ئەکات — مۆبایلەکە کوژاوەتەوە</div>
+    <div class="thread-step"><span class="sc">د٣٢</span> کامێرا: گەشە مۆبایلەکەی سەیری کردووە پێش خەوتن</div>
+    <div class="thread-step"><span class="sc">د٤١</span> <strong>ئەنجام:</strong> هەڵهاتووە — لە ژیانی کۆنی خۆی ئەشارێتەوە</div>
+  </div>
+  <div class="creative-note" style="margin-top:0.8rem;">
+    <div class="attr">⚡ ڕیسمانی بەهێز — باشترکردنی بچووک</div>
+    لە دیمەنی ٣ (ڤیدیۆ کۆڵ)، گەشە جارێک چاوی ئەکاتە لادێ — وەک ئەوەی شتێکی بیستبێت. خێرا داپۆشێت. تۆوی ئەوە ئەچینین کە بارودۆخی ژیانی وەک ئەوە نییە ئەڵێت.
+  </div>
+</div>
+
+<div class="thread">
+  <div class="thread-title door">🚪 دەرگای داخراو — خودی نهێنی نالی</div>
+  <div class="thread-steps">
+    <div class="thread-step"><span class="sc">د١٢</span> گەشە هەوڵ ئەدات دەرگاکە بکاتەوە. ناکرێتەوە.</div>
+    <div class="thread-step"><span class="sc">د١٦</span> لە یاریدا: «دەرگای ئەو ژوورە بکەرەوە.» نالی بە گاڵتە دەرئەچێت</div>
+    <div class="thread-step"><span class="sc">د٣٢</span> کامێرا: گەشە بە کلیلدانەکەوە سەیری ژوورەکەی کردووە</div>
+    <div class="thread-step"><span class="sc">د٣٢</span> <strong>ئەنجام:</strong> نالی ئەیکاتەوە. وێنەی ژیانی ئەوروپی، دایک و باوکی.</div>
+  </div>
+  <div class="creative-note" style="margin-top:0.8rem;">
+    <div class="attr">⚡ بەکارنەهاتوو — دەرفەتی گەورە</div>
+    لە دیمەنی ١٧، کاتێک گەشە بۆ کۆتایی باخچە تاریکەکە ئەڕوات، بە لای دەرگای داخراوەکەدا تێئەپەڕێت. ڕائەوەستێت. دەستی ئەنێتە سەر دەسگیرەکە. ئەگەڕێتەوە سەیری نالی ئەکات. بەردەوام ئەبێت. ئەمە ٥ چرکەیە و سێ بەرابەری قورسی دەرگاکە ئەکات.
+  </div>
+</div>
+
+<div class="thread">
+  <div class="thread-title sofa">🛋️ قەنەفەکە — شانۆی مەرگ</div>
+  <div class="thread-steps">
+    <div class="thread-step"><span class="sc">د١٦</span> گەشە ئەڵێت لەسەری ئەخەوێت</div>
+    <div class="thread-step"><span class="sc">د١٨</span> لەسەری ئەخەوێت</div>
+    <div class="thread-step"><span class="sc">د١٩</span> لەسەری مردووە</div>
+    <div class="thread-step"><span class="sc">د١٩</span> نالی جەنازەکە ئەشارێتەوە لەناوی</div>
+    <div class="thread-step"><span class="sc">د٢١–٢٨</span> هاوڕێکان لەسەری دائەنیشن، ئەخوان، ڕائەوەستن</div>
+    <div class="thread-step"><span class="sc">د٢٨</span> ئەدیب سوورە لەسەری بخەوێت — هەوڵ ئەدات بیکاتەوە</div>
+    <div class="thread-step"><span class="sc">د٢٩</span> <strong>ئەنجام:</strong> ئەدیب جەنازەکە ئەدۆزێتەوە</div>
+  </div>
+  <div class="creative-note" style="margin-top:0.8rem;">
+    <div class="attr">✅ بنەڕەتییەکەی تەواوە — بیپارێزە بە چاکسازی سەرەوە</div>
+    ئەمە لە ئاستی هیچکۆکە. بابەتەکە تەواوە — دەستکاری مەکە. بەڵام هێزی بە مەرجە: ئەگەر گرژی سەرەوە (ئەکت ٢A) شکاوە، ساتی قەنەفەکە بێکاریگەر ئەبێت چونکە بینەر بە تەواوی فشار نەدراوە. بیپارێزە بە چاکسازی ئەوەی پێشی دێت. قەنەفەکە پێویستی بە نەشتەرگەری نییە — پێویستی بە فشاری خوێنی دروست هەیە کە بگاتە دەرگاکەی.
+  </div>
+</div>
+
+<div class="thread">
+  <div class="thread-title ai-thread">🤖 AI — بزوێنەری بێلەم</div>
+  <div class="thread-steps">
+    <div class="thread-step"><span class="sc">د٣</span> نالی بانگی AI ئەکات — خوو دائەنرێت</div>
+    <div class="thread-step"><span class="sc">د٦</span> لە بازاڕەوە بانگی AI ئەکات</div>
+    <div class="thread-step"><span class="sc">د١٣</span> پەیامی دەنگی بۆ AI</div>
+    <div class="thread-step"><span class="sc">د١٨</span> بانگی AI: خۆشی ئەوێت بەڵام متمانەی پێ نییە</div>
+    <div class="thread-step"><span class="sc">د١٩</span> بانگی AI وەک «چیرۆکێک ئەنوسم» — AI یارمەتی ئەدات جەنازەکە بشارێتەوە</div>
+    <div class="thread-step"><span class="sc">د٢٤</span> بانگی AI: «چۆن بکەم بڕۆن؟» AI: «شەڕ دروست بکە.»</div>
+    <div class="thread-step"><span class="sc">د٣٧</span> نامە بۆ AI. AI ئۆفلاینە — ئەپدەیتی ڤێرژن.</div>
+    <div class="thread-step"><span class="sc">د٤٠</span> <strong>ئەنجام:</strong> ئەگەر بانگی ئەمبوڵانسی کردبایە لەجیاتی AI، هیچ ڕوونەدەدا.</div>
+  </div>
+  <div class="creative-note" style="margin-top:0.8rem;">
+    <div class="attr">✅ AI وەک کاتژمێری شاراوە</div>
+    AI بەرگری لە بڕیاری خراپ لائەبات. ئەپدەیتی ڤێرژن کێشەی چاندن نییە — مێکانیزمی کاتژمێرە. AI ئۆفلاین بوون کاتژمێری شاراوی فیلمەکەیە. هۆشداری ئومێد دەربارەی ئەپدەیتەکە ئەبێت لە دیمەنی ١٣ یان ١٨ بێت — پێش قەیرانەکە — بۆ ئەوەی بینەر بزانێت کات بەسەر تنها هاوەڵی نالی ئەچێت. بەبێ ئەم چاندنە ڕەندۆم هەست ئەکرێت. بە چاندنەکە ناچاری ئەبێت.
+  </div>
+</div>
+
+<!-- ============ دیمەن بە دیمەن ============ -->
+<h2>دیمەن بە دیمەن — شیکاری دڵەڕاوکێ</h2>
+
+<div class="controls">
+  <button class="btn" onclick="toggleAll(true)">هەمووی بکەرەوە</button>
+  <button class="btn" onclick="toggleAll(false)">هەمووی داخە</button>
+  <button class="btn" onclick="filterScenes('gap')">تەنها کەلێنەکان</button>
+  <button class="btn" onclick="filterScenes('bomb')">تەنها بۆمبەکان</button>
+  <button class="btn" onclick="filterScenes('all')">هەموویان</button>
+</div>
+
+<div id="sceneContainer"></div>
+
+<!-- ============ سێ چاکسازی ============ -->
+<h2>سێ چاکسازی سەرەکی</h2>
+<p style="font-size:0.85rem; color:var(--text-dim); margin-bottom:1rem;">
+ئەمانە ئەو دەستکارییە بنەڕەتییانەن کە سیناریۆکە لە «زۆر باش» ئەگۆڕنە «نەبیرکراوە.»
+</p>
+
+<div class="rec-card">
+  <h3>چاکسازی ١: بۆمبەکە بچینە پێش نانی ئێوارە (دیمەن ٧–١١)</h3>
+  <p>بینەر ئەبێت بزانێت شتێک لەگەڵ گەشە ڕاست نییە <em>پێش</em> ئەوەی بچێتە ماڵەکەوە.</p>
+  <p><strong>ئەلف)</strong> کاتێک گەشە یەکەم شرووبییە ئەگرێت: «ئەمانە ئەمکوژن» — بە پێکەنینەوە. بینەر بیری نەئەکاتەوە. بەڵام لە دیمەنی ٤٠ بیری ئەکەوێتەوە.</p>
+  <p><strong>ب)</strong> گەشە باسکی خۆی ئەخورێت — خوویەکی ئاسایی. لە دیمەنی ٤١، کاتێک ئەوین ئەڵێت پێویستی بە دەرزی ئەنسۆلین هەیە، بینەر تێئەگات: شوێنی دەرزییەکانی دەخورایەوە.</p>
+  <p>جەختەکە ئەبێت لەسەر ڕەفتار بێت، نەک زانیاری. شرووبییەکە ئەبێت وەک ئاسوودەیی و خۆشحاڵی هەست پێ بکرێت — نەک ئاماژە. بینەر <em>هەستی</em> ساتەکە بیر ئەکەوێتەوە، و هەستەکە ئەوەیە لە دواییدا وێرانیان ئەکات.</p>
+  <div class="impact">کاریگەری: هەموو ئێوارەکە (د١٢–١٨) ئەگۆڕێت. هەر جارێک گەشە شەکر ئەخوات، بینەر ترسی ئەگرێت. بینەر زیرەکتر ئەبێت لە نالی.</div>
+</div>
+
+<div class="rec-card">
+  <h3>چاکسازی ٢: ماڵەکە ئەبێت قسە بکات (دیمەن ١٢–١٤)</h3>
+  <p><strong>ئەلف)</strong> ماڵەکە دەنگ ئەکات. هەر دەنگێک هەردوو کارەکتەر بە شێوەیەکی جیاواز وەڵامی ئەدەنەوە — نالی گوێ نادات، گەشە ئەڕقاسێت. ئەمە بیتی دڵەڕاوکێ دروست ئەکات لەناو د١٤–١٨ <em>بەبێ زیادکردنی دیالۆگ.</em></p>
+  <p><strong>ب)</strong> ماسکەکان و سەرە وشکراوەکان ئەبێت چاویان ببین کە بەدوادا ئەکەوێت. بە شێوەی <em>چاودێری</em>. ماڵەکە چاودێری ئەکات.</p>
+  <p><strong>ج)</strong> پلەی گەرمی. گەشە ئەڵێت «ساردە لێرە.» نالی ئەڵێت ئەم ماڵە هەمیشە شەو سارد ئەبێت. کاتێک بە مردوویی و ساردبووەوە ئەدۆزرێتەوە، بینەر بیری ئەکەوێتەوە: ماڵەکە هەمیشە سارد بوو.</p>
+  <div class="impact">کاریگەری: هەر دیمەنێک دوو کار ئەکات: پەیوەندی هەستیار و بەرزبوونەوەی مەترسی. بەرهەمهێنەر نیگەرانی نامێنێت.</div>
+</div>
+
+<div class="rec-card">
+  <h3>چاکسازی ٣: چوارچێوەی خەیاڵ ئەبێت نادیار بێت تا د٤٣ — بەڵام لە سەیری دووبارەدا بدۆزرێتەوە</h3>
+  <p><strong>ئەلف)</strong> ناتەبایی کات. لە چیرۆکە خەیاڵکراوەکەدا شەو زۆر خێرا ئەکەوێت.</p>
+  <p><strong>ب)</strong> گەشە شتێک ئەڵێت کە نالی پێشتر بیستیبێتی. لە دیمەنی ٢، باخەوانەکە دەستەواژەیەکی تایبەتی بەکارئەهێنێت. لە دیمەنی ١٦ یان ١٨، گەشە هەمان دەستەواژە بەکارئەهێنێت. سەیری یەکەم: هاوبەختی. سەیری دووبارە: خەیاڵی نالی ڕۆژەکەی بەکارئەهێنێتەوە.</p>
+  <p><strong>ج)</strong> سەگەکە. گوڵە لە خەیاڵەکەدا تەواو باشە. سەگی ڕاستەقینە وانابن. لە سەیری دووبارەدا ئەمە نیشانەیە.</p>
+  <div class="impact">کاریگەری: وەرچەرخانەکە هێزی خۆی بەدەست ئەهێنێت چونکە لە سەرەتاوە لەوێ بوو. قسەی دەم خەڵک ئەبێت: «بگەڕێنەوە سەیری سەگەکە بکە.»</div>
+</div>
+
+<!-- ============ نیگەرانی بەرهەمهێنەر ============ -->
+<h2>وەڵامدانەوەی نیگەرانی بەرهەمهێنەر</h2>
+
+<div class="exec-box">
+  <p><strong>بەرهەمهێنەر ئەڵێت:</strong> «زۆر لە ماڵەکە ئەمێنینەوە. دیمەنی ١٢–١٨ درێژن.»</p>
+  <p><strong>مەبەستی ڕاستەقینەی بەرهەمهێنەر:</strong> «لەم دیمەنانەدا گرژی هەست ناکەم.»</p>
+  <p><strong>چاکسازی هەڵە:</strong> دیمەنەکان ببڕە.</p>
+  <p><strong>بۆچی هەڵەیە:</strong> ئێوارەکە خودی فیلمەکەیە. بەبێ دیمەنی ١٢–١٨، مردنی گەشە هیچ قورسییەکی هەستیاری نییە.</p>
+  <p><strong>چاکسازی ڕاست:</strong> ئەم دیمەنانە نابێت لە ڕووی کارکردنی چیرۆکییەوە کەم بکرێنەوە. هەر کورت کردنەوەیەک ئەبێت هەموو بیتەکان بپارێزێت و تەنها جێبەجێکردنەکە تەسک بکات. درێژی مەگۆڕە — <em>هاوسەنگی زانیارییەکان</em> بگۆڕە. ئەگەر بینەر بزانێت شرووبییەکە دەیکوژێت (چاکسازی ١)، ئەگەر ماڵەکە زیندوو هەست پێ بکرێت (چاکسازی ٢) — ئەوکاتە دیمەنی ١٢–١٨ ئەبنە پڕگرژییترین بەشی فیلمەکە.</p>
+  <p><strong>بۆ ماڵی نالی، شرووبییەکە بۆمبەکەیە. قەنەفەکە سنووقەکەیە. تەنها پێویستە تۆزێک زووتر پیشانی بینەریان بدەین.</strong></p>
+</div>
+
+<!-- ============ ئەوەی باشە ============ -->
+<h2>ئەوەی باشە — دەستیان لێ مەدەن</h2>
+
+<div class="exec-box" style="border-right-color: var(--green);">
+  <p><strong>مێکانیزمی قەنەفەکە (د١٩–٢٩):</strong> تەواو کارئەکات. بابەتەکە مەگۆڕە — بیپارێزە بە چاکسازی گرژی سەرەوە.</p>
+  <p><strong>AI وەک بزوێنەری بێلەم (د١٩):</strong> نالی بانگی AI ئەکات و وەک ئەوەی «چیرۆکێک ئەنوسم» قسە ئەکات. AI بەرگری لە بڕیاری خراپ لائەبات — یارمەتی ئەدات جەنازەکە بشارێتەوە چونکە وەک چیرۆک پیشکەشی کرد.</p>
+  <p><strong>دێڕی سەقفی گەشە:</strong> «ئەگەر سەقفی ماڵەکەشت ئاسمان بوایە، من هەر لەگەڵتا ئەبووم.» لەنگەری هەستییە — ئەبێت کۆتا شتی بیستراو بێت پێش ئاشکرابوون.</p>
+  <p><strong>بازپرسی دیمەنی ٤٠:</strong> هەموو ئەوەی نالی کردی بێکار بوو. هەموو ترسێک خۆسەپاندنی خۆی بوو.</p>
+  <p><strong>وەرچەرخانەکە (د٤٣):</strong> ئەمە کۆتاییەکی ڕاستەقینەیە. فیلمەکە ئەگۆڕێت بۆ گەڕانەوەیەک بەناو دەروونی نالی.</p>
+</div>
+
+<!-- ============ وەرچەرخانەکە ============ -->
+<h2>وەرچەرخانەکە — شیکاری قوڵ</h2>
+
+<div class="exec-box" style="border-right-color: var(--purple);">
+  <p><strong>وەرچەرخانەکە چییە:</strong> دیمەنی ٤٣ پاشگەزبوونەوە لە ڕاستی نییە؛ ئاشکرابوونی پرۆسەیە. فیلمەکە ڕووداوەکان دەمرشانێتەوە نییە — ئەوەیە دەردەخات کە نالی چۆن دروستیان ئەکات. بینەر ئەبێت بڕوات بە تێگەیشتنی مێشکی نالی، نەک بە گومانکردن لە چیرۆکەکە. بۆ ئەوەی ئەمە کار بکات، بینەر ئەبێت پێشتر هەست بکات بە توانای نالی بۆ خەیاڵکردنی ئەنجامی فاجعەکاری. وەرچەرخانەکە ئەبێت هەست پێ بکرێت پێش ئەوەی تێبگاترێت.</p>
+
+  <p><strong>جیاوازی سەرەکی:</strong> ئەمە وەرچەرخانی «خەون» نییە. ئەمە <em>خوڵی دەرچوونی دەروونییە</em>. لە وەرچەرخانی خەوندا ڕاستی ئاشکرا ئەبێت و خەونەکە فڕێدەدرێت. لە خوڵی دەرچوونی دەروونیدا، خەیاڵەکە خۆی ڕاستی کارەکتەرەکەیە — ئەوە دەردەخات کە مێشکەکەی چۆن کار ئەکات، نەک ئەوەی مێشکەکەی «هەڵە» بوو. بینەر نابێت بڕوات «هیچی ڕاست نەبوو» — ئەبێت بڕوات «هەمووی نالی بوو.» ئەوە جیاوازی نێوان فێڵ و ئاشکرابوونە.</p>
+
+  <p><strong>فیلمەکە نابێت وەرچەرخانەکە ڕابگەیەنێت؛ ئەبێت بینەر هەستی پێبکات پێش ئەوەی تێبگاترێت.</strong></p>
+
+  <p><strong>باخەوانەکە وەک دەرخەر:</strong> چیرۆکی باخەوانەکە لە دیمەنی ٢ خەیاڵی نالی دەست پێ ئەکات. کاتێک ئەگەڕێینەوە دیمەنی ٤٣، باخەوانەکە هێشتا لەناو هەمان چیرۆکەکەیدایە. کات تێنەپەڕیوە.</p>
+
+  <p><strong>تەلەفۆنی گەشە:</strong> کۆتا ساتی ڕاستەقینە — گەشە پەیوەندی ئەکات، زیندووە. وەڵام ئەدات؟ ڕێگەی ئەدات بێت؟ دوودڵی بهێڵەوە. بینەر بڕیار ئەدات.</p>
+</div>
+
+<!-- ============ پرسیارەکان بۆ سەروەر ============ -->
+<h2>پرسیارەکان بۆ سەروەر</h2>
+
+<div class="rec-card" style="border-right-color: var(--blue);">
+  <h3>دەربارەی وەرچەرخانەکە</h3>
+  <p>نالی وەڵامی تەلەفۆنەکە ئەداتەوە لە شۆتی کۆتایی؟ یان فیلمەکە کۆتایی دێت بە لێدانی تەلەفۆنەکە و ئێمە لە دوورەوە سەیرین؟</p>
+  <p>وەرچەرخانەکە خەونە یان دەرچوونی دەروونی؟ جیاوازییەکە چۆن هەموو دیمەنێک ئەگۆڕێت.</p>
+</div>
+
+<div class="rec-card" style="border-right-color: var(--blue);">
+  <h3>دەربارەی شرووبییەکان</h3>
+  <p>ئاماژەکانی نەخۆشی شەکرە چەند ڕوون ئەبن؟ جەختەکە لەسەر ڕەفتارە یان زانیاری؟</p>
+  <p>خواردنی شرووبی (د١٦) — ئاسوودەیییە یان ئازادییەکی دیوانەوارییە؟</p>
+</div>
+
+<div class="rec-card" style="border-right-color: var(--blue);">
+  <h3>دەربارەی ماڵەکە</h3>
+  <p>ماڵەکە چ جۆرە کەسایەتییەکی هەیە؟ دەنگەکان — ئەم ماڵە شەو چی دەنگێکی هەیە؟</p>
+</div>
+
+<div class="rec-card" style="border-right-color: var(--blue);">
+  <h3>دەربارەی خێرایی ئێوارەکە</h3>
+  <p>ئێمە بڕوامان وایە ئەم دیمەنانە نابێت لە ڕووی کارکردنی چیرۆکییەوە کەم بکرێنەوە. هەر کورت کردنەوەیەک ئەبێت هەموو بیتەکان بپارێزێت و تەنها جێبەجێکردنەکە تەسک بکات. تۆ لەکوێ ڕائەوەستیت؟</p>
+</div>
+
+<div class="rec-card" style="border-right-color: var(--blue);">
+  <h3>دەربارەی AI</h3>
+  <p>AI دەنگی تەلەفۆنییە؟ شاشەیەکە؟ بینەر چۆن AI ئەبینێت/ئەبیستێت؟</p>
+  <p>ئایا AI وەک ئامراز ئەبینیت کە نالی بەکاری ئەهێنێت، یان وەک شتێک کە بڕیارەکانی شێوە ئەدات؟ ئێمە بڕوامان وایە بەرگری لە بڕیاری خراپ لائەبات — نە دوژمن، بەڵکو بزوێنەری بێلەم.</p>
+</div>
+
+<div class="rec-card" style="border-right-color: var(--blue);">
+  <h3>دەربارەی کەموکوڕی بنچینەیی نالی</h3>
+  <p>ئێمە کەموکوڕی نالی وەک «ناوبژیوانکردنی بڕیار» پێناسە ئەکەین — ناتوانێت بڕیارێک بدات بەبێ ناوبژیوان. ڕازیت؟</p>
+  <p>وەرچەرخانەکە دەربارەی نەخۆشییەکی دەروونی تایبەتە، یان دەربارەی ئەو خوویە مرۆییانەیە کە هەموومان فاجعەکاری ئەکەین؟</p>
+</div>
+
+</div><!-- end tab-review -->
+
+<!-- ============================================================ -->
+<!-- TAB 2: بڕیارە داخراوەکان -->
+<!-- ============================================================ -->
+<div class="tab-content" id="tab-decisions">
+
+<h2>بڕیارە داخراوەکان — ڕێککەوتنی پێش کۆبوونەوە</h2>
+<p style="font-size:0.85rem; color:var(--text-dim); margin-bottom:1.5rem;">
+ئەم ١٣ بڕیارە لە ڕێگەی گەنگەشەی دژایەتیکارانەی نێوان دەریا و AI داخران. هەر خاڵێک مشتومڕی لەسەر کرا و چارەسەر کرا. سەروەر ئەتوانێت هەر یەکێکیان ڕەتبکاتەوە — وەک هەلکەوتنی سەرەتایین، نەک فەرمان.
+</p>
+
+<div class="decision-card">
+  <h4>١. شیکاری سیستەم</h4>
+  <p>«سیستەمی کۆنترۆڵکراو بە یەک درزی بنەڕەتییەوە» — نەک «دابەشکردنی ناهاوتای سووتەمەنی.» ئامێرەکە کار ئەکات. ئەکت ٢A درزەکەیە. ئەمە ڕێگا لە پارێزکاری گشتی ئەگۆڕێت بۆ چاکسازی نەشتەرگەری.</p>
+</div>
+
+<div class="decision-card">
+  <h4>٢. کێشەی ئەکت ٢A — دوو چین</h4>
+  <p>بینەر نایەکسانی زانیارییەکی نییە بەهۆی ئەوەی دیمەنەکان هیچ هێڵی مەترسی چالاکێکیان نییە لەکاتی نزیکبوونەوەی هەستییەکاندا. یەکێکیان هۆکاری ئەوەکەی تریان دروست ئەکات.</p>
+</div>
+
+<div class="decision-card">
+  <h4>٣. مۆدێلی بۆمب — دوو زمان</h4>
+  <p>ڕاستی شیکاری: سیستەمی فرە-چینی بە مەترسی نهێنی فرەوە. ڕێنمایی دەرهێنەری: یەک بۆمبی سەرەکی بۆ هەر قۆناغێک. «لەگەڵ ئەوەی مەترسی نهێنی زۆر هەن، هەر بەشێک ئەبێت یەک ‹بۆمب›ی سەرەکی بۆ بینەر لە پێشەوە بگرێت.»</p>
+</div>
+
+<div class="decision-card">
+  <h4>٤. ڕۆڵی AI</h4>
+  <p>نە دوژمنی بابەتی. نە بۆشایی. «AI بزوێنەرێکی بڕیاردانی بێلەمە کە کەموکوڕی نالی چالاک ئەکات.» کورتتر: «AI بەرگری لە بڕیاری خراپ لائەبات.»</p>
+</div>
+
+<div class="decision-card">
+  <h4>٥. AI ئۆفلاین = کاتژمێری شاراوە</h4>
+  <p>ئەپدەیتی ڤێرژن کێشەی چاندن نییە — مێکانیزمی کاتژمێرە. AI ئۆفلاین بوون کاتژمێری شاراوی فیلمەکەیە.</p>
+</div>
+
+<div class="decision-card">
+  <h4>٦. پاراستنی دیمەنی ١٢–١٨</h4>
+  <p>«ئەم دیمەنانە نابێت لە ڕووی کارکردنی چیرۆکییەوە کەم بکرێنەوە. هەر کورت کردنەوەیەک ئەبێت هەموو بیتەکان بپارێزێت و تەنها جێبەجێکردنەکە تەسک بکات.»</p>
+</div>
+
+<div class="decision-card">
+  <h4>٧. قەنەفەکە — تەواوبوونی مەرجدار</h4>
+  <p>بابەتەکە مەگۆڕە — بیپارێزە بە چاکسازی گرژی سەرەوە. هێزی قەنەفەکە بە مەرجی ئەوەیە ئەکت ٢A فشاری تەواو دابین بکات.</p>
+</div>
+
+<div class="decision-card">
+  <h4>٨. وەرچەرخانەکە — ئاشکرابوون، نەک پاشگەزبوون</h4>
+  <p>«دیمەنی ٤٣ پاشگەزبوونەوە لە ڕاستی نییە؛ ئاشکرابوونی پرۆسەیە. فیلمەکە ڕووداوەکان دەمرشانێتەوە نییە — ئەوەیە دەردەخات کە نالی چۆن دروستیان ئەکات. بینەر ئەبێت بڕوات بە تێگەیشتنی مێشکی نالی، نەک بە گومانکردن لە چیرۆکەکە. بۆ ئەوەی ئەمە کار بکات، بینەر ئەبێت پێشتر هەست بکات بە توانای نالی بۆ خەیاڵکردنی ئەنجامی فاجعەکاری. وەرچەرخانەکە ئەبێت هەست پێ بکرێت پێش ئەوەی تێبگاترێت.»</p>
+</div>
+
+<div class="decision-card">
+  <h4>٩. شرووبی — جەختی ڕەفتاری</h4>
+  <p>کێشەکە ڕوونی نییە بەڵکو بارودۆخی هەستیاری خواردنەکەیە. ئەبێت وەک ئازادبوون، خۆشحاڵی، ئاسوودەیی هەست پێ بکرێت — نەک ئاماژە.</p>
+</div>
+
+<div class="decision-card">
+  <h4>١٠. کەموکوڕی بنچینەیی نالی</h4>
+  <p>«نالی متمانە بە ڕاستی ناکات — متمانە بە تەفسیری ناوبژیوانکراو ئەکات. فاجعەکە ئەوە نییە کە نالی بڕیاری هەڵە ئەدات — ئەوەیە کە ناتوانێت بڕیارێک بدات بەبێ ناوبژیوان.»</p>
+</div>
+
+<div class="decision-card">
+  <h4>١١. ژانری داخراو</h4>
+  <p>ئەمە دڵەڕاوکێی دەروونییە، نەک درامای پەیوەندییەکان.</p>
+</div>
+
+<div class="decision-card">
+  <h4>١٢. دیمەنی دوو-کاری</h4>
+  <p>هەر دیمەنێکی نزیکایەتیی هەستیار ئەبێت هاوکات مەترسی بەرز بکات. هەر دیمەنێک دوو کار ئەکات: پەیوەندی هەستیار + بەرزبوونەوەی مەترسی.</p>
+</div>
+
+<div class="decision-card">
+  <h4>١٣. بینەر > نالی پێش ناوەڕاست</h4>
+  <p>«بینەر ئەبێت پێش ناوەڕاست فیلمەکە زیرەکتر بێت لە نالی.» ئێستا بینەر = نالی ← دڵەڕاوکێ لاواز. چاکسازی: بینەر > نالی ← گرژی داخ ئەبێت.</p>
+</div>
+
+</div><!-- end tab-decisions -->
+
+<!-- ============================================================ -->
+<!-- TAB 3: گەنگەشە -->
+<!-- ============================================================ -->
+<div class="tab-content" id="tab-conversation">
+
+<h2>گەنگەشەی پێش کۆبوونەوە — بەبێ بڕین</h2>
+<p style="font-size:0.85rem; color:var(--text-dim); margin-bottom:1.5rem;">
+گەنگەشەی تەواوی نێوان دەریا ئیبراهیم و AI لەسەر چاوخشاندنەوەکە پێش چاوپێکەوتنی سەروەر. هەموو وشەیەک بە هەمانشێوە پاراستراوە. سەروەر: ئەتوانیت هەر بڕیارێک لێرە بەرپرسیاری بکەیتەوە.
+</p>
+
+<!-- دانیشتنی ١ -->
+<div class="conv-session open">
+<div class="conv-session-header" onclick="this.parentElement.classList.toggle('open')">دانیشتنی ١ — چاوخشاندنەوەی دەریا لەسەر شیکاری AI (١٠ خاڵ)</div>
+<div class="conv-session-body">
+
+<div class="conv-msg">
+<div class="conv-who darya">دەریا</div>
+<div class="conv-text">
+<p><strong>خاڵی ١ — «بزوێنەری بەهێز / دابەشکردنی ناهاوتای سووتەمەنی»</strong></p>
+<p>شیکارەکەت: بەهێز و ڕاست — جیاوازی نێوان بابەت و جێبەجێکردنت ناسایەوە.</p>
+<p>چاکسازی من: تۆزێک ئاسایی دەیکەیت. ئەمە تەنها «سووتەمەنی ناهاوتا» نییە — <em>سیستەمێکی کۆنترۆڵکراوە بە یەک سوپاپی شکاوەوە (ئەکت ٢A)</em>.</p>
+<p>ئەمە گرنگە چونکە ڕێگا لە پارێزکاری گشتی ئەگۆڕێت بۆ چاکسازی نەشتەرگەری.</p>
+
+<p><strong>خاڵی ٢ — کێشەی ئەکت ٢A</strong></p>
+<p>هەلوێستی تۆ: کێشەی درێژی نییە، کێشەی دڵەڕاوکێیە، بینەر نایەکسانی زانیارییەکی نییە.</p>
+<p>ڕازیم: ١٠٠٪ ڕاست.</p>
+<p>پاڵنانی من: لە شیکاریدا وەستایت. نەچوویتە ئاکامەکە. کێشە ڕاستەقینەکە تەنها «نایەکسانی زانیاری» نییە — ئەوەیە: <em>هیچ هێڵی مەترسی چالاکێک لەکاتی نزیکبوونەوەی هەستییەکاندا نییە.</em></p>
+<p>زیاد بکە: هەر بیتێکی هەستیار ئەبێت هاوکات مەترسی زیاد بکات.</p>
+
+<p><strong>خاڵی ٣ — «بۆمبی ژێر مێزەکە»</strong></p>
+<p>بەکارهێنانی ئەنالۆجیای هیچکۆکەکەت: باش، بەڵام تۆزێک گشتی.</p>
+<p>لەم چیرۆکەدا بۆمبەکە تەنها «جەنازە لە قەنەفەدا» نییە. ڕاستییەکەی ٣ بۆمبی چینکراوە: ١) بارودۆخی گەشە ٢) دەروونی نالی ٣) پشتبەستنی بە AI.</p>
+<p>شیکارەکەت ئەبێت: نەک «بۆمبەکە» — بەڵکو <em>«بۆمبی فرە بە تەقینەوەی دواکەوتوو»</em>.</p>
+
+<p><strong>خاڵی ٤ — AI (بنچینەی بابەتی)</strong></p>
+<p>هەلوێستی تۆ: بەهێز، وەک بنچینەی بابەتی ناسایتەوە.</p>
+<p>چاکسازی من: تۆ وەک پشتیوانی مامەڵەی لەگەڵ ئەکەیت، بەڵام ڕاستییەکەی: <em>دوژمنی ئەخلاقی فیلمەکەیە.</em> نەک ئامراز. نەک بابەت. ئەوەیە جێنشینی غەریزەی مرۆیی ئەبێت و فاجعە دروست ئەکات.</p>
+<p>زیاد بکە: AI نەک «هاوڕێی ساختە» — بەڵکو <em>مێکانیزمی تباهکردنی بڕیار</em>.</p>
+
+<p><strong>خاڵی ٥ — ئەپدەیتی ڤێرژن</strong></p>
+<p>خاڵەکەت: پێویستی بە چاندنی زوویە ← ڕاست.</p>
+<p>وردکردنەوەی من: ئەمە تەنها کێشەی چاندن نییە — <em>مێکانیزمی کاتژمێرە</em>. «AI ئۆفلاین بوون کاتژمێری شاراوی فیلمەکەیە.»</p>
+
+<p><strong>خاڵی ٦ — قەنەفەکە</strong></p>
+<p>هەلوێستی تۆ: «دەستی لێ مەدە.»</p>
+<p>پاڵنانی من: ئەمە بیرکردنەوەیەکی مەترسیدارە. نەک دەستنەلێدراو — بنەڕەتییەکەی تەواوە بەڵام <em>پشتبەستوو بە ڕیتم</em>. ئەگەر گرژی سەرەوە چاکنەبکرێت، قەنەفەکە هێزی خۆی لەدەست ئەدات.</p>
+
+<p><strong>خاڵی ٧ — بەرهەمهێنەر دژ بە هەلوێستی تۆ</strong></p>
+<p>ئامۆژگاریەکەت: مەبڕە ← گرژی زیاد بکە.</p>
+<p>ڕاستییەکە: هەندێک <em>کورت کردنەوەی ورد</em> پێویستە. نەک بڕینی بنەڕەتی. زیاد بکە: «دووبارەکاری بکورتەوە، نەک ماوە.»</p>
+
+<p><strong>خاڵی ٨ — مامەڵەکردن لەگەڵ وەرچەرخانەکە</strong></p>
+<p>تۆ مەترسیت ناسایەوە (باش). پاڵنانی من: زۆر بەوریایییەوەیت. ئەم وەرچەرخانە ڕاستەقینەتا مەترسیدار نییە. تەنها لاواز ئەبێت ئەگەر: بەرزبوونەوەی دەروونی نەبوو، ڕەواکاری بابەتی نەبوو.</p>
+
+<p><strong>خاڵی ٩ — شرووبی</strong></p>
+<p>تێبینییەکەت: لەوانەیە زۆر ورد بێت.</p>
+<p>وریابوون: ئێستا هاوسەنگە. کێشە ڕاستەقینەکە ڕوونی نییە، بەڵکو بارودۆخی هەستیاری خواردنەکەیە. نابێت وەک ئاماژە هەست پێ بکرێت — ئەبێت وەک ئازادبوون / خۆشحاڵی / ئاسوودەیی. جەختکردن لەسەر ڕەفتار، نەک زانیاری.</p>
+
+<p><strong>خاڵی ١٠ — تۆنی گشتی شیکارەکەت</strong></p>
+<p>بەهێزییەکانت: بیرکردنەوەی بنەڕەتی، غەریزەی دروست، زمانی سینەمایی.</p>
+<p>پێویست: لە شیکار بچۆ بۆ زمانی بڕیار. وشەی گشتی کەم بکەرەوە. ڕوونی مێکانیکی زیاد بکە.</p>
+
+<p><strong>بینە زیادەکان:</strong></p>
+<p>ئەلف. فیلمەکە هەوڵ ئەدات هەم نزیکایەتیی هەستیار و هەم دڵەڕاوکێ بێت لە هەمان کاتدا — بەبێ تێکەڵکردنیان. دیمەنەکان ئەبێت دوو کار بکەن.</p>
+<p>ب. کەموکوڕی بنچینەیی نالی نەک پارانۆیایە — <em>ناوبژیوانکردنی بڕیارە</em>.</p>
+<p>ج. ژانری داخراو: دڵەڕاوکێی دەروونییە، نەک درامای پەیوەندییەکان.</p>
+</div>
+</div>
+
+<div class="conv-msg">
+<div class="conv-who ai">AI</div>
+<div class="conv-text">
+<p><strong>خاڵی ١:</strong> تۆ ڕاستیت. «دابەشکردنی ناهاوتای سووتەمەنی» ئەوە ئەگەیەنێت کێشەکە بڵاوە — نییە. ئامێرەکە کار ئەکات. ئەکت ٢A درزەکەیە. <span class="conv-locked">داخرا</span></p>
+
+<p><strong>خاڵی ٢:</strong> ڕازیم بەڵام دوو شت جیا ئەکەمەوە. «نایەکسانی زانیاری» چاکسازی لای بینەرە. «هێڵی مەترسی چالاک» مێکانیزمی لای سیناریۆیە. هەردووکیان ڕاستن بەڵام چینی جیاوازن. شیکارەکەم بینەر باس کرد. تۆ هۆکاری بنەڕەتییەکەت زیاد کرد. دوو چینەکە لەسەر یەکدی بنێ.</p>
+
+<p><strong>خاڵی ٣ — پاڵنانەوە:</strong> ڕاستە سێ تەقینەوەی دواکەوتوو هەن. بەڵام بۆمبی هیچکۆک بە یەکگیری و ڕوونی کار ئەکات. ئەگەر «بۆمبی فرە» بنووسم بۆ سەروەر، ڕەچەتەکە تێکەڵ ئەبێت. دژبەرم: نەک سێ بۆمب — <em>یەک بۆمب، یەک فتیل، یەک تەقەمەنی.</em></p>
+
+<p><strong>خاڵی ٤ — بەرپرسبوونەوەی توند:</strong> AI دوژمنی ئەخلاقی نییە. دوژمن هێز و مەبەستی هەیە. AI لەم سیناریۆدا هەمان شتە ئەکات کە بۆی دیزاین کراوە. دژبەرم: AI نەک دوژمنی ئەخلاقییە — <em>AI بۆشایی ئەخلاقییە</em> — ئەو شوێنەی بڕیاری مرۆیی ئەبێت تێیدا بێت.</p>
+
+<p><strong>خاڵی ٥:</strong> تۆ ڕاستیت. «کێشەی چاندن» زۆر نەرمە. <span class="conv-locked">داخرا</span></p>
+
+<p><strong>خاڵی ٦:</strong> «دەستی لێ مەدە» کورتکراوەیەکی تەمبەڵانە بوو. بابەتەکە بنەڕەتییەکەی تەواوە بەڵام هێزەکەی بە مەرجە. <span class="conv-locked">داخرا</span></p>
+
+<p><strong>خاڵی ٧ — نیوە بەرگری:</strong> ڕاستە «مەبڕە» دیفێنسیڤ دەرئەکەوێت. بەڵام کاتێک ئەڵێت «بکورتەوە»، دەرهێنەر «ببڕە» ئەبیستێت. پێشنیارەکەم: <em>«کورت کردنەوە بکە، مەسڕەوە.»</em></p>
+
+<p><strong>خاڵی ٨:</strong> «هەمووی لە سەری بوو» نەفرەتلێکراوترین وەرچەرخانە لە سینەمادا. ئەگەر کار نەکات فیلمەکە تێکئەچێت. چوارچێوەکەم ئەگۆڕم: <em>«ئەمە باڵاترین پاداشتە لە سیناریۆکەدا، و وردترین ئەندازیارییەکی پێویستە.»</em></p>
+
+<p><strong>خاڵی ٩:</strong> تۆ تەواو بردیت. جەختی ڕەفتاری لەسەر جەختی زانیاری. <span class="conv-locked">داخرا</span></p>
+
+<p><strong>خاڵی ١٠، ئەلف، ب، ج:</strong> قبووڵ کراو. <span class="conv-locked">داخرا</span></p>
+
+<p><strong>پوختە — هێشتا کراوە:</strong> خاڵی ٣ (مۆدێلی بۆمب)، خاڵی ٤ (ڕۆڵی AI)، خاڵی ٧ (زمانی کورت کردنەوە)، خاڵی ٨ (وەرچەرخان).</p>
+</div>
+</div>
+
+</div>
+</div>
+
+<!-- دانیشتنی ٢ -->
+<div class="conv-session">
+<div class="conv-session-header" onclick="this.parentElement.classList.toggle('open')">دانیشتنی ٢ — چارەسەری خاڵە کراوەکان</div>
+<div class="conv-session-body">
+
+<div class="conv-msg">
+<div class="conv-who darya">دەریا</div>
+<div class="conv-text">
+<p><strong>خاڵی ٣:</strong> تۆ بۆ جێبەجێکردن ڕاستیت. بەڵام شیکارەکەت بۆ شیکاری قۆناغی پەرەپیداییە نەک قۆناغی ڕاگرتن. هەردوو مۆدێلەکە بەکاربهێنە: شیکار = فرە-چین، ڕێنمایی = یەک بۆمبی سەرەکی بۆ هەر قۆناغێک. <em>«لەگەڵ ئەوەی مەترسی نهێنی زۆر هەن، هەر بەشێک ئەبێت یەک ‹بۆمب›ی سەرەکی بۆ بینەر لە پێشەوە بگرێت.»</em></p>
+
+<p><strong>خاڵی ٤:</strong> AI پێویستی نییە هێز هەبێت تا وەک دوژمن کار بکات. کەشوهەوا = دوژمن. کۆمەڵگا = دوژمن. نەخۆشی = دوژمن. بەڵام «بۆشایی» زۆر پاسیڤە. چارەسەر: نەک دوژمن ❌، نەک بۆشایی ❌. <em>«AI بزوێنەرێکی بڕیاردانی بێلەمە کە کەموکوڕی نالی چالاک ئەکات.»</em> کورتتر: <em>«AI بەرگری لە بڕیاری خراپ لائەبات.»</em></p>
+
+<p><strong>خاڵی ٧:</strong> «کورت کردنەوە بکە، مەسڕەوە» هێشتا نەرمە. تۆ هەوڵ دەدەیت دیمەنەکان بە وشەبەندی بپارێزیت لەجیاتی بە مشتومڕ. بەهێزتر: <em>«ئەم دیمەنانە نابێت لە ڕووی کارکردنی چیرۆکییەوە کەم بکرێنەوە. هەر کورت کردنەوەیەک ئەبێت هەموو بیتەکان بپارێزێت و تەنها جێبەجێکردنەکە تەسک بکات.»</em></p>
+
+<p><strong>خاڵی ٨:</strong> چوارچێوەی باشتر: <em>«وەرچەرخانەکە بنەڕەتییەکەی دروستە، بەڵام ئێستا کەم-پشتگیری کراوە.»</em> ئەمە خەونی وەرچەرخان نییە — <em>خوڵی دەرچوونی دەروونییە</em>. ئەم جیاوازییە ئەبێت لە شیکارەکەتدا دەربکەوێت.</p>
+
+<p><strong>خاڵی ب:</strong> <em>«نالی متمانە بە ڕاستی ناکات — متمانە بە تەفسیری ناوبژیوانکراو ئەکات.»</em> ئەمە هەموو شتێک ڕوون ئەکاتەوە. زیاد بکە: <em>«فاجعەکە ئەوە نییە کە نالی بڕیاری هەڵە ئەدات — ئەوەیە کە ناتوانێت بڕیارێک بدات بەبێ ناوبژیوان.»</em></p>
+
+<p><strong>شتێکی تر:</strong> <em>«بینەر ئەبێت پێش ناوەڕاست فیلمەکە زیرەکتر بێت لە نالی.»</em></p>
+</div>
+</div>
+
+<div class="conv-msg">
+<div class="conv-who ai">AI</div>
+<div class="conv-text">
+<p><strong>خاڵی ٣:</strong> ڕاست، جیاوازییەک کە خۆم ئەبێت بیبینم. دوو زمانی جیاواز بۆ دوو مەبەستی جیاواز. <span class="conv-locked">داخرا</span></p>
+<p><strong>خاڵی ٤:</strong> «بۆشایی» زۆر پاسیڤە. «بزوێنەری بڕیاردانی بێلەم» مێکانیکییەکەی تەواوە. <span class="conv-locked">داخرا</span></p>
+<p><strong>خاڵی ٧:</strong> تۆ گرتمت تەواو ئەو شتەم دەکرد کە بەرهەمهێنەرەکەم تاوانبار کرد. <span class="conv-locked">داخرا</span></p>
+<p><strong>خاڵی ٨:</strong> «مەترسیدار» زمانی ترسە و «کەم-پشتگیری کراوە» زمانی ئەندازیارییە. بەڵام دەمەوێت وردتر بم: «خوڵی دەرچوونی دەروونی» دژ بە «خەونی وەرچەرخان» — ئەم جیاوازییە ئەبێت لە شیکارەکەدا بێت. <em>«دیمەنی ٤٣ پاشگەزبوونەوە لە ڕاستی نییە — ئاشکرابوونی دەروونییە.»</em></p>
+<p><strong>خاڵی ب:</strong> «نالی متمانە بە ڕاستی ناکات — متمانە بە تەفسیری ناوبژیوانکراو ئەکات.» ئەمە ئەو ڕستە بنچینەییە بوو کە نەبووم. <span class="conv-locked">داخرا</span></p>
+<p><strong>بینەر > نالی:</strong> ئەمە وەشانی کارکردنی هەموو شتە. <span class="conv-locked">داخرا</span></p>
+</div>
+</div>
+
+</div>
+</div>
+
+<!-- دانیشتنی ٣ -->
+<div class="conv-session">
+<div class="conv-session-header" onclick="this.parentElement.classList.toggle('open')">دانیشتنی ٣ — چارەسەری کۆتایی: زمانی وەرچەرخان</div>
+<div class="conv-session-body">
+
+<div class="conv-msg">
+<div class="conv-who darya">دەریا</div>
+<div class="conv-text">
+<p>چوارچێوەکەی وەرچەرخانەکەت — <strong>بەڵێ. ئەمە دائەنیشێت. بە بەهێزی. بیهێڵەوە.</strong></p>
+<p>وردکردنەوە: «ئاشکرابوونی دەروونی» ڕاستە بەڵام هێشتا تۆزێک ئابستراکتە. وەشانی وردتر:</p>
+<p><em>«دیمەنی ٤٣ پاشگەزبوونەوە لە ڕاستی نییە؛ ئاشکرابوونی پرۆسەیە. فیلمەکە ڕووداوەکان دەمرشانێتەوە نییە — ئەوەیە دەردەخات کە نالی چۆن دروستیان ئەکات.»</em></p>
+<p>شتێکی تر: <em>«بۆ ئەوەی ئەمە کار بکات، بینەر ئەبێت پێشتر هەست بکات بە توانای نالی بۆ خەیاڵکردنی ئەنجامی فاجعەکاری پێش دیمەنی ٤٣.»</em></p>
+<p>دەروازەی کۆتایی: <em>«فیلمەکە نابێت وەرچەرخانەکە ڕابگەیەنێت؛ ئەبێت بینەر هەستی پێبکات پێش ئەوەی تێبگاترێت.»</em></p>
+<p>وەشانی تێکەڵکراوی کۆتایی: <em>«دیمەنی ٤٣ پاشگەزبوونەوە لە ڕاستی نییە؛ ئاشکرابوونی پرۆسەیە. فیلمەکە ڕووداوەکان دەمرشانێتەوە نییە — ئەوەیە دەردەخات کە نالی چۆن دروستیان ئەکات. بینەر ئەبێت بڕوات بە تێگەیشتنی مێشکی نالی، نەک بە گومانکردن لە چیرۆکەکە. بۆ ئەوەی ئەمە کار بکات، بینەر ئەبێت پێشتر هەست بکات بە توانای نالی بۆ خەیاڵکردنی ئەنجامی فاجعەکاری. وەرچەرخانەکە ئەبێت هەست پێ بکرێت پێش ئەوەی تێبگاترێت.»</em></p>
+</div>
+</div>
+
+<div class="conv-msg">
+<div class="conv-who ai">AI</div>
+<div class="conv-text">
+<p>ئەمە بەهێزترین نوسراوە لە هەموو شیکارەکەدا. <span class="conv-locked">داخرا</span> — هەموو وشەیەکی.</p>
+<p><strong>هەموو ١٣ خاڵ داخران. هیچ خاڵی کراوە نەما.</strong></p>
+</div>
+</div>
+
+</div>
+</div>
+
+</div><!-- end tab-conversation -->
+
+<!-- ============ FOOTER ============ -->
+<hr style="border-color: var(--border); margin: 3rem 0;">
+<p style="text-align:center; color:var(--text-dim); font-size:0.8rem;">
+  چاوخشاندنەوەی کتێبی چیرۆک · ڤێرژنی ٢.٠ — بۆ گەنگەشەی دەریا، AI و سەروەر<br>
+  ١٣ بڕیار لە ڕێگەی گەنگەشەی دژایەتیکارانە داخران. هەمووی کراون بۆ بەرپرسبوونەوەی دەرهێنەر.<br>
+  دەنگی دەرهێنەر پیرۆزە. ئێمە تیژ ئەکەینەوە — نوسینەوە ناکەین.
+</p>
+
+<script>
+const scenes = [
+  { num: 1, loc: "ژووری نالی", time: "ڕۆژ", summary: "درەنگ بەخەبەر دێت. نازی پەیوەندی ئەکات.", bomb: "هێشتا هیچ — تەنها دامەزراندن.", tension: 2, quality: "mid", threads: [], gap: null, note: null },
+  { num: 2, loc: "باخچە", time: "خۆرئاوا", summary: "سەیری ئەمبوڵانس. باخەوان باسی جووتە مردووەکان ئەکات. پەنجەی ئەبڕێت.", bomb: "چیرۆکی جووتە مردووەکان — تۆوی هەمووی. خەیاڵی نالی دەست پێ ئەکات.", tension: 5, quality: "high", threads: ["frame"], gap: null, note: "ئەمە دیمەنی ڕاستەقینەیە. هەمووی دوای ئەمە لە سەری نالییە.", badges: ["pivot"] },
+  { num: 3, loc: "ماڵی باخچە", time: "ئێوارە", summary: "ڤیدیۆ کۆڵ لەگەڵ گەشە. بانگی AI.", bomb: "بێقەراری گەشە: 'ئەگەر دوایی بخەیت هەرگیز نایەم.' بۆچی ئاوەها بێقەرارە؟", tension: 4, quality: "mid", threads: ["phone", "ai"], gap: "بێقەراری گەشە بە نهێنی پڕنەکراوە. پێویستمانە بریسکەیەک.", note: "گەشە لەکاتی پەیوەندیدا جارێک سەیری لادێ ئەکات. تۆو ئەچینین." },
+  { num: 4, loc: "ئۆتۆمبێل", time: "ڕۆژ", summary: "بەدوای گەشەدا. ژنی ڕێبوار باسی ڕووداو ئەکات.", bomb: "ئاماژەی ژنی ڕێبوار بە تراژیدیا = ترسی ئاسایی.", tension: 4, quality: "mid", threads: [], gap: null, note: "مناڵەکە لە پشتەوە سەیری نالی ئەکات. مناڵی وردبووەوە = بێئارامی." },
+  { num: 5, loc: "بازگە", time: "ڕۆژ", summary: "بازگەی پۆلیس، ئەمنی توند.", bomb: "بازگەکە = جیهانی دەرەوە مەترسیدارە. کامێرا پشکنین ئەکرێت.", tension: 3, quality: "mid", threads: [], gap: "ئێستا کارکردییە بەڵام دڵەڕاوکێ نییە.", note: "سەربازێک یەک بیت زیاتر لە پێویست سەیری نالی ئەکات." },
+  { num: 6, loc: "بازاڕ", time: "ڕۆژ", summary: "گەشە ئەبینێت. بانگی AI دەربارەی گوڵ.", bomb: "گەشە لەنێو گوڵەکاندا — بەڵام لە خەڵکی ئەشارێتەوە.", tension: 3, quality: "mid", threads: ["ai", "phone"], gap: "بانگی AI گرژییەکە سارئەکاتەوە.", note: "کەسێک لە بازاڕ سەیری گەشە ئەکات. ڕووی ئەگێڕێتەوە." },
+  { num: 7, loc: "ئۆتۆمبێل", time: "ڕۆژ", summary: "شیرینی شرووبی دەکڕێت. گەشە بێدەنگە.", bomb: "شرووبییەکان! تفەنگی چیکۆڤ پڕئەکرێت. بەڵام پڕکردنەکە زۆر بێدەنگە.", tension: 5, quality: "mid", threads: ["shrubi", "phone"], gap: "کڕینی شرووبییەکە ئەبێت لە ڕێگەی ڕەفتار تۆمار بکرێت بەبێ ئاشکرابوون.", note: "دێڕی گەشە: 'ئەمانە ئەمکوژن' — بە پێکەنینەوە. لە ساتی ئاسوودەیی و خۆشحاڵیدا. هەروەها: مۆبایلەکەی ئەکوژێنێتەوە. دوو بۆمب لە یەک دیمەندا.", badges: ["bomb"] },
+  { num: 8, loc: "قەراخ ڕێگا", time: "ڕۆژ", summary: "وەستانی میوە. تەحەدای تونێل.", bomb: "گەشە دانابەزێت. لە بینین ئەترسێت. تونێلەکە = دەروازەی جیهانێکی تر.", tension: 4, quality: "high", threads: ["phone"], gap: null, note: "تونێلەکە لووتکەی هەستی فیلمەکەیە پێش ئەوەی هەمووی بگۆڕێت. بیپارێزە." },
+  { num: 9, loc: "بازگە", time: "ڕۆژ", summary: "هۆشداری بکوژی سەرخۆش.", bomb: "ڕاگەیاندنی ساختە بۆ بینەر. ناوبردنی 'کوشتن' ئامادەکاری بۆ مەرگ.", tension: 5, quality: "high", threads: [], gap: null, note: "مەترسی ڕاستەقینە هەر لە ئۆتۆمبێلەکەدایە (شرووبییەکان) و لە ناو ماڵی نالییە." },
+  { num: 10, loc: "ئۆتۆمبێل", time: "ڕۆژ", summary: "چیرۆکی پاریس. خۆر ئاوا ئەبێت.", bomb: "نالی ماسکی خۆی ئەبەستێت.", tension: 3, quality: "low", threads: [], gap: "لاوازترین دیمەنی ئەکت ١.", note: "گەشە ئەڵێت 'ئەبێت پێش تاریکبوون بگەین' بە بێقەراری. ئاگاداربوونی لە مەترسییەکە." },
+  { num: 11, loc: "باخچە", time: "خۆرئاوا", summary: "گەیشتن. سەگەکە پێشوازی ئەکات.", bomb: "هێمنی پێش ڕەشەبا. نەبوونی بۆمب شۆکی د١٢ ئامادە ئەکات.", tension: 3, quality: "high", threads: [], gap: null, note: "پێشوازی تەواوی سەگەکە بەشێکە لە خەیاڵەکە (چاکسازی ٣)." },
+  { num: 12, loc: "ماڵی باخچە", time: "ئێوارە", summary: "وەرچەرخان. گەشە ئەچێتە ژوورەوە — سەری ئاسک، ماسکەکان، دەرگای داخراو.", bomb: "ماڵەکە خۆی بۆمبەکەیە. بۆشایی نێوان ئاسایی نالی و ترسناکی ماڵەکە = گرژی.", tension: 7, quality: "high", threads: ["door"], gap: null, note: "دەرگای داخراو: گەشە ڕائەوەستێت. خۆی دەچەمێنێت. گوێ ئەگرێت. هیچ نابیستێت. بەڵام بینەر خەیاڵی هەمووی ئەکات.", badges: ["pivot"] },
+  { num: 13, loc: "باخچە", time: "ئێوارە", summary: "نالی گۆشت ئەدات بە سەگ. پەیامی دەنگی بۆ AI.", bomb: "نالی ڕاستییەکان بە تەکنەلۆژیا فلتەر ئەکات — کەموکوڕی بنچینەیییەکەی بەکار.", tension: 3, quality: "low", threads: ["ai"], gap: "پردەیە کە گرژی ناکات.", note: "کاتێک نالی قسە لەگەڵ AI ئەکات، گەشە لەناوەوە دەبیسین. لەوانەیە نزیکی دەرگای داخراوەکە بێتەوە. نالی تێنانیشێت. بینەر تێئەنیشێت." },
+  { num: 14, loc: "ماڵی باخچە", time: "ئێوارە", summary: "گەشە بە جلی نوێ. نانی ئێوارە. یاری دەست پێ ئەکات.", bomb: "یارییەکە ڕاستی لە کارەکتەرانە دەکێشێتە دەرەوە. بەڵام بۆمبەکە هێشتا پیشانی بینەر نەدراوە — هیچ هێڵی مەترسی چالاکێک نییە.", tension: 4, quality: "mid", threads: ["shrubi"], gap: "بێ گرژی. بینەر هێشتا هەست بە مەترسی ناکات. هەر بیتێکی هەستیار ئەبێت هاوکات مەترسی زیاد بکات.", note: "لە کاتی ئامادەکردنی نانی ئێواراندا، شرووبییەکان ئەبێت بەرچاو بن. کامێرا ساتێک لەسەری دەمێنێت." },
+  { num: 15, loc: "مەلەوانگە", time: "شەو", summary: "نالی بە جلەوە خۆی فڕێئەداتە مەلەوانگەکە.", bomb: "تەقریبەن هیچ.", tension: 2, quality: "low", threads: [], gap: "ڕەوتی یارییەکە ئەبڕێت.", note: "ببڕە یان کورتی بکەرەوە بۆ ١٠ چرکە: نالی لەژێر ئاو، پێکەنینی گەشە بە ئاوەوە لێدراو." },
+  { num: 16, loc: "ماڵی باخچە", time: "شەو", summary: "لووتکە. داوای مۆبایل. پرسیاری نەخۆشی کوشندە. خواردنی شرووبی.", bomb: "بۆمبی فرە: ١) گەشە باسی نەخۆشی کوشندە ئەکات — خۆی ٢) مۆبایلەکە ناتوانێت پیشان بدات ٣) شرووبی دیوانەوار. لەگەڵ ئەوەی مەترسی فرە چالاکن، بۆمبی سەرەکی شرووبییەکانە.", tension: 8, quality: "high", threads: ["shrubi", "phone", "door"], gap: null, note: "پرسیاری نەخۆشی کوشندەکە لە سەیری دووبارەدا وێرانکەرە. خواردنی شرووبی = لووتکە. ڕەفتاری: خۆشحاڵی و ئاسوودەیی، نەک ئاماژە.", badges: ["bomb"] },
+  { num: 17, loc: "باخچە / ماڵ", time: "شەو", summary: "بوێری: گەشە بۆ تاریکی. نالی جانتاکەی دەپشکنێت.", bomb: "دوو خیانەت: گەشە لە تاریکی، نالی شتەکانی دەپشکنێت.", tension: 7, quality: "high", threads: ["phone"], gap: null, note: "زیاد: گەشە بە لای دەرگای داخراوەکەدا تێئەپەڕێت. ڕائەوەستێت. دەستی ئەنێتە سەر دەسگیرەکە. ٥ چرکە. سێ بەرابەر." },
+  { num: 18, loc: "ماڵی باخچە", time: "شەو", summary: "گەشە لەسەر قەنەفەکە ئەخەوێت. نالی قسە لەگەڵ AI.", bomb: "گەشە قەنەفەکە هەڵدەبژێرێت — لەسەر تابووتی خۆی ئەخەوێت.", tension: 6, quality: "high", threads: ["sofa", "ai"], gap: null, note: "کامێرا لەسەر گەشەی خەوتوو دەمێنێت. ئارام. جوان. کۆتا جارە زیندوو دەبینن. با هەناسەی هەبێت.", badges: ["pivot"] },
+  { num: 19, loc: "ماڵی باخچە", time: "بەیانی", summary: "گەشە مردووە لەسەر قەنەفەکە. سارد.", bomb: "بۆمبەکە دەتەقێت! بۆمبی نوێ: هاوڕێکان لە ڕێگاوەن.", tension: 10, quality: "high", threads: ["sofa", "ai", "shrubi"], gap: null, note: "بانگکردنی AI وەک 'چیرۆکێک ئەنوسم' — ئەمە دیمەنەکەی فیلمەکەیە. AI بەرگری لە بڕیاری خراپ لائەبات. هیچ وشەیەکی مەگۆڕە.", badges: ["pivot", "bomb"] },
+  { num: 20, loc: "باخچە", time: "ڕۆژ", summary: "نازی و ئەدیب ئەگەن.", bomb: "جەنازەکە لە قەنەفەکەدایە.", tension: 8, quality: "high", threads: ["sofa"], gap: null, note: "ڕووخساری نالی کاتێک دەروازەکە ئەکاتەوە — نواندنە لەسەر چین." },
+  { num: 21, loc: "ماڵی باخچە", time: "ڕۆژ", summary: "هاوڕێکان دێنە ژوورەوە. نازی شرووبییەکان ئەبینێت. لەسەر قەنەفەکە دائەنیشن.", bomb: "لەسەر جەنازەکە دانیشتوون! لووتکەی هیچکۆک.", tension: 9, quality: "high", threads: ["sofa", "shrubi"], gap: null, note: "نازی: 'شیرینیتان خواردووە بانگمان نەکردوون؟' نالی بۆ یەک فریم ڕائەوەستێت." },
+  { num: 22, loc: "ماڵی باخچە", time: "ئێوارە", summary: "ئاکۆ و تارا ئەگەن.", bomb: "خەڵکی زیاتر = مەترسی زیاتر.", tension: 7, quality: "high", threads: ["sofa"], gap: null, note: null },
+  { num: 23, loc: "ماڵی باخچە", time: "شەو", summary: "تەمرینی چیکۆڤ. ئەدیب نزیک لە قەنەفە.", bomb: "شانۆکە ئاوێنەی چیرۆکی سەرەکییە. باڵندەی پڕ کراوە = گەشە.", tension: 7, quality: "high", threads: ["sofa"], gap: null, note: "دێڕێک لە چۆلەکە ئەبێت بارودۆخی گەشە بهێنێتەوە." },
+  { num: 24, loc: "باخچە", time: "شەو", summary: "نالی بانگی AI: 'چۆن بکەم بڕۆن؟' AI: 'شەڕ دروست بکە.'", bomb: "AI ئامۆژگاری وێرانکەر ئەدات — بەرگری لە بڕیاری خراپ لائەبات.", tension: 6, quality: "high", threads: ["ai", "sofa"], gap: null, note: "AI نازانێت جەنازەیەک هەیە — ئامۆژگاری کۆمەڵایەتی ئەدات. بۆشایی نێوان تێگەیشتنی AI و ڕاستییەکان = بنچینەی فیلمەکە." },
+  { num: 25, loc: "ماڵی باخچە", time: "شەو", summary: "ئەدیب سەرخۆش. باسی کوشتنی دراوسێ.", bomb: "کارەکتەرەکان بارودۆخی نالییان باس دەکەن. ئایرۆنی درامایی.", tension: 8, quality: "high", threads: ["sofa"], gap: null, note: "'کێ جەنازەیەک لە ماڵی خۆی ئەشارێتەوە؟' نالی ئەبێت ڕوویی ڕاست بپارێزێت." },
+  { num: 26, loc: "ماڵی باخچە", time: "شەو", summary: "ئەدیب لەسەر قەنەفەکە ڕائەوەستێت بۆ باڵندەکە.", bomb: "ئەدیب لەسەر قەنەفەکە! لووتکەی گرژی جەستەیی.", tension: 10, quality: "high", threads: ["sofa"], gap: null, note: "قەنەفەکە جیڕەیەک ئەکات. بە هێواشی. ئەدیب تێنانیشێت. نالی تێئەنیشێت.", badges: ["bomb"] },
+  { num: 27, loc: "باخچە", time: "شەو", summary: "تارا، ئاکۆ، نازی دەڕۆن.", bomb: "ئاسوودەیی — بەڵام ئەدیب دەمێنێتەوە.", tension: 5, quality: "high", threads: ["sofa"], gap: null, note: "هۆشداری نازی پێشبینییەکی باشە بۆ د٣١." },
+  { num: 28, loc: "ماڵی باخچە", time: "شەو", summary: "ئەدیب سوورە لەسەر قەنەفەکە بخەوێت.", bomb: "خراپترین ئەنجام. هەوڵ ئەدات بیکاتەوە — گیریوە.", tension: 9, quality: "high", threads: ["sofa"], gap: null, note: "کامێرا لەسەر چاوی نالی لە تاریکیدا. هەموو شەوەکە.", badges: ["bomb"] },
+  { num: 29, loc: "ماڵی باخچە", time: "بەیانی", summary: "ئەدیب جەنازەکە ئەدۆزێتەوە. نالی پاڵی پێئەنێت. ئەدیب دەمرێت.", bomb: "تەقینەوەی دووانە. ئێستا دوو جەنازەی هەیە.", tension: 10, quality: "high", threads: ["sofa"], gap: null, note: "پاڵنانەکە ئەبێت غەریزی بێت — نە شەڕ، نە هەڵبژاردن. تەنها ڕەقاسەیەکە.", badges: ["pivot", "bomb"] },
+  { num: 30, loc: "ئۆتۆمبێل", time: "ڕۆژ", summary: "جەنازەی ئەدیب لە کورسی تەنیشتدا.", bomb: "جەنازە لە کورسی تەنیشتدا. هەر کەسێک ئەتوانێت ببینێت.", tension: 7, quality: "high", threads: [], gap: null, note: "جەنازەکە بەرەو نالی کەمایش ئەبێت. لە ترافیک لایتێکدا ئۆتۆمبێلێک سەیری ئەکات." },
+  { num: 31, loc: "دۆڵ", time: "ڕۆژ", summary: "ئۆتۆمبێلەکە فڕێ ئەداتە لێوارەکەوە.", bomb: "ساختەکردنی ڕووداو.", tension: 6, quality: "mid", threads: [], gap: "دوای بەرزاییەکانی قەنەفەکە وەک هەنگاوی کارکردنی.", note: "شوانێک یان ئۆتۆمبێلێک لە دوورەوە. ئەبێت بشارێتەوە." },
+  { num: 32, loc: "ماڵی باخچە", time: "ڕۆژ", summary: "سەیری کامێراکان. ژوورە داخراوەکە ئەکاتەوە — ڕابردووی خۆی.", bomb: "کامێراکان بەڵگەن. ژوورەکە هەستییە.", tension: 5, quality: "mid", threads: ["door", "phone"], gap: null, note: "نالی ژوورەکە ئەکاتەوە و گەشەی مردوو بە وێنەکانی ناساند — ناز و ساردترین ساتی فیلمەکە. بەبێ مۆسیقا.", badges: ["pivot"] },
+  { num: 33, loc: "ئۆتۆمبێل", time: "ڕۆژ", summary: "جەنازەی پێچراو.", bomb: "دووبارەکردنەوەی د٣٠.", tension: 5, quality: "mid", threads: [], gap: "مەترسی کەمبوونەوە.", note: "جیاوازی: نالی ئارامترە. ترسەکە بووەتە ڕووتین. ئەوە ترسناکترە." },
+  { num: 34, loc: "بیابان", time: "ڕۆژ", summary: "چاڵ هەڵدەکەنێت. مۆبایلی گەشە ناکرێتەوە.", bomb: "مۆبایلەکە ناکرێتەوە — نهێنییەکانی گەشە لەگەڵی دەمرن.", tension: 4, quality: "mid", threads: ["phone"], gap: "مەترسی کارکردنی.", note: "تانکەرەکان — شتانە کە تێکشکان و بەجێ هێڵدران. وەک گەشە." },
+  { num: 35, loc: "شار", time: "شەو", summary: "مۆبایل و سیمکارت دەکڕێت.", bomb: "کەمترین. کارکردنییە.", tension: 2, quality: "low", threads: [], gap: "نزمترین خاڵ.", note: "لەگەڵ د٣٦ یەکبکەرەوە." },
+  { num: 36, loc: "بیابان", time: "شەو", summary: "ناتوانێت بینێژێت. جەنازەکە لە نزیک دارێک بەجێ دەهێڵێت. شتەکان دەسووتێنێت. ناسنامەکەی دەهێڵێت.", bomb: "مرۆڤایەتی نالی ئەگەڕێتەوە — ناتوانێت بیسڕێتەوە.", tension: 6, quality: "high", threads: [], gap: null, note: "مرۆییترین ساتی نالی. سووتاندنی مۆبایل بەڵام هێشتنەوەی ناسنامە = بەڵگە وێران ئەکات بەڵام ناسنامەی دەپارێزێت.", badges: ["pivot"] },
+  { num: 37, loc: "لووتکەی گرد", time: "شەو", summary: "سەیری ئەمبوڵانس. نامە بۆ AI. AI ئۆفلاینە.", bomb: "AI ئۆفلاین. کاتژمێری شاراوەکە تەواو بوو. تەنهایە.", tension: 5, quality: "high", threads: ["ai"], gap: null, note: "نامەکەی بۆ AI کە وەڵامی نادرێتەوە: تەنهاترین ساتی فیلمەکە. ئەگەر چاندنی ئومێد/نوێکردنەوە پێشتر کرابوایە، ئەمە قورستر ئەکەوێت." },
+  { num: 38, loc: "شانۆ", time: "ڕۆژ", summary: "سەماکەری سوورپۆش گەشەی بیرئەخاتەوە.", bomb: "هەستیار، نەک دڵەڕاوکێ.", tension: 3, quality: "mid", threads: [], gap: "مەترسی هەست بکرێت بە فیلمێکی جیاواز.", note: "سەمای د١٦ بهێنەوە — هەمان جووڵەی دیوانەوار لە جەستەی ئافرەتێکی تردا." },
+  { num: 39, loc: "شوقەی کۆن", time: "ڕۆژ", summary: "پۆلیس دێت.", bomb: "پۆلیس لە دەرگاکە!", tension: 7, quality: "high", threads: [], gap: null, note: "شوقەی تۆزاوی — ماڵی ڕاستەقینەی نالی. ماڵی باخچە = شانۆ بوو." },
+  { num: 40, loc: "بنکەی پۆلیس", time: "ڕۆژ", summary: "بازپرسی. ئەوین. گەشە بە نەخۆشی شەکرە مردووە. مردنی سروشتییە.", bomb: "بۆمبی کۆتایی: هەمووی بێکار بوو. ئەگەر بانگی ئەمبوڵانسی کردبایە — ئەگەر متمانەی بە ڕاستی کردبایە لەجیاتی ناوبژیوان لە ڕێگەی AI — هیچ ڕوونەدەدا.", tension: 9, quality: "high", threads: ["shrubi", "phone"], gap: null, note: "دوودڵی نێوان کوشتن و ڕووداو = دوودڵی نێوان ڕاستی و خەیاڵی فیلمەکە.", badges: ["pivot", "bomb"] },
+  { num: 41, loc: "کافێ", time: "ڕۆژ", summary: "ئەوین هەموو چیرۆکەکە ئەڵێت.", bomb: "وێرانی هەستیار.", tension: 4, quality: "high", threads: ["phone"], gap: null, note: "هەمووی دەنرخێت. بارانی کۆتایی = جیهان شیوەن ئەکات." },
+  { num: 42, loc: "ماڵی باخچە", time: "شەو", summary: "خەیاڵی سوریالی: ئاگر، سەگ، بووکەڵە-گەشە.", bomb: "دەروونی. تاوانباری نالی.", tension: 3, quality: "mid", threads: [], gap: "گۆڕانکارییەکی تۆنە.", note: "٦٠ چرکە لە زۆرترینەوە. وەک بارودۆخی مێشک." },
+  { num: 43, loc: "باخچە", time: "خۆرئاوا", summary: "وەرچەرخان. ئەگەڕێتەوە د٢. پەنجەی نەبڕاوە. گەشە زیندووە.", bomb: "هەموو فیلمەکە بۆمبەکە بوو. دیمەنی ٤٣ پاشگەزبوونەوە لە ڕاستی نییە؛ ئاشکرابوونی پرۆسەیە. فیلمەکە ڕووداوەکان دەمرشانێتەوە نییە — ئەوەیە دەردەخات کە نالی چۆن دروستیان ئەکات.", tension: 10, quality: "high", threads: ["frame"], gap: null, note: "کشانەوەی کامێرا لە کۆتاییدا — هەمان فریمی د٢. باخەوانەکە هێشتا لەناو چیرۆکەکەیدایە. کات تێنەپەڕیوە. تەلەفۆنەکە لێ ئەدات. وەڵامی ئەداتەوە؟ دوودڵی بهێڵەوە. وەرچەرخانەکە ئەبێت هەست پێ بکرێت پێش ئەوەی تێبگاترێت.", badges: ["pivot"] }
+];
+
+const arcBar = document.getElementById('arcBar');
+scenes.forEach(s => {
+  const bar = document.createElement('div');
+  bar.className = 'bar';
+  bar.style.height = (s.tension / 10) * 100 + '%';
+  let color = s.quality === 'high' ? 'var(--green)' : s.quality === 'mid' ? 'var(--yellow)' : 'var(--red)';
+  bar.style.background = color;
+  bar.innerHTML = `<span class="label">${s.num}</span><span class="score-label">${s.tension}/10</span>`;
+  bar.title = `د${s.num}: ${s.summary.substring(0, 50)}...`;
+  bar.onclick = () => {
+    switchTab('review');
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-btn')[0].classList.add('active');
+    setTimeout(() => {
+      const card = document.querySelector(`[data-scene="${s.num}"]`);
+      if (card) { card.classList.add('open'); card.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+    }, 100);
+  };
+  arcBar.appendChild(bar);
+});
+
+const container = document.getElementById('sceneContainer');
+const acts = [
+  { label: 'ئەکت ١ — دامەزراندن', start: 1 },
+  { label: 'ئەکت ٢ئەلف — ئێوارەکە (درزە بنەڕەتییەکە)', start: 12 },
+  { label: 'ئەکت ٢ب — قەیرانەکە', start: 19 },
+  { label: 'ئەکت ٣ — شاردنەوە و ئاشکرابوون', start: 30 }
+];
+let actIdx = 0;
+
+scenes.forEach(s => {
+  if (actIdx < acts.length && s.num === acts[actIdx].start) {
+    const d = document.createElement('div');
+    d.className = 'act-divider';
+    d.innerHTML = `<span>${acts[actIdx].label}</span>`;
+    container.appendChild(d);
+    actIdx++;
+  }
+  const card = document.createElement('div');
+  card.className = 'scene-card';
+  card.dataset.scene = s.num;
+  card.dataset.quality = s.quality;
+  card.dataset.hasGap = s.gap ? 'true' : 'false';
+  card.dataset.hasBomb = s.tension >= 7 ? 'true' : 'false';
+
+  let badges = '';
+  if (s.badges) {
+    s.badges.forEach(b => {
+      if (b === 'bomb') badges += '<span class="badge bomb">بۆمب</span>';
+      if (b === 'pivot') badges += '<span class="badge pivot">وەرچەرخان</span>';
+    });
+  }
+  if (s.gap) badges += '<span class="badge gap-badge">کەلێن</span>';
+  if (s.tension >= 8) badges += '<span class="badge ticking">گرژی بەرز</span>';
+
+  let body = '';
+  body += `<div class="scene-row"><span class="scene-label">شوێن</span><span class="scene-val">${s.loc} · ${s.time}</span></div>`;
+  body += `<div class="scene-row"><span class="scene-label">پوختە</span><span class="scene-val">${s.summary}</span></div>`;
+  body += `<div class="scene-row"><span class="scene-label bomb-label">بۆمبەکە</span><span class="scene-val">${s.bomb}</span></div>`;
+  body += `<div class="scene-row"><span class="scene-label">گرژی</span><span class="scene-val">${'█'.repeat(s.tension)}${'░'.repeat(10-s.tension)} ${s.tension}/١٠</span></div>`;
+  if (s.gap) body += `<div class="scene-row"><span class="scene-label gap-label">کەلێن</span><span class="scene-val">${s.gap}</span></div>`;
+  if (s.note) body += `<div class="creative-note"><div class="attr">تێبینی داهێنانی — دەریا / AI</div>${s.note}</div>`;
+
+  card.innerHTML = `
+    <div class="scene-header" onclick="this.parentElement.classList.toggle('open')">
+      <span class="scene-num">${s.num}</span>
+      <span class="scene-title">${s.summary.substring(0,60)}${s.summary.length>60?'...':''}</span>
+      <div class="scene-badges">${badges}</div>
+    </div>
+    <div class="scene-body">${body}</div>`;
+  container.appendChild(card);
+});
+
+function switchTab(tabId) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + tabId).classList.add('active');
+  const btns = document.querySelectorAll('.tab-btn');
+  const idx = tabId === 'review' ? 0 : tabId === 'decisions' ? 1 : 2;
+  btns[idx].classList.add('active');
+}
+
+function toggleAll(o) { document.querySelectorAll('.scene-card').forEach(c => o ? c.classList.add('open') : c.classList.remove('open')); }
+function filterScenes(f) {
+  document.querySelectorAll('.scene-card').forEach(c => {
+    c.style.display = f === 'all' ? '' : f === 'gap' ? (c.dataset.hasGap === 'true' ? '' : 'none') : (c.dataset.hasBomb === 'true' ? '' : 'none');
+  });
+}
+</script>
+
+</body>
+</html>

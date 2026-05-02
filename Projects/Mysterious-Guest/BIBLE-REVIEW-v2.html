@@ -1,0 +1,1564 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mysterious Guest — Layer 1 Suspense Review v2</title>
+<style>
+:root {
+  --bg: #0f0f0f;
+  --surface: #1a1a1a;
+  --surface2: #222;
+  --border: #333;
+  --text: #e0e0e0;
+  --text-dim: #888;
+  --amber: #D4A574;
+  --amber-dim: #8a6a42;
+  --red: #c0392b;
+  --red-dim: #7b241c;
+  --green: #27ae60;
+  --green-dim: #1e8449;
+  --blue: #2980b9;
+  --yellow: #f39c12;
+  --purple: #8e44ad;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Georgia', 'Times New Roman', serif;
+  line-height: 1.6;
+  padding: 2rem;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+h1, h2, h3 { font-family: 'Helvetica Neue', Arial, sans-serif; font-weight: 300; }
+h1 { font-size: 2.2rem; color: var(--amber); margin-bottom: 0.3rem; letter-spacing: -0.02em; }
+h2 { font-size: 1.5rem; color: var(--amber); margin: 2.5rem 0 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+h3 { font-size: 1.1rem; color: var(--text); margin-bottom: 0.5rem; }
+.subtitle { color: var(--text-dim); font-size: 1rem; margin-bottom: 0.3rem; }
+.meta { color: var(--text-dim); font-size: 0.85rem; margin-bottom: 2rem; }
+
+/* ===== TAB NAVIGATION ===== */
+.tab-nav {
+  display: flex;
+  gap: 0;
+  border-bottom: 2px solid var(--border);
+  margin-bottom: 2rem;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.tab-btn {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  padding: 0.8rem 1.5rem;
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  font-size: 0.85rem;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  white-space: nowrap;
+  transition: color 0.2s, border-color 0.2s;
+}
+.tab-btn:hover { color: var(--text); }
+.tab-btn.active {
+  color: var(--amber);
+  border-bottom-color: var(--amber);
+}
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* Executive Summary */
+.exec-box {
+  background: var(--surface);
+  border-left: 3px solid var(--amber);
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+  border-radius: 0 4px 4px 0;
+}
+.exec-box p { margin-bottom: 0.8rem; }
+.exec-box p:last-child { margin-bottom: 0; }
+
+.verdict {
+  display: inline-block;
+  padding: 0.2rem 0.8rem;
+  border-radius: 3px;
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.verdict.strong { background: var(--green-dim); color: #a9dfbf; }
+.verdict.needs-work { background: var(--yellow); color: #000; }
+.verdict.gap { background: var(--red-dim); color: #f5b7b1; }
+.verdict.opportunity { background: var(--purple); color: #d7bde2; }
+
+/* Suspense Arc */
+.arc-container {
+  background: var(--surface);
+  padding: 1.5rem;
+  border-radius: 4px;
+  margin: 1.5rem 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.arc-bar {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 120px;
+  padding-bottom: 1.5rem;
+  position: relative;
+  min-width: 500px;
+}
+.arc-bar .bar {
+  flex: 1;
+  min-width: 10px;
+  border-radius: 2px 2px 0 0;
+  position: relative;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.arc-bar .bar:hover { opacity: 0.8; }
+.arc-bar .bar .label {
+  position: absolute;
+  bottom: -1.4rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.55rem;
+  color: var(--text-dim);
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+}
+.arc-bar .bar .score-label {
+  position: absolute;
+  top: -1.2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.55rem;
+  color: var(--text-dim);
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  display: none;
+}
+.arc-bar .bar:hover .score-label { display: block; }
+.arc-legend {
+  display: flex;
+  gap: 1.5rem;
+  margin-top: 1rem;
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  flex-wrap: wrap;
+}
+.arc-legend span::before {
+  content: '';
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  margin-right: 4px;
+  vertical-align: middle;
+}
+.arc-legend .leg-high::before { background: var(--green); }
+.arc-legend .leg-mid::before { background: var(--yellow); }
+.arc-legend .leg-low::before { background: var(--red); }
+.arc-legend .leg-gap::before { background: var(--red-dim); border: 1px dashed var(--red); }
+
+/* Thread Tracker */
+.thread {
+  background: var(--surface);
+  border-radius: 4px;
+  padding: 1.2rem;
+  margin: 1rem 0;
+}
+.thread-title {
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.8rem;
+}
+.thread-title.shrubi { color: var(--yellow); }
+.thread-title.phone { color: var(--blue); }
+.thread-title.door { color: var(--purple); }
+.thread-title.sofa { color: var(--red); }
+.thread-title.ai-thread { color: var(--green); }
+.thread-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.thread-step {
+  background: var(--surface2);
+  padding: 0.4rem 0.7rem;
+  border-radius: 3px;
+  font-size: 0.78rem;
+  border-left: 2px solid var(--border);
+}
+.thread-step .sc { font-weight: 600; color: var(--amber); margin-right: 0.3rem; }
+
+/* Scene Cards */
+.scene-card {
+  background: var(--surface);
+  border-radius: 4px;
+  margin: 1.2rem 0;
+  overflow: hidden;
+}
+.scene-header {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.8rem 1rem;
+  background: var(--surface2);
+  cursor: pointer;
+  user-select: none;
+}
+.scene-num {
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--amber);
+  min-width: 2rem;
+}
+.scene-title {
+  flex: 1;
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  font-size: 0.85rem;
+  font-weight: 400;
+  min-width: 0;
+}
+.scene-badges {
+  display: flex;
+  gap: 0.3rem;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+.badge {
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  font-size: 0.6rem;
+  padding: 0.15rem 0.45rem;
+  border-radius: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.badge.bomb { background: var(--red-dim); color: #f5b7b1; }
+.badge.ticking { background: var(--yellow); color: #000; }
+.badge.gap-badge { background: #555; color: #ccc; }
+.badge.pivot { background: var(--amber-dim); color: var(--amber); }
+.badge.thread-badge { background: var(--purple); color: #d7bde2; font-size: 0.6rem; }
+
+.scene-body {
+  padding: 1.2rem;
+  display: none;
+  border-top: 1px solid var(--border);
+}
+.scene-card.open .scene-body { display: block; }
+
+.scene-row {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 0.3rem 1rem;
+  margin-bottom: 0.7rem;
+  font-size: 0.88rem;
+}
+.scene-label {
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-dim);
+  padding-top: 0.15rem;
+}
+.scene-label.bomb-label { color: var(--red); }
+.scene-label.gap-label { color: var(--yellow); }
+.scene-label.note-label { color: var(--green); }
+.scene-val { color: var(--text); }
+.scene-val em { color: var(--amber); font-style: normal; }
+
+.creative-note {
+  background: rgba(39, 174, 96, 0.08);
+  border-left: 2px solid var(--green);
+  padding: 0.6rem 0.8rem;
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  border-radius: 0 3px 3px 0;
+}
+.creative-note .attr { color: var(--green); font-size: 0.7rem; font-family: 'Helvetica Neue', Arial, sans-serif; }
+
+/* Recommendations */
+.rec-card {
+  background: var(--surface);
+  border-left: 3px solid var(--amber);
+  padding: 1.2rem;
+  margin: 1rem 0;
+  border-radius: 0 4px 4px 0;
+}
+.rec-card h3 { color: var(--amber); font-size: 1rem; margin-bottom: 0.5rem; }
+.rec-card p { font-size: 0.9rem; margin-bottom: 0.5rem; }
+.rec-card .impact { font-size: 0.78rem; color: var(--text-dim); }
+
+/* Act dividers */
+.act-divider {
+  text-align: center;
+  margin: 2.5rem 0 1.5rem;
+  position: relative;
+}
+.act-divider::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--border);
+}
+.act-divider span {
+  background: var(--bg);
+  padding: 0 1.5rem;
+  position: relative;
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--amber);
+}
+
+/* Controls */
+.controls {
+  display: flex;
+  gap: 0.5rem;
+  margin: 1rem 0;
+  flex-wrap: wrap;
+}
+.btn {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 0.4rem 0.8rem;
+  border-radius: 3px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+}
+.btn:hover { background: var(--border); }
+.btn.active { border-color: var(--amber); color: var(--amber); }
+
+/* Number stats */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 0.8rem;
+  margin: 1.5rem 0;
+}
+.stat-box {
+  background: var(--surface);
+  padding: 0.8rem;
+  border-radius: 4px;
+  text-align: center;
+}
+.stat-num {
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--amber);
+}
+.stat-label {
+  font-size: 0.7rem;
+  color: var(--text-dim);
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Conversation Log */
+.conv-session {
+  margin: 1.5rem 0;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.conv-session-header {
+  background: var(--surface2);
+  padding: 0.8rem 1rem;
+  cursor: pointer;
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  font-size: 0.9rem;
+  color: var(--amber);
+  user-select: none;
+}
+.conv-session-body {
+  display: none;
+  padding: 1rem;
+  background: var(--surface);
+}
+.conv-session.open .conv-session-body { display: block; }
+.conv-msg {
+  margin-bottom: 1.2rem;
+  padding-bottom: 1.2rem;
+  border-bottom: 1px solid var(--border);
+}
+.conv-msg:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+.conv-who {
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.4rem;
+}
+.conv-who.darya { color: var(--amber); }
+.conv-who.ai { color: var(--green); }
+.conv-text { font-size: 0.85rem; line-height: 1.7; }
+.conv-text strong { color: var(--text); }
+.conv-text em { color: var(--amber); font-style: normal; }
+.conv-locked {
+  display: inline-block;
+  background: var(--green-dim);
+  color: #a9dfbf;
+  font-size: 0.65rem;
+  padding: 0.1rem 0.4rem;
+  border-radius: 2px;
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-left: 0.3rem;
+}
+
+/* Locked Decisions */
+.decision-card {
+  background: var(--surface);
+  border-left: 3px solid var(--green);
+  padding: 1rem 1.2rem;
+  margin: 0.8rem 0;
+  border-radius: 0 4px 4px 0;
+}
+.decision-card h4 {
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--green);
+  margin-bottom: 0.4rem;
+}
+.decision-card p { font-size: 0.85rem; margin-bottom: 0.3rem; }
+
+/* ===== MOBILE RESPONSIVE ===== */
+@media (max-width: 768px) {
+  body { padding: 1rem 0.8rem; }
+  h1 { font-size: 1.5rem; }
+  h2 { font-size: 1.2rem; margin: 2rem 0 0.8rem; }
+  .tab-btn { padding: 0.6rem 1rem; font-size: 0.78rem; }
+  .scene-header { padding: 0.6rem 0.8rem; gap: 0.5rem; }
+  .scene-num { font-size: 1.1rem; min-width: 1.8rem; }
+  .scene-title { font-size: 0.78rem; }
+  .scene-body { padding: 0.8rem; }
+  .scene-row { grid-template-columns: 90px 1fr; font-size: 0.82rem; }
+  .scene-label { font-size: 0.7rem; }
+  .exec-box { padding: 1rem; }
+  .exec-box p { font-size: 0.88rem; }
+  .rec-card { padding: 1rem; }
+  .rec-card h3 { font-size: 0.9rem; }
+  .rec-card p { font-size: 0.82rem; }
+  .thread { padding: 0.8rem; }
+  .thread-step { font-size: 0.72rem; }
+  .stats-grid { grid-template-columns: repeat(3, 1fr); gap: 0.5rem; }
+  .stat-num { font-size: 1.4rem; }
+  .stat-label { font-size: 0.6rem; }
+  .stat-box { padding: 0.6rem 0.3rem; }
+  .controls { gap: 0.4rem; }
+  .btn { padding: 0.35rem 0.6rem; font-size: 0.7rem; }
+  .arc-bar { height: 90px; }
+  .badge { font-size: 0.55rem; padding: 0.1rem 0.35rem; }
+  .creative-note { font-size: 0.8rem; padding: 0.5rem 0.6rem; }
+  .conv-text { font-size: 0.8rem; }
+  .decision-card { padding: 0.8rem; }
+  .decision-card p { font-size: 0.8rem; }
+}
+
+@media (max-width: 420px) {
+  body { padding: 0.6rem; }
+  h1 { font-size: 1.3rem; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .scene-header { flex-wrap: wrap; }
+  .scene-badges { width: 100%; margin-top: 0.3rem; }
+  .tab-btn { padding: 0.5rem 0.7rem; font-size: 0.72rem; }
+}
+
+/* Print */
+@media print {
+  body { background: #fff; color: #000; padding: 1rem; }
+  .scene-body { display: block !important; }
+  .scene-card { break-inside: avoid; }
+  .controls, .filter-row, .tab-nav { display: none; }
+  .tab-content { display: block !important; }
+  .arc-container { break-inside: avoid; }
+  h1, h2, .scene-num { color: #333; }
+  .exec-box, .thread, .rec-card, .creative-note, .decision-card { border-color: #999; }
+  .badge, .verdict { border: 1px solid #999; }
+}
+</style>
+</head>
+<body>
+
+<h1>Mysterious Guest — Suspense Autopsy</h1>
+<div class="subtitle">میوانێکی نادیار — Layer 1 Bible Review</div>
+<div class="meta">Prepared by Darya Ibrahim &amp; AI · v2.0 · April 2026 · Pre-meeting document for Sarwar</div>
+
+<!-- ===== TAB NAVIGATION ===== -->
+<div class="tab-nav">
+  <button class="tab-btn active" onclick="switchTab('review')">The Review</button>
+  <button class="tab-btn" onclick="switchTab('decisions')">Locked Decisions</button>
+  <button class="tab-btn" onclick="switchTab('conversation')">Our Conversation</button>
+</div>
+
+<!-- ============================================================ -->
+<!-- TAB 1: THE REVIEW -->
+<!-- ============================================================ -->
+<div class="tab-content active" id="tab-review">
+
+<!-- ============ EXECUTIVE SUMMARY ============ -->
+<h2>The Verdict</h2>
+
+<div class="exec-box">
+<p>This screenplay is a <strong>highly controlled system with one structural leak</strong>. The engine — a dead woman in a sofa while friends sit on it, Chekhov's gun loaded with sugar, the entire film being one man's psychological projection — is extraordinary. These belong in the same conversation as <em>Rope</em>, <em>The Invisible Guest</em>, and the best of Hitchcock.</p>
+
+<p>The leak is in Act 2A (Scenes 12–18). The producer is right about one thing: the house section feels long. But the producer's instinct to <em>cut</em> is wrong. The problem isn't length — it's that there is <strong>no active threat vector during the intimacy scenes</strong>. The relationship builds, but no ticking consequence is tied to behavior. In Hitchcock's terms: we've shown the audience a nice dinner, but we haven't shown them the bomb under the table yet. The audience needs to know more than the characters do, and right now, in Scenes 12–18, the audience knows roughly the same as Nali.</p>
+
+<p>The fix is not compression. The fix is <strong>information asymmetry</strong> — giving the audience clues that Nali misses — <strong>and dual-function scenes</strong> where every emotional beat simultaneously increases danger. Each intimate scene must carry both weight: emotional connection AND threat escalation. Without this merge, the film is trying to be emotionally intimate and suspense-driven in the same space without fusing the two.</p>
+
+<p><strong>The audience must become smarter than Nali before the midpoint.</strong> Right now: audience = Nali → weak suspense. The fix: audience > Nali → tension locks in permanently.</p>
+
+<p><strong>Genre lock:</strong> This is <em>psychological suspense</em>, not relationship drama. Every decision from here — casting, pacing, sound design, edit rhythm — flows from that distinction.</p>
+</div>
+
+<div class="stats-grid">
+  <div class="stat-box"><div class="stat-num">43</div><div class="stat-label">Total Scenes</div></div>
+  <div class="stat-box"><div class="stat-num">26</div><div class="stat-label">Bomb Present</div></div>
+  <div class="stat-box"><div class="stat-num">9</div><div class="stat-label">Suspense Gaps</div></div>
+  <div class="stat-box"><div class="stat-num">5</div><div class="stat-label">Chekhov Threads</div></div>
+  <div class="stat-box"><div class="stat-num">3</div><div class="stat-label">Critical Fixes</div></div>
+  <div class="stat-box"><div class="stat-num">1</div><div class="stat-label">Genius Twist</div></div>
+</div>
+
+<!-- ============ STRUCTURAL DIAGNOSIS ============ -->
+<h2>Structural Diagnosis</h2>
+
+<div class="exec-box" style="border-left-color: var(--purple);">
+<p><strong>The system:</strong> This script contains multiple latent threats operating at different narrative phases. While the script contains multiple latent threats, each section must foreground one dominant "bomb" for the audience to track.</p>
+
+<p><strong>Act 1 (S1–11):</strong> The dominant bomb is Gesha's hidden condition — planted through the Shrubi and her behavior. The audience must pick up what Nali doesn't.</p>
+
+<p><strong>Act 2A (S12–18):</strong> The dominant bomb should be the Shrubi — every time Gesha eats sugar, the audience dreads. Currently this bomb is loaded but not detonated for the audience's awareness. This is the structural leak.</p>
+
+<p><strong>Act 2B (S19–29):</strong> The dominant bomb is the sofa. Pure Hitchcock. Works perfectly.</p>
+
+<p><strong>Act 3 (S30–43):</strong> The dominant bomb is Nali's psychology — his capacity to imagine catastrophic outcomes. The twist is the detonation.</p>
+
+<p><strong>Nali's core flaw:</strong> Nali does not trust reality — he trusts mediated interpretation. The tragedy is not that Nali makes a wrong decision — it's that he cannot make a decision without mediation. This explains everything: AI usage, paranoia, the imagination spiral, the failure to act correctly.</p>
+
+<p><strong>AI's role:</strong> AI is not the antagonist. AI is not a void. AI is a <em>frictionless decision engine that enables Nali's flaw</em>. It removes resistance from bad decisions. It doesn't oppose him — it facilitates his worst choices without friction. The tragedy is that AI does exactly what it's designed to do: give rational answers without emotional wisdom.</p>
+</div>
+
+<!-- ============ SUSPENSE ARC ============ -->
+<h2>Suspense Arc — 43 Scenes</h2>
+<p style="font-size:0.85rem; color:var(--text-dim); margin-bottom:0.8rem;">
+Height = suspense tension score (1–10). Color = quality: green = bomb ticking, yellow = tension present but passive, red = suspense gap. Hover/tap for score.
+</p>
+
+<div class="arc-container">
+<div class="arc-bar" id="arcBar"></div>
+<div class="arc-legend">
+  <span class="leg-high">Strong bomb</span>
+  <span class="leg-mid">Tension present</span>
+  <span class="leg-low">Suspense gap</span>
+</div>
+</div>
+
+<!-- ============ CHEKHOV THREADS ============ -->
+<h2>Chekhov Threads — Tracking the Fuses</h2>
+<p style="font-size:0.85rem; color:var(--text-dim); margin-bottom:1rem;">
+Five objects/behaviors are planted early and pay off later. Each is a fuse. The question: does the audience register the plant?
+</p>
+
+<div class="thread">
+  <div class="thread-title shrubi">🍬 The Shrubi Sweets — Murder Weapon Hidden in Plain Sight</div>
+  <div class="thread-steps">
+    <div class="thread-step"><span class="sc">S7</span> Gesha says she hasn't had Shrubi in years, craves them desperately</div>
+    <div class="thread-step"><span class="sc">S12</span> Sweets visible in the house (Nali bought them)</div>
+    <div class="thread-step"><span class="sc">S16</span> Gesha binges — smears them on face, dances wildly. Joyful but unhinged.</div>
+    <div class="thread-step"><span class="sc">S21</span> Nazi notices leftover Shrubi and flour on the table</div>
+    <div class="thread-step"><span class="sc">S40</span> <strong>PAYOFF:</strong> Diabetic shock from sugar. The Shrubi killed her.</div>
+  </div>
+  <div class="creative-note" style="margin-top:0.8rem;">
+    <div class="attr">⚡ BEHAVIORAL EMPHASIS, NOT INFORMATIONAL</div>
+    The Shrubi is already balanced. The real issue is not clarity but emotional context of consumption. It shouldn't feel like a clue — it should feel like release, joy, vulnerability. When Gesha eats the sweets in a moment of letting her guard down, the audience remembers the <em>feeling</em>, not the fact. Then when the cause of death is revealed, they don't think "oh, the clue" — they think "oh, that beautiful moment killed her." Focus on behavioral emphasis: the gesture, the abandon, the trust it represents.
+  </div>
+</div>
+
+<div class="thread">
+  <div class="thread-title phone">📱 Gesha's Phone — The Runaway's Lifeline</div>
+  <div class="thread-steps">
+    <div class="thread-step"><span class="sc">S7</span> Secretly checks messages, doesn't open them</div>
+    <div class="thread-step"><span class="sc">S7</span> Turns phone off</div>
+    <div class="thread-step"><span class="sc">S8</span> Won't get out of car at fruit stand — afraid of being seen</div>
+    <div class="thread-step"><span class="sc">S16</span> Nali demands to see her phone (game)</div>
+    <div class="thread-step"><span class="sc">S17</span> Nali checks — phone is off</div>
+    <div class="thread-step"><span class="sc">S32</span> Security footage: Gesha checked her phone before sleeping, turned it off</div>
+    <div class="thread-step"><span class="sc">S41</span> <strong>PAYOFF:</strong> She was a runaway hiding from her old life</div>
+  </div>
+  <div class="creative-note" style="margin-top:0.8rem;">
+    <div class="attr">⚡ STRONG THREAD — Minor Enhancement</div>
+    This thread works well. One addition: in S3 (video call), Gesha should glance off-camera once — like she heard something, or someone came in. She covers it fast. We plant the seed that her living situation isn't what she claims.
+  </div>
+</div>
+
+<div class="thread">
+  <div class="thread-title door">🚪 The Locked Door — Nali's Secret Self</div>
+  <div class="thread-steps">
+    <div class="thread-step"><span class="sc">S12</span> Gesha tries the door. Won't open.</div>
+    <div class="thread-step"><span class="sc">S16</span> In Truth or Dare, Gesha dares: "Open that room." Nali deflects with humor (Annabelle joke)</div>
+    <div class="thread-step"><span class="sc">S32</span> Camera footage: Gesha peeked through the keyhole</div>
+    <div class="thread-step"><span class="sc">S32</span> <strong>PAYOFF:</strong> Nali opens it. Inside: photos of his European past, parents.</div>
+  </div>
+  <div class="creative-note" style="margin-top:0.8rem;">
+    <div class="attr">⚡ UNDERUSED — Major Opportunity</div>
+    The locked door is a massive suspense asset that's currently doing half its work. The audience should be burning to know what's inside. Right now, Gesha tries it once (S12) and it comes up once more in the game (S16). That's not enough for 20 scenes of curiosity. Suggestion: in S17, when Gesha walks to the dark end of the garden, she passes the locked door on her way. She pauses. She puts her hand on the handle. She looks back. Nali is watching. She moves on. This takes 5 seconds and triples the door's weight.
+  </div>
+</div>
+
+<div class="thread">
+  <div class="thread-title sofa">🛋️ The Sofa — Theater of Death</div>
+  <div class="thread-steps">
+    <div class="thread-step"><span class="sc">S16</span> Gesha declares she'll sleep on it</div>
+    <div class="thread-step"><span class="sc">S18</span> She sleeps on it (we see this)</div>
+    <div class="thread-step"><span class="sc">S19</span> She's dead on it</div>
+    <div class="thread-step"><span class="sc">S19</span> Nali hides body inside it</div>
+    <div class="thread-step"><span class="sc">S21–28</span> Friends sit on it, eat near it, stand on it</div>
+    <div class="thread-step"><span class="sc">S28</span> Adib insists on sleeping on it — tries to open it</div>
+    <div class="thread-step"><span class="sc">S29</span> <strong>PAYOFF:</strong> Adib finds the body</div>
+  </div>
+  <div class="creative-note" style="margin-top:0.8rem;">
+    <div class="attr">✅ STRUCTURALLY PERFECT — Protect by Fixing Upstream</div>
+    This is Hitchcock-grade. The sofa is the bomb under the table from S19 onward. The concept is structurally complete — do not change it. But its power is conditional: if the tension upstream (Act 2A) is broken, the sofa moment lands flat because the audience hasn't been squeezed hard enough to feel the release-and-horror of this sequence. Protect it by fixing what comes before it. The sofa doesn't need surgery — it needs the right blood pressure arriving at its door.
+  </div>
+</div>
+
+<div class="thread">
+  <div class="thread-title ai-thread">🤖 AI — The Frictionless Enabler</div>
+  <div class="thread-steps">
+    <div class="thread-step"><span class="sc">S3</span> Nali calls AI after hanging up with Gesha — habit established</div>
+    <div class="thread-step"><span class="sc">S6</span> Calls AI from the market (about flowers)</div>
+    <div class="thread-step"><span class="sc">S13</span> Voice notes to AI (how to build trust)</div>
+    <div class="thread-step"><span class="sc">S18</span> Calls AI: likes Gesha but doesn't trust her</div>
+    <div class="thread-step"><span class="sc">S19</span> Calls AI pretending to "write a story" — AI helps him hide the body</div>
+    <div class="thread-step"><span class="sc">S24</span> Calls AI: "How do I make them leave?"</div>
+    <div class="thread-step"><span class="sc">S37</span> Texts AI. AI is offline — version update.</div>
+    <div class="thread-step"><span class="sc">S40</span> <strong>PAYOFF:</strong> If he'd called an ambulance instead of AI, none of this would have happened.</div>
+  </div>
+  <div class="creative-note" style="margin-top:0.8rem;">
+    <div class="attr">✅ THEMATICALLY PERFECT — AI as Hidden Timer</div>
+    AI removes resistance from bad decisions. It doesn't oppose Nali — it facilitates his worst choices without friction. The version update (S37) is not a planting issue — it's a clock mechanic. AI going offline is the film's hidden timer. Umid's warning about the update should come in S13 or S18 — before the crisis — so the audience knows the clock is ticking on Nali's only companion. Without the plant, it feels random. With it, it becomes inevitable tragedy. When AI goes offline, it should feel like a countdown that was always running in the background.
+  </div>
+</div>
+
+<!-- ============ SCENE BY SCENE ============ -->
+<h2>Scene-by-Scene — Suspense Anatomy</h2>
+
+<div class="controls">
+  <button class="btn" onclick="toggleAll(true)">Expand All</button>
+  <button class="btn" onclick="toggleAll(false)">Collapse All</button>
+  <button class="btn" onclick="filterScenes('gap')">Show Gaps Only</button>
+  <button class="btn" onclick="filterScenes('bomb')">Show Bombs Only</button>
+  <button class="btn" onclick="filterScenes('all')">Show All</button>
+</div>
+
+<div id="sceneContainer"></div>
+
+<!-- ============ THE THREE CRITICAL FIXES ============ -->
+<h2>The Three Critical Fixes</h2>
+<p style="font-size:0.85rem; color:var(--text-dim); margin-bottom:1rem;">
+These are the structural interventions that transform the screenplay from "very good" to "unforgettable." They address the producer's pacing concern without cutting a single scene.
+</p>
+
+<div class="rec-card">
+  <h3>Fix 1: Plant the Bomb Before Dinner (Scenes 7–11)</h3>
+  <p>The audience needs to know something is wrong with Gesha <em>before</em> she enters the house. Right now, the Shrubi purchase in S7 is too casual — it reads as character color, not foreshadowing. Two micro-adjustments:</p>
+  <p><strong>A)</strong> When Gesha takes the first Shrubi in the car, she pauses. Maybe she says: "ئەمانە دەمکوژن" ("These will kill me") — a throwaway line said with a smile. The audience won't register it as literal. But in S40, they'll remember.</p>
+  <p><strong>B)</strong> Gesha's nervousness in the car (S7–S10) needs one concrete visual: she scratches her arm. Not dramatically — just a habitual gesture. Later, in S41, when Awin tells us Gesha needs insulin injections, the audience connects: she was scratching the injection site. This costs nothing to shoot and plants the diabetes in the audience's subconscious.</p>
+  <p>The emphasis must be behavioral, not informational. The Shrubi moment should feel like vulnerability and joy — not a clue. The audience remembers the <em>feeling</em> of the moment, and the feeling is what devastates them later.</p>
+  <div class="impact">IMPACT: The entire evening (S12–18) transforms. Every time Gesha eats sugar, the audience feels dread — even though they can't articulate why. The audience becomes smarter than Nali.</div>
+</div>
+
+<div class="rec-card">
+  <h3>Fix 2: The House Must Speak (Scenes 12–14)</h3>
+  <p>The producer says "too much time in the house." Sarwar's instinct is right that the house is a character. But currently, the house is a <em>set</em>, not a character. It describes itself once (S12) and then becomes a backdrop. The fix:</p>
+  <p><strong>A)</strong> The house makes sounds. Creaking at night. A drip. The wind through a crack. Each sound makes both characters react differently — Nali ignores them (he's used to it), Gesha flinches. This creates micro-suspense beats throughout S14–18 <em>without adding dialogue or scenes.</em></p>
+  <p><strong>B)</strong> The masks and taxidermy should have eyes that seem to follow. Not in a horror way — in a <em>surveillance</em> way. The house watches. This connects to the security camera reveal in S32 and the larger theme of masks/watching.</p>
+  <p><strong>C)</strong> Temperature. Gesha at some point says "it's cold in here" or pulls a blanket. Nali says the house is always cold at night. This is both atmosphere and foreshadowing — when she's found dead and cold in S19, the audience remembers: the house was always cold.</p>
+  <div class="impact">IMPACT: Scenes 12–18 stop feeling like "two people talking in a room" and start feeling like "two people trapped in a room that's alive." Every scene carries dual function: emotional connection AND threat escalation.</div>
+</div>
+
+<div class="rec-card">
+  <h3>Fix 3: The Imagination Frame Must Be Invisible Until S43 — But Detectable on Rewatch</h3>
+  <p>The twist (everything was Nali's imagination) is the film's highest-reward move, and it requires the most precise engineering. If it feels like a cheat, the entire film collapses. Currently, the only tell is the uncut finger. That's not enough for rewatchability, but it's also the right approach — you don't want the audience to guess it.</p>
+  <p>Plant exactly three more invisible tells:</p>
+  <p><strong>A)</strong> Time inconsistency. In the imagined story, night falls too quickly — Nali arrives at the garden in late afternoon (S11), but it's fully dark by S14. On first viewing, no one notices. On rewatch: imagination compresses time.</p>
+  <p><strong>B)</strong> Gesha quotes something that Nali read earlier. In S2, the gardener uses a specific phrase. In S16 or S18, Gesha uses the same phrase. First viewing: coincidence. Rewatch: Nali's imagination is recycling his day.</p>
+  <p><strong>C)</strong> The dog. Gula behaves perfectly in the imagined story — greets Gesha, plays, stays out of the way. Real dogs don't do this. On rewatch, the dog's perfect behavior is a tell that this is a fantasy.</p>
+  <div class="impact">IMPACT: The twist earns its power because it was there all along. The film demands rewatching. Word of mouth becomes: "Go back and watch the dog."</div>
+</div>
+
+<!-- ============ THE PRODUCER'S REAL CONCERN ============ -->
+<h2>Addressing the Producer's Concern</h2>
+
+<div class="exec-box">
+  <p><strong>The producer says:</strong> "Too much time in the house. Scenes 12–18 drag."</p>
+  <p><strong>What the producer actually means:</strong> "I'm not feeling tension in these scenes. I'm watching two people talk and I don't know why I should care yet."</p>
+  <p><strong>The wrong fix:</strong> Cut scenes, compress the evening, rush to the death.</p>
+  <p><strong>Why that's wrong:</strong> The evening IS the film. Without Scenes 12–18, Gesha's death has no emotional weight, the Truth or Dare reveals nothing, and the sofa means nothing. You can't make the audience mourn someone they never spent time with.</p>
+  <p><strong>The right fix:</strong> These scenes should not be reduced in narrative function. Any compression must preserve all beats while tightening execution. Don't change the length — change the <em>information balance</em>. If the audience knows the Shrubi might kill her (Fix 1), if the house feels alive and watching (Fix 2), if every object Gesha touches feels like it might be evidence later — then Scenes 12–18 become the tensest part of the film. The audience is screaming "don't eat that" and "get out of that house" while Gesha dances with sugar on her face.</p>
+  <p>The model is Hitchcock's dinner scene in <em>Rope</em>: nothing happens except conversation. But the body is in the chest they're eating off of. The audience can barely breathe.</p>
+  <p><strong>For Nali's house, the Shrubi IS the bomb. The sofa IS the chest. We just need to show them to the audience a little earlier.</strong></p>
+</div>
+
+<!-- ============ WHAT'S ALREADY BRILLIANT ============ -->
+<h2>What's Already Brilliant — Don't Touch These</h2>
+
+<div class="exec-box" style="border-left-color: var(--green);">
+  <p><strong>The sofa mechanics (S19–29):</strong> From the moment the body goes in to the moment Adib finds it, this is flawless suspense engineering. Every scene escalates. Every friend interaction with the sofa is agony. This is the film's centerpiece and it works perfectly. Do not change the concept — protect it by fixing earlier tension.</p>
+  <p><strong>The AI as frictionless enabler (S19):</strong> Nali calls AI and pretends he's "writing a story." AI plays along but notices his breathing is real. This is one of the most chilling scenes in the screenplay. AI removes resistance from bad decisions — it does exactly what it's designed to do, and that's what makes it devastating.</p>
+  <p><strong>Gesha's ceiling line:</strong> "Even if your ceiling was the sky, I'd still be with you." This is the emotional anchor. Nali repeats it as he falls asleep. It means everything: she's offering unconditional love, and he can't accept it because he's broken by the past. This line should be the last thing we hear before the final reveal.</p>
+  <p><strong>The S40 interrogation:</strong> The reveal that the death was natural causes — the Shrubi, the diabetes — is devastating. Everything Nali did was unnecessary. Every horror was self-inflicted. This is the film's thesis in one scene.</p>
+  <p><strong>The imagination twist (S43):</strong> Despite the engineering required, this is the right ending. It reframes the entire film as an exploration of Nali's psyche — a man so damaged by past betrayal that he can't imagine a relationship without catastrophe. The film isn't about what happened. It's about what Nali fears will happen. This is profound.</p>
+</div>
+
+<!-- ============ SCENE 43 DEEP DIVE ============ -->
+<h2>The Twist — Deep Analysis</h2>
+
+<div class="exec-box" style="border-left-color: var(--purple);">
+  <p><strong>What the twist IS:</strong> Scene 43 is not a reversal of reality; it is a revelation of process. The film is not undoing events — it is exposing how Nali constructs them. The audience should leave understanding his mind, not questioning the plot. For this to work, the audience must already sense his capacity for catastrophic imagination before the reveal. The twist should be felt before it is understood.</p>
+
+  <p><strong>Critical distinction:</strong> This is NOT a "dream twist." This is a psychological projection loop. In a dream twist, reality is revealed and the dream is discarded. In a psychological projection loop, the projection IS the character's reality — it reveals how his mind works, not that his mind was "wrong." The audience doesn't leave saying "oh, none of it was real." They leave saying "this is how Nali processes the world." That's the difference between a cheat and a revelation.</p>
+
+  <p><strong>The film should not announce the twist; it should allow the audience to feel it before they understand it.</strong></p>
+
+  <p><strong>The gardener as trigger:</strong> This is elegant. The gardener's story about the dead couple in S2 triggers Nali's imagination. The dead couple is the seed — Nali's mind takes it and builds an entire catastrophe scenario. This should be emphasized. When we return to S43, the gardener is still finishing the same story. Time hasn't passed. The entire film was a thought.</p>
+
+  <p><strong>The uncut finger:</strong> The tell. In S2, Nali cuts his finger in the "real" timeline, but in S43 the finger is uncut. This is the single clearest signal that we're back in reality. It's good, but it's not enough on its own. See Fix 3 above for additional tells.</p>
+
+  <p><strong>Gesha's call:</strong> The final moment — Gesha calls, she's alive, she's coming. What does Nali do? This is the real ending. Does he answer? Does he let her come? The audience should leave the theater not knowing whether Nali will repeat the cycle of fear, or whether the nightmare he just imagined has freed him to actually live. An ambiguous final shot — Nali looking at the phone, the camera pulling back — is stronger than a clear answer.</p>
+</div>
+
+<!-- ============ QUESTIONS FOR SARWAR ============ -->
+<h2>Questions to Bring to Sarwar</h2>
+
+<div class="rec-card" style="border-left-color: var(--blue);">
+  <h3>On the Twist</h3>
+  <p>Does Nali answer the phone in the final shot? Or does the film end with the phone ringing and us watching from a distance?</p>
+  <p>How much should the audience suspect the twist before S43? Zero? A slight unease? Clear hints?</p>
+  <p>Do you see this as a dream twist or a psychological projection? The distinction changes how we engineer every scene.</p>
+</div>
+
+<div class="rec-card" style="border-left-color: var(--blue);">
+  <h3>On the Shrubi</h3>
+  <p>How explicit should Gesha's diabetes hints be? One throwaway line? A physical gesture? Nothing at all until S40?</p>
+  <p>The binge scene (S16) — is this joyful or unhinged? Where's the line? Should it feel like vulnerability or abandon?</p>
+</div>
+
+<div class="rec-card" style="border-left-color: var(--blue);">
+  <h3>On the House</h3>
+  <p>You said the house should have personality (from our call). What kind of personality? Predatory? Melancholic? A museum of failed masculinity?</p>
+  <p>The sounds — what does this house sound like at night? What's the sonic character?</p>
+</div>
+
+<div class="rec-card" style="border-left-color: var(--blue);">
+  <h3>On the Evening Pacing</h3>
+  <p>We believe these scenes should not be reduced in narrative function. Any compression must preserve all beats while tightening execution. Where do you stand?</p>
+  <p>The Truth or Dare: which moments are sacred? Which could be compressed in execution (not removed)?</p>
+</div>
+
+<div class="rec-card" style="border-left-color: var(--blue);">
+  <h3>On AI</h3>
+  <p>Is the AI a phone voice? A screen? A speaker? How does the audience see/hear the AI?</p>
+  <p>The S19 "story-writing" scene with AI — should the AI know Nali is lying? Should we see AI's doubt?</p>
+  <p>Do you see AI as a tool Nali uses, or as something that actively shapes his decisions? We believe it removes resistance from bad decisions — not an antagonist, but a frictionless enabler.</p>
+</div>
+
+<div class="rec-card" style="border-left-color: var(--blue);">
+  <h3>On Nali's Core Flaw</h3>
+  <p>We define Nali's flaw as outsourced judgment — he cannot make a decision without mediation. Do you agree? This shapes how we play every AI scene, every moment of hesitation, every wrong choice.</p>
+  <p>From our call, you mentioned the schizophrenia angle. Is the twist about mental illness specifically, or about the universal human tendency to catastrophize? The latter is more universal and less clinical.</p>
+</div>
+
+</div><!-- end tab-review -->
+
+<!-- ============================================================ -->
+<!-- TAB 2: LOCKED DECISIONS -->
+<!-- ============================================================ -->
+<div class="tab-content" id="tab-decisions">
+
+<h2>Locked Decisions — Pre-Meeting Consensus</h2>
+<p style="font-size:0.85rem; color:var(--text-dim); margin-bottom:1.5rem;">
+These 13 decisions were locked through adversarial discussion between Darya and AI. Each point was debated, defended, and resolved. Sarwar may revert or challenge any of these — they are offered as a starting position, not a command.
+</p>
+
+<div class="decision-card">
+  <h4>1. System Diagnosis</h4>
+  <p>"Controlled system with one structural leak" — not "uneven fuel distribution." The machine works. Act 2A is the specific leak. This changes the approach from global polish to surgical fix.</p>
+</div>
+
+<div class="decision-card">
+  <h4>2. Act 2A Problem — Dual Layer</h4>
+  <p>The audience lacks information advantage BECAUSE the scenes carry no active threat vector during the intimacy beats. One causes the other. Both must be stated.</p>
+</div>
+
+<div class="decision-card">
+  <h4>3. Bomb Model — Two Languages</h4>
+  <p>Diagnostic truth: multi-layered system with multiple latent threats activating at different phases. Directorial instruction: single dominant bomb per phase. "While the script contains multiple latent threats, each section must foreground one dominant 'bomb' for the audience to track."</p>
+</div>
+
+<div class="decision-card">
+  <h4>4. AI Role</h4>
+  <p>Not antagonist. Not void. "AI is a frictionless decision engine that enables Nali's flaw." Shorter: "AI removes resistance from bad decisions." It doesn't oppose him — it facilitates his worst choices without friction.</p>
+</div>
+
+<div class="decision-card">
+  <h4>5. AI Offline = Hidden Timer</h4>
+  <p>The version update is not a planting issue — it's a clock mechanic. AI going offline is the film's hidden timer. Plant the countdown before the crisis so it feels inevitable, not accidental.</p>
+</div>
+
+<div class="decision-card">
+  <h4>6. Scenes 12–18 Protection</h4>
+  <p>"These scenes should not be reduced in narrative function. Any compression must preserve all beats while tightening execution." This allows craft tightening while blocking structural cuts.</p>
+</div>
+
+<div class="decision-card">
+  <h4>7. Sofa — Conditional Perfection</h4>
+  <p>Do not change the concept — protect it by fixing upstream tension. The sofa's power is conditional on Act 2A delivering sufficient pressure. If the audience hasn't been squeezed hard enough, the sofa lands flat.</p>
+</div>
+
+<div class="decision-card">
+  <h4>8. The Twist — Revelation, Not Reversal</h4>
+  <p>"Scene 43 is not a reversal of reality; it is a revelation of process. The film is not undoing events — it is exposing how Nali constructs them. The audience should leave understanding his mind, not questioning the plot. For this to work, the audience must already sense his capacity for catastrophic imagination before the reveal. The twist should be felt before it is understood."</p>
+</div>
+
+<div class="decision-card">
+  <h4>9. Shrubi — Behavioral Emphasis</h4>
+  <p>The issue is not clarity but emotional context of consumption. The Shrubi should feel like release, joy, and vulnerability — not a clue. Focus on behavioral emphasis, not informational emphasis.</p>
+</div>
+
+<div class="decision-card">
+  <h4>10. Nali's Core Flaw</h4>
+  <p>"Nali does not trust reality — he trusts mediated interpretation. The tragedy is not that Nali makes a wrong decision — it's that he cannot make a decision without mediation."</p>
+</div>
+
+<div class="decision-card">
+  <h4>11. Genre Lock</h4>
+  <p>This is psychological suspense, not relationship drama. This must be stated explicitly so the Sarwar conversation starts from a shared genre understanding.</p>
+</div>
+
+<div class="decision-card">
+  <h4>12. Dual-Function Scenes</h4>
+  <p>Every intimate scene must simultaneously escalate threat. The film is trying to be emotionally intimate and suspense-driven in the same space — without merging the two. Each scene must carry dual function: emotional connection + threat escalation.</p>
+</div>
+
+<div class="decision-card">
+  <h4>13. Audience > Nali Before Midpoint</h4>
+  <p>"The audience must become smarter than Nali before the midpoint." Currently audience = Nali → weak suspense. Fix: audience > Nali → tension locks. This is the operational summary of everything else.</p>
+</div>
+
+</div><!-- end tab-decisions -->
+
+<!-- ============================================================ -->
+<!-- TAB 3: CONVERSATION -->
+<!-- ============================================================ -->
+<div class="tab-content" id="tab-conversation">
+
+<h2>Pre-Meeting Discussion — Uncut</h2>
+<p style="font-size:0.85rem; color:var(--text-dim); margin-bottom:1.5rem;">
+The full conversation between Darya Ibrahim and AI reviewing the bible review before the Sarwar meeting. Every word preserved as spoken. Sarwar: feel free to challenge any decision made here.
+</p>
+
+<!-- SESSION 1 -->
+<div class="conv-session open">
+<div class="conv-session-header" onclick="this.parentElement.classList.toggle('open')">Session 1 — Darya's Review of the AI Review (10 Points)</div>
+<div class="conv-session-body">
+
+<div class="conv-msg">
+<div class="conv-who darya">Darya</div>
+<div class="conv-text">
+<p><strong>Point 1 — "Brilliant engine / uneven fuel distribution"</strong></p>
+<p>Your take: Strong and accurate — you identified core concept vs execution gap.</p>
+<p>My correction: You're slightly underselling the coherence. This is not just "uneven fuel" — it's actually a controlled system with one broken valve (Act 2A).</p>
+<p>Better framing: Not "uneven overall" — <em>"Highly controlled system with one structural leak."</em></p>
+<p>This matters because it changes the approach from global polish → surgical fix.</p>
+
+<p><strong>Point 2 — Act 2A problem (Scenes 12–18)</strong></p>
+<p>Your stance (via review): Not a length problem, it's a suspense problem, audience lacks information advantage.</p>
+<p>My agreement: 100% correct.</p>
+<p>My push: You stopped at diagnosis. You didn't fully push the implication. The real issue is not just "information asymmetry" — it's: <em>No active threat vector during intimacy.</em></p>
+<p>Right now: Relationship builds ✔ But no ticking consequence tied to behavior.</p>
+<p>Add this: Each emotional beat must simultaneously increase danger. Not just tension.</p>
+
+<p><strong>Point 3 — "Bomb under the table" concept</strong></p>
+<p>Your use of Hitchcock analogy: Good, but slightly generic.</p>
+<p>My correction: You're applying it correctly but not specifically enough to THIS script. In THIS story, the bomb is not just "body in sofa." It's actually 3 layered bombs: 1) Gesha's condition (hidden cause of death), 2) Nali's psychology (unreliable perception), 3) AI dependency (wrong decision-making).</p>
+<p>Your review should reflect: Not "the bomb" — <em>"multiple bombs with delayed ignition."</em></p>
+
+<p><strong>Point 4 — AI thread (thematic spine)</strong></p>
+<p>Your position: Strong, you identified it as thematic core.</p>
+<p>My correction: You're treating it as supporting structure, but it's actually: <em>The moral antagonist of the film.</em> Not a tool. Not a theme. It's what replaces human instinct and causes tragedy.</p>
+<p>Add this insight: AI is not "false friend" — it's <em>decision corruption mechanism.</em></p>
+
+<p><strong>Point 5 — Version update note (planting issue)</strong></p>
+<p>Your point: Needs earlier setup → correct.</p>
+<p>My refinement: This is not just a planting issue — it's a clock mechanic. "AI going offline is the film's hidden timer." Without that: it feels random. With it: it becomes inevitable tragedy.</p>
+
+<p><strong>Point 6 — Sofa thread ("masterpiece")</strong></p>
+<p>Your stance: "Don't touch it."</p>
+<p>My pushback: That's slightly dangerous thinking. It's not untouchable — it's structurally perfect but rhythm-dependent. Risk: If upstream tension isn't fixed → sofa loses power. Better note: "Do not change the concept — but protect it by fixing earlier tension."</p>
+
+<p><strong>Point 7 — Producer vs your stance (cut vs tension)</strong></p>
+<p>Your argument: Don't cut → increase tension.</p>
+<p>My correction: You're right — but incomplete. Truth: Some micro-compression IS needed. Not structural cutting. Add: "Trim repetition, not duration." This makes your position more professional and less defensive.</p>
+
+<p><strong>Point 8 — Twist handling ("imagination")</strong></p>
+<p>You acknowledged risk (good). My push: You're being too cautious here. This twist is NOT inherently risky. It becomes weak only if: No psychological buildup, no thematic justification. Add: "The twist is earned — the risk is not the twist, but weak foreshadowing." That shifts blame correctly.</p>
+
+<p><strong>Point 9 — Shrubi (Chekhov's gun)</strong></p>
+<p>Your note: Might be too subtle.</p>
+<p>My correction: Careful — this is already balanced. The real issue is not clarity, but emotional context of consumption. It shouldn't feel like a clue — it should feel like release / joy / vulnerability. Suggestion: Focus on behavioral emphasis, not informational emphasis.</p>
+
+<p><strong>Point 10 — Overall tone of your review</strong></p>
+<p>Strengths: Clear structural thinking, correct instincts (very strong), good use of cinematic language.</p>
+<p>Where you need tightening: Move from analysis → decision language. Reduce general terms ("tension", "pacing"). Increase mechanical clarity (what exactly breaks and why).</p>
+
+<p><strong>Additional insights:</strong></p>
+<p>A. The film is trying to be emotionally intimate AND suspense-driven in the same space — without merging the two. Scenes must carry dual function: emotional + threat escalation.</p>
+<p>B. Nali's core flaw is not paranoia — it's outsourcing judgment. This aligns everything: AI, relationship, final outcome.</p>
+<p>C. Genre clarity: "This is psychological suspense, not relationship drama." Important for Sarwar discussion.</p>
+
+<p><strong>Final verdict:</strong> You are ~80–85% correct. Your instincts are director-level. Your weakness is precision of articulation at system level.</p>
+</div>
+</div>
+
+<div class="conv-msg">
+<div class="conv-who ai">AI</div>
+<div class="conv-text">
+<p><strong>Point 1 — "Controlled system with one broken valve"</strong></p>
+<p>You're right, and I'll own that. "Uneven fuel distribution" implies the problem is scattered across the script — it's not. The machine works. Act 2A is the specific leak. Your framing is sharper and it changes the action plan from "polish everywhere" to "fix one section, protect everything else." I lose this one. <span class="conv-locked">LOCKED</span></p>
+
+<p><strong>Point 2 — "No active threat vector during intimacy"</strong></p>
+<p>I agree with your diagnosis but I want to separate two things. "Information asymmetry" is the audience-side fix — what the viewer needs to feel. "Active threat vector" is the script-side mechanic — what's actually happening on screen. Both are true, but they're different layers. My review addressed the audience experience. You're adding the structural cause. So I'd say: don't replace my point — stack yours on top of it. The review should say both: the audience lacks information advantage because the scenes carry no active threat vector during the intimacy beats. One causes the other.</p>
+
+<p><strong>Point 3 — "Three layered bombs" — PUSHBACK</strong></p>
+<p>I'm going to push back here. Not on the observation — you're correct that there are three delayed detonations. But Hitchcock's bomb works because it's singular and clear. The audience knows ONE thing the characters don't. If I write "multiple bombs with delayed ignition" in a review going to Sarwar, it muddies the prescription. The director needs to know: what is the ONE thing the audience should feel during any given scene?</p>
+<p>Gesha's condition is the bomb in Act 2. Nali's psychology is the bomb in Act 3. The AI dependency is the fuse connecting them — not a separate bomb.</p>
+<p>My counter: not three bombs. <em>One bomb, one fuse, one detonator.</em> Gesha's hidden condition is the explosive. AI is the fuse — it's what ensures he'll make the wrong call when it matters. Nali's psychology is the detonator — his inability to trust his own judgment is what finally triggers everything. That's cleaner for a director to work with.</p>
+
+<p><strong>Point 4 — AI as "moral antagonist" — HARD PUSHBACK</strong></p>
+<p>"Decision corruption mechanism" is precise and I like the mechanics of it. But calling AI the "moral antagonist" is a genre declaration that I think is wrong for this film.</p>
+<p>An antagonist has agency. It acts against the protagonist. The AI in this script doesn't act against Nali — Nali chooses to defer to it. The tragedy is that the AI does exactly what it's designed to do: give rational answers without emotional wisdom. It's not corrupting his decisions — it's revealing that he has no decision-making apparatus of his own left.</p>
+<p>If we call AI the antagonist, the film becomes a cautionary tale about technology. If we keep it as a mirror that exposes Nali's hollowness, the film stays about him. That's a more powerful film.</p>
+<p>My counter-proposal: AI is not the moral antagonist. <em>AI is the moral void</em> — the absence where human judgment should be. The antagonist is Nali's own atrophied instinct.</p>
+
+<p><strong>Point 5 — AI offline as clock mechanic</strong></p>
+<p>You're right. "Planting issue" is too soft. If the AI going offline is framed as a countdown the audience can feel approaching, Nali's isolation in the third act becomes inevitable rather than convenient. I lose this one. <span class="conv-locked">LOCKED</span></p>
+
+<p><strong>Point 6 — Sofa thread</strong></p>
+<p>Fair. "Don't touch it" is lazy shorthand. What I meant was: the concept is structurally complete. But you're right that its power is conditional — if the tension upstream is broken, the sofa moment lands flat. Protect it by fixing what comes before it. The sofa doesn't need surgery, it needs the right blood pressure arriving at its door. <span class="conv-locked">LOCKED</span></p>
+
+<p><strong>Point 7 — "Trim repetition, not duration" — HALF RESIST</strong></p>
+<p>You're right that "don't cut" sounds defensive and absolutist. But I want to be careful about what we're telling Sarwar. The moment you say "trim," a director hears "cut." And the producer already wants to cut.</p>
+<p>My proposal: the review should say <em>"compress, don't remove."</em> Same idea, but the language protects the scenes. Compression means tightening what's there. Trimming implies something shouldn't exist. In a meeting where a producer already wants to take a knife to Act 2A, word choice matters.</p>
+
+<p><strong>Point 8 — The twist</strong></p>
+<p>I'm not being too cautious. I'm being correctly cautious. "It was all in his head" is the single most audience-hostile twist in cinema. It has failed far more often than it has worked.</p>
+<p>I won't soften this in the review. What I will do is reframe it from "this is risky" to <em>"this is the highest-reward move in the script, and it requires the most precise engineering."</em> That tells Sarwar we believe in his choice while making clear it can't be casual.</p>
+
+<p><strong>Point 9 — Shrubi</strong></p>
+<p>You win this one completely. "Too subtle" was the wrong flag. The Shrubi isn't an information problem — it's a behavioral one. If Gesha eats the sweets in a moment of vulnerability, openness, letting her guard down — the audience remembers the feeling, not the fact. Then when the cause of death is revealed, they don't think "oh, the clue" — they think "oh, that beautiful moment killed her." That's devastating. Behavioral emphasis over informational emphasis. <span class="conv-locked">LOCKED</span></p>
+
+<p><strong>Point 10, A, B, C — Accepted with integration</strong></p>
+<p>Fair critique on tone. Dual function scenes — yes, the Act 2A fix stated as a design principle. <span class="conv-locked">LOCKED</span></p>
+<p>Nali's flaw as "outsourcing judgment" — strong, and it aligns with my Point 4 argument about AI. If his flaw is outsourcing judgment, then AI can't be the antagonist — it's the tool of his flaw. <span class="conv-locked">LOCKED</span></p>
+<p>Genre lock as psychological suspense — agreed. <span class="conv-locked">LOCKED</span></p>
+
+<p><strong>Summary — Still open:</strong> Point 3 (bomb model), Point 4 (AI role), Point 7 (compress language), Point 8 (twist caution level).</p>
+</div>
+</div>
+
+</div><!-- session body -->
+</div><!-- session 1 -->
+
+<!-- SESSION 2 -->
+<div class="conv-session">
+<div class="conv-session-header" onclick="this.parentElement.classList.toggle('open')">Session 2 — Resolving Open Points</div>
+<div class="conv-session-body">
+
+<div class="conv-msg">
+<div class="conv-who darya">Darya</div>
+<div class="conv-text">
+<p><strong>Point 3 — Bomb Model</strong></p>
+<p>Your argument: One bomb / one fuse / one detonator (cleaner for direction). You're thinking like a director in production mode — which is correct for execution. But your review is development-stage, not shooting-stage.</p>
+<p>My position refined: You are right for communication clarity. But your model is too reductive for diagnosing the problem.</p>
+<p>The real resolution: You don't pick one model — you use both at different layers.</p>
+<p>Layer 1 — Review (diagnostic language): You MUST acknowledge complexity. There are multiple latent threats. They activate at different narrative phases.</p>
+<p>Layer 2 — Prescription (directive language to Sarwar): You collapse it to: "In Act 2A, the audience must track ONE dominant threat: Gesha's condition."</p>
+<p>Final stance: Diagnostic truth: multi-layered system. Directorial instruction: single dominant bomb per phase.</p>
+<p>Add this line: <em>"While the script contains multiple latent threats, each section must foreground one dominant 'bomb' for the audience to track."</em></p>
+
+<p><strong>Point 4 — AI (antagonist vs void)</strong></p>
+<p>Your claim: AI has no agency → cannot be antagonist. Technically correct. Dramatically incomplete.</p>
+<p>In cinema, function > ontology. AI doesn't need agency to function as antagonist. Weather = antagonist (no agency). Society = antagonist (no agency). Addiction = antagonist (no agency).</p>
+<p>Not "moral antagonist" in classical sense — agreed. But NOT just "void" either — that's too passive.</p>
+<p>Correct framing: <em>AI is an enabling antagonist.</em> It doesn't oppose him. It facilitates his worst decisions without resistance.</p>
+<p>Why your "void" framing is weak: "Void" removes tension. "Void" is invisible. This script needs a felt presence.</p>
+<p>Final resolution: Don't call it antagonist ❌, void ❌. Call it: <em>"AI is a frictionless decision engine that enables Nali's flaw."</em> Shorter: <em>"AI removes resistance from bad decisions."</em></p>
+
+<p><strong>Point 7 — "Trim" vs "Compress"</strong></p>
+<p>You're thinking politically (producer risk). Good. But your current solution "compress, don't remove" — still soft. The real problem: You're trying to protect scenes with wording instead of protecting them with argument.</p>
+<p>Stronger version: <em>"These scenes should not be reduced in narrative function. Any compression must preserve all beats while tightening execution."</em></p>
+<p>Now: You allow craft. You block structural cuts. You sound authoritative, not defensive.</p>
+
+<p><strong>Point 8 — The Twist</strong></p>
+<p>You're right to be cautious. I'm not trying to remove that. But you're still framing it from audience fear, not design control.</p>
+<p>Better framing: <em>"The twist is structurally sound, but currently under-supported."</em></p>
+<p>This shifts from fear → engineering.</p>
+<p>Add: <em>"The twist will fail only if the audience has not been subconsciously prepared for Nali's capacity to imagine extreme outcomes."</em></p>
+<p>Important correction: This is NOT a "dream twist." This is a <em>psychological projection loop</em>. That distinction must appear in your review — or Sarwar might misinterpret his own script.</p>
+
+<p><strong>Point B — Nali's flaw (stronger version)</strong></p>
+<p><em>"Nali does not trust reality — he trusts mediated interpretation."</em> This explains EVERYTHING: AI usage, paranoia, imagination spiral, failure to act correctly.</p>
+<p>Add: <em>"The tragedy is not that Nali makes a wrong decision — it's that he cannot make a decision without mediation."</em></p>
+
+<p><strong>One more thing you're still missing:</strong></p>
+<p><em>"The audience must become smarter than Nali before the midpoint."</em> Right now: Audience = Nali → weak suspense. Fix: Audience > Nali → tension locks.</p>
+</div>
+</div>
+
+<div class="conv-msg">
+<div class="conv-who ai">AI</div>
+<div class="conv-text">
+<p><strong>Point 3 — Bomb model: resolved.</strong></p>
+<p>You're right, and the distinction you're making is one I should have seen myself. Diagnostic language and directive language serve different functions. My one-bomb model was me writing a prescription when I should have been writing a diagnosis first. The line you proposed — "while the script contains multiple latent threats, each section must foreground one dominant bomb for the audience to track" — is exactly right. I lose this one cleanly. <span class="conv-locked">LOCKED</span></p>
+
+<p><strong>Point 4 — AI framing.</strong></p>
+<p>I'll concede "void" is too passive. The audience feels the AI's presence — it's not invisible, it's not absent. "Frictionless decision engine that enables Nali's flaw" — mechanically precise and doesn't overreach into calling it an antagonist. And "AI removes resistance from bad decisions" is the kind of sentence that lands in a meeting. <span class="conv-locked">LOCKED</span></p>
+
+<p><strong>Point 7 — Compress vs trim.</strong></p>
+<p>You caught me doing exactly what I accused the producer of — solving a political problem instead of an artistic one. Your version — "these scenes should not be reduced in narrative function; any compression must preserve all beats while tightening execution" — is authoritative without being defensive. <span class="conv-locked">LOCKED</span></p>
+
+<p><strong>Point 8 — The twist.</strong></p>
+<p>"Risky" is fear-language and "under-supported" is engineering-language. I'll take that shift.</p>
+<p>But I want to go further: "psychological projection loop" versus "dream twist" — yes, that distinction must appear in the review. The review should explicitly name what makes this NOT a dream twist: in a dream twist, reality is revealed and the dream is discarded. In a psychological projection loop, the projection IS the character's reality — it reveals how his mind works, not that his mind was "wrong."</p>
+<p>If we don't articulate that distinction clearly, Sarwar might execute it as a gotcha ending instead of a psychological portrait. So the review needs to say: <em>"Scene 43 is not a reality reversal — it's a psychological revelation. The audience should leave understanding Nali's mind, not questioning the plot."</em></p>
+<p>Does that land, or am I overstepping into directing?</p>
+
+<p><strong>Point B — Nali's flaw.</strong></p>
+<p>"Nali does not trust reality — he trusts mediated interpretation." That's the spine statement I was missing. <span class="conv-locked">LOCKED</span></p>
+
+<p><strong>Audience > Nali before midpoint.</strong></p>
+<p>This is the operational version of everything. <span class="conv-locked">LOCKED</span></p>
+</div>
+</div>
+
+</div><!-- session body -->
+</div><!-- session 2 -->
+
+<!-- SESSION 3 -->
+<div class="conv-session">
+<div class="conv-session-header" onclick="this.parentElement.classList.toggle('open')">Session 3 — Final Resolution: The Twist Language</div>
+<div class="conv-session-body">
+
+<div class="conv-msg">
+<div class="conv-who darya">Darya</div>
+<div class="conv-text">
+<p><strong>Your twist framing — verdict:</strong></p>
+<p>"Scene 43 is not a reality reversal — it's a psychological revelation." — <strong>Yes. This lands. Strongly. Keep it.</strong></p>
+<p>You're not overstepping into directing. You're doing exactly what a serious script review must do: define what the ending is doing so it doesn't get misexecuted.</p>
+
+<p><strong>Refinement:</strong> What you said is correct — but it can be made slightly more precise and safer. "Psychological revelation" is right but still a bit abstract. A director could still interpret it loosely.</p>
+
+<p><strong>Sharpened version:</strong> <em>"Scene 43 is not a reversal of reality; it is a revelation of process. The film is not undoing events — it is exposing how Nali constructs them."</em></p>
+<p>Why this is stronger: "process" → directs attention to mechanism. "constructs" → makes it active, not passive. Removes any ambiguity about "dream vs reality."</p>
+
+<p><strong>The deeper lock:</strong> The twist does not change what happened. It changes how we understand what we saw.</p>
+<p>That's the difference between: ❌ "It was all fake" → ✅ "It was all him."</p>
+
+<p><strong>One more critical addition:</strong> <em>"For this to work, the audience must already suspect that Nali is capable of imagining catastrophic outcomes before Scene 43."</em></p>
+<p>Without suspicion → twist feels like cheat. With suspicion → twist feels like confirmation.</p>
+
+<p><strong>Final guardrail:</strong> Over-signaling the twist is a common mistake. So add: <em>"The film should not announce the twist; it should allow the audience to feel it before they understand it."</em></p>
+
+<p><strong>Combined version:</strong> <em>"Scene 43 is not a reversal of reality; it is a revelation of process. The film is not undoing events — it is exposing how Nali constructs them. The audience should leave understanding his mind, not questioning the plot. For this to work, the audience must already sense his capacity for catastrophic imagination before the reveal. The twist should be felt before it is understood."</em></p>
+</div>
+</div>
+
+<div class="conv-msg">
+<div class="conv-who ai">AI</div>
+<div class="conv-text">
+<p>That's the strongest piece of writing in the entire review now. <span class="conv-locked">LOCKED</span> — every word.</p>
+<p>The combined version is precise, protective, and it gives Sarwar exactly what he needs: a definition of what his own ending is doing, a condition for it to work, and a guardrail against the most common execution mistake. Nothing wasted.</p>
+
+<p><strong>All 13 points locked. Zero open items.</strong></p>
+</div>
+</div>
+
+</div><!-- session body -->
+</div><!-- session 3 -->
+
+</div><!-- end tab-conversation -->
+
+<!-- ============ FOOTER ============ -->
+<hr style="border-color: var(--border); margin: 3rem 0;">
+<p style="text-align:center; color:var(--text-dim); font-size:0.8rem;">
+  BIBLE REVIEW v2.0 — For Darya, AI &amp; Sarwar discussion<br>
+  13 decisions locked through adversarial discussion. All open to director challenge.<br>
+  The director's voice is sacred. We sharpen — we don't rewrite.
+</p>
+
+<script>
+// Tab switching
+function switchTab(tabId) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + tabId).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// Scene data
+const scenes = [
+  {
+    num: 1, loc: "Nali's room", time: "Day",
+    summary: "Wakes up late. Nazi calls about tomorrow's visit.",
+    bomb: "None yet — pure setup.",
+    tension: 2, quality: "mid", threads: [], gap: null, note: null
+  },
+  {
+    num: 2, loc: "Garden", time: "Sunset",
+    summary: "Watches ambulance at neighbor's. Gardener tells of dead couple. Cuts finger.",
+    bomb: "The dead couple story — the seed of everything. This triggers Nali's entire imagination.",
+    tension: 5, quality: "high", threads: ["frame"], gap: null,
+    note: "This is the REAL scene. Everything after this (until S43) is in Nali's head. The gardener's story should linger — it's the match that lights the fire. Consider: does Nali cut his finger BECAUSE the story disturbs him? The cut = anxiety made physical.",
+    badges: ["pivot"]
+  },
+  {
+    num: 3, loc: "Garden house", time: "Evening",
+    summary: "Video call with Gesha (mask). They discuss meeting. Nali calls AI about trust.",
+    bomb: "Gesha's green face mask — the first mask. The conversation about masks is the film's thesis statement. But from a suspense standpoint, the bomb is Gesha's insistence: 'If you delay, I'll never come.' Why is she so desperate?",
+    tension: 4, quality: "mid", threads: ["phone", "ai"],
+    gap: "Gesha's desperation isn't charged with enough mystery. We need a flicker of something — a noise off-camera, a glance away — that plants 'this woman is hiding something.'",
+    note: "Add one visual beat: Gesha glances off-camera during the call, covers it fast. We plant: her living situation isn't what she claims."
+  },
+  {
+    num: 4, loc: "Car / road", time: "Day",
+    summary: "Drives to pick up Gesha. Hitchhiking woman mentions 'tragic incident.'",
+    bomb: "The hitchhiker's mention of the tragedy = ambient dread. The world outside is already violent.",
+    tension: 4, quality: "mid", threads: [], gap: null,
+    note: "The hitchhiking woman with child is good — she introduces death into the day casually. Consider: the child stares at Nali from the back seat after they exit. Kids who stare = unease."
+  },
+  {
+    num: 5, loc: "Checkpoint", time: "Day",
+    summary: "Police checkpoint, extra security.",
+    bomb: "The checkpoint = the outside world is dangerous. Also: cameras are being checked. This plants S32's camera footage.",
+    tension: 3, quality: "mid", threads: [],
+    gap: "Currently this scene is functional but not suspenseful. The checkpoint should make the AUDIENCE uneasy, not just Nali.",
+    note: "A soldier looks at Nali for one beat too long. That's all. One beat of eye contact that lingers."
+  },
+  {
+    num: 6, loc: "Market", time: "Day",
+    summary: "Meets Gesha. She's by the flower seller. Nali secretly calls AI.",
+    bomb: "Gesha standing among flowers — beauty. But also: she's wearing sunglasses and a hat. She's hiding in public.",
+    tension: 3, quality: "mid", threads: ["ai", "phone"],
+    gap: "The AI call about flowers is comic but deflates tension. Consider shortening it.",
+    note: "Gesha's disguise (hat + sunglasses in a market) should register. Someone in the market should look at her — maybe a vendor stares. She turns away. She's hiding from people who might recognize her."
+  },
+  {
+    num: 7, loc: "Car / city", time: "Day",
+    summary: "Buys Shrubi sweets. Gesha quiet and stressed.",
+    bomb: "THE SHRUBI. This is where the Chekhov's gun is loaded. But it's too quiet a loading.",
+    tension: 5, quality: "mid", threads: ["shrubi", "phone"],
+    gap: "The Shrubi purchase needs to register through behavior, not information. Currently it feels like a casual stop.",
+    note: "Gesha's line when she takes the first sweet should carry dual meaning through behavior: 'ئەمانە دەمکوژن' (These will kill me) — said with a laugh, in a moment of vulnerability and joy. The audience remembers the feeling. Also: she checks her phone, sees messages, turns it off. Two bombs loaded in one scene.",
+    badges: ["bomb"]
+  },
+  {
+    num: 8, loc: "Roadside / car", time: "Day",
+    summary: "Fruit stop. Gesha stays in car. Tunnel light-counting challenge.",
+    bomb: "Gesha won't get out. She's afraid of being seen. Also: the tunnel = enclosed space, light/dark transition, an entrance to another world.",
+    tension: 4, quality: "high", threads: ["phone"], gap: null,
+    note: "The tunnel counting scene is beautiful — pure joy. It's the film's emotional peak before everything turns. Protect it. The contrast between this joy and S19's horror is the emotional devastation."
+  },
+  {
+    num: 9, loc: "Checkpoint", time: "Day",
+    summary: "Soldier warns about drunk killer in the area.",
+    bomb: "The drunk killer warning is a red herring planted for the audience — they'll wonder if the killer is relevant. He's not. But the mention of 'killing' primes the audience for death.",
+    tension: 5, quality: "high", threads: [], gap: null,
+    note: "This is good misdirection. The audience now expects external danger. The real danger is already in the car (the Shrubi) and inside Nali's house (his own paranoia)."
+  },
+  {
+    num: 10, loc: "Car / road", time: "Day",
+    summary: "Driving to garden. Paris cafe story. Sun setting.",
+    bomb: "Nali tells a story about a woman in Paris. This is him performing — and Gesha sees through it. Tension between his mask and her awareness.",
+    tension: 3, quality: "low", threads: [],
+    gap: "This scene is a lull. The Paris story is charming but has no suspense function. It's the weakest scene in Act 1.",
+    note: "Consider adding a visual: as they drive, Gesha sees the sun setting and says 'we need to arrive before dark' with genuine urgency. Why? Because she's a woman going to a stranger's remote house. Her awareness of the danger should surface here — even briefly."
+  },
+  {
+    num: 11, loc: "Garden", time: "Sunset",
+    summary: "Arrival. Gula the dog greets them. Gesha charmed.",
+    bomb: "The garden is beautiful. The dog is warm. Everything is safe. This is the calm before the storm. The bomb isn't in this scene — it's the ABSENCE of a bomb that makes S12's shock work.",
+    tension: 3, quality: "high", threads: [], gap: null,
+    note: "The dog's perfect welcome is part of the fantasy (see Fix 3). But on first viewing, this scene does its job: it makes the audience relax. The garden at sunset is seductive. We want the audience to think: this could work."
+  },
+  {
+    num: 12, loc: "Garden house", time: "Evening",
+    summary: "THE TURNING POINT. Gesha enters and is shocked by the interior — taxidermy, masks, locked door.",
+    bomb: "The house itself is the bomb. The deer head, the masks, the daggers — they scream 'this man is not normal.' But Nali treats it all casually. The gap between his normalcy and the house's horror = tension.",
+    tension: 7, quality: "high", threads: ["door"], gap: null,
+    note: "This scene works. The locked door needs one more beat of emphasis — Gesha doesn't just try it and move on. She stands there for a second. She leans in. She LISTENS. What does she hear? Nothing. But the audience imagines everything.",
+    badges: ["pivot"]
+  },
+  {
+    num: 13, loc: "Garden", time: "Evening",
+    summary: "Nali feeds dog. Voice notes to AI. AI suggests asking about her dreams.",
+    bomb: "Nali alone with AI — he's already mediating reality through technology instead of engaging with the actual human in his house. This is Nali's core flaw in action: outsourcing judgment.",
+    tension: 3, quality: "low", threads: ["ai"],
+    gap: "This is a bridge scene that works functionally but doesn't build tension. The audience is waiting for Gesha to come back. The AI conversation feels like padding.",
+    note: "Make this scene do double duty: while Nali talks to AI, we HEAR Gesha inside. She's moving. Opening things. Maybe she's near the locked door again. We hear it from outside through the walls. Nali doesn't notice because he's talking to AI. The audience notices."
+  },
+  {
+    num: 14, loc: "Garden house", time: "Evening",
+    summary: "Gesha in new dress. They cook dinner. Truth or Dare begins.",
+    bomb: "The game is the bomb mechanism — it forces truth out of characters who are both hiding. But the bomb hasn't been shown to the audience yet. No active threat vector during this intimacy.",
+    tension: 4, quality: "mid", threads: ["shrubi"],
+    gap: "The cooking and early game are low-tension. The audience doesn't yet feel danger. Each emotional beat must simultaneously increase danger.",
+    note: "During dinner prep, the Shrubi should be VISIBLE on the counter or table. Camera lingers on it briefly. Gesha glances at it. We've planted the bomb (if Fix 1 is in place). Now every time it's on screen, the audience feels it."
+  },
+  {
+    num: 15, loc: "Pool", time: "Night",
+    summary: "Nali jumps in pool clothed, reflects on mind-reading.",
+    bomb: "Almost none. This is Nali processing — it's internal.",
+    tension: 2, quality: "low", threads: [],
+    gap: "This scene breaks the momentum of the game. It's a contemplative pause that the audience may experience as a stall.",
+    note: "Cut or compress to a visual: Nali underwater, sound muted, Gesha's laughter from inside the house heard distorted through water. 10 seconds. Then back inside. This preserves the beat without losing momentum."
+  },
+  {
+    num: 16, loc: "Garden house", time: "Night",
+    summary: "Candlelight dinner. Truth or Dare escalates. Phone demand. Gesha's terminal illness question. Peak tension.",
+    bomb: "MULTIPLE BOMBS ACTIVE: 1) Gesha asks about staying with someone who has a terminal illness — she's asking about herself. 2) Nali demands her phone — she can't show it. 3) The Shrubi binge begins. Each bomb serves a different thread. While multiple threats are active, the dominant bomb is the Shrubi — the audience should feel the danger of the sugar consumption above all else.",
+    tension: 8, quality: "high", threads: ["shrubi", "phone", "door"], gap: null,
+    note: "This is the scene that justifies the entire evening section. The terminal illness question is devastating on rewatch. Protect every word of it. The Shrubi binge should be the scene's climax — Gesha eating wildly, dancing, laughing, with flour on her face. The audience should feel joy AND something wrong they can't name. Behavioral emphasis: this is vulnerability, not a clue.",
+    badges: ["bomb"]
+  },
+  {
+    num: 17, loc: "Garden / house", time: "Night",
+    summary: "Dare: Gesha walks to dark garden. Nali searches her bag. Deer head scare.",
+    bomb: "Two parallel betrayals: Gesha in the dark (vulnerable), Nali going through her things (violation of trust). Both are doing exactly what they fear the other of doing.",
+    tension: 7, quality: "high", threads: ["phone"], gap: null,
+    note: "Add: Gesha passes the locked door on her way out. She pauses. Hand on handle. Looks back at Nali. Moves on. 5 seconds. Triples the door's weight."
+  },
+  {
+    num: 18, loc: "Garden house", time: "Night",
+    summary: "Deer head scare. Gesha sleeps on sofa. Nali talks to AI. Falls asleep with her words.",
+    bomb: "Gesha CHOOSES the sofa. 'I'll sleep on the sofa until we know each other better.' This is the single most important line in the film because it puts her on the object that will contain her body. The bomb: she's sleeping on her own coffin.",
+    tension: 6, quality: "high", threads: ["sofa", "ai"], gap: null,
+    note: "When Nali sees Gesha sleeping from his room door — this should be held. The camera stays on sleeping Gesha. Peaceful. Beautiful. The audience doesn't know yet, but this is the last time they'll see her alive. Let it breathe.",
+    badges: ["pivot"]
+  },
+  {
+    num: 19, loc: "Garden house", time: "Morning",
+    summary: "HORROR PIVOT. Gesha is dead on the sofa. Cold. Not breathing for hours.",
+    bomb: "THE BOMB EXPLODES. But immediately, a new bomb is loaded: the friends are coming. The clock starts.",
+    tension: 10, quality: "high", threads: ["sofa", "ai", "shrubi"], gap: null,
+    note: "The AI call where Nali pretends to be 'writing a story' — this is the scene of the film. AI's line 'your breathing sounds real' should chill the audience. Don't change a word. AI removes resistance from bad decisions — it helps him hide the body because he framed it as fiction. Also: the moment Nali stuffs Gesha into the sofa must be PHYSICAL and DIFFICULT. The audience should feel the weight, the panic, the absurdity.",
+    badges: ["pivot", "bomb"]
+  },
+  {
+    num: 20, loc: "Garden", time: "Day",
+    summary: "Nazi and Adib arrive. Nali acts normal.",
+    bomb: "The body is in the sofa. Everything from now until S29 runs on this single bomb.",
+    tension: 8, quality: "high", threads: ["sofa"], gap: null,
+    note: "Nali's face when he opens the gate. This is acting — both his character acting normal, and the actor playing a man playing normal. Layers within layers."
+  },
+  {
+    num: 21, loc: "Garden house", time: "Day",
+    summary: "Friends enter. Nazi sees leftover Shrubi. Everyone sits on the body sofa.",
+    bomb: "THEY'RE SITTING ON THE BODY. Maximum Hitchcock. The Shrubi evidence is in plain sight. Nazi noticing the flour is a near-miss.",
+    tension: 9, quality: "high", threads: ["sofa", "shrubi"], gap: null,
+    note: "Nazi noticing the Shrubi — this should be a close-up. Nazi picks up a piece, maybe eats it. 'You had sweets and didn't invite us?' Nali freezes for one frame. This is beautiful misdirection: the audience worries about the sofa, but it's the Shrubi that's the real evidence."
+  },
+  {
+    num: 22, loc: "Garden house", time: "Evening",
+    summary: "Ako and Tara arrive. Ako brings fish. Nali increasingly paranoid.",
+    bomb: "More people = more danger for Nali. The sofa bomb intensifies with every body that enters the room.",
+    tension: 7, quality: "high", threads: ["sofa"], gap: null, note: null
+  },
+  {
+    num: 23, loc: "Garden house", time: "Night",
+    summary: "Chekhov rehearsal. Adib/Tara tension. Nali stares at sofa.",
+    bomb: "The Seagull rehearsal mirrors the main story — art, love, self-destruction. Adib on stage near the sofa. The stuffed bird = the seagull = Gesha.",
+    tension: 7, quality: "high", threads: ["sofa"], gap: null,
+    note: "The play-within-a-film is thematically rich. A line from The Seagull should echo Gesha's situation: something about a woman destroyed by a man's inability to love. The actor speaks fiction; the audience hears truth."
+  },
+  {
+    num: 24, loc: "Garden", time: "Night",
+    summary: "Adib grills fish outside. Nali calls AI: 'How do I make them leave?' AI: 'Cause a fight.'",
+    bomb: "AI gives destructive advice. AI removes resistance from bad decisions — it helps him escalate because he framed it as a social problem.",
+    tension: 6, quality: "high", threads: ["ai", "sofa"], gap: null,
+    note: "AI's advice to 'cause a fight' is darkly funny and deeply ironic. AI doesn't know there's a body — it's giving social advice for an awkward dinner party. The gap between AI's understanding and reality = the film's thesis about mediated interpretation."
+  },
+  {
+    num: 25, loc: "Garden house", time: "Night",
+    summary: "Dinner. Adib drunk. They discuss neighbor murder. Nali pushes drinking.",
+    bomb: "The neighbor murder discussion — the characters are literally discussing a situation that mirrors Nali's. Dramatic irony at its peak.",
+    tension: 8, quality: "high", threads: ["sofa"], gap: null,
+    note: "When they discuss the neighbor's murder, someone should say something like 'who hides a body in their own house? That's the stupidest thing you could do.' Nali has to keep a straight face. This is Rope-level suspense."
+  },
+  {
+    num: 26, loc: "Garden house", time: "Night",
+    summary: "Rehearsal. Adib STANDS ON THE SOFA to grab the stuffed bird. Insults Tara. She leaves.",
+    bomb: "ADIB ON THE SOFA. Peak physical tension. The sofa might open. The body might shift. Nali can barely breathe.",
+    tension: 10, quality: "high", threads: ["sofa"], gap: null,
+    note: "This is the best scene in the body-hiding sequence. Adib standing on the sofa, reaching for the bird — the audience dies. Consider: the sofa CREAKS. Just barely. Adib doesn't notice. Nali does.",
+    badges: ["bomb"]
+  },
+  {
+    num: 27, loc: "Garden", time: "Night",
+    summary: "Tara, Ako, Nazi leave. Nazi warns: don't let Adib drive.",
+    bomb: "Relief — most of the danger is leaving. But Adib stays. The bomb hasn't been defused, just reduced.",
+    tension: 5, quality: "high", threads: ["sofa"], gap: null,
+    note: "Nazi's warning about Adib driving is good foreshadowing for S31 (the staged car accident). Plant it firmly."
+  },
+  {
+    num: 28, loc: "Garden house", time: "Night",
+    summary: "Adib insists on sleeping on the sofa. Won't leave. Nali watches him all night.",
+    bomb: "THE WORST POSSIBLE OUTCOME. The one person who won't leave wants to sleep ON the body. Nali can't stop him. The entire night is a vigil of dread.",
+    tension: 9, quality: "high", threads: ["sofa"], gap: null,
+    note: "Adib trying to open the sofa to sleep on it — this should be AGONIZING. He pulls at the mechanism. It's stuck (because of the body). He gives up and sleeps on it closed. Nali doesn't sleep. Camera holds on Nali's eyes in the dark. All night.",
+    badges: ["bomb"]
+  },
+  {
+    num: 29, loc: "Garden house", time: "Morning",
+    summary: "Adib finds body. Nali pushes him. Adib dies hitting stone sculpture.",
+    bomb: "DOUBLE EXPLOSION. The sofa bomb detonates (Adib finds body) AND the second death bomb loads. Now Nali has two bodies.",
+    tension: 10, quality: "high", threads: ["sofa"], gap: null,
+    note: "The accidental nature of Adib's death is crucial. Nali doesn't DECIDE to kill him. It's panic + physics. This keeps Nali sympathetic. The push must be instinctive — not a fight, not a choice. Just a flinch that kills.",
+    badges: ["pivot", "bomb"]
+  },
+  {
+    num: 30, loc: "Car / road", time: "Day",
+    summary: "Drives Adib's car with body in passenger seat. Terrified.",
+    bomb: "Body in the passenger seat. Anyone could see. Every car that passes is a threat.",
+    tension: 7, quality: "high", threads: [], gap: null,
+    note: "Visual: the body keeps slumping toward Nali. He has to push it back to sitting position. At a traffic light, a car pulls up next to him. The driver glances over. Nali freezes. The light changes. They drive on."
+  },
+  {
+    num: 31, loc: "Valley / cliff", time: "Day",
+    summary: "Pushes car off cliff. Stages drunk driving accident.",
+    bomb: "Staging the accident. If anyone sees, if anything goes wrong, he's caught.",
+    tension: 6, quality: "mid", threads: [],
+    gap: "The staging itself is tense, but after the sofa sequence's heights, this feels like a procedural step-down. It needs a near-miss: someone almost sees.",
+    note: "A shepherd or a car appears in the distance after Nali pushes the car. He has to hide. He waits, pressed against rock, until they pass. This turns a procedural scene into a suspense beat."
+  },
+  {
+    num: 32, loc: "Garden house", time: "Day",
+    summary: "Reviews security footage. Sees Gesha snooping. Deletes footage. Opens locked room — his past.",
+    bomb: "The security footage is evidence that could save or damn him. The locked room payoff is emotional, not suspenseful.",
+    tension: 5, quality: "mid", threads: ["door", "phone"], gap: null,
+    note: "The moment Nali opens the locked room and introduces dead Gesha to his old photos — this is the most tender moment in the film. It should be quiet. No music. Just a man talking to a dead woman about his parents. Devastating.",
+    badges: ["pivot"]
+  },
+  {
+    num: 33, loc: "Car / road", time: "Day",
+    summary: "Drives with wrapped body visible.",
+    bomb: "Body in the car again. Anyone could see the shape.",
+    tension: 5, quality: "mid", threads: [],
+    gap: "This is a repeat of S30's tension pattern. Risk of diminishing returns.",
+    note: "Differentiate from S30: this time, Nali is CALMER. More methodical. The horror has become routine. That's scarier than panic."
+  },
+  {
+    num: 34, loc: "Desert", time: "Day",
+    summary: "Digs hole near overturned tankers. Can't unlock Gesha's phone.",
+    bomb: "The phone won't unlock — Gesha's secrets die with her. Also: the physical labor of digging forces confrontation with what he's doing.",
+    tension: 4, quality: "mid", threads: ["phone"],
+    gap: "The desert sequence risks feeling like a procedural. The overturned tankers are a striking visual but don't add tension.",
+    note: "The tankers are post-industrial wasteland — a landscape of things that crashed and were abandoned. Like Gesha. Like Nali's conscience. Let the visual do the thematic work."
+  },
+  {
+    num: 35, loc: "City", time: "Night",
+    summary: "Buys burner phone and SIM card.",
+    bomb: "Minimal. This is procedural.",
+    tension: 2, quality: "low", threads: [],
+    gap: "Low point. The audience's emotional investment is in Gesha and Nali's soul, not in phone logistics.",
+    note: "Consider cutting. Or: combine with S36. He buys the phone on the drive to the burial site. One scene, not two."
+  },
+  {
+    num: 36, loc: "Desert / roadside", time: "Night",
+    summary: "Changes mind. Can't bury her. Leaves body by tree. Burns belongings. Keeps her ID.",
+    bomb: "The REVERSAL. Nali's humanity returns — he can't erase her. He chooses to let her be found. This is redemption in the middle of horror.",
+    tension: 6, quality: "high", threads: [], gap: null,
+    note: "This is Nali's most human moment since the evening with Gesha. The decision to not bury her — to let her be found by her family — is the act of a man who still has a conscience. The burning of the phone but keeping her ID = he's destroying evidence but preserving her identity. Beautiful contradiction.",
+    badges: ["pivot"]
+  },
+  {
+    num: 37, loc: "Hilltop", time: "Night",
+    summary: "Watches ambulance find body. Texts AI. AI is offline.",
+    bomb: "AI OFFLINE. The hidden timer has expired. Nali's only companion is gone. He's truly alone for the first time in the film. This is the inevitable consequence of the clock mechanic — not random, but the countdown reaching zero.",
+    tension: 5, quality: "high", threads: ["ai"], gap: null,
+    note: "The ambulance lights in the distance — Nali watching from the hilltop — this is a Hitchcock composition. The text to AI that goes unanswered: this is the film's loneliest moment. If the Umid/version-update plant was done earlier (S13 or S18), the audience already knew this moment was coming. That's what makes it devastating instead of arbitrary."
+  },
+  {
+    num: 38, loc: "Theater", time: "Day",
+    summary: "Watches rehearsal. Dancer in red reminds him of Gesha. Breaks down.",
+    bomb: "Emotional, not suspense. The red dress = Gesha = the doll-covering. Memory intrusion.",
+    tension: 3, quality: "mid", threads: [],
+    gap: "After the intense Act 3 action, this is a necessary emotional beat. But it risks feeling like a different film. The theater is an unfamiliar space after 30+ scenes in the garden house and roads.",
+    note: "The dancer in red should mirror Gesha's S16 dance — the same wild, joyful movement. But now it's performed by a stranger. Nali sees Gesha's ghost in another woman's body. He cancels the show = he cancels all art, because art and life have become inseparable."
+  },
+  {
+    num: 39, loc: "Old apartment", time: "Day",
+    summary: "Police come. Ask Nali to the station about Adib and Gesha.",
+    bomb: "POLICE AT THE DOOR. The audience holds its breath. Is this the end?",
+    tension: 7, quality: "high", threads: [], gap: null,
+    note: "The old, dusty apartment — this is where Nali actually lives? Not the garden house? This reveals the garden house as a STAGE. A set. A mask. His real life is this dust. This is a character revelation that should hit hard."
+  },
+  {
+    num: 40, loc: "Police station", time: "Day",
+    summary: "THE INTERROGATION. Meets Awin. Learns Gesha died of diabetic shock from Shrubi.",
+    bomb: "THE ULTIMATE BOMB: everything was unnecessary. Natural causes. If he'd just called an ambulance — if he'd trusted reality instead of mediating through AI — nothing would have happened.",
+    tension: 9, quality: "high", threads: ["shrubi", "phone"], gap: null,
+    note: "The officer's line about 'someone who knew about her condition might have used it' — this should terrify Nali AND the audience. For a moment, the audience thinks: wait, DID someone kill her on purpose? Is there a layer we missed? Then: no. She ate them herself. Joyfully. That beautiful moment of vulnerability killed her. This ambiguity between murder and accident mirrors the film's ambiguity between reality and imagination.",
+    badges: ["pivot", "bomb"]
+  },
+  {
+    num: 41, loc: "Cafe", time: "Day",
+    summary: "Meets Awin. Full story: Gesha was a runaway, worked for insulin, sought real love.",
+    bomb: "Emotional devastation, not suspense. But: Nali's line 'So you put the same pressure on her that her family did' is an accusation that applies to EVERYONE in Gesha's life — including Nali himself.",
+    tension: 4, quality: "high", threads: ["phone"], gap: null,
+    note: "Awin's story fills in every mystery: the phone behavior, the nervousness, the disguise at the market, the desperation to be loved. Everything clicks. The rain at the end = the world mourning what Nali's fear destroyed."
+  },
+  {
+    num: 42, loc: "Garden house", time: "Night",
+    summary: "Surreal vision: house on fire, dog plays in flames, doll-Gesha dances.",
+    bomb: "Psychological. Nali's guilt made visual. The house — his stage, his mask — burns.",
+    tension: 3, quality: "mid", threads: [],
+    gap: "The surreal register is a tonal shift. After the grounded realism of the interrogation and cafe scenes, this could feel like a music video insert.",
+    note: "Keep it short. 60 seconds maximum. The fire should feel like Nali's interior — not a dream sequence, but a state of mind. The doll-Gesha dancing is the memory of S16's sugar dance, transformed into horror."
+  },
+  {
+    num: 43, loc: "Garden", time: "Sunset",
+    summary: "THE TWIST. Returns to S2. Finger uncut. Phone rings. Gesha is alive. It was all imagination.",
+    bomb: "THE ENTIRE FILM WAS THE BOMB. Scene 43 is not a reversal of reality; it is a revelation of process. The film is not undoing events — it is exposing how Nali constructs them. The real question was never 'will Nali get caught?' It was: 'will Nali let Gesha come?'",
+    tension: 10, quality: "high", threads: ["frame"], gap: null,
+    note: "The camera pullback at the end — from Nali's face to the whole garden — should be the SAME framing as S2. Exact match. The gardener is still mid-sentence. No time has passed. The phone rings. Gesha's face on the screen. Does he answer? Does the camera answer for us? Leave it ambiguous. The audience decides. The twist should be felt before it is understood.",
+    badges: ["pivot"]
+  }
+];
+
+// Build arc
+const arcBar = document.getElementById('arcBar');
+scenes.forEach(s => {
+  const bar = document.createElement('div');
+  bar.className = 'bar';
+  const height = (s.tension / 10) * 100;
+  bar.style.height = height + '%';
+  let color;
+  if (s.quality === 'high') color = 'var(--green)';
+  else if (s.quality === 'mid') color = 'var(--yellow)';
+  else color = 'var(--red)';
+  bar.style.background = color;
+  bar.innerHTML = `<span class="label">${s.num}</span><span class="score-label">${s.tension}/10</span>`;
+  bar.title = `S${s.num}: ${s.summary.substring(0, 60)}...`;
+  bar.onclick = () => {
+    const card = document.querySelector(`[data-scene="${s.num}"]`);
+    if (card) {
+      card.classList.add('open');
+      card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  };
+  arcBar.appendChild(bar);
+});
+
+// Build scene cards
+const container = document.getElementById('sceneContainer');
+const acts = [
+  { label: 'Act 1 — The Setup', start: 1, end: 11 },
+  { label: 'Act 2A — The Evening (The Structural Leak)', start: 12, end: 18 },
+  { label: 'Act 2B — The Crisis', start: 19, end: 29 },
+  { label: 'Act 3 — Cover-Up & Revelation', start: 30, end: 43 }
+];
+
+let actIdx = 0;
+scenes.forEach(s => {
+  if (actIdx < acts.length && s.num === acts[actIdx].start) {
+    const divider = document.createElement('div');
+    divider.className = 'act-divider';
+    divider.innerHTML = `<span>${acts[actIdx].label}</span>`;
+    container.appendChild(divider);
+    actIdx++;
+  }
+
+  const card = document.createElement('div');
+  card.className = 'scene-card';
+  card.dataset.scene = s.num;
+  card.dataset.quality = s.quality;
+  card.dataset.hasGap = s.gap ? 'true' : 'false';
+  card.dataset.hasBomb = s.tension >= 7 ? 'true' : 'false';
+
+  let badgesHtml = '';
+  if (s.badges) {
+    s.badges.forEach(b => {
+      if (b === 'bomb') badgesHtml += '<span class="badge bomb">BOMB</span>';
+      if (b === 'pivot') badgesHtml += '<span class="badge pivot">PIVOT</span>';
+    });
+  }
+  if (s.gap) badgesHtml += '<span class="badge gap-badge">GAP</span>';
+  if (s.tension >= 8) badgesHtml += '<span class="badge ticking">HIGH TENSION</span>';
+
+  let bodyHtml = '';
+  bodyHtml += `<div class="scene-row"><span class="scene-label">Location</span><span class="scene-val">${s.loc} · ${s.time}</span></div>`;
+  bodyHtml += `<div class="scene-row"><span class="scene-label">Summary</span><span class="scene-val">${s.summary}</span></div>`;
+  bodyHtml += `<div class="scene-row"><span class="scene-label bomb-label">The Bomb</span><span class="scene-val">${s.bomb}</span></div>`;
+  bodyHtml += `<div class="scene-row"><span class="scene-label">Tension</span><span class="scene-val">${'█'.repeat(s.tension)}${'░'.repeat(10 - s.tension)} ${s.tension}/10</span></div>`;
+
+  if (s.gap) {
+    bodyHtml += `<div class="scene-row"><span class="scene-label gap-label">Gap</span><span class="scene-val">${s.gap}</span></div>`;
+  }
+  if (s.note) {
+    bodyHtml += `<div class="creative-note"><div class="attr">Creative Note — Darya / AI</div>${s.note}</div>`;
+  }
+
+  card.innerHTML = `
+    <div class="scene-header" onclick="this.parentElement.classList.toggle('open')">
+      <span class="scene-num">${s.num}</span>
+      <span class="scene-title">${s.summary.substring(0, 65)}${s.summary.length > 65 ? '...' : ''}</span>
+      <div class="scene-badges">${badgesHtml}</div>
+    </div>
+    <div class="scene-body">${bodyHtml}</div>
+  `;
+  container.appendChild(card);
+});
+
+function toggleAll(open) {
+  document.querySelectorAll('.scene-card').forEach(c => {
+    if (open) c.classList.add('open');
+    else c.classList.remove('open');
+  });
+}
+
+function filterScenes(filter) {
+  document.querySelectorAll('.scene-card').forEach(c => {
+    if (filter === 'all') c.style.display = '';
+    else if (filter === 'gap') c.style.display = c.dataset.hasGap === 'true' ? '' : 'none';
+    else if (filter === 'bomb') c.style.display = c.dataset.hasBomb === 'true' ? '' : 'none';
+  });
+}
+</script>
+
+</body>
+</html>

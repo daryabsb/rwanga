@@ -1,0 +1,1266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scene 12 — Mysterious Guest | Preproduction Package</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#1a1a1a;--bg2:#222;--bg3:#2a2a2a;--bg4:#333;
+  --amber:#D4A574;--amber2:#E8C99A;--amber3:#B8875A;
+  --text:#e8e0d4;--text2:#a09080;--text3:#6a5f55;
+  --yellow:#F5D76E;--blue:#6BA3D6;--white:#ddd;
+  --dialogue:#3a3020;--visual:#202020;--insert:#1a2535;
+  --dialogue-border:#F5D76E;--visual-border:#999;--insert-border:#6BA3D6;
+  --sidebar-w:220px;--header-h:56px;
+  --radius:6px;--transition:0.22s ease;
+}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:15px}
+a{color:var(--amber);text-decoration:none}
+
+/* Layout */
+#app{display:flex;height:100vh;overflow:hidden}
+#sidebar{width:var(--sidebar-w);min-width:var(--sidebar-w);background:var(--bg2);border-right:1px solid #2e2e2e;display:flex;flex-direction:column;transition:width var(--transition),min-width var(--transition);overflow:hidden;z-index:10}
+#sidebar.collapsed{width:56px;min-width:56px}
+#sidebar-header{padding:16px 14px 12px;border-bottom:1px solid #2e2e2e;display:flex;align-items:center;gap:10px;min-height:var(--header-h)}
+#sidebar-header .film-title{font-size:11px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:1.5px;white-space:nowrap;overflow:hidden}
+#sidebar-header .scene-label{font-size:10px;color:var(--text2);white-space:nowrap}
+#sidebar-toggle{background:none;border:none;color:var(--text2);cursor:pointer;padding:4px;border-radius:4px;display:flex;align-items:center;justify-content:center;flex-shrink:0;min-width:28px}
+#sidebar-toggle:hover{color:var(--amber)}
+#nav-list{flex:1;overflow-y:auto;padding:8px 0}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;border-left:3px solid transparent;transition:background var(--transition),border-color var(--transition);min-height:44px;white-space:nowrap;overflow:hidden}
+.nav-item:hover{background:var(--bg3)}
+.nav-item.active{background:var(--bg3);border-left-color:var(--amber);color:var(--amber)}
+.nav-item .nav-icon{font-size:18px;flex-shrink:0;width:22px;text-align:center}
+.nav-item .nav-label{font-size:13px;font-weight:500;white-space:nowrap}
+#sidebar.collapsed .nav-label{display:none}
+#sidebar.collapsed #sidebar-header .film-title,#sidebar.collapsed #sidebar-header .scene-label{display:none}
+#sidebar-footer{padding:10px 14px;border-top:1px solid #2e2e2e;font-size:10px;color:var(--text3);white-space:nowrap;overflow:hidden}
+#sidebar.collapsed #sidebar-footer{display:none}
+
+#main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+#topbar{height:var(--header-h);background:var(--bg2);border-bottom:1px solid #2e2e2e;display:flex;align-items:center;padding:0 20px;gap:16px;flex-shrink:0}
+#topbar h1{font-size:14px;font-weight:600;color:var(--amber);letter-spacing:0.5px}
+#topbar .meta{font-size:11px;color:var(--text2)}
+#topbar .spacer{flex:1}
+#btn-fullscreen{background:none;border:1px solid var(--text3);color:var(--text2);border-radius:4px;padding:5px 10px;cursor:pointer;font-size:11px;display:flex;align-items:center;gap:5px;min-height:32px}
+#btn-fullscreen:hover{border-color:var(--amber);color:var(--amber)}
+
+#content{flex:1;overflow:hidden;position:relative}
+.section{display:none;height:100%;overflow-y:auto;padding:24px;animation:fadeIn 0.2s ease}
+.section.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* Typography */
+h2{font-size:22px;font-weight:700;color:var(--amber);margin-bottom:6px;letter-spacing:0.3px}
+h3{font-size:15px;font-weight:600;color:var(--amber2);margin-bottom:8px;margin-top:20px}
+h4{font-size:13px;font-weight:600;color:var(--text);margin-bottom:6px;margin-top:14px}
+p{color:var(--text2);line-height:1.7;margin-bottom:10px}
+.section-subtitle{font-size:13px;color:var(--text2);margin-bottom:24px;border-bottom:1px solid #2e2e2e;padding-bottom:12px}
+
+/* Cards & Grid */
+.card{background:var(--bg3);border-radius:var(--radius);padding:16px;border:1px solid #333}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+.stats-row{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:20px}
+.stat-box{background:var(--bg3);border:1px solid #333;border-radius:var(--radius);padding:14px 20px;text-align:center;min-width:100px}
+.stat-box .val{font-size:28px;font-weight:700;color:var(--amber);line-height:1}
+.stat-box .lbl{font-size:11px;color:var(--text2);margin-top:4px;text-transform:uppercase;letter-spacing:1px}
+
+/* Shot type badges */
+.badge{display:inline-block;padding:2px 8px;border-radius:3px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px}
+.badge-dialogue{background:rgba(245,215,110,0.15);color:var(--yellow);border:1px solid rgba(245,215,110,0.3)}
+.badge-visual{background:rgba(200,200,200,0.08);color:#ccc;border:1px solid #444}
+.badge-insert{background:rgba(107,163,214,0.15);color:var(--blue);border:1px solid rgba(107,163,214,0.3)}
+
+/* ============ OVERVIEW ============ */
+.movement-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:16px 0}
+.movement-card{background:var(--bg3);border:1px solid #333;border-radius:var(--radius);padding:16px;border-top:3px solid var(--amber3)}
+.movement-card .num{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+.movement-card .title{font-size:14px;font-weight:700;color:var(--amber);margin-bottom:8px}
+.movement-card .desc{font-size:12px;color:var(--text2);line-height:1.6}
+
+/* ============ STORYBOARD ============ */
+#storyboard-section{padding:0;display:flex;flex-direction:column;height:100%}
+#storyboard-section.active{display:flex}
+#sb-grid{flex:1;overflow-y:auto;padding:20px;display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px}
+.sb-card{background:var(--bg3);border:1px solid #333;border-radius:var(--radius);overflow:hidden;cursor:pointer;transition:border-color var(--transition),transform var(--transition)}
+.sb-card:hover{border-color:var(--amber);transform:translateY(-2px)}
+.sb-card img{width:100%;aspect-ratio:16/9;object-fit:cover;background:#111;display:block}
+.sb-card .sb-meta{padding:10px 12px}
+.sb-card .sb-num{font-size:11px;font-weight:700;color:var(--amber);margin-bottom:3px;display:flex;align-items:center;gap:6px}
+.sb-card .sb-style{font-size:11px;color:var(--text2)}
+.sb-card .sb-info{display:flex;gap:8px;margin-top:5px;align-items:center;flex-wrap:wrap}
+.sb-card .sb-lens{font-size:10px;color:var(--text3);background:#2a2a2a;padding:1px 6px;border-radius:3px}
+.sb-card .sb-dur{font-size:10px;color:var(--text3)}
+
+/* Lightbox */
+#lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.93);z-index:1000;flex-direction:column;align-items:center;justify-content:center}
+#lightbox.open{display:flex}
+#lb-img-wrap{position:relative;max-width:90vw;max-height:75vh;display:flex;align-items:center;justify-content:center}
+#lb-img{max-width:90vw;max-height:75vh;object-fit:contain;border-radius:4px;border:1px solid #333}
+#lb-meta{margin-top:16px;text-align:center;max-width:600px}
+#lb-meta .lb-num{font-size:12px;font-weight:700;color:var(--amber);letter-spacing:1px}
+#lb-meta .lb-style{font-size:15px;font-weight:600;color:var(--text);margin:4px 0}
+#lb-meta .lb-desc{font-size:12px;color:var(--text2);line-height:1.6}
+#lb-meta .lb-info{display:flex;gap:16px;justify-content:center;margin-top:8px;flex-wrap:wrap}
+#lb-meta .lb-info span{font-size:11px;color:var(--text3);background:#2a2a2a;padding:2px 10px;border-radius:3px}
+#lb-close{position:fixed;top:20px;right:24px;background:none;border:1px solid #555;color:#aaa;border-radius:50%;width:40px;height:40px;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+#lb-close:hover{border-color:var(--amber);color:var(--amber)}
+#lb-prev,#lb-next{position:fixed;top:50%;transform:translateY(-50%);background:rgba(0,0,0,0.6);border:1px solid #444;color:#ccc;width:50px;height:50px;border-radius:50%;font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:border-color var(--transition)}
+#lb-prev{left:20px}#lb-next{right:20px}
+#lb-prev:hover,#lb-next:hover{border-color:var(--amber);color:var(--amber)}
+#lb-counter{position:fixed;top:22px;left:50%;transform:translateX(-50%);font-size:12px;color:var(--text2)}
+
+/* ============ SHOT BREAKDOWN TABLE ============ */
+#shot-section .filters{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
+#shot-section .filters button{padding:6px 14px;border-radius:4px;border:1px solid #444;background:var(--bg3);color:var(--text2);cursor:pointer;font-size:12px;min-height:36px}
+#shot-section .filters button.active{border-color:var(--amber);color:var(--amber);background:rgba(212,165,116,0.1)}
+.shot-table{width:100%;border-collapse:collapse}
+.shot-table th{background:var(--bg3);color:var(--text2);font-size:11px;text-transform:uppercase;letter-spacing:0.8px;padding:10px 12px;text-align:left;border-bottom:2px solid #333;position:sticky;top:0;z-index:2}
+.shot-table td{padding:10px 12px;font-size:13px;border-bottom:1px solid #282828;vertical-align:top}
+.shot-row{cursor:pointer;transition:background var(--transition)}
+.shot-row:hover{background:var(--bg3)}
+.shot-row.dialogue{border-left:3px solid var(--dialogue-border)}
+.shot-row.visual{border-left:3px solid var(--visual-border)}
+.shot-row.insert{border-left:3px solid var(--insert-border)}
+.shot-row .shot-num{font-weight:700;color:var(--amber);font-size:13px}
+.shot-row .setup-badge{display:inline-block;background:var(--bg4);border:1px solid #444;border-radius:3px;padding:1px 6px;font-size:11px;font-weight:700;color:var(--text);margin-left:6px}
+.expanded-row td{background:var(--bg3);padding:16px}
+.expanded-row{display:none}
+.expanded-row.open{display:table-row}
+.expanded-detail{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.expanded-detail .field{margin-bottom:8px}
+.expanded-detail .field-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:3px}
+.expanded-detail .field-val{font-size:13px;color:var(--text);line-height:1.5}
+.notes-box{background:rgba(212,165,116,0.07);border:1px solid rgba(212,165,116,0.2);border-radius:4px;padding:10px 12px;font-size:12px;color:var(--text2);line-height:1.6;margin-top:8px}
+
+/* ============ FLOOR PLAN ============ */
+#floorplan-section .fp-wrap{position:relative;background:var(--bg3);border:1px solid #333;border-radius:var(--radius);padding:16px;overflow:auto}
+#floorplan-section .fp-wrap svg{max-width:100%;height:auto;display:block;margin:0 auto}
+.fp-controls{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.fp-controls button{padding:6px 14px;border-radius:4px;border:1px solid #444;background:var(--bg3);color:var(--text2);cursor:pointer;font-size:12px;min-height:36px}
+.fp-controls button.active{border-color:var(--amber);color:var(--amber)}
+.setup-info{background:var(--bg3);border:1px solid #333;border-radius:var(--radius);padding:16px;margin-top:16px}
+.setup-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin-top:12px}
+.setup-chip{background:var(--bg4);border:1px solid #444;border-radius:4px;padding:8px 10px;cursor:pointer;transition:border-color var(--transition)}
+.setup-chip:hover,.setup-chip.active{border-color:var(--amber);background:rgba(212,165,116,0.08)}
+.setup-chip .setup-letter{font-size:18px;font-weight:700;color:var(--amber)}
+.setup-chip .setup-shots{font-size:10px;color:var(--text2);margin-top:3px}
+
+/* ============ SCHEDULE ============ */
+.schedule-timeline{display:flex;flex-direction:column;gap:6px}
+.sched-block{border-radius:var(--radius);padding:12px 16px;display:grid;grid-template-columns:90px 1fr auto;gap:12px;align-items:start;border:1px solid transparent;transition:border-color var(--transition)}
+.sched-block:hover{border-color:#444}
+.sched-block.break-block{background:rgba(255,255,255,0.03);border:1px dashed #333}
+.sched-block.dialogue-block{background:rgba(245,215,110,0.06);border-left:4px solid var(--yellow)}
+.sched-block.visual-block{background:rgba(200,200,200,0.04);border-left:4px solid #666}
+.sched-block.insert-block{background:rgba(107,163,214,0.06);border-left:4px solid var(--blue)}
+.sched-block.mixed-block{background:rgba(212,165,116,0.06);border-left:4px solid var(--amber)}
+.sched-time{font-size:11px;color:var(--text3);font-family:monospace;padding-top:2px}
+.sched-time .dur{color:var(--amber2);font-weight:600}
+.sched-body .sched-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.sched-body .sched-shots{font-size:11px;color:var(--text2)}
+.sched-body .sched-notes{font-size:11px;color:var(--text3);margin-top:3px;font-style:italic}
+.sched-cast{font-size:11px;color:var(--text2);text-align:right;min-width:80px}
+.priority-high{display:inline-block;background:rgba(200,80,80,0.2);color:#e88;border:1px solid rgba(200,80,80,0.4);border-radius:3px;padding:1px 6px;font-size:9px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase}
+
+/* ============ LIGHTING ============ */
+.color-temp-bar{display:flex;border-radius:6px;overflow:hidden;height:32px;margin:12px 0}
+.ct-seg{display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:rgba(0,0,0,0.7);flex:1;transition:flex var(--transition)}
+.lighting-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px}
+.light-card{background:var(--bg3);border:1px solid #333;border-radius:var(--radius);padding:12px}
+.light-card .lc-num{font-size:11px;font-weight:700;color:var(--amber);margin-bottom:4px}
+.light-card .lc-desc{font-size:12px;color:var(--text2);line-height:1.5}
+.warn-box{background:rgba(200,80,80,0.12);border:1px solid rgba(200,80,80,0.35);border-radius:var(--radius);padding:12px 16px;display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.warn-box .warn-icon{font-size:20px}
+.warn-box .warn-text{font-size:13px;color:#e88}
+
+/* ============ SOUND ============ */
+.sound-moment{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid #282828}
+.sound-moment:last-child{border-bottom:none}
+.sm-icon{font-size:18px;width:28px;text-align:center;flex-shrink:0;padding-top:1px}
+.sm-body .sm-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:3px}
+.sm-body .sm-desc{font-size:12px;color:var(--text2);line-height:1.5}
+.sm-critical{color:#e88}
+.track-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0}
+.track-box{background:var(--bg3);border:1px solid #333;border-radius:var(--radius);padding:10px;text-align:center}
+.track-box .tb-label{font-size:11px;font-weight:700;color:var(--amber);margin-bottom:4px}
+.track-box .tb-desc{font-size:11px;color:var(--text2)}
+
+/* ============ PROPS ============ */
+.prop-category{margin-bottom:24px}
+.prop-cat-header{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.prop-cat-badge{padding:3px 10px;border-radius:3px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px}
+.cat-hero{background:rgba(200,80,80,0.2);color:#e88;border:1px solid rgba(200,80,80,0.4)}
+.cat-dressing{background:rgba(212,165,116,0.15);color:var(--amber);border:1px solid rgba(212,165,116,0.3)}
+.cat-existing{background:rgba(100,150,100,0.15);color:#8c8;border:1px solid rgba(100,150,100,0.3)}
+.prop-list{display:flex;flex-direction:column;gap:6px}
+.prop-item{display:flex;align-items:start;gap:10px;background:var(--bg3);border:1px solid #333;border-radius:4px;padding:10px 12px}
+.prop-item input[type=checkbox]{width:18px;height:18px;margin-top:1px;accent-color:var(--amber);flex-shrink:0;cursor:pointer}
+.prop-item .pi-name{font-size:13px;color:var(--text);font-weight:500}
+.prop-item .pi-note{font-size:11px;color:var(--text2);margin-top:2px}
+.prop-item .pi-shots{font-size:10px;color:var(--amber);margin-top:2px}
+.budget-box{background:var(--bg3);border:1px solid var(--amber3);border-radius:var(--radius);padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;gap:16px}
+.budget-box .bb-val{font-size:24px;font-weight:700;color:var(--amber)}
+.budget-box .bb-label{font-size:11px;color:var(--text2)}
+
+/* ============ WARDROBE ============ */
+.wardrobe-split{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:16px 0}
+.wardrobe-char{background:var(--bg3);border:1px solid #333;border-radius:var(--radius);padding:16px;border-top:4px solid}
+.wardrobe-char.nali{border-top-color:#5a7a5a}
+.wardrobe-char.gesha{border-top-color:#8a5a8a}
+.wc-name{font-size:16px;font-weight:700;color:var(--amber);margin-bottom:12px}
+.wc-item{display:flex;gap-8px;margin-bottom:8px;font-size:13px;color:var(--text2);line-height:1.6}
+.wc-item strong{color:var(--text);display:inline-block;min-width:90px}
+.design-principle{background:rgba(212,165,116,0.08);border-left:3px solid var(--amber);padding:12px 16px;border-radius:0 var(--radius) var(--radius) 0;font-size:14px;font-style:italic;color:var(--amber2);margin:16px 0}
+.outfit-change{background:var(--bg3);border:1px solid #333;border-radius:var(--radius);padding:14px 16px;margin-top:12px}
+.outfit-change .oc-title{font-size:12px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px}
+
+/* ============ CONTINUITY ============ */
+.scene-flow{display:flex;align-items:center;gap:0;margin:16px 0}
+.sc-node{background:var(--bg3);border:1px solid #333;border-radius:var(--radius);padding:14px 16px;text-align:center;flex:1}
+.sc-node.current{border-color:var(--amber);background:rgba(212,165,116,0.08)}
+.sc-node .sc-num{font-size:20px;font-weight:700;color:var(--amber)}
+.sc-node .sc-label{font-size:11px;color:var(--text2);margin-top:4px}
+.sc-arrow{font-size:24px;color:var(--text3);padding:0 8px}
+.cont-checklist{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.cont-item{display:flex;align-items:center;gap:10px;background:var(--bg3);border:1px solid #333;border-radius:4px;padding:10px 12px}
+.cont-item input[type=checkbox]{width:18px;height:18px;accent-color:var(--amber);flex-shrink:0;cursor:pointer}
+.cont-item .ci-text{font-size:13px;color:var(--text)}
+.cont-item .ci-note{font-size:11px;color:var(--text2)}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:var(--bg2)}
+::-webkit-scrollbar-thumb{background:#444;border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:#666}
+
+/* Print */
+@media print{
+  #sidebar,#topbar,#btn-fullscreen,#lb-prev,#lb-next,#lb-close{display:none!important}
+  #app{display:block}
+  #main,#content,.section.active{overflow:visible;height:auto}
+  body{background:#fff;color:#000}
+  .card,.stat-box,.sb-card,.shot-table th{background:#f5f5f5}
+}
+
+/* Responsive */
+@media(max-width:900px){
+  :root{--sidebar-w:56px}
+  #sidebar .nav-label,#sidebar .film-title,#sidebar .scene-label,#sidebar-footer{display:none}
+  .grid-2,.grid-3,.wardrobe-split,.movement-cards,.grid-2{grid-template-columns:1fr}
+  .track-grid{grid-template-columns:1fr 1fr}
+  .expanded-detail{grid-template-columns:1fr}
+}
+@media(max-width:768px){
+  .section{padding:14px}
+  .stats-row{gap:8px}
+  .stat-box{min-width:80px;padding:10px 12px}
+  .stat-box .val{font-size:22px}
+  .sched-block{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div id="app">
+  <!-- Sidebar -->
+  <nav id="sidebar">
+    <div id="sidebar-header">
+      <button id="sidebar-toggle" onclick="toggleSidebar()" title="Toggle sidebar">☰</button>
+      <div>
+        <div class="film-title">Mysterious Guest</div>
+        <div class="scene-label">Scene 12 — Garden House</div>
+      </div>
+    </div>
+    <div id="nav-list">
+      <div class="nav-item active" onclick="showSection('overview')" data-section="overview">
+        <span class="nav-icon">🎬</span><span class="nav-label">Overview</span>
+      </div>
+      <div class="nav-item" onclick="showSection('storyboard')" data-section="storyboard">
+        <span class="nav-icon">🖼</span><span class="nav-label">Storyboard</span>
+      </div>
+      <div class="nav-item" onclick="showSection('shots')" data-section="shots">
+        <span class="nav-icon">📋</span><span class="nav-label">Shot Breakdown</span>
+      </div>
+      <div class="nav-item" onclick="showSection('floorplan')" data-section="floorplan">
+        <span class="nav-icon">📐</span><span class="nav-label">Floor Plan</span>
+      </div>
+      <div class="nav-item" onclick="showSection('schedule')" data-section="schedule">
+        <span class="nav-icon">⏱</span><span class="nav-label">Schedule</span>
+      </div>
+      <div class="nav-item" onclick="showSection('lighting')" data-section="lighting">
+        <span class="nav-icon">💡</span><span class="nav-label">Lighting</span>
+      </div>
+      <div class="nav-item" onclick="showSection('sound')" data-section="sound">
+        <span class="nav-icon">🎙</span><span class="nav-label">Sound</span>
+      </div>
+      <div class="nav-item" onclick="showSection('props')" data-section="props">
+        <span class="nav-icon">🏺</span><span class="nav-label">Props</span>
+      </div>
+      <div class="nav-item" onclick="showSection('wardrobe')" data-section="wardrobe">
+        <span class="nav-icon">👗</span><span class="nav-label">Wardrobe</span>
+      </div>
+      <div class="nav-item" onclick="showSection('continuity')" data-section="continuity">
+        <span class="nav-icon">🔗</span><span class="nav-label">Continuity</span>
+      </div>
+    </div>
+    <div id="sidebar-footer">LOCKED v1.0 — April 2026</div>
+  </nav>
+
+  <!-- Main -->
+  <div id="main">
+    <div id="topbar">
+      <div>
+        <h1>Scene 12 — INT. Garden House — Evening</h1>
+      </div>
+      <div class="meta">Dir: Sarwar Muhedin &nbsp;|&nbsp; میوانێکی نادیار</div>
+      <div class="spacer"></div>
+      <button id="btn-fullscreen" onclick="toggleFullscreen()">⛶ Fullscreen</button>
+    </div>
+
+    <div id="content">
+
+      <!-- OVERVIEW -->
+      <div class="section active" id="overview">
+        <div style="position:relative;width:100%;max-height:280px;overflow:hidden;border-radius:var(--radius);margin-bottom:24px;border:1px solid #333">
+          <img src="storyboard/images/HERO.jpg" alt="Scene 12 — Gesha" style="width:100%;height:280px;object-fit:cover;object-position:center 30%;display:block;filter:brightness(0.7)">
+          <div style="position:absolute;inset:0;background:linear-gradient(0deg,rgba(26,26,26,0.95) 0%,rgba(26,26,26,0.4) 40%,transparent 100%);display:flex;flex-direction:column;justify-content:flex-end;padding:24px 28px">
+            <div style="font-size:11px;color:var(--amber);text-transform:uppercase;letter-spacing:2px;font-weight:700;margin-bottom:6px">Scene 12 — INT. Garden House — Evening</div>
+            <div style="font-size:24px;font-weight:700;color:#fff;margin-bottom:8px">The First Entrance</div>
+            <div style="font-size:13px;color:var(--text2);max-width:600px;line-height:1.6">Gesha enters Nali's strangely decorated garden house for the first time. She discovers taxidermy heads, theatrical masks, and cryptic notes. A locked door raises questions. The scene establishes the house as a third character and seeds Gesha's growing unease about who Nali really is.</div>
+          </div>
+        </div>
+        <div class="stats-row">
+          <div class="stat-box"><div class="val">15</div><div class="lbl">Shots</div></div>
+          <div class="stat-box"><div class="val">13</div><div class="lbl">Setups</div></div>
+          <div class="stat-box"><div class="val">3:12</div><div class="lbl">Screen Time</div></div>
+          <div class="stat-box"><div class="val">5h</div><div class="lbl">Shoot Day</div></div>
+          <div class="stat-box"><div class="val">6</div><div class="lbl">Dialogue Shots</div></div>
+          <div class="stat-box"><div class="val">6</div><div class="lbl">Visual Shots</div></div>
+          <div class="stat-box"><div class="val">3</div><div class="lbl">Insert Shots</div></div>
+        </div>
+
+        <h3>Emotional Structure — 3 Movements</h3>
+        <div class="movement-cards">
+          <div class="movement-card">
+            <div class="num">Movement 1 · Shots 12.1–12.4</div>
+            <div class="title">THE ENTRANCE</div>
+            <div class="desc">Wonder turning to unease. Camera reveals space through Gesha's experience. She crosses a threshold into another world.</div>
+          </div>
+          <div class="movement-card">
+            <div class="num">Movement 2 · Shots 12.5–12.13</div>
+            <div class="title">THE DISCOVERY</div>
+            <div class="desc">Curiosity and fear. Each discovery peels back a layer of Nali's psyche — deer, masks, cryptic notes. The house accumulates meaning.</div>
+          </div>
+          <div class="movement-card">
+            <div class="num">Movement 3 · Shots 12.14–12.15</div>
+            <div class="title">THE LOCKED DOOR</div>
+            <div class="desc">Tension and deflection. Scene ends with separation. A question is asked without words. The house watches Nali alone.</div>
+          </div>
+        </div>
+
+        <div class="grid-2" style="margin-top:16px">
+          <div class="card">
+            <h4>Location</h4>
+            <p style="margin:0">INT. Garden House — Evening<br>Warm amber interior. Low evening sun through west windows. Practical pendant lamps. A space that feels lived in by someone you don't fully know.</p>
+          </div>
+          <div class="card">
+            <h4>Color Coding Key</h4>
+            <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">
+              <div style="display:flex;align-items:center;gap:8px"><span class="badge badge-dialogue">Dialogue</span><span style="font-size:12px;color:var(--text2)">Scenes with spoken lines — yellow border</span></div>
+              <div style="display:flex;align-items:center;gap:8px"><span class="badge badge-visual">Visual</span><span style="font-size:12px;color:var(--text2)">Silent / performance shots — neutral border</span></div>
+              <div style="display:flex;align-items:center;gap:8px"><span class="badge badge-insert">Insert</span><span style="font-size:12px;color:var(--text2)">No actors required — blue border</span></div>
+            </div>
+          </div>
+          <div class="card">
+            <h4>Key Challenges</h4>
+            <ul style="color:var(--text2);font-size:13px;line-height:1.8;padding-left:18px">
+              <li>Shot 12.1 — complex tracking take, rehearse extensively</li>
+              <li>Locked door moment (12.14) — performance is everything</li>
+              <li>LED strip on back wall (5000K) must be OFF</li>
+              <li>Gesha's bags must appear in correct scene position</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h4>Scene Position</h4>
+            <div style="display:flex;align-items:center;gap:8px;margin-top:8px">
+              <div style="background:var(--bg4);border:1px solid #444;border-radius:4px;padding:8px 12px;text-align:center;font-size:13px;color:var(--text2)">Scene 11<br><span style="font-size:10px">EXT. Garden</span></div>
+              <div style="color:var(--amber);font-size:20px">→</div>
+              <div style="background:rgba(212,165,116,0.1);border:1px solid var(--amber3);border-radius:4px;padding:8px 12px;text-align:center;font-size:13px;color:var(--amber)">Scene 12<br><span style="font-size:10px">INT. Garden House</span></div>
+              <div style="color:var(--amber);font-size:20px">→</div>
+              <div style="background:var(--bg4);border:1px solid #444;border-radius:4px;padding:8px 12px;text-align:center;font-size:13px;color:var(--text2)">Scene 13<br><span style="font-size:10px">EXT. Garden</span></div>
+            </div>
+            <p style="font-size:11px;color:var(--text3);margin-top:8px;margin-bottom:0">CONTINUOUS — no time gap. Clothes show wear from Scene 7 onward.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- STORYBOARD -->
+      <div class="section" id="storyboard-section" style="padding:0;display:none;flex-direction:column">
+        <div style="padding:16px 20px 0;display:flex;align-items:center;gap:16px;flex-shrink:0">
+          <div>
+            <h2 style="margin-bottom:2px">Storyboard</h2>
+            <p style="font-size:12px;color:var(--text2);margin:0">15 frames — click to enlarge — use ← → arrows to navigate</p>
+          </div>
+          <div style="flex:1"></div>
+          <div style="font-size:11px;color:var(--text3);display:flex;gap:12px">
+            <span><span class="badge badge-dialogue">YLW</span> Dialogue</span>
+            <span><span class="badge badge-visual">WHT</span> Visual</span>
+            <span><span class="badge badge-insert">BLU</span> Insert</span>
+          </div>
+        </div>
+        <div id="sb-grid"></div>
+      </div>
+
+      <!-- SHOT BREAKDOWN -->
+      <div class="section" id="shot-section">
+        <h2>Shot Breakdown</h2>
+        <p class="section-subtitle">All 15 shots. Click any row to expand full details.</p>
+        <div class="filters">
+          <span style="font-size:12px;color:var(--text2);margin-right:4px">Filter:</span>
+          <button class="active" onclick="filterShots('all',this)">All (15)</button>
+          <button onclick="filterShots('dialogue',this)">Dialogue (6)</button>
+          <button onclick="filterShots('visual',this)">Visual (6)</button>
+          <button onclick="filterShots('insert',this)">Insert (3)</button>
+          <button onclick="filterShots('1',this)">Movement 1</button>
+          <button onclick="filterShots('2',this)">Movement 2</button>
+          <button onclick="filterShots('3',this)">Movement 3</button>
+        </div>
+        <table class="shot-table" id="shot-table">
+          <thead>
+            <tr>
+              <th>Shot</th>
+              <th>Style</th>
+              <th>Lens</th>
+              <th>Characters</th>
+              <th>Duration</th>
+              <th>Type</th>
+            </tr>
+          </thead>
+          <tbody id="shot-tbody"></tbody>
+        </table>
+      </div>
+
+      <!-- FLOOR PLAN -->
+      <div class="section" id="floorplan">
+        <h2>Floor Plan</h2>
+        <p class="section-subtitle">Overhead view — 13 camera setups (A–M). Click a setup button to highlight which shots use it.</p>
+        <div class="fp-controls" id="fp-controls"></div>
+        <div class="fp-wrap" id="fp-wrap">
+          <img src="scene12_overhead_floor_plan.svg" alt="Scene 12 Overhead Floor Plan" style="max-width:100%;height:auto;display:block;margin:0 auto;border-radius:4px">
+        </div>
+        <div class="setup-info">
+          <h4>Setup Details</h4>
+          <div class="setup-grid" id="setup-grid"></div>
+          <div id="setup-detail" style="margin-top:14px;display:none"></div>
+        </div>
+      </div>
+
+      <!-- SCHEDULE -->
+      <div class="section" id="schedule-section">
+        <h2>Shooting Schedule</h2>
+        <p class="section-subtitle">11 blocks — estimated 5-hour shoot day. Two 15-minute breaks built in.</p>
+        <div class="schedule-timeline" id="schedule-list"></div>
+      </div>
+
+      <!-- LIGHTING -->
+      <div class="section" id="lighting-section">
+        <h2>Lighting</h2>
+        <p class="section-subtitle">Design philosophy and shot-by-shot notes for Scene 12.</p>
+
+        <div class="warn-box">
+          <span class="warn-icon">⚠️</span>
+          <span class="warn-text"><strong>CRITICAL FIX:</strong> LED strip on back wall is 5000K — must be TURNED OFF before shooting. It will destroy the warm amber mood.</span>
+        </div>
+
+        <div class="card" style="margin-bottom:16px">
+          <h4>Core Philosophy</h4>
+          <p style="margin:0;font-style:italic;color:var(--amber2);font-size:14px">"If it looks lit, it's wrong."</p>
+          <p style="margin-top:8px;margin-bottom:0">The house should look like it lights itself. All film lights are motivated by practical sources. Warm amber from the center radiates out to cooler, dimmer zones near walls. The room is alive with hierarchy — brightest where the eye should look, dimmer at the edges where the unknown lives.</p>
+        </div>
+
+        <h3>Color Temperature Map</h3>
+        <div class="color-temp-bar">
+          <div class="ct-seg" style="background:#FF8C00;flex:2">2700K<br><span style="font-size:9px">Warm Amber</span></div>
+          <div class="ct-seg" style="background:#FFA500;flex:2">2700-3000K<br><span style="font-size:9px">Golden</span></div>
+          <div class="ct-seg" style="background:#FFD700;flex:1.5">3200K<br><span style="font-size:9px">Neutral Warm</span></div>
+          <div class="ct-seg" style="background:#A0A0A0;flex:1;color:#fff">Shadow<br><span style="font-size:9px">West Wall</span></div>
+          <div class="ct-seg" style="background:#E0E8FF;flex:1.5">3500-4000K<br><span style="font-size:9px">Window</span></div>
+        </div>
+
+        <div class="grid-2" style="margin-bottom:16px">
+          <div class="card">
+            <h4>Practical Lights (5)</h4>
+            <ul style="color:var(--text2);font-size:13px;line-height:2;padding-left:18px">
+              <li>3 pendant lamps (ceiling) — 2700K warm LED</li>
+              <li>Shelf accent lights — 2700-3000K</li>
+              <li>Desk lamp — warm incandescent or LED</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h4>Film Lights (4)</h4>
+            <ul style="color:var(--text2);font-size:13px;line-height:2;padding-left:18px">
+              <li>2× LED panels — key/fill, tungsten mode</li>
+              <li>1× Dedolight — deer head eye glint</li>
+              <li>1× Battery LED — mask area practical motivation</li>
+            </ul>
+          </div>
+        </div>
+
+        <h3>Shot-by-Shot Lighting</h3>
+        <div class="lighting-grid" id="lighting-shots"></div>
+      </div>
+
+      <!-- SOUND -->
+      <div class="section" id="sound-section">
+        <h2>Sound</h2>
+        <p class="section-subtitle">Design philosophy, recording approach, and key moments for Scene 12.</p>
+
+        <div class="card" style="margin-bottom:20px">
+          <h4>Golden Rule</h4>
+          <p style="font-style:italic;color:var(--amber2);font-size:15px;margin:0">"Silence is the third actor."</p>
+          <p style="margin-top:8px;margin-bottom:0">The house itself communicates through sound — or its absence. Every practical sound effect is a story beat. Sound design post-production will layer an almost subliminal ambient bed under the room's silences.</p>
+        </div>
+
+        <h3>Recording Setup — 4 Track</h3>
+        <div class="track-grid">
+          <div class="track-box"><div class="tb-label">Track 1</div><div class="tb-desc">Boom mic<br>Primary dialogue</div></div>
+          <div class="track-box"><div class="tb-label">Track 2</div><div class="tb-desc">Lav — Nali<br>Backup + movement</div></div>
+          <div class="track-box"><div class="tb-label">Track 3</div><div class="tb-desc">Lav — Gesha<br>Backup + movement</div></div>
+          <div class="track-box"><div class="tb-label">Track 4</div><div class="tb-desc">Room mic<br>Ambient / atmos</div></div>
+        </div>
+
+        <h3>Key Sound Moments</h3>
+        <div class="card">
+          <div class="sound-moment">
+            <span class="sm-icon">👣</span>
+            <div class="sm-body">
+              <div class="sm-title">Entrance Footsteps (12.1)</div>
+              <div class="sm-desc">Gesha's footsteps on threshold change character as she enters — outside to inside. The shift in acoustic is the crossing. Record at least 3 takes with different shoe pressure.</div>
+            </div>
+          </div>
+          <div class="sound-moment">
+            <span class="sm-icon">🦌</span>
+            <div class="sm-body">
+              <div class="sm-title">Deer Head Silence (12.5)</div>
+              <div class="sm-desc">POV shot requires near-total silence on set. Post-production: tinnitus-adjacent tone, barely perceivable, creates unease. Do not replicate with obvious SFX — it should feel neurological.</div>
+            </div>
+          </div>
+          <div class="sound-moment">
+            <span class="sm-icon">📄</span>
+            <div class="sm-body">
+              <div class="sm-title">Paper Pickup (12.11)</div>
+              <div class="sm-desc">Foley: paper rustle is intimate, close. Post-production will treat with subtle high-frequency presence boost so audience "hears" what Gesha reads.</div>
+            </div>
+          </div>
+          <div class="sound-moment">
+            <span class="sm-icon sm-critical">🔒</span>
+            <div class="sm-body">
+              <div class="sm-title sm-critical">LOCKED DOOR HANDLE (12.14) — CRITICAL</div>
+              <div class="sm-desc">This is one of the most important sound moments in the film. The handle turn and its failure to open must be captured with full presence — no background noise, no traffic, no crew movement. Call silence for this take. Record the handle 5+ times in isolation as Foley source.</div>
+            </div>
+          </div>
+          <div class="sound-moment">
+            <span class="sm-icon">🕯</span>
+            <div class="sm-body">
+              <div class="sm-title">Empty Room (12.15)</div>
+              <div class="sm-desc">After Nali exits frame, hold 10 seconds of room tone with camera. Post: ambient bed rises (20-40Hz) — barely felt, not heard. The house exhales.</div>
+            </div>
+          </div>
+        </div>
+
+        <h3>Post-Production Sound Design</h3>
+        <div class="grid-2">
+          <div class="card">
+            <h4>Ambient Bed</h4>
+            <p>20-40Hz sub-bass — always present but subliminal. Created from room resonance recording of location. Should make audience vaguely uncomfortable without knowing why.</p>
+          </div>
+          <div class="card">
+            <h4>Mask Reveal (12.7–12.8)</h4>
+            <p>Low-end swell as camera holds on masks. No obvious stinger. The dread is architectural. Barely perceivable upward pitch shift on ambient bed.</p>
+          </div>
+          <div class="card">
+            <h4>Deer POV (12.5)</h4>
+            <p>Tinnitus-adjacent tone, 6-8kHz, ~-30dB under dialogue threshold. Simulates the experience of being watched. Not horror SFX — neurological discomfort.</p>
+          </div>
+          <div class="card">
+            <h4>Paper / Text Isolation</h4>
+            <p>"Stories are waiting" — the paper's rustle should feel louder than it is. Use gentle spectral expansion in post to make the texture present in the mix.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- PROPS -->
+      <div class="section" id="props-section">
+        <h2>Props</h2>
+        <p class="section-subtitle">Three categories with status tracking. Check items off as confirmed for shoot day.</p>
+
+        <div class="budget-box">
+          <div>
+            <div class="bb-val">$125–$400</div>
+            <div class="bb-label">Estimated budget range</div>
+          </div>
+          <div style="font-size:12px;color:var(--text2);line-height:1.6">Hero props dominate budget. Deer head is the single most expensive item if rental is needed. Theater masks can be sourced from theatrical suppliers or borrowed from local theater companies.</div>
+        </div>
+
+        <div class="prop-category">
+          <div class="prop-cat-header">
+            <span class="prop-cat-badge cat-hero">Category A — Hero Props</span>
+            <span style="font-size:12px;color:var(--text2)">Featured prominently — must be perfect</span>
+          </div>
+          <div class="prop-list">
+            <div class="prop-item">
+              <input type="checkbox" id="p1"><label for="p1" style="cursor:pointer;flex:1">
+                <div class="pi-name">Mounted Deer Head (Taxidermy)</div>
+                <div class="pi-shots">Featured in: 12.1, 12.2, 12.5, 12.6, 12.13, 12.15 — 6 shots CRITICAL</div>
+                <div class="pi-note">Glass eyes that catch light. Must be wall-mountable at appropriate height. Source dedicated lighting (dedolight) for eye glint effect.</div>
+              </label>
+            </div>
+            <div class="prop-item">
+              <input type="checkbox" id="p2"><label for="p2" style="cursor:pointer;flex:1">
+                <div class="pi-name">Theater Masks (set of 4–6)</div>
+                <div class="pi-shots">Featured in: 12.7, 12.8, 12.9, 12.13 — 4 shots CRITICAL</div>
+                <div class="pi-note">Pale, expressionless. Half-hidden in shadow near bookcase. Should read as unsettling without being overtly theatrical. Variety of styles preferred.</div>
+              </label>
+            </div>
+            <div class="prop-item">
+              <input type="checkbox" id="p3"><label for="p3" style="cursor:pointer;flex:1">
+                <div class="pi-name">"Stories are waiting" Paper / Handwritten Note</div>
+                <div class="pi-shots">Featured in: 12.11 — HIGH priority</div>
+                <div class="pi-note">Single page. Handwritten vs typed — confirm with director before shoot. Text must be legible on camera. Prepare 5 identical copies.</div>
+              </label>
+            </div>
+            <div class="prop-item">
+              <input type="checkbox" id="p4"><label for="p4" style="cursor:pointer;flex:1">
+                <div class="pi-name">Gesha's Bags (day bag + overnight)</div>
+                <div class="pi-shots">Featured in: 12.1, 12.3, 12.14 — HIGH priority</div>
+                <div class="pi-note">She sets them down on dining table in 12.3, picks them up in 12.14. Continuity critical — same bags throughout scene.</div>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="prop-category">
+          <div class="prop-cat-header">
+            <span class="prop-cat-badge cat-dressing">Category B — Set Dressing</span>
+            <span style="font-size:12px;color:var(--text2)">Visible on camera, supports world-building</span>
+          </div>
+          <div class="prop-list">
+            <div class="prop-item">
+              <input type="checkbox" id="p5"><label for="p5" style="cursor:pointer;flex:1">
+                <div class="pi-name">Wall Weapons (decorative — daggers, swords)</div>
+                <div class="pi-note">Visible in wide shots 12.2. Reinforces "cabinet of curiosities" feel. Can be ornamental replicas.</div>
+              </label>
+            </div>
+            <div class="prop-item">
+              <input type="checkbox" id="p6"><label for="p6" style="cursor:pointer;flex:1">
+                <div class="pi-name">Alien / Abstract Sculptures (2–4 pieces)</div>
+                <div class="pi-note">Mentioned in 12.2 description. Should read as art-adjacent, not kitsch. Small to medium scale.</div>
+              </label>
+            </div>
+            <div class="prop-item">
+              <input type="checkbox" id="p7"><label for="p7" style="cursor:pointer;flex:1">
+                <div class="pi-name">Desk Dressing (laptop + papers + personal items)</div>
+                <div class="pi-note">For 12.11 — desk where Gesha finds the paper. Laptop must be present. Additional papers around it for context.</div>
+              </label>
+            </div>
+            <div class="prop-item">
+              <input type="checkbox" id="p8"><label for="p8" style="cursor:pointer;flex:1">
+                <div class="pi-name">Meat / Food for Dog (Nali's prop)</div>
+                <div class="pi-note">12.15 — Nali picks up meat for dog before leaving. Practical food prop, wrapped or on plate.</div>
+              </label>
+            </div>
+            <div class="prop-item">
+              <input type="checkbox" id="p9"><label for="p9" style="cursor:pointer;flex:1">
+                <div class="pi-name">Nali's Mobile Phone</div>
+                <div class="pi-note">12.15 — picks up phone. Continuity with other scenes — same phone model throughout.</div>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="prop-category">
+          <div class="prop-cat-header">
+            <span class="prop-cat-badge cat-existing">Category C — Existing Location</span>
+            <span style="font-size:12px;color:var(--text2)">Pre-existing — verify and dress</span>
+          </div>
+          <div class="prop-list">
+            <div class="prop-item">
+              <input type="checkbox" id="p10"><label for="p10" style="cursor:pointer;flex:1">
+                <div class="pi-name">Dining Table + Chairs</div>
+                <div class="pi-note">Central set piece. Gesha sets bags here. Ensure clear of clutter except art direction-approved items.</div>
+              </label>
+            </div>
+            <div class="prop-item">
+              <input type="checkbox" id="p11"><label for="p11" style="cursor:pointer;flex:1">
+                <div class="pi-name">Area Rugs</div><div class="pi-note">Sound absorption. Footstep sound design. Confirm in place and secured.</div>
+              </label>
+            </div>
+            <div class="prop-item">
+              <input type="checkbox" id="p12"><label for="p12" style="cursor:pointer;flex:1">
+                <div class="pi-name">Shelving Units + Books</div>
+                <div class="pi-note">East wall. Visible in multiple shots. Dress with books + objects that suggest eclectic, intellectual character.</div>
+              </label>
+            </div>
+            <div class="prop-item">
+              <input type="checkbox" id="p13"><label for="p13" style="cursor:pointer;flex:1">
+                <div class="pi-name">3 Pendant Lamps (ceiling)</div>
+                <div class="pi-note">KEY PRACTICAL LIGHTS — must be 2700K warm LED bulbs. Confirm wattage is sufficient for camera exposure.</div>
+              </label>
+            </div>
+            <div class="prop-item">
+              <input type="checkbox" id="p14"><label for="p14" style="cursor:pointer;flex:1">
+                <div class="pi-name">Sofa + Bookcase (west wall)</div>
+                <div class="pi-note">Background dressing. Less critical but must be styled to match Nali's character.</div>
+              </label>
+            </div>
+            <div class="prop-item">
+              <input type="checkbox" id="p15"><label for="p15" style="cursor:pointer;flex:1">
+                <div class="pi-name">Back Wall Curtains</div>
+                <div class="pi-note">North wall. Partially drawn. The window behind them is light source for 3500-4000K cooler zone. Confirm fabric color — should be dark/moody, not bright.</div>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- WARDROBE -->
+      <div class="section" id="wardrobe-section">
+        <h2>Wardrobe</h2>
+        <p class="section-subtitle">Character looks, outfit details, and continuity notes for Scene 12.</p>
+
+        <div class="design-principle">"Nali blends INTO the house. Gesha stands OUT from it."</div>
+
+        <div class="wardrobe-split">
+          <div class="wardrobe-char nali">
+            <div class="wc-name">NALI</div>
+            <div class="wc-item"><strong>Top:</strong> Olive / sage linen shirt — long sleeve, slightly rumpled. Muted earth tone that reads as part of the interior.</div>
+            <div class="wc-item"><strong>Bottom:</strong> Dark chinos — charcoal or deep olive. Well-worn, not formal.</div>
+            <div class="wc-item"><strong>Shoes:</strong> Worn leather loafers — lived-in, broken in. No socks or ankle socks.</div>
+            <div class="wc-item"><strong>Hair:</strong> Swept back but loosened — started tidy, now relaxed at home.</div>
+            <div class="wc-item"><strong>Beard:</strong> Full, trimmed. Not styled.</div>
+            <div class="wc-item"><strong>Makeup:</strong> None.</div>
+            <div style="margin-top:12px;padding:10px;background:rgba(90,122,90,0.1);border-radius:4px;font-size:12px;color:var(--text2)">Design note: His colors are pulled from the wall palette — wood, leather, shadow. He belongs here. The house was made for him, or he for it.</div>
+          </div>
+          <div class="wardrobe-char gesha">
+            <div class="wc-name">GESHA — Outfit A (Scene 12 Entrance)</div>
+            <div class="wc-item"><strong>Top:</strong> Dark top — charcoal or deep navy. Clean, contemporary cut.</div>
+            <div class="wc-item"><strong>Bottom:</strong> Casual dark pants — fitted but relaxed.</div>
+            <div class="wc-item"><strong>Shoes:</strong> Flats — comfortable for walking. Neutral color.</div>
+            <div class="wc-item"><strong>Accessories:</strong> Sunglasses pushed up on head. Small earrings.</div>
+            <div class="wc-item"><strong>Hair:</strong> Natural, half-pinned — day has lived in it.</div>
+            <div class="wc-item"><strong>Makeup:</strong> No-makeup makeup. Light mascara only.</div>
+            <div style="margin-top:12px;padding:10px;background:rgba(138,90,138,0.1);border-radius:4px;font-size:12px;color:var(--text2)">Design note: She reads as visitor, outsider. Her clean urban palette contrasts with the house's warm amber and shadow tones.</div>
+          </div>
+        </div>
+
+        <div class="outfit-change">
+          <div class="oc-title">Outfit Change — Shot 12.14 → Scene 14</div>
+          <p>At the end of Scene 12, Gesha takes her bags into Nali's room to change. She exits in Scene 14 wearing <strong>a short floral dress</strong> — warmer, more feminine, and notably different from her arrival look. This signals a shift in her relationship to the space.</p>
+          <p style="margin-bottom:0;font-size:12px;color:var(--text3)">Continuity: Outfit A must be carefully documented (photo reference) so it can be matched if any Scene 11 pickups are needed.</p>
+        </div>
+
+        <h3>Continuity Notes</h3>
+        <div class="card">
+          <ul style="color:var(--text2);font-size:13px;line-height:1.9;padding-left:18px">
+            <li>Both characters' clothes should show a <strong>full day of wear</strong> — not freshly pressed. Scene 7 is the morning reference.</li>
+            <li>Gesha's sunglasses must be on her head throughout Scene 12 — she puts them on to leave in Scene 13.</li>
+            <li>Nali's shirt may have one untucked section — intentional. Do not correct between takes.</li>
+            <li>Gesha's bags must be identical in Scene 11 and Scene 12 — same straps, same position of buckles.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- CONTINUITY -->
+      <div class="section" id="continuity-section">
+        <h2>Continuity</h2>
+        <p class="section-subtitle">Scene position context and incoming/outgoing continuity requirements.</p>
+
+        <h3>Scene Flow</h3>
+        <div class="scene-flow">
+          <div class="sc-node">
+            <div class="sc-num">11</div>
+            <div class="sc-label">EXT. Garden<br>Arrival</div>
+          </div>
+          <div class="sc-arrow">→</div>
+          <div class="sc-node current">
+            <div class="sc-num">12</div>
+            <div class="sc-label">INT. Garden House<br>Evening</div>
+          </div>
+          <div class="sc-arrow">→</div>
+          <div class="sc-node">
+            <div class="sc-num">13</div>
+            <div class="sc-label">EXT. Garden<br>Nali feeds dog</div>
+          </div>
+        </div>
+        <p style="font-size:12px;color:var(--text3);margin-bottom:20px">CONTINUOUS — no time gap between scenes. All three scenes happen in the same unbroken evening.</p>
+
+        <div class="grid-2">
+          <div>
+            <h3>Incoming from Scene 11</h3>
+            <div class="cont-checklist">
+              <div class="cont-item"><input type="checkbox" id="c1"><label for="c1"><div class="ci-text">Gesha arrives carrying bags — same bags as Scene 11 establishing shot</div></label></div>
+              <div class="cont-item"><input type="checkbox" id="c2"><label for="c2"><div class="ci-text">Nali's shirt untucked on right side — matches Scene 11 closeup</div></label></div>
+              <div class="cont-item"><input type="checkbox" id="c3"><label for="c3"><div class="ci-text">Evening light — golden hour quality consistent with exterior</div></label></div>
+              <div class="cont-item"><input type="checkbox" id="c4"><label for="c4"><div class="ci-text">Gesha's sunglasses on top of head — as she removed them in Scene 11</div></label></div>
+              <div class="cont-item"><input type="checkbox" id="c5"><label for="c5"><div class="ci-text">Nali unlocks/opens the front door — that action begins Scene 12</div></label></div>
+            </div>
+          </div>
+          <div>
+            <h3>Outgoing to Scene 13</h3>
+            <div class="cont-checklist">
+              <div class="cont-item"><input type="checkbox" id="c6"><label for="c6"><div class="ci-text">Nali picks up phone + meat — visible in 12.15, used in 13</div></label></div>
+              <div class="cont-item"><input type="checkbox" id="c7"><label for="c7"><div class="ci-text">Gesha is in Nali's room (off-screen) — door closed</div></label></div>
+              <div class="cont-item"><input type="checkbox" id="c8"><label for="c8"><div class="ci-text">Bags are inside — not at entrance where she put them down</div></label></div>
+              <div class="cont-item"><input type="checkbox" id="c9"><label for="c9"><div class="ci-text">Deer head position unchanged — background continuity</div></label></div>
+              <div class="cont-item"><input type="checkbox" id="c10"><label for="c10"><div class="ci-text">Room lighting unchanged — Nali leaves without adjusting lights</div></label></div>
+            </div>
+          </div>
+        </div>
+
+        <h3>Cross-Scene Clothing Reference</h3>
+        <div class="card">
+          <p>Both characters' clothes originate in Scene 7 (morning). By Scene 12 (evening), they should show approximately 10-12 hours of wear:</p>
+          <ul style="color:var(--text2);font-size:13px;line-height:1.9;padding-left:18px">
+            <li>No visible stains — they haven't been physically active</li>
+            <li>Slight wrinkling, especially at elbows and waist</li>
+            <li>Hair has loosened from morning styling</li>
+            <li>Gesha's mascara is fully intact — she has not cried or been rained on</li>
+          </ul>
+        </div>
+
+        <h3>Locked Door — Future Payoff</h3>
+        <div class="card" style="border-color:rgba(200,80,80,0.3)">
+          <p><strong style="color:#e88">THE SEED:</strong> The locked door in Shot 12.14 must be established <em>without</em> overselling it. It pays off in a later scene. The camera should not linger or add visual emphasis beyond what the story requires in this moment. Gesha's look to Nali is the content — hold on her face, not the door.</p>
+          <p style="margin:0;font-size:12px;color:var(--text3)">Ensure the door and its lock mechanism is art-directed and consistent with later appearances.</p>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<!-- Lightbox -->
+<div id="lightbox" role="dialog" aria-modal="true" aria-label="Storyboard viewer">
+  <button id="lb-close" onclick="closeLightbox()" title="Close (Esc)">✕</button>
+  <div id="lb-counter"></div>
+  <button id="lb-prev" onclick="lbNav(-1)" title="Previous (←)">‹</button>
+  <div id="lb-img-wrap">
+    <img id="lb-img" src="" alt="">
+  </div>
+  <div id="lb-meta">
+    <div class="lb-num"></div>
+    <div class="lb-style"></div>
+    <div class="lb-desc"></div>
+    <div class="lb-info"></div>
+  </div>
+  <button id="lb-next" onclick="lbNav(1)" title="Next (→)">›</button>
+</div>
+
+<script>
+// ===== DATA =====
+const shots = [
+  { num: "12.1", setup: "A", style: "Tracking Shot", movement: "Track forward through doorway, pan left to follow Nali, then hold on Gesha", lens: "24mm", chars: "Nali, Gesha", desc: "Camera follows Nali and Gesha from porch threshold into house. Nali enters first, moves left toward kitchen. Gesha steps in behind and stops — body language shifts. Camera continues past Nali and stays with Gesha. Warm amber light, long shadows from low evening sun.", dialogue: false, duration: "30s", notes: "Complex single take. Requires dolly/track or steadicam. Rehearse blocking extensively.", movement_num: 1, type: "visual" },
+  { num: "12.2", setup: "B", style: "Wide Shot (Low Angle)", movement: "Static, low tripod", lens: "18mm", chars: "—", desc: "From Gesha's eye level, slow reveal of living room — taxidermy heads, hanging weapons, alien sculptures. Room feels like cabinet of curiosities. Deer head prominent.", dialogue: false, duration: "8s", notes: "Could be slow tilt up. All wall props must be dressed and lit.", movement_num: 1, type: "insert" },
+  { num: "12.3", setup: "C", style: "Close-up", movement: "Static or slight push in", lens: "85mm", chars: "Gesha", desc: "Gesha's face. Mouth slightly open. Eyes scan left to right. Mix of fascination and dawning unease. Puts bags down on dining table unconsciously.", dialogue: false, duration: "6s", notes: "Performance-critical. Direct actress: don't overplay fear, let it live in the eyes.", movement_num: 1, type: "visual" },
+  { num: "12.4", setup: "D", style: "Over-the-shoulder", movement: "Static", lens: "50mm", chars: "Nali (fg), Gesha (bg)", desc: "From behind kitchen counter, over Nali's shoulder. He watches Gesha with faint knowing smile. He's enjoying her reaction — this is his world.", dialogue: false, duration: "5s", notes: "Nali's expression: subtle pride, not menacing. Shallow DOF to separate planes.", movement_num: 1, type: "visual" },
+  { num: "12.5", setup: "E", style: "POV — Deer Head", movement: "Slow push in (dolly or slider)", lens: "35mm", chars: "— (Deer head)", desc: "Gesha's POV. Slow push toward mounted deer head. Glass eyes catch light — almost seem alive. Camera drifts slightly, mimicking unsettled gaze.", dialogue: false, duration: "8s", notes: "Practical light for eye-glint on taxidermy. Slight handheld drift adds subjectivity.", movement_num: 2, type: "visual" },
+  { num: "12.6", setup: "F", style: "Two Shot (Medium)", movement: "Static", lens: "40mm", chars: "Nali, Gesha", desc: "Gesha: 'Why didn't you tell me you had a house like this?' She looks at deer: 'Look at those eyes, how alive they are...' Nali: 'If I'd told you, you wouldn't be this surprised now.'", dialogue: true, duration: "25s", notes: "Key dialogue. Power dynamic in body language — Nali relaxed, Gesha guarded.", movement_num: 2, type: "dialogue" },
+  { num: "12.7", setup: "G", style: "Medium Shot", movement: "Slight pan right following Gesha", lens: "50mm", chars: "Gesha", desc: "Gesha takes steps forward, discovers theater masks near bookcase. Pale, expressionless, half-hidden in shadow — as if they could come alive.", dialogue: false, duration: "7s", notes: "Masks pre-lit with dim practical. Gesha's movement should feel pulled, not deliberate.", movement_num: 2, type: "visual" },
+  { num: "12.8", setup: "H", style: "Close-up Insert", movement: "Static, Dutch angle (slight)", lens: "85mm macro", chars: "— (Masks)", desc: "Insert of masks. Tight, slightly Dutch angle. They stare back at the audience. Unsettling.", dialogue: false, duration: "4s", notes: "Barely perceptible push-in. Horror-adjacent but restrained.", movement_num: 2, type: "insert" },
+  { num: "12.9", setup: "G", style: "Medium Close-up", movement: "Static", lens: "50mm", chars: "Gesha", desc: "Gesha: 'What are these masks for? Are they part of your story?' Beat. 'Yesterday you talked about masks but never mentioned you actually have them.'", dialogue: true, duration: "12s", notes: "Same setup as 12.7, tighter. Accusatory but curious tone.", movement_num: 2, type: "dialogue" },
+  { num: "12.10", setup: "I", style: "Medium Shot", movement: "Static", lens: "50mm", chars: "Nali", desc: "Nali leaning casually: 'That was a different conversation. These have nothing to do with my stories — they belong to friends who rehearse here.' Gestures toward room: 'You can go change in there.'", dialogue: true, duration: "12s", notes: "Casualness IS the performance. The gesture closes the conversation.", movement_num: 2, type: "dialogue" },
+  { num: "12.11", setup: "J", style: "Medium Shot", movement: "Slight track right with Gesha", lens: "40mm", chars: "Gesha", desc: "Gesha drifts toward desk with laptop and papers. Picks up a page. Insert: 'Stories are waiting.' Asks: 'Is this your new project?' She's unsettled — house doesn't match online Nali.", dialogue: true, duration: "15s", notes: "Insert of paper can be cutaway (Setup J2). Handwriting vs typed — confirm with director.", movement_num: 2, type: "dialogue" },
+  { num: "12.12", setup: "I", style: "Close-up", movement: "Static", lens: "85mm", chars: "Nali", desc: "Nali: 'Yes, it's the title of my new play.' Simple answer, but his eyes hold something back.", dialogue: true, duration: "5s", notes: "Same axis as 12.10, tighter. The pause before answering is everything.", movement_num: 2, type: "dialogue" },
+  { num: "12.13", setup: "K", style: "Medium Shot", movement: "Pan left following Gesha back to deer", lens: "50mm", chars: "Gesha (Nali OS)", desc: "Gesha walks back to deer head, calmer now. 'Tell me the story of these sculptures.' 'Did you bring them from Europe?' Nali OS: 'Each one has a story. Which one do you want to hear?' She chooses the deer.", dialogue: true, duration: "18s", notes: "Her relationship with deer head evolves — from shock to curiosity.", movement_num: 2, type: "dialogue" },
+  { num: "12.14", setup: "L", style: "Wide Shot", movement: "Static or slow track", lens: "28mm", chars: "Gesha, Nali (bg)", desc: "Gesha picks up bags, walks to two doors. 'This room?' Tries handle — locked. Nali: 'That one's closed. The other one.' Gesha gives him a look — wants to ask but doesn't. Enters Nali's room, closes door.", dialogue: true, duration: "20s", notes: "THE SEED SHOT — locked door pays off later. Don't oversell. The look Gesha gives is the real content.", movement_num: 3, type: "dialogue" },
+  { num: "12.15", setup: "M", style: "Medium Shot", movement: "Static", lens: "50mm", chars: "Nali", desc: "Nali stands alone. Deer head looms behind. Picks up phone, grabs meat for dog, heads to front door. Room feels emptier, stranger. A man alone with his masks.", dialogue: false, duration: "12s", notes: "Final shot. Hold after Nali exits frame — let the empty room breathe. The house watches.", movement_num: 3, type: "visual" }
+];
+
+const storyboardImages = [
+  { shot: "12.1", path: "storyboard/images/12.1.jpg" },
+  { shot: "12.2", path: "storyboard/images/12.2.jpg" },
+  { shot: "12.3", path: "storyboard/images/12.3.jpg" },
+  { shot: "12.4", path: "storyboard/images/12.4.jpg" },
+  { shot: "12.5", path: "storyboard/images/12.5.jpg" },
+  { shot: "12.6", path: "storyboard/images/12.6.jpg" },
+  { shot: "12.7", path: "storyboard/images/12.7.jpg" },
+  { shot: "12.8", path: "storyboard/images/12.8.jpg" },
+  { shot: "12.9", path: "storyboard/images/12.9.jpg" },
+  { shot: "12.10", path: "storyboard/images/12.10.jpg" },
+  { shot: "12.11", path: "storyboard/images/12.11.jpg" },
+  { shot: "12.12", path: "storyboard/images/12.12.jpg" },
+  { shot: "12.13", path: "storyboard/images/12.13.jpg" },
+  { shot: "12.14", path: "storyboard/images/12.14.jpg" },
+  { shot: "12.15", path: "storyboard/images/12.15.jpg" }
+];
+
+const schedule = [
+  { block: 1, time: "0:00–0:45", duration: "45 min", setup: "A", shots: ["12.1"], type: "visual", title: "The Tracking Shot", cast: "Nali, Gesha", notes: "Shoot first while energy is fresh. Complex blocking.", priority: "HIGH" },
+  { block: 2, time: "0:45–1:20", duration: "35 min", setup: "F → C", shots: ["12.6", "12.3"], type: "mixed", title: "Dining Table Dialogue + Reaction", cast: "Nali + Gesha → Gesha only", notes: "Two shot then tighten to close-up." },
+  { block: 3, time: "1:20–1:30", duration: "10 min", setup: "D", shots: ["12.4"], type: "visual", title: "Nali Watches (Kitchen OTS)", cast: "Nali, Gesha (bg)", notes: "Quick setup, one angle." },
+  { block: "BREAK", time: "1:30–1:45", duration: "15 min", title: "Break 1", notes: "Crew reset. Move camera to west side." },
+  { block: 4, time: "1:45–2:00", duration: "15 min", setup: "I", shots: ["12.10", "12.12"], type: "dialogue", title: "Nali's Dialogue Coverage", cast: "Nali only", notes: "Same axis, medium then close-up." },
+  { block: 5, time: "2:00–2:20", duration: "20 min", setup: "G → H", shots: ["12.7", "12.9", "12.8"], type: "mixed", title: "Mask Discovery", cast: "Gesha → No actors", notes: "3 shots, 2 setups." },
+  { block: 6, time: "2:20–2:35", duration: "15 min", setup: "E", shots: ["12.5"], type: "insert", title: "Deer Head POV", cast: "None", notes: "Slider. No actors — give them rest." },
+  { block: 7, time: "2:35–2:50", duration: "15 min", setup: "J", shots: ["12.11"], type: "dialogue", title: "Desk Discovery", cast: "Gesha", notes: "Includes paper insert cutaway." },
+  { block: "BREAK", time: "2:50–3:05", duration: "15 min", title: "Break 2", notes: "Review footage. Prepare for final blocks." },
+  { block: 8, time: "3:05–3:20", duration: "15 min", setup: "K", shots: ["12.13"], type: "dialogue", title: "Return to Deer", cast: "Gesha (Nali OS)", notes: "Pan shot." },
+  { block: 9, time: "3:20–3:30", duration: "10 min", setup: "B", shots: ["12.2"], type: "insert", title: "Room Reveal (No Actors)", cast: "None", notes: "Low angle beauty shot. Can be sacrificed if time tight." },
+  { block: 10, time: "3:30–3:50", duration: "20 min", setup: "L", shots: ["12.14"], type: "dialogue", title: "The Locked Door", cast: "Gesha, Nali", notes: "Critical performance shot.", priority: "HIGH" },
+  { block: 11, time: "3:50–4:00", duration: "10 min", setup: "M", shots: ["12.15"], type: "visual", title: "Nali Alone", cast: "Nali only", notes: "Shoot last. Emotional button of the scene." }
+];
+
+const lightingNotes = [
+  { num: "12.1", note: "Wide angle entering space. Key light from pendants. Exposure set for interior — exterior through door intentionally hot/overexposed." },
+  { num: "12.2", note: "Low angle reveal. All wall props lit. Deer head lit from above-right. Room must look full and warm. No visible hard shadows from film lights." },
+  { num: "12.3", note: "Close-up, 85mm. Key from slightly above camera left (motivated by pendant). Clean catchlight in eyes essential." },
+  { num: "12.4", note: "OTS — shallow DOF. Nali in focus (fg) should have kitchen practical rim light. Gesha (bg) glows in living room ambient." },
+  { num: "12.5", note: "POV push in on deer. Dedicated dedolight for glass eye glint — position precisely. Rest of frame warmer, lower key." },
+  { num: "12.6", note: "Two shot dialogue. Balance lighting for both characters — Nali slightly hotter (his territory). Gesha has fill from table bounce." },
+  { num: "12.7", note: "Medium following Gesha to masks. Mask area pre-lit with dim practical (shelf light). Gesha walks from warm zone into shadow zone — motivated transition." },
+  { num: "12.8", note: "Insert — masks. Dutch angle. Minimal light. Shadows are the key element. One small practical source casting raking light across mask faces." },
+  { num: "12.9", note: "MCU Gesha at masks. Same position as 12.7. Adjust key to slightly cooler — she's in the shadow zone now. Let it read on her face." },
+  { num: "12.10", note: "Medium Nali. Back in his warm zone. Pendant key from above. Motivated and confident. He IS the warm light here." },
+  { num: "12.11", note: "Medium following Gesha to desk. Desk lamp is practical light — LED warm. She enters its pool. Battery LED panel supplements from camera left." },
+  { num: "12.12", note: "CU Nali — same setup as 12.10, tighter. Catchlight from pendant. Eyes must be alive. The pause is lit." },
+  { num: "12.13", note: "Medium pan back to deer. Returning to the warm center. Deer head lit as in 12.5 but from Gesha's near-angle now, not POV." },
+  { num: "12.14", note: "Wide — door area. The locked door zone should be slightly dimmer / cooler than room center. Motivated by being farther from pendants. Don't force it — let the distance do the work." },
+  { num: "12.15", note: "Medium Nali alone. Warmest light of the scene — pendants at full. But room feels emptier. Post-production grades this slightly cooler as he exits." }
+];
+
+const setups = {
+  A: { desc: "Entrance tracking — porch threshold into house", shots: ["12.1"] },
+  B: { desc: "Wide low-angle room reveal — west side", shots: ["12.2"] },
+  C: { desc: "Close-up — Gesha reaction at dining table", shots: ["12.3"] },
+  D: { desc: "OTS from kitchen counter — Nali watching", shots: ["12.4"] },
+  E: { desc: "POV push in on deer head — north wall", shots: ["12.5"] },
+  F: { desc: "Two shot dialogue — dining table", shots: ["12.6"] },
+  G: { desc: "Medium — Gesha at mask area / bookcase", shots: ["12.7", "12.9"] },
+  H: { desc: "Close insert — masks (Dutch angle)", shots: ["12.8"] },
+  I: { desc: "Medium/CU — Nali, west side", shots: ["12.10", "12.12"] },
+  J: { desc: "Medium — Gesha at desk", shots: ["12.11"] },
+  K: { desc: "Medium pan — Gesha returns to deer", shots: ["12.13"] },
+  L: { desc: "Wide — door area, north wall", shots: ["12.14"] },
+  M: { desc: "Medium — Nali alone, center room", shots: ["12.15"] }
+};
+
+// ===== UI STATE =====
+let currentSection = 'overview';
+let lbIndex = 0;
+let shotFilter = 'all';
+
+// ===== NAVIGATION =====
+function showSection(id) {
+  // Hide all
+  document.querySelectorAll('.section').forEach(s => {
+    s.classList.remove('active');
+    s.style.display = 'none';
+  });
+  // Show target
+  const el = document.getElementById(sectionId(id));
+  if (el) {
+    el.style.display = id === 'storyboard' ? 'flex' : 'block';
+    el.classList.add('active');
+  }
+  // Nav highlight
+  document.querySelectorAll('.nav-item').forEach(n => {
+    n.classList.toggle('active', n.dataset.section === id);
+  });
+  currentSection = id;
+}
+
+function sectionId(key) {
+  const map = {
+    overview: 'overview',
+    storyboard: 'storyboard-section',
+    shots: 'shot-section',
+    floorplan: 'floorplan',
+    schedule: 'schedule-section',
+    lighting: 'lighting-section',
+    sound: 'sound-section',
+    props: 'props-section',
+    wardrobe: 'wardrobe-section',
+    continuity: 'continuity-section'
+  };
+  return map[key] || key;
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('collapsed');
+}
+
+function toggleFullscreen() {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen();
+    document.getElementById('btn-fullscreen').textContent = '⛶ Exit Full';
+  } else {
+    document.exitFullscreen();
+    document.getElementById('btn-fullscreen').textContent = '⛶ Fullscreen';
+  }
+}
+
+// ===== STORYBOARD =====
+function buildStoryboard() {
+  const grid = document.getElementById('sb-grid');
+  grid.innerHTML = '';
+  shots.forEach((shot, i) => {
+    const img = storyboardImages.find(s => s.shot === shot.num);
+    const badgeClass = `badge-${shot.type}`;
+    const card = document.createElement('div');
+    card.className = 'sb-card';
+    card.onclick = () => openLightbox(i);
+    card.innerHTML = `
+      <img src="${img ? img.path : ''}" alt="Shot ${shot.num}" loading="lazy">
+      <div class="sb-meta">
+        <div class="sb-num">
+          <span>${shot.num}</span>
+          <span class="badge ${badgeClass}">${shot.type}</span>
+          ${shot.movement_num ? `<span style="font-size:10px;color:var(--text3)">Mvt ${shot.movement_num}</span>` : ''}
+        </div>
+        <div class="sb-style">${shot.style}</div>
+        <div class="sb-info">
+          <span class="sb-lens">${shot.lens}</span>
+          <span class="sb-dur">${shot.duration}</span>
+          ${shot.chars !== '—' ? `<span class="sb-lens">${shot.chars}</span>` : ''}
+        </div>
+      </div>`;
+    grid.appendChild(card);
+  });
+}
+
+function openLightbox(index) {
+  lbIndex = index;
+  updateLightbox();
+  document.getElementById('lightbox').classList.add('open');
+}
+
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('open');
+}
+
+function lbNav(dir) {
+  lbIndex = (lbIndex + dir + shots.length) % shots.length;
+  updateLightbox();
+}
+
+function updateLightbox() {
+  const shot = shots[lbIndex];
+  const img = storyboardImages.find(s => s.shot === shot.num);
+  document.getElementById('lb-img').src = img ? img.path : '';
+  document.getElementById('lb-img').alt = `Shot ${shot.num}`;
+  document.getElementById('lb-counter').textContent = `${lbIndex + 1} / ${shots.length}`;
+  const meta = document.getElementById('lb-meta');
+  meta.querySelector('.lb-num').textContent = `SHOT ${shot.num}  ·  SETUP ${shot.setup}  ·  MOVEMENT ${shot.movement_num}`;
+  meta.querySelector('.lb-style').textContent = shot.style;
+  meta.querySelector('.lb-desc').textContent = shot.desc;
+  meta.querySelector('.lb-info').innerHTML = `
+    <span>${shot.lens}</span>
+    <span>${shot.duration}</span>
+    <span class="badge badge-${shot.type}">${shot.type}</span>
+    ${shot.chars !== '—' ? `<span>${shot.chars}</span>` : ''}
+  `;
+}
+
+// ===== SHOT TABLE =====
+function buildShotTable() {
+  renderShotTable(shots);
+}
+
+function filterShots(filter, btn) {
+  shotFilter = filter;
+  document.querySelectorAll('#shot-section .filters button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  let filtered;
+  if (filter === 'all') filtered = shots;
+  else if (filter === '1' || filter === '2' || filter === '3') filtered = shots.filter(s => s.movement_num === parseInt(filter));
+  else filtered = shots.filter(s => s.type === filter);
+  renderShotTable(filtered);
+}
+
+function renderShotTable(data) {
+  const tbody = document.getElementById('shot-tbody');
+  tbody.innerHTML = '';
+  data.forEach((shot, i) => {
+    const row = document.createElement('tr');
+    row.className = `shot-row ${shot.type}`;
+    row.onclick = () => toggleExpanded(shot.num);
+    row.id = `shot-row-${shot.num.replace('.', '_')}`;
+    row.innerHTML = `
+      <td><span class="shot-num">${shot.num}</span><span class="setup-badge">${shot.setup}</span></td>
+      <td>${shot.style}</td>
+      <td><span class="sb-lens">${shot.lens}</span></td>
+      <td style="font-size:12px;color:var(--text2)">${shot.chars}</td>
+      <td>${shot.duration}</td>
+      <td><span class="badge badge-${shot.type}">${shot.type}</span></td>`;
+    tbody.appendChild(row);
+
+    const expRow = document.createElement('tr');
+    expRow.className = 'expanded-row';
+    expRow.id = `exp-${shot.num.replace('.', '_')}`;
+    expRow.innerHTML = `<td colspan="6">
+      <div class="expanded-detail">
+        <div>
+          <div class="field"><div class="field-label">Camera Movement</div><div class="field-val">${shot.movement}</div></div>
+          <div class="field"><div class="field-label">Description</div><div class="field-val">${shot.desc}</div></div>
+        </div>
+        <div>
+          <div class="field"><div class="field-label">Characters</div><div class="field-val">${shot.chars}</div></div>
+          <div class="field"><div class="field-label">Duration</div><div class="field-val">${shot.duration}</div></div>
+          <div class="field"><div class="field-label">Dialogue</div><div class="field-val">${shot.dialogue ? 'Yes' : 'No'}</div></div>
+          <div class="field"><div class="field-label">Movement</div><div class="field-val">${shot.movement_num} of 3</div></div>
+        </div>
+      </div>
+      <div class="notes-box"><strong>Notes:</strong> ${shot.notes}</div>
+    </td>`;
+    tbody.appendChild(expRow);
+  });
+}
+
+function toggleExpanded(shotNum) {
+  const id = shotNum.replace('.', '_');
+  const row = document.getElementById(`exp-${id}`);
+  if (row) row.classList.toggle('open');
+}
+
+// ===== FLOOR PLAN =====
+function buildFloorPlan() {
+  const ctrl = document.getElementById('fp-controls');
+  const grid = document.getElementById('setup-grid');
+  ctrl.innerHTML = '';
+  grid.innerHTML = '';
+
+  const allBtn = document.createElement('button');
+  allBtn.textContent = 'All Setups';
+  allBtn.className = 'active';
+  allBtn.onclick = () => { showSetupDetail(null); allBtn.classList.add('active'); };
+  ctrl.appendChild(allBtn);
+
+  Object.entries(setups).forEach(([letter, data]) => {
+    const btn = document.createElement('button');
+    btn.textContent = `Setup ${letter}`;
+    btn.onclick = () => { showSetupDetail(letter); allBtn.classList.remove('active'); };
+    ctrl.appendChild(btn);
+
+    const chip = document.createElement('div');
+    chip.className = 'setup-chip';
+    chip.onclick = () => { showSetupDetail(letter); };
+    chip.innerHTML = `<div class="setup-letter">${letter}</div><div class="setup-shots">Shots: ${data.shots.join(', ')}</div>`;
+    grid.appendChild(chip);
+  });
+}
+
+function showSetupDetail(letter) {
+  const el = document.getElementById('setup-detail');
+  document.querySelectorAll('.setup-chip').forEach(c => c.classList.remove('active'));
+  if (!letter) { el.style.display = 'none'; return; }
+  const data = setups[letter];
+  el.style.display = 'block';
+  const shotDetails = data.shots.map(sn => {
+    const s = shots.find(x => x.num === sn);
+    return s ? `<div style="margin:4px 0;font-size:12px;color:var(--text2)"><strong style="color:var(--text)">${s.num}</strong> — ${s.style} (${s.lens}) · ${s.duration}</div>` : '';
+  }).join('');
+  el.innerHTML = `
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
+      <span style="font-size:28px;font-weight:700;color:var(--amber)">Setup ${letter}</span>
+      <span style="font-size:13px;color:var(--text2)">${data.desc}</span>
+    </div>
+    <div><strong style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.8px">Shots using this setup:</strong>${shotDetails}</div>`;
+}
+
+// ===== SCHEDULE =====
+function buildSchedule() {
+  const list = document.getElementById('schedule-list');
+  list.innerHTML = '';
+  schedule.forEach(block => {
+    const isBreak = block.block === 'BREAK';
+    const typeClass = isBreak ? 'break-block' : `${block.type || 'visual'}-block`;
+    const div = document.createElement('div');
+    div.className = `sched-block ${typeClass}`;
+    if (isBreak) {
+      div.innerHTML = `
+        <div class="sched-time"><div>${block.time}</div><div class="dur">${block.duration}</div></div>
+        <div class="sched-body">
+          <div class="sched-title" style="color:var(--text3)">— ${block.title} —</div>
+          <div class="sched-notes">${block.notes}</div>
+        </div>
+        <div></div>`;
+    } else {
+      div.innerHTML = `
+        <div class="sched-time">
+          <div>${block.time}</div>
+          <div class="dur">${block.duration}</div>
+          ${block.setup ? `<div style="font-size:10px;color:var(--text3);margin-top:4px">Setup ${block.setup}</div>` : ''}
+        </div>
+        <div class="sched-body">
+          <div class="sched-title">
+            <span style="color:var(--text2);font-size:11px;font-weight:400">Block ${block.block}</span>
+            ${block.title}
+            ${block.priority === 'HIGH' ? '<span class="priority-high">HIGH</span>' : ''}
+          </div>
+          <div class="sched-shots">Shots: ${(block.shots || []).join(', ')}</div>
+          <div class="sched-notes">${block.notes}</div>
+        </div>
+        <div class="sched-cast">${block.cast || ''}</div>`;
+    }
+    list.appendChild(div);
+  });
+}
+
+// ===== LIGHTING =====
+function buildLighting() {
+  const grid = document.getElementById('lighting-shots');
+  grid.innerHTML = '';
+  lightingNotes.forEach(ln => {
+    const shot = shots.find(s => s.num === ln.num);
+    const div = document.createElement('div');
+    div.className = 'light-card';
+    div.innerHTML = `
+      <div class="lc-num">Shot ${ln.num} — ${shot ? shot.style : ''} <span class="badge badge-${shot ? shot.type : 'visual'}">${shot ? shot.type : ''}</span></div>
+      <div class="lc-desc">${ln.note}</div>`;
+    grid.appendChild(div);
+  });
+}
+
+// ===== KEYBOARD =====
+document.addEventListener('keydown', e => {
+  if (document.getElementById('lightbox').classList.contains('open')) {
+    if (e.key === 'ArrowLeft') lbNav(-1);
+    else if (e.key === 'ArrowRight') lbNav(1);
+    else if (e.key === 'Escape') closeLightbox();
+    return;
+  }
+  const sectionKeys = ['1','2','3','4','5','6','7','8','9','0'];
+  const sections = ['overview','storyboard','shots','floorplan','schedule','lighting','sound','props','wardrobe','continuity'];
+  const idx = sectionKeys.indexOf(e.key);
+  if (idx !== -1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
+    showSection(sections[idx]);
+  }
+  if (currentSection === 'storyboard') {
+    if (e.key === 'ArrowLeft') { lbIndex = (lbIndex - 1 + shots.length) % shots.length; }
+    else if (e.key === 'ArrowRight') { lbIndex = (lbIndex + 1) % shots.length; }
+  }
+});
+
+// Click outside lightbox to close
+document.getElementById('lightbox').addEventListener('click', function(e) {
+  if (e.target === this) closeLightbox();
+});
+
+// ===== INIT =====
+function init() {
+  buildStoryboard();
+  buildShotTable();
+  buildFloorPlan();
+  buildSchedule();
+  buildLighting();
+  showSection('overview');
+}
+
+init();
+</script>
+</body>
+</html>

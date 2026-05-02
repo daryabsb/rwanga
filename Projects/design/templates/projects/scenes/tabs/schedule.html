@@ -1,0 +1,112 @@
+{# ════════════════════════════════════════════════════════
+   RWANGA — projects/scenes/tabs/schedule.html
+   Scene schedule tab. HTMX fragment.
+   Shows when this scene is scheduled to shoot.
+
+   Context:
+     scene            — Scene instance
+     project          — Project instance
+     schedule_blocks  — QuerySet[ScheduleBlock] for this scene
+     shoot_day        — ShootDay or None
+   ════════════════════════════════════════════════════════ #}
+{% load i18n %}
+
+<div style="padding:var(--rw-pad-lg)">
+
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--rw-pad-md)">
+    <h2 style="font-size:16px;font-weight:700">{% trans "خشتەی وێنەگرتن" %}</h2>
+    {% if shoot_day %}
+    <a href="{% url 'scheduling:stripboard' project.pk %}" class="rw-btn rw-btn-ghost">
+      {% trans "دیتنی ستریپبۆرد" %} →
+    </a>
+    {% endif %}
+  </div>
+
+  {% if shoot_day %}
+  {# ── Shoot day info ── #}
+  <div class="rw-card" style="margin-bottom:var(--rw-pad-lg)">
+    <div class="rw-grid-2">
+      <div>
+        <div class="rw-field-label">{% trans "ڕۆژی وێنەگرتن" %}</div>
+        <div class="rw-field-val" style="font-size:18px;font-weight:700;color:var(--rw-amber)">
+          {% trans "ڕۆژی" %} {{ shoot_day.day_number }}
+        </div>
+      </div>
+      <div>
+        <div class="rw-field-label">{% trans "بەروار" %}</div>
+        <div class="rw-field-val" style="font-family:var(--rw-font-en)">
+          {{ shoot_day.date|date:"l، j F Y" }}
+        </div>
+      </div>
+    </div>
+    {% if shoot_day.notes %}
+    <div class="rw-notes-block" style="margin-top:var(--rw-pad-sm)">{{ shoot_day.notes }}</div>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  {% if schedule_blocks %}
+  <div class="rw-sched-list">
+    {% for block in schedule_blocks %}
+    {% if block.block_type == 'break' %}
+    <div class="rw-sched-row s-break">
+      <div>
+        <div class="rw-s-time" dir="ltr">{{ block.time_start|time:"H:i"|default:"—" }}</div>
+        <div class="rw-s-dur">{{ block.title }}</div>
+      </div>
+      <div>
+        <div style="font-size:12px;color:var(--rw-text-3)">{{ block.notes }}</div>
+      </div>
+      <div></div>
+    </div>
+    {% else %}
+    <div class="rw-sched-row {% if block.is_priority %}s-hi{% endif %}">
+      <div>
+        <div class="rw-s-time" dir="ltr">
+          {{ block.time_start|time:"H:i"|default:"—" }}
+        </div>
+        <div class="rw-s-dur" dir="ltr">
+          {% if block.duration %}{{ block.duration|duration_hm }}{% endif %}
+        </div>
+        {% if block.scene %}
+        <div class="rw-s-setup">{% trans "ئامادەکردن" %} {{ block.title|slice:":3" }}</div>
+        {% endif %}
+      </div>
+      <div>
+        <div class="rw-s-title">
+          {{ block.title }}
+          {% if block.is_priority %}<span class="rw-pri-badge">{% trans "گرنگ" %}</span>{% endif %}
+        </div>
+        {% if block.shots.exists %}
+        <div class="rw-s-shots">
+          {% for shot in block.shots.all %}
+          <span dir="ltr">{{ shot.number }}</span>{% if not forloop.last %}، {% endif %}
+          {% endfor %}
+        </div>
+        {% endif %}
+        {% if block.notes %}
+        <div class="rw-s-notes">{{ block.notes }}</div>
+        {% endif %}
+      </div>
+      <div class="rw-s-cast">
+        {% for shot in block.shots.all %}
+          {% if shot.chars %}{{ shot.chars }}{% endif %}
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+    {% endfor %}
+  </div>
+
+  {% else %}
+  <div class="rw-empty" style="padding:var(--rw-pad-xl) var(--rw-pad-md)">
+    <div class="rw-empty-icon">📅</div>
+    <div class="rw-empty-title">{% trans "هێشتا خشتەیەک نییە" %}</div>
+    <div class="rw-empty-sub">{% trans "ئەم دیمەنە هێشتا لە خشتەی وێنەگرتندا نییە" %}</div>
+    <a href="{% url 'scheduling:stripboard' project.pk %}" class="rw-btn rw-btn-primary">
+      {% trans "بڕۆ بۆ ستریپبۆرد" %}
+    </a>
+  </div>
+  {% endif %}
+
+</div>

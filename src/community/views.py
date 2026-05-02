@@ -32,7 +32,10 @@ class CommunityIndexView(View):
 
 class CommunityCreateView(View):
     def get(self, request):
-        return render(request, "community/index.html", {"project": Project.objects.filter(owner=request.user).first(), "sessions": []})
+        project = Project.objects.filter(owner=request.user).first() if request.user.is_authenticated else None
+        if request.headers.get("HX-Request"):
+            return render(request, "community/_create_modal.html", {"project": project})
+        return HttpResponseRedirect(reverse("community:list"))
 
     def post(self, request):
         project = Project.objects.filter(owner=request.user).first()

@@ -1,0 +1,642 @@
+============================
+[CHUNK-01] — Title & Meta
+============================
+Mysterious Guest — Suspense Autopsy
+Layer 1 Bible Review
+Prepared by Darya Ibrahim & AI · v2.0 · April 2026 · Pre-meeting document for Sarwar
+
+Tab buttons:
+The Review
+Locked Decisions
+Our Conversation
+
+============================
+[CHUNK-02] — The Verdict (Executive Summary)
+============================
+The Verdict
+
+This screenplay is a highly controlled system with one structural leak. The engine — a dead woman in a sofa while friends sit on it, Chekhov's gun loaded with sugar, the entire film being one man's psychological projection — is extraordinary. These belong in the same conversation as Rope, The Invisible Guest, and the best of Hitchcock.
+
+The leak is in Act 2A (Scenes 12–18). The producer is right about one thing: the house section feels long. But the producer's instinct to cut is wrong. The problem isn't length — it's that there is no active threat vector during the intimacy scenes. The relationship builds, but no ticking consequence is tied to behavior. In Hitchcock's terms: we've shown the audience a nice dinner, but we haven't shown them the bomb under the table yet. The audience needs to know more than the characters do, and right now, in Scenes 12–18, the audience knows roughly the same as Nali.
+
+The fix is not compression. The fix is information asymmetry — giving the audience clues that Nali misses — and dual-function scenes where every emotional beat simultaneously increases danger. Each intimate scene must carry both weight: emotional connection AND threat escalation. Without this merge, the film is trying to be emotionally intimate and suspense-driven in the same space without fusing the two.
+
+The audience must become smarter than Nali before the midpoint. Right now: audience = Nali → weak suspense. The fix: audience > Nali → tension locks in permanently.
+
+Genre lock: This is psychological suspense, not relationship drama. Every decision from here — casting, pacing, sound design, edit rhythm — flows from that distinction.
+
+============================
+[CHUNK-03] — Stats & Structural Diagnosis
+============================
+Stats:
+43 — Total Scenes
+26 — Bomb Present
+9 — Suspense Gaps
+5 — Chekhov Threads
+3 — Critical Fixes
+1 — Genius Twist
+
+Structural Diagnosis
+
+The system: This script contains multiple latent threats operating at different narrative phases. While the script contains multiple latent threats, each section must foreground one dominant "bomb" for the audience to track.
+
+Act 1 (S1–11): The dominant bomb is Gesha's hidden condition — planted through the Shrubi and her behavior. The audience must pick up what Nali doesn't.
+
+Act 2A (S12–18): The dominant bomb should be the Shrubi — every time Gesha eats sugar, the audience dreads. Currently this bomb is loaded but not detonated for the audience's awareness. This is the structural leak.
+
+Act 2B (S19–29): The dominant bomb is the sofa. Pure Hitchcock. Works perfectly.
+
+Act 3 (S30–43): The dominant bomb is Nali's psychology — his capacity to imagine catastrophic outcomes. The twist is the detonation.
+
+Nali's core flaw: Nali does not trust reality — he trusts mediated interpretation. The tragedy is not that Nali makes a wrong decision — it's that he cannot make a decision without mediation. This explains everything: AI usage, paranoia, the imagination spiral, the failure to act correctly.
+
+AI's role: AI is not the antagonist. AI is not a void. AI is a frictionless decision engine that enables Nali's flaw. It removes resistance from bad decisions. It doesn't oppose him — it facilitates his worst choices without friction. The tragedy is that AI does exactly what it's designed to do: give rational answers without emotional wisdom.
+
+============================
+[CHUNK-04] — Suspense Arc & Legend
+============================
+Suspense Arc — 43 Scenes
+
+Height = suspense tension score (1–10). Color = quality: green = bomb ticking, yellow = tension present but passive, red = suspense gap. Hover/tap for score.
+
+Legend:
+Strong bomb
+Tension present
+Suspense gap
+
+============================
+[CHUNK-05] — Chekhov Thread 1: The Shrubi Sweets
+============================
+Chekhov Threads — Tracking the Fuses
+
+Five objects/behaviors are planted early and pay off later. Each is a fuse. The question: does the audience register the plant?
+
+The Shrubi Sweets — Murder Weapon Hidden in Plain Sight
+
+S7 — Gesha says she hasn't had Shrubi in years, craves them desperately
+S12 — Sweets visible in the house (Nali bought them)
+S16 — Gesha binges — smears them on face, dances wildly. Joyful but unhinged.
+S21 — Nazi notices leftover Shrubi and flour on the table
+S40 — PAYOFF: Diabetic shock from sugar. The Shrubi killed her.
+
+BEHAVIORAL EMPHASIS, NOT INFORMATIONAL
+The Shrubi is already balanced. The real issue is not clarity but emotional context of consumption. It shouldn't feel like a clue — it should feel like release, joy, vulnerability. When Gesha eats the sweets in a moment of letting her guard down, the audience remembers the feeling, not the fact. Then when the cause of death is revealed, they don't think "oh, the clue" — they think "oh, that beautiful moment killed her." Focus on behavioral emphasis: the gesture, the abandon, the trust it represents.
+
+============================
+[CHUNK-06] — Chekhov Thread 2: Gesha's Phone
+============================
+Gesha's Phone — The Runaway's Lifeline
+
+S7 — Secretly checks messages, doesn't open them
+S7 — Turns phone off
+S8 — Won't get out of car at fruit stand — afraid of being seen
+S16 — Nali demands to see her phone (game)
+S17 — Nali checks — phone is off
+S32 — Security footage: Gesha checked her phone before sleeping, turned it off
+S41 — PAYOFF: She was a runaway hiding from her old life
+
+STRONG THREAD — Minor Enhancement
+This thread works well. One addition: in S3 (video call), Gesha should glance off-camera once — like she heard something, or someone came in. She covers it fast. We plant the seed that her living situation isn't what she claims.
+
+============================
+[CHUNK-07] — Chekhov Thread 3: The Locked Door
+============================
+The Locked Door — Nali's Secret Self
+
+S12 — Gesha tries the door. Won't open.
+S16 — In Truth or Dare, Gesha dares: "Open that room." Nali deflects with humor (Annabelle joke)
+S32 — Camera footage: Gesha peeked through the keyhole
+S32 — PAYOFF: Nali opens it. Inside: photos of his European past, parents.
+
+UNDERUSED — Major Opportunity
+The locked door is a massive suspense asset that's currently doing half its work. The audience should be burning to know what's inside. Right now, Gesha tries it once (S12) and it comes up once more in the game (S16). That's not enough for 20 scenes of curiosity. Suggestion: in S17, when Gesha walks to the dark end of the garden, she passes the locked door on her way. She pauses. She puts her hand on the handle. She looks back. Nali is watching. She moves on. This takes 5 seconds and triples the door's weight.
+
+============================
+[CHUNK-08] — Chekhov Thread 4: The Sofa
+============================
+The Sofa — Theater of Death
+
+S16 — Gesha declares she'll sleep on it
+S18 — She sleeps on it (we see this)
+S19 — She's dead on it
+S19 — Nali hides body inside it
+S21–28 — Friends sit on it, eat near it, stand on it
+S28 — Adib insists on sleeping on it — tries to open it
+S29 — PAYOFF: Adib finds the body
+
+STRUCTURALLY PERFECT — Protect by Fixing Upstream
+This is Hitchcock-grade. The sofa is the bomb under the table from S19 onward. The concept is structurally complete — do not change it. But its power is conditional: if the tension upstream (Act 2A) is broken, the sofa moment lands flat because the audience hasn't been squeezed hard enough to feel the release-and-horror of this sequence. Protect it by fixing what comes before it. The sofa doesn't need surgery — it needs the right blood pressure arriving at its door.
+
+============================
+[CHUNK-09] — Chekhov Thread 5: AI
+============================
+AI — The Frictionless Enabler
+
+S3 — Nali calls AI after hanging up with Gesha — habit established
+S6 — Calls AI from the market (about flowers)
+S13 — Voice notes to AI (how to build trust)
+S18 — Calls AI: likes Gesha but doesn't trust her
+S19 — Calls AI pretending to "write a story" — AI helps him hide the body
+S24 — Calls AI: "How do I make them leave?"
+S37 — Texts AI. AI is offline — version update.
+S40 — PAYOFF: If he'd called an ambulance instead of AI, none of this would have happened.
+
+THEMATICALLY PERFECT — AI as Hidden Timer
+AI removes resistance from bad decisions. It doesn't oppose Nali — it facilitates his worst choices without friction. The version update (S37) is not a planting issue — it's a clock mechanic. AI going offline is the film's hidden timer. Umid's warning about the update should come in S13 or S18 — before the crisis — so the audience knows the clock is ticking on Nali's only companion. Without the plant, it feels random. With it, it becomes inevitable tragedy. When AI goes offline, it should feel like a countdown that was always running in the background.
+
+============================
+[CHUNK-10] — Scene-by-Scene Header & Controls
+============================
+Scene-by-Scene — Suspense Anatomy
+
+Buttons:
+Expand All
+Collapse All
+Show Gaps Only
+Show Bombs Only
+Show All
+
+Act dividers:
+Act 1 — The Setup
+Act 2A — The Evening (The Structural Leak)
+Act 2B — The Crisis
+Act 3 — Cover-Up & Revelation
+
+============================
+[CHUNK-11] — Scene Data: Scenes 1–5
+============================
+Scene 1 — Nali's room · Day
+Summary: Wakes up late. Nazi calls about tomorrow's visit.
+The Bomb: None yet — pure setup.
+Gap: (none)
+Note: (none)
+
+Scene 2 — Garden · Sunset
+Summary: Watches ambulance at neighbor's. Gardener tells of dead couple. Cuts finger.
+The Bomb: The dead couple story — the seed of everything. This triggers Nali's entire imagination.
+Note: This is the REAL scene. Everything after this (until S43) is in Nali's head. The gardener's story should linger — it's the match that lights the fire. Consider: does Nali cut his finger BECAUSE the story disturbs him? The cut = anxiety made physical.
+
+Scene 3 — Garden house · Evening
+Summary: Video call with Gesha (mask). They discuss meeting. Nali calls AI about trust.
+The Bomb: Gesha's green face mask — the first mask. The conversation about masks is the film's thesis statement. But from a suspense standpoint, the bomb is Gesha's insistence: 'If you delay, I'll never come.' Why is she so desperate?
+Gap: Gesha's desperation isn't charged with enough mystery. We need a flicker of something — a noise off-camera, a glance away — that plants 'this woman is hiding something.'
+Note: Add one visual beat: Gesha glances off-camera during the call, covers it fast. We plant: her living situation isn't what she claims.
+
+Scene 4 — Car / road · Day
+Summary: Drives to pick up Gesha. Hitchhiking woman mentions 'tragic incident.'
+The Bomb: The hitchhiker's mention of the tragedy = ambient dread. The world outside is already violent.
+Note: The hitchhiking woman with child is good — she introduces death into the day casually. Consider: the child stares at Nali from the back seat after they exit. Kids who stare = unease.
+
+Scene 5 — Checkpoint · Day
+Summary: Police checkpoint, extra security.
+The Bomb: The checkpoint = the outside world is dangerous. Also: cameras are being checked. This plants S32's camera footage.
+Gap: Currently this scene is functional but not suspenseful. The checkpoint should make the AUDIENCE uneasy, not just Nali.
+Note: A soldier looks at Nali for one beat too long. That's all. One beat of eye contact that lingers.
+
+============================
+[CHUNK-12] — Scene Data: Scenes 6–10
+============================
+Scene 6 — Market · Day
+Summary: Meets Gesha. She's by the flower seller. Nali secretly calls AI.
+The Bomb: Gesha standing among flowers — beauty. But also: she's wearing sunglasses and a hat. She's hiding in public.
+Gap: The AI call about flowers is comic but deflates tension. Consider shortening it.
+Note: Gesha's disguise (hat + sunglasses in a market) should register. Someone in the market should look at her — maybe a vendor stares. She turns away. She's hiding from people who might recognize her.
+
+Scene 7 — Car / city · Day
+Summary: Buys Shrubi sweets. Gesha quiet and stressed.
+The Bomb: THE SHRUBI. This is where the Chekhov's gun is loaded. But it's too quiet a loading.
+Gap: The Shrubi purchase needs to register through behavior, not information. Currently it feels like a casual stop.
+Note: Gesha's line when she takes the first sweet should carry dual meaning through behavior: 'These will kill me' — said with a laugh, in a moment of vulnerability and joy. The audience remembers the feeling. Also: she checks her phone, sees messages, turns it off. Two bombs loaded in one scene.
+
+Scene 8 — Roadside / car · Day
+Summary: Fruit stop. Gesha stays in car. Tunnel light-counting challenge.
+The Bomb: Gesha won't get out. She's afraid of being seen. Also: the tunnel = enclosed space, light/dark transition, an entrance to another world.
+Note: The tunnel counting scene is beautiful — pure joy. It's the film's emotional peak before everything turns. Protect it. The contrast between this joy and S19's horror is the emotional devastation.
+
+Scene 9 — Checkpoint · Day
+Summary: Soldier warns about drunk killer in the area.
+The Bomb: The drunk killer warning is a red herring planted for the audience — they'll wonder if the killer is relevant. He's not. But the mention of 'killing' primes the audience for death.
+Note: This is good misdirection. The audience now expects external danger. The real danger is already in the car (the Shrubi) and inside Nali's house (his own paranoia).
+
+Scene 10 — Car / road · Day
+Summary: Driving to garden. Paris cafe story. Sun setting.
+The Bomb: Nali tells a story about a woman in Paris. This is him performing — and Gesha sees through it. Tension between his mask and her awareness.
+Gap: This scene is a lull. The Paris story is charming but has no suspense function. It's the weakest scene in Act 1.
+Note: Consider adding a visual: as they drive, Gesha sees the sun setting and says 'we need to arrive before dark' with genuine urgency. Why? Because she's a woman going to a stranger's remote house. Her awareness of the danger should surface here — even briefly.
+
+============================
+[CHUNK-13] — Scene Data: Scenes 11–15
+============================
+Scene 11 — Garden · Sunset
+Summary: Arrival. Gula the dog greets them. Gesha charmed.
+The Bomb: The garden is beautiful. The dog is warm. Everything is safe. This is the calm before the storm. The bomb isn't in this scene — it's the ABSENCE of a bomb that makes S12's shock work.
+Note: The dog's perfect welcome is part of the fantasy (see Fix 3). But on first viewing, this scene does its job: it makes the audience relax. The garden at sunset is seductive. We want the audience to think: this could work.
+
+Scene 12 — Garden house · Evening
+Summary: THE TURNING POINT. Gesha enters and is shocked by the interior — taxidermy, masks, locked door.
+The Bomb: The house itself is the bomb. The deer head, the masks, the daggers — they scream 'this man is not normal.' But Nali treats it all casually. The gap between his normalcy and the house's horror = tension.
+Note: This scene works. The locked door needs one more beat of emphasis — Gesha doesn't just try it and move on. She stands there for a second. She leans in. She LISTENS. What does she hear? Nothing. But the audience imagines everything.
+
+Scene 13 — Garden · Evening
+Summary: Nali feeds dog. Voice notes to AI. AI suggests asking about her dreams.
+The Bomb: Nali alone with AI — he's already mediating reality through technology instead of engaging with the actual human in his house. This is Nali's core flaw in action: outsourcing judgment.
+Gap: This is a bridge scene that works functionally but doesn't build tension. The audience is waiting for Gesha to come back. The AI conversation feels like padding.
+Note: Make this scene do double duty: while Nali talks to AI, we HEAR Gesha inside. She's moving. Opening things. Maybe she's near the locked door again. We hear it from outside through the walls. Nali doesn't notice because he's talking to AI. The audience notices.
+
+Scene 14 — Garden house · Evening
+Summary: Gesha in new dress. They cook dinner. Truth or Dare begins.
+The Bomb: The game is the bomb mechanism — it forces truth out of characters who are both hiding. But the bomb hasn't been shown to the audience yet. No active threat vector during this intimacy.
+Gap: The cooking and early game are low-tension. The audience doesn't yet feel danger. Each emotional beat must simultaneously increase danger.
+Note: During dinner prep, the Shrubi should be VISIBLE on the counter or table. Camera lingers on it briefly. Gesha glances at it. We've planted the bomb (if Fix 1 is in place). Now every time it's on screen, the audience feels it.
+
+Scene 15 — Pool · Night
+Summary: Nali jumps in pool clothed, reflects on mind-reading.
+The Bomb: Almost none. This is Nali processing — it's internal.
+Gap: This scene breaks the momentum of the game. It's a contemplative pause that the audience may experience as a stall.
+Note: Cut or compress to a visual: Nali underwater, sound muted, Gesha's laughter from inside the house heard distorted through water. 10 seconds. Then back inside. This preserves the beat without losing momentum.
+
+============================
+[CHUNK-14] — Scene Data: Scenes 16–20
+============================
+Scene 16 — Garden house · Night
+Summary: Candlelight dinner. Truth or Dare escalates. Phone demand. Gesha's terminal illness question. Peak tension.
+The Bomb: MULTIPLE BOMBS ACTIVE: 1) Gesha asks about staying with someone who has a terminal illness — she's asking about herself. 2) Nali demands her phone — she can't show it. 3) The Shrubi binge begins. Each bomb serves a different thread. While multiple threats are active, the dominant bomb is the Shrubi — the audience should feel the danger of the sugar consumption above all else.
+Note: This is the scene that justifies the entire evening section. The terminal illness question is devastating on rewatch. Protect every word of it. The Shrubi binge should be the scene's climax — Gesha eating wildly, dancing, laughing, with flour on her face. The audience should feel joy AND something wrong they can't name. Behavioral emphasis: this is vulnerability, not a clue.
+
+Scene 17 — Garden / house · Night
+Summary: Dare: Gesha walks to dark garden. Nali searches her bag. Deer head scare.
+The Bomb: Two parallel betrayals: Gesha in the dark (vulnerable), Nali going through her things (violation of trust). Both are doing exactly what they fear the other of doing.
+Note: Add: Gesha passes the locked door on her way out. She pauses. Hand on handle. Looks back at Nali. Moves on. 5 seconds. Triples the door's weight.
+
+Scene 18 — Garden house · Night
+Summary: Deer head scare. Gesha sleeps on sofa. Nali talks to AI. Falls asleep with her words.
+The Bomb: Gesha CHOOSES the sofa. 'I'll sleep on the sofa until we know each other better.' This is the single most important line in the film because it puts her on the object that will contain her body. The bomb: she's sleeping on her own coffin.
+Note: When Nali sees Gesha sleeping from his room door — this should be held. The camera stays on sleeping Gesha. Peaceful. Beautiful. The audience doesn't know yet, but this is the last time they'll see her alive. Let it breathe.
+
+Scene 19 — Garden house · Morning
+Summary: HORROR PIVOT. Gesha is dead on the sofa. Cold. Not breathing for hours.
+The Bomb: THE BOMB EXPLODES. But immediately, a new bomb is loaded: the friends are coming. The clock starts.
+Note: The AI call where Nali pretends to be 'writing a story' — this is the scene of the film. AI's line 'your breathing sounds real' should chill the audience. Don't change a word. AI removes resistance from bad decisions — it helps him hide the body because he framed it as fiction. Also: the moment Nali stuffs Gesha into the sofa must be PHYSICAL and DIFFICULT. The audience should feel the weight, the panic, the absurdity.
+
+Scene 20 — Garden · Day
+Summary: Nazi and Adib arrive. Nali acts normal.
+The Bomb: The body is in the sofa. Everything from now until S29 runs on this single bomb.
+Note: Nali's face when he opens the gate. This is acting — both his character acting normal, and the actor playing a man playing normal. Layers within layers.
+
+============================
+[CHUNK-15] — Scene Data: Scenes 21–25
+============================
+Scene 21 — Garden house · Day
+Summary: Friends enter. Nazi sees leftover Shrubi. Everyone sits on the body sofa.
+The Bomb: THEY'RE SITTING ON THE BODY. Maximum Hitchcock. The Shrubi evidence is in plain sight. Nazi noticing the flour is a near-miss.
+Note: Nazi noticing the Shrubi — this should be a close-up. Nazi picks up a piece, maybe eats it. 'You had sweets and didn't invite us?' Nali freezes for one frame. This is beautiful misdirection: the audience worries about the sofa, but it's the Shrubi that's the real evidence.
+
+Scene 22 — Garden house · Evening
+Summary: Ako and Tara arrive. Ako brings fish. Nali increasingly paranoid.
+The Bomb: More people = more danger for Nali. The sofa bomb intensifies with every body that enters the room.
+
+Scene 23 — Garden house · Night
+Summary: Chekhov rehearsal. Adib/Tara tension. Nali stares at sofa.
+The Bomb: The Seagull rehearsal mirrors the main story — art, love, self-destruction. Adib on stage near the sofa. The stuffed bird = the seagull = Gesha.
+Note: The play-within-a-film is thematically rich. A line from The Seagull should echo Gesha's situation: something about a woman destroyed by a man's inability to love. The actor speaks fiction; the audience hears truth.
+
+Scene 24 — Garden · Night
+Summary: Adib grills fish outside. Nali calls AI: 'How do I make them leave?' AI: 'Cause a fight.'
+The Bomb: AI gives destructive advice. AI removes resistance from bad decisions — it helps him escalate because he framed it as a social problem.
+Note: AI's advice to 'cause a fight' is darkly funny and deeply ironic. AI doesn't know there's a body — it's giving social advice for an awkward dinner party. The gap between AI's understanding and reality = the film's thesis about mediated interpretation.
+
+Scene 25 — Garden house · Night
+Summary: Dinner. Adib drunk. They discuss neighbor murder. Nali pushes drinking.
+The Bomb: The neighbor murder discussion — the characters are literally discussing a situation that mirrors Nali's. Dramatic irony at its peak.
+Note: When they discuss the neighbor's murder, someone should say something like 'who hides a body in their own house? That's the stupidest thing you could do.' Nali has to keep a straight face. This is Rope-level suspense.
+
+============================
+[CHUNK-16] — Scene Data: Scenes 26–30
+============================
+Scene 26 — Garden house · Night
+Summary: Rehearsal. Adib STANDS ON THE SOFA to grab the stuffed bird. Insults Tara. She leaves.
+The Bomb: ADIB ON THE SOFA. Peak physical tension. The sofa might open. The body might shift. Nali can barely breathe.
+Note: This is the best scene in the body-hiding sequence. Adib standing on the sofa, reaching for the bird — the audience dies. Consider: the sofa CREAKS. Just barely. Adib doesn't notice. Nali does.
+
+Scene 27 — Garden · Night
+Summary: Tara, Ako, Nazi leave. Nazi warns: don't let Adib drive.
+The Bomb: Relief — most of the danger is leaving. But Adib stays. The bomb hasn't been defused, just reduced.
+Note: Nazi's warning about Adib driving is good foreshadowing for S31 (the staged car accident). Plant it firmly.
+
+Scene 28 — Garden house · Night
+Summary: Adib insists on sleeping on the sofa. Won't leave. Nali watches him all night.
+The Bomb: THE WORST POSSIBLE OUTCOME. The one person who won't leave wants to sleep ON the body. Nali can't stop him. The entire night is a vigil of dread.
+Note: Adib trying to open the sofa to sleep on it — this should be AGONIZING. He pulls at the mechanism. It's stuck (because of the body). He gives up and sleeps on it closed. Nali doesn't sleep. Camera holds on Nali's eyes in the dark. All night.
+
+Scene 29 — Garden house · Morning
+Summary: Adib finds body. Nali pushes him. Adib dies hitting stone sculpture.
+The Bomb: DOUBLE EXPLOSION. The sofa bomb detonates (Adib finds body) AND the second death bomb loads. Now Nali has two bodies.
+Note: The accidental nature of Adib's death is crucial. Nali doesn't DECIDE to kill him. It's panic + physics. This keeps Nali sympathetic. The push must be instinctive — not a fight, not a choice. Just a flinch that kills.
+
+Scene 30 — Car / road · Day
+Summary: Drives Adib's car with body in passenger seat. Terrified.
+The Bomb: Body in the passenger seat. Anyone could see. Every car that passes is a threat.
+Note: Visual: the body keeps slumping toward Nali. He has to push it back to sitting position. At a traffic light, a car pulls up next to him. The driver glances over. Nali freezes. The light changes. They drive on.
+
+============================
+[CHUNK-17] — Scene Data: Scenes 31–35
+============================
+Scene 31 — Valley / cliff · Day
+Summary: Pushes car off cliff. Stages drunk driving accident.
+The Bomb: Staging the accident. If anyone sees, if anything goes wrong, he's caught.
+Gap: The staging itself is tense, but after the sofa sequence's heights, this feels like a procedural step-down. It needs a near-miss: someone almost sees.
+Note: A shepherd or a car appears in the distance after Nali pushes the car. He has to hide. He waits, pressed against rock, until they pass. This turns a procedural scene into a suspense beat.
+
+Scene 32 — Garden house · Day
+Summary: Reviews security footage. Sees Gesha snooping. Deletes footage. Opens locked room — his past.
+The Bomb: The security footage is evidence that could save or damn him. The locked room payoff is emotional, not suspenseful.
+Note: The moment Nali opens the locked room and introduces dead Gesha to his old photos — this is the most tender moment in the film. It should be quiet. No music. Just a man talking to a dead woman about his parents. Devastating.
+
+Scene 33 — Car / road · Day
+Summary: Drives with wrapped body visible.
+The Bomb: Body in the car again. Anyone could see the shape.
+Gap: This is a repeat of S30's tension pattern. Risk of diminishing returns.
+Note: Differentiate from S30: this time, Nali is CALMER. More methodical. The horror has become routine. That's scarier than panic.
+
+Scene 34 — Desert · Day
+Summary: Digs hole near overturned tankers. Can't unlock Gesha's phone.
+The Bomb: The phone won't unlock — Gesha's secrets die with her. Also: the physical labor of digging forces confrontation with what he's doing.
+Gap: The desert sequence risks feeling like a procedural. The overturned tankers are a striking visual but don't add tension.
+Note: The tankers are post-industrial wasteland — a landscape of things that crashed and were abandoned. Like Gesha. Like Nali's conscience. Let the visual do the thematic work.
+
+Scene 35 — City · Night
+Summary: Buys burner phone and SIM card.
+The Bomb: Minimal. This is procedural.
+Gap: Low point. The audience's emotional investment is in Gesha and Nali's soul, not in phone logistics.
+Note: Consider cutting. Or: combine with S36. He buys the phone on the drive to the burial site. One scene, not two.
+
+============================
+[CHUNK-18] — Scene Data: Scenes 36–39
+============================
+Scene 36 — Desert / roadside · Night
+Summary: Changes mind. Can't bury her. Leaves body by tree. Burns belongings. Keeps her ID.
+The Bomb: The REVERSAL. Nali's humanity returns — he can't erase her. He chooses to let her be found. This is redemption in the middle of horror.
+Note: This is Nali's most human moment since the evening with Gesha. The decision to not bury her — to let her be found by her family — is the act of a man who still has a conscience. The burning of the phone but keeping her ID = he's destroying evidence but preserving her identity. Beautiful contradiction.
+
+Scene 37 — Hilltop · Night
+Summary: Watches ambulance find body. Texts AI. AI is offline.
+The Bomb: AI OFFLINE. The hidden timer has expired. Nali's only companion is gone. He's truly alone for the first time in the film. This is the inevitable consequence of the clock mechanic — not random, but the countdown reaching zero.
+Note: The ambulance lights in the distance — Nali watching from the hilltop — this is a Hitchcock composition. The text to AI that goes unanswered: this is the film's loneliest moment. If the Umid/version-update plant was done earlier (S13 or S18), the audience already knew this moment was coming. That's what makes it devastating instead of arbitrary.
+
+Scene 38 — Theater · Day
+Summary: Watches rehearsal. Dancer in red reminds him of Gesha. Breaks down.
+The Bomb: Emotional, not suspense. The red dress = Gesha = the doll-covering. Memory intrusion.
+Gap: After the intense Act 3 action, this is a necessary emotional beat. But it risks feeling like a different film. The theater is an unfamiliar space after 30+ scenes in the garden house and roads.
+Note: The dancer in red should mirror Gesha's S16 dance — the same wild, joyful movement. But now it's performed by a stranger. Nali sees Gesha's ghost in another woman's body. He cancels the show = he cancels all art, because art and life have become inseparable.
+
+Scene 39 — Old apartment · Day
+Summary: Police come. Ask Nali to the station about Adib and Gesha.
+The Bomb: POLICE AT THE DOOR. The audience holds its breath. Is this the end?
+Note: The old, dusty apartment — this is where Nali actually lives? Not the garden house? This reveals the garden house as a STAGE. A set. A mask. His real life is this dust. This is a character revelation that should hit hard.
+
+============================
+[CHUNK-19] — Scene Data: Scenes 40–43
+============================
+Scene 40 — Police station · Day
+Summary: THE INTERROGATION. Meets Awin. Learns Gesha died of diabetic shock from Shrubi.
+The Bomb: THE ULTIMATE BOMB: everything was unnecessary. Natural causes. If he'd just called an ambulance — if he'd trusted reality instead of mediating through AI — nothing would have happened.
+Note: The officer's line about 'someone who knew about her condition might have used it' — this should terrify Nali AND the audience. For a moment, the audience thinks: wait, DID someone kill her on purpose? Is there a layer we missed? Then: no. She ate them herself. Joyfully. That beautiful moment of vulnerability killed her. This ambiguity between murder and accident mirrors the film's ambiguity between reality and imagination.
+
+Scene 41 — Cafe · Day
+Summary: Meets Awin. Full story: Gesha was a runaway, worked for insulin, sought real love.
+The Bomb: Emotional devastation, not suspense. But: Nali's line 'So you put the same pressure on her that her family did' is an accusation that applies to EVERYONE in Gesha's life — including Nali himself.
+Note: Awin's story fills in every mystery: the phone behavior, the nervousness, the disguise at the market, the desperation to be loved. Everything clicks. The rain at the end = the world mourning what Nali's fear destroyed.
+
+Scene 42 — Garden house · Night
+Summary: Surreal vision: house on fire, dog plays in flames, doll-Gesha dances.
+The Bomb: Psychological. Nali's guilt made visual. The house — his stage, his mask — burns.
+Gap: The surreal register is a tonal shift. After the grounded realism of the interrogation and cafe scenes, this could feel like a music video insert.
+Note: Keep it short. 60 seconds maximum. The fire should feel like Nali's interior — not a dream sequence, but a state of mind. The doll-Gesha dancing is the memory of S16's sugar dance, transformed into horror.
+
+Scene 43 — Garden · Sunset
+Summary: THE TWIST. Returns to S2. Finger uncut. Phone rings. Gesha is alive. It was all imagination.
+The Bomb: THE ENTIRE FILM WAS THE BOMB. Scene 43 is not a reversal of reality; it is a revelation of process. The film is not undoing events — it is exposing how Nali constructs them. The real question was never 'will Nali get caught?' It was: 'will Nali let Gesha come?'
+Note: The camera pullback at the end — from Nali's face to the whole garden — should be the SAME framing as S2. Exact match. The gardener is still mid-sentence. No time has passed. The phone rings. Gesha's face on the screen. Does he answer? Does the camera answer for us? Leave it ambiguous. The audience decides. The twist should be felt before it is understood.
+
+============================
+[CHUNK-20] — The Three Critical Fixes (Fix 1)
+============================
+The Three Critical Fixes
+
+These are the structural interventions that transform the screenplay from "very good" to "unforgettable." They address the producer's pacing concern without cutting a single scene.
+
+Fix 1: Plant the Bomb Before Dinner (Scenes 7–11)
+
+The audience needs to know something is wrong with Gesha before she enters the house. Right now, the Shrubi purchase in S7 is too casual — it reads as character color, not foreshadowing. Two micro-adjustments:
+
+A) When Gesha takes the first Shrubi in the car, she pauses. Maybe she says: "These will kill me" — a throwaway line said with a smile. The audience won't register it as literal. But in S40, they'll remember.
+
+B) Gesha's nervousness in the car (S7–S10) needs one concrete visual: she scratches her arm. Not dramatically — just a habitual gesture. Later, in S41, when Awin tells us Gesha needs insulin injections, the audience connects: she was scratching the injection site. This costs nothing to shoot and plants the diabetes in the audience's subconscious.
+
+The emphasis must be behavioral, not informational. The Shrubi moment should feel like vulnerability and joy — not a clue. The audience remembers the feeling of the moment, and the feeling is what devastates them later.
+
+IMPACT: The entire evening (S12–18) transforms. Every time Gesha eats sugar, the audience feels dread — even though they can't articulate why. The audience becomes smarter than Nali.
+
+============================
+[CHUNK-21] — Fix 2: The House Must Speak
+============================
+Fix 2: The House Must Speak (Scenes 12–14)
+
+The producer says "too much time in the house." Sarwar's instinct is right that the house is a character. But currently, the house is a set, not a character. It describes itself once (S12) and then becomes a backdrop. The fix:
+
+A) The house makes sounds. Creaking at night. A drip. The wind through a crack. Each sound makes both characters react differently — Nali ignores them (he's used to it), Gesha flinches. This creates micro-suspense beats throughout S14–18 without adding dialogue or scenes.
+
+B) The masks and taxidermy should have eyes that seem to follow. Not in a horror way — in a surveillance way. The house watches. This connects to the security camera reveal in S32 and the larger theme of masks/watching.
+
+C) Temperature. Gesha at some point says "it's cold in here" or pulls a blanket. Nali says the house is always cold at night. This is both atmosphere and foreshadowing — when she's found dead and cold in S19, the audience remembers: the house was always cold.
+
+IMPACT: Scenes 12–18 stop feeling like "two people talking in a room" and start feeling like "two people trapped in a room that's alive." Every scene carries dual function: emotional connection AND threat escalation.
+
+============================
+[CHUNK-22] — Fix 3: The Imagination Frame
+============================
+Fix 3: The Imagination Frame Must Be Invisible Until S43 — But Detectable on Rewatch
+
+The twist (everything was Nali's imagination) is the film's highest-reward move, and it requires the most precise engineering. If it feels like a cheat, the entire film collapses. Currently, the only tell is the uncut finger. That's not enough for rewatchability, but it's also the right approach — you don't want the audience to guess it.
+
+Plant exactly three more invisible tells:
+
+A) Time inconsistency. In the imagined story, night falls too quickly — Nali arrives at the garden in late afternoon (S11), but it's fully dark by S14. On first viewing, no one notices. On rewatch: imagination compresses time.
+
+B) Gesha quotes something that Nali read earlier. In S2, the gardener uses a specific phrase. In S16 or S18, Gesha uses the same phrase. First viewing: coincidence. Rewatch: Nali's imagination is recycling his day.
+
+C) The dog. Gula behaves perfectly in the imagined story — greets Gesha, plays, stays out of the way. Real dogs don't do this. On rewatch, the dog's perfect behavior is a tell that this is a fantasy.
+
+IMPACT: The twist earns its power because it was there all along. The film demands rewatching. Word of mouth becomes: "Go back and watch the dog."
+
+============================
+[CHUNK-23] — Addressing the Producer's Concern
+============================
+Addressing the Producer's Concern
+
+The producer says: "Too much time in the house. Scenes 12–18 drag."
+
+What the producer actually means: "I'm not feeling tension in these scenes. I'm watching two people talk and I don't know why I should care yet."
+
+The wrong fix: Cut scenes, compress the evening, rush to the death.
+
+Why that's wrong: The evening IS the film. Without Scenes 12–18, Gesha's death has no emotional weight, the Truth or Dare reveals nothing, and the sofa means nothing. You can't make the audience mourn someone they never spent time with.
+
+The right fix: These scenes should not be reduced in narrative function. Any compression must preserve all beats while tightening execution. Don't change the length — change the information balance. If the audience knows the Shrubi might kill her (Fix 1), if the house feels alive and watching (Fix 2), if every object Gesha touches feels like it might be evidence later — then Scenes 12–18 become the tensest part of the film. The audience is screaming "don't eat that" and "get out of that house" while Gesha dances with sugar on her face.
+
+The model is Hitchcock's dinner scene in Rope: nothing happens except conversation. But the body is in the chest they're eating off of. The audience can barely breathe.
+
+For Nali's house, the Shrubi IS the bomb. The sofa IS the chest. We just need to show them to the audience a little earlier.
+
+============================
+[CHUNK-24] — What's Already Brilliant
+============================
+What's Already Brilliant — Don't Touch These
+
+The sofa mechanics (S19–29): From the moment the body goes in to the moment Adib finds it, this is flawless suspense engineering. Every scene escalates. Every friend interaction with the sofa is agony. This is the film's centerpiece and it works perfectly. Do not change the concept — protect it by fixing earlier tension.
+
+The AI as frictionless enabler (S19): Nali calls AI and pretends he's "writing a story." AI plays along but notices his breathing is real. This is one of the most chilling scenes in the screenplay. AI removes resistance from bad decisions — it does exactly what it's designed to do, and that's what makes it devastating.
+
+Gesha's ceiling line: "Even if your ceiling was the sky, I'd still be with you." This is the emotional anchor. Nali repeats it as he falls asleep. It means everything: she's offering unconditional love, and he can't accept it because he's broken by the past. This line should be the last thing we hear before the final reveal.
+
+The S40 interrogation: The reveal that the death was natural causes — the Shrubi, the diabetes — is devastating. Everything Nali did was unnecessary. Every horror was self-inflicted. This is the film's thesis in one scene.
+
+The imagination twist (S43): Despite the engineering required, this is the right ending. It reframes the entire film as an exploration of Nali's psyche — a man so damaged by past betrayal that he can't imagine a relationship without catastrophe. The film isn't about what happened. It's about what Nali fears will happen. This is profound.
+
+============================
+[CHUNK-25] — The Twist Deep Analysis
+============================
+The Twist — Deep Analysis
+
+What the twist IS: Scene 43 is not a reversal of reality; it is a revelation of process. The film is not undoing events — it is exposing how Nali constructs them. The audience should leave understanding his mind, not questioning the plot. For this to work, the audience must already sense his capacity for catastrophic imagination before the reveal. The twist should be felt before it is understood.
+
+Critical distinction: This is NOT a "dream twist." This is a psychological projection loop. In a dream twist, reality is revealed and the dream is discarded. In a psychological projection loop, the projection IS the character's reality — it reveals how his mind works, not that his mind was "wrong." The audience doesn't leave saying "oh, none of it was real." They leave saying "this is how Nali processes the world." That's the difference between a cheat and a revelation.
+
+The film should not announce the twist; it should allow the audience to feel it before they understand it.
+
+The gardener as trigger: This is elegant. The gardener's story about the dead couple in S2 triggers Nali's imagination. The dead couple is the seed — Nali's mind takes it and builds an entire catastrophe scenario. This should be emphasized. When we return to S43, the gardener is still finishing the same story. Time hasn't passed. The entire film was a thought.
+
+The uncut finger: The tell. In S2, Nali cuts his finger in the "real" timeline, but in S43 the finger is uncut. This is the single clearest signal that we're back in reality. It's good, but it's not enough on its own. See Fix 3 above for additional tells.
+
+Gesha's call: The final moment — Gesha calls, she's alive, she's coming. What does Nali do? This is the real ending. Does he answer? Does he let her come? The audience should leave the theater not knowing whether Nali will repeat the cycle of fear, or whether the nightmare he just imagined has freed him to actually live. An ambiguous final shot — Nali looking at the phone, the camera pulling back — is stronger than a clear answer.
+
+============================
+[CHUNK-26] — Questions for Sarwar (Part 1)
+============================
+Questions to Bring to Sarwar
+
+On the Twist
+Does Nali answer the phone in the final shot? Or does the film end with the phone ringing and us watching from a distance?
+How much should the audience suspect the twist before S43? Zero? A slight unease? Clear hints?
+Do you see this as a dream twist or a psychological projection? The distinction changes how we engineer every scene.
+
+On the Shrubi
+How explicit should Gesha's diabetes hints be? One throwaway line? A physical gesture? Nothing at all until S40?
+The binge scene (S16) — is this joyful or unhinged? Where's the line? Should it feel like vulnerability or abandon?
+
+On the House
+You said the house should have personality (from our call). What kind of personality? Predatory? Melancholic? A museum of failed masculinity?
+The sounds — what does this house sound like at night? What's the sonic character?
+
+============================
+[CHUNK-27] — Questions for Sarwar (Part 2)
+============================
+On the Evening Pacing
+We believe these scenes should not be reduced in narrative function. Any compression must preserve all beats while tightening execution. Where do you stand?
+The Truth or Dare: which moments are sacred? Which could be compressed in execution (not removed)?
+
+On AI
+Is the AI a phone voice? A screen? A speaker? How does the audience see/hear the AI?
+The S19 "story-writing" scene with AI — should the AI know Nali is lying? Should we see AI's doubt?
+Do you see AI as a tool Nali uses, or as something that actively shapes his decisions? We believe it removes resistance from bad decisions — not an antagonist, but a frictionless enabler.
+
+On Nali's Core Flaw
+We define Nali's flaw as outsourced judgment — he cannot make a decision without mediation. Do you agree? This shapes how we play every AI scene, every moment of hesitation, every wrong choice.
+From our call, you mentioned the schizophrenia angle. Is the twist about mental illness specifically, or about the universal human tendency to catastrophize? The latter is more universal and less clinical.
+
+============================
+[CHUNK-28] — Locked Decisions (1–7)
+============================
+Locked Decisions — Pre-Meeting Consensus
+
+These 13 decisions were locked through adversarial discussion between Darya and AI. Each point was debated, defended, and resolved. Sarwar may revert or challenge any of these — they are offered as a starting position, not a command.
+
+1. System Diagnosis
+"Controlled system with one structural leak" — not "uneven fuel distribution." The machine works. Act 2A is the specific leak. This changes the approach from global polish to surgical fix.
+
+2. Act 2A Problem — Dual Layer
+The audience lacks information advantage BECAUSE the scenes carry no active threat vector during the intimacy beats. One causes the other. Both must be stated.
+
+3. Bomb Model — Two Languages
+Diagnostic truth: multi-layered system with multiple latent threats activating at different phases. Directorial instruction: single dominant bomb per phase. "While the script contains multiple latent threats, each section must foreground one dominant 'bomb' for the audience to track."
+
+4. AI Role
+Not antagonist. Not void. "AI is a frictionless decision engine that enables Nali's flaw." Shorter: "AI removes resistance from bad decisions." It doesn't oppose him — it facilitates his worst choices without friction.
+
+5. AI Offline = Hidden Timer
+The version update is not a planting issue — it's a clock mechanic. AI going offline is the film's hidden timer. Plant the countdown before the crisis so it feels inevitable, not accidental.
+
+6. Scenes 12–18 Protection
+"These scenes should not be reduced in narrative function. Any compression must preserve all beats while tightening execution." This allows craft tightening while blocking structural cuts.
+
+7. Sofa — Conditional Perfection
+Do not change the concept — protect it by fixing upstream tension. The sofa's power is conditional on Act 2A delivering sufficient pressure. If the audience hasn't been squeezed hard enough, the sofa lands flat.
+
+============================
+[CHUNK-29] — Locked Decisions (8–13)
+============================
+8. The Twist — Revelation, Not Reversal
+"Scene 43 is not a reversal of reality; it is a revelation of process. The film is not undoing events — it is exposing how Nali constructs them. The audience should leave understanding his mind, not questioning the plot. For this to work, the audience must already sense his capacity for catastrophic imagination before the reveal. The twist should be felt before it is understood."
+
+9. Shrubi — Behavioral Emphasis
+The issue is not clarity but emotional context of consumption. The Shrubi should feel like release, joy, and vulnerability — not a clue. Focus on behavioral emphasis, not informational emphasis.
+
+10. Nali's Core Flaw
+"Nali does not trust reality — he trusts mediated interpretation. The tragedy is not that Nali makes a wrong decision — it's that he cannot make a decision without mediation."
+
+11. Genre Lock
+This is psychological suspense, not relationship drama. This must be stated explicitly so the Sarwar conversation starts from a shared genre understanding.
+
+12. Dual-Function Scenes
+Every intimate scene must simultaneously escalate threat. The film is trying to be emotionally intimate and suspense-driven in the same space — without merging the two. Each scene must carry dual function: emotional connection + threat escalation.
+
+13. Audience > Nali Before Midpoint
+"The audience must become smarter than Nali before the midpoint." Currently audience = Nali → weak suspense. Fix: audience > Nali → tension locks. This is the operational summary of everything else.
+
+============================
+[CHUNK-30] — Footer
+============================
+BIBLE REVIEW v2.0 — For Darya, AI & Sarwar discussion
+13 decisions locked through adversarial discussion. All open to director challenge.
+The director's voice is sacred. We sharpen — we don't rewrite.
+
+============================
+[CHUNK-31] — UI Labels & Badges (for interface translation)
+============================
+Scene card labels:
+Location
+Summary
+The Bomb
+Tension
+Gap
+Creative Note — Darya / AI
+
+Badge labels:
+BOMB
+PIVOT
+GAP
+HIGH TENSION
+
+Verdict labels:
+STRONG
+NEEDS WORK
+GAP
+OPPORTUNITY
+
+Other UI text:
+LOCKED
+BEHAVIORAL EMPHASIS, NOT INFORMATIONAL
+STRONG THREAD — Minor Enhancement
+UNDERUSED — Major Opportunity
+STRUCTURALLY PERFECT — Protect by Fixing Upstream
+THEMATICALLY PERFECT — AI as Hidden Timer

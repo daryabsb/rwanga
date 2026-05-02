@@ -1,11 +1,44 @@
 {% load i18n %}
-<div class="rw-card">
-  <h3>{% trans "Inline Comments" %}</h3>
-  <ul>
-    {% for comment in comments %}
-      <li>{{ comment.body }}</li>
-    {% empty %}
-      <li>{% trans "No comments" %}</li>
-    {% endfor %}
-  </ul>
+<div style="display:flex;flex-direction:column;gap:0">
+  <div class="rw-section-hdr">{% trans "لێدوانەکانی ناوخۆیی" %}</div>
+  {% for comment in comments %}
+  <div id="cm-{{ comment.pk }}" style="border-bottom:1px solid var(--rw-border-2);padding:12px;background:var(--rw-surface)">
+    <div style="display:flex;align-items:flex-start;gap:10px">
+      <div class="rw-avatar" style="width:30px;height:30px;font-size:11px;flex-shrink:0;margin-top:2px">
+        {{ comment.author.first_name|first|upper }}{{ comment.author.last_name|first|upper }}
+      </div>
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+          <span style="font-size:12px;font-weight:700;color:var(--rw-text)">{{ comment.author.get_full_name }}</span>
+          <span style="font-size:10px;color:var(--rw-text-3)" dir="ltr">{{ comment.created_at|timesince }} {% trans "پێش" %}</span>
+        </div>
+        <div style="font-size:13px;color:var(--rw-text-2);line-height:1.7">{{ comment.body }}</div>
+        <div style="display:flex;gap:6px;margin-top:8px">
+          <button type="button" style="background:var(--rw-surface-2);border:1px solid var(--rw-border);color:var(--rw-text-2);font-size:11px;padding:2px 8px">👍</button>
+          <button type="button" style="background:var(--rw-surface-2);border:1px solid var(--rw-border);color:var(--rw-text-2);font-size:11px;padding:2px 8px">👎</button>
+          <button type="button" style="background:var(--rw-surface-2);border:1px solid var(--rw-border);color:var(--rw-text-2);font-size:11px;padding:2px 8px">❓</button>
+        </div>
+        {% if comment.replies.all %}
+        <div style="padding-inline-start:16px;border-inline-start:2px solid var(--rw-border);margin-top:10px">
+          {% for reply in comment.replies.all %}
+          <div style="padding:8px 0;border-bottom:1px solid var(--rw-border-2)">
+            <div style="display:flex;align-items:flex-start;gap:8px">
+              <div class="rw-avatar" style="width:22px;height:22px;font-size:9px;flex-shrink:0">
+                {{ reply.author.first_name|first|upper }}{{ reply.author.last_name|first|upper }}
+              </div>
+              <div style="flex:1">
+                <div style="font-size:11px;color:var(--rw-text-3)">{{ reply.author.get_full_name }} · {{ reply.created_at|timesince }} {% trans "پێش" %}</div>
+                <div style="font-size:12px;color:var(--rw-text-2);line-height:1.6">{{ reply.body }}</div>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  {% empty %}
+  <div style="padding:16px;text-align:center;color:var(--rw-text-3)">{% trans "هێشتا لێدوانێک نییە" %}</div>
+  {% endfor %}
 </div>

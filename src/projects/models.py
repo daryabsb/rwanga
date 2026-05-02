@@ -11,6 +11,26 @@ class Project(BaseModel):
     slug = models.SlugField(unique=True)
     synopsis = models.TextField(blank=True)
     status = models.CharField(max_length=32, default="draft")
+    canonical_bible = models.JSONField(default=dict, blank=True)
+    bible_version = models.PositiveIntegerField(default=0)
+    bible_status = models.CharField(
+        max_length=20,
+        choices=[
+            ("empty", "Empty"),
+            ("draft", "Draft"),
+            ("in_review", "In Review"),
+            ("final", "Final"),
+        ],
+        default="empty",
+    )
+    bible_finalized_at = models.DateTimeField(null=True, blank=True)
+    bible_finalized_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="finalized_bibles",
+    )
 
     class Meta:
         ordering = ["title"]

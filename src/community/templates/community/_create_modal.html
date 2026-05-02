@@ -1,0 +1,30 @@
+{% load i18n %}
+<div class="rw-modal-backdrop" onclick="this.innerHTML=''">
+  <div class="rw-modal" onclick="event.stopPropagation()">
+    <div class="rw-modal-hd">
+      <h3>{% trans "دانیشتنی نوێ" %}</h3>
+      <button type="button" class="rw-modal-x" onclick="document.getElementById('rw-modal-container').innerHTML=''">×</button>
+    </div>
+    <form method="post" action="{% url 'community:create' %}">
+      {% csrf_token %}
+      <div class="rw-modal-bd" style="display:flex;flex-direction:column;gap:10px">
+        <label style="font-size:12px;color:var(--rw-text-2)">{% trans "ناونیشان" %}</label>
+        <input name="title" required style="width:100%;background:var(--rw-surface);color:var(--rw-text);border:1px solid var(--rw-border);padding:10px">
+        <label style="font-size:12px;color:var(--rw-text-2)">{% trans "جۆر" %}</label>
+        <select name="session_type" style="width:100%;background:var(--rw-surface);color:var(--rw-text);border:1px solid var(--rw-border);padding:10px">
+          <option value="screenplay">{% trans "دەستنووس" %}</option>
+          <option value="story_bible">{% trans "بایبڵی چیرۆک" %}</option>
+        </select>
+        <label style="font-size:12px;color:var(--rw-text-2)">{% trans "بینراوی" %}</label>
+        <select name="visibility" style="width:100%;background:var(--rw-surface);color:var(--rw-text);border:1px solid var(--rw-border);padding:10px">
+          <option value="invite_only">{% trans "تەنها بانگهێشتکراو" %}</option>
+          <option value="public">{% trans "گشتی" %}</option>
+        </select>
+      </div>
+      <div class="rw-modal-ft">
+        <button type="button" class="rw-btn rw-btn-ghost" onclick="document.getElementById('rw-modal-container').innerHTML=''">{% trans "پاشگەزبوونەوە" %}</button>
+        <button type="submit" class="rw-btn rw-btn-primary">{% trans "دروستکردن" %}</button>
+      </div>
+    </form>
+  </div>
+</div>

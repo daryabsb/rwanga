@@ -1,0 +1,14 @@
+{# ════════════════════════════════════════════════════
+   _breadcrumb.html
+   Context: crumbs = list of {label, url} dicts
+            current = current page label
+   Usage: {% include "components/_breadcrumb.html" with crumbs=crumbs current=scene.heading %}
+   ════════════════════════════════════════════════════ #}
+<div class="rw-breadcrumb" aria-label="breadcrumb">
+  {% for crumb in crumbs %}
+    <a href="{{ crumb.url }}" class="rw-crumb-back">← {{ crumb.label }}</a>
+    <span class="rw-crumb-sep">/</span>
+  {% endfor %}
+  <span class="rw-crumb-node">{{ current }}</span>
+  {% if location %}<span class="rw-crumb-sep">/</span><span class="rw-crumb-leaf">{{ location }}</span>{% endif %}
+</div>

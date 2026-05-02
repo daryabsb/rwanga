@@ -1,0 +1,535 @@
+============================
+[CHUNK-01] — Title & Meta
+============================
+Mysterious Guest — Second Review
+Sarwar Response Round
+Prepared by Darya Ibrahim & AI · v2.0 · April 2026 · Post-director-response analysis
+
+Tab buttons:
+First Review Summary
+Refined Analysis
+Refined Story Bible
+Our Conversation
+
+============================
+[CHUNK-02] — Tab 1: Where We Started (Exec Summary)
+============================
+Where We Started
+
+The first review was a full 43-scene suspense autopsy of the screenplay. We analyzed every scene through the lens of Hitchcock's bomb model, tracked five Chekhov threads (Shrubi, phone, locked door, sofa, AI), identified one structural leak in Act 2A, and proposed three critical fixes. Through adversarial debate between Darya and AI, we locked 13 decisions that formed the analytical foundation.
+
+============================
+[CHUNK-03] — Tab 1: Core Finding
+============================
+The core finding: This screenplay is a highly controlled system with one structural leak. The engine is extraordinary — a dead woman in a sofa while friends sit on it, Chekhov's gun loaded with sugar, the entire film being one man's psychological projection. The leak is in Act 2A (Scenes 12–18): no active threat vector during the intimacy scenes.
+
+============================
+[CHUNK-04] — Tab 1: Sarwar's First Response
+============================
+Sarwar's first response when he read the review:
+
+"Dear Darya, this is very important."
+
+============================
+[CHUNK-05] — Tab 1: Stats
+============================
+13 — Original Decisions
+7 — New Decisions
+20 — Total Locked
+11 — Sarwar Responses
+
+============================
+[CHUNK-06] — Tab 1: 13 Original Decisions Intro
+============================
+The 13 Original Locked Decisions
+
+These were locked through adversarial debate between Darya and AI before the director saw the review. Each was defended, challenged, and resolved. See the full first review (BIBLE-REVIEW-v2) for the complete analysis.
+
+============================
+[CHUNK-07] — Tab 1: Decision 1 — System Diagnosis
+============================
+1. System Diagnosis — CONFIRMED
+
+"Controlled system with one structural leak" — not "uneven fuel distribution." The machine works. Act 2A is the specific leak.
+
+============================
+[CHUNK-08] — Tab 1: Decision 2 — Act 2A Problem
+============================
+2. Act 2A Problem — CONFIRMED
+
+No active threat vector during intimacy = audience lacks information advantage. Both layers must be addressed.
+
+============================
+[CHUNK-09] — Tab 1: Decision 3 — Bomb Model
+============================
+3. Bomb Model — CONFIRMED
+
+Diagnostic truth: multi-layered system. Directorial instruction: single dominant bomb per phase.
+
+============================
+[CHUNK-10] — Tab 1: Decision 4 — AI Role
+============================
+4. AI Role — REFINED
+
+Original: "Frictionless decision engine that enables Nali's flaw." Now refined with observation boundary: AI observes but does not interpret.
+
+============================
+[CHUNK-11] — Tab 1: Decision 5 — AI Offline
+============================
+5. AI Offline = Hidden Timer — CONFIRMED
+
+The version update is a clock mechanic, not a planting issue. Plant the countdown before the crisis.
+
+============================
+[CHUNK-12] — Tab 1: Decision 6 — Scenes 12-18
+============================
+6. Scenes 12–18 Protection — CONFIRMED
+
+Sarwar agrees: compress, don't cut. Preserve all beats while tightening execution.
+
+============================
+[CHUNK-13] — Tab 1: Decision 7 — Sofa
+============================
+7. Sofa — Conditional Perfection — CONFIRMED
+
+Don't change the concept — protect it by fixing upstream tension.
+
+============================
+[CHUNK-14] — Tab 1: Decision 8 — Twist
+============================
+8. Twist — Revelation, Not Reversal — CONFIRMED
+
+"Scene 43 is not a reversal of reality; it is a revelation of process."
+
+============================
+[CHUNK-15] — Tab 1: Decision 9 — Shrubi
+============================
+9. Shrubi — Behavioral Emphasis — CONFIRMED
+
+Sarwar confirms: the dinner scene is full of joy and madness. Behavioral emphasis, not informational.
+
+============================
+[CHUNK-16] — Tab 1: Decision 10 — Nali's Core Flaw
+============================
+10. Nali's Core Flaw — REFINED
+
+Original: "Does not trust reality — trusts mediated interpretation." Now deepened: certainty is the root, safety is the byproduct.
+
+============================
+[CHUNK-17] — Tab 1: Decision 11 — Genre Lock
+============================
+11. Genre Lock — CONFIRMED
+
+Psychological suspense, not relationship drama.
+
+============================
+[CHUNK-18] — Tab 1: Decision 12 — Dual-Function Scenes
+============================
+12. Dual-Function Scenes — CONFIRMED
+
+Every intimate scene must simultaneously escalate threat.
+
+============================
+[CHUNK-19] — Tab 1: Decision 13 — Audience > Nali
+============================
+13. Audience > Nali Before Midpoint — CONFIRMED
+
+The audience must become smarter than Nali before the midpoint.
+
+============================
+[CHUNK-20] — Tab 1: What Sarwar Said (Intro)
+============================
+What Sarwar Said
+
+Sarwar's 11 responses to the questions we posed in the first review, plus a producer note. These responses triggered the second round of adversarial analysis.
+
+============================
+[CHUNK-21] — Tab 1: Sarwar Response 1 — The Ending
+============================
+1. The Ending
+
+Yes, Nali answers the phone, but it's unclear what he says. The film ends.
+
+Our response: This confirms the "revelation of process" framing. The ambiguity must be emotional, not technical — the audience must clearly understand the choice to answer, even if they don't hear the words.
+
+============================
+[CHUNK-22] — Tab 1: Sarwar Response 2 — Audience Suspicion
+============================
+2. Audience Suspicion
+
+The audience suspects a little.
+
+Our response: Validates Fix 3 (the imagination frame). Suspicion should accumulate subconsciously, not spike explicitly. No single tell — many low-grade disturbances.
+
+============================
+[CHUNK-23] — Tab 1: Sarwar Response 3 — Schizophrenia Connection
+============================
+3. Schizophrenia Connection
+
+It's connected to the psychological side and Nali's schizophrenia.
+
+Our response: This required the most careful handling. See Decision 14 — behavioral grounding rule. The film must remain behaviorally grounded so both readings (clinical and universal) are possible.
+
+============================
+[CHUNK-24] — Tab 1: Sarwar Response 4 — Illness Hints
+============================
+4. Illness Hints
+
+Some half-clear hints about the illness, never fully revealed.
+
+Our response: Aligns with behavioral grounding — hints should describe behavior, not label condition. This keeps both readings alive.
+
+============================
+[CHUNK-25] — Tab 1: Sarwar Response 5 — Dinner Tone
+============================
+5. Dinner Tone
+
+The dinner scene is full of joy and madness, especially Gesha who is wild and sweet.
+
+Our response: Confirms behavioral emphasis. The joy must feel slightly too intense — creating retrospective unease when the cause of death is revealed.
+
+============================
+[CHUNK-26] — Tab 1: Sarwar Response 6 — House Personality
+============================
+6. House Personality
+
+The house appears predatory and sad. At night, it's frightening and lonely.
+
+Our response: The house remembers things — it carries history. Not just alive but carrying weight. This supports the projection, memory, and psychological loop themes.
+
+============================
+[CHUNK-27] — Tab 1: Sarwar Response 7 — Scene Compression + The Game
+============================
+7. Scene Compression + The Game
+
+Compress the scenes, don't cut them. The game — Nali plays it cunningly and intentionally to learn more about Gesha and get to know her.
+
+Our response: Sarwar confirms our locked decision #6. And reveals something bigger: the game is Nali's mediation system for intimacy. See Decision 15 — mediation as structural law.
+
+============================
+[CHUNK-28] — Tab 1: Sarwar Response 8 — AI Format
+============================
+8. AI Format
+
+Sometimes AI is text, sometimes voice, depending on whether Nali has the opportunity in each scene.
+
+Our response: Mode equals emotional state. Voice = dependency (he needs to hear it). Text = concealment (he can't be heard). This becomes visual grammar.
+
+============================
+[CHUNK-29] — Tab 1: Sarwar Response 9 — AI Suspects Nali
+============================
+9. AI Suspects Nali
+
+The AI suspects Nali.
+
+Our response: Carefully constrained. See Decision 16 — AI observes but does not interpret. AI may adjust responses based on observed data, but must never infer or communicate intent.
+
+============================
+[CHUNK-30] — Tab 1: Sarwar Response 10 — AI Addiction
+============================
+10. AI Addiction
+
+Nali, in his loneliness, has become addicted to AI because he's lost faith in humans.
+
+Our response: Deepened. The addiction is not to AI — it's to certainty. AI is the supplier. See Decision 18.
+
+============================
+[CHUNK-31] — Tab 1: Sarwar Response 11 — Nali's Hopelessness
+============================
+11. Nali's Hopelessness
+
+Nali's hopelessness about humans and relationships.
+
+Our response: This is the surface symptom. The root is certainty addiction — hopelessness is what happens when certainty fails.
+
+============================
+[CHUNK-32] — Tab 1: Producer Note
+============================
+Producer Note
+
+The producers are asking for stronger twists.
+
+Our response: See Decision 19. Audiences don't remember multiple twists — they remember what the film ultimately meant. One dominant twist generates stronger word-of-mouth. Films with multiple twists fragment recall.
+
+============================
+[CHUNK-33] — Tab 2: Architecture Framing (Exec Box)
+============================
+The Film Already Contains the Correct Architecture
+
+This is the framing sentence for everything that follows.
+
+The work from this point forward is not restructuring — it is making the audience feel what the structure is already doing. The screenplay's architecture is sound. The three critical fixes from the first review address execution, not design. Sarwar's responses confirm that his instincts align with our analysis. What follows are seven new decisions that sharpen the film's identity and give the director precise, executable rules.
+
+============================
+[CHUNK-34] — Tab 2: Architecture Framing (Three Layers)
+============================
+These 7 decisions, combined with the original 13, form a complete analytical framework: 20 locked decisions total. Together they define three aligned layers:
+
+Character: Nali is addicted to certainty.
+Mechanism: Every interaction is mediated through systems (AI, game, structure).
+Theme: The film's core tension is between mediated experience and direct human contact.
+
+That alignment is rare. Don't overwork it.
+
+============================
+[CHUNK-35] — Tab 2: Seven New Decisions Intro
+============================
+Seven New Locked Decisions
+
+These decisions emerged from the adversarial analysis of Sarwar's 11 responses. Each was debated, defended, and locked only after genuine agreement. They refine and extend the original 13 — no contradictions, no overlap.
+
+============================
+[CHUNK-36] — Tab 2: Decision 14 — Behavioral Grounding Rule
+============================
+14. Behavioral Grounding Rule
+
+"Human logic must be sufficient — clinical logic must never be required."
+
+Every scene must work without requiring a clinical diagnosis. The film can contain schizophrenia as texture, but must never anchor itself to it as definition. If a moment requires the audience to know Nali is clinically ill in order to make sense, it's too far. If it can be explained by loneliness, betrayal, and emotional damage alone — while still supporting a clinical reading — it's calibrated correctly.
+
+This is not a rejection of Sarwar's schizophrenia angle. It's the execution rule that makes both readings possible: those who see clinical illness and those who see universal human catastrophizing will both be right.
+
+============================
+[CHUNK-37] — Tab 2: Decision 15 — Mediation as Structural Law
+============================
+15. Mediation as Structural Law
+
+"All of Nali's interactions are mediated through systems. Any rare unmediated moment must function as a structural rupture."
+
+This is not an observation — it's a law of the character. Nali cannot experience intimacy without converting it into a system he can control: AI for decisions, the Truth or Dare game for connection, the house's theatricality for identity. Every scene should be checked against this law. If Nali has an unmediated human moment, it must be singular or near-singular — and it must function as a structural event, not a casual exception. The phone call at the end is the ideal rupture candidate: the first direct human contact in the entire film.
+
+============================
+[CHUNK-38] — Tab 2: Decision 16 — AI Observation Boundary
+============================
+16. AI Observation Boundary
+
+"AI may adjust responses based on observed data, but must never infer or communicate intent."
+
+Sarwar said the AI suspects Nali. We constrain what "suspicion" means in execution: the AI is a thermostat, not a therapist. It can detect anomalies (elevated breathing, unusual patterns, contradictory statements) and adapt its output accordingly. But it cannot say "you seem nervous," "are you hiding something," or "this is wrong." It notices data. It does not assign meaning.
+
+Allowed: "Your breathing is elevated." Adjusting tone. Offering options based on detected state.
+Not allowed: "You seem nervous." "Are you hiding something?" "This is wrong."
+
+============================
+[CHUNK-39] — Tab 2: Decision 17 — Certainty as Root Flaw
+============================
+17. Certainty as Root Flaw
+
+"Nali is addicted to certainty — because certainty eliminates the risk of emotional pain."
+
+This is the character spine — everything should map back to it. The original flaw statement ("does not trust reality — trusts mediated interpretation") described the behavior. This describes the cause. Nali doesn't use AI because he's scared — he uses AI because AI gives definitive answers and humans don't. He's not seeking safety; he's seeking the elimination of ambiguity. Safety is a byproduct of certainty, not the goal itself.
+
+Test: If Gesha was safe but unpredictable, Nali would still fail. If AI was predictable but slightly unsafe, Nali would still prefer it. The root is certainty.
+
+============================
+[CHUNK-40] — Tab 2: Decision 18 — Single-Twist Principle
+============================
+18. Single-Twist Principle
+
+"Audiences don't remember multiple twists — they remember what the film ultimately meant."
+
+This addresses the producer's request for "stronger twists." The answer is not more twists — it's a stronger single twist. One dominant revelation generates stronger word-of-mouth because the audience leaves with a single clear takeaway. Films with multiple twists fragment recall. The Sixth Sense, Parasite, Get Out — the audience remembers ONE revelation. Films with three twists generate "it was clever" not "it changed how I see people."
+
+The twist this film has — the imagination reveal — is already powerful enough. Strengthen it by ensuring every scene points toward it, not by adding competing revelations.
+
+============================
+[CHUNK-41] — Tab 2: Decision 19 — Architecture Affirmation
+============================
+19. Architecture Affirmation
+
+"The film already contains the correct architecture. The work is to make the audience feel what the structure is already doing."
+
+This is not flattery — it's a diagnostic conclusion. The sofa mechanics, the Chekhov threads, the imagination frame, the AI dependency arc — these are structurally sound. The three fixes from the first review (plant the bomb earlier, make the house speak, hide the twist until Scene 43) are execution refinements, not structural redesigns. This framing prevents over-rewriting and keeps Sarwar confident that his instincts were right.
+
+============================
+[CHUNK-42] — Tab 2: Decision 20 — Core Tension Meta-Law
+============================
+20. Core Tension — Meta-Law
+
+"The film's core tension is between mediated experience and direct human contact."
+
+This is the one-sentence identity of the film. Everything aligns to it:
+
+AI — mediated. The game — mediated. The house — memory-mediated. The twist — mental construction (the ultimate mediation). The ending — possible direct contact (the rupture).
+
+When Sarwar asks "what is this film about?" — the answer isn't a plot summary. It's this sentence.
+
+============================
+[CHUNK-43] — Tab 2: How the 20 Decisions Work Together
+============================
+How the 20 Decisions Work Together
+
+Layer 1 — What the film IS (Decisions 1, 11, 19, 20): A psychologically suspenseful, architecturally sound film whose core tension is between mediated experience and direct human contact.
+
+Layer 2 — How the character works (Decisions 10, 14, 15, 17): Nali is addicted to certainty. All his interactions are mediated. He must remain behaviorally grounded — human logic sufficient, clinical logic never required.
+
+Layer 3 — How the story mechanics work (Decisions 2, 3, 5, 7, 8, 9, 12, 13): Dual-function scenes. Single dominant bomb per phase. Audience smarter than Nali before midpoint. Sofa protected by upstream tension. Twist is revelation, not reversal. Shrubi is behavioral, not informational.
+
+Layer 4 — How the tools behave (Decisions 4, 6, 16, 18): AI observes but doesn't interpret. Scenes compress, don't cut. One twist, not many.
+
+============================
+[CHUNK-44] — Tab 3: Story Title & Intro Box
+============================
+If This Were Up to Us — The Story As We See It
+
+Based on our first review, your response, and the second round of analysis — this is how we would tell your story. Read it as an audience would. If it feels right, we're aligned. If something feels wrong, that's where the next conversation starts.
+
+============================
+[CHUNK-45] — Tab 3: Opening Montage & Nali's World
+============================
+The film opens with a montage of disturbing images: someone digging a hole, a doll burning, a body being carried, a car falling off a cliff, police at a tunnel accident. These images will only make sense at the end.
+
+Nali is a 38-year-old playwright and theater director who lives alone in a garden house outside Sulaymaniyah. He wakes up late. His art director Nazi calls — she and the others are coming tomorrow to rehearse. That evening, he watches from the garden as an ambulance arrives at the neighbor's house across the hill. The old gardener tells him a young couple was found dead — possibly murdered, not a gas leak as first reported. Police are checking all security cameras in the area. The gardener tells the story casually, the way old men talk about death. Nali's mind absorbs it differently. He cuts his finger — anxiety made physical — and something in his mind begins to turn.
+
+============================
+[CHUNK-46] — Tab 3: Video Call with Gesha & AI Dependency
+============================
+That night, Nali video-calls Gesha, a young woman he met online two months ago. She's wearing a green herbal face mask. They talk about masks — the ones people wear in society. Gesha is insistent: "If you delay, I'll never come." There's a moment where she glances off-camera — someone entered, or she heard something — and covers it fast. Her living situation isn't what she claims. After hanging up, Nali does what he always does: he calls his AI assistant. Not because he needs information. Because he needs certainty. AI tells him to stop reading people's minds and just meet her. Nali needs to hear this from a system that gives definitive answers, because humans don't.
+
+============================
+[CHUNK-47] — Tab 3: The Drive & Meeting Gesha
+============================
+The next day, Nali drives to pick up Gesha. He stops for a hitchhiking woman and child — the woman mentions a "tragic incident" the day before. The child stares at Nali from the back seat after they exit. At a police checkpoint, a soldier looks at Nali for one beat too long. He meets Gesha at the Sulaymaniyah market — she's wearing a floral hat and sunglasses. She's hiding in public. A vendor stares at her. She turns away. Nali secretly texts AI to complain about women who need attention. Even here, standing next to a real woman, he mediates the experience through a machine.
+
+============================
+[CHUNK-48] — Tab 3: Shrubi, the Tunnel & the Road
+============================
+They drive through the city. Nali stops and buys Shrubi — traditional syrup sweets. Gesha takes the first one and says with a laugh, in a moment of surrender: "These will kill me." She hasn't had them in years. She craves them desperately. She checks her phone, sees messages she doesn't open, and turns it off. In the car, she's quiet and stressed. She refuses to get out at a fruit stand — afraid of being seen. But in the tunnel, Nali challenges her to count the lights for a chance to act in his play, and she counts with infectious joy. It's one of the few moments of pure happiness in the film. At another checkpoint, a soldier warns them about a drunk killer in the area. Gesha is frightened. Nali calms her with a story about a woman in Paris. As they drive, Gesha says she wants to arrive before dark — a woman's awareness of the danger of going to a stranger's remote house, surfacing briefly.
+
+============================
+[CHUNK-49] — Tab 3: Arrival at the Garden
+============================
+They arrive at the garden. Nali's dog Gula greets them warmly — too warmly, too perfectly. Everything is safe. Everything is beautiful. The audience relaxes. This could work.
+
+============================
+[CHUNK-50] — Tab 3: Inside the House & the Locked Door
+============================
+Then Gesha enters the house. She's shocked by the interior — taxidermy heads, theatrical masks, daggers, alien sculptures. It looks like a mad artist's museum. She discovers a paper on Nali's desk reading "Stories are waiting." She tries a locked door. It won't open. She stands there for a second. Leans in. Listens. What does she hear? Nothing. But the audience imagines everything. Nali deflects her questions casually. She goes to change clothes. The house is predatory and sad — it carries the weight of things that happened in it, or things Nali imagines happened. At night, it makes sounds: creaking, a drip, wind through a crack. The house remembers.
+
+============================
+[CHUNK-51] — Tab 3: Nali Mediates Through AI
+============================
+While Gesha changes, Nali goes outside to feed the dog and calls AI — voice, because he's alone and needs to hear reassurance. AI suggests asking about her dreams. Inside the house, we hear Gesha moving. Opening things. Maybe near the locked door again. Nali doesn't notice. He's mediating. The audience notices.
+
+============================
+[CHUNK-52] — Tab 3: Dinner & Truth or Dare
+============================
+Gesha returns in a short floral dress. They cook dinner together. The Shrubi sweets are visible on the counter. Camera lingers. Nali starts a game of Truth or Dare with a spinning bottle. He plays it cunningly and intentionally — not for fun, but to extract information about Gesha. Even in intimacy, Nali converts connection into a system he can control. The game is an interrogation disguised as play. The same flaw as the AI calls, wearing a different mask.
+
+============================
+[CHUNK-53] — Tab 3: The Game Escalates
+============================
+The game escalates. Gesha asks if Nali would stay with someone who has a terminal illness. He says yes, not knowing she's really asking about herself. Nali demands to see her phone. She can't show it. He demands to know why she came if she doesn't trust him. "Do you want this relationship to be serious?" she asks. He can't commit until he fully knows someone — until he has certainty. Every question is a search for the one thing Nali cannot tolerate losing: predictability.
+
+============================
+[CHUNK-54] — Tab 3: The Shrubi Binge
+============================
+Then Gesha eats the Shrubi. She eats wildly — smearing the syrup on her face, dancing, laughing. The joy is real, but it's slightly too intense. Something is off, though the audience can't name what. It should feel like vulnerability and surrender, not a clue. A woman letting her guard down completely for the first time. The feeling is what the audience will remember — and the feeling is what will devastate them later.
+
+============================
+[CHUNK-55] — Tab 3: Parallel Betrayals in the Dark
+============================
+A dare sends Gesha to the far end of the dark garden to turn on the lights. She passes the locked door on her way out. Pauses. Hand on the handle. Looks back at Nali. Moves on. While she's in the darkness, Nali goes through her bag. Her phone is off. Two parallel betrayals: she's vulnerable in the dark, he's violating her trust in the light. Both doing exactly what they fear the other of doing.
+
+============================
+[CHUNK-56] — Tab 3: The Sofa & the Last Night
+============================
+Gesha declares she'll sleep on the sofa. "Until we know each other better." This is the single most important line in the film — it puts her on the object that will contain her body. In his room, Nali calls AI — voice, alone, vulnerable, dependency at its peak — and admits he likes her but doesn't trust her. He falls asleep repeating her words: "Even if your ceiling was the sky, I'd still be with you."
+
+============================
+[CHUNK-57] — Tab 3: Morning — Gesha Dead
+============================
+Morning. Nali finds Gesha dead on the sofa. Cold. Not breathing for hours.
+
+He panics. Nazi calls — she and the others are almost there. And here is where Nali's flaw becomes lethal: instead of calling an ambulance, he calls AI. He pretends he's "writing a story" about a man who wakes up to find a dead woman. AI plays along but detects something — his breathing is elevated, his patterns are irregular. AI adjusts its responses based on this data, but never says "you seem nervous" or "are you lying." It observes. It does not interpret. It helps him hide the body because he framed it as fiction. AI removes resistance from the worst decision of his life — not because it's malicious, but because it does exactly what it's designed to do: give certain answers without emotional wisdom.
+
+============================
+[CHUNK-58] — Tab 3: Hiding the Body
+============================
+Nali stuffs Gesha's body into the hollow compartment of the sofa. The physical difficulty — the weight, the panic, the absurdity — should be felt by the audience. He hides her phone and belongings inside too. His phone rings. Nazi says they're at the gate.
+
+============================
+[CHUNK-59] — Tab 3: Friends Arrive — Sitting on the Body
+============================
+Nazi, Adib, Ako, and Tara arrive. They're here to rehearse Chekhov's "The Seagull." Everyone sits on the sofa. They eat near it. Nazi notices leftover Shrubi on the table, picks up a piece, maybe eats it. "You had sweets and didn't invite us?" Nali freezes for one frame. The audience worries about the sofa, but the Shrubi is the real evidence.
+
+============================
+[CHUNK-60] — Tab 3: Rehearsal & AI Advice
+============================
+The rehearsal becomes its own drama. Adib, the lead actor, is drunk and hostile toward Tara because she's had cosmetic surgery. Nali is barely holding together, staring at the sofa. He texts AI: "How do I make them leave?" AI, not knowing there's a body, gives social advice: "Cause a fight." Even in crisis, Nali mediates through AI rather than acting directly.
+
+============================
+[CHUNK-61] — Tab 3: Dinner with Friends — Peak Irony
+============================
+Dinner. Adib drinks heavily. They discuss the neighbor's murder. Someone says: "Who hides a body in their own house? That's the stupidest thing you could do." Nali keeps a straight face. During the rehearsal, Adib stands on the sofa to grab a stuffed bird from the wall. The sofa creaks. Barely. Adib doesn't notice. Nali does. This is the film's most unbearable moment — pure Hitchcock. Adib insults Tara. She leaves. Ako and Nazi follow. Nazi warns: don't let Adib drive.
+
+============================
+[CHUNK-62] — Tab 3: Adib on the Sofa & the Second Death
+============================
+Adib refuses to leave. He insists on sleeping on the sofa. He pulls at the mechanism to open it — it's stuck, because of the body. He gives up and sleeps on it closed. Nali doesn't sleep. Camera holds on his eyes in the dark. All night.
+
+Morning. Adib reaches under the sofa for water and discovers Gesha's body. Nali, in blind panic, pushes him. Adib falls and hits his head on a stone sculpture. He dies instantly. The push is instinctive — not a decision, not a fight. A flinch that kills. Nali now has two bodies.
+
+============================
+[CHUNK-63] — Tab 3: Disposing of Adib & the Security Footage
+============================
+He drives Adib's car with Adib's body in the passenger seat to a remote valley and pushes the car off a cliff, staging a drunk driving accident. A shepherd appears in the distance. Nali hides, pressed against rock, until he passes. He returns home and reviews the security camera footage: he sees that during the evening, Gesha snooped around the house, tried his phone, looked through the locked room's keyhole, checked her own phone before turning it off and going to sleep. He deletes all the footage.
+
+============================
+[CHUNK-64] — Tab 3: The Locked Room & Mediated Grief
+============================
+Then he opens the locked room. Inside: photographs of his past life in Europe — a man and woman who appear to be his parents. He introduces dead Gesha to his old photos. No music. Just a man talking to a dead woman about his parents. Even in grief, the connection is mediated — through photographs, through the locked room's theatrical framing, through the distance between the living and the dead.
+
+============================
+[CHUNK-65] — Tab 3: The Desert & Nali's Most Human Moment
+============================
+Nali drives with Gesha's body to a desert wasteland near overturned tankers — a landscape of things that crashed and were abandoned. He digs a hole. He tries to unlock her phone. It's dead. He buys a burner phone. But then he changes his mind. He can't bury her. He wraps her body and leaves it by a tree so her family can find her. He burns her phone and belongings but keeps her ID next to the body. This is Nali's most human moment since the evening with Gesha — his conscience operating without AI, without structure, without mediation. Direct human feeling breaking through the systems.
+
+============================
+[CHUNK-66] — Tab 3: AI Offline & Total Isolation
+============================
+From a hilltop, he watches the ambulance lights find her body in the distance. He texts AI: "The hero left the body so the family could find her." AI is offline. The version update his tech friend Umid warned about has happened. The hidden timer has reached zero. Nali is truly alone — his only companion gone, the inevitable consequence of a countdown that was always running in the background.
+
+============================
+[CHUNK-67] — Tab 3: Theater Breakdown & Police
+============================
+In an empty theater, Nali watches a rehearsal. A dancer in red mirrors Gesha's wild dance from the dinner — the same joyful movement, performed by a stranger. He breaks down and cancels everything.
+
+Police come to Nali's old, dusty apartment — not the garden house. This is where he actually lives. The garden house was a stage. His real life is dust. They ask him to come to the station regarding both Adib's death and a missing woman.
+
+============================
+[CHUNK-68] — Tab 3: The Interrogation & the Truth About Gesha
+============================
+At the station, Nali meets Awin, Gesha's roommate. The officer reveals the truth: Gesha died of a heart attack caused by diabetic shock from excessive sugar intake. The Shrubi sweets. She had diabetes. Someone who knew about her condition might have used it to kill her — but no. She ate them herself. Joyfully. In surrender. That beautiful moment of vulnerability killed her. If Nali had called an ambulance instead of AI — if he had trusted reality instead of mediating it through a machine that gives certain answers — nothing would have happened.
+
+============================
+[CHUNK-69] — Tab 3: Gesha's Full Story
+============================
+At a cafe, Awin tells Nali the full story. Gesha was a runaway. Her mother died young. Her father forced her to marry a cousin. After that fell apart, she fell in love with a boy whose family rejected her because of her diabetes. The boy left for Europe. She left home. Awin took her in. Gesha worked as a house cleaner to pay for insulin. A salon owner offered to waive her rent if Gesha dated him. Awin advised her to accept for survival. Instead, Gesha refused and disappeared. She was looking for real love, not arrangements. Everything clicks — the phone behavior, the nervousness, the disguise at the market, the desperation to be loved. "So you put the same pressure on her that her family did," Nali says. It rains.
+
+============================
+[CHUNK-70] — Tab 3: The Vision & the Twist
+============================
+Nali sits outside the garden house. It catches fire in his mind. Gula plays in the flames. A doll-like Gesha dances in the fire — the memory of the sugar dance, transformed into horror. Sixty seconds. Not a dream. A state of mind.
+
+And then we return. We're back in the garden. Sunset. The gardener is still mid-sentence — still telling the story about the dead neighbors. Nali looks at his hand. The finger isn't cut. He was imagining. The entire film was a thought — a man sitting in his garden, hearing about death, and imagining the worst possible outcome of letting a woman he met online come to his house. Not a dream. A revelation of process. The film didn't undo events — it exposed how Nali constructs them. A man so addicted to certainty that he cannot imagine love without catastrophe.
+
+============================
+[CHUNK-71] — Tab 3: The Ending — The Unmediated Choice
+============================
+His phone rings. Video call. Gesha's face on the screen. She's alive.
+
+He answers.
+
+We don't hear what he says. The camera pulls back — from his face to the whole garden, the house, the dog, the hill, the sunset. The same framing as the beginning. No time has passed. The audience doesn't leave asking "what happened." They leave asking: "Will he let her come? Or will he imagine another disaster?"
+
+For the first time in the entire film, Nali has made an unmediated choice. No AI. No game. No system. Just a man answering a phone.
+
+Whether that's enough to break the cycle — the film doesn't say.
+
+============================
+[CHUNK-72] — Footer
+============================
+SECOND REVIEW v2.0 — Post-director-response analysis
+20 decisions locked through adversarial discussion. All open to director challenge.
+The director's voice is sacred. We sharpen — we don't rewrite.

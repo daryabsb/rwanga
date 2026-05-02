@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="ku" dir="rtl" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ڕوانگە — Platform Preview v0.2</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ── INLINE DESIGN SYSTEM (mirrors rwanga.css) ── */
+:root {
+  --rw-bg:#0F0F12;--rw-surface:#17171C;--rw-surface-2:#1E1E26;--rw-surface-3:#26262E;
+  --rw-border:#2C2C38;--rw-border-2:#222230;
+  --rw-text:#EDEAD8;--rw-text-2:#78788C;--rw-text-3:#40404E;
+  --rw-amber:#D4A574;--rw-amber-dim:rgba(212,165,116,.10);
+  --rw-pink:#F72585;--rw-pink-dim:rgba(247,37,133,.10);
+  --rw-script:#FF6B35;--rw-break:#2D5BE3;--rw-vis:#00A896;--rw-plan:#7C3AED;--rw-shoot:#F72585;
+  --rw-rail-bg:#0A0A0D;--rw-rail-w:68px;--rw-panel-w:248px;
+  --rw-topnav-h:56px;--rw-crumb-h:48px;--rw-tabs-h:52px;
+  --rw-font:'Cairo',system-ui,sans-serif;--rw-font-en:'Inter',system-ui,sans-serif;
+  --rw-r:2px;--rw-t:.12s ease;
+}
+[data-theme="light"] {
+  --rw-bg:#F7F7FA;--rw-surface:#FFFFFF;--rw-surface-2:#F0F0F6;--rw-surface-3:#E8E8F2;
+  --rw-border:#DCDCE8;--rw-border-2:#EBEBF4;
+  --rw-text:#0F0F12;--rw-text-2:#5C5C70;--rw-text-3:#A0A0B8;
+  --rw-amber:#9A5520;--rw-amber-dim:rgba(154,85,32,.08);--rw-pink-dim:rgba(247,37,133,.08);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;box-shadow:none!important}
+html,body{height:100%;overflow:hidden;background:var(--rw-bg);color:var(--rw-text);font-family:var(--rw-font);font-size:15px}
+.en,.mono{font-family:var(--rw-font-en);font-size:.93em}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--rw-border)}
+
+/* Shell */
+.rw-app{display:flex;height:100vh;overflow:hidden}
+.rw-main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+
+/* Rail */
+.rw-rail{width:var(--rw-rail-w);background:var(--rw-rail-bg);display:flex;flex-direction:column;align-items:center;padding:16px 0;flex-shrink:0;z-index:100}
+.rw-rail-logo{width:44px;height:44px;background:var(--rw-pink);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#fff;margin-bottom:24px;cursor:pointer;font-family:var(--rw-font)}
+.rw-rail-icon{width:44px;height:44px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--rw-text-3);font-size:20px;transition:color var(--rw-t);position:relative;border:none;background:none}
+.rw-rail-icon:hover{color:var(--rw-text-2)}
+.rw-rail-icon.active{color:#fff}
+.rw-rail-icon.active::before{content:'';position:absolute;inset-inline-start:0;top:8px;bottom:8px;width:3px;background:var(--rw-pink)}
+.rw-rail-sep{width:28px;height:1px;background:rgba(255,255,255,.06);margin:8px 0}
+.rw-rail-spacer{flex:1}
+.rw-rail-theme{width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--rw-text-3);font-size:18px;border:none;background:none;transition:color var(--rw-t)}
+.rw-rail-theme:hover{color:var(--rw-text-2)}
+
+/* Topnav */
+.rw-topnav{height:var(--rw-topnav-h);background:var(--rw-surface);border-bottom:1px solid var(--rw-border);display:flex;align-items:center;padding:0 28px;flex-shrink:0}
+.rw-tn-project{display:flex;align-items:center;gap:12px;padding-inline-end:24px;border-inline-end:1px solid var(--rw-border);cursor:pointer}
+.rw-project-thumb{width:30px;height:30px;background:var(--rw-script);flex-shrink:0}
+.rw-project-name{font-size:14px;font-weight:700;white-space:nowrap}
+.rw-section-tabs{display:flex;margin-inline-start:4px}
+.rw-sec-tab{display:flex;align-items:center;gap:6px;padding:0 16px;height:var(--rw-topnav-h);font-size:13px;font-weight:600;cursor:pointer;color:var(--rw-text-2);border:none;background:none;border-bottom:3px solid transparent;transition:color var(--rw-t),border-color var(--rw-t);white-space:nowrap}
+.rw-sec-tab:hover{color:var(--rw-text)}
+.rw-sec-tab[data-s="s"].active{color:var(--rw-script);border-bottom-color:var(--rw-script)}
+.rw-sec-tab[data-s="b"].active{color:var(--rw-break);border-bottom-color:var(--rw-break)}
+.rw-sec-tab[data-s="v"].active{color:var(--rw-vis);border-bottom-color:var(--rw-vis)}
+.rw-sec-tab[data-s="p"].active{color:var(--rw-plan);border-bottom-color:var(--rw-plan)}
+.rw-sec-tab[data-s="sh"].active{color:var(--rw-shoot);border-bottom-color:var(--rw-shoot)}
+.rw-tn-spacer{flex:1}
+.rw-tn-end{display:flex;align-items:center;gap:12px}
+
+/* Buttons */
+.rw-btn{display:inline-flex;align-items:center;gap:8px;padding:9px 20px;font-family:var(--rw-font);font-size:13px;font-weight:600;border:none;cursor:pointer;transition:opacity var(--rw-t);border-radius:var(--rw-r);white-space:nowrap}
+.rw-btn:hover{opacity:.88}
+.rw-btn-primary{background:var(--rw-pink);color:#fff}
+.rw-btn-amber{background:var(--rw-amber);color:#fff}
+.rw-btn-ghost{background:var(--rw-surface-2);color:var(--rw-text-2);border:1px solid var(--rw-border)}
+.rw-btn-ghost:hover{color:var(--rw-text);opacity:1}
+.rw-btn-ai{background:transparent;border:1px solid var(--rw-border);color:var(--rw-text-2)}
+.rw-btn-ai:hover{border-color:var(--rw-amber);color:var(--rw-amber);opacity:1}
+.rw-btn-icon{width:36px;height:36px;padding:0;background:var(--rw-surface-2);border:1px solid var(--rw-border);color:var(--rw-text-2);font-size:16px}
+.rw-avatar{width:32px;height:32px;background:var(--rw-break);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;border-radius:50%;cursor:pointer}
+.rw-theme-btn{width:36px;height:36px;border:1px solid var(--rw-border);background:var(--rw-surface-2);color:var(--rw-text-2);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:border-color var(--rw-t),color var(--rw-t);border-radius:var(--rw-r)}
+.rw-theme-btn:hover{border-color:var(--rw-amber);color:var(--rw-amber)}
+
+/* Breadcrumb */
+.rw-breadcrumb{height:var(--rw-crumb-h);background:var(--rw-surface-2);border-bottom:1px solid var(--rw-border);display:flex;align-items:center;padding:0 28px;gap:12px;flex-shrink:0}
+.rw-crumb-back{display:inline-flex;align-items:center;gap:8px;padding:7px 16px;background:var(--rw-pink);color:#fff;font-size:13px;font-weight:600;cursor:pointer;border:none;border-radius:var(--rw-r);transition:opacity var(--rw-t);white-space:nowrap}
+.rw-crumb-back:hover{opacity:.88}
+.rw-crumb-sep{color:var(--rw-text-3);font-size:16px}
+.rw-crumb-node{font-size:13px;font-weight:600;color:var(--rw-text)}
+.rw-crumb-leaf{font-size:13px;color:var(--rw-text-2)}
+
+/* Dashboard */
+.rw-proj-header{display:flex;align-items:center;gap:28px;padding:48px 48px 32px;background:var(--rw-surface);border-bottom:1px solid var(--rw-border)}
+.rw-proj-cover{width:96px;height:96px;flex-shrink:0;background:var(--rw-script);display:flex;align-items:center;justify-content:center;font-size:40px}
+.rw-proj-title{font-size:26px;font-weight:700;line-height:1.15;margin-bottom:6px}
+.rw-proj-sub{font-size:13px;color:var(--rw-text-2)}
+.rw-dash-body{padding:28px 48px;display:flex;flex-direction:column;gap:0;overflow-y:auto;flex:1}
+.rw-sec-row{display:flex;align-items:stretch;background:var(--rw-surface);border:1px solid var(--rw-border);border-bottom:none}
+.rw-sec-row:last-child{border-bottom:1px solid var(--rw-border)}
+.rw-sec-label{width:100px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:28px 8px;cursor:pointer;transition:opacity var(--rw-t)}
+.rw-sec-label:hover{opacity:.88}
+.rw-sec-label-icon{font-size:28px}
+.rw-sec-label-text{font-size:11px;font-weight:700;color:#fff;text-align:center;letter-spacing:.3px}
+.rw-sec-modules{flex:1;display:flex;flex-wrap:wrap;border-inline-start:1px solid var(--rw-border)}
+.rw-mod-card{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:28px 20px;min-width:132px;cursor:pointer;border-inline-start:1px solid var(--rw-border);transition:background var(--rw-t)}
+.rw-mod-card:first-child{border-inline-start:none}
+.rw-mod-card:hover{background:var(--rw-surface-2)}
+.rw-mod-icon{font-size:28px;line-height:1}
+.rw-mod-name{font-size:12px;font-weight:600;color:var(--rw-text-2);text-align:center;line-height:1.4}
+.rw-exclusive{font-size:9px;font-weight:700;color:var(--rw-vis);text-transform:uppercase;letter-spacing:.8px;margin-top:2px}
+.rw-ai-badge{display:inline-block;font-size:9px;font-weight:700;background:linear-gradient(135deg,var(--rw-script),var(--rw-shoot));color:#fff;padding:2px 6px;border-radius:2px}
+
+/* Scene panel */
+.rw-scene-panel{width:var(--rw-panel-w);background:var(--rw-surface);border-inline-start:1px solid var(--rw-border);display:flex;flex-direction:column;flex-shrink:0}
+.rw-panel-header{padding:20px 16px 12px;font-size:10px;font-weight:700;color:var(--rw-text-3);text-transform:uppercase;letter-spacing:1.2px;border-bottom:1px solid var(--rw-border)}
+.rw-scene-search{padding:12px;border-bottom:1px solid var(--rw-border)}
+.rw-scene-search input{width:100%;background:var(--rw-surface-2);border:1px solid var(--rw-border);color:var(--rw-text);font-family:var(--rw-font);font-size:13px;padding:9px 12px;outline:none;transition:border-color var(--rw-t)}
+.rw-scene-search input:focus{border-color:var(--rw-amber)}
+.rw-scene-search input::placeholder{color:var(--rw-text-3)}
+.rw-group-toggle{display:flex;align-items:center;gap:8px;padding:9px 12px;font-size:12px;color:var(--rw-text-2);border-bottom:1px solid var(--rw-border);cursor:pointer}
+.rw-group-toggle input{accent-color:var(--rw-amber)}
+.rw-scene-list{flex:1;overflow-y:auto;padding:8px 0}
+.rw-scene-grp-label{padding:12px 16px 4px;font-size:9px;font-weight:700;color:var(--rw-text-3);text-transform:uppercase;letter-spacing:1px}
+.rw-scene-item{display:flex;align-items:center;gap:10px;padding:11px 14px;cursor:pointer;transition:background var(--rw-t);border-inline-start:3px solid transparent}
+.rw-scene-item:hover{background:var(--rw-surface-2)}
+.rw-scene-item.active{background:var(--rw-amber-dim);border-inline-start-color:var(--rw-amber)}
+.rw-sc-num{font-family:var(--rw-font-en);font-size:11px;font-weight:600;color:var(--rw-text-3);min-width:20px}
+.rw-scene-item.active .rw-sc-num{color:var(--rw-amber)}
+.rw-sc-loc{font-size:13px;color:var(--rw-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rw-sc-time{font-size:11px;color:var(--rw-text-3)}
+.rw-scene-item.active .rw-sc-loc{color:var(--rw-amber);font-weight:600}
+
+/* Scene main */
+.rw-scene-main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.rw-scene-topbar{padding:0 28px;height:72px;background:var(--rw-surface);border-bottom:1px solid var(--rw-border);display:flex;align-items:center;gap:16px;flex-shrink:0}
+.rw-scene-title{font-size:16px;font-weight:700;color:var(--rw-text);line-height:1.2}
+.rw-scene-meta{font-size:12px;color:var(--rw-text-2);margin-top:3px}
+.rw-mod-tabs{display:flex;background:var(--rw-surface);border-bottom:1px solid var(--rw-border);overflow-x:auto;flex-shrink:0;padding:0 16px;height:var(--rw-tabs-h)}
+.rw-mod-tab{display:flex;align-items:center;padding:0 18px;height:var(--rw-tabs-h);font-size:13px;font-weight:600;color:var(--rw-text-2);cursor:pointer;white-space:nowrap;border:none;background:none;border-bottom:3px solid transparent;transition:color var(--rw-t),border-color var(--rw-t)}
+.rw-mod-tab:hover{color:var(--rw-text)}
+.rw-mod-tab.active{color:var(--rw-amber);border-bottom-color:var(--rw-amber)}
+.rw-tab-content{flex:1;overflow-y:auto;background:var(--rw-bg)}
+.rw-tab-pane{display:none;padding:48px}
+.rw-tab-pane.active{display:block}
+
+/* Content components */
+.rw-stats{display:flex;gap:0;margin-bottom:40px;border:1px solid var(--rw-border)}
+.rw-stat{flex:1;padding:28px 16px;text-align:center;background:var(--rw-surface);border-inline-start:1px solid var(--rw-border)}
+.rw-stat:first-child{border-inline-start:none}
+.rw-stat-val{font-family:var(--rw-font-en);font-size:34px;font-weight:600;color:var(--rw-amber);line-height:1;margin-bottom:8px}
+.rw-stat-lbl{font-size:10px;font-weight:700;color:var(--rw-text-3);text-transform:uppercase;letter-spacing:1px}
+.rw-section-hdr{font-size:10px;font-weight:700;color:var(--rw-text-3);text-transform:uppercase;letter-spacing:1.2px;margin:32px 0 16px;padding-bottom:8px;border-bottom:1px solid var(--rw-border)}
+.rw-mov-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--rw-border);border:1px solid var(--rw-border);margin-bottom:40px}
+.rw-mov-card{background:var(--rw-surface);padding:28px;border-top:4px solid var(--rw-amber)}
+.rw-mov-n{font-size:9px;color:var(--rw-text-3);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px}
+.rw-mov-t{font-size:15px;font-weight:700;color:var(--rw-text);margin-bottom:10px}
+.rw-mov-d{font-size:12px;color:var(--rw-text-2);line-height:1.8}
+.rw-card{background:var(--rw-surface);border:1px solid var(--rw-border);padding:28px;margin-bottom:16px}
+.rw-card-title{font-size:10px;font-weight:700;color:var(--rw-text-3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:14px}
+.rw-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+
+/* Shot table */
+.rw-shot-table{width:100%;border-collapse:collapse;background:var(--rw-surface);border:1px solid var(--rw-border)}
+.rw-shot-table th{padding:12px 16px;text-align:start;font-size:10px;font-weight:700;color:var(--rw-text-3);text-transform:uppercase;letter-spacing:.9px;background:var(--rw-surface-2);border-bottom:1px solid var(--rw-border);position:sticky;top:0;z-index:2}
+.rw-shot-table td{padding:15px 16px;font-size:13px;border-bottom:1px solid var(--rw-border-2);vertical-align:middle}
+.rw-shot-row{cursor:pointer;transition:background var(--rw-t)}
+.rw-shot-row:hover td{background:var(--rw-surface-2)}
+.rw-shot-row.s-d{border-inline-end:3px solid #F5D76E}
+.rw-shot-row.s-v{border-inline-end:3px solid var(--rw-text-3)}
+.rw-shot-row.s-i{border-inline-end:3px solid var(--rw-break)}
+.rw-snum{font-family:var(--rw-font-en);font-size:13px;font-weight:700;color:var(--rw-amber)}
+.rw-setup-chip{display:inline-block;padding:2px 8px;font-family:var(--rw-font-en);font-size:10px;font-weight:700;background:var(--rw-surface-2);border:1px solid var(--rw-border);color:var(--rw-text-2);margin-inline-start:6px}
+.rw-badge{display:inline-block;padding:3px 8px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+.rw-badge-d{background:rgba(245,215,110,.12);color:#F5D76E;border:1px solid rgba(245,215,110,.25)}
+.rw-badge-v{background:var(--rw-surface-2);color:var(--rw-text-2);border:1px solid var(--rw-border)}
+.rw-badge-i{background:rgba(45,91,227,.12);color:#7FA8FF;border:1px solid rgba(45,91,227,.25)}
+.rw-exp-row{display:none}
+.rw-exp-row.open{display:table-row}
+.rw-exp-row td{background:var(--rw-surface-2);padding:24px 28px;border-bottom:1px solid var(--rw-border)}
+.rw-exp-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.rw-field-label{font-size:9px;font-weight:700;color:var(--rw-text-3);text-transform:uppercase;letter-spacing:.9px;margin-bottom:5px}
+.rw-field-val{font-size:13px;color:var(--rw-text);line-height:1.7}
+.rw-notes-block{background:var(--rw-amber-dim);border-inline-start:3px solid var(--rw-amber);padding:14px 18px;font-size:12px;color:var(--rw-text-2);margin-top:14px;line-height:1.7}
+.rw-filter-row{display:flex;gap:0;margin-bottom:28px;border:1px solid var(--rw-border);width:fit-content}
+.rw-f-btn{padding:10px 18px;font-family:var(--rw-font);font-size:12px;font-weight:600;background:var(--rw-surface);border:none;border-inline-start:1px solid var(--rw-border);color:var(--rw-text-2);cursor:pointer;transition:background var(--rw-t),color var(--rw-t)}
+.rw-f-btn:first-child{border-inline-start:none}
+.rw-f-btn:hover{background:var(--rw-surface-2);color:var(--rw-text)}
+.rw-f-btn.active{background:var(--rw-amber);color:#fff}
+
+/* Schedule */
+.rw-sched-list{display:flex;flex-direction:column;gap:0}
+.rw-sched-row{display:grid;grid-template-columns:110px 1fr 150px;gap:24px;align-items:start;padding:20px 28px;background:var(--rw-surface);border-bottom:1px solid var(--rw-border-2);border-inline-end:3px solid transparent;transition:background var(--rw-t)}
+.rw-sched-row:hover{background:var(--rw-surface-2)}
+.rw-sched-row.s-break{background:var(--rw-bg);border-bottom:1px dashed var(--rw-border)}
+.rw-sched-row.s-hi{border-inline-end-color:var(--rw-shoot)}
+.rw-s-time{font-family:var(--rw-font-en);font-size:11px;color:var(--rw-text-3);line-height:1.8}
+.rw-s-dur{font-weight:600;color:var(--rw-text-2);font-size:13px}
+.rw-s-setup{font-size:10px;color:var(--rw-amber);margin-top:3px}
+.rw-s-title{font-size:14px;font-weight:700;color:var(--rw-text);margin-bottom:5px;display:flex;align-items:center;gap:8px}
+.rw-s-shots{font-size:11px;color:var(--rw-text-2)}
+.rw-s-notes{font-size:11px;color:var(--rw-text-3);margin-top:4px;font-style:italic}
+.rw-s-cast{font-size:12px;color:var(--rw-text-2);text-align:end}
+.rw-pri-badge{display:inline-block;padding:2px 7px;font-size:9px;font-weight:700;text-transform:uppercase;background:var(--rw-pink-dim);color:var(--rw-shoot);border:1px solid rgba(247,37,133,.25)}
+
+/* Lighting */
+.rw-ct-bar{display:flex;height:28px;margin:16px 0}
+.rw-ct-seg{display:flex;align-items:center;justify-content:center;font-family:var(--rw-font-en);font-size:9px;font-weight:600;color:rgba(0,0,0,.65);flex:1}
+.rw-light-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--rw-border);border:1px solid var(--rw-border)}
+.rw-light-card{background:var(--rw-surface);padding:20px}
+.rw-light-num{font-size:10px;font-weight:700;color:var(--rw-amber);margin-bottom:7px;text-transform:uppercase;letter-spacing:.5px}
+.rw-light-note{font-size:12px;color:var(--rw-text-2);line-height:1.7}
+
+/* Checklist */
+.rw-checklist{display:flex;flex-direction:column}
+.rw-check-item{display:flex;align-items:flex-start;gap:14px;padding:15px 18px;background:var(--rw-surface);border-bottom:1px solid var(--rw-border-2);transition:background var(--rw-t)}
+.rw-check-item:hover{background:var(--rw-surface-2)}
+.rw-check-item input[type=checkbox]{width:16px;height:16px;margin-top:2px;accent-color:var(--rw-amber);flex-shrink:0;cursor:pointer}
+.rw-ci-name{font-size:13px;font-weight:600;color:var(--rw-text);margin-bottom:3px}
+.rw-ci-note{font-size:11px;color:var(--rw-text-2);line-height:1.6}
+.rw-ci-shots{font-size:10px;color:var(--rw-amber);margin-top:3px}
+.rw-cat-label{display:inline-block;padding:3px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;margin-bottom:10px}
+.rw-cat-a{background:var(--rw-pink-dim);color:var(--rw-shoot);border:1px solid rgba(247,37,133,.25)}
+.rw-cat-b{background:var(--rw-amber-dim);color:var(--rw-amber);border:1px solid rgba(212,165,116,.25)}
+.rw-cat-c{background:rgba(0,168,150,.08);color:var(--rw-vis);border:1px solid rgba(0,168,150,.25)}
+
+/* Wardrobe */
+.rw-wardrobe-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--rw-border);margin-bottom:16px}
+.rw-wc-card{background:var(--rw-surface);padding:28px;border-top:4px solid}
+.rw-wc-card.nali{border-top-color:var(--rw-break)}
+.rw-wc-card.gesha{border-top-color:var(--rw-plan)}
+.rw-wc-name{font-size:18px;font-weight:700;color:var(--rw-text);margin-bottom:22px}
+.rw-wc-row{display:flex;gap:8px;font-size:13px;color:var(--rw-text-2);margin-bottom:12px;line-height:1.5}
+.rw-wc-row strong{color:var(--rw-text);min-width:72px;flex-shrink:0;font-weight:600}
+.rw-wc-note{margin-top:18px;padding:14px 16px;background:var(--rw-surface-2);border-inline-start:3px solid var(--rw-border);font-size:12px;color:var(--rw-text-2);line-height:1.7}
+
+/* Continuity */
+.rw-flow{display:flex;align-items:center;margin:16px 0 32px}
+.rw-flow-node{flex:1;background:var(--rw-surface);border:1px solid var(--rw-border);padding:18px 16px;text-align:center}
+.rw-flow-node.current{border-color:var(--rw-amber);background:var(--rw-amber-dim)}
+.rw-flow-num{font-family:var(--rw-font-en);font-size:26px;font-weight:700;color:var(--rw-amber)}
+.rw-flow-lbl{font-size:11px;color:var(--rw-text-2);margin-top:4px}
+.rw-flow-arr{font-size:20px;color:var(--rw-text-3);padding:0 8px;flex-shrink:0}
+.rw-cont-grid{display:grid;grid-template-columns:1fr 1fr;gap:28px}
+
+/* Sound */
+.rw-sound-list{background:var(--rw-surface);border:1px solid var(--rw-border)}
+.rw-sound-item{display:flex;gap:18px;padding:20px 28px;border-bottom:1px solid var(--rw-border-2)}
+.rw-sound-item:last-child{border-bottom:none}
+.rw-si-icon{font-size:22px;width:32px;flex-shrink:0;padding-top:2px}
+.rw-si-title{font-size:14px;font-weight:700;color:var(--rw-text);margin-bottom:5px}
+.rw-si-title.crit{color:var(--rw-shoot)}
+.rw-si-desc{font-size:12px;color:var(--rw-text-2);line-height:1.7}
+.rw-warn{display:flex;gap:12px;align-items:flex-start;padding:18px 24px;background:rgba(247,37,133,.06);border:1px solid rgba(247,37,133,.2);border-inline-start:4px solid var(--rw-shoot);margin-bottom:16px}
+.rw-warn-icon{font-size:16px;flex-shrink:0;margin-top:2px}
+.rw-warn-text{font-size:13px;color:var(--rw-shoot);line-height:1.6}
+
+/* Storyboard */
+.rw-sb-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1px;background:var(--rw-border);border:1px solid var(--rw-border)}
+.rw-sb-card{background:var(--rw-surface);cursor:pointer;transition:background var(--rw-t)}
+.rw-sb-card:hover{background:var(--rw-surface-2)}
+.rw-sb-thumb{aspect-ratio:16/9;background:var(--rw-surface-2);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;border-bottom:1px solid var(--rw-border);font-family:var(--rw-font-en);color:var(--rw-text-3);font-size:11px}
+.rw-sb-thumb-num{font-size:22px;font-weight:700;color:var(--rw-amber)}
+.rw-sb-meta{padding:14px 16px}
+.rw-sb-num{font-size:10px;font-weight:700;color:var(--rw-amber);margin-bottom:5px}
+.rw-sb-style{font-size:12px;color:var(--rw-text-2)}
+.rw-sb-lens{display:inline-block;margin-top:7px;font-family:var(--rw-font-en);font-size:10px;background:var(--rw-surface-2);color:var(--rw-text-3);padding:2px 7px;border:1px solid var(--rw-border)}
+
+/* Floor plan */
+.rw-fp-controls{display:flex;gap:0;margin-bottom:16px;border:1px solid var(--rw-border);width:fit-content}
+.rw-fp-btn{padding:9px 16px;font-family:var(--rw-font);font-size:12px;font-weight:600;background:var(--rw-surface);border:none;border-inline-start:1px solid var(--rw-border);color:var(--rw-text-2);cursor:pointer;transition:background var(--rw-t),color var(--rw-t)}
+.rw-fp-btn:first-child{border-inline-start:none}
+.rw-fp-btn.active{background:var(--rw-surface-3);color:var(--rw-amber)}
+.rw-fp-wrap{background:var(--rw-surface);border:1px solid var(--rw-border);padding:28px;overflow:auto;margin-bottom:16px}
+.rw-fp-setup-detail{background:var(--rw-surface);border:1px solid var(--rw-border);padding:20px 24px}
+
+/* Login */
+.rw-auth-page{min-height:100vh;background:var(--rw-bg);display:flex;align-items:center;justify-content:center;padding:48px}
+.rw-auth-box{width:100%;max-width:420px}
+.rw-auth-logo{width:56px;height:56px;background:var(--rw-pink);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:#fff;margin-bottom:28px}
+.rw-auth-title{font-size:28px;font-weight:700;color:var(--rw-text);margin-bottom:8px}
+.rw-auth-sub{font-size:14px;color:var(--rw-text-2);margin-bottom:48px;line-height:1.7}
+.rw-form-label{display:block;font-size:11px;font-weight:700;color:var(--rw-text-2);text-transform:uppercase;letter-spacing:.8px;margin-bottom:9px}
+.rw-form-input{width:100%;background:var(--rw-surface);border:1px solid var(--rw-border);color:var(--rw-text);font-family:var(--rw-font);font-size:15px;padding:15px 16px;outline:none;transition:border-color var(--rw-t);margin-bottom:16px;border-radius:var(--rw-r)}
+.rw-form-input:focus{border-color:var(--rw-amber)}
+.rw-auth-divider{display:flex;align-items:center;gap:16px;margin:28px 0;font-size:11px;color:var(--rw-text-3)}
+.rw-auth-divider::before,.rw-auth-divider::after{content:'';flex:1;height:1px;background:var(--rw-border)}
+</style>
+</head>
+<body>
+
+<!-- VIEW SWITCHER -->
+<div id="view-switcher" style="position:fixed;top:12px;inset-inline-start:50%;transform:translateX(-50%);z-index:9999;display:flex;gap:0;background:var(--rw-rail-bg);border:1px solid var(--rw-border);padding:4px">
+  <button onclick="switchView('dash')" id="sw-dash" style="padding:6px 14px;font-family:var(--rw-font);font-size:12px;font-weight:600;background:var(--rw-pink);color:#fff;border:none;cursor:pointer">داشبۆرد</button>
+  <button onclick="switchView('scene')" id="sw-scene" style="padding:6px 14px;font-family:var(--rw-font);font-size:12px;font-weight:600;background:transparent;color:var(--rw-text-2);border:none;cursor:pointer">دیمەنی ١٢</button>
+  <button onclick="switchView('login')" id="sw-login" style="padding:6px 14px;font-family:var(--rw-font);font-size:12px;font-weight:600;background:transparent;color:var(--rw-text-2);border:none;cursor:pointer">چوونەژوورەوە</button>
+</div>
+
+<!-- ══════════ DASHBOARD VIEW ══════════ -->
+<div id="view-dash" class="rw-app">
+  <!-- Rail -->
+  <aside class="rw-rail">
+    <div class="rw-rail-logo" onclick="switchView('dash')">ڕ</div>
+    <button class="rw-rail-icon active">⊞</button>
+    <button class="rw-rail-icon">◎</button>
+    <button class="rw-rail-icon">◈</button>
+    <div class="rw-rail-sep"></div>
+    <button class="rw-rail-icon">⚙</button>
+    <div class="rw-rail-spacer"></div>
+    <button class="rw-rail-icon">🔔</button>
+    <button class="rw-rail-theme js-theme-toggle" onclick="toggleTheme()">☀</button>
+  </aside>
+
+  <div class="rw-main">
+    <!-- Topnav -->
+    <nav class="rw-topnav">
+      <div class="rw-tn-project">
+        <div class="rw-project-thumb"></div>
+        <span class="rw-project-name">میوانێکی نادیار</span>
+      </div>
+      <div class="rw-section-tabs">
+        <button class="rw-sec-tab active" data-s="s">دەستنووس</button>
+        <button class="rw-sec-tab" data-s="b">داڕشتن</button>
+        <button class="rw-sec-tab" data-s="v">بینراوکردن</button>
+        <button class="rw-sec-tab" data-s="p">ڕێنوێس</button>
+        <button class="rw-sec-tab" data-s="sh">وێنەگرتن</button>
+      </div>
+      <div class="rw-tn-spacer"></div>
+      <div class="rw-tn-end">
+        <button class="rw-btn rw-btn-ghost rw-btn-ai">🤖 AI دروستکردن</button>
+        <button class="rw-btn rw-btn-amber" onclick="switchView('scene')">↗ دەرهێنانی HTML</button>
+        <div style="width:1px;height:24px;background:var(--rw-border)"></div>
+        <span style="font-size:12px;color:var(--rw-text-2);white-space:nowrap">سەروەر موحەدین فیلمز</span>
+        <div class="rw-avatar">DI</div>
+        <button class="rw-theme-btn js-theme-toggle" onclick="toggleTheme()">☀</button>
+      </div>
+    </nav>
+
+    <!-- Project header -->
+    <div class="rw-proj-header">
+      <div class="rw-proj-cover">🎬</div>
+      <div>
+        <div class="rw-proj-title">میوانێکی نادیار</div>
+        <div class="rw-proj-sub">سەروەر موحەدین فیلمز &nbsp;·&nbsp; فیلمی کورت &nbsp;·&nbsp; ٣٢ دیمەن &nbsp;·&nbsp; ١٨٧ لێدان</div>
+      </div>
+      <div style="margin-inline-start:auto;display:flex;gap:12px">
+        <button class="rw-btn rw-btn-ghost">+ بارکردنی دەستنووس</button>
+        <button class="rw-btn rw-btn-ghost rw-btn-icon">⚙</button>
+      </div>
+    </div>
+
+    <!-- Module grid -->
+    <div class="rw-dash-body">
+      <!-- Script -->
+      <div class="rw-sec-row">
+        <div class="rw-sec-label" style="background:var(--rw-script)">
+          <span class="rw-sec-label-icon">✏</span><span class="rw-sec-label-text">دەستنووس</span>
+        </div>
+        <div class="rw-sec-modules">
+          <div class="rw-mod-card"><span class="rw-mod-icon">📝</span><span class="rw-mod-name">دەستنووسەکان</span></div>
+          <div class="rw-mod-card"><span class="rw-mod-icon">✨</span><span class="rw-mod-name">AI داڕشتن<br><span class="rw-ai-badge">AI</span></span></div>
+          <div class="rw-mod-card"><span class="rw-mod-icon">📄</span><span class="rw-mod-name">بەڵگەکان</span></div>
+        </div>
+      </div>
+      <!-- Breakdown -->
+      <div class="rw-sec-row">
+        <div class="rw-sec-label" style="background:var(--rw-break)">
+          <span class="rw-sec-label-icon">🏷</span><span class="rw-sec-label-text">داڕشتن</span>
+        </div>
+        <div class="rw-sec-modules">
+          <div class="rw-mod-card" onclick="switchView('scene')"><span class="rw-mod-icon">🏷</span><span class="rw-mod-name">داڕشتنی دەستنووس</span></div>
+          <div class="rw-mod-card" onclick="switchView('scene')"><span class="rw-mod-icon">≡</span><span class="rw-mod-name">ستریپبۆرد</span></div>
+          <div class="rw-mod-card"><span class="rw-mod-icon">◇</span><span class="rw-mod-name">ئێلیمێنتەکان</span></div>
+        </div>
+      </div>
+      <!-- Visualize -->
+      <div class="rw-sec-row">
+        <div class="rw-sec-label" style="background:var(--rw-vis)">
+          <span class="rw-sec-label-icon">🎞</span><span class="rw-sec-label-text">بینراوکردن</span>
+        </div>
+        <div class="rw-sec-modules">
+          <div class="rw-mod-card" onclick="switchView('scene')"><span class="rw-mod-icon">≡</span><span class="rw-mod-name">لیستی لێدانەکان</span></div>
+          <div class="rw-mod-card" onclick="switchView('scene')"><span class="rw-mod-icon">⊞</span><span class="rw-mod-name">ستۆری‌بۆردەکان</span></div>
+          <div class="rw-mod-card" onclick="switchView('scene')"><span class="rw-mod-icon">⌂</span><span class="rw-mod-name">نەخشەی ژوور<br><span class="rw-exclusive">ڕوانگە ✦</span></span></div>
+        </div>
+      </div>
+      <!-- Plan -->
+      <div class="rw-sec-row">
+        <div class="rw-sec-label" style="background:var(--rw-plan)">
+          <span class="rw-sec-label-icon">📅</span><span class="rw-sec-label-text">ڕێنوێس</span>
+        </div>
+        <div class="rw-sec-modules">
+          <div class="rw-mod-card" onclick="switchView('scene')"><span class="rw-mod-icon">📅</span><span class="rw-mod-name">خشتەی وێنەگرتن</span></div>
+          <div class="rw-mod-card"><span class="rw-mod-icon">📋</span><span class="rw-mod-name">ئایننامەکان</span></div>
+          <div class="rw-mod-card"><span class="rw-mod-icon">◎</span><span class="rw-mod-name">پەیوەندییەکان</span></div>
+          <div class="rw-mod-card" onclick="switchView('scene')"><span class="rw-mod-icon">💡</span><span class="rw-mod-name">ڕووناکی<br><span class="rw-exclusive">ڕوانگە ✦</span></span></div>
+        </div>
+      </div>
+      <!-- Shoot -->
+      <div class="rw-sec-row">
+        <div class="rw-sec-label" style="background:var(--rw-shoot)">
+          <span class="rw-sec-label-icon">🎬</span><span class="rw-sec-label-text">وێنەگرتن</span>
+        </div>
+        <div class="rw-sec-modules">
+          <div class="rw-mod-card"><span class="rw-mod-icon">📍</span><span class="rw-mod-name">شوێنەکان</span></div>
+          <div class="rw-mod-card" onclick="switchView('scene')"><span class="rw-mod-icon">🔊</span><span class="rw-mod-name">دەنگ<br><span class="rw-exclusive">ڕوانگە ✦</span></span></div>
+          <div class="rw-mod-card" onclick="switchView('scene')"><span class="rw-mod-icon">👗</span><span class="rw-mod-name">جلوبەرگ</span></div>
+          <div class="rw-mod-card" onclick="switchView('scene')"><span class="rw-mod-icon">🔗</span><span class="rw-mod-name">بەردەوامی<br><span class="rw-exclusive">ڕوانگە ✦</span></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ SCENE VIEW ══════════ -->
+<div id="view-scene" class="rw-app" style="display:none">
+  <!-- Rail -->
+  <aside class="rw-rail">
+    <div class="rw-rail-logo" onclick="switchView('dash')">ڕ</div>
+    <button class="rw-rail-icon active">⊞</button>
+    <button class="rw-rail-icon">◎</button>
+    <button class="rw-rail-icon">◈</button>
+    <div class="rw-rail-sep"></div>
+    <button class="rw-rail-icon">⚙</button>
+    <div class="rw-rail-spacer"></div>
+    <button class="rw-rail-icon">🔔</button>
+    <button class="rw-rail-theme js-theme-toggle" onclick="toggleTheme()">☀</button>
+  </aside>
+
+  <div class="rw-main">
+    <!-- Topnav -->
+    <nav class="rw-topnav">
+      <div class="rw-tn-project" onclick="switchView('dash')" style="cursor:pointer">
+        <div class="rw-project-thumb"></div>
+        <span class="rw-project-name">میوانێکی نادیار</span>
+      </div>
+      <div class="rw-section-tabs">
+        <button class="rw-sec-tab" data-s="s">دەستنووس</button>
+        <button class="rw-sec-tab" data-s="b">داڕشتن</button>
+        <button class="rw-sec-tab active" data-s="v">بینراوکردن</button>
+        <button class="rw-sec-tab" data-s="p">ڕێنوێس</button>
+        <button class="rw-sec-tab" data-s="sh">وێنەگرتن</button>
+      </div>
+      <div class="rw-tn-spacer"></div>
+      <div class="rw-tn-end">
+        <button class="rw-btn rw-btn-ghost rw-btn-ai">🤖 AI دروستکردن</button>
+        <button class="rw-btn rw-btn-amber">↗ دەرهێنانی HTML</button>
+        <div style="width:1px;height:24px;background:var(--rw-border)"></div>
+        <span style="font-size:12px;color:var(--rw-text-2);white-space:nowrap">سەروەر موحەدین فیلمز</span>
+        <div class="rw-avatar">DI</div>
+        <button class="rw-theme-btn js-theme-toggle" onclick="toggleTheme()">☀</button>
+      </div>
+    </nav>
+
+    <!-- Content -->
+    <div style="display:flex;flex:1;overflow:hidden">
+      <!-- Scene panel -->
+      <aside class="rw-scene-panel">
+        <div class="rw-panel-header">دیمەنەکان</div>
+        <div class="rw-scene-search">
+          <input type="search" placeholder="گەڕان..." oninput="filterScenes(this.value)">
+        </div>
+        <label class="rw-group-toggle">
+          <input type="checkbox" id="grp-toggle" checked onchange="renderSceneList()">
+          گروپبەندی بەپێی شوێن
+        </label>
+        <div class="rw-scene-list" id="scene-list-body"></div>
+      </aside>
+
+      <!-- Scene main -->
+      <div class="rw-scene-main">
+        <!-- Breadcrumb -->
+        <div class="rw-breadcrumb">
+          <button class="rw-crumb-back" onclick="switchView('dash')">← میوانێکی نادیار</button>
+          <span class="rw-crumb-sep">/</span>
+          <span class="rw-crumb-node">دیمەنی ١٢</span>
+          <span class="rw-crumb-sep">/</span>
+          <span class="rw-crumb-leaf">ناوەوە. باغی ماڵ — ئێوارە</span>
+        </div>
+
+        <!-- Scene topbar -->
+        <div class="rw-scene-topbar">
+          <div style="flex:1">
+            <div class="rw-scene-title">دیمەنی ١٢</div>
+            <div class="rw-scene-meta">١٥ لێدان &nbsp;·&nbsp; ١٣ ئامادەکردن &nbsp;·&nbsp; ٣:١٢ کاتی شاشە &nbsp;·&nbsp; ڕۆژی وێنەگرتنی ٥</div>
+          </div>
+          <div style="display:flex;gap:4px">
+            <button class="rw-btn rw-btn-ghost rw-btn-icon">›</button>
+            <button class="rw-btn rw-btn-ghost rw-btn-icon">‹</button>
+          </div>
+          <button class="rw-btn rw-btn-ghost rw-btn-ai">🤖 AI دروستکردن</button>
+          <button class="rw-btn rw-btn-amber">↗ دەرهێنانی HTML</button>
+        </div>
+
+        <!-- Module tabs -->
+        <div class="rw-mod-tabs" id="mod-tabs"></div>
+
+        <!-- Tab content -->
+        <div class="rw-tab-content" id="tab-content"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ LOGIN VIEW ══════════ -->
+<div id="view-login" style="display:none">
+  <div class="rw-auth-page">
+    <div class="rw-auth-box">
+      <div class="rw-auth-logo">ڕ</div>
+      <h1 class="rw-auth-title">بەخێربێیت بۆ ڕوانگە</h1>
+      <p class="rw-auth-sub">پلاتفۆرمی پێش‌بەرهەمهێنانی فیلمی کوردی.<br>لە دەستنووسەوە بۆ شاشە.</p>
+      <label class="rw-form-label">ئیمەیڵ</label>
+      <input class="rw-form-input" type="email" placeholder="name@studio.com">
+      <button class="rw-btn rw-btn-primary" style="width:100%;justify-content:center;padding:15px;font-size:14px">لینکی جادووی بنێرە</button>
+      <div class="rw-auth-divider">یان</div>
+      <label class="rw-form-label">ئیمەیڵ</label>
+      <input class="rw-form-input" type="email" placeholder="name@studio.com">
+      <label class="rw-form-label">پاسوۆرد</label>
+      <input class="rw-form-input" type="password">
+      <button class="rw-btn rw-btn-ghost" style="width:100%;justify-content:center;padding:15px;font-size:14px">چوونەژوورەوە</button>
+      <p style="margin-top:28px;font-size:12px;color:var(--rw-text-3);text-align:center">
+        هەژماری نییە؟ <a href="#" style="color:var(--rw-amber)">ستودیۆ دروست بکە</a>
+      </p>
+      <div style="text-align:center;margin-top:32px">
+        <button class="js-theme-toggle" onclick="toggleTheme()" style="background:none;border:none;color:var(--rw-text-3);font-size:18px;cursor:pointer">☀</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── DATA ──
+const shots = [
+  {num:"12.1",setup:"A",style:"لێدانی گواستنەوە",movement:"بەدواداچوون لە ڕێگەی دەرگاوە، پان بۆ لای چەپ",lens:"24mm",chars:"نالی، گەشە",desc:"کامێرا نالی و گەشە لە بیرگەی بەرگی بابەتەوە دەگەیاند ژوورەوە. ڕووناکی عەمبەر گەرم.",dialogue:false,duration:"30s",notes:"تەیکی تاکی ئاڵۆز. دۆلی/تراک یان ستیدیکام پێویستە.",movement_num:1,type:"visual"},
+  {num:"12.2",setup:"B",style:"لێدانی فراوان (زاویەی خوارەوە)",movement:"ساکن، سێپۆدی نزم",lens:"18mm",chars:"—",desc:"نیشاندانی هێماکانی ژوورەخانەکە — سەری ئاژەل، توشتاتی ئاویسە، مجسمەی بیگانەیی.",dialogue:false,duration:"8s",notes:"دەکرێت تیلتی هێواش بەرەو سەرەوە بێت.",movement_num:1,type:"insert"},
+  {num:"12.3",setup:"C",style:"داخڵکردن",movement:"ساکن یان پوشی سووک",lens:"85mm",chars:"گەشە",desc:"ڕووی گەشە. دەم کەم کراویی. چاوەکانی لە چەپ بۆ ڕاست گەڕێت.",dialogue:false,duration:"6s",notes:"ئەداکاری گرنگ.",movement_num:1,type:"visual"},
+  {num:"12.4",setup:"D",style:"لەسەر شان",movement:"ساکن",lens:"50mm",chars:"نالی (پ)، گەشە (پش)",desc:"لە پاشی بانکی ئاشپێزخانەوە. نالی گەشە تێماشە دەکات.",dialogue:false,duration:"5s",notes:"DOF کەم بۆ جیاکردنی ئاستەکان.",movement_num:1,type:"visual"},
+  {num:"12.5",setup:"E",style:"POV — سەری ئاسک",movement:"پوشی هێواش (دۆلی/سلایدەر)",lens:"35mm",chars:"—",desc:"POV گەشە. چاوە شووشەییەکانی ڕووناکی دەگریتەوە.",dialogue:false,duration:"8s",notes:"Dedolight بۆ بریقەدانی چاوی تاکسیدێرمی.",movement_num:2,type:"visual"},
+  {num:"12.6",setup:"F",style:"دوو لێدان (ناوەندی)",movement:"ساکن",lens:"40mm",chars:"نالی، گەشە",desc:"گەشە: «بۆچی نەتت گوتم؟» نالی: «ئێگەر پێتت گویا، ئەم سەرسامیت ناهێشتبوایا.»",dialogue:true,duration:"25s",notes:"دیالۆگی سەرەکی. دینامیکای هێز.",movement_num:2,type:"dialogue"},
+  {num:"12.7",setup:"G",style:"لێدانی ناوەندی",movement:"پانی سووک بۆ لای ڕاست",lens:"50mm",chars:"گەشە",desc:"گەشە دەمامک تیاتری دەدۆزێتەوە.",dialogue:false,duration:"7s",notes:"دەمامکەکان پێشتر ڕووناک کراون.",movement_num:2,type:"visual"},
+  {num:"12.8",setup:"H",style:"داخڵکردن — دەمامک",movement:"ساکن، زاویەی Dutch",lens:"85mm macro",chars:"—",desc:"داخڵکردنی دەمامک. تایت، زاویەی Dutch کەم.",dialogue:false,duration:"4s",notes:"پوشی هەست‌نەکراوە بەرەو ناوەوە.",movement_num:2,type:"insert"},
+  {num:"12.9",setup:"G",style:"نزیک‌ناوەندی",movement:"ساکن",lens:"50mm",chars:"گەشە",desc:"گەشە: «ئەم دەمامکانە بۆ چیتن؟»",dialogue:true,duration:"12s",notes:"هەمان ئامادەکردن وەک ١٢.٧.",movement_num:2,type:"dialogue"},
+  {num:"12.10",setup:"I",style:"لێدانی ناوەندی",movement:"ساکن",lens:"50mm",chars:"نالی",desc:"نالی رێسانی دەکات: «دەتوانی تێبگەڕێی لەمو ژوورە.»",dialogue:true,duration:"12s",notes:"ئاسوودی خۆی ئەداکارییەکەیە.",movement_num:2,type:"dialogue"},
+  {num:"12.11",setup:"J",style:"لێدانی ناوەندی — گەشە لە دەسک",movement:"تراکی سووک",lens:"40mm",chars:"گەشە",desc:"کاغەزیکی دەگریت: «چیرۆکەکان چاوێت دەکەن.»",dialogue:true,duration:"15s",notes:"داخڵکردنی کاغەز دەتوانرێت قەتاوەی بێت.",movement_num:2,type:"dialogue"},
+  {num:"12.12",setup:"I",style:"داخڵکردن — نالی",movement:"ساکن",lens:"85mm",chars:"نالی",desc:"نالی: «بەڵێ، ناوی پێش ناتووچکەم یە.»",dialogue:true,duration:"5s",notes:"بریقەدان لە چاو لە لامپەوە.",movement_num:2,type:"dialogue"},
+  {num:"12.13",setup:"K",style:"ناوەندی — گەشە بۆ سەری ئاسک",movement:"پان بۆ لای چەپ",lens:"50mm",chars:"گەشە",desc:"«کامیان چیرۆکی بیسەنەیت؟»",dialogue:true,duration:"18s",notes:"پەیوەندی گەشە لەگەڵ سەری ئاسک دەگۆڕێت.",movement_num:2,type:"dialogue"},
+  {num:"12.14",setup:"L",style:"لێدانی فراوان — کۆڕیدۆر",movement:"ساکن یان تراکی هێواش",lens:"28mm",chars:"گەشە، نالی",desc:"دەرگای داخراو. نالی: «ئەو تێیدا داخراو.»",dialogue:true,duration:"20s",notes:"لێدانی تۆوە. زۆری مەکە.",movement_num:3,type:"dialogue"},
+  {num:"12.15",setup:"M",style:"ناوەندی — نالی تەنیا",movement:"ساکن",lens:"50mm",chars:"نالی",desc:"نالی لە ژوورەخانەکە تەنیا دەوەستێت.",dialogue:false,duration:"12s",notes:"دوای ئەوەی نالی لە فرەیم دەچێت بوەستە.",movement_num:3,type:"visual"}
+];
+
+const setups={A:{desc:"گواستنەوەی دەرچوون",shots:["12.1"]},B:{desc:"فراوانی زاویەی نزم",shots:["12.2"]},C:{desc:"داخڵکردن — واکنشن",shots:["12.3"]},D:{desc:"لەسەر شان، ئاشپێزخانە",shots:["12.4"]},E:{desc:"POV پوش بەرەو سەری ئاسک",shots:["12.5"]},F:{desc:"دوو لێدانی دیالۆگ",shots:["12.6"]},G:{desc:"ناوەندی — ناوچەی دەمامک",shots:["12.7","12.9"]},H:{desc:"داخڵکردن — دەمامکەکان",shots:["12.8"]},I:{desc:"ناوەندی/داخڵکردن — نالی",shots:["12.10","12.12"]},J:{desc:"ناوەندی — گەشە لە دەسک",shots:["12.11"]},K:{desc:"ناوەندی پان — گەشە بۆ سەری ئاسک",shots:["12.13"]},L:{desc:"فراوان — ناوچەی دەرگا",shots:["12.14"]},M:{desc:"ناوەندی — نالی تەنیا",shots:["12.15"]}};
+
+const schedule=[
+  {block:1,time:"0:00–0:45",dur:"٤٥خ",setup:"A",shots:["12.1"],type:"visual",title:"لێدانی گواستنەوە",cast:"نالی، گەشە",notes:"یەکەم شت بوەرگرە.",hi:true},
+  {block:2,time:"0:45–1:20",dur:"٣٥خ",setup:"F→C",shots:["12.6","12.3"],type:"mixed",title:"دیالۆگی مێزی نان",cast:"نالی+گەشە",notes:"دوو لێدان ئینجا بیتەسکە."},
+  {block:3,time:"1:20–1:30",dur:"١٠خ",setup:"D",shots:["12.4"],type:"visual",title:"نالی سەیر دەکات (OTS)",cast:"نالی،گەشە",notes:"ئامادەکردن خێرا."},
+  {block:"BREAK",time:"1:30–1:45",dur:"١٥خ",title:"پشووی ١",notes:"تیم ڕیسێت بکەن."},
+  {block:4,time:"1:45–2:00",dur:"١٥خ",setup:"I",shots:["12.10","12.12"],type:"dialogue",title:"کەڤەرکردنی دیالۆگی نالی",cast:"نالی",notes:"هەمان ئاسۆ."},
+  {block:5,time:"2:00–2:20",dur:"٢٠خ",setup:"G→H",shots:["12.7","12.9","12.8"],type:"mixed",title:"دۆزینەوەی دەمامک",cast:"گەشە",notes:"٣ لێدان."},
+  {block:6,time:"2:20–2:35",dur:"١٥خ",setup:"E",shots:["12.5"],type:"insert",title:"POV سەری ئاسک",cast:"هیچ",notes:"سلایدەر — ئەکتەرەکان پشوو."},
+  {block:7,time:"2:35–2:50",dur:"١٥خ",setup:"J",shots:["12.11"],type:"dialogue",title:"دۆزینەوەی دەسک",cast:"گەشە",notes:"داخڵکردنی کاغەز."},
+  {block:"BREAK",time:"2:50–3:05",dur:"١٥خ",title:"پشووی ٢",notes:"فوتەج بپشکنن."},
+  {block:10,time:"3:30–3:50",dur:"٢٠خ",setup:"L",shots:["12.14"],type:"dialogue",title:"دەرگای داخراو",cast:"گەشە، نالی",notes:"لێدانی ئەداکاری گرنگ.",hi:true},
+  {block:11,time:"3:50–4:00",dur:"١٠خ",setup:"M",shots:["12.15"],type:"visual",title:"نالی تەنیا",cast:"نالی",notes:"دوگمەی هەستی دیمەنەکە."}
+];
+
+const lightingNotes=[
+  {num:"12.1",note:"زاویەی فراوان. دەرەوە لە ڕێگەی دەرگاوە بە قەست زۆر ڕۆشنە."},
+  {num:"12.2",note:"زاویەی نزم. هەموو کەلوپەلەکان ڕووناک کراون. سەری ئاسک لە سەرەوە-ڕاست."},
+  {num:"12.3",note:"داخڵکردن، 85mm. بریقەدانی پاک لە چاو گرنگە."},
+  {num:"12.5",note:"Dedolight ی تایبەت بۆ بریقەدانی چاوی شووشەیی."},
+  {num:"12.6",note:"دوو لێدانی دیالۆگ. نالی کەمێک گەرمتر — خاکەکەی ئەوە."},
+  {num:"12.14",note:"ناوچەی دەرگای داخراو دەبێ کەمێک تاریکتر / ساردتر بێت."}
+];
+
+const typeLabel={dialogue:"دیالۆگ",visual:"بینراو",insert:"داخڵکردن"};
+
+const allScenes=[
+  {n:1,loc:"دەرەوە. گوند",time:"بەیانی"},{n:2,loc:"ناوەوە. ئۆتومبێل",time:"بەیانی"},{n:3,loc:"دەرەوە. شەقام",time:"ڕوو بەرز"},
+  {n:4,loc:"دەرەوە. گوند",time:"ڕوو بەرز"},{n:5,loc:"ناوەوە. ئۆتومبێل",time:"کاتژمێر"},{n:6,loc:"دەرەوە. شەقام",time:"کاتژمێر"},
+  {n:7,loc:"دەرەوە. گوند",time:"کاتژمێر"},{n:8,loc:"ناوەوە. ئۆتومبێل",time:"ئێوارە"},{n:9,loc:"دەرەوە. شەقام",time:"ئێوارە"},
+  {n:10,loc:"دەرەوە. گوند",time:"ئێوارە"},{n:11,loc:"دەرەوە. باغ",time:"ئێوارە"},{n:12,loc:"ناوەوە. باغی ماڵ",time:"ئێوارە"},
+  {n:13,loc:"دەرەوە. باغ",time:"شەو"},{n:14,loc:"ناوەوە. باغی ماڵ",time:"ئێوارە"},{n:15,loc:"دەرەوە. گوند",time:"شەو"},
+  {n:16,loc:"ناوەوە. ئۆتێل",time:"شەو"},{n:17,loc:"ناوەوە. باغی ماڵ",time:"شەو"},{n:18,loc:"دەرەوە. باغ",time:"بەیانی"},
+  {n:19,loc:"ناوەوە. ئۆتێل",time:"بەیانی"},{n:20,loc:"دەرەوە. شەقام",time:"شەو"},{n:21,loc:"دەرەوە. گوند",time:"بەیانی"},
+  {n:22,loc:"ناوەوە. باغی ماڵ",time:"بەیانی"},{n:23,loc:"ناوەوە. ئۆتێل",time:"کاتژمێر"},{n:24,loc:"دەرەوە. شەقام",time:"بەیانی"},
+  {n:25,loc:"دەرەوە. گوند",time:"کاتژمێر"},{n:26,loc:"دەرەوە. باغ",time:"ئێوارە"},{n:27,loc:"ناوەوە. ئۆتێل",time:"شەو"},
+  {n:28,loc:"ناوەوە. ئۆتومبێل",time:"بەیانی"},{n:29,loc:"دەرەوە. شەقام",time:"کاتژمێر"},{n:30,loc:"دەرەوە. گوند",time:"شەو"},
+  {n:31,loc:"ناوەوە. باغی ماڵ",time:"شەو"},{n:32,loc:"دەرەوە. باغ",time:"شەو"}
+];
+
+const tabs=[
+  {id:'overview',label:'پوختە'},{id:'shots',label:'لێدانەکان'},{id:'storyboard',label:'ستۆری‌بۆرد'},
+  {id:'floorplan',label:'نەخشەی ژوور'},{id:'schedule',label:'خشتە'},{id:'lighting',label:'ڕووناکی'},
+  {id:'sound',label:'دەنگ'},{id:'props',label:'کەلوپەل'},{id:'wardrobe',label:'جلوبەرگ'},{id:'continuity',label:'بەردەوامی'}
+];
+
+// ── VIEW SWITCHER ──
+let currentView = 'dash';
+function switchView(v) {
+  ['dash','scene','login'].forEach(id => {
+    const el = document.getElementById(`view-${id}`);
+    if(el) el.style.display = id === v ? (id==='login'?'block':'flex') : 'none';
+  });
+  ['sw-dash','sw-scene','sw-login'].forEach(id => {
+    const btn = document.getElementById(id);
+    if(btn) { btn.style.background = id===`sw-${v}` ? 'var(--rw-pink)' : 'transparent'; btn.style.color = id===`sw-${v}` ? '#fff' : 'var(--rw-text-2)'; }
+  });
+  currentView = v;
+  if(v === 'scene') { renderSceneList(); if(!tabsBuilt) buildTabs(); }
+}
+
+// ── THEME ──
+function toggleTheme() {
+  const d = document.documentElement;
+  const next = d.getAttribute('data-theme')==='dark' ? 'light' : 'dark';
+  d.setAttribute('data-theme', next);
+  document.querySelectorAll('.js-theme-toggle').forEach(b => b.textContent = next==='dark' ? '☀' : '☽');
+}
+
+// ── SCENE LIST ──
+let sceneQ = '';
+function filterScenes(q) { sceneQ = q; renderSceneList(); }
+function renderSceneList() {
+  const grouped = document.getElementById('grp-toggle')?.checked;
+  const body = document.getElementById('scene-list-body');
+  if(!body) return;
+  const filtered = allScenes.filter(s => !sceneQ || s.loc.includes(sceneQ) || String(s.n).includes(sceneQ));
+  if(grouped) {
+    const grps = {};
+    filtered.forEach(s => { if(!grps[s.loc]) grps[s.loc]=[]; grps[s.loc].push(s); });
+    body.innerHTML = Object.entries(grps).map(([loc,scenes]) =>
+      `<div class="rw-scene-grp-label">${loc}</div>${scenes.map(sceneItem).join('')}`
+    ).join('');
+  } else {
+    body.innerHTML = filtered.map(sceneItem).join('');
+  }
+}
+function sceneItem(s) {
+  return `<div class="rw-scene-item${s.n===12?' active':''}" onclick="this.parentElement.querySelectorAll('.rw-scene-item').forEach(e=>e.classList.remove('active'));this.classList.add('active')">
+    <span class="rw-sc-num">${s.n}</span>
+    <div style="flex:1;min-width:0"><div class="rw-sc-loc">${s.loc}</div><div class="rw-sc-time">${s.time}</div></div>
+  </div>`;
+}
+
+// ── TABS ──
+let tabsBuilt = false;
+function buildTabs() {
+  const tabBar = document.getElementById('mod-tabs');
+  tabBar.innerHTML = tabs.map(t =>
+    `<button class="rw-mod-tab${t.id==='overview'?' active':''}" data-tab="${t.id}" onclick="showTab('${t.id}')">${t.label}</button>`
+  ).join('');
+  buildTabContent();
+  tabsBuilt = true;
+}
+
+function showTab(id) {
+  document.querySelectorAll('.rw-mod-tab').forEach(t => t.classList.toggle('active', t.dataset.tab===id));
+  document.querySelectorAll('.rw-tab-pane').forEach(p => p.classList.toggle('active', p.id===`pane-${id}`));
+}
+
+function buildTabContent() {
+  document.getElementById('tab-content').innerHTML = tabs.map(t =>
+    `<div class="rw-tab-pane${t.id==='overview'?' active':''}" id="pane-${t.id}">${buildPane(t.id)}</div>`
+  ).join('');
+}
+
+function buildPane(id) {
+  if(id==='overview') return paneOverview();
+  if(id==='shots') return paneShots();
+  if(id==='storyboard') return paneStoryboard();
+  if(id==='floorplan') return paneFloorplan();
+  if(id==='schedule') return paneSchedule();
+  if(id==='lighting') return paneLighting();
+  if(id==='sound') return paneSound();
+  if(id==='props') return paneProps();
+  if(id==='wardrobe') return paneWardrobe();
+  if(id==='continuity') return paneContinuity();
+  return '';
+}
+
+function paneOverview() { return `
+  <div class="rw-stats">
+    <div class="rw-stat"><div class="rw-stat-val">١٥</div><div class="rw-stat-lbl">لێدان</div></div>
+    <div class="rw-stat"><div class="rw-stat-val">١٣</div><div class="rw-stat-lbl">ئامادەکردن</div></div>
+    <div class="rw-stat"><div class="rw-stat-val">٣:١٢</div><div class="rw-stat-lbl">کاتی شاشە</div></div>
+    <div class="rw-stat"><div class="rw-stat-val">٥ک</div><div class="rw-stat-lbl">ڕۆژی وێنەگرتن</div></div>
+    <div class="rw-stat"><div class="rw-stat-val">٧</div><div class="rw-stat-lbl">دیالۆگ</div></div>
+    <div class="rw-stat"><div class="rw-stat-val">٨</div><div class="rw-stat-lbl">بینراو</div></div>
+  </div>
+  <div class="rw-section-hdr">پێکهاتەی هەستی — ٣ جوڵانەوە</div>
+  <div class="rw-mov-grid">
+    <div class="rw-mov-card"><div class="rw-mov-n">جوڵانەوەی ١ · ١٢.١–١٢.٤</div><div class="rw-mov-t">چوونە ژوورەوە</div><div class="rw-mov-d">سەرسام بۆ نیشتمەندی. باغەکە جوان بوو. ئێستا گەشە و نالی ئاماژوو دەچن.</div></div>
+    <div class="rw-mov-card"><div class="rw-mov-n">جوڵانەوەی ٢ · ١٢.٥–١٢.١٣</div><div class="rw-mov-t">دۆزینەوە</div><div class="rw-mov-d">تێدەردی و ترس. گەشە سەری ئاسک و دەمامک و دەسک دەدۆزێتەوە.</div></div>
+    <div class="rw-mov-card"><div class="rw-mov-n">جوڵانەوەی ٣ · ١٢.١٤–١٢.١٥</div><div class="rw-mov-t">دەرگای داخراو</div><div class="rw-mov-d">کێشە و لادان. دیمەنەکە بە جیاکردنەوە دەتەواوە.</div></div>
+  </div>
+  <div class="rw-grid-2">
+    <div class="rw-card"><div class="rw-card-title">شوێن</div><p style="font-size:13px;color:var(--rw-text-2);line-height:1.8">ناوەوە. باغی ماڵ — ئێوارە<br>ڕووناکی عەمبەر گەرم. شوێنێک کە هەست دەکەیت کەسێک تێیدا دەژیت بەڵام ناتەوانیت بیناسیت.</p></div>
+    <div class="rw-card"><div class="rw-card-title">گرفتە سەرەکییەکان</div><p style="font-size:13px;color:var(--rw-text-2);line-height:1.8">١٢.١ — تەیکی گواستنەوەی ئاڵۆز<br>ساتی دەرگای داخراو (١٢.١٤) — ئەداکاری هەموو شتە<br>شریتی LED ی دیواری پشتەوە دەبێ بکوژرێتەوە</p></div>
+  </div>`; }
+
+function paneShots() {
+  const filterRow = `<div class="rw-filter-row">
+    <button class="rw-f-btn active" onclick="filterS('all',this)">هەموو (١٥)</button>
+    <button class="rw-f-btn" onclick="filterS('dialogue',this)">دیالۆگ (٧)</button>
+    <button class="rw-f-btn" onclick="filterS('visual',this)">بینراو (٨)</button>
+    <button class="rw-f-btn" onclick="filterS('insert',this)">داخڵکردن (٣)</button>
+    <button class="rw-f-btn" onclick="filterS('1',this)">جوڵانەوەی ١</button>
+    <button class="rw-f-btn" onclick="filterS('2',this)">جوڵانەوەی ٢</button>
+    <button class="rw-f-btn" onclick="filterS('3',this)">جوڵانەوەی ٣</button>
+  </div>`;
+  return filterRow + `<table class="rw-shot-table"><thead><tr>
+    <th>گرتە</th><th>شێوازی لێدان</th><th>لێنس</th><th>کەسایەتی</th><th>ماوە</th><th>جۆر</th>
+  </tr></thead><tbody id="shot-tbody">${renderShotRows(shots)}</tbody></table>`;
+}
+
+function renderShotRows(data) {
+  return data.map(s => {
+    const tc=s.type==='dialogue'?'s-d':s.type==='insert'?'s-i':'s-v';
+    const bc=s.type==='dialogue'?'rw-badge-d':s.type==='insert'?'rw-badge-i':'rw-badge-v';
+    const id=s.num.replace('.','_');
+    return `<tr class="rw-shot-row ${tc}" onclick="toggleExp('${id}')" data-type="${s.type}" data-movement="${s.movement_num}" data-shot-id="${id}">
+      <td><span class="rw-snum">${s.num}</span><span class="rw-setup-chip">${s.setup}</span></td>
+      <td>${s.style}</td><td><span class="mono">${s.lens}</span></td>
+      <td style="color:var(--rw-text-2)">${s.chars}</td><td>${s.duration}</td>
+      <td><span class="rw-badge ${bc}">${typeLabel[s.type]}</span></td>
+    </tr>
+    <tr class="rw-exp-row" id="exp-${id}"><td colspan="6">
+      <div class="rw-exp-grid">
+        <div><div class="rw-field-label">جوڵانەوەی کامێرا</div><div class="rw-field-val">${s.movement}</div><div class="rw-field-label" style="margin-top:14px">وەسف</div><div class="rw-field-val">${s.desc}</div></div>
+        <div><div class="rw-field-label">دیالۆگ</div><div class="rw-field-val">${s.dialogue?'بەڵێ':'نەخێر'}</div><div class="rw-field-label" style="margin-top:14px">جوڵانەوە</div><div class="rw-field-val">${s.movement_num} لە ٣</div></div>
+      </div>
+      <div class="rw-notes-block">تێبینی: ${s.notes}</div>
+    </td></tr>`;
+  }).join('');
+}
+
+function filterS(f,btn) {
+  document.querySelectorAll('.rw-filter-row .rw-f-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  let data=shots;
+  if(f==='dialogue'||f==='visual'||f==='insert') data=shots.filter(s=>s.type===f);
+  else if(f==='1'||f==='2'||f==='3') data=shots.filter(s=>s.movement_num===+f);
+  const tb=document.getElementById('shot-tbody');
+  if(tb) tb.innerHTML=renderShotRows(data);
+}
+
+function toggleExp(id) { const r=document.getElementById('exp-'+id); if(r) r.classList.toggle('open'); }
+
+function paneStoryboard() {
+  return `<div class="rw-sb-grid">${shots.map(s=>`
+    <div class="rw-sb-card">
+      <div class="rw-sb-thumb"><div class="rw-sb-thumb-num">${s.num}</div><span>${s.setup}</span></div>
+      <div class="rw-sb-meta">
+        <div class="rw-sb-num">${s.num} <span class="rw-badge ${s.type==='dialogue'?'rw-badge-d':s.type==='insert'?'rw-badge-i':'rw-badge-v'}" style="font-size:9px">${typeLabel[s.type]}</span></div>
+        <div class="rw-sb-style">${s.style}</div>
+        <span class="rw-sb-lens">${s.lens}</span>
+      </div>
+    </div>`).join('')}</div>`;
+}
+
+function paneFloorplan() {
+  const chips=Object.keys(setups).map(l=>`<button class="rw-fp-btn" onclick="hlSetup('${l}',this)">${l}</button>`).join('');
+  return `<div class="rw-fp-controls"><button class="rw-fp-btn active" onclick="hlSetup(null,this)">هەموو</button>${chips}</div>
+  <div class="rw-fp-wrap">
+    <svg viewBox="0 0 712 526" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto;display:block;margin:0 auto">
+      <defs><marker id="ac" markerWidth="6" markerHeight="5" refX="6" refY="2.5" orient="auto"><path d="M0,0L6,2.5L0,5Z" fill="#4B7BE5"/></marker>
+      <marker id="ar" markerWidth="6" markerHeight="5" refX="6" refY="2.5" orient="auto"><path d="M0,0L6,2.5L0,5Z" fill="#F72585"/></marker></defs>
+      <text x="356" y="22" text-anchor="middle" font-family="Cairo,Arial" font-size="13" font-weight="bold" fill="#D4A574">نەخشەی سەرەوەی ژوور — دیمەنی ١٢</text>
+      <text x="356" y="36" text-anchor="middle" font-family="Cairo,Arial" font-size="9" fill="#666">ناوەوە. باغی ماڵ — ئێوارە | A–M | ~٤م × ٨م</text>
+      <rect x="100" y="55" width="500" height="400" rx="0" fill="none" stroke="var(--rw-border)" stroke-width="2"/>
+      <text x="350" y="50" text-anchor="middle" font-family="Cairo,Arial" font-size="8" fill="#666">باکوور — پەنجەرە</text>
+      <text x="350" y="470" text-anchor="middle" font-family="Cairo,Arial" font-size="8" fill="#666">باشوور — دەرگا</text>
+      <line x1="130" y1="60" x2="440" y2="60" stroke="#8D6E63" stroke-width="3" stroke-dasharray="8,4"/>
+      <rect x="480" y="55" width="40" height="8" fill="#3949AB" rx="1"/>
+      <text x="500" y="50" text-anchor="middle" font-family="Arial" font-size="7" fill="#7986CB" font-weight="bold">داخراو</text>
+      <rect x="310" y="450" width="80" height="8" fill="var(--rw-border)" rx="1"/>
+      <rect x="250" y="250" width="200" height="90" rx="0" fill="rgba(104,159,56,.1)" stroke="#689F38" stroke-width="1.5"/>
+      <text x="350" y="295" text-anchor="middle" font-family="Cairo,Arial" font-size="9" fill="#8BC34A" font-weight="bold">مێزی نان</text>
+      <rect x="200" y="110" width="120" height="50" rx="0" fill="rgba(123,31,162,.1)" stroke="#9C27B0" stroke-width="1"/>
+      <text x="260" y="138" text-anchor="middle" font-family="Cairo,Arial" font-size="8" fill="#CE93D8" font-weight="bold">دەسک</text>
+      <rect x="105" y="120" width="50" height="120" rx="0" fill="rgba(21,101,192,.1)" stroke="#42A5F5" stroke-width="1"/>
+      <rect x="555" y="180" width="40" height="180" rx="0" fill="rgba(230,81,0,.1)" stroke="#E65100" stroke-width="1"/>
+      <circle cx="350" cy="62" r="10" fill="rgba(198,40,40,.2)" stroke="#C62828" stroke-width="1.5"/>
+      <text x="350" y="66" text-anchor="middle" font-size="7">🦌</text>
+      <circle cx="165" cy="165" r="8" fill="rgba(198,40,40,.2)" stroke="#C62828" stroke-width="1.2"/>
+      <text x="165" y="169" text-anchor="middle" font-size="7">🎭</text>
+      <polyline points="350,440 350,300 340,270 220,180 200,170 260,135 350,100 500,65" fill="none" stroke="#F72585" stroke-width="2" stroke-dasharray="6,3" marker-end="url(#ar)"/>
+      ${Object.entries(setups).map(([l,d],i)=>{
+        const cx=[350,300,420,520,350,450,300,200,250,350,430,280,350][i];
+        const cy=[440,360,300,280,210,330,230,200,330,170,170,150,380][i];
+        return `<g data-setup="${l}" onclick="hlSetup('${l}',null)" style="cursor:pointer">
+          <circle cx="${cx}" cy="${cy}" r="11" fill="#1F497D" id="cam-${l}" opacity=".9"/>
+          <text x="${cx}" y="${cy+4}" text-anchor="middle" font-family="Arial" font-size="8" fill="white" font-weight="bold" style="pointer-events:none">${l}</text>
+        </g>`;
+      }).join('')}
+    </svg>
+  </div>
+  <div class="rw-fp-setup-detail" id="fp-detail"><p style="font-size:12px;color:var(--rw-text-2)">کلیک بکە لەسەر شوێنی کامێرا بۆ دیتنی وردەکاری.</p></div>`;
+}
+
+function hlSetup(l,btn) {
+  if(btn){document.querySelectorAll('.rw-fp-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');}
+  document.querySelectorAll('[data-setup] circle').forEach(c=>c.setAttribute('fill','#1F497D'));
+  if(l){
+    const el=document.getElementById('cam-'+l);
+    if(el) el.setAttribute('fill','#D4A574');
+    const d=setups[l];
+    const shots2=d.shots.map(sn=>{const s=shots.find(x=>x.num===sn);return s?`<span style="color:var(--rw-amber);font-weight:700">${s.num}</span> — ${s.style} (${s.lens}) · ${s.duration}`:''}).join('<br>');
+    document.getElementById('fp-detail').innerHTML=`<div style="font-size:18px;font-weight:700;color:var(--rw-amber);margin-bottom:8px">ئامادەکردنی ${l}</div><p style="font-size:13px;color:var(--rw-text-2);margin-bottom:12px">${d.desc}</p>${shots2}`;
+  }
+}
+
+function paneSchedule() {
+  return `<div class="rw-sched-list">${schedule.map(b=>{
+    if(b.block==='BREAK') return `<div class="rw-sched-row s-break"><div class="rw-s-time">${b.time}<br><span class="rw-s-dur">${b.dur}</span></div><div><div class="rw-s-title" style="color:var(--rw-text-3)">— ${b.title} —</div><div class="rw-s-notes">${b.notes}</div></div><div></div></div>`;
+    return `<div class="rw-sched-row${b.hi?' s-hi':''}">
+      <div class="rw-s-time">${b.time}<br><span class="rw-s-dur">${b.dur}</span><div class="rw-s-setup">${b.setup||''}</div></div>
+      <div><div class="rw-s-title"><span style="font-size:10px;font-weight:400;color:var(--rw-text-3)">بلۆک ${b.block}</span> &nbsp;${b.title}${b.hi?` <span class="rw-pri-badge">بەرز</span>`:''}</div>
+        <div class="rw-s-shots">لێدانەکان: ${(b.shots||[]).join('، ')}</div>
+        <div class="rw-s-notes">${b.notes}</div></div>
+      <div class="rw-s-cast">${b.cast||''}</div></div>`;
+  }).join('')}</div>`;
+}
+
+function paneLighting() {
+  return `
+  <div class="rw-warn"><span class="rw-warn-icon">⚠</span><div class="rw-warn-text"><strong>چاکردنی گرنگ:</strong> شریتی LED ی دیواری پشتەوە 5000K ـە — دەبێ پێش وێنەگرتن بکوژرێتەوە.</div></div>
+  <div class="rw-card"><div class="rw-card-title">فەلسەفەی بنەڕەتی</div><p style="font-style:italic;color:var(--rw-amber);font-size:14px;margin-bottom:10px">"ئەگەر وەک ڕووناک کراو دیاربێت، هەڵەیە."</p><p style="font-size:13px;color:var(--rw-text-2);line-height:1.8">ماڵەکە دەبێ وەک خۆی ڕۆشن بکات. عەمبەری گەرم لە ناوەڕاستەوە بڵاو دەبێتەوە بۆ ناوچە ساردتر لە لایەکان.</p></div>
+  <div class="rw-section-hdr">نەخشەی پلەی گەرمی ڕەنگ</div>
+  <div class="rw-ct-bar">
+    <div class="rw-ct-seg" style="background:#FF8C00;flex:2">2700K<br>عەمبەر</div>
+    <div class="rw-ct-seg" style="background:#FFA500;flex:2">2700–3000K<br>زێڕین</div>
+    <div class="rw-ct-seg" style="background:#FFD700;flex:1.5">3200K<br>ناوەند</div>
+    <div class="rw-ct-seg" style="background:#909090;flex:1;color:#eee">سێبەر</div>
+    <div class="rw-ct-seg" style="background:#C8D8FF;flex:1.5">3500–4000K<br>پەنجەرە</div>
+  </div>
+  <div class="rw-section-hdr">لێدان بە لێدان</div>
+  <div class="rw-light-grid">${lightingNotes.map(ln=>{const s=shots.find(x=>x.num===ln.num);return `
+    <div class="rw-light-card">
+      <div class="rw-light-num">لێدانی ${ln.num}${s?` <span class="rw-badge ${s.type==='dialogue'?'rw-badge-d':'rw-badge-v'}" style="font-size:9px">${typeLabel[s.type]}</span>`:''}</div>
+      <div class="rw-light-note">${ln.note}</div>
+    </div>`}).join('')}</div>`;
+}
+
+function paneSound() {
+  const moments=[
+    {icon:"👣",title:"هەنگاوی هاتنەژوورەوە (١٢.١)",desc:"گۆڕانی ئەکۆستیکەکە تێپەڕینەکەیە. بە لایەنی کەمەوە ٣ تەیک بە فشاری جیاوازی پێڵاو تۆمار بکە."},
+    {icon:"🦌",title:"بێدەنگی سەری ئاسک (١٢.٥)",desc:"لێدانی POV پێویستی بە بێدەنگی تەواو هەیە. دوای بەرهەم: تۆنێکی نزیک بە گوێ‌لێبوونەوە."},
+    {icon:"📄",title:"هەڵگرتنی کاغەز (١٢.١١)",desc:"فۆلی: شرشری کاغەز. دوای بەرهەم بە بەرزکردنەوەی فریکوانسی بەرز دەکرێت."},
+    {icon:"🔒",title:"دەستگیرەی دەرگای داخراو (١٢.١٤)",crit:true,desc:"گرنگترین ساتی دەنگ لە فیلمەکەدا. بێ دەنگی پاشبنەما. ٥+ جار بە تەنیا وەک فۆلی تۆمار بکە."},
+    {icon:"🕯",title:"ژووری بەتاڵ (١٢.١٥)",desc:"دوای بەرهەم: بنەمای ئەتمۆسفێر 20-40Hz بەرز دەبێت — بە زۆری هەست پێدەکرێت، نابیسرێت."}
+  ];
+  return `<div class="rw-card" style="margin-bottom:28px"><div class="rw-card-title">یاسای زێڕین</div><p style="font-style:italic;color:var(--rw-amber);font-size:15px">"بێدەنگی ئەکتەری سێیەمە."</p></div>
+  <div class="rw-section-hdr">ساتە گرنگەکانی دەنگ</div>
+  <div class="rw-sound-list">${moments.map(m=>`
+    <div class="rw-sound-item"><span class="rw-si-icon">${m.icon}</span>
+    <div><div class="rw-si-title${m.crit?' crit':''}">${m.title}</div><div class="rw-si-desc">${m.desc}</div></div>
+    </div>`).join('')}</div>`;
+}
+
+function paneProps() {
+  const catA=[{n:"سەری ئاسک (تاکسیدێرمی)",shots:"١٢.١،١٢.٢،١٢.٥،١٢.٦،١٢.١٣،١٢.١٥",note:"Dedolight بۆ بریقەدانی چاو."},{n:"دەمامکی تیاتر (٤–٦ دانە)",shots:"١٢.٧،١٢.٨،١٢.٩،١٢.١٣",note:"ڕەنگ‌پەریدوو، نیوە‌شاردراو."},{n:"کاغەزی «چیرۆکەکان چاوێت دەکەن»",shots:"١٢.١١ — گرنگی بەرز",note:"٥ کۆپی ئامادە بکە."},{n:"جانتاکانی گەشە",shots:"١٢.١،١٢.٣،١٢.١٤",note:"بەردەوامی گرنگە."}];
+  const catB=[{n:"چەکی دیوار",note:"هەستی موزەخانەی سەیری بەهێز دەکات."},{n:"مجسمەی بیگانەیی (٢–٤ دانە)",note:"دەبێ وەک هونەر بخوێنرێتەوە."},{n:"ڕازاندنەوەی دەسک",note:"لاپتۆپ + کاغەز."},{n:"گۆشت بۆ سەگ",note:"١٢.١٥."}];
+  function rows(items) { return items.map(p=>`<div class="rw-check-item"><input type="checkbox"><div><div class="rw-ci-name">${p.n}</div>${p.shots?`<div class="rw-ci-shots">${p.shots}</div>`:''}<div class="rw-ci-note">${p.note}</div></div></div>`).join(''); }
+  return `
+  <div class="rw-card" style="margin-bottom:28px;border-inline-start:4px solid var(--rw-amber)"><span style="font-size:13px;color:var(--rw-text-2)">بودجەی خەمڵێنراو: </span><span style="font-size:22px;font-weight:700;color:var(--rw-amber)">$١٢٥–$٤٠٠</span></div>
+  <div class="rw-section-hdr"><span class="rw-cat-label rw-cat-a">پۆلی A — کەلوپەلی سەرەکی</span></div><div class="rw-checklist">${rows(catA)}</div>
+  <div class="rw-section-hdr" style="margin-top:28px"><span class="rw-cat-label rw-cat-b">پۆلی B — ڕازاندنەوەی سێت</span></div><div class="rw-checklist">${rows(catB)}</div>`;
+}
+
+function paneWardrobe() { return `
+  <div class="rw-card" style="font-style:italic;color:var(--rw-amber);font-size:14px;margin-bottom:28px">"نالی تێکەڵ دەبێت لەگەڵ ماڵەکە. گەشە جیا دەردەکەوێت لێی."</div>
+  <div class="rw-wardrobe-grid">
+    <div class="rw-wc-card nali"><div class="rw-wc-name">نالی</div>
+      <div class="rw-wc-row"><strong>سەرەوە:</strong>کراسی کەتەنی ڕەنگی زەیتوونی، درێژ‌قۆڵ</div>
+      <div class="rw-wc-row"><strong>خوارەوە:</strong>شاروال تاریک — خاکەسوور یان زەیتوونی قووڵ</div>
+      <div class="rw-wc-row"><strong>پێڵاو:</strong>چەرمی کۆنکراو — ژیاو، شکاو</div>
+      <div class="rw-wc-row"><strong>مکیاژ:</strong>هیچ</div>
+      <div class="rw-wc-note">ڕەنگەکانی لە پاڵێتی دیوارەوە هێنراون — دار، چەرم، سێبەر. ماڵەکە بۆ وی دروستکراوە.</div>
+    </div>
+    <div class="rw-wc-card gesha"><div class="rw-wc-name">گەشە — جلی A</div>
+      <div class="rw-wc-row"><strong>سەرەوە:</strong>سەری تاریک — خاکەسوور یان نیلی قووڵ، بڕینی پاک</div>
+      <div class="rw-wc-row"><strong>ئەکسەسوار:</strong>چاویلکە لەسەر سەر، گوارەی بچووک</div>
+      <div class="rw-wc-row"><strong>مکیاژ:</strong>ڕیمەلی سووک</div>
+      <div class="rw-wc-note">وەک سەردانکەر دەخوێنرێتەوە. پاڵێتی شارستانی پاک بەرامبەر عەمبەری گەرم.</div>
+    </div>
+  </div>
+  <div class="rw-card"><div class="rw-card-title">گۆڕینی جل — ١٢.١٤ → دیمەنی ١٤</div><p style="font-size:13px;color:var(--rw-text-2);line-height:1.8">گەشە بۆ ژووری نالی دەچێت بۆ گۆڕین. لە دیمەنی ١٤ دا بە کراسێکی کورتی گوڵدار دەردەچێت — گەرمتر، بە ئاشکرا جیاواز.</p></div>`; }
+
+function paneContinuity() {
+  const inItems=["گەشە جانتا هەڵگرتووە","کراسی نالی لە لای ڕاستەوە دەرچووە","ڕووناکی ئێوارە بەردەوامە","چاویلکەی گەشە لەسەر سەری"];
+  const outItems=["نالی مۆبایل + گۆشت هەڵدەگرێت","گەشە لە ژووری نالیدایە — دەرگا داخراوە","جانتاکان لەناوەوەن","شوێنی سەری ئاسک نەگۆڕاوە"];
+  function chk(items){return items.map(t=>`<div class="rw-check-item"><input type="checkbox"><div><div class="rw-ci-name">${t}</div></div></div>`).join('');}
+  return `
+  <div class="rw-flow">
+    <div class="rw-flow-node"><div class="rw-flow-num">١١</div><div class="rw-flow-lbl">دەرەوە. باغ</div></div>
+    <span class="rw-flow-arr">←</span>
+    <div class="rw-flow-node current"><div class="rw-flow-num">١٢</div><div class="rw-flow-lbl">ناوەوە. باغی ماڵ</div></div>
+    <span class="rw-flow-arr">←</span>
+    <div class="rw-flow-node"><div class="rw-flow-num">١٣</div><div class="rw-flow-lbl">دەرەوە. باغ</div></div>
+  </div>
+  <div class="rw-cont-grid">
+    <div><div class="rw-section-hdr">هاتن لە دیمەنی ١١</div><div class="rw-checklist">${chk(inItems)}</div></div>
+    <div><div class="rw-section-hdr">چوون بۆ دیمەنی ١٣</div><div class="rw-checklist">${chk(outItems)}</div></div>
+  </div>
+  <div class="rw-warn" style="margin-top:28px"><span class="rw-warn-icon">⚠</span><div class="rw-warn-text"><strong>دەرگای داخراو:</strong> تۆوەکە دەبێ بسەپێنرێت بەبێ زیادەکاری فرۆشتن. ئەو سەیرەی گەشە ناوەڕۆکی ڕاستەقینەیە.</div></div>`; }
+
+// ── INIT ──
+renderSceneList();
+buildTabs();
+document.getElementById('view-dash').style.display='flex';
+document.getElementById('view-scene').style.display='none';
+document.getElementById('view-login').style.display='none';
+</script>
+</body>
+</html>

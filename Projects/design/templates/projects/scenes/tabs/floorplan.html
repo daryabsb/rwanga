@@ -1,0 +1,105 @@
+{# ════════════════════════════════════════════════════════
+   RWANGA — projects/scenes/tabs/floorplan.html
+   Floor plan editor tab. HTMX fragment.
+   SVG canvas rendered client-side from JSON via floorplan-editor.js.
+
+   Context:
+     scene      — Scene instance
+     project    — Project instance
+     floorplan  — FloorPlan instance or None
+   ════════════════════════════════════════════════════════ #}
+{% load static i18n %}
+
+<div style="padding:var(--rw-pad-lg)">
+
+  {% if floorplan %}
+
+  {# ── Toolbar ── #}
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--rw-pad-sm)">
+    <div class="rw-fp-controls">
+      <button class="rw-fp-btn active" id="fp-tool-select" onclick="FP.setTool('select',this)">{% trans "هەڵبژاردن" %}</button>
+      <button class="rw-fp-btn" id="fp-tool-furniture" onclick="FP.setTool('furniture',this)">{% trans "کەلوپەل" %}</button>
+      <button class="rw-fp-btn" id="fp-tool-camera"    onclick="FP.setTool('camera',this)">{% trans "کامێرا" %}</button>
+      <button class="rw-fp-btn" id="fp-tool-path"      onclick="FP.setTool('path',this)">{% trans "ڕێچکە" %}</button>
+      <button class="rw-fp-btn" id="fp-tool-delete"    onclick="FP.setTool('delete',this)">{% trans "سڕینەوە" %}</button>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="rw-btn rw-btn-ghost rw-btn-ai"
+              hx-post="{% url 'ai_engine:generate_floorplan' scene.pk %}"
+              hx-target="#rw-ai-status" hx-indicator=".htmx-indicator">
+        🤖 {% trans "AI دروستکردن" %}
+      </button>
+      <button class="rw-btn rw-btn-amber" id="fp-save-btn"
+              hx-post="{% url 'floorplans:save' project.pk scene.pk %}"
+              hx-vals="js:{data: FP.serialize()}"
+              hx-swap="none">
+        {% trans "پاشەکەوتکردن" %}
+      </button>
+    </div>
+  </div>
+
+  {# ── Canvas ── #}
+  <div class="rw-fp-wrap" style="position:relative">
+    <svg id="rw-fp-canvas"
+         data-floor-plan-id="{{ floorplan.pk }}"
+         data-room-width="{{ floorplan.room_width }}"
+         data-room-height="{{ floorplan.room_height }}"
+         data-furniture='{{ floorplan.furniture|safe }}'
+         data-cameras='{{ floorplan.cameras|safe }}'
+         data-paths='{{ floorplan.paths|safe }}'
+         viewBox="0 0 800 560"
+         style="width:100%;height:auto;display:block;cursor:crosshair"
+         aria-label="{% trans 'نەخشەی ژووری دیمەن' %}">
+      {# Rendered by floorplan-editor.js #}
+    </svg>
+  </div>
+
+  {# ── Properties panel ── #}
+  <div id="rw-fp-props" style="display:none;margin-top:var(--rw-pad-sm);background:var(--rw-surface);border:1px solid var(--rw-border);padding:var(--rw-pad-md)">
+    <div class="rw-card-title">{% trans "تایبەتمەندییەکان" %}</div>
+    <div id="rw-fp-props-content"></div>
+  </div>
+
+  {# ── Room dimensions ── #}
+  <div style="margin-top:var(--rw-pad-sm);display:flex;gap:var(--rw-pad-md);align-items:center">
+    <div>
+      <label class="rw-form-label" for="fp-room-w">{% trans "پانی ژوور (م)" %}</label>
+      <input class="rw-form-input" type="number" id="fp-room-w" step="0.5" min="2" max="30"
+             value="{{ floorplan.room_width }}" style="width:100px;padding:8px 12px"
+             onchange="FP.setRoomWidth(this.value)">
+    </div>
+    <div>
+      <label class="rw-form-label" for="fp-room-h">{% trans "درێژی ژوور (م)" %}</label>
+      <input class="rw-form-input" type="number" id="fp-room-h" step="0.5" min="2" max="30"
+             value="{{ floorplan.room_height }}" style="width:100px;padding:8px 12px"
+             onchange="FP.setRoomHeight(this.value)">
+    </div>
+    <div style="font-size:12px;color:var(--rw-text-3);margin-top:18px">
+      {{ floorplan.room_width }}م × {{ floorplan.room_height }}م
+    </div>
+  </div>
+
+  {% else %}
+  {# ── Empty state ── #}
+  <div class="rw-empty">
+    <div class="rw-empty-icon">⌂</div>
+    <div class="rw-empty-title">{% trans "هێشتا نەخشەی ژوور نییە" %}</div>
+    <div class="rw-empty-sub">{% trans "نەخشەی ژووری دیمەن دروست بکە یان بیانێڵە AI بیدروستکات" %}</div>
+    <div style="display:flex;gap:8px;margin-top:var(--rw-pad-sm)">
+      <button class="rw-btn rw-btn-primary"
+              hx-post="{% url 'floorplans:create' project.pk scene.pk %}"
+              hx-target="#rw-tab-content" hx-swap="innerHTML">
+        + {% trans "دروستکردنی نەخشەی ژوور" %}
+      </button>
+      <button class="rw-btn rw-btn-ghost rw-btn-ai"
+              hx-post="{% url 'ai_engine:generate_floorplan' scene.pk %}"
+              hx-target="#rw-ai-status" hx-indicator=".htmx-indicator">
+        🤖 {% trans "AI دروستکردن" %}
+      </button>
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+
+<div id="rw-ai-status" style="position:fixed;bottom:var(--rw-pad-md);inset-inline-end:var(--rw-pad-md);width:360px;z-index:200"></div>

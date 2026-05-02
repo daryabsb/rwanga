@@ -21,6 +21,7 @@
   <title>{% block title %}ڕوانگە{% endblock %} — ڕوانگە</title>
   <meta name="description" content="{% block meta_description %}پلاتفۆرمی پێش‌بەرهەمهێنانی فیلمی کوردی{% endblock %}">
 
+  <meta name="htmx-config" content='{"defaultSwapStyle":"outerHTML"}'>
   {% comment %} Bootstrap 5 — single stylesheet, handles RTL/LTR via dir attribute on <html> {% endcomment %}
   <link rel="stylesheet" href="{% static 'vendor/bootstrap/bootstrap.rtl.min.css' %}">
 
@@ -61,13 +62,10 @@
 
 {% comment %} ── SCRIPTS ── {% endcomment %}
 <script src="{% static 'vendor/bootstrap/bootstrap.bundle.min.js' %}"></script>
-{% comment %} <script src="{% static 'vendor/bootstrap/bootstrap.bundle.min.js' %}?v=1"></script> {% endcomment %}
 <script src="{% static 'js/rwanga.js' %}"></script>
 {% block floorplan_js %}{% endblock %}
 {% block extra_js %}{% endblock %}
 
-{% comment %} HTMX config: push CSRF header on every request {% endcomment %}
-<meta name="htmx-config" content='{"defaultSwapStyle":"outerHTML"}'>
 {% csrf_token %}
 
 </body>

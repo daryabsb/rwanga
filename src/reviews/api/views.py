@@ -26,6 +26,17 @@ class BibleReviewViewSet(viewsets.ModelViewSet):
     serializer_class = BibleReviewSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+    def partial_update(self, request, *args, **kwargs):
+        review = self.get_object()
+        new_status = request.data.get("status")
+        if new_status == BibleReview.Status.DELIVERED and review.status != BibleReview.Status.DELIVERED:
+            try:
+                ReviewService.deliver_review(review=review, delivered_by=request.user)
+            except ValueError as exc:
+                return Response({"detail": str(exc)}, status=400)
+            return Response(self.get_serializer(review).data)
+        return super().partial_update(request, *args, **kwargs)
+
 
 class SceneEvaluationViewSet(viewsets.ModelViewSet):
     queryset = SceneEvaluation.objects.all()
@@ -60,7 +71,10 @@ class BibleReviewByProjectAPIView(APIView):
 
     def post(self, request, project_id):
         project = get_object_or_404(Project, id=project_id)
-        review = ReviewService.create_review(project=project, author=request.user)
+        try:
+            review = ReviewService.create_review(project=project, author=request.user)
+        except ValueError as exc:
+            return Response({"detail": str(exc)}, status=400)
         content = request.data.get("content")
         if content is not None:
             review.content = content
@@ -86,6 +100,13 @@ class BibleReviewDetailByProjectAPIView(APIView):
 
     def patch(self, request, project_id, id):
         review = get_object_or_404(BibleReview, project_id=project_id, id=id)
+        new_status = request.data.get("status")
+        if new_status == BibleReview.Status.DELIVERED and review.status != BibleReview.Status.DELIVERED:
+            try:
+                ReviewService.deliver_review(review=review, delivered_by=request.user)
+            except ValueError as exc:
+                return Response({"detail": str(exc)}, status=400)
+            return Response(BibleReviewSerializer(review).data)
         serializer = BibleReviewSerializer(review, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()

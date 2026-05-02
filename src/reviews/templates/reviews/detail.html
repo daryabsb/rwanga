@@ -116,29 +116,29 @@
 
   {% comment %} ── Tab bar ── {% endcomment %}
   <div class="rw-mod-tabs" style="flex-shrink:0" role="tablist">
-    <button class="rw-mod-tab {% if active_tab == 'decisions' %}active{% endif %}"
-            hx-get="{% url 'reviews:tab' review.pk 'decisions' %}"
+    <button type="button" class="rw-mod-tab {% if active_tab == 'decisions' %}active{% endif %}"
+            hx-get="{% url 'reviews:decisions_tab' review.pk %}"
             hx-target="#rv-tab-content"
-            hx-push-url="true">
+            hx-swap="innerHTML">
       {% trans "بڕیارەکان" %}
       {% if decisions.count %}<span style="font-family:var(--rw-font-en);font-size:10px;background:var(--rw-amber-dim);color:var(--rw-amber);padding:1px 6px;border:1px solid rgba(212,165,116,.3);margin-inline-start:6px">{{ decisions.count }}</span>{% endif %}
     </button>
-    <button class="rw-mod-tab {% if active_tab == 'evaluations' %}active{% endif %}"
-            hx-get="{% url 'reviews:tab' review.pk 'evaluations' %}"
+    <button type="button" class="rw-mod-tab {% if active_tab == 'evaluations' %}active{% endif %}"
+            hx-get="{% url 'reviews:evaluations_tab' review.pk %}"
             hx-target="#rv-tab-content"
-            hx-push-url="true">
+            hx-swap="innerHTML">
       {% trans "هەڵسەنگاندنی دیمەنەکان" %}
     </button>
-    <button class="rw-mod-tab {% if active_tab == 'comments' %}active{% endif %}"
-            hx-get="{% url 'reviews:tab' review.pk 'comments' %}"
+    <button type="button" class="rw-mod-tab {% if active_tab == 'comments' %}active{% endif %}"
+            hx-get="{% url 'reviews:comments_tab' review.pk %}"
             hx-target="#rv-tab-content"
-            hx-push-url="true">
+            hx-swap="innerHTML">
       {% trans "لێدوانەکان" %}
     </button>
-    <button class="rw-mod-tab {% if active_tab == 'bible' %}active{% endif %}"
-            hx-get="{% url 'reviews:tab' review.pk 'bible' %}"
+    <button type="button" class="rw-mod-tab {% if active_tab == 'bible' %}active{% endif %}"
+            hx-get="{% url 'reviews:bible_tab' review.pk %}"
             hx-target="#rv-tab-content"
-            hx-push-url="true">
+            hx-swap="innerHTML">
       {% trans "بایبڵ" %}
     </button>
   </div>

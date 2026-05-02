@@ -77,7 +77,7 @@ class ReviewDetailView(View):
 
     def get(self, request, pk, tab="decisions"):
         review = get_object_or_404(BibleReview.objects.select_related("project", "author", "author__user"), id=pk)
-        decisions = review.decisions.select_related("scene", "proposed_by", "locked_by", "rejected_by")
+        decisions = review.decisions.select_related("scene", "proposed_by", "locked_by", "rejected_by").order_by("-created_at")
         evaluations = review.scene_evaluations.select_related("scene")
         ct = ContentType.objects.get_for_model(ReviewDecision)
         decision_ids = [str(d.id) for d in decisions]
@@ -102,6 +102,16 @@ class ReviewDetailView(View):
         review.rejected_decisions_count = decisions.filter(status=ReviewDecision.Status.REJECTED).count()
         review.comments = type("Obj", (), {"count": lambda _self: comments.count()})()
         active_tab = tab if tab in {"decisions", "evaluations", "comments", "bible"} else "decisions"
+        if request.headers.get("HX-Request"):
+            tab_context = {
+                "review": review,
+                "decisions": decisions,
+                "evaluations": evaluations,
+                "comments": comments,
+                "can_manage": request.user.is_authenticated,
+                "can_review": request.user.is_authenticated,
+            }
+            return render(request, self._tab_template(active_tab), tab_context)
         return render(
             request,
             "reviews/detail.html",

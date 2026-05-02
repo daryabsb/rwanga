@@ -50,9 +50,11 @@
         {% trans "لینکی جادووی بنێرە" %}
       </button>
     </form>
+    {% if DEBUG %}
     <p style="margin-top:var(--rw-pad-sm);font-size:12px;color:var(--rw-text-3)">
       {% trans "Email sending is not configured in development mode. Use email/password login instead." %}
     </p>
+    {% endif %}
 
     <div id="rw-auth-feedback" style="margin-top:var(--rw-pad-sm)"></div>
 
@@ -86,9 +88,9 @@
   </div>
 </div>
 
-<script src="{% static 'js/rwanga.js' %}"></script>
-<script src="{% static 'vendor/bootstrap/bootstrap.bundle.min.js' %}"></script>
 <script src="{% static 'htmx/htmx.min.js' %}"></script>
+<script src="{% static 'vendor/bootstrap/bootstrap.bundle.min.js' %}"></script>
+<script src="{% static 'js/rwanga.js' %}"></script>
 </body>
 </html>
 

@@ -12,18 +12,18 @@
         {% endif %}
       </div>
       {% if decision.status == 'proposed' %}
-      <span style="display:inline-block;padding:3px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;background:var(--rw-amber-dim);color:var(--rw-amber);border:1px solid rgba(212,165,116,.3);flex-shrink:0">{% trans "???????" %}</span>
+      <span style="display:inline-block;padding:3px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;background:var(--rw-amber-dim);color:var(--rw-amber);border:1px solid rgba(212,165,116,.3);flex-shrink:0">{% trans "پێشنیاز" %}</span>
       {% elif decision.status == 'locked' %}
-      <span style="display:inline-block;padding:3px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;background:rgba(0,168,150,.1);color:#00A896;border:1px solid rgba(0,168,150,.3);flex-shrink:0">{% trans "?????????" %}</span>
+      <span style="display:inline-block;padding:3px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;background:rgba(0,168,150,.1);color:#00A896;border:1px solid rgba(0,168,150,.3);flex-shrink:0">{% trans "جێگیرکراو" %}</span>
       {% else %}
-      <span style="display:inline-block;padding:3px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;background:var(--rw-pink-dim);color:var(--rw-shoot);border:1px solid rgba(247,37,133,.25);flex-shrink:0">{% trans "????????" %}</span>
+      <span style="display:inline-block;padding:3px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;background:var(--rw-pink-dim);color:var(--rw-shoot);border:1px solid rgba(247,37,133,.25);flex-shrink:0">{% trans "ڕەتکراوە" %}</span>
       {% endif %}
     </div>
 
     <div style="font-size:14px;color:var(--rw-text-2);line-height:1.7;margin-bottom:12px;padding:12px 16px;background:var(--rw-surface-2);border-inline-start:3px solid var(--rw-border)">{{ decision.decision_text }}</div>
 
     <div style="display:flex;align-items:center;gap:16px;font-size:11px;color:var(--rw-text-3)">
-      <span>{% trans "???????????? ???????" %} <strong style="color:var(--rw-text-2)">{{ decision.proposed_by.get_full_name }}</strong></span>
+      <span>{% trans "پێشنیازکراوە لەلایەن" %} <strong style="color:var(--rw-text-2)">{{ decision.proposed_by.get_full_name }}</strong></span>
       <span dir="ltr" style="font-family:var(--rw-font-en)">{{ decision.created_at|date:"Y-m-d" }}</span>
     </div>
   </div>
@@ -32,24 +32,24 @@
   <div style="padding:var(--rw-pad-xs) var(--rw-pad-md);border-top:1px solid var(--rw-border-2);background:var(--rw-surface-2);display:flex;flex-direction:column;gap:10px">
     <form method="post" action="{% url 'reviews:lock_decision' decision.pk %}" hx-post="{% url 'reviews:lock_decision' decision.pk %}" hx-target="#decision-{{ decision.pk }}" hx-swap="outerHTML">
       {% csrf_token %}
-      <textarea name="comment" rows="2" style="width:100%;margin-bottom:8px;background:var(--rw-surface);color:var(--rw-text);border:1px solid var(--rw-border);padding:8px" placeholder="{% trans '?????? (??????????????)...' %}"></textarea>
-      <button type="submit" class="rw-btn" style="background:rgba(0,168,150,.12);color:#00A896;border:1px solid rgba(0,168,150,.3);padding:7px 16px;font-size:12px">? {% trans "??????????" %}</button>
+      <textarea name="comment" rows="2" style="width:100%;margin-bottom:8px;background:var(--rw-surface);color:var(--rw-text);border:1px solid var(--rw-border);padding:8px" placeholder="{% trans 'تێبینی (ئارەزووی)...' %}"></textarea>
+      <button type="submit" class="rw-btn" style="background:rgba(0,168,150,.12);color:#00A896;border:1px solid rgba(0,168,150,.3);padding:7px 16px;font-size:12px">✓ {% trans "جێگیرکردن" %}</button>
     </form>
 
     <form method="post" action="{% url 'reviews:reject_decision' decision.pk %}" hx-post="{% url 'reviews:reject_decision' decision.pk %}" hx-target="#decision-{{ decision.pk }}" hx-swap="outerHTML">
       {% csrf_token %}
-      <textarea name="reason" rows="2" required style="width:100%;margin-bottom:8px;background:var(--rw-surface);color:var(--rw-text);border:1px solid var(--rw-border);padding:8px" placeholder="{% trans '?????? ?????????? (???????)...' %}"></textarea>
-      <button type="submit" class="rw-btn" style="background:var(--rw-pink-dim);color:var(--rw-shoot);border:1px solid rgba(247,37,133,.25);padding:7px 16px;font-size:12px">? {% trans "??????????" %}</button>
+      <textarea name="reason" rows="2" required style="width:100%;margin-bottom:8px;background:var(--rw-surface);color:var(--rw-text);border:1px solid var(--rw-border);padding:8px" placeholder="{% trans 'هۆکاری ڕەتکردنەوە (پێویستە)...' %}"></textarea>
+      <button type="submit" class="rw-btn" style="background:var(--rw-pink-dim);color:var(--rw-shoot);border:1px solid rgba(247,37,133,.25);padding:7px 16px;font-size:12px">✕ {% trans "ڕەتکردنەوە" %}</button>
     </form>
   </div>
   {% endif %}
 
   {% if decision.status == 'locked' and decision.lock_comment %}
-  <div style="margin:8px 12px 12px;padding:8px;background:rgba(16,185,129,0.1);border-radius:4px;font-size:13px;color:var(--rw-text-2)"><strong>{{ decision.locked_by.get_full_name }}:</strong> {{ decision.lock_comment }}</div>
+  <div style="margin:8px 12px 12px;padding:8px;background:rgba(0,168,150,.1);border-radius:var(--rw-r);font-size:13px;color:var(--rw-text-2)"><strong>{{ decision.locked_by.get_full_name }}:</strong> {{ decision.lock_comment }}</div>
   {% endif %}
 
   {% if decision.status == 'rejected' and decision.reject_reason %}
-  <div style="margin:8px 12px 12px;padding:8px;background:rgba(239,68,68,0.1);border-radius:4px;font-size:13px;color:var(--rw-text-2)"><strong>{{ decision.rejected_by.get_full_name }}:</strong> {{ decision.reject_reason }}</div>
+  <div style="margin:8px 12px 12px;padding:8px;background:var(--rw-pink-dim);border-radius:var(--rw-r);font-size:13px;color:var(--rw-text-2)"><strong>{{ decision.rejected_by.get_full_name }}:</strong> {{ decision.reject_reason }}</div>
   {% endif %}
 
   {% if can_manage and decision.status == 'rejected' %}
@@ -58,7 +58,7 @@
       {% csrf_token %}
       <input type="hidden" name="topic" value="{{ decision.topic }}">
       <input type="hidden" name="decision_text" value="{{ decision.decision_text }}">
-      <button type="submit" class="rw-btn rw-btn-ghost" style="padding:7px 16px;font-size:12px">? {% trans "??????? ???????????" %}</button>
+      <button type="submit" class="rw-btn rw-btn-ghost" style="padding:7px 16px;font-size:12px">↺ {% trans "دووبارە پێشنیازکردن" %}</button>
     </form>
   </div>
   {% endif %}

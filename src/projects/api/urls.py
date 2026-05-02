@@ -1,7 +1,7 @@
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
-from src.projects.api.views import CharacterViewSet, LocationViewSet, ProjectViewSet, SceneViewSet
+from src.projects.api.views import CharacterViewSet, FinalizeBibleView, LocationViewSet, ProjectBibleView, ProjectViewSet, SceneViewSet
 
 router = DefaultRouter()
 router.register("projects", ProjectViewSet, basename="project")
@@ -11,6 +11,8 @@ router.register("locations", LocationViewSet, basename="location")
 
 urlpatterns = [
     path("", include(router.urls)),
+    path("projects/<uuid:pk>/bible/", ProjectBibleView.as_view(), name="project-bible"),
+    path("projects/<uuid:pk>/bible/finalize/", FinalizeBibleView.as_view(), name="project-bible-finalize"),
     path("projects/<uuid:project_id>/scenes/", SceneViewSet.as_view({"get": "list", "post": "create"}), name="project-scenes"),
     path(
         "projects/<uuid:project_id>/scenes/<uuid:pk>/",

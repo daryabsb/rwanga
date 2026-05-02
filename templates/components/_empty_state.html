@@ -4,18 +4,18 @@
   {% if icon %}<div class="rw-empty-icon">{{ icon }}</div>{% endif %}
   <div class="rw-empty-title">{{ title }}</div>
   {% if sub %}<div class="rw-empty-sub">{{ sub }}</div>{% endif %}
-  {% if cta_label %}
+  {% if cta_text %}
     {% if cta_htmx %}
     <button class="rw-btn rw-btn-primary"
             hx-get="{{ cta_url }}"
             hx-target="#rw-modal-container"
             hx-swap="innerHTML"
             style="margin-top:8px">
-      {{ cta_label }}
+      {{ cta_text }}
     </button>
     {% else %}
     <a href="{{ cta_url }}" class="rw-btn rw-btn-primary" style="margin-top:8px">
-      {{ cta_label }}
+      {{ cta_text }}
     </a>
     {% endif %}
   {% endif %}

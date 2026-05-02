@@ -1,0 +1,288 @@
+TRANSLATION CHUNKS — REVIEW V3
+================================
+For translator: These are the English text chunks from Review V3.
+Translate each numbered chunk to Slemani Kurdish dialect.
+Keep the chunk numbers — they will be used to rebuild the Kurdish HTML.
+
+IMPORTANT: The Story Bible (Tab 3) is NOT included here.
+It is in a separate file: STORY-BIBLE-V3.md
+Please translate that file separately.
+
+================================
+TAB 1 — PREVIOUS REVIEWS
+================================
+
+[1]
+The Journey So Far
+
+[2]
+This is the third review of "The Mysterious Guest." The first was a 43-scene suspense autopsy. The second processed Sarwar's 11 responses and locked 7 new decisions. This third review incorporates the director's corrections to the screenplay — factual fixes from a newer version, behavioral clarifications about character motivation, and one major structural addition.
+
+[3]
+Core statement (locked): "A man constructs a controlled reality to eliminate emotional risk. A woman enters it carrying her own collapse. The system cannot contain both truths — and breaks."
+
+[4]
+First Review — The Suspense Autopsy
+
+[5]
+A full 43-scene analysis through the lens of Hitchcock's bomb model. Five Chekhov threads tracked (Shrubi, phone, locked door, sofa, AI). One structural leak identified in Act 2A. Three critical fixes proposed. 13 decisions locked through adversarial debate.
+
+[6]
+The core finding: This screenplay is a highly controlled system with one structural leak. The engine is extraordinary — a dead woman in a sofa while friends sit on it, Chekhov's gun loaded with sugar, the entire film being one man's psychological projection. The leak is in Act 2A (Scenes 12–18): no active threat vector during the intimacy scenes.
+
+[7]
+Three critical fixes proposed: (1) Plant the bomb before dinner — make the Shrubi visible and active earlier. (2) Make the house speak — give it sensory presence that creates unease. (3) Hide the imagination frame until Scene 43 — protect the twist through accumulated subconscious suspicion, not a single tell.
+
+[8]
+1. System Diagnosis — CONFIRMED
+"Controlled system with one structural leak" — not "uneven fuel distribution." The machine works. Act 2A is the specific leak.
+
+[9]
+2. Act 2A Problem — CONFIRMED
+No active threat vector during intimacy = audience lacks information advantage.
+
+[10]
+3. Bomb Model — CONFIRMED
+Diagnostic truth: multi-layered system. Directorial instruction: single dominant bomb per phase.
+
+[11]
+4. AI Role — REFINED
+"Frictionless decision engine that enables Nali's flaw." Later refined: AI observes but does not interpret. Certainty is the root, not dependency.
+
+[12]
+5. AI Offline = Hidden Timer — CONFIRMED
+The version update is a clock mechanic. Plant the countdown before the crisis.
+
+[13]
+6. Scenes 12–18 Protection — CONFIRMED
+Compress, don't cut. Preserve all beats while tightening execution.
+
+[14]
+7. Sofa — Conditional Perfection — CONFIRMED
+Don't change the concept — protect it by fixing upstream tension.
+
+[15]
+8. Twist — Revelation, Not Reversal — CONFIRMED
+"Scene 43 is not a reversal of reality; it is a revelation of process."
+
+[16]
+9. Shrubi — Behavioral Emphasis — UPGRADED IN V3
+Originally: behavioral emphasis, not informational. Now upgraded: the Shrubi consumption is a self-destructive act of despair. Gesha is aware of the risk. See V3 analysis.
+
+[17]
+10. Nali's Core Flaw — REFINED
+"Does not trust reality — trusts mediated interpretation." Deepened: certainty is the root, safety is the byproduct.
+
+[18]
+11. Genre Lock — CONFIRMED
+Psychological suspense, not relationship drama.
+
+[19]
+12. Dual-Function Scenes — CONFIRMED
+Every intimate scene must simultaneously escalate threat.
+
+[20]
+13. Audience > Nali Before Midpoint — CONFIRMED
+The audience must become smarter than Nali before the midpoint.
+
+[21]
+Second Review — Sarwar's Response Round
+
+[22]
+Sarwar read the first review and responded with 11 points. Through three sessions of adversarial debate, 7 new decisions were locked. A three-layer alignment was identified: Character (certainty) → Mechanism (mediation) → Theme (mediated vs direct contact).
+
+[23]
+14. Behavioral Grounding Rule — CONFIRMED
+"Human logic must be sufficient — clinical logic must never be required." Both clinical and universal readings must be possible.
+
+[24]
+15. Mediation as Structural Law — CONFIRMED
+"All of Nali's interactions are mediated. Any rare unmediated moment = structural rupture." The phone call at the end is the rupture candidate.
+
+[25]
+16. AI Observation Boundary — CONFIRMED
+"AI observes but does not interpret." Thermostat, not therapist. Detects anomalies, never assigns meaning.
+
+[26]
+17. Certainty as Root Flaw — CONFIRMED
+"Nali is addicted to certainty — because certainty eliminates the risk of emotional pain." The character spine.
+
+[27]
+18. Single-Twist Principle — CONFIRMED
+"Audiences don't remember multiple twists — they remember what the film ultimately meant."
+
+[28]
+19. Architecture Affirmation — CONFIRMED
+"The film already contains the correct architecture. The work is to make the audience feel what the structure is already doing."
+
+[29]
+20. Core Tension — Meta-Law — CONFIRMED
+"The film's core tension is between mediated experience and direct human contact."
+
+[30]
+What Changed — The Director's Corrections
+
+[31]
+After reading the second review, Sarwar provided 8 corrections. Some were factual (we had an older screenplay version). Some were behavioral clarifications about character motivation. One was a major structural addition not present in any version we had seen.
+
+[32]
+Factual: Video Call Is Daytime (Scene 3)
+Our bible said "evening" / "night." Sarwar corrected: the video call happens during the day.
+
+[33]
+Factual: Beauty Mask, Not Theatrical (Scene 3)
+The mask is a facial skincare mask, not a theatrical mask. A domestic, intimate object.
+
+[34]
+Factual: Café Scene Removed (Scenes 40–41)
+Awin meets Nali at the police precinct, not at a separate café. Nali goes to the precinct because Adib was last located at his garden — his friends left him there. Meeting Awin is coincidental. The investigation splits into two.
+
+[35]
+Behavioral: Nali's Cruel Line (Scene 16)
+"You're the kind of girl who goes alone to meet a boy in a garden by herself?" — the specific moment that breaks Gesha's heart and triggers her collapse.
+
+[36]
+Behavioral: Shrubi Is Despair, Not Joy (Scene 16)
+Gesha eats the Shrubi out of anger, hopelessness, and heartbreak. She is aware of the risk. The act functions as self-destructive behavior — almost suicidal. Not "joyful but unhinged." Despair masked as abandon.
+
+[37]
+Behavioral: Nali Projects Gesha onto Corpses (Scene 37)
+When watching the garden corpses from a distance, Nali sees a signal that makes him feel it might be Gesha. A specific distortion event — his mind replacing reality with its own construction.
+
+[38]
+Structural: The French Girl in the Locked Room (Scene 32)
+The locked room contains a portrait of a girl Nali loved in France who looks very much like Gesha. This is why he pursued Gesha — in his eyes, they are one and the same. Whether Nali is consciously aware of the resemblance is not specified. This was not in any previous version we had access to.
+
+================================
+TAB 2 — V3 ANALYSIS
+================================
+
+[39]
+What the Corrections Reveal
+
+[40]
+The 20 locked decisions are not broken. Sarwar's corrections do not contradict any of them. What they do is deepen the framework — pushing implications we had identified to their full depth. The factual corrections (wrong version of screenplay) are clean fixes. The behavioral corrections sharpen character motivation. The structural addition (French girl) completes the architecture.
+
+[41]
+The upgraded core: "A man constructs a controlled reality to eliminate emotional risk. A woman enters it carrying her own collapse. The system cannot contain both truths — and breaks."
+
+[42]
+Analytical Upgrades
+
+[43]
+These are not new decisions — they are upgrades to existing ones, driven by Sarwar's corrections. Each one was debated and agreed before being applied. They sharpen without contradicting.
+
+[44]
+Upgrade to Decision 9: Shrubi — From Behavioral Emphasis to Decision Under Collapse
+
+[45]
+Original (V1): "Shrubi: behavioral emphasis, not informational."
+
+[46]
+Upgraded (V3): The Shrubi consumption is not a suspense device. It is not wild joy. It is a self-destructive act driven by despair. Gesha eats the Shrubi because Nali broke her heart with a specific cruel line. She is aware of the risk. She has given up. This is decision under collapse — a woman choosing to surrender control of her future.
+
+[47]
+Critical implication: The tragedy is bilateral. Two broken systems collide. Gesha's death is not just "Nali failed to call an ambulance." It is two people's collapses intersecting — his need for certainty destroying her last hope, her despair activating the weapon he unknowingly provided.
+
+[48]
+Upgrade to Decision 17: Certainty — From Addiction to Pattern Repetition
+
+[49]
+Original (V2): "Nali is addicted to certainty — because certainty eliminates the risk of emotional pain."
+
+[50]
+Upgraded (V3): The French girl in the locked room reveals that Nali's addiction to certainty has a specific origin. He is not just avoiding uncertainty — he is recreating a previous emotional structure. Gesha is not a new relationship. She is a reconstruction attempt. The system (AI, house, game) is not defensive — it is reconstructive. Nali is trying to rewrite a past outcome.
+
+[51]
+What this means for the film: "A failed attempt to rewrite a past outcome" — this is what the audience will feel without being told. The Paris story in Scene 10 is the early resonance. The locked room portrait is the late confirmation. Recognition must be delayed — resonance must not be.
+
+[52]
+Upgrade to Decision 20: Core Tension — The House as System Space
+
+[53]
+Original (V2): "The film's core tension is between mediated experience and direct human contact."
+
+[54]
+Upgraded (V3): The house is not a setting — it is part of the constructed system. AI, game, house — three components of a single environment built to eliminate emotional risk. When Gesha enters the house in Scene 12, she enters the system itself. Every room is designed. Every object is placed. The taxidermy, the beauty masks on display, the locked door — none of it is decorative. It is infrastructure.
+
+[55]
+Upgraded meta-law: The film is not just mediated experience — it is a constructed environment for emotional control. The garden house was a stage. His real life is dust.
+
+[56]
+New Principle: Reality Replacement
+
+[57]
+"Nali does not misinterpret reality — he replaces it."
+
+[58]
+The projection onto the garden corpses (Scene 37) confirms this. When Nali sees a signal that makes him feel the body might be Gesha, he is not deteriorating gradually — he is experiencing a specific distortion event. His mind overwrites reality. This is consistent with the ending: the entire film is Nali's mind replacing an uncertain future with a constructed narrative where he can predict every outcome. The twist doesn't reveal that he was wrong — it reveals that he was constructing.
+
+[59]
+New Principle: Bilateral Tragedy
+
+[60]
+"Two broken systems collide. The tragedy is shared."
+
+[61]
+Gesha is not material for Nali's reconstruction. She has her own desperation, her own last card, her own collapse. She enters Nali's system carrying her own reasons — none of which have anything to do with him. The film's deepest cut is that a real person would have walked into his constructed reality and been destroyed inside it — not by him specifically, but because the system cannot contain both truths. His need for certainty. Her need for love. Incompatible under the same roof.
+
+[62]
+The French Girl — Execution Rules
+
+[63]
+Rule: Recognition Must Be Delayed — Resonance Must Not Be
+
+[64]
+The audience must feel the pattern before they understand it. No explicit early exposition. No clear "he lost someone like her." But: visual and emotional echoing early. The Paris story (Scene 10) plants the resonance. The locked room portrait (Scene 32) delivers the recognition.
+
+[65]
+If revealed too late with no prior echo: feels like explanation. If revealed too early: feels like motivation simplification. Correct structure: Early = unconscious repetition signals. Mid = discomfort. Late = confirmation.
+
+[66]
+Rule: The French Girl Must Destabilize, Not Explain
+
+[67]
+After the reveal, the audience should think: "Is he repeating? Is he projecting? Is Gesha real as herself?" — NOT: "Oh, he misses his ex." The French girl should not explain Nali. She should destabilize the audience's interpretation of everything they've watched.
+
+[68]
+Awareness boundary: Whether Nali is consciously aware of the resemblance is not specified in the screenplay. This ambiguity must be preserved — it is a feature, not a gap.
+
+[69]
+How All 20 Decisions + Upgrades Work Together
+
+[70]
+Layer 1 — What the film IS (D1, D11, D19, D20 upgraded): A psychologically suspenseful, architecturally sound film whose core tension is between constructed reality and direct human contact. The house, AI, and game are a single system. The environment itself is part of the mediation.
+
+[71]
+Layer 2 — How the characters work (D10, D14, D15, D17 upgraded): Nali is addicted to certainty and is recreating a previous emotional structure. All his interactions are mediated. He must remain behaviorally grounded. Gesha carries her own collapse — the tragedy is bilateral.
+
+[72]
+Layer 3 — How the story mechanics work (D2, D3, D5, D7, D8, D9 upgraded, D12, D13): Dual-function scenes. Single dominant bomb per phase. Audience smarter than Nali before midpoint. Sofa protected by upstream tension. Twist is revelation, not reversal. Shrubi is decision under collapse — despair, not joy.
+
+[73]
+Layer 4 — How the tools behave (D4, D6, D16, D18): AI observes but doesn't interpret. Scenes compress, don't cut. One twist, not many. Recognition delayed, resonance not.
+
+[74]
+New principles: Nali replaces reality, doesn't misinterpret it. The tragedy is bilateral — two broken systems colliding. The French girl destabilizes interpretation, doesn't simplify it.
+
+================================
+TAB 4 — CONVERSATION LOG
+================================
+
+[75]
+Third Review Discussion — Uncut
+
+[76]
+The full discussion between Darya Ibrahim and AI processing Sarwar's corrections after the second review. Same rules as before: defend positions, don't fold, lock through genuine debate. English preserved as spoken.
+
+[77]
+NOTE: Tab 4 (Conversation Log) is preserved in English in the Kurdish version, same as in previous reviews. The introduction above is translated; the conversation content below remains in English.
+
+================================
+END OF CHUNKS
+================================
+
+REMINDER: The Story Bible (Tab 3) is in a separate file — STORY-BIBLE-V3.md
+Please translate it separately and return it as a separate document.
+
+Total chunks in this file: 77

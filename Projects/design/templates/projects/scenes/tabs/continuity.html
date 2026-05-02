@@ -1,0 +1,131 @@
+{# ════════════════════════════════════════════════════════
+   RWANGA — projects/scenes/tabs/continuity.html
+   Continuity module tab. HTMX fragment.
+   Scene flow diagram + in/out checklists.
+
+   Context:
+     scene             — Scene instance
+     project           — Project instance
+     prev_scene        — Scene or None
+     next_scene        — Scene or None
+     continuity_items  — QuerySet[ContinuityItem] (in/out)
+   ════════════════════════════════════════════════════════ #}
+{% load i18n %}
+
+<div style="padding:var(--rw-pad-lg)">
+
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--rw-pad-md)">
+    <h2 style="font-size:16px;font-weight:700">{% trans "بەردەوامی" %}</h2>
+    <button class="rw-btn rw-btn-ghost"
+            hx-get="{% url 'departments:add_continuity_modal' project.pk scene.pk %}"
+            hx-target="#rw-modal-container" hx-swap="innerHTML">
+      + {% trans "زیادکردن" %}
+    </button>
+  </div>
+
+  {# ── Scene flow ── #}
+  <div class="rw-flow" style="margin-bottom:var(--rw-pad-lg)">
+    {# Previous scene #}
+    {% if prev_scene %}
+    <a href="{% url 'projects:scene' project.pk prev_scene.pk %}" style="text-decoration:none;flex:1">
+      <div class="rw-flow-node">
+        <div class="rw-flow-num">{{ prev_scene.number }}</div>
+        <div class="rw-flow-lbl">{{ prev_scene.int_ext }}. {{ prev_scene.location_name }}</div>
+        <div style="font-size:9px;color:var(--rw-text-3);margin-top:4px">{{ prev_scene.time_of_day }}</div>
+      </div>
+    </a>
+    {% else %}
+    <div class="rw-flow-node" style="opacity:.3">
+      <div class="rw-flow-num">—</div>
+      <div class="rw-flow-lbl">{% trans "دیمەنی پێشوو نییە" %}</div>
+    </div>
+    {% endif %}
+
+    <div class="rw-flow-arr">{% if LANGUAGE_BIDI %}›{% else %}‹{% endif %}</div>
+
+    {# Current scene #}
+    <div class="rw-flow-node current" style="flex:1.2">
+      <div class="rw-flow-num">{{ scene.number }}</div>
+      <div class="rw-flow-lbl">{{ scene.int_ext }}. {{ scene.location_name }}</div>
+      <div style="font-size:9px;color:var(--rw-amber);margin-top:4px">{{ scene.time_of_day }}</div>
+    </div>
+
+    <div class="rw-flow-arr">{% if LANGUAGE_BIDI %}›{% else %}‹{% endif %}</div>
+
+    {# Next scene #}
+    {% if next_scene %}
+    <a href="{% url 'projects:scene' project.pk next_scene.pk %}" style="text-decoration:none;flex:1">
+      <div class="rw-flow-node">
+        <div class="rw-flow-num">{{ next_scene.number }}</div>
+        <div class="rw-flow-lbl">{{ next_scene.int_ext }}. {{ next_scene.location_name }}</div>
+        <div style="font-size:9px;color:var(--rw-text-3);margin-top:4px">{{ next_scene.time_of_day }}</div>
+      </div>
+    </a>
+    {% else %}
+    <div class="rw-flow-node" style="opacity:.3">
+      <div class="rw-flow-num">—</div>
+      <div class="rw-flow-lbl">{% trans "دیمەنی دواتر نییە" %}</div>
+    </div>
+    {% endif %}
+  </div>
+
+  {# ── In / Out checklists ── #}
+  <div class="rw-cont-grid">
+
+    {# IN — what carries into this scene from previous #}
+    <div>
+      <div class="rw-section-hdr" style="color:var(--rw-vis)">
+        ↓ {% trans "داهاتن بۆ ئەم دیمەنە" %}
+      </div>
+      <div class="rw-checklist" style="border:1px solid var(--rw-border)">
+        {% for item in continuity_items %}{% if item.direction == 'in' %}
+        <div class="rw-check-item">
+          <input type="checkbox" id="cont-{{ item.pk }}"
+                 {% if item.checked %}checked{% endif %}
+                 hx-post="{% url 'departments:toggle_continuity' project.pk item.pk %}"
+                 hx-swap="none">
+          <div style="flex:1">
+            <div class="rw-ci-name">{{ item.description }}</div>
+          </div>
+        </div>
+        {% endif %}{% endfor %}
+        <div style="padding:8px 16px">
+          <button class="rw-btn rw-btn-ghost" style="font-size:11px;padding:5px 12px"
+                  hx-get="{% url 'departments:add_continuity_modal' project.pk scene.pk %}?direction=in"
+                  hx-target="#rw-modal-container" hx-swap="innerHTML">
+            + {% trans "زیادکردن" %}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    {# OUT — what carries from this scene to next #}
+    <div>
+      <div class="rw-section-hdr" style="color:var(--rw-shoot)">
+        ↑ {% trans "چوون بۆ دیمەنی دواتر" %}
+      </div>
+      <div class="rw-checklist" style="border:1px solid var(--rw-border)">
+        {% for item in continuity_items %}{% if item.direction == 'out' %}
+        <div class="rw-check-item">
+          <input type="checkbox" id="cont-{{ item.pk }}"
+                 {% if item.checked %}checked{% endif %}
+                 hx-post="{% url 'departments:toggle_continuity' project.pk item.pk %}"
+                 hx-swap="none">
+          <div style="flex:1">
+            <div class="rw-ci-name">{{ item.description }}</div>
+          </div>
+        </div>
+        {% endif %}{% endfor %}
+        <div style="padding:8px 16px">
+          <button class="rw-btn rw-btn-ghost" style="font-size:11px;padding:5px 12px"
+                  hx-get="{% url 'departments:add_continuity_modal' project.pk scene.pk %}?direction=out"
+                  hx-target="#rw-modal-container" hx-swap="innerHTML">
+            + {% trans "زیادکردن" %}
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>

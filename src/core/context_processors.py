@@ -19,10 +19,19 @@ def navigation_context(request):
     elif "/community/" in path:
         nav_mode = "community"
     else:
-        nav_mode = "project"
+        nav_mode = None
+
+    pending_decisions_count = ReviewDecision.objects.filter(
+        status=ReviewDecision.Status.PROPOSED,
+        bible_review__project__owner=request.user,
+    ).count()
+    active_sessions_count = ReviewSession.objects.filter(
+        status=ReviewSession.Status.OPEN,
+        project__owner=request.user,
+    ).count()
 
     return {
         "nav_mode": nav_mode,
-        "pending_decisions_count": ReviewDecision.objects.filter(status=ReviewDecision.Status.PROPOSED).count(),
-        "active_sessions_count": ReviewSession.objects.filter(status=ReviewSession.Status.OPEN).count(),
+        "pending_decisions_count": pending_decisions_count,
+        "active_sessions_count": active_sessions_count,
     }
