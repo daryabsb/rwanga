@@ -41,20 +41,39 @@ class ReviewService:
             proposed_by=user,
         )
 
-    def lock_decision(self, *, decision, user):
+    def lock_decision(self, *, decision, user, comment=""):
         if not (self._is_consultant(user) or self._is_director(user, decision.bible_review.project)):
             raise PermissionDenied("Only consultants or directors can lock decisions")
         decision.status = ReviewDecision.Status.LOCKED
         decision.locked_by = user
         decision.locked_at = timezone.now()
-        decision.save(update_fields=["status", "locked_by", "locked_at", "updated_at"])
+        decision.lock_comment = comment or ""
+        decision.save(update_fields=["status", "locked_by", "locked_at", "lock_comment", "updated_at"])
         return decision
 
-    def reject_decision(self, *, decision, user):
+
+    def repropose_decision(self, *, original_decision, user, new_topic=None, new_text=None):
+        if original_decision.status != ReviewDecision.Status.REJECTED:
+            raise PermissionDenied("Only rejected decisions can be reproposed")
+        is_member = ProjectMembership.objects.filter(project=original_decision.bible_review.project, user=user, is_active=True).exists()
+        if not (self._is_consultant(user) or is_member or original_decision.bible_review.project.owner_id == user.id):
+            raise PermissionDenied("Only consultants or project members can repropose decisions")
+        return ReviewDecision.objects.create(
+            bible_review=original_decision.bible_review,
+            scene=original_decision.scene,
+            topic=new_topic or original_decision.topic,
+            decision_text=new_text or original_decision.decision_text,
+            status=ReviewDecision.Status.PROPOSED,
+            proposed_by=user,
+            reproposed_from=original_decision,
+        )
+
+    def reject_decision(self, *, decision, user, reason=""):
         if not self._is_director(user, decision.bible_review.project):
             raise PermissionDenied("Only directors can reject decisions")
         decision.status = ReviewDecision.Status.REJECTED
         decision.rejected_by = user
         decision.rejected_at = timezone.now()
-        decision.save(update_fields=["status", "rejected_by", "rejected_at", "updated_at"])
+        decision.reject_reason = reason or ""
+        decision.save(update_fields=["status", "rejected_by", "rejected_at", "reject_reason", "updated_at"])
         return decision

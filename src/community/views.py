@@ -1,3 +1,4 @@
+from django.contrib.auth import get_user_model
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
@@ -11,12 +12,28 @@ from src.reviews.models import BibleReview
 
 class CommunityIndexView(View):
     def get(self, request, project_pk=None):
-        project = get_object_or_404(Project, id=project_pk) if project_pk else Project.objects.filter(owner=request.user).first()
-        sessions = CommunityService().list_sessions(project=project)
-        return render(request, "community/index.html", {"project": project, "sessions": sessions, "active_project": project, "active_section": "p"})
+        if project_pk:
+            project = get_object_or_404(Project, id=project_pk)
+        else:
+            project = Project.objects.filter(owner=request.user).first() if request.user.is_authenticated else None
+        sessions = CommunityService().list_sessions(project=project) if project else ReviewSession.objects.none()
+        return render(
+            request,
+            "community/list.html",
+            {
+                "project": project,
+                "sessions": sessions,
+                "can_create": request.user.is_authenticated,
+                "active_project": project,
+                "active_section": "p",
+            },
+        )
 
 
 class CommunityCreateView(View):
+    def get(self, request):
+        return render(request, "community/index.html", {"project": Project.objects.filter(owner=request.user).first(), "sessions": []})
+
     def post(self, request):
         project = Project.objects.filter(owner=request.user).first()
         if not request.user.is_authenticated or project is None:
@@ -32,12 +49,23 @@ class CommunitySessionDetailView(View):
     def get(self, request, pk):
         session = get_object_or_404(ReviewSession.objects.select_related("project", "created_by"), id=pk)
         items = SessionContent.objects.filter(session=session).order_by("order", "created_at")
-        notes = SessionComment.objects.filter(session_content__session=session, parent__isnull=True).select_related("author").order_by("-created_at")
+        notes = SessionComment.objects.filter(session_content__session=session, parent__isnull=True).select_related("author").prefetch_related("replies", "reactions").order_by("-created_at")
         participants = ReviewSessionParticipant.objects.filter(session=session).select_related("user")
+        content_blocks = []
+        comments = []
         for note in notes:
             note.agree_count = note.reactions.filter(reaction_type=SessionReaction.ReactionType.AGREE).count()
             note.disagree_count = note.reactions.filter(reaction_type=SessionReaction.ReactionType.DISAGREE).count()
             note.question_count = note.reactions.filter(reaction_type=SessionReaction.ReactionType.QUESTION).count()
+            note.reaction_counts = {
+                "👍": note.agree_count,
+                "👎": note.disagree_count,
+                "❓": note.question_count,
+            }
+            note.scene_ref = note.anchor_ref
+            comments.append(note)
+        for item in items:
+            content_blocks.append({"type": "text", "body": item.label})
         return render(
             request,
             "community/detail.html",
@@ -46,6 +74,10 @@ class CommunitySessionDetailView(View):
                 "session": session,
                 "items": items,
                 "notes": notes,
+                "comments": comments,
+                "content_blocks": content_blocks,
+                "can_comment": request.user.is_authenticated,
+                "can_manage": request.user.is_authenticated,
                 "participants": participants,
                 "scenes": Scene.objects.filter(project=session.project).order_by("number"),
                 "reviews": BibleReview.objects.filter(project=session.project).order_by("-created_at"),
@@ -98,19 +130,41 @@ class CommunityStatusView(View):
             CommunityService.open_session(session=session)
         elif action == "close":
             CommunityService.close_session(session=session)
+        elif action == "toggle":
+            if session.status == ReviewSession.Status.OPEN:
+                CommunityService.close_session(session=session)
+            else:
+                CommunityService.open_session(session=session)
         return HttpResponseRedirect(reverse("community:detail", args=[session.id]))
 
 
 class CommunityReactView(View):
-    def post(self, request, pk, comment_pk):
-        session = get_object_or_404(ReviewSession, id=pk)
-        comment = get_object_or_404(SessionComment, id=comment_pk, session_content__session=session)
-        reaction_type = (request.POST.get("reaction_type") or SessionReaction.ReactionType.AGREE).strip()
-        if request.user.is_authenticated:
-            SessionReaction.objects.update_or_create(
-                comment=comment,
-                author=request.user,
-                defaults={"reaction_type": reaction_type},
-            )
+    def post(self, request, pk=None, comment_pk=None, action="react"):
+        if comment_pk and pk is None:
+            comment = get_object_or_404(SessionComment, id=comment_pk)
+            session = comment.session_content.session
+        else:
+            session = get_object_or_404(ReviewSession, id=pk)
+            comment = get_object_or_404(SessionComment, id=comment_pk, session_content__session=session)
+        if action == "reply":
+            body = (request.POST.get("body") or "").strip()
+            if body and request.user.is_authenticated:
+                SessionComment.objects.create(session_content=comment.session_content, author=request.user, body=body, parent=comment)
+        else:
+            emoji = (request.POST.get("emoji") or "").strip()
+            reaction_map = {"👍": SessionReaction.ReactionType.AGREE, "👎": SessionReaction.ReactionType.DISAGREE, "❓": SessionReaction.ReactionType.QUESTION}
+            reaction_type = reaction_map.get(emoji) or (request.POST.get("reaction_type") or SessionReaction.ReactionType.AGREE).strip()
+            if request.user.is_authenticated:
+                SessionReaction.objects.update_or_create(comment=comment, author=request.user, defaults={"reaction_type": reaction_type})
+        notes = SessionComment.objects.filter(session_content__session=session, parent__isnull=True).select_related("author").prefetch_related("replies", "reactions").order_by("-created_at")
+        comments = []
+        for note in notes:
+            note.reaction_counts = {
+                "👍": note.reactions.filter(reaction_type=SessionReaction.ReactionType.AGREE).count(),
+                "👎": note.reactions.filter(reaction_type=SessionReaction.ReactionType.DISAGREE).count(),
+                "❓": note.reactions.filter(reaction_type=SessionReaction.ReactionType.QUESTION).count(),
+            }
+            comments.append(note)
+        if request.headers.get("HX-Request"):
+            return render(request, "community/_comment_thread.html", {"comments": comments, "session": session, "can_comment": request.user.is_authenticated})
         return HttpResponseRedirect(reverse("community:detail", args=[session.id]))
-from django.contrib.auth import get_user_model

@@ -1,0 +1,8 @@
+{% load i18n %}
+<div style="padding:16px">
+  {% if bible_text %}
+    <div style="background:var(--rw-surface);border:1px solid var(--rw-border);padding:14px;line-height:1.8;white-space:pre-wrap">{{ bible_text }}</div>
+  {% else %}
+    <div style="color:var(--rw-text-3)">{% trans "No bible content provided." %}</div>
+  {% endif %}
+</div>

@@ -59,3 +59,6 @@ class ReviewDecision(BaseModel):
     locked_at = models.DateTimeField(null=True, blank=True)
     rejected_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="decisions_rejected")
     rejected_at = models.DateTimeField(null=True, blank=True)
+    lock_comment = models.TextField(blank=True, default="")
+    reject_reason = models.TextField(blank=True, default="")
+    reproposed_from = models.ForeignKey("self", null=True, blank=True, on_delete=models.SET_NULL, related_name="reproposals")

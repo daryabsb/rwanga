@@ -122,10 +122,12 @@ class ReviewDecisionDetailByReviewAPIView(APIView):
         decision = get_object_or_404(ReviewDecision, bible_review_id=review_id, id=id)
         status = request.data.get("status")
         if status == ReviewDecision.Status.LOCKED:
-            ReviewService().lock_decision(decision=decision, user=request.user)
+            comment = request.data.get("comment", "")
+            ReviewService().lock_decision(decision=decision, user=request.user, comment=comment)
             return Response(ReviewDecisionSerializer(decision).data)
         if status == ReviewDecision.Status.REJECTED:
-            ReviewService().reject_decision(decision=decision, user=request.user)
+            reason = request.data.get("reason", "")
+            ReviewService().reject_decision(decision=decision, user=request.user, reason=reason)
             return Response(ReviewDecisionSerializer(decision).data)
         serializer = ReviewDecisionSerializer(decision, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)

@@ -1,27 +1,37 @@
 {# ════════════════════════════════════════════════════════
-   RWANGA — components/_sidebar.html
+   RWANGA — components/_sidebar.html  (updated)
    Icon rail — always dark, survives theme switch.
-   Context: request.user, active_section (s/b/v/p/sh)
+   Added: reviews + community icons, badge counts.
+
+   Context:
+     request.user
+     active_section          — 's'|'b'|'v'|'p'|'sh'|None
+     nav_mode                — 'production'|'reviews'|'community'|None
+     unread_count            — int
+     pending_decisions_count — int  (proposed, unacted)
+     active_sessions_count   — int  (open sessions)
    ════════════════════════════════════════════════════════ #}
 {% load i18n %}
 <aside class="rw-rail" role="navigation" aria-label="{% trans 'ناڤیگەیشنی سەرەکی' %}">
 
-  {# Brand mark — links to studio dashboard #}
+  {# Brand mark #}
   <a href="{% url 'projects:list' %}" class="rw-rail-logo" title="ڕوانگە">ڕ</a>
 
-  {# Global nav icons #}
+  {# Projects #}
   <a href="{% url 'projects:list' %}"
-     class="rw-rail-icon {% if request.resolver_match.app_name == 'projects' and not active_project %}active{% endif %}"
+     class="rw-rail-icon {% if request.resolver_match.app_name == 'projects' and not nav_mode %}active{% endif %}"
      title="{% trans 'پڕۆژەکان' %}">
     ⊞
   </a>
 
+  {# Team #}
   <a href="{% url 'accounts:team' %}"
      class="rw-rail-icon {% if request.resolver_match.app_name == 'accounts' %}active{% endif %}"
      title="{% trans 'تیم' %}">
     ◎
   </a>
 
+  {# Locations #}
   <a href="{% url 'locations:list' %}"
      class="rw-rail-icon {% if request.resolver_match.app_name == 'locations' %}active{% endif %}"
      title="{% trans 'شوێنەکان' %}">
@@ -30,6 +40,31 @@
 
   <div class="rw-rail-sep"></div>
 
+  {# Reviews — purple accent when active, badge for pending decisions #}
+  <a href="{% url 'reviews:list' %}"
+     class="rw-rail-icon {% if nav_mode == 'reviews' %}active{% endif %}"
+     title="{% trans 'پێداچوونەوەکان' %}"
+     style="position:relative;{% if nav_mode == 'reviews' %}color:#7C3AED{% endif %}">
+    📋
+    {% if pending_decisions_count %}
+    <span style="position:absolute;top:4px;inset-inline-end:4px;min-width:16px;height:16px;background:#7C3AED;color:#fff;font-family:var(--rw-font-en);font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;border-radius:100px;padding:0 3px">{{ pending_decisions_count }}</span>
+    {% endif %}
+  </a>
+
+  {# Community — teal accent when active, badge for open sessions #}
+  <a href="{% url 'community:list' %}"
+     class="rw-rail-icon {% if nav_mode == 'community' %}active{% endif %}"
+     title="{% trans 'کۆمیونیتی' %}"
+     style="position:relative;{% if nav_mode == 'community' %}color:#0D9488{% endif %}">
+    💬
+    {% if active_sessions_count %}
+    <span style="position:absolute;top:4px;inset-inline-end:4px;min-width:16px;height:16px;background:#0D9488;color:#fff;font-family:var(--rw-font-en);font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;border-radius:100px;padding:0 3px">{{ active_sessions_count }}</span>
+    {% endif %}
+  </a>
+
+  <div class="rw-rail-sep"></div>
+
+  {# Settings #}
   <a href="{% url 'accounts:settings' %}"
      class="rw-rail-icon {% if request.resolver_match.url_name == 'settings' %}active{% endif %}"
      title="{% trans 'ڕێکخستن' %}">
@@ -38,7 +73,7 @@
 
   <div class="rw-rail-spacer"></div>
 
-  {# Notification bell — badge populated via WebSocket OOB swap #}
+  {# Notification bell #}
   <button class="rw-rail-icon" style="position:relative" title="{% trans 'ئاگادارکردنەوەکان' %}"
           hx-get="{% url 'notifications:panel' %}"
           hx-target="#rw-notif-panel"

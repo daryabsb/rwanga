@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% comment %} ════════════════════════════════════════════════════════
+   RWANGA — community/list.html
+   Community sessions list — external sandbox.
+
+   Context:
+     sessions       — QuerySet[CommunitySession]
+     active_project — Project|None
+     can_create     — bool
+   ════════════════════════════════════════════════════════ {% endcomment %}
+ 
+{% load static i18n %}
+
+{% block title %}{% trans "کۆمیونیتی" %}{% endblock %}
+
+{% block content %}
+<div id="rw-content" style="overflow-y:auto;flex:1">
+
+  {% comment %} ── Page header ── {% endcomment %}
+  <div style="padding:var(--rw-pad-lg) var(--rw-pad-lg) var(--rw-pad-md);background:var(--rw-surface);border-bottom:1px solid var(--rw-border);display:flex;align-items:center;gap:var(--rw-pad-md)">
+    <div style="display:flex;align-items:center;gap:16px">
+      <div style="width:44px;height:44px;background:#0D9488;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">◎</div>
+      <div>
+        <h1 style="font-size:22px;font-weight:700;margin-bottom:3px">{% trans "کۆمیونیتی" %}</h1>
+        <p style="font-size:13px;color:var(--rw-text-2)">{% trans "دانیشتنەکانی کۆمیونیتی و لێدوانەکانی دەرەکی" %}</p>
+      </div>
+    </div>
+    <div style="margin-inline-start:auto;display:flex;gap:8px;align-items:center">
+      {% if can_create %}
+      <button class="rw-btn rw-btn-primary"
+              hx-get="{% url 'community:create' %}"
+              hx-target="#rw-modal-container"
+              hx-swap="innerHTML">
+        + {% trans "دانیشتنی نوێ" %}
+      </button>
+      {% endif %}
+    </div>
+  </div>
+
+  {% comment %} ── Filter strip ── {% endcomment %}
+  <div style="padding:var(--rw-pad-sm) var(--rw-pad-lg);background:var(--rw-surface-2);border-bottom:1px solid var(--rw-border);display:flex;align-items:center;gap:0">
+    <div class="rw-filter-row" style="margin-bottom:0">
+      <button class="rw-f-btn active" onclick="rwFilterSessions('all',this)">{% trans "هەموو" %}</button>
+      <button class="rw-f-btn" onclick="rwFilterSessions('open',this)">{% trans "کراوەیە" %}</button>
+      <button class="rw-f-btn" onclick="rwFilterSessions('closed',this)">{% trans "داخراوە" %}</button>
+    </div>
+    <span style="font-size:12px;color:var(--rw-text-3);margin-inline-start:auto">
+      {{ sessions.count }} {% trans "دانیشتن" %}
+    </span>
+  </div>
+
+  <div style="padding:var(--rw-pad-md) var(--rw-pad-lg)">
+
+    {% if sessions %}
+    <div id="sessions-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:1px;background:var(--rw-border);border:1px solid var(--rw-border)">
+
+      {% for session in sessions %}
+      <a href="{% url 'community:detail' session.pk %}" style="text-decoration:none;display:block" data-status="{{ session.status }}">
+        <div style="background:var(--rw-surface);padding:var(--rw-pad-md);transition:background var(--rw-t);height:100%;display:flex;flex-direction:column;gap:12px;border-top:3px solid #0D9488">
+
+          {% comment %} Status + project row {% endcomment %}
+          <div style="display:flex;align-items:center;gap:8px">
+            {% if session.status == 'open' %}
+            <span style="display:inline-block;padding:2px 8px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;background:rgba(13,148,136,.1);color:#0D9488;border:1px solid rgba(13,148,136,.3)">{% trans "کراوەیە" %}</span>
+            {% else %}
+            <span style="display:inline-block;padding:2px 8px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;background:var(--rw-surface-3);color:var(--rw-text-3);border:1px solid var(--rw-border)">{% trans "داخراوە" %}</span>
+            {% endif %}
+            <span style="font-size:12px;color:var(--rw-text-3)">{{ session.project.title }}</span>
+          </div>
+
+          {% comment %} Session title {% endcomment %}
+          <div style="font-size:15px;font-weight:700;color:var(--rw-text);line-height:1.4">{{ session.title }}</div>
+
+          {% comment %} Description snippet {% endcomment %}
+          {% if session.description %}
+          <p style="font-size:13px;color:var(--rw-text-2);line-height:1.6;margin:0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">{{ session.description }}</p>
+          {% endif %}
+
+          {% comment %} Stats row {% endcomment %}
+          <div style="display:flex;gap:16px;font-size:12px;color:var(--rw-text-3);margin-top:auto;padding-top:10px;border-top:1px solid var(--rw-border-2)">
+            <span>
+              <span style="font-family:var(--rw-font-en);font-weight:700;color:var(--rw-text-2)">{{ session.comments.count }}</span>
+              {% trans "لێدوان" %}
+            </span>
+            <span>
+              <span style="font-family:var(--rw-font-en);font-weight:700;color:var(--rw-text-2)">{{ session.participants.count }}</span>
+              {% trans "بەشدار" %}
+            </span>
+            <span style="margin-inline-start:auto" dir="ltr" style="font-family:var(--rw-font-en)">{{ session.created_at|timesince }} {% trans "پێش" %}</span>
+          </div>
+
+        </div>
+      </a>
+      {% endfor %}
+
+    </div>
+
+    {% else %}
+    {% include "components/_empty_state.html" with icon="◎" title=_("هێشتا دانیشتنێک نییە") sub=_("یەکەمین دانیشتنی کۆمیونیتیت دروست بکە بۆ ئەوەی بەشدارەکانی دەرەکی بتوانن لێدوان بدەن") cta_text=_("دانیشتنی نوێ") cta_url="community:create" %}
+    {% endif %}
+
+  </div>
+</div>
+
+<div id="rw-modal-container"></div>
+
+<script>
+function rwFilterSessions(status, btn) {
+  document.querySelectorAll('.rw-f-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('#sessions-list [data-status]').forEach(card => {
+    card.style.display = (status === 'all' || card.dataset.status === status) ? 'block' : 'none';
+  });
+}
+</script>
+{% endblock %}
+
+

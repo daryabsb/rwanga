@@ -4,9 +4,11 @@ from django.urls import reverse
 from django.views import View
 
 from src.accounts.models import ProjectMembership
+from src.community.models import ReviewSession
 from src.projects.forms import ModuleSelectionForm, ProjectBasicsForm, ScriptUploadForm, TeamInviteForm
 from src.projects.models import Project, Scene
 from src.projects.services import ProjectService
+from src.reviews.models import BibleReview
 
 
 class ProjectListView(View):
@@ -39,6 +41,16 @@ class ProjectListView(View):
             owned_projects = Project.objects.none()
             member_projects = Project.objects.none()
             invitations = ProjectMembership.objects.none()
+        active_reviews_count = BibleReview.objects.filter(project__owner=request.user).exclude(status=BibleReview.Status.DELIVERED).count() if request.user.is_authenticated else 0
+        active_sessions_count = ReviewSession.objects.filter(project__owner=request.user, status=ReviewSession.Status.OPEN).count() if request.user.is_authenticated else 0
+        for project in owned_projects:
+            metadata = project.metadata if hasattr(project, "metadata") and isinstance(project.metadata, dict) else {}
+            project.logline = metadata.get("logline") or project.synopsis
+            project.get_project_type_display = lambda m=metadata: (m.get("project_type") or "feature").replace("_", " ").title()
+        for project in member_projects:
+            metadata = project.metadata if hasattr(project, "metadata") and isinstance(project.metadata, dict) else {}
+            project.logline = metadata.get("logline") or project.synopsis
+            project.get_project_type_display = lambda m=metadata: (m.get("project_type") or "feature").replace("_", " ").title()
         return render(
             request,
             "projects/list.html",
@@ -46,6 +58,8 @@ class ProjectListView(View):
                 "owned_projects": owned_projects,
                 "member_projects": member_projects,
                 "invitations": invitations,
+                "active_reviews_count": active_reviews_count,
+                "active_sessions_count": active_sessions_count,
                 "active_project": None,
                 "active_section": "h",
             },

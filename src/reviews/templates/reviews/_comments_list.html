@@ -1,0 +1,13 @@
+{% load i18n %}
+{% if comments %}
+  <div style="padding:16px;display:flex;flex-direction:column;gap:10px">
+    {% for comment in comments %}
+      <div style="background:var(--rw-surface);border:1px solid var(--rw-border);padding:10px 12px">
+        <div style="font-size:12px;color:var(--rw-text-3)">{{ comment.author.get_full_name }} · {{ comment.created_at|timesince }} {% trans "ago" %}</div>
+        <div style="font-size:13px;color:var(--rw-text);margin-top:4px">{{ comment.body }}</div>
+      </div>
+    {% endfor %}
+  </div>
+{% else %}
+  <div style="padding:16px;color:var(--rw-text-3)">{% trans "No comments yet." %}</div>
+{% endif %}

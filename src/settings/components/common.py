@@ -94,6 +94,7 @@ TEMPLATES = [
                 "django.contrib.messages.context_processors.messages",
                 "django.template.context_processors.i18n",
                 "src.core.context_processors.studio_context",
+                "src.core.context_processors.navigation_context",
             ],
         },
     }

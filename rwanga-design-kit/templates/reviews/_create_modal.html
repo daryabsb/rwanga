@@ -1,0 +1,101 @@
+{# ════════════════════════════════════════════════════════
+   RWANGA — reviews/_create_modal.html
+   Create a new review. Loaded via HTMX into #rw-modal-container.
+
+   Context:
+     form        — ReviewCreateForm
+     projects    — QuerySet[Project] the user directs/manages
+     active_project — Project|None (pre-selects project)
+   ════════════════════════════════════════════════════════ #}
+{% load i18n %}
+
+<div class="rw-modal-backdrop" id="rw-modal-backdrop" onclick="rwCloseModal(event)">
+  <div class="rw-modal" onclick="event.stopPropagation()">
+
+    <div class="rw-modal-header">
+      <span>{% trans "پێداچوونەوەی نوێ" %}</span>
+      <button onclick="document.getElementById('rw-modal-container').innerHTML=''"
+              style="background:none;border:none;color:var(--rw-text-2);font-size:20px;cursor:pointer;line-height:1">×</button>
+    </div>
+
+    <form method="post" action="{% url 'reviews:create' %}"
+          hx-post="{% url 'reviews:create' %}"
+          hx-target="#rw-modal-container"
+          hx-swap="outerHTML">
+      {% csrf_token %}
+
+      <div class="rw-modal-body">
+
+        {# Project selector #}
+        <div style="margin-bottom:var(--rw-pad-sm)">
+          <label class="rw-form-label" for="rv-project">{% trans "پڕۆژە" %}</label>
+          <select id="rv-project" name="project"
+                  class="rw-form-input" style="padding:10px 16px;cursor:pointer"
+                  onchange="rwAutoTitle(this)">
+            {% for project in projects %}
+            <option value="{{ project.pk }}" {% if active_project and active_project.pk == project.pk %}selected{% endif %}>
+              {{ project.title }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        {# Title (auto-generated, editable) #}
+        <div style="margin-bottom:var(--rw-pad-sm)">
+          <label class="rw-form-label" for="rv-title">{% trans "ناونیشان" %}</label>
+          <input id="rv-title" name="title" type="text"
+                 class="rw-form-input"
+                 value="{{ form.title.value|default:'' }}"
+                 placeholder="{% trans 'پێداچوونەوەی v1' %}">
+          <div style="font-size:11px;color:var(--rw-text-3);margin-top:4px">{% trans "بە خۆی دروست دەبێت — دەتوانیت بیگۆڕیت" %}</div>
+        </div>
+
+        {# Optional initial bible text #}
+        <div style="margin-bottom:0">
+          <label class="rw-form-label" for="rv-bible">{% trans "ناوەڕۆکی بایبڵ (ئارەزووی)" %}</label>
+          <textarea id="rv-bible" name="bible_content"
+                    class="rw-form-input" style="min-height:120px;resize:vertical;font-size:13px;line-height:1.7"
+                    placeholder="{% trans 'تێکستی بایبڵی دەستنووس لێرە بنووسە...' %}">{{ form.bible_content.value|default:'' }}</textarea>
+        </div>
+
+        {# Form errors #}
+        {% if form.errors %}
+        <div class="rw-warn" style="margin-top:var(--rw-pad-sm)">
+          <span class="rw-warn-icon">⚠</span>
+          <div class="rw-warn-text">
+            {% for field, errors in form.errors.items %}
+              {% for error in errors %}{{ error }} {% endfor %}
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+
+      </div>
+
+      <div class="rw-modal-footer">
+        <button type="button"
+                onclick="document.getElementById('rw-modal-container').innerHTML=''"
+                class="rw-btn rw-btn-ghost">{% trans "پاشگەزبوونەوە" %}</button>
+        <button type="submit" class="rw-btn rw-btn-primary">{% trans "دروستکردن" %}</button>
+      </div>
+
+    </form>
+  </div>
+</div>
+
+<script>
+function rwCloseModal(e) {
+  if (e.target.id === 'rw-modal-backdrop') {
+    document.getElementById('rw-modal-container').innerHTML = '';
+  }
+}
+function rwAutoTitle(sel) {
+  const title = document.getElementById('rv-title');
+  if (!title.dataset.edited) {
+    title.value = sel.options[sel.selectedIndex].text + ' — پێداچوونەوەی v1';
+  }
+}
+document.getElementById('rv-title')?.addEventListener('input', function() {
+  this.dataset.edited = '1';
+});
+</script>

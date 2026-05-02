@@ -1,0 +1,8 @@
+{% load i18n %}
+{% if decisions %}
+  {% for decision in decisions %}
+    {% include "reviews/_decision_card.html" with decision=decision can_review=can_review can_manage=can_manage %}
+  {% endfor %}
+{% else %}
+  <div style="padding:16px;color:var(--rw-text-3)">{% trans "No decisions yet." %}</div>
+{% endif %}

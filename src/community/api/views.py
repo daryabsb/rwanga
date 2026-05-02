@@ -110,10 +110,12 @@ class CommunitySessionCommentsAPIView(APIView):
 
     def post(self, request, id):
         session = get_object_or_404(ReviewSession, id=id)
-        serializer = SessionCommentSerializer(data=request.data)
+        payload = request.data.copy()
+        payload["author"] = request.user.id
+        serializer = SessionCommentSerializer(data=payload)
         serializer.is_valid(raise_exception=True)
         content = get_object_or_404(SessionContent, id=serializer.validated_data["session_content"].id, session=session)
-        serializer.save(author=request.user, session_content=content)
+        serializer.save(session_content=content)
         return Response(serializer.data, status=201)
 
 
@@ -135,7 +137,9 @@ class CommunitySessionContentAPIView(APIView):
 
     def post(self, request, id):
         session = get_object_or_404(ReviewSession, id=id)
-        serializer = SessionContentSerializer(data=request.data)
+        payload = request.data.copy()
+        payload["session"] = str(session.id)
+        serializer = SessionContentSerializer(data=payload)
         serializer.is_valid(raise_exception=True)
-        serializer.save(session=session)
+        serializer.save()
         return Response(serializer.data, status=201)

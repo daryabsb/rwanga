@@ -1,0 +1,148 @@
+{% comment %} ════════════════════════════════════════════════════════
+   RWANGA — community/_comment_thread.html
+   Threaded comment list + compose box.
+   HTMX-swappable: target #cm-thread
+
+   Context:
+     comments    — QuerySet[CommunityComment] top-level
+     session     — CommunitySession
+     can_comment — bool
+   ════════════════════════════════════════════════════════ {% endcomment %}
+{% load i18n %}
+
+<div style="display:flex;flex-direction:column;gap:0">
+
+  {% for comment in comments %}
+  <div id="cm-{{ comment.pk }}" style="border-bottom:1px solid var(--rw-border-2)">
+
+    {% comment %} Top-level comment {% endcomment %}
+    <div style="padding:var(--rw-pad-sm) var(--rw-pad-md)">
+      <div style="display:flex;align-items:flex-start;gap:10px">
+
+        {% comment %} Avatar {% endcomment %}
+        <div class="rw-avatar" style="width:30px;height:30px;font-size:11px;flex-shrink:0;margin-top:2px">
+          {{ comment.author.first_name|first|upper }}{{ comment.author.last_name|first|upper }}
+        </div>
+
+        <div style="flex:1;min-width:0">
+          {% comment %} Author + time {% endcomment %}
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+            <span style="font-size:12px;font-weight:700;color:var(--rw-text)">{{ comment.author.get_full_name }}</span>
+            <span style="font-size:10px;color:var(--rw-text-3)" dir="ltr">{{ comment.created_at|timesince }} {% trans "پێش" %}</span>
+            {% if comment.scene_ref %}
+            <span style="font-family:var(--rw-font-en);font-size:10px;font-weight:700;color:var(--rw-amber);background:var(--rw-amber-dim);border:1px solid rgba(212,165,116,.3);padding:1px 6px">{{ comment.scene_ref }}</span>
+            {% endif %}
+          </div>
+
+          {% comment %} Body {% endcomment %}
+          <div style="font-size:13px;color:var(--rw-text-2);line-height:1.7">{{ comment.body }}</div>
+
+          {% comment %} Reactions + reply {% endcomment %}
+          <div style="display:flex;align-items:center;gap:12px;margin-top:8px">
+            {% if comment.reaction_counts %}
+            <div style="display:flex;gap:4px">
+              {% for emoji, count in comment.reaction_counts.items %}
+              <button style="background:var(--rw-surface-2);border:1px solid var(--rw-border);color:var(--rw-text-2);font-size:11px;padding:2px 8px;cursor:pointer;display:inline-flex;align-items:center;gap:4px"
+                      hx-post="{% url 'community:react' comment.pk %}"
+                      hx-vals='{"emoji":"{{ emoji }}"}'
+                      hx-target="#cm-{{ comment.pk }}"
+                      hx-swap="outerHTML">
+                {{ emoji }} <span style="font-family:var(--rw-font-en)">{{ count }}</span>
+              </button>
+              {% endfor %}
+            </div>
+            {% endif %}
+
+            {% if can_comment %}
+            <button style="background:none;border:none;font-size:11px;color:var(--rw-text-3);cursor:pointer;padding:0"
+                    onclick="rwToggleReply('reply-{{ comment.pk }}')">
+              ↩ {% trans "وەڵامدانەوە" %}
+            </button>
+            {% endif %}
+          </div>
+
+          {% comment %} Reply form (hidden by default) {% endcomment %}
+          {% if can_comment %}
+          <div id="reply-{{ comment.pk }}" style="display:none;margin-top:10px">
+            <form hx-post="{% url 'community:reply' comment.pk %}"
+                  hx-target="#cm-{{ comment.pk }}"
+                  hx-swap="outerHTML">
+              {% csrf_token %}
+              <textarea name="body" rows="2"
+                        class="rw-form-input" style="font-size:13px;padding:10px 12px;margin-bottom:8px;resize:none"
+                        placeholder="{% trans 'وەڵامت بنووسە...' %}"></textarea>
+              <div style="display:flex;gap:8px">
+                <button type="submit" class="rw-btn rw-btn-primary" style="padding:7px 16px;font-size:12px">{% trans "ناردن" %}</button>
+                <button type="button" class="rw-btn rw-btn-ghost" style="padding:7px 16px;font-size:12px"
+                        onclick="rwToggleReply('reply-{{ comment.pk }}')">{% trans "پاشگەزبوونەوە" %}</button>
+              </div>
+            </form>
+          </div>
+          {% endif %}
+
+        </div>
+      </div>
+    </div>
+
+    {% comment %} Replies (indented) {% endcomment %}
+    {% if comment.replies.all %}
+    <div style="padding-inline-start:var(--rw-pad-lg);border-inline-start:2px solid var(--rw-border);margin-inline-start:calc(var(--rw-pad-md) + 15px);margin-bottom:var(--rw-pad-xs)">
+      {% for reply in comment.replies.all %}
+      <div style="padding:10px 0;border-bottom:1px solid var(--rw-border-2)">
+        <div style="display:flex;align-items:flex-start;gap:10px">
+          <div class="rw-avatar" style="width:24px;height:24px;font-size:9px;flex-shrink:0;background:var(--rw-break)">
+            {{ reply.author.first_name|first|upper }}{{ reply.author.last_name|first|upper }}
+          </div>
+          <div style="flex:1">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+              <span style="font-size:12px;font-weight:700;color:var(--rw-text)">{{ reply.author.get_full_name }}</span>
+              <span style="font-size:10px;color:var(--rw-text-3)" dir="ltr">{{ reply.created_at|timesince }} {% trans "پێش" %}</span>
+            </div>
+            <div style="font-size:12px;color:var(--rw-text-2);line-height:1.7">{{ reply.body }}</div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+  </div>
+  {% empty %}
+  <div style="padding:var(--rw-pad-lg);text-align:center;color:var(--rw-text-3)">
+    <div style="font-size:28px;margin-bottom:12px;opacity:.3">💬</div>
+    <div style="font-size:13px;font-weight:600;color:var(--rw-text-2)">{% trans "هێشتا لێدوانێک نییە" %}</div>
+    <div style="font-size:12px;margin-top:4px">{% trans "یەکەمی بە بە لێدوانت" %}</div>
+  </div>
+  {% endfor %}
+
+</div>
+
+{% comment %} ── Compose box ── {% endcomment %}
+{% if can_comment %}
+<div style="border-top:1px solid var(--rw-border);padding:var(--rw-pad-sm) var(--rw-pad-md);background:var(--rw-surface);flex-shrink:0;position:sticky;bottom:0">
+  <form hx-post="{% url 'community:comment' session.pk %}"
+        hx-target="#cm-thread"
+        hx-swap="innerHTML">
+    {% csrf_token %}
+    <textarea name="body" rows="3"
+              class="rw-form-input" style="font-size:13px;padding:10px 12px;margin-bottom:8px;resize:none"
+              placeholder="{% trans 'لێدوانت بنووسە...' %}"></textarea>
+    <div style="display:flex;align-items:center;gap:8px">
+      <button type="submit" class="rw-btn rw-btn-primary" style="padding:8px 20px;font-size:13px">{% trans "ناردن" %}</button>
+      <span style="font-size:11px;color:var(--rw-text-3)">{% trans "بە ناوی خۆت دەنێرێت" %}</span>
+    </div>
+  </form>
+</div>
+{% else %}
+<div style="padding:var(--rw-pad-sm) var(--rw-pad-md);background:var(--rw-surface-2);border-top:1px solid var(--rw-border);text-align:center;font-size:12px;color:var(--rw-text-3)">
+  {% trans "پێویستە داواکاری بەشدارکردن بکەیت بۆ لێدوانی" %}
+</div>
+{% endif %}
+
+<script>
+function rwToggleReply(id) {
+  const el = document.getElementById(id);
+  if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+</script>
+

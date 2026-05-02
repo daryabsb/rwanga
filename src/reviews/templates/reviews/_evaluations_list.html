@@ -1,0 +1,8 @@
+{% load i18n %}
+{% if evaluations %}
+  {% for evaluation in evaluations %}
+    {% include "reviews/_evaluation_card.html" with evaluation=evaluation %}
+  {% endfor %}
+{% else %}
+  <div style="padding:16px;color:var(--rw-text-3)">{% trans "No evaluations yet." %}</div>
+{% endif %}

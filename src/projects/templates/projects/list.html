@@ -1,15 +1,17 @@
 {% extends "base.html" %}
-{% load static i18n %}
 {% comment %} ════════════════════════════════════════════════════════
-   RWANGA — projects/list.html
-   Studio lobby — the first page after login.
-   Pick which project workspace to enter.
+   RWANGA — projects/list.html  (updated)
+   Studio lobby — projects + Reviews & Community tiles.
 
    Context:
-     owned_projects   — QuerySet[Project] owned by user's studio
-     member_projects  — QuerySet[Project] where user has ProjectMembership
-     invitations      — QuerySet[ProjectMembership] pending (accepted_at=None)
+     owned_projects   — QuerySet[Project]
+     member_projects  — QuerySet[Project]
+     invitations      — QuerySet[ProjectMembership] pending
+     active_reviews_count   — int
+     active_sessions_count  — int
    ════════════════════════════════════════════════════════ {% endcomment %}
+ 
+{% load static i18n %}
 
 {% block title %}{% trans "پڕۆژەکان" %}{% endblock %}
 
@@ -43,12 +45,10 @@
           </div>
         </div>
         <div style="display:flex;gap:8px;align-items:center">
-          <form method="post" action="{% url 'accounts:accept_invite' inv.pk %}">
-            {% csrf_token %}
+          <form method="post" action="{% url 'accounts:accept_invite' inv.pk %}">{% csrf_token %}
             <button type="submit" class="rw-btn rw-btn-amber" style="padding:7px 16px;font-size:12px">{% trans "قبووڵکردن" %}</button>
           </form>
-          <form method="post" action="{% url 'accounts:decline_invite' inv.pk %}">
-            {% csrf_token %}
+          <form method="post" action="{% url 'accounts:decline_invite' inv.pk %}">{% csrf_token %}
             <button type="submit" class="rw-btn rw-btn-ghost" style="padding:7px 16px;font-size:12px">{% trans "ڕەتکردنەوە" %}</button>
           </form>
         </div>
@@ -83,8 +83,6 @@
         </div>
       </a>
       {% endfor %}
-
-      {% comment %} New project card {% endcomment %}
       <a href="{% url 'projects:create_wizard' %}" style="text-decoration:none;display:block">
         <div style="background:var(--rw-surface);cursor:pointer;transition:background var(--rw-t);height:100%;min-height:120px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;color:var(--rw-text-3);padding:var(--rw-pad-md)">
           <div style="font-size:36px;opacity:.3">+</div>
@@ -95,6 +93,63 @@
     {% else %}
     {% include "components/_empty_state.html" with icon="🎬" title=_("هێشتا پڕۆژەت نییە") sub=_("یەکەمین پڕۆژەی فیلمیت دروست بکە") cta_text=_("دەستپێکردن") cta_url="projects:create_wizard" %}
     {% endif %}
+
+    {% comment %} ══════════════════════════════════════════════════
+       REVIEWS + COMMUNITY TILES
+       Two feature-section tiles, always visible.
+       ══════════════════════════════════════════════════ {% endcomment %}
+    <div class="rw-section-hdr" style="margin-top:var(--rw-pad-md)">{% trans "هاوکاری و کۆمیونیتی" %}</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--rw-border);border:1px solid var(--rw-border);margin-bottom:var(--rw-pad-lg)">
+
+      {% comment %} Reviews tile {% endcomment %}
+      <a href="{% url 'reviews:list' %}" style="text-decoration:none;display:block">
+        <div style="background:var(--rw-surface);padding:var(--rw-pad-lg);transition:background var(--rw-t);border-top:4px solid #7C3AED;cursor:pointer;height:100%;display:flex;flex-direction:column;gap:var(--rw-pad-sm)">
+          <div style="display:flex;align-items:center;gap:14px">
+            <div style="width:52px;height:52px;background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.25);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">📋</div>
+            <div>
+              <div style="font-size:17px;font-weight:700;color:var(--rw-text);margin-bottom:4px">{% trans "پێداچوونەوەکان" %}</div>
+              <div style="font-size:12px;color:var(--rw-text-2)">{% trans "پێداچوونەوەی بایبڵ، بڕیارەکان، هەڵسەنگاندنی دیمەن" %}</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:16px;font-size:12px;color:var(--rw-text-3);padding-top:var(--rw-pad-xs);border-top:1px solid var(--rw-border-2)">
+            {% if active_reviews_count %}
+            <span>
+              <span style="font-family:var(--rw-font-en);font-size:20px;font-weight:700;color:#7C3AED">{{ active_reviews_count }}</span>
+              {% trans "پێداچوونەوەی چالاک" %}
+            </span>
+            {% else %}
+            <span style="color:var(--rw-text-3)">{% trans "هێشتا پێداچوونەوەیەک نییە" %}</span>
+            {% endif %}
+            <span style="margin-inline-start:auto;font-size:18px;color:#7C3AED">→</span>
+          </div>
+        </div>
+      </a>
+
+      {% comment %} Community tile {% endcomment %}
+      <a href="{% url 'community:list' %}" style="text-decoration:none;display:block">
+        <div style="background:var(--rw-surface);padding:var(--rw-pad-lg);transition:background var(--rw-t);border-top:4px solid #0D9488;cursor:pointer;height:100%;display:flex;flex-direction:column;gap:var(--rw-pad-sm)">
+          <div style="display:flex;align-items:center;gap:14px">
+            <div style="width:52px;height:52px;background:rgba(13,148,136,.1);border:1px solid rgba(13,148,136,.25);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">◎</div>
+            <div>
+              <div style="font-size:17px;font-weight:700;color:var(--rw-text);margin-bottom:4px">{% trans "کۆمیونیتی" %}</div>
+              <div style="font-size:12px;color:var(--rw-text-2)">{% trans "دانیشتنەکانی کۆمیونیتی و لێدوانەکانی دەرەکی" %}</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:16px;font-size:12px;color:var(--rw-text-3);padding-top:var(--rw-pad-xs);border-top:1px solid var(--rw-border-2)">
+            {% if active_sessions_count %}
+            <span>
+              <span style="font-family:var(--rw-font-en);font-size:20px;font-weight:700;color:#0D9488">{{ active_sessions_count }}</span>
+              {% trans "دانیشتنی چالاک" %}
+            </span>
+            {% else %}
+            <span style="color:var(--rw-text-3)">{% trans "هێشتا دانیشتنێک نییە" %}</span>
+            {% endif %}
+            <span style="margin-inline-start:auto;font-size:18px;color:#0D9488">→</span>
+          </div>
+        </div>
+      </a>
+
+    </div>
 
     {% comment %} ── Member projects ── {% endcomment %}
     {% if member_projects %}
@@ -120,3 +175,5 @@
   </div>
 </div>
 {% endblock %}
+
+

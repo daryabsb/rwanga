@@ -1,0 +1,65 @@
+{% load i18n %}
+<div id="decision-{{ decision.pk }}" style="background:var(--rw-surface);border:1px solid var(--rw-border);border-bottom:none;border-inline-start:4px solid {% if decision.status == 'locked' %}#00A896{% elif decision.status == 'rejected' %}var(--rw-shoot){% else %}var(--rw-amber){% endif %}">
+  <div style="padding:var(--rw-pad-md)">
+    <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:10px">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:15px;font-weight:700;color:var(--rw-text);margin-bottom:4px;line-height:1.4">{{ decision.topic }}</div>
+        {% if decision.scene %}
+        <div style="font-size:11px;color:var(--rw-text-3);display:flex;align-items:center;gap:6px">
+          <span style="font-family:var(--rw-font-en);font-weight:700;color:var(--rw-amber)">{{ decision.scene.number }}</span>
+          <span>{{ decision.scene.int_ext }}. {{ decision.scene.location_name }} - {{ decision.scene.time_of_day }}</span>
+        </div>
+        {% endif %}
+      </div>
+      {% if decision.status == 'proposed' %}
+      <span style="display:inline-block;padding:3px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;background:var(--rw-amber-dim);color:var(--rw-amber);border:1px solid rgba(212,165,116,.3);flex-shrink:0">{% trans "???????" %}</span>
+      {% elif decision.status == 'locked' %}
+      <span style="display:inline-block;padding:3px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;background:rgba(0,168,150,.1);color:#00A896;border:1px solid rgba(0,168,150,.3);flex-shrink:0">{% trans "?????????" %}</span>
+      {% else %}
+      <span style="display:inline-block;padding:3px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;background:var(--rw-pink-dim);color:var(--rw-shoot);border:1px solid rgba(247,37,133,.25);flex-shrink:0">{% trans "????????" %}</span>
+      {% endif %}
+    </div>
+
+    <div style="font-size:14px;color:var(--rw-text-2);line-height:1.7;margin-bottom:12px;padding:12px 16px;background:var(--rw-surface-2);border-inline-start:3px solid var(--rw-border)">{{ decision.decision_text }}</div>
+
+    <div style="display:flex;align-items:center;gap:16px;font-size:11px;color:var(--rw-text-3)">
+      <span>{% trans "???????????? ???????" %} <strong style="color:var(--rw-text-2)">{{ decision.proposed_by.get_full_name }}</strong></span>
+      <span dir="ltr" style="font-family:var(--rw-font-en)">{{ decision.created_at|date:"Y-m-d" }}</span>
+    </div>
+  </div>
+
+  {% if can_review and decision.status == 'proposed' %}
+  <div style="padding:var(--rw-pad-xs) var(--rw-pad-md);border-top:1px solid var(--rw-border-2);background:var(--rw-surface-2);display:flex;flex-direction:column;gap:10px">
+    <form method="post" action="{% url 'reviews:lock_decision' decision.pk %}" hx-post="{% url 'reviews:lock_decision' decision.pk %}" hx-target="#decision-{{ decision.pk }}" hx-swap="outerHTML">
+      {% csrf_token %}
+      <textarea name="comment" rows="2" style="width:100%;margin-bottom:8px;background:var(--rw-surface);color:var(--rw-text);border:1px solid var(--rw-border);padding:8px" placeholder="{% trans '?????? (??????????????)...' %}"></textarea>
+      <button type="submit" class="rw-btn" style="background:rgba(0,168,150,.12);color:#00A896;border:1px solid rgba(0,168,150,.3);padding:7px 16px;font-size:12px">? {% trans "??????????" %}</button>
+    </form>
+
+    <form method="post" action="{% url 'reviews:reject_decision' decision.pk %}" hx-post="{% url 'reviews:reject_decision' decision.pk %}" hx-target="#decision-{{ decision.pk }}" hx-swap="outerHTML">
+      {% csrf_token %}
+      <textarea name="reason" rows="2" required style="width:100%;margin-bottom:8px;background:var(--rw-surface);color:var(--rw-text);border:1px solid var(--rw-border);padding:8px" placeholder="{% trans '?????? ?????????? (???????)...' %}"></textarea>
+      <button type="submit" class="rw-btn" style="background:var(--rw-pink-dim);color:var(--rw-shoot);border:1px solid rgba(247,37,133,.25);padding:7px 16px;font-size:12px">? {% trans "??????????" %}</button>
+    </form>
+  </div>
+  {% endif %}
+
+  {% if decision.status == 'locked' and decision.lock_comment %}
+  <div style="margin:8px 12px 12px;padding:8px;background:rgba(16,185,129,0.1);border-radius:4px;font-size:13px;color:var(--rw-text-2)"><strong>{{ decision.locked_by.get_full_name }}:</strong> {{ decision.lock_comment }}</div>
+  {% endif %}
+
+  {% if decision.status == 'rejected' and decision.reject_reason %}
+  <div style="margin:8px 12px 12px;padding:8px;background:rgba(239,68,68,0.1);border-radius:4px;font-size:13px;color:var(--rw-text-2)"><strong>{{ decision.rejected_by.get_full_name }}:</strong> {{ decision.reject_reason }}</div>
+  {% endif %}
+
+  {% if can_manage and decision.status == 'rejected' %}
+  <div style="padding:var(--rw-pad-xs) var(--rw-pad-md);border-top:1px solid var(--rw-border-2);background:var(--rw-surface-2)">
+    <form method="post" action="{% url 'reviews:repropose_decision' decision.pk %}" hx-post="{% url 'reviews:repropose_decision' decision.pk %}" hx-target="#decision-{{ decision.pk }}" hx-swap="outerHTML">
+      {% csrf_token %}
+      <input type="hidden" name="topic" value="{{ decision.topic }}">
+      <input type="hidden" name="decision_text" value="{{ decision.decision_text }}">
+      <button type="submit" class="rw-btn rw-btn-ghost" style="padding:7px 16px;font-size:12px">? {% trans "??????? ???????????" %}</button>
+    </form>
+  </div>
+  {% endif %}
+</div>

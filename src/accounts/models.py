@@ -69,6 +69,13 @@ class Studio(BaseModel):
 
 
 class ProjectMembership(BaseModel):
+    ROLE_CHOICES = [
+        ("director", "دەرهێنەر"),
+        ("production_team", "تیمی بەرهەمهێنان"),
+        ("reviewer", "پێداچوونەوەکەر"),
+        ("community", "کۆمیونیتی"),
+        ("full_access", "هەموو"),
+    ]
     class RoleType(models.TextChoices):
         CREW = "crew", "Crew"
         INTERNAL_REVIEWER = "internal_reviewer", "Internal Reviewer"
@@ -89,6 +96,7 @@ class ProjectMembership(BaseModel):
         db_constraint=False,
     )
     role_type = models.CharField(max_length=32, choices=RoleType.choices)
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default="production_team")
     department_role = models.CharField(max_length=32, choices=DepartmentRole.choices, blank=True)
     review_scope = models.CharField(max_length=64, blank=True)
     is_active = models.BooleanField(default=True)

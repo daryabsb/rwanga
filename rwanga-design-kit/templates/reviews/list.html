@@ -1,0 +1,146 @@
+{# ════════════════════════════════════════════════════════
+   RWANGA — reviews/list.html
+   All reviews the current user can access, grouped by project.
+
+   Context:
+     reviews        — QuerySet[Review] visible to user
+     active_project — Project|None (if coming from a project context)
+     can_create     — bool (director / superuser)
+   ════════════════════════════════════════════════════════ #}
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "پێداچوونەوەکان" %}{% endblock %}
+
+{% block content %}
+<div id="rw-content" style="overflow-y:auto;flex:1">
+
+  {# ── Page header ── #}
+  <div style="padding:var(--rw-pad-lg) var(--rw-pad-lg) var(--rw-pad-md);background:var(--rw-surface);border-bottom:1px solid var(--rw-border);display:flex;align-items:center;gap:var(--rw-pad-md)">
+    <div style="display:flex;align-items:center;gap:16px">
+      <div style="width:44px;height:44px;background:#7C3AED;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">📋</div>
+      <div>
+        <h1 style="font-size:22px;font-weight:700;margin-bottom:3px">{% trans "پێداچوونەوەکان" %}</h1>
+        <p style="font-size:13px;color:var(--rw-text-2)">{% trans "پێداچوونەوەی بایبڵ و بڕیارەکانی پڕۆژە" %}</p>
+      </div>
+    </div>
+    <div style="margin-inline-start:auto;display:flex;gap:8px;align-items:center">
+      {% if can_create %}
+      <button class="rw-btn rw-btn-primary"
+              hx-get="{% url 'reviews:create' %}"
+              hx-target="#rw-modal-container"
+              hx-swap="innerHTML">
+        + {% trans "پێداچوونەوەی نوێ" %}
+      </button>
+      {% endif %}
+    </div>
+  </div>
+
+  {# ── Status filter strip ── #}
+  <div style="padding:var(--rw-pad-sm) var(--rw-pad-lg);background:var(--rw-surface-2);border-bottom:1px solid var(--rw-border);display:flex;align-items:center;gap:0">
+    <div class="rw-filter-row" style="margin-bottom:0">
+      <button class="rw-f-btn active" onclick="rwFilterReviews('all',this)">{% trans "هەموو" %}</button>
+      <button class="rw-f-btn" onclick="rwFilterReviews('in_review',this)">{% trans "لە پێداچوونەوەدا" %}</button>
+      <button class="rw-f-btn" onclick="rwFilterReviews('draft',this)">{% trans "پێشنووس" %}</button>
+      <button class="rw-f-btn" onclick="rwFilterReviews('delivered',this)">{% trans "گەیشتووە" %}</button>
+    </div>
+    <span style="font-size:12px;color:var(--rw-text-3);margin-inline-start:auto">
+      {{ reviews.count }} {% trans "پێداچوونەوە" %}
+    </span>
+  </div>
+
+  <div style="padding:var(--rw-pad-md) var(--rw-pad-lg)">
+
+    {% if reviews %}
+    <div id="reviews-list" style="display:flex;flex-direction:column;gap:0;border:1px solid var(--rw-border)">
+
+      {% for review in reviews %}
+      <a href="{% url 'reviews:detail' review.pk %}" style="text-decoration:none;display:block" data-status="{{ review.status }}">
+        <div style="display:flex;align-items:stretch;background:var(--rw-surface);border-bottom:1px solid var(--rw-border-2);transition:background var(--rw-t);border-inline-start:4px solid transparent"
+             class="rv-row rv-row-{{ review.status }}">
+
+          {# Status accent bar color via inline override #}
+          {# Draft=border-2, in_review=amber, delivered=vis, closed=pink #}
+
+          {# Left: main info #}
+          <div style="flex:1;padding:var(--rw-pad-md);min-width:0">
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+              {# Status badge #}
+              {% if review.status == 'draft' %}
+              <span style="display:inline-block;padding:3px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;background:var(--rw-surface-3);color:var(--rw-text-2);border:1px solid var(--rw-border)">{% trans "پێشنووس" %}</span>
+              {% elif review.status == 'in_review' %}
+              <span style="display:inline-block;padding:3px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;background:var(--rw-amber-dim);color:var(--rw-amber);border:1px solid rgba(212,165,116,.3)">{% trans "لە پێداچوونەوەدا" %}</span>
+              {% elif review.status == 'delivered' %}
+              <span style="display:inline-block;padding:3px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;background:rgba(0,168,150,.1);color:#00A896;border:1px solid rgba(0,168,150,.3)">{% trans "گەیشتووە" %}</span>
+              {% else %}
+              <span style="display:inline-block;padding:3px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;background:var(--rw-pink-dim);color:var(--rw-shoot);border:1px solid rgba(247,37,133,.25)">{% trans "داخراوە" %}</span>
+              {% endif %}
+
+              {# Version tag #}
+              <span style="font-family:var(--rw-font-en);font-size:11px;font-weight:600;color:var(--rw-text-3);background:var(--rw-surface-2);border:1px solid var(--rw-border);padding:2px 8px">v{{ review.version }}</span>
+
+              {# Project pill #}
+              <span style="font-size:12px;color:var(--rw-text-3)">{{ review.project.title }}</span>
+            </div>
+
+            <div style="font-size:15px;font-weight:700;color:var(--rw-text);margin-bottom:6px">{{ review.title }}</div>
+
+            {# Decision stats row #}
+            <div style="display:flex;align-items:center;gap:20px;font-size:12px;color:var(--rw-text-2)">
+              <span>
+                <span style="font-family:var(--rw-font-en);font-weight:700;color:var(--rw-text)">{{ review.decisions.count }}</span>
+                {% trans "بڕیار" %}
+              </span>
+              <span>
+                <span style="font-family:var(--rw-font-en);font-weight:700;color:#00A896">{{ review.locked_decisions_count }}</span>
+                {% trans "جێگیرکراو" %}
+              </span>
+              <span>
+                <span style="font-family:var(--rw-font-en);font-weight:700;color:var(--rw-shoot)">{{ review.rejected_decisions_count }}</span>
+                {% trans "ڕەتکراوە" %}
+              </span>
+              <span style="margin-inline-start:8px;color:var(--rw-text-3)">·</span>
+              <span>
+                <span style="font-family:var(--rw-font-en);font-weight:700;color:var(--rw-text)">{{ review.evaluations.count }}</span>
+                {% trans "هەڵسەنگاندنی دیمەن" %}
+              </span>
+            </div>
+          </div>
+
+          {# Right: author + date #}
+          <div style="flex-shrink:0;padding:var(--rw-pad-md) var(--rw-pad-md);border-inline-start:1px solid var(--rw-border);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;min-width:120px">
+            <div class="rw-avatar" style="width:36px;height:36px;font-size:13px">
+              {{ review.author.first_name|first|upper }}{{ review.author.last_name|first|upper }}
+            </div>
+            <div style="text-align:center">
+              <div style="font-size:11px;font-weight:600;color:var(--rw-text-2)">{{ review.author.get_full_name }}</div>
+              <div style="font-size:10px;color:var(--rw-text-3);margin-top:2px" dir="ltr">{{ review.created_at|timesince }} {% trans "پێش" %}</div>
+            </div>
+          </div>
+
+        </div>
+      </a>
+      {% endfor %}
+
+    </div>
+
+    {% else %}
+    {% include "components/_empty_state.html" with icon="📋" title=_("هێشتا پێداچوونەوەیەک نییە") sub=_("پێداچوونەوەیەکی نوێ دروست بکە بۆ ئەوەی هاوکارەکانت بتوانن بایبڵ و بڕیارەکانت پێداچوونەوە بکەن") cta_text=_("پێداچوونەوەی نوێ") cta_url="reviews:create" %}
+    {% endif %}
+
+  </div>
+</div>
+
+{# Modal container #}
+<div id="rw-modal-container"></div>
+
+<script>
+function rwFilterReviews(status, btn) {
+  document.querySelectorAll('.rw-f-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('#reviews-list [data-status]').forEach(row => {
+    row.style.display = (status === 'all' || row.dataset.status === status) ? 'block' : 'none';
+  });
+}
+</script>
+{% endblock %}
