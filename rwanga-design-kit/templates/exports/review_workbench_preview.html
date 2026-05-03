@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="ku" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rwanga — Review Workbench</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --rw-bg:#0F0F12;--rw-surface:#17171C;--rw-surface-2:#1E1E26;--rw-surface-3:#26262E;
+  --rw-border:#2C2C38;--rw-border-2:#222230;
+  --rw-text:#EDEAD8;--rw-text-2:#78788C;--rw-text-3:#40404E;
+  --rw-amber:#D4A574;--rw-amber-dim:rgba(212,165,116,.10);
+  --rw-pink:#F72585;--rw-green:#2EC4B6;--rw-red:#E63946;
+}
+body{font-family:'Cairo','Noto Sans Arabic',Arial,sans-serif;background:var(--rw-bg);color:var(--rw-text);font-size:14px;min-height:100vh;direction:rtl;line-height:1.6;}
+
+/* ── TOP BAR ── */
+.rw-topbar{position:sticky;top:0;z-index:100;background:var(--rw-surface);border-bottom:1px solid var(--rw-border);display:flex;align-items:center;gap:12px;padding:0 20px;height:52px;}
+.rw-logo{width:36px;height:36px;background:var(--rw-pink);color:#fff;font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:center;font-family:'Cairo',sans-serif;flex-shrink:0;}
+.rw-topbar-title{font-size:14px;font-weight:700;color:var(--rw-text);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.rw-topbar-meta{font-family:'Inter',sans-serif;font-size:11px;color:var(--rw-text-3);direction:ltr;white-space:nowrap;}
+
+/* ── TABS ── */
+.rw-tabs{display:flex;background:var(--rw-surface);border-bottom:1px solid var(--rw-border);padding:0 8px;position:sticky;top:52px;z-index:90;}
+.rw-tab{display:flex;align-items:center;gap:6px;padding:0 18px;height:48px;font-size:13px;font-weight:600;color:var(--rw-text-2);white-space:nowrap;border:none;background:none;border-bottom:3px solid transparent;transition:color .12s,border-color .12s;cursor:pointer;font-family:'Cairo',sans-serif;}
+.rw-tab:hover{color:var(--rw-text);}
+.rw-tab.active{color:var(--rw-amber);border-bottom-color:var(--rw-amber);}
+.rw-tab-count{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 6px;font-family:'Inter',sans-serif;font-size:11px;font-weight:700;border-radius:10px;background:var(--rw-pink);color:#fff;}
+.rw-tab-count.locked{background:var(--rw-surface-3);color:var(--rw-text-2);}
+
+/* ── MAIN LAYOUT ── */
+.rw-main{display:flex;min-height:calc(100vh - 100px);}
+.rw-left{flex:1;min-width:0;border-inline-end:1px solid var(--rw-border);overflow-y:auto;max-height:calc(100vh - 100px);}
+.rw-right{width:420px;flex-shrink:0;overflow-y:auto;max-height:calc(100vh - 100px);background:var(--rw-surface);}
+
+/* ── PANES ── */
+.rw-pane{display:none;padding:20px;}
+.rw-pane.active{display:block;}
+
+/* ── DECISION CARD ── */
+.rw-decision{background:var(--rw-surface);border:1px solid var(--rw-border);margin-bottom:10px;transition:border-color .15s;}
+.rw-decision:hover{border-color:var(--rw-amber);}
+.rw-decision.selected{border-color:var(--rw-amber);border-inline-start:3px solid var(--rw-amber);}
+.rw-d-header{padding:14px 16px 10px;cursor:pointer;}
+.rw-d-topic{font-size:15px;font-weight:700;color:var(--rw-text);margin-bottom:4px;}
+.rw-d-text{font-size:13px;color:var(--rw-text-2);line-height:1.7;margin-bottom:8px;}
+.rw-d-meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
+
+/* Badges */
+.rw-chip{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;font-size:11px;font-weight:600;border-radius:2px;font-family:'Cairo',sans-serif;}
+.rw-chip-scene{background:rgba(247,37,133,.12);border:1px solid rgba(247,37,133,.3);color:var(--rw-pink);}
+.rw-chip-expr{border:1px solid var(--rw-border);color:var(--rw-text-2);background:var(--rw-surface-2);}
+.rw-chip-expr.emotional{border-color:rgba(45,91,227,.3);color:#7FA8FF;}
+.rw-chip-expr.behavioral{border-color:rgba(212,165,116,.3);color:var(--rw-amber);}
+.rw-chip-expr.artistic{border-color:rgba(247,37,133,.3);color:var(--rw-pink);}
+.rw-chip-expr.broken{border-color:rgba(230,57,70,.3);color:#E63946;}
+.rw-chip-expr.memory{border-color:rgba(46,196,182,.3);color:var(--rw-green);}
+
+/* Intensity bar */
+.rw-intensity{display:flex;align-items:center;gap:6px;font-size:11px;font-family:'Inter',sans-serif;color:var(--rw-text-3);}
+.rw-int-bar{display:flex;gap:2px;}
+.rw-int-dot{width:6px;height:14px;background:var(--rw-surface-3);border-radius:1px;}
+.rw-int-dot.on{background:var(--rw-amber);}
+.rw-int-dot.on.peak{background:var(--rw-pink);}
+.rw-int-dot.on.collapse{background:var(--rw-red);}
+
+/* Actions */
+.rw-d-actions{display:flex;gap:8px;padding:0 16px 14px;align-items:center;}
+.rw-btn{padding:6px 14px;font-size:12px;font-weight:600;border:1px solid var(--rw-border);background:var(--rw-surface-2);color:var(--rw-text-2);cursor:pointer;font-family:'Cairo',sans-serif;transition:all .12s;display:inline-flex;align-items:center;gap:5px;}
+.rw-btn:hover{color:var(--rw-text);border-color:var(--rw-text-3);}
+.rw-btn-accept{border-color:rgba(212,165,116,.35);color:var(--rw-amber);}
+.rw-btn-accept:hover{background:rgba(212,165,116,.12);border-color:var(--rw-amber);}
+.rw-btn-reject{border-color:rgba(230,57,70,.25);color:var(--rw-text-3);}
+.rw-btn-reject:hover{background:rgba(230,57,70,.08);color:var(--rw-red);border-color:rgba(230,57,70,.4);}
+.rw-btn-comment{margin-inline-start:auto;}
+
+/* Comment input */
+.rw-comment-area{display:none;padding:0 16px 14px;}
+.rw-comment-area.open{display:block;}
+.rw-comment-input{width:100%;background:var(--rw-surface-2);border:1px solid var(--rw-border);color:var(--rw-text);padding:10px 12px;font-size:13px;font-family:'Cairo',sans-serif;resize:vertical;min-height:60px;direction:rtl;}
+.rw-comment-input:focus{outline:none;border-color:var(--rw-amber);}
+
+/* ── LOCKED DECISION ── */
+.rw-locked{background:var(--rw-surface);border:1px solid var(--rw-border);margin-bottom:6px;}
+.rw-locked-hdr{display:flex;align-items:center;gap:10px;padding:12px 16px;cursor:pointer;transition:background .12s;}
+.rw-locked-hdr:hover{background:var(--rw-surface-2);}
+.rw-locked-topic{font-size:14px;font-weight:600;color:var(--rw-text);flex:1;}
+.rw-locked-badge{padding:2px 8px;font-size:10px;font-weight:700;background:rgba(212,165,116,.12);border:1px solid rgba(212,165,116,.3);color:var(--rw-amber);}
+.rw-locked-ver{font-family:'Inter',sans-serif;font-size:11px;color:var(--rw-text-3);}
+.rw-locked-chevron{font-size:12px;color:var(--rw-text-3);transition:transform .12s;}
+.rw-locked-hdr.open .rw-locked-chevron{transform:rotate(90deg);}
+.rw-locked-body{display:none;padding:0 16px 14px;border-top:1px solid var(--rw-border-2);}
+.rw-locked-body.open{display:block;padding-top:12px;}
+.rw-locked-text{font-size:13px;color:var(--rw-text-2);line-height:1.7;margin-bottom:8px;}
+.rw-locked-comment{font-size:12px;color:var(--rw-text-3);font-style:italic;padding-inline-start:12px;border-inline-start:2px solid var(--rw-border);}
+.rw-locked-date{font-family:'Inter',sans-serif;font-size:11px;color:var(--rw-text-3);margin-top:6px;direction:ltr;display:inline-block;}
+
+/* Version group */
+.rw-ver-group{margin-bottom:16px;}
+.rw-ver-label{font-size:10px;font-weight:700;color:var(--rw-text-3);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--rw-border);font-family:'Inter',sans-serif;direction:ltr;}
+
+/* ── BIBLE PANE ── */
+.rw-bible{padding:20px;font-size:14px;color:var(--rw-text-2);line-height:1.9;}
+.rw-bible h2{font-size:16px;font-weight:700;color:var(--rw-text);margin-bottom:10px;margin-top:20px;}
+.rw-bible h2:first-child{margin-top:0;}
+.rw-bible p{margin-bottom:12px;}
+
+/* ── RIGHT PANEL ── */
+.rw-right-header{display:flex;align-items:center;gap:0;border-bottom:1px solid var(--rw-border);background:var(--rw-surface);}
+.rw-right-tab{flex:1;padding:12px;text-align:center;font-size:12px;font-weight:600;color:var(--rw-text-3);cursor:pointer;border-bottom:2px solid transparent;transition:all .12s;font-family:'Cairo',sans-serif;}
+.rw-right-tab:hover{color:var(--rw-text-2);}
+.rw-right-tab.active{color:var(--rw-amber);border-bottom-color:var(--rw-amber);}
+.rw-right-pane{display:none;padding:20px;}
+.rw-right-pane.active{display:block;}
+
+/* Bible highlight */
+.rw-bible-section{padding:12px 14px;margin-bottom:8px;border-inline-start:3px solid transparent;transition:all .2s;}
+.rw-bible-section.highlighted{border-inline-start-color:var(--rw-amber);background:var(--rw-amber-dim);}
+.rw-bible-section h3{font-size:14px;font-weight:700;color:var(--rw-text);margin-bottom:6px;}
+.rw-bible-section p{font-size:13px;color:var(--rw-text-2);line-height:1.8;}
+
+/* Script in right panel */
+.rw-script-line{font-size:13px;color:var(--rw-text-2);line-height:1.8;margin-bottom:6px;padding:4px 8px;}
+.rw-script-line.scene-header{font-weight:700;color:var(--rw-text);font-size:14px;margin-top:16px;padding:8px;background:var(--rw-surface-2);border:1px solid var(--rw-border);}
+.rw-script-line.dialogue{padding-inline-start:40px;color:var(--rw-text);}
+.rw-script-line.character{font-weight:700;color:var(--rw-amber);font-size:12px;text-transform:uppercase;padding-inline-start:40px;margin-top:10px;margin-bottom:2px;}
+.rw-script-line.action{color:var(--rw-text-2);font-style:italic;}
+.rw-script-line.highlighted{background:var(--rw-amber-dim);border-inline-start:3px solid var(--rw-amber);}
+
+/* ── FOOTER ── */
+.rw-footer{background:var(--rw-surface);border-top:1px solid var(--rw-border);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--rw-text-3);}
+.rw-footer-brand{display:flex;align-items:center;gap:8px;font-weight:700;color:var(--rw-text-2);}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:6px;}
+::-webkit-scrollbar-track{background:var(--rw-bg);}
+::-webkit-scrollbar-thumb{background:var(--rw-surface-3);border-radius:3px;}
+::-webkit-scrollbar-thumb:hover{background:var(--rw-text-3);}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="rw-topbar">
+  <div class="rw-logo">ڕ</div>
+  <div class="rw-topbar-title">ڕوانگە — میوانێکی نادیار — پێداچوونەوە v03</div>
+  <div class="rw-topbar-meta">review v03 · bible v3.0 · draft</div>
+</div>
+
+<!-- TABS -->
+<div class="rw-tabs" id="rw-tabs">
+  <button class="rw-tab active" onclick="rwTab('active',this)">بڕیارە نوێیەکان <span class="rw-tab-count">19</span></button>
+  <button class="rw-tab" onclick="rwTab('locked',this)">بڕیارە جێگیرکراوەکان <span class="rw-tab-count locked">25</span></button>
+  <button class="rw-tab" onclick="rwTab('bible',this)">بایبڵ</button>
+</div>
+
+<!-- MAIN -->
+<div class="rw-main">
+
+  <!-- LEFT PANEL -->
+  <div class="rw-left">
+
+    <!-- ACTIVE DECISIONS PANE -->
+    <div class="rw-pane active" id="rw-active">
+      <!-- Decisions will be rendered by JS -->
+    </div>
+
+    <!-- LOCKED DECISIONS PANE -->
+    <div class="rw-pane" id="rw-locked">
+      <!-- Locked decisions rendered by JS -->
+    </div>
+
+    <!-- FULL BIBLE PANE -->
+    <div class="rw-pane" id="rw-bible">
+      <div class="rw-bible">
+        <h2>بەشی یەکەم: سیستمی ناڵی</h2>
+        <p>ناڵی مرۆڤێکە کە هەر پەیوەندییەکی مرۆییانەی بە ناڕاستەوخۆ ئەنجام دەدات — بە ئامێری AI، بە نواندن، بە سیستمی کۆنترۆڵ. ئەمە نەخۆشییەک نییە — ئەوەیە کە بووەتە. هەر ساتێک کە ناپایداری دەبینێت، سیستمەکەی دەخاتەکار. کاتێک سیستمەکە ناکارا دەبێت، ئەو تەنها دەمێنێتەوە.</p>
+
+        <h2>بەشی دووەم: گەشە — میوانەکە</h2>
+        <p>گەشە نەک تەنها قوربانییەکەیە — ئەو خاوەنی چیرۆکی خۆیەتی. شەکرەبایی و نەخۆشییەکەی، ماسکی چەرمسازی، کۆتاییەکەی — هەموو ئەمانە بەشی ڕێبازی خۆیەتین. ئەو بە سیستمی ناڵی نەمردوە — بە نەخۆشییەکەی خۆی مردوە.</p>
+
+        <h2>بەشی سێیەم: جیهانی فیزیکی</h2>
+        <p>سۆفا شەش کارکردی هەیە: نوستنگا، جێگای مردن، تابوت، کەلوپەلی کۆمەڵایەتی، شوێنی نزیک-دۆزینەوە، بەڵگەنامە. دەرگای قفڵکراو ڕابردووی ناڵی ئاشکرا دەکات. خانوو بەرامبەر ئاپارتمان — باخچە شانۆ بوو.</p>
+
+        <h2>بەشی چوارەم: ئاوازی فیلم</h2>
+        <p>مۆنتاژی سەرەتا پارچەکانی بێواتا پێشکەش دەکات — کە لە کۆتاییدا واتادار دەبن. فەکەری باخەوان بنەمای کاتییە. چیخۆڤ ئاوێنەی تیمایییە. تویستی کۆتایی هەموو شتێک دەگۆڕێتەوە — ئایا وا دەرکەوت بۆ باشتر بوو یان خراپتر؟</p>
+      </div>
+    </div>
+
+  </div><!-- /rw-left -->
+
+  <!-- RIGHT PANEL -->
+  <div class="rw-right">
+    <div class="rw-right-header">
+      <div class="rw-right-tab active" onclick="rwRight('rbible',this)">بایبڵ</div>
+      <div class="rw-right-tab" onclick="rwRight('rscript',this)">سکریپت</div>
+    </div>
+
+    <!-- Bible sections -->
+    <div class="rw-right-pane active" id="rw-rbible">
+      <div class="rw-bible-section" data-section="nali-system">
+        <h3>سیستمی ناڵی — D15 ناڕاستەوخۆیی</h3>
+        <p>هەر پەیوەندییەکی ناڵی بە سیستمێکەوە ناڕاستەوخۆ ئەنجام دەدرێت. ئەو هەرگیز ڕاستەوخۆ کار ناکات لەسەر ڕاستی. لە AI بۆ شانۆ، لە کۆنترۆڵ بۆ هونەر — هەر جارە ناوبژیوانێک هەیە نێوان ناڵی و ڕاستییەکە.</p>
+      </div>
+      <div class="rw-bible-section" data-section="gesha">
+        <h3>گەشە — چیرۆکی تایبەتی خۆی</h3>
+        <p>گەشە تەنها قوربانی نییە. شەکرەبایی و نەخۆشییەکەی، ماسکەکەی، شەربەتەکەی — هەموو ئەمانە بەشی ئەرکی ڕێبازین. ئەو بە سیستمی ناڵی نەمردوە، بەڵکو بە نەخۆشییەکەی خۆی.</p>
+      </div>
+      <div class="rw-bible-section" data-section="physical">
+        <h3>جیهانی فیزیکی — شتەکان چیرۆک دەگێڕن</h3>
+        <p>سۆفا، دەرگای قفڵکراو، خانووی باخچە — هەر شتێک لە فیلمەکەدا بارگی ستراکچەری هەڵدەگرێت. سۆفا ٦ کاری هەیە. دەرگای قفڵکراو ڕابردوو ئاشکرا دەکات. خانوو بەرامبەر ئاپارتمان ڕاستییەکە نیشان دەدات.</p>
+      </div>
+      <div class="rw-bible-section" data-section="architecture">
+        <h3>ئاوازی فیلم — چوارچێوە</h3>
+        <p>تویستی کۆتایی هەموو شتێک دەگۆڕێتەوە. مۆنتاژی سەرەتا ئامادەکاری کۆتاییە. فەکەری باخەوان بنەمای کاتییە. لە ٥ خولەکی کۆتاییدا بڕیار دەدرێت — ئایا فیلمەکە وێستگایەکی بریلیانت بوو یان فێڵ.</p>
+      </div>
+    </div>
+
+    <!-- Script panel -->
+    <div class="rw-right-pane" id="rw-rscript">
+      <div class="rw-script-line scene-header">دیمەنی ٣ — ژووری ناڵی — شەو</div>
+      <div class="rw-script-line action">ناڵی لە تەختی مۆبایلەکەی سەیر دەکات. دوای ئەوەی بە گەشە قسەی کرد، تەلەفۆنەکە دادەنێت و ئەپی AI دەکاتەوە.</div>
+      <div class="rw-script-line character" data-scene="3">ناڵی</div>
+      <div class="rw-script-line dialogue" data-scene="3">ئەوەی ئەمشەو قسەی کردین... ئایا ئەو ڕاستگۆ بوو؟</div>
+      <div class="rw-script-line character" data-scene="3">AI</div>
+      <div class="rw-script-line dialogue" data-scene="3">بەپێی شیکردنەوەی دەنگ — ئاستی دڵنیایی ٧٨٪ بوو. بەڵام ئەو ماسکی جوانکاری لەبەردەمی کامێرا لەبەرکردبوو.</div>
+
+      <div class="rw-script-line scene-header" style="margin-top:24px">دیمەنی ١٣ — ناوی خانوو — ڕۆژ</div>
+      <div class="rw-script-line action">ناڵی لە ژوورێکی دیکەوە بە نهێنی تەلەفۆن بۆ AI دەکات. گەشە لە ژووری خواردن ئامادەکاری خواردن دەکات.</div>
+      <div class="rw-script-line character" data-scene="13">ناڵی</div>
+      <div class="rw-script-line dialogue" data-scene="13">ئەو قسەی کرد لەبارەی ئەوەی ئەویشنەوە بۆ ئەوەی کە بەسەر چووبوو... واتا چی؟</div>
+      <div class="rw-script-line character" data-scene="13">AI</div>
+      <div class="rw-script-line dialogue" data-scene="13">واز لە خوێندنەوەی مێشکی مرۆڤەکان بهێنە. تۆ زانیاری ناتەواو بەکار دەهێنیت بۆ ئاوێتەی تەواو.</div>
+
+      <div class="rw-script-line scene-header" style="margin-top:24px">دیمەنی ٢١ — ژووری نیشتەجێبوون — ئێوارە</div>
+      <div class="rw-script-line action">ناڵی ڕاهێنانی چیخۆڤ بەڕێوە دەبات. ئەکتەرەکان لەسەر سۆفا ئەکتەری دەکەن — نازانن تەرمی گەشە لەژێریانە.</div>
+      <div class="rw-script-line character" data-scene="21">ناڵی</div>
+      <div class="rw-script-line dialogue" data-scene="21">(بە دەرهێنەرانە) باشە، بیربکەنەوە ئەمە ساتی ڕاستییە. نینا ڕاستییەکە دەزانێت. ئێوە — ئەو ڕاستییە ناکارە.</div>
+    </div>
+
+  </div><!-- /rw-right -->
+
+</div><!-- /rw-main -->
+
+<!-- FOOTER -->
+<div class="rw-footer">
+  <div class="rw-footer-brand">
+    <div class="rw-logo" style="width:28px;height:28px;font-size:12px">ڕ</div>
+    <span><span style="color:var(--rw-pink)">ڕوانگە</span> — پلاتفۆرمی پێشبەرهەمهێنانی سینەمای کوردی</span>
+  </div>
+  <div><span style="font-family:'Inter',sans-serif;direction:ltr;display:inline-block">v03 · 2026-05-02</span></div>
+</div>
+
+<script>
+/* ── TAB SWITCHING ── */
+function rwTab(id, btn) {
+  document.querySelectorAll('#rw-tabs .rw-tab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.rw-left .rw-pane').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('rw-' + id).classList.add('active');
+}
+
+/* ── RIGHT PANEL TOGGLE ── */
+function rwRight(id, btn) {
+  document.querySelectorAll('.rw-right-tab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.rw-right-pane').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('rw-' + id).classList.add('active');
+}
+
+/* ── DECISION DATA ── */
+var activeDecisions = [
+  {id:'3e31d9a6', topic:'تویستی کۆتایی', text:'ئایا ئاشکرابوونی ئەوەی هەموو شتێک خەیاڵی ناڵی بوو، فیلمەکە بەهێزتر دەکات یان لاوازتری دەکات؟ ئایا بینەری هەست بە فریودان دەکات؟', scenes:['42','43'], expr:'artistic', intensity:'peak', section:'architecture'},
+  {id:'52664763', topic:'ناڵی — ئاڵوگۆڕی دڵنیایی', text:'ناڵی پێویستییەکی نەخۆشانەی بە دڵنیایی هەیە. ئایا ئەمە بینەر وادەکات نەفرەتی لێ بکات بەبێ هاوسۆزی؟', scenes:['3','13','21','34'], expr:'behavioral', intensity:'peak', section:'nali-system'},
+  {id:'76487c5e', topic:'گەشە — کەسایەتی و نەخۆشی شەکرە', text:'ئایا بینەر دەبێت پێش مردنی گەشە بزانێت کە شەکرەبایی هەیە؟ یان ئایا ئاشکرابوونی لە کۆتاییدا بەسە؟', scenes:['3','8','16','38'], expr:'emotional', intensity:'medium', section:'gesha'},
+  {id:'00cda708', topic:'سۆفا — ناوەندی فیزیکی تراژیدیا', text:'سۆفا ٦ کارکردی هەیە لە فیلمەکەدا. ئایا ئەمە بارگرانە بۆ تاکە شتێک؟ ئایا ئەمە سمبۆلیکی باشە یان باری زیادە؟', scenes:['18','19','20','21','24'], expr:'memory', intensity:'medium', section:'physical'},
+];
+
+var lockedDecisions = [
+  {id:'d01', topic:'تەمەی سەرەکی — واقیعی دەستکرد', text:'پوختەی سەرەکی فیلمەکە ئەوەیە کە ناڵی لە ڕێگەی ناڕاستەوخۆییەوە هەموو پەیوەندییەکانی بەڕێوە دەبات.', ver:'v01', lockComment:'ڕێکەوت لەگەڵ ڕوانگەی دەرهێنەر.', date:'2026-04-15'},
+  {id:'d02', topic:'کێشەی بەشی ٢A — ستراکچەری ناوەند', text:'بەشی دووەمی یەکەم پێویستە تەنسیۆنی نێوان کۆنترۆڵ و شکانی ناڵی نیشان بدات.', ver:'v01', lockComment:'', date:'2026-04-15'},
+  {id:'d03', topic:'مۆدێلی بۆمب — کاتی ناڕاستەوخۆ', text:'فیلمەکە وەک بۆمبێکی ساتی ئاهەستە دەخوازرێت — بینەر دەزانێت چی لەبەرەوە، بەڵام نازانێت کەی دەتەقێت.', ver:'v02', lockComment:'مۆدێلی ساتی نهێنی.', date:'2026-04-22'},
+  {id:'d04', topic:'ڕۆڵی AI — چاودێری بەبێ هەست', text:'AI وەک ئامێری چاودێری دەکار دەهێنرێت — بەبێ هەست، بەبێ بڕیار. تەنها ڕاپۆرت دەدات و شیکاری دەکات.', ver:'v02', lockComment:'AI ویژدانی ناڵی نییە — ئامێری ناڵییە.', date:'2026-04-22'},
+];
+
+/* ── RENDER ACTIVE DECISIONS ── */
+(function buildActive() {
+  var container = document.getElementById('rw-active');
+  activeDecisions.forEach(function(d, i) {
+    var intLevel = d.intensity === 'low' ? 1 : d.intensity === 'medium' ? 2 : d.intensity === 'peak' ? 3 : 4;
+    var intClass = d.intensity === 'peak' ? 'peak' : d.intensity === 'collapse' ? 'collapse' : '';
+    var dots = '';
+    for (var j = 1; j <= 4; j++) {
+      dots += '<div class="rw-int-dot' + (j <= intLevel ? ' on' + (j === intLevel && intClass ? ' '+intClass : '') : '') + '"></div>';
+    }
+
+    var sceneBadges = d.scenes.map(function(s) {
+      return '<span class="rw-chip rw-chip-scene">دیمەن ' + s + '</span>';
+    }).join('');
+
+    var el = document.createElement('div');
+    el.className = 'rw-decision';
+    el.setAttribute('data-section', d.section);
+    el.innerHTML =
+      '<div class="rw-d-header" onclick="selectDecision(this,\'' + d.section + '\')">' +
+        '<div class="rw-d-topic">' + d.topic + '</div>' +
+        '<div class="rw-d-text">' + d.text + '</div>' +
+        '<div class="rw-d-meta">' +
+          sceneBadges +
+          '<span class="rw-chip rw-chip-expr ' + d.expr + '">' + d.expr + '</span>' +
+          '<div class="rw-intensity"><div class="rw-int-bar">' + dots + '</div><span>' + d.intensity + '</span></div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="rw-d-actions">' +
+        '<button class="rw-btn rw-btn-accept" onclick="event.stopPropagation()">✓ پەسەندکردن</button>' +
+        '<button class="rw-btn rw-btn-reject" onclick="event.stopPropagation()">✗ ڕەتکردنەوە</button>' +
+        '<button class="rw-btn rw-btn-comment" onclick="toggleComment(this)">💬 تێبینی</button>' +
+      '</div>' +
+      '<div class="rw-comment-area">' +
+        '<textarea class="rw-comment-input" placeholder="تێبینیت لێرە بنووسە..."></textarea>' +
+      '</div>';
+    container.appendChild(el);
+  });
+})();
+
+/* ── RENDER LOCKED DECISIONS ── */
+(function buildLocked() {
+  var container = document.getElementById('rw-locked');
+  var groups = {};
+  lockedDecisions.forEach(function(d) {
+    if (!groups[d.ver]) groups[d.ver] = [];
+    groups[d.ver].push(d);
+  });
+
+  Object.keys(groups).sort().forEach(function(ver) {
+    var grp = document.createElement('div');
+    grp.className = 'rw-ver-group';
+    grp.innerHTML = '<div class="rw-ver-label">' + ver.toUpperCase() + ' — ' + groups[ver].length + ' بڕیار</div>';
+
+    groups[ver].forEach(function(d) {
+      var el = document.createElement('div');
+      el.className = 'rw-locked';
+      var bid = 'lb-' + d.id;
+      el.innerHTML =
+        '<div class="rw-locked-hdr" onclick="toggleLocked(this,\'' + bid + '\')">' +
+          '<span class="rw-locked-topic">' + d.topic + '</span>' +
+          '<span class="rw-locked-badge">جێگیر</span>' +
+          '<span class="rw-locked-ver">' + d.ver + '</span>' +
+          '<span class="rw-locked-chevron">›</span>' +
+        '</div>' +
+        '<div class="rw-locked-body" id="' + bid + '">' +
+          '<div class="rw-locked-text">' + d.text + '</div>' +
+          (d.lockComment ? '<div class="rw-locked-comment">' + d.lockComment + '</div>' : '') +
+          '<div class="rw-locked-date">' + d.date + '</div>' +
+        '</div>';
+      grp.appendChild(el);
+    });
+
+    container.appendChild(grp);
+  });
+})();
+
+/* ── INTERACTIONS ── */
+function selectDecision(hdr, section) {
+  // Remove previous selection
+  document.querySelectorAll('.rw-decision').forEach(function(d) { d.classList.remove('selected'); });
+  hdr.closest('.rw-decision').classList.add('selected');
+
+  // Highlight bible section
+  document.querySelectorAll('.rw-bible-section').forEach(function(s) { s.classList.remove('highlighted'); });
+  var target = document.querySelector('.rw-bible-section[data-section="' + section + '"]');
+  if (target) {
+    target.classList.add('highlighted');
+    target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+}
+
+function toggleLocked(hdr, bid) {
+  var body = document.getElementById(bid);
+  if (!body) return;
+  var open = body.classList.contains('open');
+  body.classList.toggle('open', !open);
+  hdr.classList.toggle('open', !open);
+}
+
+function toggleComment(btn) {
+  var area = btn.closest('.rw-decision').querySelector('.rw-comment-area');
+  area.classList.toggle('open');
+  if (area.classList.contains('open')) {
+    area.querySelector('textarea').focus();
+  }
+}
+</script>
+</body>
+</html>

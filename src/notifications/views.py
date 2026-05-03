@@ -1,7 +1,7 @@
+from django.db import DatabaseError
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, render
 from django.views import View
-from django.db import DatabaseError
 
 from src.notifications.models import Notification
 from src.notifications.services import NotificationService

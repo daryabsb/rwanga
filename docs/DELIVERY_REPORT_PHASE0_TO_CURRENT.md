@@ -44,7 +44,7 @@ The following drift happened and is confirmed:
 
 - Drift A: Auth flow diverged from expected HUD2/allauth behavior in runtime (`POST /accounts/login/` returned `405`).
 - Drift B: Bootstrap was loaded via CDN instead of project-local BS5 assets.
-- Drift C: Large Django `{% comment %} ... {% endcomment %}` comment blocks caused visible leakage in UI in some rendering paths.
+- Drift C: Large Django `{# ... #}` comment blocks caused visible leakage in UI in some rendering paths.
 - Drift D: Multiple invented placeholder templates/views were added where strict design-kit-first reuse was expected.
 - Drift E: Static serving path resolution was broken in dev runtime for `/static/...` due settings/include path behavior.
 

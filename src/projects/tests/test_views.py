@@ -10,7 +10,6 @@ class ProjectsViewTests(TestCase):
         self.user = get_user_model().objects.create_user(
             email="view-owner@example.com", password="pass12345"
         )
-        self.client.force_login(self.user)
         self.studio = Studio.objects.create(name="Studio View", slug="studio-view")
         self.project = Project.objects.create(
             studio=self.studio, owner=self.user, title="View Film", slug="view-film"

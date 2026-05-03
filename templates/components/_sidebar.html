@@ -74,10 +74,10 @@
   <div class="rw-rail-spacer"></div>
 
   {% comment %} Notification bell {% endcomment %}
-  <button class="rw-rail-icon" style="position:relative" title="{% trans 'ئاگادارکردنەوەکان' %}"
+  <button id="notification-bell" type="button" class="rw-rail-icon" style="position:relative" title="{% trans 'ئاگادارکردنەوەکان' %}"
           hx-get="{% url 'notifications:panel' %}"
           hx-target="#rw-notif-panel"
-          hx-swap="outerHTML">
+          hx-swap="innerHTML">
     🔔
     <span class="rw-notif-badge" id="rw-notif-count"
           {% if unread_count == 0 %}style="display:none"{% endif %}></span>
@@ -89,4 +89,5 @@
           title="{% trans 'گۆڕینی شێوازی ڕووکار' %}">☀</button>
 
 </aside>
+
 

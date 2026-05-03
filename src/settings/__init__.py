@@ -16,7 +16,6 @@ include(
     "components/restframework.py",
     "components/cors.py",
     "components/integrations.py",
-    "components/ai_engine.py",
     "components/rwanga.py",
     optional("components/local.py"),
 )

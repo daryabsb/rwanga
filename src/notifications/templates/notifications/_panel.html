@@ -27,7 +27,7 @@
         {% trans "هەموو خوێندراوەن" %}
       </button>
       {% endif %}
-      <button id="notification-close-btn" onclick="document.getElementById('rw-notif-panel').innerHTML=''"
+      <button id="notification-close-btn" type="button" onclick="var el=document.getElementById('rw-notif-panel'); if(el){el.innerHTML='';}"
               style="background:none;border:none;color:var(--rw-text-3);font-size:18px;cursor:pointer;padding:0 4px;line-height:1">✕</button>
     </div>
   </div>
@@ -83,3 +83,4 @@
   </div>
 
 </div>
+

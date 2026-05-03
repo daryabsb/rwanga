@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="ku" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rwanga — Chain Viewer</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --cv-bg:#0F0F12;--cv-surface:#17171C;--cv-surface-2:#1E1E26;--cv-surface-3:#26262E;
+  --cv-border:#2C2C38;--cv-border-2:#222230;
+  --cv-text:#EDEAD8;--cv-text-2:#78788C;--cv-text-3:#40404E;
+  --cv-amber:#D4A574;--cv-amber-dim:rgba(212,165,116,.10);
+  --cv-pink:#F72585;--cv-red:#E63946;
+}
+body{font-family:'Cairo','Noto Sans Arabic',Arial,sans-serif;background:var(--cv-bg);color:var(--cv-text);font-size:14px;min-height:100vh;direction:rtl;line-height:1.6;}
+
+/* ── TOP BAR ── */
+.cv-topbar{position:sticky;top:0;z-index:100;background:var(--cv-surface);border-bottom:1px solid var(--cv-border);display:flex;align-items:center;gap:12px;padding:0 20px;height:52px;}
+.cv-logo{width:36px;height:36px;background:var(--cv-pink);color:#fff;font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:center;font-family:'Cairo',sans-serif;flex-shrink:0;}
+.cv-back{font-size:12px;color:var(--cv-text-2);cursor:pointer;padding:6px 12px;border:1px solid var(--cv-border);background:var(--cv-surface-2);font-family:'Cairo',sans-serif;text-decoration:none;display:inline-flex;align-items:center;gap:4px;}
+.cv-back:hover{color:var(--cv-text);border-color:var(--cv-text-3);}
+.cv-chain-title{font-size:14px;font-weight:700;color:var(--cv-pink);flex:1;}
+.cv-chain-id{font-family:'Inter',sans-serif;font-size:11px;color:var(--cv-text-3);direction:ltr;}
+
+/* ── CHAIN HERO ── */
+.cv-hero{background:var(--cv-surface);border-bottom:1px solid var(--cv-border);padding:24px 28px 20px;text-align:center;}
+.cv-hero-label{font-size:10px;font-weight:700;color:var(--cv-text-3);text-transform:uppercase;letter-spacing:1.4px;margin-bottom:6px;font-family:'Inter',sans-serif;}
+.cv-hero-title{font-size:22px;font-weight:700;color:var(--cv-text);margin-bottom:6px;}
+.cv-hero-sub{font-size:13px;color:var(--cv-text-2);max-width:640px;margin:0 auto;}
+
+/* ── TIMELINE ── */
+.cv-timeline-wrap{padding:40px 28px 20px;overflow-x:auto;}
+.cv-timeline{display:flex;align-items:flex-start;justify-content:center;gap:0;min-width:700px;position:relative;direction:ltr;}
+
+/* Node */
+.cv-node{display:flex;flex-direction:column;align-items:center;position:relative;cursor:pointer;transition:transform .15s;flex-shrink:0;}
+.cv-node:hover{transform:translateY(-3px);}
+.cv-node.selected .cv-node-box{border-color:var(--cv-amber);box-shadow:0 0 20px rgba(212,165,116,.2);}
+
+.cv-node-box{width:110px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px 10px;border:2px solid var(--cv-border);background:var(--cv-surface);transition:all .2s;position:relative;}
+
+/* Intensity visual encoding */
+.cv-node.intensity-low .cv-node-box{
+  height:90px;border-color:var(--cv-border);opacity:0.75;
+}
+.cv-node.intensity-medium .cv-node-box{
+  height:110px;border-color:rgba(212,165,116,.4);border-width:2px;
+}
+.cv-node.intensity-peak .cv-node-box{
+  height:140px;border-color:var(--cv-amber);border-width:3px;
+  box-shadow:0 0 30px rgba(212,165,116,.15), inset 0 0 20px rgba(212,165,116,.05);
+}
+.cv-node.intensity-collapse .cv-node-box{
+  height:100px;
+  border-color:var(--cv-red);border-width:2px;
+  border-style:dashed;
+  opacity:0.7;
+  background:repeating-linear-gradient(
+    -45deg,
+    var(--cv-surface),
+    var(--cv-surface) 4px,
+    rgba(230,57,70,.03) 4px,
+    rgba(230,57,70,.03) 8px
+  );
+}
+.cv-node.intensity-collapse-sustained .cv-node-box{
+  height:95px;
+  border-color:var(--cv-red);border-width:2px;
+  border-style:dotted;
+  opacity:0.6;
+  background:repeating-linear-gradient(
+    -45deg,
+    var(--cv-surface),
+    var(--cv-surface) 3px,
+    rgba(230,57,70,.04) 3px,
+    rgba(230,57,70,.04) 6px
+  );
+}
+
+.cv-scene-num{font-family:'Inter',sans-serif;font-size:18px;font-weight:700;color:var(--cv-amber);margin-bottom:4px;}
+.cv-node.intensity-collapse .cv-scene-num,
+.cv-node.intensity-collapse-sustained .cv-scene-num{color:var(--cv-red);opacity:0.8;}
+.cv-node.intensity-peak .cv-scene-num{color:var(--cv-amber);font-size:22px;}
+
+.cv-intensity-label{font-family:'Inter',sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;padding:2px 6px;margin-bottom:2px;}
+.cv-int-low{color:var(--cv-text-3);}
+.cv-int-medium{color:var(--cv-amber);opacity:0.8;}
+.cv-int-peak{color:var(--cv-amber);background:rgba(212,165,116,.1);border-radius:2px;}
+.cv-int-collapse{color:var(--cv-red);opacity:0.7;}
+
+/* Below-node labels */
+.cv-node-below{margin-top:10px;text-align:center;}
+.cv-expr-type{font-size:11px;font-weight:600;color:var(--cv-text-2);margin-bottom:2px;}
+.cv-func{font-size:10px;color:var(--cv-text-3);line-height:1.4;max-width:110px;}
+
+/* Arrow connector */
+.cv-arrow{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:60px;padding-top:20px;position:relative;}
+.cv-arrow-line{width:100%;height:2px;background:linear-gradient(90deg, rgba(212,165,116,.15), rgba(212,165,116,.5), rgba(212,165,116,.15));position:relative;}
+.cv-arrow-line::after{content:'▶';position:absolute;left:-4px;top:-8px;font-size:12px;color:var(--cv-amber);opacity:0.6;}
+.cv-arrow.to-collapse .cv-arrow-line{background:linear-gradient(90deg, rgba(212,165,116,.3), rgba(230,57,70,.4));}
+.cv-arrow.to-collapse .cv-arrow-line::after{color:var(--cv-red);}
+.cv-arrow-label{font-family:'Inter',sans-serif;font-size:9px;color:var(--cv-text-3);margin-top:6px;white-space:nowrap;text-align:center;direction:ltr;}
+
+/* ── ESCALATION BAR ── */
+.cv-esc-bar{margin:0 auto;max-width:750px;padding:0 28px 30px;direction:ltr;}
+.cv-esc-track{height:4px;background:var(--cv-surface-3);border-radius:2px;position:relative;overflow:hidden;}
+.cv-esc-fill{position:absolute;top:0;right:0;height:100%;border-radius:2px;
+  background:linear-gradient(90deg, rgba(212,165,116,.2) 0%, var(--cv-amber) 55%, var(--cv-pink) 70%, var(--cv-red) 85%, rgba(230,57,70,.4) 100%);}
+.cv-esc-labels{display:flex;justify-content:space-between;margin-top:6px;font-family:'Inter',sans-serif;font-size:9px;color:var(--cv-text-3);text-transform:uppercase;letter-spacing:0.5px;}
+
+/* ── DETAIL PANEL ── */
+.cv-detail{background:var(--cv-surface);border:1px solid var(--cv-border);margin:0 28px 28px;display:none;}
+.cv-detail.open{display:block;}
+
+.cv-detail-header{display:flex;align-items:center;gap:14px;padding:16px 20px;border-bottom:1px solid var(--cv-border-2);}
+.cv-detail-scene{font-family:'Inter',sans-serif;font-size:24px;font-weight:700;color:var(--cv-amber);}
+.cv-detail-title{font-size:16px;font-weight:700;color:var(--cv-text);flex:1;}
+.cv-detail-close{width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--cv-text-3);font-size:16px;border:1px solid var(--cv-border);background:var(--cv-surface-2);}
+.cv-detail-close:hover{color:var(--cv-text);border-color:var(--cv-text-3);}
+
+.cv-detail-body{padding:20px;}
+.cv-detail-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:16px;margin-bottom:20px;}
+.cv-dg-item{background:var(--cv-surface-2);padding:12px;border:1px solid var(--cv-border-2);}
+.cv-dg-label{font-size:9px;font-weight:700;color:var(--cv-text-3);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:4px;font-family:'Inter',sans-serif;}
+.cv-dg-value{font-size:14px;font-weight:600;color:var(--cv-text);}
+
+.cv-detail-lens{background:var(--cv-amber-dim);border-inline-start:3px solid var(--cv-amber);padding:14px 18px;margin-bottom:16px;}
+.cv-detail-lens-label{font-size:9px;font-weight:700;color:var(--cv-amber);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-family:'Inter',sans-serif;}
+.cv-detail-lens-text{font-size:14px;color:var(--cv-text);line-height:1.8;font-family:'Cairo',sans-serif;}
+
+.cv-detail-analysis{font-size:13px;color:var(--cv-text-2);line-height:1.8;margin-bottom:16px;}
+
+.cv-detail-link{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;font-size:12px;font-weight:600;color:var(--cv-amber);border:1px solid rgba(212,165,116,.3);background:rgba(212,165,116,.05);cursor:pointer;font-family:'Cairo',sans-serif;transition:all .12s;}
+.cv-detail-link:hover{background:rgba(212,165,116,.12);border-color:var(--cv-amber);}
+
+/* ── FOOTER ── */
+.cv-footer{background:var(--cv-surface);border-top:1px solid var(--cv-border);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--cv-text-3);}
+.cv-footer-brand{display:flex;align-items:center;gap:8px;font-weight:700;color:var(--cv-text-2);}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="cv-topbar">
+  <div class="cv-logo">ڕ</div>
+  <a class="cv-back">← بگەڕێوە بۆ پێداچوونەوە</a>
+  <div class="cv-chain-title">زنجیرە: D15 — ناڕاستەوخۆیی</div>
+  <div class="cv-chain-id">D15 · 5 scenes · v03</div>
+</div>
+
+<!-- HERO -->
+<div class="cv-hero">
+  <div class="cv-hero-label">DECISION CHAIN</div>
+  <div class="cv-hero-title">D15 — ناڕاستەوخۆیی (Mediation)</div>
+  <div class="cv-hero-sub">هەر پەیوەندییەکی ناڵی بە سیستمێکەوە ناڕاستەوخۆ ئەنجام دەدرێت. ئەو هەرگیز ڕاستەوخۆ کار ناکات لەسەر ڕاستی.</div>
+</div>
+
+<!-- TIMELINE -->
+<div class="cv-timeline-wrap">
+  <div class="cv-timeline" id="cv-timeline">
+
+    <!-- Node 1: Scene 3 -->
+    <div class="cv-node intensity-low" onclick="showDetail(0)">
+      <div class="cv-node-box">
+        <div class="cv-scene-num">3</div>
+        <div class="cv-intensity-label cv-int-low">LOW</div>
+      </div>
+      <div class="cv-node-below">
+        <div class="cv-expr-type">emotional</div>
+        <div class="cv-func">stabilize uncertainty</div>
+      </div>
+    </div>
+
+    <!-- Arrow 1→2 -->
+    <div class="cv-arrow">
+      <div class="cv-arrow-line"></div>
+      <div class="cv-arrow-label">emotional → behavioral</div>
+    </div>
+
+    <!-- Node 2: Scene 13 -->
+    <div class="cv-node intensity-medium" onclick="showDetail(1)">
+      <div class="cv-node-box">
+        <div class="cv-scene-num">13</div>
+        <div class="cv-intensity-label cv-int-medium">MEDIUM</div>
+      </div>
+      <div class="cv-node-below">
+        <div class="cv-expr-type">behavioral</div>
+        <div class="cv-func">control interaction</div>
+      </div>
+    </div>
+
+    <!-- Arrow 2→3 -->
+    <div class="cv-arrow">
+      <div class="cv-arrow-line"></div>
+      <div class="cv-arrow-label">behavioral → artistic</div>
+    </div>
+
+    <!-- Node 3: Scene 21 — PEAK -->
+    <div class="cv-node intensity-peak" onclick="showDetail(2)">
+      <div class="cv-node-box">
+        <div class="cv-scene-num">21</div>
+        <div class="cv-intensity-label cv-int-peak">PEAK</div>
+      </div>
+      <div class="cv-node-below">
+        <div class="cv-expr-type">artistic</div>
+        <div class="cv-func">overwrite reality</div>
+      </div>
+    </div>
+
+    <!-- Arrow 3→4 -->
+    <div class="cv-arrow to-collapse">
+      <div class="cv-arrow-line"></div>
+      <div class="cv-arrow-label">artistic → broken</div>
+    </div>
+
+    <!-- Node 4: Scene 34 — COLLAPSE -->
+    <div class="cv-node intensity-collapse" onclick="showDetail(3)">
+      <div class="cv-node-box">
+        <div class="cv-scene-num">34</div>
+        <div class="cv-intensity-label cv-int-collapse">COLLAPSE</div>
+      </div>
+      <div class="cv-node-below">
+        <div class="cv-expr-type">broken</div>
+        <div class="cv-func">system fails (forced)</div>
+      </div>
+    </div>
+
+    <!-- Arrow 4→5 -->
+    <div class="cv-arrow to-collapse">
+      <div class="cv-arrow-line"></div>
+      <div class="cv-arrow-label">collapse → sustained</div>
+    </div>
+
+    <!-- Node 5: Scene 37 — SUSTAINED COLLAPSE -->
+    <div class="cv-node intensity-collapse-sustained" onclick="showDetail(4)">
+      <div class="cv-node-box">
+        <div class="cv-scene-num">37</div>
+        <div class="cv-intensity-label cv-int-collapse">HELD</div>
+      </div>
+      <div class="cv-node-below">
+        <div class="cv-expr-type">broken (held)</div>
+        <div class="cv-func">conscience alone (chosen)</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ESCALATION BAR -->
+<div class="cv-esc-bar">
+  <div class="cv-esc-track">
+    <div class="cv-esc-fill" style="width:100%"></div>
+  </div>
+  <div class="cv-esc-labels">
+    <span>ESTABLISH</span>
+    <span>ENFORCE</span>
+    <span>PEAK</span>
+    <span>FRACTURE</span>
+    <span>SUSPEND</span>
+  </div>
+</div>
+
+<!-- DETAIL PANEL -->
+<div class="cv-detail" id="cv-detail">
+  <div class="cv-detail-header">
+    <div class="cv-detail-scene" id="cd-scene"></div>
+    <div class="cv-detail-title" id="cd-title"></div>
+    <div class="cv-detail-close" onclick="closeDetail()">✕</div>
+  </div>
+  <div class="cv-detail-body">
+    <div class="cv-detail-grid">
+      <div class="cv-dg-item"><div class="cv-dg-label">Type</div><div class="cv-dg-value" id="cd-type"></div></div>
+      <div class="cv-dg-item"><div class="cv-dg-label">Intensity</div><div class="cv-dg-value" id="cd-intensity"></div></div>
+      <div class="cv-dg-item"><div class="cv-dg-label">Function</div><div class="cv-dg-value" id="cd-function"></div></div>
+      <div class="cv-dg-item"><div class="cv-dg-label">Transition</div><div class="cv-dg-value" id="cd-transition"></div></div>
+    </div>
+    <div class="cv-detail-lens">
+      <div class="cv-detail-lens-label">LENS</div>
+      <div class="cv-detail-lens-text" id="cd-lens"></div>
+    </div>
+    <div class="cv-detail-analysis" id="cd-analysis"></div>
+    <div class="cv-detail-link">سکریپت ببینە ←</div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="cv-footer">
+  <div class="cv-footer-brand">
+    <div class="cv-logo" style="width:28px;height:28px;font-size:12px">ڕ</div>
+    <span><span style="color:var(--cv-pink)">ڕوانگە</span> — پلاتفۆرمی پێشبەرهەمهێنانی سینەمای کوردی</span>
+  </div>
+  <div><span style="font-family:'Inter',sans-serif;direction:ltr;display:inline-block">D15 chain · v03 · 2026-05-02</span></div>
+</div>
+
+<script>
+var chainData = [
+  {
+    scene: 3,
+    title: 'دیمەنی ٣ — ژووری ناڵی — شەو',
+    type: 'Emotional',
+    intensity: 'Low',
+    func: 'Stabilize uncertainty',
+    transition: '— (origin)',
+    lens: 'ماسک و دڵنیایی — هەردوکیان دەشارنەوە. نالی دوای پەیوەندییەکە، بە AIیەوە "دڵنیایی" دەوێت — نەک زانیاری. ماسک لەگەڵ مرۆڤ، ڕاستی لە ئامێر.',
+    analysis: 'ناڵی قسەی ڕاستی لەگەڵ مرۆڤ دەکات (گەشە). کاتێک تەواو دەبێت، سەرنجی دەدات بۆ AI. نەک بۆ ئەوەی قسەکەی شکست هێنابوو — بەڵکو بۆ ئەوەی نادڵنیایی بەرهەم هێنابوو. AI ئەرکی ئەوەیە نادڵنیایی بسڕێتەوە.'
+  },
+  {
+    scene: 13,
+    title: 'دیمەنی ١٣ — ناوی خانوو — ڕۆژ',
+    type: 'Behavioral',
+    intensity: 'Medium',
+    func: 'Control interaction',
+    transition: 'Emotional → Behavioral',
+    lens: 'مۆدێلی سیقەکردن — نالی یەکسەر تەلەفۆن بۆ AI دەکات — نەک بۆ یارمەتی، بەڵکو بۆ پشتڕاستکردنەوەی گومانەکانی. AI پێی دەڵێت "واز لە خوێندنەوەی مێشکی مرۆڤەکان بهێنە." نالی گوێ نادات.',
+    analysis: 'ناڕاستەوخۆیی گۆڕاوە. لە دیمەنی ٣، ناڵی دوای قسەکە بۆ AI پەیوەندی دەکرد. لە دیمەنی ١٣، لە کاتی قسەکەدا بۆ AI پەیوەندی دەکات. AI چیتر ئامێری پرۆسێسکردن نییە — ئامێری چاودێرییە.'
+  },
+  {
+    scene: 21,
+    title: 'دیمەنی ٢١ — ڕاهێنان — ئێوارە',
+    type: 'Artistic',
+    intensity: 'Peak',
+    func: 'Overwrite reality',
+    transition: 'Behavioral → Artistic',
+    lens: 'لووتکەی ناڕاستەوخۆیی — کاتێک ناڕاستەوخۆیی دەگاتە لووتکەکەی، دەبێتە هونەر. نالی تەرمەکە ناشارێتەوە — نواندنێک بەڕێوە دەبات کە تەرمەکە نابینراو دەکات. دەرهێنەر و بکوژ یەک ڕۆڵن.',
+    analysis: 'AI نییە. گەشە مردوە. بەڵام ناڕاستەوخۆییەکە ناوەستێت — بەرزتر دەبێتەوە. ناڵی ناتوانێت کارەسات ڕاستەوخۆ پرۆسێس بکات، بۆیە تاکە شتی سیستمەکەی ئیجازەی پێدەدات ئەنجام دەدات: نواندنێک دەرهێنەرانە بەڕێوە دەبات.'
+  },
+  {
+    scene: 34,
+    title: 'دیمەنی ٣٤ — بیابان — شەو',
+    type: 'Broken',
+    intensity: 'Collapse',
+    func: 'System failure (forced)',
+    transition: 'Artistic → Broken',
+    lens: 'ویژدان بەبێ سیستم — نالی چاڵ هەڵدەکەنێت بەڵام ناتوانێت گەشە بشارێتەوە. بۆ یەکەمجار بڕیارەکەی ڕاستەوخۆیە — نە AI، نە نواندن، نە ئامێر. تەنها مرۆڤ و ویژدان.',
+    analysis: 'هیچ. ئەوەی گرنگە. ناڵی لە بیابانە بەبێ ئینتەرنێت. AI نادەگەیەنرێت. ئەکتەرێک نییە بۆ دەرهێنان، بینەرێک نییە بۆ نواندن. بۆ یەکەمجار، ناڵی دەبێت بڕیار بدات بەبێ هیچ سیستمێک نێوان ئەو و ڕاستییەکە.'
+  },
+  {
+    scene: 37,
+    title: 'دیمەنی ٣٧ — گردەکە — بەیانی',
+    type: 'Broken (held)',
+    intensity: 'Collapse (sustained)',
+    func: 'Conscience alone (chosen)',
+    transition: 'Collapse → Sustained',
+    lens: 'مرۆییترین ساتی نالی — نالی ناتوانێت بیشارێتەوە. ناسنامەکەی جێدەهێڵێت. بۆ یەکەم جار بەبێ AI و بەبێ سیستەم بڕیار دەدات — ویژدانی ڕاستەقینە.',
+    analysis: 'دیمەنی ٣٤ شکانەکە بوو — یەکەم کرداری ڕاستەوخۆی ناخوازراو. دیمەنی ٣٧ پشتڕاستکردنەوەیە: شکانەکە دەمێنێتەوە. ناڵی جەستەکە جێدەهێڵێت لەوەی خێزانەکە بیدۆزنەوە. ئەمە نزیکترین شتە بۆ ساتێکی مرۆییانەی بەبێ ناوبژیوان.'
+  }
+];
+
+function showDetail(i) {
+  var d = chainData[i];
+  // Select node
+  document.querySelectorAll('.cv-node').forEach(function(n){ n.classList.remove('selected'); });
+  document.querySelectorAll('.cv-node')[i].classList.add('selected');
+
+  // Fill detail
+  document.getElementById('cd-scene').textContent = d.scene;
+  document.getElementById('cd-title').textContent = d.title;
+  document.getElementById('cd-type').textContent = d.type;
+  document.getElementById('cd-intensity').textContent = d.intensity;
+  document.getElementById('cd-function').textContent = d.func;
+  document.getElementById('cd-transition').textContent = d.transition;
+  document.getElementById('cd-lens').textContent = d.lens;
+  document.getElementById('cd-analysis').textContent = d.analysis;
+
+  var panel = document.getElementById('cv-detail');
+  panel.classList.add('open');
+  panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function closeDetail() {
+  document.getElementById('cv-detail').classList.remove('open');
+  document.querySelectorAll('.cv-node').forEach(function(n){ n.classList.remove('selected'); });
+}
+
+// Auto-select scene 21 (peak) on load
+setTimeout(function(){ showDetail(2); }, 400);
+</script>
+</body>
+</html>

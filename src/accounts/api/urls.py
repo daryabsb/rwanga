@@ -8,7 +8,6 @@ from src.accounts.api.views import (
     SignupProfileViewSet,
     StudioViewSet,
     UserViewSet,
-    obtain_token,
 )
 
 router = DefaultRouter()
@@ -20,6 +19,5 @@ router.register("consultant-assignments", ProjectConsultantAssignmentViewSet, ba
 router.register("signup-profiles", SignupProfileViewSet, basename="signup-profile")
 
 urlpatterns = [
-    path("token/", obtain_token, name="accounts-api-obtain-token"),
     path("", include(router.urls)),
 ]
