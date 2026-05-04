@@ -36,6 +36,11 @@
       </div>
     </div>
     <div style="margin-inline-start:auto;display:flex;gap:12px;align-items:center">
+      <a href="{% url 'reviews:project_list' project.pk %}" class="rw-btn rw-btn-ghost">{% trans "Reviews" %}</a>
+      {% if latest_review %}
+      <a href="{% url 'projects:review_workbench' project.pk latest_review.pk %}" class="rw-btn rw-btn-ghost">{% trans "Workbench" %}</a>
+      <a href="{% url 'projects:review_summary_pdf' project.pk latest_review.pk %}" class="rw-btn rw-btn-ghost">{% trans "Summary PDF" %}</a>
+      {% endif %}
       <a href="{% url 'scripts:upload' project.pk %}" class="rw-btn rw-btn-ghost">
         + {% trans "بارکردنی دەستنووس" %}
       </a>
@@ -179,3 +184,5 @@
   </div>{% comment %} /dash-body {% endcomment %}
 </div>{% comment %} /rw-content {% endcomment %}
 {% endblock %}
+
+

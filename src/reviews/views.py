@@ -1,8 +1,12 @@
 from django.contrib.contenttypes.models import ContentType
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
+from django.template.loader import render_to_string
 from django.urls import reverse
+from django.utils import timezone
 from django.views import View
+from django.views.generic import DetailView, TemplateView
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 from src.projects.models import Project, Scene
 from src.reviews.forms import ReviewDecisionForm, SceneEvaluationForm
@@ -253,3 +257,96 @@ class ReviewBibleTabView(View):
         review = get_object_or_404(BibleReview, id=pk)
         bible_text = (review.content or {}).get("bible_content", "")
         return render(request, "reviews/_bible_tab.html", {"review": review, "bible_text": bible_text})
+
+
+class ReviewWorkbenchView(LoginRequiredMixin, DetailView):
+    model = BibleReview
+    template_name = "reviews/workbench.html"
+    context_object_name = "review"
+    pk_url_kwarg = "review_id"
+
+    def get_queryset(self):
+        return BibleReview.objects.select_related("project").prefetch_related("decisions__scene")
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        review = self.object
+        decisions = review.decisions.select_related("scene").order_by("created_at")
+        ctx["project"] = review.project
+        ctx["active_decisions"] = decisions.filter(status=ReviewDecision.Status.PROPOSED)
+        ctx["locked_decisions"] = decisions.filter(status=ReviewDecision.Status.LOCKED)
+        ctx["rejected_decisions"] = decisions.filter(status=ReviewDecision.Status.REJECTED)
+        ctx["bible_text"] = (review.content or {}).get("bible_content", "")
+        return ctx
+
+
+class LockDecisionView(LoginRequiredMixin, View):
+    def patch(self, request, review_id, decision_id):
+        decision = get_object_or_404(ReviewDecision, id=decision_id, bible_review_id=review_id)
+        comment = request.POST.get("comment", "")
+        ReviewService().lock_decision(decision=decision, user=request.user, comment=comment)
+        return render(request, "reviews/partials/decision_locked_card.html", {"decision": decision})
+
+
+class RejectDecisionView(LoginRequiredMixin, View):
+    def patch(self, request, review_id, decision_id):
+        decision = get_object_or_404(ReviewDecision, id=decision_id, bible_review_id=review_id)
+        reason = request.POST.get("reason", "")
+        ReviewService().reject_decision(decision=decision, user=request.user, reason=reason)
+        return render(request, "reviews/partials/decision_rejected_card.html", {"decision": decision})
+
+
+class ChainViewerView(LoginRequiredMixin, TemplateView):
+    template_name = "reviews/chain_viewer.html"
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        review_id = self.kwargs["review_id"]
+        chain_id = self.kwargs["chain_id"]
+        chain_decisions = (
+            ReviewDecision.objects.filter(bible_review_id=review_id, chain_id=chain_id)
+            .select_related("scene", "bible_review", "bible_review__project")
+            .order_by("chain_order", "created_at")
+        )
+        review = get_object_or_404(BibleReview.objects.select_related("project"), id=review_id)
+        ctx["review"] = review
+        ctx["project"] = review.project
+        ctx["chain_id"] = chain_id
+        ctx["chain_decisions"] = chain_decisions
+        ctx["chain_name"] = chain_decisions.first().chain_name if chain_decisions.exists() else chain_id
+        return ctx
+
+
+class ReviewSummaryView(LoginRequiredMixin, DetailView):
+    model = BibleReview
+    template_name = "reviews/summary_pdf.html"
+    context_object_name = "review"
+    pk_url_kwarg = "review_id"
+
+    def get_queryset(self):
+        return BibleReview.objects.select_related("project").prefetch_related("decisions__scene")
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        review = self.object
+        decisions = review.decisions.select_related("scene").order_by("chain_id", "chain_order", "created_at")
+        ctx["project"] = review.project
+        ctx["locked"] = decisions.filter(status=ReviewDecision.Status.LOCKED)
+        ctx["proposed"] = decisions.filter(status=ReviewDecision.Status.PROPOSED)
+        ctx["rejected"] = decisions.filter(status=ReviewDecision.Status.REJECTED)
+        ctx["total_count"] = decisions.count()
+        ctx["today"] = timezone.now()
+        return ctx
+
+
+class ReviewSummaryPDFView(ReviewSummaryView):
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        ctx = self.get_context_data()
+        html_string = render_to_string(self.template_name, ctx, request=request)
+        from weasyprint import HTML
+
+        pdf = HTML(string=html_string, base_url=request.build_absolute_uri("/")).write_pdf()
+        response = HttpResponse(pdf, content_type="application/pdf")
+        response["Content-Disposition"] = f'inline; filename="review-{self.object.id}-summary.pdf"'
+        return response

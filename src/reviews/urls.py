@@ -1,6 +1,9 @@
 from django.urls import path
 
 from src.reviews.views import (
+    ChainViewerView,
+    LockDecisionView,
+    RejectDecisionView,
     ReviewCommentsTabView,
     ReviewCreateView,
     ReviewDecisionCommentView,
@@ -9,7 +12,10 @@ from src.reviews.views import (
     ReviewDetailView,
     ReviewEvaluationsTabView,
     ReviewsIndexView,
+    ReviewSummaryPDFView,
+    ReviewSummaryView,
     ReviewSetStatusView,
+    ReviewWorkbenchView,
     SceneEvaluationCreateView,
     ReviewBibleTabView,
     ReviewDecisionsTabView,
@@ -40,4 +46,13 @@ urlpatterns = [
     path("decisions/<uuid:pk>/repropose/", ReviewDecisionStatusView.as_view(), {"action": "repropose"}, name="repropose_decision"),
     path("decisions/<uuid:pk>/comment/", ReviewDecisionCommentView.as_view(), name="decision_comment"),
     path("<uuid:project_pk>/scenes/<uuid:scene_pk>/comments/", SceneCommentsPartialView.as_view(), name="scene_comments"),
+    path("projects/<uuid:project_id>/reviews/<uuid:review_id>/workbench/", ReviewWorkbenchView.as_view(), name="workbench"),
+    path("projects/<uuid:project_id>/reviews/<uuid:review_id>/chain/<str:chain_id>/", ChainViewerView.as_view(), name="chain_viewer"),
+    path("projects/<uuid:project_id>/reviews/<uuid:review_id>/chain/<str:chain_id>/", ChainViewerView.as_view(), name="chain-viewer"),
+    path("projects/<uuid:project_id>/reviews/<uuid:review_id>/summary/", ReviewSummaryView.as_view(), name="summary"),
+    path("projects/<uuid:project_id>/reviews/<uuid:review_id>/summary/pdf/", ReviewSummaryPDFView.as_view(), name="summary_pdf"),
+    path("reviews/<uuid:review_id>/decisions/<uuid:decision_id>/lock/", LockDecisionView.as_view(), name="lock_decision_htmx"),
+    path("reviews/<uuid:review_id>/decisions/<uuid:decision_id>/lock/", LockDecisionView.as_view(), name="lock-decision"),
+    path("reviews/<uuid:review_id>/decisions/<uuid:decision_id>/reject/", RejectDecisionView.as_view(), name="reject_decision_htmx"),
+    path("reviews/<uuid:review_id>/decisions/<uuid:decision_id>/reject/", RejectDecisionView.as_view(), name="reject-decision"),
 ]

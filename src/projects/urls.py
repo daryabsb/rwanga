@@ -10,6 +10,7 @@ from src.projects.views import (
     ProjectSceneView,
     ProjectSettingsView,
 )
+from src.reviews.views import ChainViewerView, ReviewSummaryPDFView, ReviewSummaryView, ReviewWorkbenchView
 
 app_name = "projects"
 
@@ -24,4 +25,8 @@ urlpatterns = [
     path("<uuid:pk>/scenes/", ProjectSceneListPartialView.as_view(), name="scene_list_partial"),
     path("<uuid:pk>/scenes/<uuid:scene_pk>/", ProjectSceneView.as_view(), name="scene"),
     path("<uuid:pk>/scenes/<uuid:scene_pk>/<str:tab>/", ProjectSceneTabView.as_view(), name="scene_tab"),
+    path("<uuid:project_id>/reviews/<uuid:review_id>/workbench/", ReviewWorkbenchView.as_view(), name="review_workbench"),
+    path("<uuid:project_id>/reviews/<uuid:review_id>/chain/<str:chain_id>/", ChainViewerView.as_view(), name="review_chain"),
+    path("<uuid:project_id>/reviews/<uuid:review_id>/summary/", ReviewSummaryView.as_view(), name="review_summary"),
+    path("<uuid:project_id>/reviews/<uuid:review_id>/summary/pdf/", ReviewSummaryPDFView.as_view(), name="review_summary_pdf"),
 ]

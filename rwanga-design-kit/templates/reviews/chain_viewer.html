@@ -1,0 +1,610 @@
+{# ════════════════════════════════════════════════════════
+   RWANGA — reviews/chain_viewer.html
+   Chain Viewer — visual escalation timeline for decision chains
+   Shows how a decision evolves across scenes with intensity encoding.
+
+   Context:
+     review           — BibleReview instance
+     project          — Project instance
+     chain_decisions  — QuerySet ordered by chain_order
+     chain_id         — string (e.g. "D15")
+     chain_name       — string (e.g. "ناڕاستەوخۆیی")
+   ════════════════════════════════════════════════════════ #}
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}زنجیرە {{ chain_id }} — {{ project.title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ══════════════════════════════════════════════════════
+   CHAIN VIEWER — component CSS
+   Uses var(--rw-*) tokens from rwanga.css
+   ══════════════════════════════════════════════════════ */
+
+/* ── TOP BAR ── */
+.cv-topbar {
+  background: var(--rw-surface);
+  border-bottom: 1px solid var(--rw-border);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 var(--rw-pad-md);
+  height: 52px;
+  flex-shrink: 0;
+}
+.cv-back {
+  font-size: 12px;
+  color: var(--rw-text-2);
+  cursor: pointer;
+  padding: 6px 12px;
+  border: 1px solid var(--rw-border);
+  background: var(--rw-surface-2);
+  font-family: var(--rw-font);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.cv-back:hover { color: var(--rw-text); border-color: var(--rw-text-3); }
+.cv-chain-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--rw-pink);
+  flex: 1;
+}
+.cv-chain-id {
+  font-family: var(--rw-font-en);
+  font-size: 11px;
+  color: var(--rw-text-3);
+  direction: ltr;
+}
+
+/* ── CHAIN HERO ── */
+.cv-hero {
+  background: var(--rw-surface);
+  border-bottom: 1px solid var(--rw-border);
+  padding: 24px 28px 20px;
+  text-align: center;
+  flex-shrink: 0;
+}
+.cv-hero-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--rw-text-3);
+  text-transform: uppercase;
+  letter-spacing: 1.4px;
+  margin-bottom: 6px;
+  font-family: var(--rw-font-en);
+}
+.cv-hero-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--rw-text);
+  margin-bottom: 6px;
+}
+.cv-hero-sub {
+  font-size: 13px;
+  color: var(--rw-text-2);
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+/* ── TIMELINE ── */
+.cv-timeline-wrap {
+  padding: 40px 28px 20px;
+  overflow-x: auto;
+  flex-shrink: 0;
+}
+.cv-timeline {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 0;
+  min-width: 700px;
+  position: relative;
+  direction: ltr;
+}
+
+/* Node */
+.cv-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.15s;
+  flex-shrink: 0;
+}
+.cv-node:hover { transform: translateY(-3px); }
+.cv-node.selected .cv-node-box {
+  border-color: var(--rw-amber);
+}
+
+.cv-node-box {
+  width: 110px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 10px;
+  border: 2px solid var(--rw-border);
+  background: var(--rw-surface);
+  transition: all 0.2s;
+  position: relative;
+}
+
+/* Intensity visual encoding — NON-NEGOTIABLE */
+.cv-node.intensity-low .cv-node-box {
+  height: 90px;
+  border-color: var(--rw-border);
+  opacity: 0.75;
+}
+.cv-node.intensity-medium .cv-node-box {
+  height: 110px;
+  border-color: rgba(212, 165, 116, 0.4);
+  border-width: 2px;
+}
+.cv-node.intensity-peak .cv-node-box {
+  height: 140px;
+  border-color: var(--rw-amber);
+  border-width: 3px;
+}
+.cv-node.intensity-collapse .cv-node-box {
+  height: 100px;
+  border-color: #E63946;
+  border-width: 2px;
+  border-style: dashed;
+  opacity: 0.7;
+  background: repeating-linear-gradient(
+    -45deg,
+    var(--rw-surface),
+    var(--rw-surface) 4px,
+    rgba(230, 57, 70, 0.03) 4px,
+    rgba(230, 57, 70, 0.03) 8px
+  );
+}
+.cv-node.intensity-collapse-sustained .cv-node-box {
+  height: 95px;
+  border-color: #E63946;
+  border-width: 2px;
+  border-style: dotted;
+  opacity: 0.6;
+  background: repeating-linear-gradient(
+    -45deg,
+    var(--rw-surface),
+    var(--rw-surface) 3px,
+    rgba(230, 57, 70, 0.04) 3px,
+    rgba(230, 57, 70, 0.04) 6px
+  );
+}
+
+.cv-scene-num {
+  font-family: var(--rw-font-en);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--rw-amber);
+  margin-bottom: 4px;
+}
+.cv-node.intensity-collapse .cv-scene-num,
+.cv-node.intensity-collapse-sustained .cv-scene-num {
+  color: #E63946;
+  opacity: 0.8;
+}
+.cv-node.intensity-peak .cv-scene-num {
+  color: var(--rw-amber);
+  font-size: 22px;
+}
+
+.cv-intensity-label {
+  font-family: var(--rw-font-en);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  padding: 2px 6px;
+  margin-bottom: 2px;
+}
+.cv-int-low { color: var(--rw-text-3); }
+.cv-int-medium { color: var(--rw-amber); opacity: 0.8; }
+.cv-int-peak { color: var(--rw-amber); background: var(--rw-amber-dim); border-radius: 2px; }
+.cv-int-collapse { color: #E63946; opacity: 0.7; }
+
+/* Below-node labels */
+.cv-node-below { margin-top: 10px; text-align: center; }
+.cv-expr-type { font-size: 11px; font-weight: 600; color: var(--rw-text-2); margin-bottom: 2px; }
+.cv-func { font-size: 10px; color: var(--rw-text-3); line-height: 1.4; max-width: 110px; }
+
+/* Arrow connector */
+.cv-arrow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 60px;
+  padding-top: 20px;
+  position: relative;
+}
+.cv-arrow-line {
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, rgba(212, 165, 116, 0.15), rgba(212, 165, 116, 0.5), rgba(212, 165, 116, 0.15));
+  position: relative;
+}
+.cv-arrow-line::after {
+  content: '▶';
+  position: absolute;
+  left: -4px;
+  top: -8px;
+  font-size: 12px;
+  color: var(--rw-amber);
+  opacity: 0.6;
+}
+.cv-arrow.to-collapse .cv-arrow-line {
+  background: linear-gradient(90deg, rgba(212, 165, 116, 0.3), rgba(230, 57, 70, 0.4));
+}
+.cv-arrow.to-collapse .cv-arrow-line::after { color: #E63946; }
+.cv-arrow-label {
+  font-family: var(--rw-font-en);
+  font-size: 9px;
+  color: var(--rw-text-3);
+  margin-top: 6px;
+  white-space: nowrap;
+  text-align: center;
+  direction: ltr;
+}
+
+/* ── ESCALATION BAR ── */
+.cv-esc-bar {
+  margin: 0 auto;
+  max-width: 750px;
+  padding: 0 28px 30px;
+  direction: ltr;
+  flex-shrink: 0;
+}
+.cv-esc-track {
+  height: 4px;
+  background: var(--rw-surface-3);
+  border-radius: 2px;
+  position: relative;
+  overflow: hidden;
+}
+.cv-esc-fill {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+  border-radius: 2px;
+  background: linear-gradient(90deg, rgba(212, 165, 116, 0.2) 0%, var(--rw-amber) 55%, var(--rw-pink) 70%, #E63946 85%, rgba(230, 57, 70, 0.4) 100%);
+}
+.cv-esc-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+  font-family: var(--rw-font-en);
+  font-size: 9px;
+  color: var(--rw-text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ── DETAIL PANEL ── */
+.cv-detail {
+  background: var(--rw-surface);
+  border: 1px solid var(--rw-border);
+  margin: 0 28px 28px;
+  display: none;
+}
+.cv-detail.open { display: block; }
+
+.cv-detail-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--rw-border-2);
+}
+.cv-detail-scene {
+  font-family: var(--rw-font-en);
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--rw-amber);
+}
+.cv-detail-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--rw-text);
+  flex: 1;
+}
+.cv-detail-close {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--rw-text-3);
+  font-size: 16px;
+  border: 1px solid var(--rw-border);
+  background: var(--rw-surface-2);
+}
+.cv-detail-close:hover { color: var(--rw-text); border-color: var(--rw-text-3); }
+
+.cv-detail-body { padding: 20px; }
+.cv-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+.cv-dg-item {
+  background: var(--rw-surface-2);
+  padding: 12px;
+  border: 1px solid var(--rw-border-2);
+}
+.cv-dg-label {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--rw-text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 4px;
+  font-family: var(--rw-font-en);
+}
+.cv-dg-value { font-size: 14px; font-weight: 600; color: var(--rw-text); }
+
+.cv-detail-lens {
+  background: var(--rw-amber-dim);
+  border-inline-start: 3px solid var(--rw-amber);
+  padding: 14px 18px;
+  margin-bottom: 16px;
+}
+.cv-detail-lens-label {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--rw-amber);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+  font-family: var(--rw-font-en);
+}
+.cv-detail-lens-text {
+  font-size: 14px;
+  color: var(--rw-text);
+  line-height: 1.8;
+  font-family: var(--rw-font);
+}
+
+.cv-detail-analysis {
+  font-size: 13px;
+  color: var(--rw-text-2);
+  line-height: 1.8;
+  margin-bottom: 16px;
+}
+
+.cv-detail-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--rw-amber);
+  border: 1px solid rgba(212, 165, 116, 0.3);
+  background: var(--rw-amber-dim);
+  cursor: pointer;
+  font-family: var(--rw-font);
+  transition: all 0.12s;
+  text-decoration: none;
+}
+.cv-detail-link:hover { background: rgba(212, 165, 116, 0.12); border-color: var(--rw-amber); }
+
+/* ── FOOTER ── */
+.cv-footer {
+  background: var(--rw-surface);
+  border-top: 1px solid var(--rw-border);
+  padding: 12px var(--rw-pad-md);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--rw-text-3);
+  flex-shrink: 0;
+  margin-top: auto;
+}
+.cv-footer-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  color: var(--rw-text-2);
+}
+
+/* ── EMPTY STATE ── */
+.cv-empty {
+  text-align: center;
+  padding: 80px 20px;
+  color: var(--rw-text-3);
+}
+.cv-empty p:first-child { font-size: 18px; margin-bottom: 8px; }
+.cv-empty p:last-child { font-size: 13px; }
+
+/* ── SCROLLABLE BODY ── */
+.cv-body {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+
+{# ── Top bar ── #}
+<div class="cv-topbar">
+  <a class="cv-back" href="{% url 'review-workbench' project.id review.id %}">← بگەڕێوە بۆ پێداچوونەوە</a>
+  <div class="cv-chain-title">زنجیرە: {{ chain_id }} — {{ chain_name }}</div>
+  <div class="cv-chain-id" style="font-family:var(--rw-font-en);direction:ltr">{{ chain_id }} · {{ chain_decisions.count }} scenes · {{ review.version|default:"v03" }}</div>
+</div>
+
+{% if chain_decisions %}
+
+{# ── Hero ── #}
+<div class="cv-hero">
+  <div class="cv-hero-label">DECISION CHAIN</div>
+  <div class="cv-hero-title">{{ chain_id }} — {{ chain_name }}</div>
+  {% with first=chain_decisions.first %}
+  {% if first.decision_text %}
+  <div class="cv-hero-sub">{{ first.decision_text|truncatewords:30 }}</div>
+  {% endif %}
+  {% endwith %}
+</div>
+
+<div class="cv-body">
+
+{# ── Timeline ── #}
+<div class="cv-timeline-wrap">
+  <div class="cv-timeline" id="cv-timeline">
+    {% for d in chain_decisions %}
+
+    {# Arrow before every node except first #}
+    {% if not forloop.first %}
+    <div class="cv-arrow{% if d.intensity == 'collapse' or d.intensity == 'collapse-sustained' %} to-collapse{% endif %}">
+      <div class="cv-arrow-line"></div>
+      {% if d.transition_label %}
+      <div class="cv-arrow-label">{{ d.transition_label }}</div>
+      {% endif %}
+    </div>
+    {% endif %}
+
+    {# Node #}
+    <div class="cv-node intensity-{{ d.intensity|default:'medium' }}" onclick="cvShowDetail({{ forloop.counter0 }})">
+      <div class="cv-node-box">
+        <div class="cv-scene-num">{{ d.scene.scene_number|default:"?" }}</div>
+        <div class="cv-intensity-label cv-int-{{ d.intensity|default:'medium' }}">{{ d.intensity|default:"—"|upper }}</div>
+      </div>
+      <div class="cv-node-below">
+        <div class="cv-expr-type">{{ d.expression_type|default:"—" }}</div>
+        <div class="cv-func">{{ d.function_label|default:"" }}</div>
+      </div>
+    </div>
+
+    {% endfor %}
+  </div>
+</div>
+
+{# ── Escalation bar ── #}
+<div class="cv-esc-bar">
+  <div class="cv-esc-track">
+    <div class="cv-esc-fill" style="width:100%"></div>
+  </div>
+  <div class="cv-esc-labels">
+    <span>ESTABLISH</span>
+    <span>ENFORCE</span>
+    <span>PEAK</span>
+    <span>FRACTURE</span>
+    <span>SUSPEND</span>
+  </div>
+</div>
+
+{# ── Detail panel ── #}
+<div class="cv-detail" id="cv-detail">
+  <div class="cv-detail-header">
+    <div class="cv-detail-scene" id="cd-scene"></div>
+    <div class="cv-detail-title" id="cd-title"></div>
+    <div class="cv-detail-close" onclick="cvCloseDetail()">✕</div>
+  </div>
+  <div class="cv-detail-body">
+    <div class="cv-detail-grid">
+      <div class="cv-dg-item"><div class="cv-dg-label">TYPE</div><div class="cv-dg-value" id="cd-type"></div></div>
+      <div class="cv-dg-item"><div class="cv-dg-label">INTENSITY</div><div class="cv-dg-value" id="cd-intensity"></div></div>
+      <div class="cv-dg-item"><div class="cv-dg-label">FUNCTION</div><div class="cv-dg-value" id="cd-function"></div></div>
+      <div class="cv-dg-item"><div class="cv-dg-label">TRANSITION</div><div class="cv-dg-value" id="cd-transition"></div></div>
+    </div>
+    <div class="cv-detail-lens">
+      <div class="cv-detail-lens-label">LENS</div>
+      <div class="cv-detail-lens-text" id="cd-lens"></div>
+    </div>
+    <div class="cv-detail-analysis" id="cd-analysis"></div>
+    <a class="cv-detail-link" id="cd-link" href="#">سکریپت ببینە ←</a>
+  </div>
+</div>
+
+</div>{# /cv-body #}
+
+{% else %}
+
+{# ── Empty state ── #}
+<div class="cv-empty">
+  <p>هیچ بڕیارێک لەم زنجیرەیەدا نییە</p>
+  <p>داتای زنجیرە هێشتا پڕنەکراوەتەوە.</p>
+</div>
+
+{% endif %}
+
+{# ── Footer ── #}
+<div class="cv-footer">
+  <div class="cv-footer-brand">
+    <span><span style="color:var(--rw-pink);font-weight:700">ڕوانگە</span> — پلاتفۆرمی پێشبەرهەمهێنانی سینەمای کوردی</span>
+  </div>
+  <div style="font-family:var(--rw-font-en);direction:ltr;display:inline-block">{{ chain_id }} chain · {{ review.version|default:"v03" }} · {% now "Y-m-d" %}</div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+/* Chain detail data — built from Django context */
+var cvChainData = [
+  {% for d in chain_decisions %}
+  {
+    scene: {{ d.scene.scene_number|default:0 }},
+    title: '{{ d.topic|escapejs }}',
+    type: '{{ d.expression_type|default:"—"|escapejs }}',
+    intensity: '{{ d.intensity|default:"—"|escapejs }}',
+    func: '{{ d.function_label|default:"—"|escapejs }}',
+    transition: '{{ d.transition_label|default:"—"|escapejs }}',
+    lens: '{{ d.decision_text|escapejs }}',
+    analysis: '{{ d.lock_comment|default:""|escapejs }}'
+  }{% if not forloop.last %},{% endif %}
+  {% endfor %}
+];
+
+function cvShowDetail(i) {
+  var d = cvChainData[i];
+  /* Select node */
+  document.querySelectorAll('.cv-node').forEach(function(n) { n.classList.remove('selected'); });
+  document.querySelectorAll('.cv-node')[i].classList.add('selected');
+
+  /* Fill detail */
+  document.getElementById('cd-scene').textContent = d.scene;
+  document.getElementById('cd-title').textContent = d.title;
+  document.getElementById('cd-type').textContent = d.type;
+  document.getElementById('cd-intensity').textContent = d.intensity;
+  document.getElementById('cd-function').textContent = d.func;
+  document.getElementById('cd-transition').textContent = d.transition;
+  document.getElementById('cd-lens').textContent = d.lens;
+  document.getElementById('cd-analysis').textContent = d.analysis;
+
+  var panel = document.getElementById('cv-detail');
+  panel.classList.add('open');
+  panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function cvCloseDetail() {
+  document.getElementById('cv-detail').classList.remove('open');
+  document.querySelectorAll('.cv-node').forEach(function(n) { n.classList.remove('selected'); });
+}
+
+/* Auto-select peak node on load (find intensity-peak, or fallback to middle node) */
+document.addEventListener('DOMContentLoaded', function() {
+  var nodes = document.querySelectorAll('.cv-node');
+  if (nodes.length === 0) return;
+  var peakIdx = -1;
+  nodes.forEach(function(n, i) { if (n.classList.contains('intensity-peak')) peakIdx = i; });
+  if (peakIdx === -1) peakIdx = Math.floor(nodes.length / 2);
+  setTimeout(function() { cvShowDetail(peakIdx); }, 400);
+});
+</script>
+{% endblock %}

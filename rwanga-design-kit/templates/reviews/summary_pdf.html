@@ -1,0 +1,274 @@
+{# ════════════════════════════════════════════════════════
+   RWANGA — reviews/summary_pdf.html
+   Review Summary PDF — A4 printable document for WeasyPrint
+   STANDALONE template (does NOT extend base.html)
+   WeasyPrint renders this to PDF directly.
+
+   Context:
+     review            — BibleReview instance
+     project           — Project instance
+     locked_decisions  — QuerySet (status=locked)
+     proposed_decisions — QuerySet (status=proposed)
+     rejected_decisions — QuerySet (status=rejected)
+     total_decisions   — int
+   ════════════════════════════════════════════════════════ #}
+{% load static i18n %}
+<!DOCTYPE html>
+<html lang="ku" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>ڕوانگە — پوختەی پێداچوونەوە</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap');
+
+*,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Cairo', 'Noto Sans Arabic', Arial, sans-serif;
+  font-size: 11pt;
+  color: #0F0F12;
+  direction: rtl;
+  line-height: 1.5;
+  background: #E8E8EC;
+  min-height: 100vh;
+}
+
+/* ── PDF PAGE WRAPPER ── */
+.pdf-wrap { padding: 32px; }
+.pdf-page {
+  background: #fff;
+  max-width: 210mm;
+  margin: 0 auto;
+  padding: 14mm 12mm 18mm;
+  min-height: 297mm;
+  font-family: 'Cairo', 'Noto Sans Arabic', Arial, sans-serif;
+  font-size: 11pt;
+  color: #0F0F12;
+  direction: rtl;
+  line-height: 1.5;
+}
+.en { font-family: 'Inter', sans-serif; direction: ltr; unicode-bidi: isolate; }
+
+/* ── HEADER / LETTERHEAD ── */
+.rs-header { border-bottom: 3pt solid #F72585; padding-bottom: 10pt; margin-bottom: 14pt; }
+.rs-header-row { display: flex; align-items: center; gap: 16pt; }
+.rs-logo-mark {
+  width: 48pt; height: 48pt; background: #F72585; color: #fff;
+  font-family: 'Cairo', sans-serif; font-size: 22pt; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.rs-logo-name { font-size: 8pt; font-weight: 700; color: #5C5C70; text-transform: uppercase; letter-spacing: 1.2pt; margin-top: 3pt; }
+.rs-project-info { flex: 1; }
+.rs-project-title { font-size: 17pt; font-weight: 700; color: #0F0F12; line-height: 1.2; }
+.rs-project-sub { font-size: 9.5pt; color: #5C5C70; margin-top: 2pt; }
+.rs-review-col { text-align: end; }
+.rs-review-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 8pt 16pt; background: #F72585; color: #fff;
+  font-family: 'Inter', sans-serif; font-size: 14pt; font-weight: 700;
+}
+.rs-review-label { font-size: 8pt; color: #A0A0B8; text-align: center; margin-top: 3pt; text-transform: uppercase; letter-spacing: 0.8pt; }
+
+/* ── META ROW ── */
+.rs-meta { display: flex; justify-content: space-between; background: #F7F7FA; border: 1pt solid #DCDCE8; padding: 10pt 14pt; margin-bottom: 14pt; }
+.rs-meta-item { text-align: center; }
+.rs-meta-val { font-family: 'Inter', sans-serif; font-size: 18pt; font-weight: 700; color: #9A5520; line-height: 1; }
+.rs-meta-lbl { font-size: 8pt; font-weight: 700; color: #A0A0B8; text-transform: uppercase; letter-spacing: 0.8pt; margin-top: 3pt; }
+
+/* ── SECTION TITLES ── */
+.rs-section-title {
+  font-size: 9pt; font-weight: 700; color: #5C5C70; text-transform: uppercase;
+  letter-spacing: 1pt; padding: 8pt 0; border-bottom: 2pt solid #F72585;
+  margin-top: 18pt; margin-bottom: 10pt; display: flex; align-items: center; gap: 8pt;
+}
+.rs-section-count { font-family: 'Inter', sans-serif; font-size: 8pt; font-weight: 700; background: #F72585; color: #fff; padding: 2pt 8pt; border-radius: 2pt; }
+.rs-section-title.locked-title { border-bottom-color: #D4A574; }
+.rs-section-title.locked-title .rs-section-count { background: #D4A574; color: #0F0F12; }
+
+/* ── DECISION ITEMS ── */
+.rs-decision { padding: 10pt 0; border-bottom: 1pt solid #DCDCE8; }
+.rs-decision:last-child { border-bottom: none; }
+.rs-d-row { display: flex; align-items: flex-start; gap: 10pt; }
+.rs-d-num { font-family: 'Inter', sans-serif; font-size: 9pt; font-weight: 700; color: #A0A0B8; min-width: 20pt; flex-shrink: 0; padding-top: 2pt; }
+.rs-d-content { flex: 1; min-width: 0; }
+.rs-d-topic { font-size: 12pt; font-weight: 700; color: #0F0F12; margin-bottom: 3pt; }
+.rs-d-text { font-size: 10pt; color: #5C5C70; line-height: 1.6; margin-bottom: 5pt; }
+.rs-d-comment { font-size: 9pt; color: #A0A0B8; font-style: italic; padding-inline-start: 10pt; border-inline-start: 2pt solid #DCDCE8; margin-top: 4pt; }
+.rs-d-chain { font-size: 9pt; color: #9A5520; margin-top: 4pt; }
+.rs-d-chain-letter {
+  font-family: 'Inter', sans-serif; font-weight: 700; display: inline-block;
+  width: 18pt; height: 18pt; text-align: center; line-height: 18pt;
+  background: rgba(154, 85, 32, 0.1); border: 1pt solid rgba(154, 85, 32, 0.3);
+  font-size: 8pt; margin-inline-end: 4pt;
+}
+
+/* Status badges */
+.rs-badge { display: inline-block; padding: 1pt 8pt; font-size: 8pt; font-weight: 700; margin-inline-start: auto; flex-shrink: 0; white-space: nowrap; }
+.rs-badge-locked { background: rgba(212, 165, 116, 0.12); border: 1pt solid rgba(212, 165, 116, 0.3); color: #9A5520; }
+.rs-badge-proposed { background: rgba(247, 37, 133, 0.08); border: 1pt solid rgba(247, 37, 133, 0.25); color: #F72585; }
+.rs-badge-rejected { background: #F7F7FA; border: 1pt solid #DCDCE8; color: #A0A0B8; text-decoration: line-through; }
+
+/* Lock date */
+.rs-d-date { font-family: 'Inter', sans-serif; font-size: 8pt; color: #A0A0B8; direction: ltr; display: inline-block; margin-top: 4pt; }
+
+/* ── SUMMARY TABLE ── */
+.rs-summary { margin-top: 20pt; border: 2pt solid #DCDCE8; }
+.rs-summary-title { background: #F7F7FA; padding: 8pt 14pt; font-size: 9pt; font-weight: 700; color: #5C5C70; text-transform: uppercase; letter-spacing: 0.8pt; border-bottom: 1pt solid #DCDCE8; }
+.rs-summary-row { display: flex; }
+.rs-summary-cell { flex: 1; padding: 12pt 14pt; text-align: center; border-inline-start: 1pt solid #DCDCE8; }
+.rs-summary-cell:first-child { border-inline-start: none; }
+.rs-summary-val { font-family: 'Inter', sans-serif; font-size: 22pt; font-weight: 700; line-height: 1; }
+.rs-summary-val.locked { color: #9A5520; }
+.rs-summary-val.proposed { color: #F72585; }
+.rs-summary-val.rejected { color: #A0A0B8; }
+.rs-summary-lbl { font-size: 8pt; font-weight: 700; color: #A0A0B8; text-transform: uppercase; letter-spacing: 0.8pt; margin-top: 4pt; }
+
+/* ── FOOTER ── */
+.rs-footer { margin-top: 20pt; padding-top: 8pt; border-top: 1pt solid #DCDCE8; display: flex; justify-content: space-between; font-size: 8pt; color: #A0A0B8; }
+.rs-footer-brand { font-weight: 700; color: #F72585; }
+
+@media print {
+  body { background: #fff; }
+  .pdf-wrap { padding: 0; }
+  .pdf-page { box-shadow: none; max-width: none; padding: 10mm; }
+}
+</style>
+</head>
+<body>
+<div class="pdf-wrap">
+<div class="pdf-page">
+
+  <!-- LETTERHEAD -->
+  <div class="rs-header">
+    <div class="rs-header-row">
+      <div>
+        <div class="rs-logo-mark">ڕ</div>
+        <div class="rs-logo-name">ڕوانگە</div>
+      </div>
+      <div class="rs-project-info">
+        <div class="rs-project-title">{{ project.title }}</div>
+        <div class="rs-project-sub">{{ project.subtitle|default:"فیلمی کورت" }} — {{ project.studio|default:"ستودیۆی سەروەر مهەدین" }} — پێداچوونەوەی بایبڵ</div>
+      </div>
+      <div class="rs-review-col">
+        <div class="rs-review-badge">{{ review.version|default:"v03" }}</div>
+        <div class="rs-review-label">پێداچوونەوە</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- META ROW -->
+  <div class="rs-meta">
+    <div class="rs-meta-item"><div class="rs-meta-val en">{% now "Y/m/d" %}</div><div class="rs-meta-lbl">بەروار</div></div>
+    <div class="rs-meta-item"><div class="rs-meta-val en">{{ total_decisions }}</div><div class="rs-meta-lbl">بڕیاری گشتی</div></div>
+    <div class="rs-meta-item"><div class="rs-meta-val en">{{ locked_decisions.count }}</div><div class="rs-meta-lbl">جێگیرکراو</div></div>
+    <div class="rs-meta-item"><div class="rs-meta-val en">{{ proposed_decisions.count }}</div><div class="rs-meta-lbl">نوێ</div></div>
+    <div class="rs-meta-item"><div class="rs-meta-val en">{{ rejected_decisions.count }}</div><div class="rs-meta-lbl">ڕەتکراوە</div></div>
+  </div>
+
+  <!-- ═══ LOCKED DECISIONS SECTION ═══ -->
+  {% if locked_decisions %}
+  <div class="rs-section-title locked-title">
+    بڕیارە جێگیرکراوەکان <span class="rs-section-count">{{ locked_decisions.count }}</span>
+  </div>
+
+  {% for d in locked_decisions %}
+  <div class="rs-decision">
+    <div class="rs-d-row">
+      <div class="rs-d-num en">{{ forloop.counter }}</div>
+      <div class="rs-d-content">
+        <div class="rs-d-topic">{{ d.topic }}</div>
+        <div class="rs-d-text">{{ d.decision_text }}</div>
+        {% if d.lock_comment %}
+        <div class="rs-d-comment">{{ d.lock_comment }}</div>
+        {% endif %}
+        {% if d.chain_id %}
+        <div class="rs-d-chain"><span class="rs-d-chain-letter">{{ d.chain_id }}</span> زنجیرەی {{ d.chain_id }}{% if d.chain_name %} — {{ d.chain_name }}{% endif %}</div>
+        {% endif %}
+        {% if d.locked_at %}
+        <div class="rs-d-date">{{ d.locked_at|date:"Y-m-d" }}</div>
+        {% endif %}
+      </div>
+      <span class="rs-badge rs-badge-locked">جێگیر</span>
+    </div>
+  </div>
+  {% endfor %}
+  {% endif %}
+
+  <!-- ═══ UNSETTLED DECISIONS SECTION ═══ -->
+  {% if proposed_decisions %}
+  <div class="rs-section-title">
+    بڕیارە نوێیەکان <span class="rs-section-count">{{ proposed_decisions.count }}</span>
+  </div>
+
+  {% for d in proposed_decisions %}
+  <div class="rs-decision">
+    <div class="rs-d-row">
+      <div class="rs-d-num en">{{ forloop.counter }}</div>
+      <div class="rs-d-content">
+        <div class="rs-d-topic">{{ d.topic }}</div>
+        <div class="rs-d-text">{{ d.decision_text }}</div>
+        {% if d.chain_id %}
+        <div class="rs-d-chain"><span class="rs-d-chain-letter">{{ d.chain_id }}</span> زنجیرەی {{ d.chain_id }}{% if d.chain_name %} — {{ d.chain_name }}{% endif %}</div>
+        {% endif %}
+      </div>
+      <span class="rs-badge rs-badge-proposed">نوێ</span>
+    </div>
+  </div>
+  {% endfor %}
+  {% endif %}
+
+  <!-- ═══ REJECTED DECISIONS SECTION ═══ -->
+  {% if rejected_decisions %}
+  <div class="rs-section-title" style="border-bottom-color:#A0A0B8">
+    بڕیارە ڕەتکراوەکان <span class="rs-section-count" style="background:#A0A0B8;color:#fff">{{ rejected_decisions.count }}</span>
+  </div>
+
+  {% for d in rejected_decisions %}
+  <div class="rs-decision">
+    <div class="rs-d-row">
+      <div class="rs-d-num en">{{ forloop.counter }}</div>
+      <div class="rs-d-content">
+        <div class="rs-d-topic" style="text-decoration:line-through;color:#A0A0B8">{{ d.topic }}</div>
+        <div class="rs-d-text">{{ d.decision_text }}</div>
+        {% if d.reject_reason %}
+        <div class="rs-d-comment">هۆکاری ڕەتکردنەوە: {{ d.reject_reason }}</div>
+        {% endif %}
+      </div>
+      <span class="rs-badge rs-badge-rejected">ڕەتکراوە</span>
+    </div>
+  </div>
+  {% endfor %}
+  {% endif %}
+
+  <!-- ═══ SUMMARY TABLE ═══ -->
+  <div class="rs-summary">
+    <div class="rs-summary-title">خشتەی پوختە</div>
+    <div class="rs-summary-row">
+      <div class="rs-summary-cell">
+        <div class="rs-summary-val locked en">{{ locked_decisions.count }}</div>
+        <div class="rs-summary-lbl">جێگیرکراو</div>
+      </div>
+      <div class="rs-summary-cell">
+        <div class="rs-summary-val proposed en">{{ proposed_decisions.count }}</div>
+        <div class="rs-summary-lbl">نوێ</div>
+      </div>
+      <div class="rs-summary-cell">
+        <div class="rs-summary-val rejected en">{{ rejected_decisions.count }}</div>
+        <div class="rs-summary-lbl">ڕەتکراوە</div>
+      </div>
+      <div class="rs-summary-cell">
+        <div class="rs-summary-val en" style="color:#0F0F12">{{ total_decisions }}</div>
+        <div class="rs-summary-lbl">کۆی گشتی</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="rs-footer">
+    <span>دروستکراوە لە <span class="rs-footer-brand">ڕوانگە</span> — پلاتفۆرمی پێشبەرهەمهێنانی سینەمای کوردی</span>
+    <span class="en">{{ review.version|default:"v03" }} · {% now "Y-m-d" %}</span>
+  </div>
+
+</div><!-- /pdf-page -->
+</div><!-- /pdf-wrap -->
+</body>
+</html>

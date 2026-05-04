@@ -63,3 +63,56 @@ class ReviewDecision(BaseModel):
     lock_comment = models.TextField(blank=True, default="")
     reject_reason = models.TextField(blank=True, default="")
     reproposed_from = models.ForeignKey("self", null=True, blank=True, on_delete=models.SET_NULL, related_name="reproposals")
+    expression_type = models.CharField(
+        max_length=20,
+        choices=[
+            ("emotional", "Emotional"),
+            ("behavioral", "Behavioral"),
+            ("artistic", "Artistic"),
+            ("memory", "Memory"),
+            ("broken", "Broken"),
+        ],
+        blank=True,
+        null=True,
+        help_text="Expression type for chain visualization",
+    )
+    intensity = models.CharField(
+        max_length=20,
+        choices=[
+            ("low", "Low"),
+            ("medium", "Medium"),
+            ("peak", "Peak"),
+            ("collapse", "Collapse"),
+        ],
+        blank=True,
+        null=True,
+        help_text="Intensity level for chain visualization",
+    )
+    function_label = models.CharField(
+        max_length=100,
+        blank=True,
+        default="",
+        help_text="What the decision does at this point (e.g. 'stabilize uncertainty')",
+    )
+    transition_label = models.CharField(
+        max_length=100,
+        blank=True,
+        default="",
+        help_text="How it moved from previous state (e.g. 'emotional -> behavioral')",
+    )
+    chain_id = models.CharField(
+        max_length=10,
+        blank=True,
+        default="",
+        help_text="Chain letter assignment (A, B, C, D, etc.)",
+    )
+    chain_name = models.CharField(
+        max_length=200,
+        blank=True,
+        default="",
+        help_text="Human name of the chain (e.g. 'Gesha: The Guest's Own Tragedy')",
+    )
+    chain_order = models.PositiveIntegerField(
+        default=0,
+        help_text="Order within the chain (0 = first link)",
+    )

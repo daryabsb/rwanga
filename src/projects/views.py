@@ -199,9 +199,11 @@ class ProjectCreateStepView(View):
 class ProjectDashboardView(View):
     def get(self, request, pk):
         project = get_object_or_404(Project, id=pk)
+        latest_review = BibleReview.objects.filter(project=project).order_by("-created_at").first()
         active_jobs = []
         context = {
             "project": project,
+            "latest_review": latest_review,
             "active_project": project,
             "active_jobs": active_jobs,
             "active_section": "v",
