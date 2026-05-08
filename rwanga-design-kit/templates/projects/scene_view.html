@@ -1,4 +1,6 @@
-{# ════════════════════════════════════════════════════════
+{% extends "base.html" %}
+{% load static i18n %}
+{% comment %} ════════════════════════════════════════════════════════
    RWANGA — projects/scene_view.html
    The core production screen. One scene, all modules.
    Tabbed interface — each tab loads via HTMX.
@@ -12,16 +14,14 @@
      scene_list    — QuerySet of Scene (for panel)
      prev_scene    — Scene|None
      next_scene    — Scene|None
-   ════════════════════════════════════════════════════════ #}
-{% extends "base.html" %}
-{% load static i18n %}
+   ════════════════════════════════════════════════════════ {% endcomment %}
 
 {% block title %}{% trans "دیمەنی" %} {{ scene.number }} — {{ project.title }}{% endblock %}
 
 {% block content %}
 <div class="d-flex flex-grow-1 overflow-hidden">
 
-  {# ── SCENE LIST PANEL ── first in DOM = right in RTL #}
+  {% comment %} ── SCENE LIST PANEL ── first in DOM = right in RTL {% endcomment %}
   <aside class="rw-scene-panel d-none d-lg-flex flex-column overflow-hidden">
     <div class="px-3 py-2 rw-overline"
          style="border-bottom:1px solid var(--rw-border)">
@@ -50,7 +50,7 @@
     </div>
   </aside>
 
-  {# ── SCENE MAIN ── #}
+  {% comment %} ── SCENE MAIN ── {% endcomment %}
   <div id="rw-scene-main" class="flex-grow-1 d-flex flex-column overflow-hidden">
 
     {# Breadcrumb #}
@@ -107,7 +107,7 @@
       {% endfor %}
     </div>
 
-    {# ── MODULE TABS ── #}
+    {% comment %} ── MODULE TABS ── {% endcomment %}
     <div class="d-flex overflow-x-auto px-3 bg-rw-surface"
          style="height:48px;flex-shrink:0;border-bottom:1px solid var(--rw-border)"
          role="tablist">
@@ -126,7 +126,7 @@
       {% endfor %}
     </div>
 
-    {# ── TAB CONTENT ── #}
+    {% comment %} ── TAB CONTENT ── {% endcomment %}
     <div id="rw-tab-content" class="flex-grow-1 overflow-auto p-4"
          style="background:var(--rw-bg)"
          role="tabpanel">

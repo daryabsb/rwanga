@@ -1,9 +1,61 @@
+{% comment %} ════════════════════════════════════════════════════════
+   RWANGA — projects/_scene_list.html
+   HTMX partial — scene list panel content.
+   Swapped into #rw-scene-list on load and filter changes.
+
+   Context:
+     scenes       — QuerySet[Scene]
+     active_scene — Scene instance (current)
+     group_by     — bool (group by location when True)
+   ════════════════════════════════════════════════════════ {% endcomment %}
 {% load i18n %}
-{% for scene in scenes %}
-<a class="rw-scene-item" href="{% url 'projects:scene' project.pk scene.pk %}">
-  <span class="rw-scene-item-num">{{ scene.number }}</span>
-  <span class="rw-scene-item-title">{{ scene.title }}</span>
-</a>
-{% empty %}
-<div class="rw-empty">{% trans "No scenes yet" %}</div>
-{% endfor %}
+
+{% if group_by %}
+  {% comment %} ── Grouped by location ── {% endcomment %}
+  {% regroup scenes by location_name as location_groups %}
+  {% for group in location_groups %}
+  <div class="rw-overline px-3 py-1"
+       style="border-bottom:1px solid var(--rw-border);font-size:10px;color:var(--rw-text-3)">
+    {{ group.grouper }}
+  </div>
+  {% for scene in group.list %}
+  <a class="rw-scene-item {% if active_scene and active_scene.pk == scene.pk %}active{% endif %}"
+     hx-get="{% url 'projects:scene' scene.project_id scene.pk %}"
+     hx-target="#rw-scene-main"
+     hx-select="#rw-scene-main"
+     hx-swap="outerHTML"
+     hx-push-url="true">
+    <span class="rw-sc-num">{{ scene.number }}</span>
+    <div class="flex-grow-1" style="min-width:0">
+      <div class="rw-sc-loc">{{ scene.int_ext }}. {{ scene.location_name }}</div>
+      <div class="rw-sc-time">{{ scene.time_of_day }}</div>
+    </div>
+  </a>
+  {% endfor %}
+  {% empty %}
+  <div class="px-3 py-4 text-center" style="font-size:12px;color:var(--rw-text-3)">
+    {% trans "هیچ دیمەنێک نەدۆزرایەوە" %}
+  </div>
+  {% endfor %}
+
+{% else %}
+  {% comment %} ── Flat list ── {% endcomment %}
+  {% for scene in scenes %}
+  <a class="rw-scene-item {% if active_scene and active_scene.pk == scene.pk %}active{% endif %}"
+     hx-get="{% url 'projects:scene' scene.project_id scene.pk %}"
+     hx-target="#rw-scene-main"
+     hx-select="#rw-scene-main"
+     hx-swap="outerHTML"
+     hx-push-url="true">
+    <span class="rw-sc-num">{{ scene.number }}</span>
+    <div class="flex-grow-1" style="min-width:0">
+      <div class="rw-sc-loc">{{ scene.int_ext }}. {{ scene.location_name }}</div>
+      <div class="rw-sc-time">{{ scene.time_of_day }}</div>
+    </div>
+  </a>
+  {% empty %}
+  <div class="px-3 py-4 text-center" style="font-size:12px;color:var(--rw-text-3)">
+    {% trans "هیچ دیمەنێک نەدۆزرایەوە" %}
+  </div>
+  {% endfor %}
+{% endif %}

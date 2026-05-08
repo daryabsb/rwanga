@@ -1,4 +1,4 @@
-{# ════════════════════════════════════════════════════════
+{% comment %} ════════════════════════════════════════════════════════
    RWANGA — projects/scenes/tabs/overview.html
    Scene overview tab — default tab. HTMX fragment.
 
@@ -9,10 +9,10 @@
      setup_count  — int
      screen_time  — string e.g. "2:30"
      characters   — QuerySet[Character] in this scene
-   ════════════════════════════════════════════════════════ #}
+   ════════════════════════════════════════════════════════ {% endcomment %}
 {% load i18n %}
 
-  {# ── Stats ── #}
+  {% comment %} ── Stats ── {% endcomment %}
   <div class="rw-stats mb-4">
     <div class="rw-stat">
       <div class="rw-stat-val">{{ shot_count }}</div>
@@ -32,7 +32,7 @@
     </div>
   </div>
 
-  {# ── Scene info ── #}
+  {% comment %} ── Scene info ── {% endcomment %}
   <div class="row g-3 mb-4">
     <div class="col-md-6">
       <div class="rw-card h-100 mb-0">
@@ -65,7 +65,7 @@
     </div>
   </div>
 
-  {# ── Description ── #}
+  {% comment %} ── Description ── {% endcomment %}
   {% if scene.description %}
   <div class="rw-card mb-4">
     <div class="rw-card-title">{% trans "وەسف" %}</div>
@@ -73,7 +73,7 @@
   </div>
   {% endif %}
 
-  {# ── Script text ── #}
+  {% comment %} ── Script text ── {% endcomment %}
   {% if scene.script_text %}
   <div class="rw-card mb-4">
     <div class="rw-card-title">{% trans "دەستنووس" %}</div>
@@ -81,7 +81,7 @@
   </div>
   {% endif %}
 
-  {# ── Quick actions ── #}
+  {% comment %} ── Quick actions ── {% endcomment %}
   <div class="d-flex gap-2 flex-wrap">
     <button class="rw-btn rw-btn-ghost"
             hx-get="{% url 'projects:scene_tab' project.pk scene.pk 'shots' %}"
@@ -93,7 +93,7 @@
       ↗ {% trans "دەرهێنانی دیمەن" %}
     </a>
     <button class="rw-btn rw-btn-ghost"
-            hx-get="{% url 'projects:edit_scene_modal' project.pk scene.pk %}"
+            hx-get="{{ edit_scene_modal_url|default:'#' }}"
             hx-target="#rw-modal-container" hx-swap="innerHTML">
       ✎ {% trans "دەستکاریکردن" %}
     </button>

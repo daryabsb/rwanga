@@ -79,8 +79,8 @@ urlpatterns = [
     path("contacts/<uuid:project_id>/", contacts, name="contacts"),
     path("invite-row/", invite_row, name="invite_row"),
     path("invite-modal/", invite_modal, name="invite_modal"),
-    path("member/<int:pk>/edit/", edit_member_modal, name="edit_member_modal"),
-    path("invite/<int:pk>/resend/", resend_invite, name="resend_invite"),
-    path("invite/<int:pk>/cancel/", cancel_invite, name="cancel_invite"),
+    path("member/<uuid:pk>/edit/", edit_member_modal, name="edit_member_modal"),
+    path("invite/<uuid:pk>/resend/", resend_invite, name="resend_invite"),
+    path("invite/<uuid:pk>/cancel/", cancel_invite, name="cancel_invite"),
     path("delete/", delete_account, name="delete_account"),
 ]

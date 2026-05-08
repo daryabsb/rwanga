@@ -1,4 +1,6 @@
-{# ════════════════════════════════════════════════════════
+{% extends "base.html" %}
+{% load static i18n %}
+{% comment %} ════════════════════════════════════════════════════════
    RWANGA — projects/dashboard.html
    The project home. Module grid organised by section.
    Extends base.html.
@@ -8,15 +10,13 @@
      active_section  — 's'|'b'|'v'|'p'|'sh' (optional)
      recent_activity — QuerySet of ActivityLog
      shoot_days      — QuerySet of ShootDay
-   ════════════════════════════════════════════════════════ #}
-{% extends "base.html" %}
-{% load static i18n %}
+   ════════════════════════════════════════════════════════ {% endcomment %}
 
 {% block title %}{{ project.title }}{% endblock %}
 
 {% block content %}
 
-  {# ── Project header ── #}
+  {% comment %} ── Project header ── {% endcomment %}
   <div class="d-flex align-items-center gap-4 px-4 py-4 bg-rw-surface"
        style="border-bottom:1px solid var(--rw-border)">
     <div class="rw-proj-cover d-flex align-items-center justify-content-center">
@@ -59,17 +59,17 @@
     </div>
   </div>
 
-  {# ── AI progress (shown when a job is running) ── #}
+  {% comment %} ── AI progress (shown when a job is running) ── {% endcomment %}
   <div id="rw-ai-status" class="px-4">
     {% for job in active_jobs %}
       {% include "components/_ai_progress.html" with job=job %}
     {% endfor %}
   </div>
 
-  {# ── Module grid ── #}
+  {% comment %} ── Module grid ── {% endcomment %}
   <div class="px-4 pb-4">
 
-    {# ── دەستنووس (Script) ── #}
+    {% comment %} ── دەستنووس (Script) ── {% endcomment %}
     <div class="d-flex rw-sec-row">
       <a href="{% url 'scripts:index' project.pk %}"
          class="rw-sec-label d-flex flex-column align-items-center justify-content-center gap-2 py-3"
@@ -112,7 +112,7 @@
       </div>
     </div>
 
-    {# ── داڕشتن (Breakdown) ── #}
+    {% comment %} ── داڕشتن (Breakdown) ── {% endcomment %}
     <div class="d-flex rw-sec-row">
       <a href="{% url 'scripts:breakdown' project.pk %}"
          class="rw-sec-label d-flex flex-column align-items-center justify-content-center gap-2 py-3"
@@ -151,7 +151,7 @@
       </div>
     </div>
 
-    {# ── بینراوکردن (Visualize) ── #}
+    {% comment %} ── بینراوکردن (Visualize) ── {% endcomment %}
     <div class="d-flex rw-sec-row">
       <a href="{% url 'shots:list' project.pk %}"
          class="rw-sec-label d-flex flex-column align-items-center justify-content-center gap-2 py-3"
@@ -197,7 +197,7 @@
       </div>
     </div>
 
-    {# ── ڕێنوێس (Plan) ── #}
+    {% comment %} ── ڕێنوێس (Plan) ── {% endcomment %}
     <div class="d-flex rw-sec-row">
       <a href="{% url 'scheduling:index' project.pk %}"
          class="rw-sec-label d-flex flex-column align-items-center justify-content-center gap-2 py-3"
@@ -256,7 +256,7 @@
       </div>
     </div>
 
-    {# ── وێنەگرتن (Shoot) ── #}
+    {% comment %} ── وێنەگرتن (Shoot) ── {% endcomment %}
     <div class="d-flex rw-sec-row">
       <a href="{% url 'scheduling:call_sheets' project.pk %}"
          class="rw-sec-label d-flex flex-column align-items-center justify-content-center gap-2 py-3"

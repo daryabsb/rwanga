@@ -11,12 +11,10 @@
    ════════════════════════════════════════════════════════ {% endcomment %}
 {% load i18n %}
 
-<div style="padding:var(--rw-pad-lg)">
-
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--rw-pad-md)">
-    <h2 style="font-size:16px;font-weight:700">{% trans "خشتەی وێنەگرتن" %}</h2>
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <h2 class="fs-6 fw-bold mb-0">{% trans "خشتەی وێنەگرتن" %}</h2>
     {% if shoot_day %}
-    <a href="{% url 'scheduling:stripboard' project.pk %}" class="rw-btn rw-btn-ghost">
+    <a href="{% url 'scheduling:stripboard' project.pk %}" class="rw-btn rw-btn-ghost rw-btn-sm">
       {% trans "دیتنی ستریپبۆرد" %} →
     </a>
     {% endif %}
@@ -24,23 +22,23 @@
 
   {% if shoot_day %}
   {% comment %} ── Shoot day info ── {% endcomment %}
-  <div class="rw-card" style="margin-bottom:var(--rw-pad-lg)">
-    <div class="rw-grid-2">
-      <div>
+  <div class="rw-card mb-4">
+    <div class="row g-3">
+      <div class="col-md-6">
         <div class="rw-field-label">{% trans "ڕۆژی وێنەگرتن" %}</div>
-        <div class="rw-field-val" style="font-size:18px;font-weight:700;color:var(--rw-amber)">
+        <div class="rw-field-val fw-bold" style="font-size:18px;color:var(--rw-amber)">
           {% trans "ڕۆژی" %} {{ shoot_day.day_number }}
         </div>
       </div>
-      <div>
+      <div class="col-md-6">
         <div class="rw-field-label">{% trans "بەروار" %}</div>
-        <div class="rw-field-val" style="font-family:var(--rw-font-en)">
+        <div class="rw-field-val rw-font-en">
           {{ shoot_day.date|date:"l، j F Y" }}
         </div>
       </div>
     </div>
     {% if shoot_day.notes %}
-    <div class="rw-notes-block" style="margin-top:var(--rw-pad-sm)">{{ shoot_day.notes }}</div>
+    <div class="rw-notes-block mt-3">{{ shoot_day.notes }}</div>
     {% endif %}
   </div>
   {% endif %}
@@ -51,7 +49,7 @@
     {% if block.block_type == 'break' %}
     <div class="rw-sched-row s-break">
       <div>
-        <div class="rw-s-time" dir="ltr">{{ block.time_start|time:"H:i"|default:"—" }}</div>
+        <div class="rw-s-time rw-font-en" dir="ltr">{{ block.time_start|time:"H:i"|default:"—" }}</div>
         <div class="rw-s-dur">{{ block.title }}</div>
       </div>
       <div>
@@ -62,10 +60,10 @@
     {% else %}
     <div class="rw-sched-row {% if block.is_priority %}s-hi{% endif %}">
       <div>
-        <div class="rw-s-time" dir="ltr">
+        <div class="rw-s-time rw-font-en" dir="ltr">
           {{ block.time_start|time:"H:i"|default:"—" }}
         </div>
-        <div class="rw-s-dur" dir="ltr">
+        <div class="rw-s-dur rw-font-en" dir="ltr">
           {% if block.duration %}{{ block.duration|duration_hm }}{% endif %}
         </div>
         {% if block.scene %}
@@ -75,12 +73,12 @@
       <div>
         <div class="rw-s-title">
           {{ block.title }}
-          {% if block.is_priority %}<span class="rw-pri-badge">{% trans "گرنگ" %}</span>{% endif %}
+          {% if block.is_priority %}<span class="rw-badge rw-badge-warn ms-2">{% trans "گرنگ" %}</span>{% endif %}
         </div>
         {% if block.shots.exists %}
         <div class="rw-s-shots">
           {% for shot in block.shots.all %}
-          <span dir="ltr">{{ shot.number }}</span>{% if not forloop.last %}، {% endif %}
+          <bdi dir="ltr" class="rw-font-en">{{ shot.number }}</bdi>{% if not forloop.last %}، {% endif %}
           {% endfor %}
         </div>
         {% endif %}
@@ -99,14 +97,10 @@
   </div>
 
   {% else %}
-  <div class="rw-empty" style="padding:var(--rw-pad-xl) var(--rw-pad-md)">
-    <div class="rw-empty-icon">📅</div>
-    <div class="rw-empty-title">{% trans "هێشتا خشتەیەک نییە" %}</div>
-    <div class="rw-empty-sub">{% trans "ئەم دیمەنە هێشتا لە خشتەی وێنەگرتندا نییە" %}</div>
+  {% include "components/_empty_state.html" with icon_svg="schedule" title="هێشتا خشتەیەک نییە" sub="ئەم دیمەنە هێشتا لە خشتەی وێنەگرتندا نییە" %}
+  <div class="text-center mt-3">
     <a href="{% url 'scheduling:stripboard' project.pk %}" class="rw-btn rw-btn-primary">
       {% trans "بڕۆ بۆ ستریپبۆرد" %}
     </a>
   </div>
   {% endif %}
-
-</div>

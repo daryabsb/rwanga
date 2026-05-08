@@ -12,86 +12,93 @@
    ════════════════════════════════════════════════════════ {% endcomment %}
 {% load i18n %}
 
-<div style="padding:var(--rw-pad-lg)">
-
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--rw-pad-md)">
-    <h2 style="font-size:16px;font-weight:700">{% trans "بەردەوامی" %}</h2>
-    <button class="rw-btn rw-btn-ghost"
-            hx-get="{% url 'departments:add_continuity_modal' project.pk scene.pk %}"
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <h2 class="fs-6 fw-bold mb-0">{% trans "بەردەوامی" %}</h2>
+    <button class="rw-btn rw-btn-ghost rw-btn-sm"
+            hx-get="{{ add_continuity_url|default:'#' }}"
             hx-target="#rw-modal-container" hx-swap="innerHTML">
       + {% trans "زیادکردن" %}
     </button>
   </div>
 
   {% comment %} ── Scene flow ── {% endcomment %}
-  <div class="rw-flow" style="margin-bottom:var(--rw-pad-lg)">
-    {% comment %} Previous scene {% endcomment %}
+  <div class="rw-flow d-flex align-items-center gap-2 mb-4 p-3"
+       style="background:var(--rw-surface);border:1px solid var(--rw-border)">
+    {# Previous scene #}
     {% if prev_scene %}
-    <a href="{% url 'projects:scene' project.pk prev_scene.pk %}" style="text-decoration:none;flex:1">
-      <div class="rw-flow-node">
-        <div class="rw-flow-num">{{ prev_scene.number }}</div>
-        <div class="rw-flow-lbl">{{ prev_scene.int_ext }}. {{ prev_scene.location_name }}</div>
-        <div style="font-size:9px;color:var(--rw-text-3);margin-top:4px">{{ prev_scene.time_of_day }}</div>
-      </div>
+    <a href="{% url 'projects:scene' project.pk prev_scene.pk %}"
+       class="rw-flow-node flex-grow-1 text-decoration-none text-center p-2"
+       style="background:var(--rw-bg);border:1px solid var(--rw-border)">
+      <div class="rw-flow-num fw-bold" style="color:var(--rw-text)">{{ prev_scene.number }}</div>
+      <div class="rw-flow-lbl mt-1" style="font-size:11px;color:var(--rw-text-2)">{{ prev_scene.int_ext }}. {{ prev_scene.location_name }}</div>
+      <div class="mt-1" style="font-size:9px;color:var(--rw-text-3)">{{ prev_scene.time_of_day }}</div>
     </a>
     {% else %}
-    <div class="rw-flow-node" style="opacity:.3">
-      <div class="rw-flow-num">—</div>
-      <div class="rw-flow-lbl">{% trans "دیمەنی پێشوو نییە" %}</div>
+    <div class="rw-flow-node flex-grow-1 text-center p-2"
+         style="opacity:.3;background:var(--rw-bg);border:1px solid var(--rw-border)">
+      <div class="rw-flow-num fw-bold">—</div>
+      <div class="mt-1" style="font-size:11px;color:var(--rw-text-3)">{% trans "دیمەنی پێشوو نییە" %}</div>
     </div>
     {% endif %}
 
-    <div class="rw-flow-arr">{% if LANGUAGE_BIDI %}›{% else %}‹{% endif %}</div>
-
-    {% comment %} Current scene {% endcomment %}
-    <div class="rw-flow-node current" style="flex:1.2">
-      <div class="rw-flow-num">{{ scene.number }}</div>
-      <div class="rw-flow-lbl">{{ scene.int_ext }}. {{ scene.location_name }}</div>
-      <div style="font-size:9px;color:var(--rw-amber);margin-top:4px">{{ scene.time_of_day }}</div>
+    <div class="rw-flow-arr flex-shrink-0" style="font-size:18px;color:var(--rw-text-3)">
+      {% if LANGUAGE_BIDI %}›{% else %}‹{% endif %}
     </div>
 
-    <div class="rw-flow-arr">{% if LANGUAGE_BIDI %}›{% else %}‹{% endif %}</div>
+    {# Current scene — highlighted #}
+    <div class="rw-flow-node text-center p-2 flex-grow-1"
+         style="background:var(--rw-surface-2);border:1px solid var(--rw-amber)">
+      <div class="rw-flow-num fw-bold" style="color:var(--rw-amber)">{{ scene.number }}</div>
+      <div class="mt-1" style="font-size:11px;color:var(--rw-text)">{{ scene.int_ext }}. {{ scene.location_name }}</div>
+      <div class="mt-1" style="font-size:9px;color:var(--rw-amber)">{{ scene.time_of_day }}</div>
+    </div>
 
-    {% comment %} Next scene {% endcomment %}
+    <div class="rw-flow-arr flex-shrink-0" style="font-size:18px;color:var(--rw-text-3)">
+      {% if LANGUAGE_BIDI %}›{% else %}‹{% endif %}
+    </div>
+
+    {# Next scene #}
     {% if next_scene %}
-    <a href="{% url 'projects:scene' project.pk next_scene.pk %}" style="text-decoration:none;flex:1">
-      <div class="rw-flow-node">
-        <div class="rw-flow-num">{{ next_scene.number }}</div>
-        <div class="rw-flow-lbl">{{ next_scene.int_ext }}. {{ next_scene.location_name }}</div>
-        <div style="font-size:9px;color:var(--rw-text-3);margin-top:4px">{{ next_scene.time_of_day }}</div>
-      </div>
+    <a href="{% url 'projects:scene' project.pk next_scene.pk %}"
+       class="rw-flow-node flex-grow-1 text-decoration-none text-center p-2"
+       style="background:var(--rw-bg);border:1px solid var(--rw-border)">
+      <div class="rw-flow-num fw-bold" style="color:var(--rw-text)">{{ next_scene.number }}</div>
+      <div class="mt-1" style="font-size:11px;color:var(--rw-text-2)">{{ next_scene.int_ext }}. {{ next_scene.location_name }}</div>
+      <div class="mt-1" style="font-size:9px;color:var(--rw-text-3)">{{ next_scene.time_of_day }}</div>
     </a>
     {% else %}
-    <div class="rw-flow-node" style="opacity:.3">
-      <div class="rw-flow-num">—</div>
-      <div class="rw-flow-lbl">{% trans "دیمەنی دواتر نییە" %}</div>
+    <div class="rw-flow-node flex-grow-1 text-center p-2"
+         style="opacity:.3;background:var(--rw-bg);border:1px solid var(--rw-border)">
+      <div class="rw-flow-num fw-bold">—</div>
+      <div class="mt-1" style="font-size:11px;color:var(--rw-text-3)">{% trans "دیمەنی دواتر نییە" %}</div>
     </div>
     {% endif %}
   </div>
 
   {% comment %} ── In / Out checklists ── {% endcomment %}
-  <div class="rw-cont-grid">
+  <div class="row g-4">
 
-    {% comment %} IN — what carries into this scene from previous {% endcomment %}
-    <div>
-      <div class="rw-section-hdr" style="color:var(--rw-vis)">
+    {# IN — what carries into this scene from previous #}
+    <div class="col-md-6">
+      <div class="rw-section-hdr mb-2" style="color:var(--rw-vis)">
         ↓ {% trans "داهاتن بۆ ئەم دیمەنە" %}
       </div>
       <div class="rw-checklist" style="border:1px solid var(--rw-border)">
         {% for item in continuity_items %}{% if item.direction == 'in' %}
-        <div class="rw-check-item">
+        <div class="rw-check-item d-flex align-items-center gap-2 px-3 py-2"
+             style="border-bottom:1px solid var(--rw-border)">
           <input type="checkbox" id="cont-{{ item.pk }}"
                  {% if item.checked %}checked{% endif %}
-                 hx-post="{% url 'departments:toggle_continuity' project.pk item.pk %}"
+                 hx-post="{{ toggle_continuity_url|default:'#' }}"
                  hx-swap="none">
-          <div style="flex:1">
-            <div class="rw-ci-name">{{ item.description }}</div>
+          <div class="flex-grow-1">
+            <div class="rw-ci-name" style="font-size:13px">{{ item.description }}</div>
           </div>
         </div>
         {% endif %}{% endfor %}
-        <div style="padding:8px 16px">
-          <button class="rw-btn rw-btn-ghost" style="font-size:11px;padding:5px 12px"
-                  hx-get="{% url 'departments:add_continuity_modal' project.pk scene.pk %}?direction=in"
+        <div class="px-3 py-2">
+          <button class="rw-btn rw-btn-ghost rw-btn-sm"
+                  hx-get="{{ add_continuity_url|default:'#' }}?direction=in"
                   hx-target="#rw-modal-container" hx-swap="innerHTML">
             + {% trans "زیادکردن" %}
           </button>
@@ -99,26 +106,27 @@
       </div>
     </div>
 
-    {% comment %} OUT — what carries from this scene to next {% endcomment %}
-    <div>
-      <div class="rw-section-hdr" style="color:var(--rw-shoot)">
+    {# OUT — what carries from this scene to next #}
+    <div class="col-md-6">
+      <div class="rw-section-hdr mb-2" style="color:var(--rw-shoot)">
         ↑ {% trans "چوون بۆ دیمەنی دواتر" %}
       </div>
       <div class="rw-checklist" style="border:1px solid var(--rw-border)">
         {% for item in continuity_items %}{% if item.direction == 'out' %}
-        <div class="rw-check-item">
+        <div class="rw-check-item d-flex align-items-center gap-2 px-3 py-2"
+             style="border-bottom:1px solid var(--rw-border)">
           <input type="checkbox" id="cont-{{ item.pk }}"
                  {% if item.checked %}checked{% endif %}
-                 hx-post="{% url 'departments:toggle_continuity' project.pk item.pk %}"
+                 hx-post="{{ toggle_continuity_url|default:'#' }}"
                  hx-swap="none">
-          <div style="flex:1">
-            <div class="rw-ci-name">{{ item.description }}</div>
+          <div class="flex-grow-1">
+            <div class="rw-ci-name" style="font-size:13px">{{ item.description }}</div>
           </div>
         </div>
         {% endif %}{% endfor %}
-        <div style="padding:8px 16px">
-          <button class="rw-btn rw-btn-ghost" style="font-size:11px;padding:5px 12px"
-                  hx-get="{% url 'departments:add_continuity_modal' project.pk scene.pk %}?direction=out"
+        <div class="px-3 py-2">
+          <button class="rw-btn rw-btn-ghost rw-btn-sm"
+                  hx-get="{{ add_continuity_url|default:'#' }}?direction=out"
                   hx-target="#rw-modal-container" hx-swap="innerHTML">
             + {% trans "زیادکردن" %}
           </button>
@@ -127,5 +135,3 @@
     </div>
 
   </div>
-
-</div>

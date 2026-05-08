@@ -1,4 +1,4 @@
-{# ════════════════════════════════════════════════════════
+{% comment %} ════════════════════════════════════════════════════════
    RWANGA — projects/scenes/tabs/wardrobe.html
    Wardrobe module tab. HTMX fragment.
    Per-character outfit cards with top-colour border.
@@ -8,13 +8,13 @@
      project         — Project instance
      characters      — QuerySet[Character] in scene
      wardrobe_items  — QuerySet[WardrobeItem] grouped by character
-   ════════════════════════════════════════════════════════ #}
+   ════════════════════════════════════════════════════════ {% endcomment %}
 {% load i18n %}
 
   <div class="d-flex align-items-center justify-content-between mb-4">
     <h2 class="fs-6 fw-bold mb-0">{% trans "جلوبەرگ و گریم" %}</h2>
     <button class="rw-btn rw-btn-primary rw-btn-sm"
-            hx-get="{% url 'departments:add_wardrobe_modal' project.pk scene.pk %}"
+            hx-get="{{ add_wardrobe_url|default:'#' }}"
             hx-target="#rw-modal-container" hx-swap="innerHTML">
       + {% trans "زیادکردن" %}
     </button>
@@ -50,16 +50,18 @@
         {% endif %}
 
         <div class="mt-2">
+          {% url 'departments:edit_wardrobe_modal' item.pk as edit_u %}
           <button class="rw-btn rw-btn-ghost rw-btn-sm"
-                  hx-get="{% url 'departments:edit_wardrobe_modal' project.pk item.pk %}"
-                  hx-target="#rw-modal-container" hx-swap="innerHTML">✎</button>
+                  hx-get="{{ edit_u|default:'#' }}"
+                  hx-target="#rw-modal-container" hx-swap="innerHTML"
+                  aria-label="{% trans 'دەستکاری' %}">✎</button>
         </div>
       </div>
       {% endif %}{% endfor %}
 
       {# Add outfit button for this character #}
       <button class="rw-btn rw-btn-ghost rw-btn-sm w-100 justify-content-center"
-              hx-get="{% url 'departments:add_wardrobe_modal' project.pk scene.pk %}?character={{ character.pk }}"
+              hx-get="{{ add_wardrobe_url|default:'#' }}?character={{ character.pk }}"
               hx-target="#rw-modal-container" hx-swap="innerHTML">
         + {% trans "زیادکردنی جل" %}
       </button>
@@ -75,7 +77,7 @@
   {% include "components/_empty_state.html" with icon_svg="wardrobe" title="هێشتا تێبینی جلوبەرگێک نییە" sub="جلوبەرگی هەر کەسایەتییەک بۆ ئەم دیمەنە زیاد بکە" %}
   <div class="text-center mt-3">
     <button class="rw-btn rw-btn-primary"
-            hx-get="{% url 'departments:add_wardrobe_modal' project.pk scene.pk %}"
+            hx-get="{{ add_wardrobe_url|default:'#' }}"
             hx-target="#rw-modal-container" hx-swap="innerHTML">
       + {% trans "زیادکردن" %}
     </button>

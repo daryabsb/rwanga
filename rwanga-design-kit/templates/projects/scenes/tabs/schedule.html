@@ -1,4 +1,4 @@
-{# ════════════════════════════════════════════════════════
+{% comment %} ════════════════════════════════════════════════════════
    RWANGA — projects/scenes/tabs/schedule.html
    Scene schedule tab. HTMX fragment.
    Shows when this scene is scheduled to shoot.
@@ -8,7 +8,7 @@
      project          — Project instance
      schedule_blocks  — QuerySet[ScheduleBlock] for this scene
      shoot_day        — ShootDay or None
-   ════════════════════════════════════════════════════════ #}
+   ════════════════════════════════════════════════════════ {% endcomment %}
 {% load i18n %}
 
   <div class="d-flex align-items-center justify-content-between mb-4">
@@ -21,7 +21,7 @@
   </div>
 
   {% if shoot_day %}
-  {# ── Shoot day info ── #}
+  {% comment %} ── Shoot day info ── {% endcomment %}
   <div class="rw-card mb-4">
     <div class="row g-3">
       <div class="col-md-6">

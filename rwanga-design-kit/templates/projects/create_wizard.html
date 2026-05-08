@@ -1,4 +1,6 @@
-{# ════════════════════════════════════════════════════════
+{% extends "base.html" %}
+{% load static i18n %}
+{% comment %} ════════════════════════════════════════════════════════
    RWANGA — projects/create_wizard.html
    4-step project creation wizard.
    Steps: 1=Basics, 2=Script Upload, 3=Modules, 4=Team
@@ -9,9 +11,7 @@
      form        — WizardStepForm for current step
      project     — Project (available from step 2 onward)
      wizard_data — session data
-   ════════════════════════════════════════════════════════ #}
-{% extends "base.html" %}
-{% load static i18n %}
+   ════════════════════════════════════════════════════════ {% endcomment %}
 
 {% block title %}{% trans "پڕۆژەی نوێ" %}{% endblock %}
 
@@ -19,7 +19,7 @@
 <div class="flex-grow-1 overflow-auto p-4 p-lg-5" style="background:var(--rw-bg)">
   <div style="max-width:640px;margin:0 auto">
 
-    {# ── Wizard step bar ── #}
+    {% comment %} ── Wizard step bar ── {% endcomment %}
     <div class="rw-wizard-bar mb-4">
       {% with steps=wizard_steps %}
       {% for s in steps %}
@@ -32,7 +32,7 @@
       {% endwith %}
     </div>
 
-    {# ── Wizard content ── #}
+    {% comment %} ── Wizard content ── {% endcomment %}
     <div id="rw-wizard-body">
 
       {% if step == 1 %}
@@ -41,6 +41,7 @@
       <form id="rw-wizard-form"
             hx-post="{% url 'projects:create_step' 1 %}"
             hx-target="#rw-wizard-body"
+            hx-select="#rw-wizard-body"
             hx-swap="innerHTML">
         {% csrf_token %}
 
@@ -87,6 +88,7 @@
       <form id="rw-wizard-form"
             hx-post="{% url 'projects:create_step' 2 %}"
             hx-target="#rw-wizard-body"
+            hx-select="#rw-wizard-body"
             hx-encoding="multipart/form-data">
         {% csrf_token %}
         <input type="hidden" name="project_id" value="{{ project.pk }}">
@@ -121,6 +123,7 @@
         <button class="rw-btn rw-btn-ghost"
                 hx-post="{% url 'projects:create_step' 2 %}"
                 hx-target="#rw-wizard-body"
+                hx-select="#rw-wizard-body"
                 hx-vals='{"skip": true, "project_id": "{{ project.pk }}"}'>
           {% trans "بگوزەرێ — دواتر زیاد دەکەم" %}
         </button>
@@ -134,7 +137,8 @@
       </p>
       <form id="rw-wizard-form"
             hx-post="{% url 'projects:create_step' 3 %}"
-            hx-target="#rw-wizard-body">
+            hx-target="#rw-wizard-body"
+            hx-select="#rw-wizard-body">
         {% csrf_token %}
         <input type="hidden" name="project_id" value="{{ project.pk }}">
 
@@ -163,7 +167,8 @@
       </p>
       <form id="rw-wizard-form"
             hx-post="{% url 'projects:create_step' 4 %}"
-            hx-target="#rw-wizard-body">
+            hx-target="#rw-wizard-body"
+            hx-select="#rw-wizard-body">
         {% csrf_token %}
         <input type="hidden" name="project_id" value="{{ project.pk }}">
 
@@ -180,13 +185,14 @@
       </form>
       {% endif %}
 
-      {# ── Wizard footer nav ── #}
+      {% comment %} ── Wizard footer nav ── {% endcomment %}
       <div class="rw-wizard-footer d-flex justify-content-between mt-4 pt-3"
            style="border-top:1px solid var(--rw-border)">
         {% if step > 1 %}
         <button class="rw-btn rw-btn-ghost"
                 hx-get="{% url 'projects:create_wizard' %}?step={{ step|add:'-1' }}&project={{ project.pk }}"
-                hx-target="#rw-wizard-body">
+                hx-target="#rw-wizard-body"
+                hx-select="#rw-wizard-body">
           ← {% trans "پێشوو" %}
         </button>
         {% else %}<div></div>{% endif %}

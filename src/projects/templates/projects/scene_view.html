@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static i18n %}
 {% comment %} ════════════════════════════════════════════════════════
    RWANGA — projects/scene_view.html
    The core production screen. One scene, all modules.
@@ -14,87 +15,92 @@
      prev_scene    — Scene|None
      next_scene    — Scene|None
    ════════════════════════════════════════════════════════ {% endcomment %}
-{% load static i18n %}
 
 {% block title %}{% trans "دیمەنی" %} {{ scene.number }} — {{ project.title }}{% endblock %}
 
 {% block content %}
-<div class="rw-scene-view" style="display:flex;flex:1;overflow:hidden" id="rw-content">
+<div class="d-flex flex-grow-1 overflow-hidden">
 
-  {% comment %} ── SCENE LIST PANEL ── first in flex = right in RTL {% endcomment %}
-  <aside class="rw-scene-panel">
-    <div class="rw-panel-header">{% trans "دیمەنەکان" %}</div>
-
-    <div class="rw-scene-search">
-      <input type="search"
-             placeholder="{% trans 'گەڕان...' %}"
-             oninput="RW.sceneFilter(this.value)"
-             aria-label="{% trans 'گەڕان لە دیمەنەکان' %}">
+  {% comment %} ── SCENE LIST PANEL ── first in DOM = right in RTL {% endcomment %}
+  <aside class="rw-scene-panel d-none d-lg-flex flex-column overflow-hidden">
+    <div class="px-3 py-2 rw-overline"
+         style="border-bottom:1px solid var(--rw-border)">
+      {% trans "دیمەنەکان" %}
     </div>
 
-    <label class="rw-group-toggle">
+    <div class="px-2 py-2" style="border-bottom:1px solid var(--rw-border)">
+      <input type="search" class="rw-form-input"
+             placeholder="{% trans 'گەڕان...' %}"
+             oninput="RW.sceneFilter(this.value)"
+             aria-label="{% trans 'گەڕان لە دیمەنەکان' %}"
+             style="padding:6px 10px;font-size:12px">
+    </div>
+
+    <label class="d-flex align-items-center gap-2 px-3 py-2"
+           style="font-size:11px;color:var(--rw-text-3);cursor:pointer;border-bottom:1px solid var(--rw-border);flex-shrink:0">
       <input type="checkbox" id="rw-group-toggle" checked>
       {% trans "گروپبەندی بەپێی شوێن" %}
     </label>
 
-    <div class="rw-scene-list" id="rw-scene-list"
+    <div class="flex-grow-1 overflow-auto" id="rw-scene-list"
          hx-get="{% url 'projects:scene_list_partial' project.pk %}"
          hx-trigger="load"
          hx-swap="innerHTML">
-      {% comment %} Populated by HTMX on load — returns _scene_list.html partial {% endcomment %}
+      {# Populated by HTMX on load — returns _scene_list.html partial #}
     </div>
   </aside>
 
   {% comment %} ── SCENE MAIN ── {% endcomment %}
-  <div class="rw-scene-main">
+  <div id="rw-scene-main" class="flex-grow-1 d-flex flex-column overflow-hidden">
 
-    {% comment %} Breadcrumb {% endcomment %}
+    {# Breadcrumb #}
     {% include "components/_breadcrumb.html" with crumbs=crumbs current=scene.number|stringformat:"s" location=scene.heading %}
 
-    {% comment %} Scene topbar {% endcomment %}
-    <div class="rw-scene-topbar">
-      <div style="flex:1">
-        <div class="rw-scene-title">
+    {# Scene topbar #}
+    <div class="d-flex align-items-center px-4 gap-3 bg-rw-surface"
+         style="height:56px;flex-shrink:0;border-bottom:1px solid var(--rw-border)">
+      <div class="flex-grow-1">
+        <div class="fw-bold">
           {% trans "دیمەنی" %} {{ scene.number }}
-          <span style="color:var(--rw-text-2);font-weight:400;font-size:14px;margin-inline-start:12px">
+          <span class="ms-2" style="color:var(--rw-text-2);font-weight:400;font-size:14px">
             {{ scene.int_ext }}. {{ scene.location_name }} — {{ scene.time_of_day }}
           </span>
         </div>
-        <div class="rw-scene-meta">
+        <div style="font-size:11px;color:var(--rw-text-2)">
           {{ scene.shots.count }} {% trans "لێدان" %} &nbsp;·&nbsp;
           {{ scene.setups_count }} {% trans "ئامادەکردن" %} &nbsp;·&nbsp;
           {{ scene.screen_time }} {% trans "کاتی شاشە" %}
         </div>
       </div>
 
-      {% comment %} Scene prev/next nav {% endcomment %}
-      <div style="display:flex;gap:4px">
+      {# Scene prev/next nav #}
+      <div class="d-flex gap-1">
         {% if prev_scene %}
         <a href="{% url 'projects:scene' project.pk prev_scene.pk %}"
-           class="rw-btn rw-btn-ghost rw-btn-icon" title="{% trans 'دیمەنی پێشوو' %}">›</a>
+           class="rw-btn rw-btn-ghost rw-btn-sm" title="{% trans 'دیمەنی پێشوو' %}">›</a>
         {% endif %}
         {% if next_scene %}
         <a href="{% url 'projects:scene' project.pk next_scene.pk %}"
-           class="rw-btn rw-btn-ghost rw-btn-icon" title="{% trans 'دیمەنی دواتر' %}">‹</a>
+           class="rw-btn rw-btn-ghost rw-btn-sm" title="{% trans 'دیمەنی دواتر' %}">‹</a>
         {% endif %}
       </div>
 
-      {% comment %} AI generate — async Celery task {% endcomment %}
-      <button class="rw-btn rw-btn-ghost rw-btn-ai"
+      {# AI generate — async Celery task #}
+      <button class="rw-btn rw-btn-ai rw-btn-sm"
               hx-post="{% url 'ai_engine:generate_scene' scene.pk %}"
               hx-target="#rw-ai-status"
               hx-indicator=".htmx-indicator">
-        🤖 {% trans "AI دروستکردن" %}
+        {% trans "AI دروستکردن" %}
       </button>
 
-      {% comment %} Export scene viewer HTML {% endcomment %}
+      {# Export scene viewer HTML #}
       <a href="{% url 'exports:scene_viewer' scene.pk %}"
-         class="rw-btn rw-btn-amber">
+         class="rw-btn rw-btn-amber rw-btn-sm">
         ↗ {% trans "دەرهێنانی HTML" %}
       </a>
     </div>
 
-    {% comment %} AI job status strip {% endcomment %}
+    {# AI job status strip #}
     <div id="rw-ai-status">
       {% for job in active_jobs %}
         {% include "components/_ai_progress.html" with job=job %}
@@ -102,7 +108,9 @@
     </div>
 
     {% comment %} ── MODULE TABS ── {% endcomment %}
-    <div class="rw-mod-tabs" role="tablist">
+    <div class="d-flex overflow-x-auto px-3 bg-rw-surface"
+         style="height:48px;flex-shrink:0;border-bottom:1px solid var(--rw-border)"
+         role="tablist">
       {% for tab in tabs %}
       <button class="rw-mod-tab {% if active_tab == tab.id %}active{% endif %}"
               data-tab="{{ tab.id }}"
@@ -119,20 +127,13 @@
     </div>
 
     {% comment %} ── TAB CONTENT ── {% endcomment %}
-    <div class="rw-tab-content" id="rw-tab-content" role="tabpanel">
-      {% comment %} Initial content loaded server-side; subsequent tabs via HTMX {% endcomment %}
+    <div id="rw-tab-content" class="flex-grow-1 overflow-auto p-4"
+         style="background:var(--rw-bg)"
+         role="tabpanel">
+      {# Initial content loaded server-side; subsequent tabs via HTMX #}
       {% include active_tab_template %}
     </div>
 
-    <div id="rw-scene-comments"
-         hx-get="{% url 'reviews:scene_comments' project.pk scene.pk %}"
-         hx-trigger="load"
-         hx-swap="innerHTML"
-         style="margin-top:var(--rw-pad-md)"></div>
-
-  </div>{% comment %} /rw-scene-main {% endcomment %}
-</div>{% comment %} /rw-scene-view {% endcomment %}
-
-{% comment %} Modal container {% endcomment %}
-<div id="rw-modal-container"></div>
+  </div>{# /rw-scene-main #}
+</div>
 {% endblock %}

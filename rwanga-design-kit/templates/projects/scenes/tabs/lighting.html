@@ -1,4 +1,4 @@
-{# ════════════════════════════════════════════════════════
+{% comment %} ════════════════════════════════════════════════════════
    RWANGA — projects/scenes/tabs/lighting.html
    Lighting module tab. HTMX fragment.
    Color temperature bar + per-shot lighting notes grid.
@@ -8,19 +8,19 @@
      project        — Project instance
      lighting_notes — QuerySet[LightingNote] for shots in this scene
      color_temps    — list of {shot_num, temp_k, label, color_hex}
-   ════════════════════════════════════════════════════════ #}
+   ════════════════════════════════════════════════════════ {% endcomment %}
 {% load i18n %}
 
   <div class="d-flex align-items-center justify-content-between mb-4">
     <h2 class="fs-6 fw-bold mb-0">{% trans "ڕووناکی" %}</h2>
     <button class="rw-btn rw-btn-ghost rw-btn-sm"
-            hx-get="{% url 'departments:add_lighting_modal' project.pk scene.pk %}"
+            hx-get="{{ add_lighting_url|default:'#' }}"
             hx-target="#rw-modal-container" hx-swap="innerHTML">
       + {% trans "تێبینی" %}
     </button>
   </div>
 
-  {# ── Color temperature bar ── #}
+  {% comment %} ── Color temperature bar ── {% endcomment %}
   {% if color_temps %}
   <div class="rw-card mb-4">
     <div class="rw-card-title">{% trans "گەرمی ڕەنگی ژوورەکە" %}</div>
@@ -45,7 +45,7 @@
   </div>
   {% endif %}
 
-  {# ── Per-shot lighting notes ── #}
+  {% comment %} ── Per-shot lighting notes ── {% endcomment %}
   {% if lighting_notes %}
   <div class="rw-light-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1px;background:var(--rw-border);border:1px solid var(--rw-border)">
     {% for note in lighting_notes %}
@@ -67,9 +67,11 @@
       </div>
       {% endif %}
       <div class="mt-2">
+        {% url 'departments:edit_lighting_modal' note.pk as edit_u %}
         <button class="rw-btn rw-btn-ghost rw-btn-sm"
-                hx-get="{% url 'departments:edit_lighting_modal' project.pk note.pk %}"
-                hx-target="#rw-modal-container" hx-swap="innerHTML">✎</button>
+                hx-get="{{ edit_u|default:'#' }}"
+                hx-target="#rw-modal-container" hx-swap="innerHTML"
+                aria-label="{% trans 'دەستکاری' %}">✎</button>
       </div>
     </div>
     {% endfor %}
@@ -78,7 +80,7 @@
   {% include "components/_empty_state.html" with icon_svg="lighting" title="هێشتا تێبینی ڕووناکییەک نییە" sub="بۆ هەر لێدانێک تێبینی ڕووناکی زیاد بکە" %}
   <div class="text-center mt-3">
     <button class="rw-btn rw-btn-primary"
-            hx-get="{% url 'departments:add_lighting_modal' project.pk scene.pk %}"
+            hx-get="{{ add_lighting_url|default:'#' }}"
             hx-target="#rw-modal-container" hx-swap="innerHTML">
       + {% trans "تێبینی یەکەم" %}
     </button>

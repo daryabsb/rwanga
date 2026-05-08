@@ -1,4 +1,4 @@
-{# ════════════════════════════════════════════════════════
+{% comment %} ════════════════════════════════════════════════════════
    RWANGA — projects/scenes/tabs/props.html
    Props checklist tab. HTMX fragment.
    Categorised A/B/C, HTMX checkbox toggles.
@@ -7,13 +7,13 @@
      scene    — Scene instance
      project  — Project instance
      props    — QuerySet[Prop] categorised (A/B/C)
-   ════════════════════════════════════════════════════════ #}
+   ════════════════════════════════════════════════════════ {% endcomment %}
 {% load i18n %}
 
   <div class="d-flex align-items-center justify-content-between mb-4">
     <h2 class="fs-6 fw-bold mb-0">{% trans "کەلوپەلەکان" %}</h2>
     <button class="rw-btn rw-btn-primary rw-btn-sm"
-            hx-get="{% url 'departments:add_prop_modal' project.pk scene.pk %}"
+            hx-get="{{ add_prop_url|default:'#' }}"
             hx-target="#rw-modal-container" hx-swap="innerHTML">
       + {% trans "کەلوپەلی نوێ" %}
     </button>
@@ -21,7 +21,7 @@
 
   {% if props %}
 
-  {# ── Category A — Critical ── #}
+  {% comment %} ── Category A — Critical ── {% endcomment %}
   <span class="rw-cat-label rw-cat-a mb-1 d-inline-block">
     <bdi dir="ltr" class="rw-font-en">A</bdi> — {% trans "سەرەکی" %}
   </span>
@@ -31,7 +31,7 @@
          style="border-bottom:1px solid var(--rw-border)">
       <input type="checkbox" id="prop-{{ prop.pk }}"
              {% if prop.status == 'on_set' or prop.status == 'sourced' %}checked{% endif %}
-             hx-post="{% url 'departments:toggle_prop' project.pk prop.pk %}"
+             hx-post="{{ toggle_prop_url|default:'#' }}"
              hx-swap="none"
              hx-vals='{"checked": "{% if prop.status == "on_set" %}false{% else %}true{% endif %}"}'>
       <div class="flex-grow-1">
@@ -48,7 +48,7 @@
     {% endif %}{% endfor %}
   </div>
 
-  {# ── Category B — Important ── #}
+  {% comment %} ── Category B — Important ── {% endcomment %}
   <span class="rw-cat-label rw-cat-b mb-1 d-inline-block">
     <bdi dir="ltr" class="rw-font-en">B</bdi> — {% trans "گرنگ" %}
   </span>
@@ -58,7 +58,7 @@
          style="border-bottom:1px solid var(--rw-border)">
       <input type="checkbox" id="prop-{{ prop.pk }}"
              {% if prop.status == 'on_set' or prop.status == 'sourced' %}checked{% endif %}
-             hx-post="{% url 'departments:toggle_prop' project.pk prop.pk %}"
+             hx-post="{{ toggle_prop_url|default:'#' }}"
              hx-swap="none">
       <div class="flex-grow-1">
         <div class="rw-ci-name fw-semibold" style="font-size:13px">{{ prop.name }}</div>
@@ -71,7 +71,7 @@
     {% endfor %}
   </div>
 
-  {# ── Category C — Background ── #}
+  {% comment %} ── Category C — Background ── {% endcomment %}
   <span class="rw-cat-label rw-cat-c mb-1 d-inline-block">
     <bdi dir="ltr" class="rw-font-en">C</bdi> — {% trans "پاشخانە" %}
   </span>
@@ -81,7 +81,7 @@
          style="border-bottom:1px solid var(--rw-border)">
       <input type="checkbox" id="prop-{{ prop.pk }}"
              {% if prop.status == 'on_set' or prop.status == 'sourced' %}checked{% endif %}
-             hx-post="{% url 'departments:toggle_prop' project.pk prop.pk %}"
+             hx-post="{{ toggle_prop_url|default:'#' }}"
              hx-swap="none">
       <div class="flex-grow-1">
         <div class="rw-ci-name fw-semibold" style="font-size:13px">{{ prop.name }}</div>
@@ -95,7 +95,7 @@
   {% include "components/_empty_state.html" with icon_svg="props" title="هێشتا کەلوپەلێک نییە" sub="کەلوپەلەکانی دیمەن زیاد بکە" %}
   <div class="text-center mt-3">
     <button class="rw-btn rw-btn-primary"
-            hx-get="{% url 'departments:add_prop_modal' project.pk scene.pk %}"
+            hx-get="{{ add_prop_url|default:'#' }}"
             hx-target="#rw-modal-container" hx-swap="innerHTML">
       + {% trans "کەلوپەلی یەکەم" %}
     </button>

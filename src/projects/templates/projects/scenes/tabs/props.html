@@ -10,12 +10,10 @@
    ════════════════════════════════════════════════════════ {% endcomment %}
 {% load i18n %}
 
-<div style="padding:var(--rw-pad-lg)">
-
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--rw-pad-md)">
-    <h2 style="font-size:16px;font-weight:700">{% trans "کەلوپەلەکان" %}</h2>
-    <button class="rw-btn rw-btn-primary"
-            hx-get="{% url 'departments:add_prop_modal' project.pk scene.pk %}"
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <h2 class="fs-6 fw-bold mb-0">{% trans "کەلوپەلەکان" %}</h2>
+    <button class="rw-btn rw-btn-primary rw-btn-sm"
+            hx-get="{{ add_prop_url|default:'#' }}"
             hx-target="#rw-modal-container" hx-swap="innerHTML">
       + {% trans "کەلوپەلی نوێ" %}
     </button>
@@ -24,85 +22,82 @@
   {% if props %}
 
   {% comment %} ── Category A — Critical ── {% endcomment %}
-  {% with cat_a=props|dictsort:"category"|slice_by_category:"A" %}
-  {% if cat_a %}
-  <span class="rw-cat-label rw-cat-a">A — {% trans "سەرەکی" %}</span>
-  <div class="rw-checklist" style="border:1px solid var(--rw-border);margin-bottom:var(--rw-pad-md)">
+  <span class="rw-cat-label rw-cat-a mb-1 d-inline-block">
+    <bdi dir="ltr" class="rw-font-en">A</bdi> — {% trans "سەرەکی" %}
+  </span>
+  <div class="rw-checklist mb-4" style="border:1px solid var(--rw-border)">
     {% for prop in props %}{% if prop.category == 'A' %}
-    <div class="rw-check-item">
+    <div class="rw-check-item d-flex align-items-start gap-3 px-3 py-2"
+         style="border-bottom:1px solid var(--rw-border)">
       <input type="checkbox" id="prop-{{ prop.pk }}"
              {% if prop.status == 'on_set' or prop.status == 'sourced' %}checked{% endif %}
-             hx-post="{% url 'departments:toggle_prop' project.pk prop.pk %}"
+             hx-post="{{ toggle_prop_url|default:'#' }}"
              hx-swap="none"
-             hx-vals='{"checked": "{% if prop.status == 'on_set' %}false{% else %}true{% endif %}"}'>
-      <div style="flex:1">
-        <div class="rw-ci-name">{{ prop.name }}</div>
-        {% if prop.notes %}<div class="rw-ci-note">{{ prop.notes }}</div>{% endif %}
-        <div class="rw-ci-shots">
-          {% for scene in prop.scenes.all %}{% trans "دیمەنی" %} {{ scene.number }}{% if not forloop.last %}، {% endif %}{% endfor %}
+             hx-vals='{"checked": "{% if prop.status == "on_set" %}false{% else %}true{% endif %}"}'>
+      <div class="flex-grow-1">
+        <div class="rw-ci-name fw-semibold" style="font-size:13px">{{ prop.name }}</div>
+        {% if prop.notes %}<div class="rw-ci-note mt-1" style="font-size:11px;color:var(--rw-text-3)">{{ prop.notes }}</div>{% endif %}
+        <div class="rw-ci-shots mt-1" style="font-size:11px;color:var(--rw-text-3)">
+          {% for s in prop.scenes.all %}{% trans "دیمەنی" %} {{ s.number }}{% if not forloop.last %}، {% endif %}{% endfor %}
         </div>
       </div>
-      <span class="rw-badge {% if prop.status == 'on_set' %}rw-badge-v{% elif prop.status == 'sourced' %}rw-badge-i{% else %}rw-badge-d{% endif %}" style="font-size:9px;flex-shrink:0">
+      <span class="rw-badge {% if prop.status == 'on_set' %}rw-badge-ok{% elif prop.status == 'sourced' %}rw-badge-warn{% else %}rw-badge-mute{% endif %} flex-shrink-0" style="font-size:9px">
         {{ prop.get_status_display }}
       </span>
     </div>
     {% endif %}{% endfor %}
   </div>
-  {% endif %}
-  {% endwith %}
 
   {% comment %} ── Category B — Important ── {% endcomment %}
-  <span class="rw-cat-label rw-cat-b">B — {% trans "گرنگ" %}</span>
-  <div class="rw-checklist" style="border:1px solid var(--rw-border);margin-bottom:var(--rw-pad-md)">
+  <span class="rw-cat-label rw-cat-b mb-1 d-inline-block">
+    <bdi dir="ltr" class="rw-font-en">B</bdi> — {% trans "گرنگ" %}
+  </span>
+  <div class="rw-checklist mb-4" style="border:1px solid var(--rw-border)">
     {% for prop in props %}{% if prop.category == 'B' %}
-    <div class="rw-check-item">
+    <div class="rw-check-item d-flex align-items-start gap-3 px-3 py-2"
+         style="border-bottom:1px solid var(--rw-border)">
       <input type="checkbox" id="prop-{{ prop.pk }}"
              {% if prop.status == 'on_set' or prop.status == 'sourced' %}checked{% endif %}
-             hx-post="{% url 'departments:toggle_prop' project.pk prop.pk %}"
+             hx-post="{{ toggle_prop_url|default:'#' }}"
              hx-swap="none">
-      <div style="flex:1">
-        <div class="rw-ci-name">{{ prop.name }}</div>
-        {% if prop.notes %}<div class="rw-ci-note">{{ prop.notes }}</div>{% endif %}
+      <div class="flex-grow-1">
+        <div class="rw-ci-name fw-semibold" style="font-size:13px">{{ prop.name }}</div>
+        {% if prop.notes %}<div class="rw-ci-note mt-1" style="font-size:11px;color:var(--rw-text-3)">{{ prop.notes }}</div>{% endif %}
       </div>
-      <span class="rw-badge rw-badge-v" style="font-size:9px;flex-shrink:0">{{ prop.get_status_display }}</span>
+      <span class="rw-badge rw-badge-mute flex-shrink-0" style="font-size:9px">{{ prop.get_status_display }}</span>
     </div>
     {% empty %}
-    <div style="padding:14px 16px;font-size:13px;color:var(--rw-text-3)">{% trans "کەلوپەلی B نییە" %}</div>
+    <div class="px-3 py-3" style="font-size:13px;color:var(--rw-text-3)">{% trans "کەلوپەلی B نییە" %}</div>
     {% endfor %}
-    {% for prop in props %}{% if prop.category == 'B' %}{% else %}{% endif %}{% endfor %}
   </div>
 
   {% comment %} ── Category C — Background ── {% endcomment %}
-  <span class="rw-cat-label rw-cat-c">C — {% trans "پاشخانە" %}</span>
+  <span class="rw-cat-label rw-cat-c mb-1 d-inline-block">
+    <bdi dir="ltr" class="rw-font-en">C</bdi> — {% trans "پاشخانە" %}
+  </span>
   <div class="rw-checklist" style="border:1px solid var(--rw-border)">
     {% for prop in props %}{% if prop.category == 'C' %}
-    <div class="rw-check-item">
+    <div class="rw-check-item d-flex align-items-start gap-3 px-3 py-2"
+         style="border-bottom:1px solid var(--rw-border)">
       <input type="checkbox" id="prop-{{ prop.pk }}"
              {% if prop.status == 'on_set' or prop.status == 'sourced' %}checked{% endif %}
-             hx-post="{% url 'departments:toggle_prop' project.pk prop.pk %}"
+             hx-post="{{ toggle_prop_url|default:'#' }}"
              hx-swap="none">
-      <div style="flex:1">
-        <div class="rw-ci-name">{{ prop.name }}</div>
-        {% if prop.notes %}<div class="rw-ci-note">{{ prop.notes }}</div>{% endif %}
+      <div class="flex-grow-1">
+        <div class="rw-ci-name fw-semibold" style="font-size:13px">{{ prop.name }}</div>
+        {% if prop.notes %}<div class="rw-ci-note mt-1" style="font-size:11px;color:var(--rw-text-3)">{{ prop.notes }}</div>{% endif %}
       </div>
     </div>
     {% endfor %}
-    {% if not props|selectattr:"category","equalto","C"|list %}
-    <div style="padding:14px 16px;font-size:13px;color:var(--rw-text-3)">{% trans "کەلوپەلی C نییە" %}</div>
-    {% endif %}
   </div>
 
   {% else %}
-  <div class="rw-empty" style="padding:var(--rw-pad-xl) var(--rw-pad-md)">
-    <div class="rw-empty-icon">🎭</div>
-    <div class="rw-empty-title">{% trans "هێشتا کەلوپەلێک نییە" %}</div>
-    <div class="rw-empty-sub">{% trans "کەلوپەلەکانی دیمەن زیاد بکە" %}</div>
+  {% include "components/_empty_state.html" with icon_svg="props" title="هێشتا کەلوپەلێک نییە" sub="کەلوپەلەکانی دیمەن زیاد بکە" %}
+  <div class="text-center mt-3">
     <button class="rw-btn rw-btn-primary"
-            hx-get="{% url 'departments:add_prop_modal' project.pk scene.pk %}"
+            hx-get="{{ add_prop_url|default:'#' }}"
             hx-target="#rw-modal-container" hx-swap="innerHTML">
       + {% trans "کەلوپەلی یەکەم" %}
     </button>
   </div>
   {% endif %}
-
-</div>

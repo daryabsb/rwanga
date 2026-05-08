@@ -11,11 +11,9 @@
    ════════════════════════════════════════════════════════ {% endcomment %}
 {% load i18n %}
 
-<div style="padding:var(--rw-pad-lg)">
-
   {% comment %} ── Filter bar ── {% endcomment %}
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--rw-pad-md)">
-    <div class="rw-filter-row" style="margin-bottom:0">
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <div class="rw-filter-row">
       <button class="rw-f-btn {% if not filter_type or filter_type == 'all' %}active{% endif %}"
               hx-get="{% url 'projects:scene_tab' project.pk scene.pk 'shots' %}?type=all"
               hx-target="#rw-tab-content" hx-swap="innerHTML">
@@ -38,7 +36,7 @@
       </button>
     </div>
     <button class="rw-btn rw-btn-primary"
-            hx-get="{% url 'shots:create_modal' project.pk scene.pk %}"
+            hx-get="{{ create_shot_url|default:'#' }}"
             hx-target="#rw-modal-container" hx-swap="innerHTML">
       + {% trans "لێدانی نوێ" %}
     </button>
@@ -46,95 +44,100 @@
 
   {% if shots %}
   {% comment %} ── Shot table ── {% endcomment %}
-  <table class="rw-shot-table" id="rw-shot-list" data-sortable>
-    <thead>
-      <tr>
-        <th>{% trans "گرتە" %}</th>
-        <th>{% trans "جۆر" %}</th>
-        <th>{% trans "شێوازی لێدان" %}</th>
-        <th>{% trans "لێنس" %}</th>
-        <th>{% trans "جوڵانەوە" %}</th>
-        <th>{% trans "ماوە" %}</th>
-        <th>{% trans "ئامادەکردن" %}</th>
-      </tr>
-    </thead>
-    <tbody id="rw-shots-tbody">
-      {% for shot in shots %}
-      {% comment %} Row class based on type {% endcomment %}
-      <tr class="rw-shot-row {% if shot.shot_type == 'dialogue' %}s-d{% elif shot.shot_type == 'insert' %}s-i{% else %}s-v{% endif %}"
-          data-shot-id="{{ shot.pk }}"
-          onclick="RW.toggleShotExp('{{ shot.pk }}')">
-        <td>
-          <span class="rw-shot-num">{{ shot.number }}</span>
-          <span class="rw-setup-chip">{{ shot.setup.letter|default:"—" }}</span>
-        </td>
-        <td>
-          {% if shot.shot_type == 'dialogue' %}
-          <span class="rw-badge rw-badge-d">{% trans "دیالۆگ" %}</span>
-          {% elif shot.shot_type == 'insert' %}
-          <span class="rw-badge rw-badge-i">{% trans "داخڵکردن" %}</span>
-          {% else %}
-          <span class="rw-badge rw-badge-v">{% trans "بینراو" %}</span>
-          {% endif %}
-        </td>
-        <td>{{ shot.style }}</td>
-        <td><span class="mono" dir="ltr">{{ shot.lens|default:"—" }}</span></td>
-        <td style="color:var(--rw-text-2);font-size:12px;max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ shot.movement|default:"—" }}</td>
-        <td><span class="mono" dir="ltr">{{ shot.duration|default:"—" }}</span></td>
-        <td>
-          {% if shot.setup %}
-          <span style="font-size:11px;color:var(--rw-amber);font-weight:600">{{ shot.setup.letter }}</span>
-          {% else %}—{% endif %}
-        </td>
-      </tr>
-      {% comment %} Expanded detail row {% endcomment %}
-      <tr class="rw-exp-row" id="rw-exp-{{ shot.pk }}">
-        <td colspan="7">
-          <div class="rw-exp-grid">
-            <div>
-              <div class="rw-field-label">{% trans "جوڵانەوەی کامێرا" %}</div>
-              <div class="rw-field-val">{{ shot.movement|default:"—" }}</div>
-              <div class="rw-field-label" style="margin-top:12px">{% trans "وەسف" %}</div>
-              <div class="rw-field-val">{{ shot.description|default:"—" }}</div>
+  <div style="overflow-x:auto">
+    <table class="rw-tbl" id="rw-shot-list" data-sortable>
+      <thead>
+        <tr>
+          <th class="px-3 py-2">{% trans "گرتە" %}</th>
+          <th class="px-3 py-2">{% trans "جۆر" %}</th>
+          <th class="px-3 py-2">{% trans "شێوازی لێدان" %}</th>
+          <th class="px-3 py-2">{% trans "لێنس" %}</th>
+          <th class="px-3 py-2">{% trans "جوڵانەوە" %}</th>
+          <th class="px-3 py-2">{% trans "ماوە" %}</th>
+          <th class="px-3 py-2">{% trans "ئامادەکردن" %}</th>
+        </tr>
+      </thead>
+      <tbody id="rw-shots-tbody">
+        {% for shot in shots %}
+        {# Row class based on type #}
+        <tr class="rw-tbl-row {% if shot.shot_type == 'dialogue' %}s-d{% elif shot.shot_type == 'insert' %}s-i{% else %}s-v{% endif %}"
+            data-shot-id="{{ shot.pk }}"
+            onclick="RW.toggleShotExp('{{ shot.pk }}')">
+          <td class="px-3 py-2">
+            <span class="rw-shot-num">{{ shot.number }}</span>
+            <span class="rw-setup-chip">{{ shot.setup.letter|default:"—" }}</span>
+          </td>
+          <td class="px-3 py-2">
+            {% if shot.shot_type == 'dialogue' %}
+            <span class="rw-badge rw-badge-d">{% trans "دیالۆگ" %}</span>
+            {% elif shot.shot_type == 'insert' %}
+            <span class="rw-badge rw-badge-i">{% trans "داخڵکردن" %}</span>
+            {% else %}
+            <span class="rw-badge rw-badge-v">{% trans "بینراو" %}</span>
+            {% endif %}
+          </td>
+          <td class="px-3 py-2">{{ shot.style }}</td>
+          <td class="px-3 py-2"><bdi dir="ltr" class="rw-font-en">{{ shot.lens|default:"—" }}</bdi></td>
+          <td class="px-3 py-2 text-truncate" style="max-width:200px;color:var(--rw-text-2);font-size:12px">{{ shot.movement|default:"—" }}</td>
+          <td class="px-3 py-2"><bdi dir="ltr" class="rw-font-en">{{ shot.duration|default:"—" }}</bdi></td>
+          <td class="px-3 py-2">
+            {% if shot.setup %}
+            <span style="font-size:11px;color:var(--rw-amber);font-weight:600">{{ shot.setup.letter }}</span>
+            {% else %}—{% endif %}
+          </td>
+        </tr>
+        {# Expanded detail row #}
+        <tr class="rw-exp-row" id="rw-exp-{{ shot.pk }}">
+          <td colspan="7" class="px-3 py-3">
+            <div class="row g-3 mb-2">
+              <div class="col-md-6">
+                <div class="rw-field-label">{% trans "جوڵانەوەی کامێرا" %}</div>
+                <div class="rw-field-val">{{ shot.movement|default:"—" }}</div>
+                <div class="rw-field-label mt-3">{% trans "وەسف" %}</div>
+                <div class="rw-field-val">{{ shot.description|default:"—" }}</div>
+              </div>
+              <div class="col-md-6">
+                <div class="rw-field-label">{% trans "دیالۆگ" %}</div>
+                <div class="rw-field-val">{% if shot.has_dialogue %}{% trans "بەڵێ" %}{% else %}{% trans "نەخێر" %}{% endif %}</div>
+                <div class="rw-field-label mt-3">{% trans "ئامادەکردن" %}</div>
+                <div class="rw-field-val">{{ shot.setup.description|default:"—" }}</div>
+              </div>
             </div>
-            <div>
-              <div class="rw-field-label">{% trans "دیالۆگ" %}</div>
-              <div class="rw-field-val">{% if shot.has_dialogue %}{% trans "بەڵێ" %}{% else %}{% trans "نەخێر" %}{% endif %}</div>
-              <div class="rw-field-label" style="margin-top:12px">{% trans "ئامادەکردن" %}</div>
-              <div class="rw-field-val">{{ shot.setup.description|default:"—" }}</div>
+            {% if shot.notes %}
+            <div class="rw-notes-block mb-2">{{ shot.notes }}</div>
+            {% endif %}
+            <div class="d-flex gap-2 mt-2">
+              {% url 'shots:edit' active_project.pk shot.pk as edit_u %}
+              <button class="rw-btn rw-btn-ghost rw-btn-sm"
+                      hx-get="{{ edit_u|default:'#' }}"
+                      hx-target="[data-shot-id='{{ shot.pk }}']"
+                      hx-swap="outerHTML"
+                      onclick="event.stopPropagation()">✎ {% trans "دەستکاری" %}</button>
+              {% url 'shots:delete' active_project.pk shot.pk as del_u %}
+              <button class="rw-btn rw-btn-sm"
+                      style="background:var(--rw-pink-dim);color:var(--rw-shoot);border:1px solid rgba(247,37,133,.2)"
+                      hx-delete="{{ del_u|default:'#' }}"
+                      hx-target="[data-shot-id='{{ shot.pk }}']"
+                      hx-swap="outerHTML"
+                      hx-confirm="{% trans 'دڵنیایت؟' %}"
+                      onclick="event.stopPropagation()">{% trans "سڕینەوە" %}</button>
             </div>
-          </div>
-          {% if shot.notes %}
-          <div class="rw-notes-block">{{ shot.notes }}</div>
-          {% endif %}
-          <div style="display:flex;gap:8px;margin-top:12px">
-            <button class="rw-btn rw-btn-ghost" style="padding:6px 14px;font-size:12px"
-                    hx-get="{% url 'shots:edit_row' project.pk shot.pk %}"
-                    hx-target="[data-shot-id='{{ shot.pk }}']"
-                    hx-swap="outerHTML"
-                    onclick="event.stopPropagation()">✎ {% trans "دەستکاری" %}</button>
-            <button class="rw-btn" style="padding:6px 14px;font-size:12px;background:var(--rw-pink-dim);color:var(--rw-shoot);border:1px solid rgba(247,37,133,.2)"
-                    hx-delete="{% url 'shots:delete' project.pk shot.pk %}"
-                    hx-target="[data-shot-id='{{ shot.pk }}']"
-                    hx-swap="outerHTML"
-                    hx-confirm="{% trans 'دڵنیایت؟' %}"
-                    onclick="event.stopPropagation()">{% trans "سڕینەوە" %}</button>
-          </div>
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 
-  {% comment %} Sortable init {% endcomment %}
+  {# Sortable init #}
   <script>
     if (typeof Sortable !== 'undefined') {
       Sortable.create(document.getElementById('rw-shots-tbody'), {
         animation: 150,
-        handle: '.rw-shot-row',
+        handle: '.rw-tbl-row',
         onEnd: function(evt) {
           const ids = [...document.querySelectorAll('#rw-shots-tbody [data-shot-id]')].map(r=>r.dataset.shotId);
-          htmx.ajax('PATCH', '{% url "shots:reorder" project.pk scene.pk %}', {
+          htmx.ajax('PATCH', '{{ reorder_shots_url|default:'#' }}', {
             values: { order: ids }, target: '#rw-shots-tbody', swap: 'innerHTML'
           });
         }
@@ -143,19 +146,15 @@
   </script>
 
   {% else %}
-  <div class="rw-empty">
-    <div class="rw-empty-icon">🎯</div>
-    <div class="rw-empty-title">{% trans "هێشتا لێدانێک نییە" %}</div>
-    <div class="rw-empty-sub">{% trans "لیستی لێدانەکان دروست بکە بۆ ئەم دیمەنە" %}</div>
+  {% include "components/_empty_state.html" with icon_svg="viewfinder" title="هێشتا لێدانێک نییە" sub="لیستی لێدانەکان دروست بکە بۆ ئەم دیمەنە" %}
+  <div class="text-center mt-3">
     <button class="rw-btn rw-btn-primary"
-            hx-get="{% url 'shots:create_modal' project.pk scene.pk %}"
+            hx-get="{{ create_shot_url|default:'#' }}"
             hx-target="#rw-modal-container" hx-swap="innerHTML">
       + {% trans "لێدانی یەکەم" %}
     </button>
   </div>
   {% endif %}
-
-</div>
 
 <script>
 RW.toggleShotExp = function(pk) {

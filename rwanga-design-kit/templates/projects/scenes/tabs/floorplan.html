@@ -1,4 +1,4 @@
-{# ════════════════════════════════════════════════════════
+{% comment %} ════════════════════════════════════════════════════════
    RWANGA — projects/scenes/tabs/floorplan.html
    Floor plan editor tab. HTMX fragment.
    SVG canvas rendered client-side from JSON via floorplan-editor.js.
@@ -7,12 +7,12 @@
      scene      — Scene instance
      project    — Project instance
      floorplan  — FloorPlan instance or None
-   ════════════════════════════════════════════════════════ #}
+   ════════════════════════════════════════════════════════ {% endcomment %}
 {% load static i18n %}
 
   {% if floorplan %}
 
-  {# ── Toolbar ── #}
+  {% comment %} ── Toolbar ── {% endcomment %}
   <div class="d-flex align-items-center justify-content-between mb-3">
     <div class="rw-fp-controls d-flex gap-1">
       <button class="rw-fp-btn active" id="fp-tool-select" onclick="FP.setTool('select',this)">{% trans "هەڵبژاردن" %}</button>
@@ -23,12 +23,12 @@
     </div>
     <div class="d-flex gap-2">
       <button class="rw-btn rw-btn-ai rw-btn-sm"
-              hx-post="{% url 'ai_engine:generate_floorplan' scene.pk %}"
+              hx-post="{{ generate_floorplan_url|default:'#' }}"
               hx-target="#rw-ai-status" hx-indicator=".htmx-indicator">
         {% trans "AI دروستکردن" %}
       </button>
       <button class="rw-btn rw-btn-primary" id="fp-save-btn"
-              hx-post="{% url 'floorplans:save' project.pk scene.pk %}"
+              hx-post="{{ save_floorplan_url|default:'#' }}"
               hx-vals="js:{data: FP.serialize()}"
               hx-swap="none">
         {% trans "پاشەکەوتکردن" %}
@@ -36,7 +36,7 @@
     </div>
   </div>
 
-  {# ── Canvas ── #}
+  {% comment %} ── Canvas ── {% endcomment %}
   <div class="rw-fp-wrap mb-3" style="position:relative">
     <svg id="rw-fp-canvas"
          data-floor-plan-id="{{ floorplan.pk }}"
@@ -52,13 +52,13 @@
     </svg>
   </div>
 
-  {# ── Properties panel ── #}
+  {% comment %} ── Properties panel ── {% endcomment %}
   <div id="rw-fp-props" class="d-none mb-3 p-3" style="background:var(--rw-surface);border:1px solid var(--rw-border)">
     <div class="rw-card-title">{% trans "تایبەتمەندییەکان" %}</div>
     <div id="rw-fp-props-content"></div>
   </div>
 
-  {# ── Room dimensions ── #}
+  {% comment %} ── Room dimensions ── {% endcomment %}
   <div class="d-flex align-items-center gap-4 mt-2">
     <div>
       <label class="rw-form-label" for="fp-room-w">{% trans "پانی ژوور (م)" %}</label>
@@ -78,16 +78,16 @@
   </div>
 
   {% else %}
-  {# ── Empty state ── #}
+  {% comment %} ── Empty state ── {% endcomment %}
   {% include "components/_empty_state.html" with icon_svg="floorplan" title="هێشتا نەخشەی ژوور نییە" sub="نەخشەی ژووری دیمەن دروست بکە یان بیانێڵە AI بیدروستکات" %}
   <div class="d-flex gap-2 justify-content-center mt-3">
     <button class="rw-btn rw-btn-primary"
-            hx-post="{% url 'floorplans:create' project.pk scene.pk %}"
+            hx-post="{{ create_floorplan_url|default:'#' }}"
             hx-target="#rw-tab-content" hx-swap="innerHTML">
       + {% trans "دروستکردنی نەخشەی ژوور" %}
     </button>
     <button class="rw-btn rw-btn-ai"
-            hx-post="{% url 'ai_engine:generate_floorplan' scene.pk %}"
+            hx-post="{{ generate_floorplan_url|default:'#' }}"
             hx-target="#rw-ai-status" hx-indicator=".htmx-indicator">
       {% trans "AI دروستکردن" %}
     </button>

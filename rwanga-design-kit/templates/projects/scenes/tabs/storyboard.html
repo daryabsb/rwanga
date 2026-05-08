@@ -1,4 +1,4 @@
-{# ════════════════════════════════════════════════════════
+{% comment %} ════════════════════════════════════════════════════════
    RWANGA — projects/scenes/tabs/storyboard.html
    Storyboard grid tab. HTMX fragment.
    Upload images, associate with shots, Sortable.js reorder.
@@ -7,16 +7,16 @@
      scene              — Scene instance
      project            — Project instance
      storyboard_frames  — QuerySet[StoryboardFrame] with linked shots
-   ════════════════════════════════════════════════════════ #}
+   ════════════════════════════════════════════════════════ {% endcomment %}
 {% load i18n %}
 
-  {# ── Header actions ── #}
+  {% comment %} ── Header actions ── {% endcomment %}
   <div class="d-flex align-items-center justify-content-between mb-3">
     <div style="font-size:13px;color:var(--rw-text-2)">
       {{ storyboard_frames.count }} {% trans "فریم" %}
     </div>
     <button class="rw-btn rw-btn-primary"
-            hx-get="{% url 'shots:upload_storyboard_modal' project.pk scene.pk %}"
+            hx-get="{{ upload_storyboard_url|default:'#' }}"
             hx-target="#rw-modal-container" hx-swap="innerHTML">
       + {% trans "زیادکردنی فریم" %}
     </button>
@@ -66,7 +66,7 @@
         animation: 150,
         onEnd: function(evt) {
           const ids = [...document.querySelectorAll('#rw-sb-sortable [data-frame-id]')].map(el=>el.dataset.frameId);
-          htmx.ajax('PATCH', '{% url "shots:reorder_storyboard" project.pk scene.pk %}', {
+          htmx.ajax('PATCH', '{{ reorder_storyboard_url|default:'#' }}', {
             values: { order: ids }, swap: 'none'
           });
         }
@@ -78,7 +78,7 @@
   {% include "components/_empty_state.html" with icon_svg="storyboard" title="هێشتا فریمێک نییە" sub="وێنەکان بار بکە یان لە لێدانەکانەوە فریم دروست بکە" %}
   <div class="text-center mt-3">
     <button class="rw-btn rw-btn-primary"
-            hx-get="{% url 'shots:upload_storyboard_modal' project.pk scene.pk %}"
+            hx-get="{{ upload_storyboard_url|default:'#' }}"
             hx-target="#rw-modal-container" hx-swap="innerHTML">
       + {% trans "زیادکردنی فریمی یەکەم" %}
     </button>

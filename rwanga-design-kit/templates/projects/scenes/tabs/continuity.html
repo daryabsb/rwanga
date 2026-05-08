@@ -1,4 +1,4 @@
-{# ════════════════════════════════════════════════════════
+{% comment %} ════════════════════════════════════════════════════════
    RWANGA — projects/scenes/tabs/continuity.html
    Continuity module tab. HTMX fragment.
    Scene flow diagram + in/out checklists.
@@ -9,19 +9,19 @@
      prev_scene        — Scene or None
      next_scene        — Scene or None
      continuity_items  — QuerySet[ContinuityItem] (in/out)
-   ════════════════════════════════════════════════════════ #}
+   ════════════════════════════════════════════════════════ {% endcomment %}
 {% load i18n %}
 
   <div class="d-flex align-items-center justify-content-between mb-4">
     <h2 class="fs-6 fw-bold mb-0">{% trans "بەردەوامی" %}</h2>
     <button class="rw-btn rw-btn-ghost rw-btn-sm"
-            hx-get="{% url 'departments:add_continuity_modal' project.pk scene.pk %}"
+            hx-get="{{ add_continuity_url|default:'#' }}"
             hx-target="#rw-modal-container" hx-swap="innerHTML">
       + {% trans "زیادکردن" %}
     </button>
   </div>
 
-  {# ── Scene flow ── #}
+  {% comment %} ── Scene flow ── {% endcomment %}
   <div class="rw-flow d-flex align-items-center gap-2 mb-4 p-3"
        style="background:var(--rw-surface);border:1px solid var(--rw-border)">
     {# Previous scene #}
@@ -75,7 +75,7 @@
     {% endif %}
   </div>
 
-  {# ── In / Out checklists ── #}
+  {% comment %} ── In / Out checklists ── {% endcomment %}
   <div class="row g-4">
 
     {# IN — what carries into this scene from previous #}
@@ -89,7 +89,7 @@
              style="border-bottom:1px solid var(--rw-border)">
           <input type="checkbox" id="cont-{{ item.pk }}"
                  {% if item.checked %}checked{% endif %}
-                 hx-post="{% url 'departments:toggle_continuity' project.pk item.pk %}"
+                 hx-post="{{ toggle_continuity_url|default:'#' }}"
                  hx-swap="none">
           <div class="flex-grow-1">
             <div class="rw-ci-name" style="font-size:13px">{{ item.description }}</div>
@@ -98,7 +98,7 @@
         {% endif %}{% endfor %}
         <div class="px-3 py-2">
           <button class="rw-btn rw-btn-ghost rw-btn-sm"
-                  hx-get="{% url 'departments:add_continuity_modal' project.pk scene.pk %}?direction=in"
+                  hx-get="{{ add_continuity_url|default:'#' }}?direction=in"
                   hx-target="#rw-modal-container" hx-swap="innerHTML">
             + {% trans "زیادکردن" %}
           </button>
@@ -117,7 +117,7 @@
              style="border-bottom:1px solid var(--rw-border)">
           <input type="checkbox" id="cont-{{ item.pk }}"
                  {% if item.checked %}checked{% endif %}
-                 hx-post="{% url 'departments:toggle_continuity' project.pk item.pk %}"
+                 hx-post="{{ toggle_continuity_url|default:'#' }}"
                  hx-swap="none">
           <div class="flex-grow-1">
             <div class="rw-ci-name" style="font-size:13px">{{ item.description }}</div>
@@ -126,7 +126,7 @@
         {% endif %}{% endfor %}
         <div class="px-3 py-2">
           <button class="rw-btn rw-btn-ghost rw-btn-sm"
-                  hx-get="{% url 'departments:add_continuity_modal' project.pk scene.pk %}?direction=out"
+                  hx-get="{{ add_continuity_url|default:'#' }}?direction=out"
                   hx-target="#rw-modal-container" hx-swap="innerHTML">
             + {% trans "زیادکردن" %}
           </button>

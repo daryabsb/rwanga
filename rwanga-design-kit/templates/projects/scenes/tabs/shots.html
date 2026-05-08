@@ -1,4 +1,4 @@
-{# ════════════════════════════════════════════════════════
+{% comment %} ════════════════════════════════════════════════════════
    RWANGA — projects/scenes/tabs/shots.html
    Shot list tab. HTMX fragment. Inline-editable table.
 
@@ -8,10 +8,10 @@
      shots        — QuerySet[Shot] ordered by `order`
      setups       — QuerySet[Setup]
      filter_type  — current filter string (optional)
-   ════════════════════════════════════════════════════════ #}
+   ════════════════════════════════════════════════════════ {% endcomment %}
 {% load i18n %}
 
-  {# ── Filter bar ── #}
+  {% comment %} ── Filter bar ── {% endcomment %}
   <div class="d-flex align-items-center justify-content-between mb-3">
     <div class="rw-filter-row">
       <button class="rw-f-btn {% if not filter_type or filter_type == 'all' %}active{% endif %}"
@@ -36,14 +36,14 @@
       </button>
     </div>
     <button class="rw-btn rw-btn-primary"
-            hx-get="{% url 'shots:create_modal' project.pk scene.pk %}"
+            hx-get="{{ create_shot_url|default:'#' }}"
             hx-target="#rw-modal-container" hx-swap="innerHTML">
       + {% trans "لێدانی نوێ" %}
     </button>
   </div>
 
   {% if shots %}
-  {# ── Shot table ── #}
+  {% comment %} ── Shot table ── {% endcomment %}
   <div style="overflow-x:auto">
     <table class="rw-tbl" id="rw-shot-list" data-sortable>
       <thead>
@@ -107,14 +107,16 @@
             <div class="rw-notes-block mb-2">{{ shot.notes }}</div>
             {% endif %}
             <div class="d-flex gap-2 mt-2">
+              {% url 'shots:edit' active_project.pk shot.pk as edit_u %}
               <button class="rw-btn rw-btn-ghost rw-btn-sm"
-                      hx-get="{% url 'shots:edit_row' project.pk shot.pk %}"
+                      hx-get="{{ edit_u|default:'#' }}"
                       hx-target="[data-shot-id='{{ shot.pk }}']"
                       hx-swap="outerHTML"
                       onclick="event.stopPropagation()">✎ {% trans "دەستکاری" %}</button>
+              {% url 'shots:delete' active_project.pk shot.pk as del_u %}
               <button class="rw-btn rw-btn-sm"
                       style="background:var(--rw-pink-dim);color:var(--rw-shoot);border:1px solid rgba(247,37,133,.2)"
-                      hx-delete="{% url 'shots:delete' project.pk shot.pk %}"
+                      hx-delete="{{ del_u|default:'#' }}"
                       hx-target="[data-shot-id='{{ shot.pk }}']"
                       hx-swap="outerHTML"
                       hx-confirm="{% trans 'دڵنیایت؟' %}"
@@ -135,7 +137,7 @@
         handle: '.rw-tbl-row',
         onEnd: function(evt) {
           const ids = [...document.querySelectorAll('#rw-shots-tbody [data-shot-id]')].map(r=>r.dataset.shotId);
-          htmx.ajax('PATCH', '{% url "shots:reorder" project.pk scene.pk %}', {
+          htmx.ajax('PATCH', '{{ reorder_shots_url|default:'#' }}', {
             values: { order: ids }, target: '#rw-shots-tbody', swap: 'innerHTML'
           });
         }
@@ -147,7 +149,7 @@
   {% include "components/_empty_state.html" with icon_svg="viewfinder" title="هێشتا لێدانێک نییە" sub="لیستی لێدانەکان دروست بکە بۆ ئەم دیمەنە" %}
   <div class="text-center mt-3">
     <button class="rw-btn rw-btn-primary"
-            hx-get="{% url 'shots:create_modal' project.pk scene.pk %}"
+            hx-get="{{ create_shot_url|default:'#' }}"
             hx-target="#rw-modal-container" hx-swap="innerHTML">
       + {% trans "لێدانی یەکەم" %}
     </button>

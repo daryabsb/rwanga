@@ -1,4 +1,6 @@
-{# ════════════════════════════════════════════════════════
+{% extends "base.html" %}
+{% load static i18n %}
+{% comment %} ════════════════════════════════════════════════════════
    RWANGA — projects/settings.html
    Project metadata, team management, danger zone.
 
@@ -6,9 +8,7 @@
      project   — Project instance
      form      — Project edit form
      members   — QuerySet[ProjectMembership]
-   ════════════════════════════════════════════════════════ #}
-{% extends "base.html" %}
-{% load static i18n %}
+   ════════════════════════════════════════════════════════ {% endcomment %}
 
 {% block title %}{% trans "ڕێکخستنەکان" %} — {{ project.title }}{% endblock %}
 
@@ -18,7 +18,7 @@
 
     {% include "components/_breadcrumb.html" with project=project current="ڕێکخستنەکان" %}
 
-    {# ── Project info ── #}
+    {% comment %} ── Project info ── {% endcomment %}
     <div class="rw-section-hdr mb-4">{% trans "زانیاری پڕۆژە" %}</div>
     <form method="post" action="{% url 'projects:settings' project.pk %}" enctype="multipart/form-data">
       {% csrf_token %}
@@ -97,7 +97,7 @@
       </div>
     </form>
 
-    {# ── Team ── #}
+    {% comment %} ── Team ── {% endcomment %}
     <div class="rw-section-hdr mb-3">{% trans "تیمی پڕۆژە" %}</div>
     <div class="mb-4" style="background:var(--rw-surface);border:1px solid var(--rw-border)">
       {% for m in members %}
@@ -126,7 +126,7 @@
       </div>
     </div>
 
-    {# ── Danger zone ── #}
+    {% comment %} ── Danger zone ── {% endcomment %}
     <div class="rw-section-hdr mb-3" style="color:var(--rw-shoot)">{% trans "ناوچەی مەترسیدار" %}</div>
     <div class="rw-alert rw-alert-err d-flex align-items-center gap-3">
       <span class="rw-alert-icon">⚠</span>
@@ -136,7 +136,7 @@
       </div>
       <button type="button" class="rw-btn rw-btn-sm flex-shrink-0"
               style="background:var(--rw-pink-dim);color:var(--rw-shoot);border:1px solid rgba(247,37,133,.25)"
-              onclick="if(confirm('{% trans "دڵنیایت؟ ئەم کارە گەڕانەوەی نییە." %}')) window.location='{% url 'projects:delete' project.pk %}'">
+              onclick="if(confirm('{% trans "دڵنیایت؟ ئەم کارە گەڕانەوەی نییە." %}')) window.location='{{ delete_project_url|default:'#' }}'">
         {% trans "سڕینەوەی پڕۆژە" %}
       </button>
     </div>
