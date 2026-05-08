@@ -1,30 +1,79 @@
+{% comment %}
+RWANGA — community/_create_modal.html
+Create a new community session. Loaded via HTMX into #rw-modal-container.
+
+Context:
+  (none required — form fields are inline)
+{% endcomment %}
 {% load i18n %}
-<div class="rw-modal-backdrop" onclick="this.innerHTML=''">
-  <div class="rw-modal" onclick="event.stopPropagation()">
-    <div class="rw-modal-hd">
-      <h3>{% trans "دانیشتنی نوێ" %}</h3>
-      <button type="button" class="rw-modal-x" onclick="document.getElementById('rw-modal-container').innerHTML=''">×</button>
+{% url 'community:create' as create_url %}
+
+<div class="rw-modal-backdrop"
+     hx-on:click="if(event.target===this) document.getElementById('rw-modal-container').innerHTML=''">
+
+  <div class="rw-modal" role="dialog" aria-modal="true" aria-labelledby="cm-modal-title"
+       onclick="event.stopPropagation()">
+
+    <div class="rw-modal-header">
+      <span class="rw-modal-title" id="cm-modal-title">{% trans "دانیشتنی نوێ" %}</span>
+      <button class="rw-modal-close"
+              onclick="document.getElementById('rw-modal-container').innerHTML=''"
+              aria-label="{% trans 'داخستن' %}">&#x2715;</button>
     </div>
-    <form method="post" action="{% url 'community:create' %}">
+
+    <form id="rw-modal-form" method="post" action="{{ create_url|default:'#' }}"
+          hx-post="{{ create_url|default:'#' }}"
+          hx-target="#rw-modal-container"
+          hx-swap="outerHTML">
       {% csrf_token %}
-      <div class="rw-modal-bd" style="display:flex;flex-direction:column;gap:10px">
-        <label style="font-size:12px;color:var(--rw-text-2)">{% trans "ناونیشان" %}</label>
-        <input name="title" required style="width:100%;background:var(--rw-surface);color:var(--rw-text);border:1px solid var(--rw-border);padding:10px">
-        <label style="font-size:12px;color:var(--rw-text-2)">{% trans "جۆر" %}</label>
-        <select name="session_type" style="width:100%;background:var(--rw-surface);color:var(--rw-text);border:1px solid var(--rw-border);padding:10px">
-          <option value="screenplay">{% trans "دەستنووس" %}</option>
-          <option value="story_bible">{% trans "بایبڵی چیرۆک" %}</option>
-        </select>
-        <label style="font-size:12px;color:var(--rw-text-2)">{% trans "بینراوی" %}</label>
-        <select name="visibility" style="width:100%;background:var(--rw-surface);color:var(--rw-text);border:1px solid var(--rw-border);padding:10px">
-          <option value="invite_only">{% trans "تەنها بانگهێشتکراو" %}</option>
-          <option value="public">{% trans "گشتی" %}</option>
-        </select>
+
+      <div class="rw-modal-body">
+
+        {# Title #}
+        <div style="margin-bottom:var(--rw-pad-sm)">
+          <label class="rw-form-label" for="cm-title">{% trans "ناونیشان" %}</label>
+          <input id="cm-title" name="title" type="text" required
+                 class="rw-form-input"
+                 placeholder="{% trans 'ناونیشانی دانیشتنەکە...' %}">
+        </div>
+
+        {# Session type #}
+        <div style="margin-bottom:var(--rw-pad-sm)">
+          <label class="rw-form-label" for="cm-type">{% trans "جۆر" %}</label>
+          <select id="cm-type" name="session_type" class="rw-form-input" style="padding:10px 16px;cursor:pointer">
+            <option value="screenplay">{% trans "دەستنووس" %}</option>
+            <option value="story_bible">{% trans "بایبڵی چیرۆک" %}</option>
+          </select>
+        </div>
+
+        {# Visibility #}
+        <div style="margin-bottom:0">
+          <label class="rw-form-label" for="cm-visibility">{% trans "بینراوی" %}</label>
+          <select id="cm-visibility" name="visibility" class="rw-form-input" style="padding:10px 16px;cursor:pointer">
+            <option value="invite_only">{% trans "تەنها بانگهێشتکراو" %}</option>
+            <option value="public">{% trans "گشتی" %}</option>
+          </select>
+        </div>
+
       </div>
-      <div class="rw-modal-ft">
-        <button type="button" class="rw-btn rw-btn-ghost" onclick="document.getElementById('rw-modal-container').innerHTML=''">{% trans "پاشگەزبوونەوە" %}</button>
+
+      <div class="rw-modal-footer">
+        <button type="button"
+                onclick="document.getElementById('rw-modal-container').innerHTML=''"
+                class="rw-btn rw-btn-ghost">{% trans "پاشگەزبوونەوە" %}</button>
         <button type="submit" class="rw-btn rw-btn-primary">{% trans "دروستکردن" %}</button>
       </div>
+
     </form>
+
   </div>
 </div>
+
+<script>
+document.addEventListener('keydown', function _rwCmModalEsc(e) {
+  if (e.key === 'Escape') {
+    document.getElementById('rw-modal-container').innerHTML = '';
+    document.removeEventListener('keydown', _rwCmModalEsc);
+  }
+});
+</script>

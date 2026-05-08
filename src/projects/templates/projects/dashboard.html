@@ -69,6 +69,44 @@
   {% comment %} ── Module grid ── {% endcomment %}
   <div class="px-4 pb-4">
 
+    {% comment %} ── هاوکاری (Collaboration: Reviews + Community) ── {% endcomment %}
+    <div class="d-flex rw-sec-row">
+      <a href="{% url 'reviews:project_list' project.pk %}"
+         class="rw-sec-label d-flex flex-column align-items-center justify-content-center gap-2 py-3"
+         style="background:var(--rw-amber)">
+        <svg width="28" height="28" viewBox="0 0 24 24" class="ico">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        </svg>
+        <span class="rw-sec-label-text">{% trans "هاوکاری" %}</span>
+      </a>
+      <div class="rw-sec-modules flex-grow-1 d-flex flex-wrap">
+        <a href="{% url 'reviews:project_list' project.pk %}"
+           class="rw-mod-card d-flex flex-column align-items-center justify-content-center gap-2 py-4 px-3 text-decoration-none">
+          <svg width="28" height="28" viewBox="0 0 24 24" class="ico" style="color:var(--rw-plan)">
+            <path d="M9 11l3 3L22 4"/>
+            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+          </svg>
+          <span class="rw-mod-name">{% trans "پێداچوونەوەکان" %}</span>
+        </a>
+        <a href="{% url 'community:project_list' project.pk %}"
+           class="rw-mod-card d-flex flex-column align-items-center justify-content-center gap-2 py-4 px-3 text-decoration-none">
+          <svg width="28" height="28" viewBox="0 0 24 24" class="ico" style="color:var(--rw-vis)">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+          <span class="rw-mod-name">{% trans "کۆمەڵگا" %}</span>
+        </a>
+        <a href="{% url 'accounts:team' %}"
+           class="rw-mod-card d-flex flex-column align-items-center justify-content-center gap-2 py-4 px-3 text-decoration-none">
+          <svg width="28" height="28" viewBox="0 0 24 24" class="ico" style="color:var(--rw-amber)">
+            <circle cx="9" cy="7" r="3"/>
+            <path d="M3 21v-1a6 6 0 0 1 12 0v1"/>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75M21 21v-1a4 4 0 0 0-3-3.85"/>
+          </svg>
+          <span class="rw-mod-name">{% trans "تیم" %}</span>
+        </a>
+      </div>
+    </div>
+
     {% comment %} ── دەستنووس (Script) ── {% endcomment %}
     <div class="d-flex rw-sec-row">
       <a href="{% url 'scripts:index' project.pk %}"

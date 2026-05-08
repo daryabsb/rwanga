@@ -1,12 +1,12 @@
-{# ════════════════════════════════════════════════════════
-   RWANGA — reviews/_create_modal.html
-   Create a new review. Loaded via HTMX into #rw-modal-container.
+{% comment %}
+RWANGA — reviews/_create_modal.html
+Create a new review. Loaded via HTMX into #rw-modal-container.
 
-   Context:
-     form        — ReviewCreateForm
-     projects    — QuerySet[Project] the user directs/manages
-     active_project — Project|None (pre-selects project)
-   ════════════════════════════════════════════════════════ #}
+Context:
+  form        — ReviewCreateForm
+  projects    — QuerySet[Project] the user directs/manages
+  active_project — Project|None (pre-selects project)
+{% endcomment %}
 {% load i18n %}
 
 <div class="rw-modal-backdrop" id="rw-modal-backdrop" onclick="rwCloseModal(event)">

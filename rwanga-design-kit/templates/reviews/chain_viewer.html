@@ -317,7 +317,7 @@ Context:
 {% block content %}
 <div class="d-flex flex-column flex-grow-1 overflow-hidden">
 
-  {# ── Top bar ── #}
+  {# Top bar #}
   <div class="d-flex align-items-center gap-3 px-4 bg-rw-surface"
        style="height:52px;flex-shrink:0;border-bottom:1px solid var(--rw-border)">
     <a class="rw-btn rw-btn-ghost rw-btn-sm"
@@ -334,7 +334,7 @@ Context:
 
   {% if chain_decisions %}
 
-  {# ── Hero ── #}
+  {# Hero #}
   <div class="cv-hero">
     <div class="cv-hero-label">DECISION CHAIN</div>
     <div class="cv-hero-title">{{ chain_id }} — {{ chain_name }}</div>
@@ -347,7 +347,7 @@ Context:
 
   <div class="cv-body">
 
-    {# ── Timeline ── #}
+    {# Timeline #}
     <div class="cv-timeline-wrap">
       <div class="cv-timeline" id="cv-timeline">
         {% for d in chain_decisions %}
@@ -379,7 +379,7 @@ Context:
       </div>
     </div>
 
-    {# ── Escalation bar ── #}
+    {# Escalation bar #}
     <div class="cv-esc-bar">
       <div class="cv-esc-track">
         <div class="cv-esc-fill" style="width:100%"></div>
@@ -393,7 +393,7 @@ Context:
       </div>
     </div>
 
-    {# ── Detail panel ── #}
+    {# Detail panel #}
     <div class="cv-detail" id="cv-detail">
       <div class="cv-detail-header">
         <div class="cv-detail-scene" id="cd-scene"></div>
@@ -427,7 +427,7 @@ Context:
 
   {% endif %}
 
-  {# ── Footer ── #}
+  {# Footer #}
   <div class="d-flex align-items-center justify-content-between px-4 bg-rw-surface"
        style="height:44px;flex-shrink:0;border-top:1px solid var(--rw-border);font-size:11px;color:var(--rw-text-3);margin-top:auto">
     <div class="d-flex align-items-center gap-2 fw-bold" style="color:var(--rw-text-2)">

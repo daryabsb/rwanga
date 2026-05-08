@@ -1,18 +1,18 @@
-{# ════════════════════════════════════════════════════════
-   RWANGA — reviews/detail.html
-   Full review detail: decisions, scene evals, comments, bible.
-
-   Context:
-     review         — Review instance
-     project        — Project instance
-     active_tab     — 'decisions'|'evaluations'|'comments'|'bible'
-     decisions      — QuerySet[ReviewDecision]
-     evaluations    — QuerySet[SceneEvaluation]
-     comments       — QuerySet[InlineComment] (threaded)
-     can_manage     — bool (director / superuser)
-     can_review     — bool (reviewer role)
-   ════════════════════════════════════════════════════════ #}
 {% extends "base.html" %}
+{% comment %}
+RWANGA — reviews/detail.html
+Full review detail: decisions, scene evals, comments, bible.
+
+Context:
+  review         — Review instance
+  project        — Project instance
+  active_tab     — 'decisions'|'evaluations'|'comments'|'bible'
+  decisions      — QuerySet[ReviewDecision]
+  evaluations    — QuerySet[SceneEvaluation]
+  comments       — QuerySet[InlineComment] (threaded)
+  can_manage     — bool (director / superuser)
+  can_review     — bool (reviewer role)
+{% endcomment %}
 {% load static i18n %}
 
 {% block title %}{{ review.title }} — {% trans "پێداچوونەوە" %}{% endblock %}
@@ -20,7 +20,7 @@
 {% block content %}
 <div id="rw-content" style="display:flex;flex-direction:column;flex:1;overflow:hidden">
 
-  {# ── Review topbar ── #}
+  {# Review topbar #}
   <div style="background:var(--rw-surface);border-bottom:1px solid var(--rw-border);padding:0 var(--rw-pad-lg);height:72px;display:flex;align-items:center;gap:16px;flex-shrink:0">
 
     {# Back #}
@@ -89,7 +89,7 @@
     </div>
   </div>
 
-  {# ── Stats strip ── #}
+  {# Stats strip #}
   <div class="rw-stats" style="margin:0;border-radius:0;border-inline:none;border-top:none;flex-shrink:0">
     <div class="rw-stat">
       <div class="rw-stat-val">{{ decisions.count }}</div>
@@ -113,7 +113,7 @@
     </div>
   </div>
 
-  {# ── Tab bar ── #}
+  {# Tab bar #}
   <div class="rw-mod-tabs" style="flex-shrink:0" role="tablist">
     <button class="rw-mod-tab {% if active_tab == 'decisions' %}active{% endif %}"
             hx-get="{% url 'reviews:tab' review.pk 'decisions' %}"
@@ -142,7 +142,7 @@
     </button>
   </div>
 
-  {# ── Tab content ── #}
+  {# Tab content #}
   <div class="rw-tab-content" id="rv-tab-content" style="flex:1;overflow-y:auto">
     {% include active_tab_template %}
   </div>

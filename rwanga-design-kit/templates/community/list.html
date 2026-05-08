@@ -1,13 +1,13 @@
-{# ════════════════════════════════════════════════════════
-   RWANGA — community/list.html
-   Community sessions list — external sandbox.
-
-   Context:
-     sessions       — QuerySet[CommunitySession]
-     active_project — Project|None
-     can_create     — bool
-   ════════════════════════════════════════════════════════ #}
 {% extends "base.html" %}
+{% comment %}
+RWANGA — community/list.html
+Community sessions list — external sandbox.
+
+Context:
+  sessions       — QuerySet[CommunitySession]
+  active_project — Project|None
+  can_create     — bool
+{% endcomment %}
 {% load static i18n %}
 
 {% block title %}{% trans "کۆمیونیتی" %}{% endblock %}
@@ -15,7 +15,7 @@
 {% block content %}
 <div id="rw-content" style="overflow-y:auto;flex:1">
 
-  {# ── Page header ── #}
+  {# Page header #}
   <div style="padding:var(--rw-pad-lg) var(--rw-pad-lg) var(--rw-pad-md);background:var(--rw-surface);border-bottom:1px solid var(--rw-border);display:flex;align-items:center;gap:var(--rw-pad-md)">
     <div style="display:flex;align-items:center;gap:16px">
       <div style="width:44px;height:44px;background:#0D9488;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">◎</div>
@@ -36,7 +36,7 @@
     </div>
   </div>
 
-  {# ── Filter strip ── #}
+  {# Filter strip #}
   <div style="padding:var(--rw-pad-sm) var(--rw-pad-lg);background:var(--rw-surface-2);border-bottom:1px solid var(--rw-border);display:flex;align-items:center;gap:0">
     <div class="rw-filter-row" style="margin-bottom:0">
       <button class="rw-f-btn active" onclick="rwFilterSessions('all',this)">{% trans "هەموو" %}</button>

@@ -1,8 +1,35 @@
+{% comment %}
+RWANGA — reviews/_bible_tab.html
+Bible tab partial. Loaded via HTMX into #rv-tab-content in detail.html.
+
+Context:
+  review     — BibleReview instance
+  bible_text — str (extracted from review.content)
+{% endcomment %}
 {% load i18n %}
-<div style="padding:16px">
+
+<div style="padding:var(--rw-pad-lg)">
+
+  {# Header #}
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--rw-pad-md)">
+    <div>
+      <div style="font-size:15px;font-weight:700;color:var(--rw-text)">{% trans "بایبڵی چیرۆک" %}</div>
+      <div style="font-size:12px;color:var(--rw-text-3);margin-top:2px">{{ review.title }}</div>
+    </div>
+    {% if review.bible_version %}
+    <span style="font-family:var(--rw-font-en);font-size:11px;font-weight:600;color:var(--rw-text-3);background:var(--rw-surface-2);border:1px solid var(--rw-border);padding:2px 8px">{{ review.bible_version }}</span>
+    {% endif %}
+  </div>
+
+  {# Bible content #}
   {% if bible_text %}
-    <div style="background:var(--rw-surface);border:1px solid var(--rw-border);padding:14px;line-height:1.8;white-space:pre-wrap">{{ bible_text }}</div>
+  <div style="background:var(--rw-surface);border:1px solid var(--rw-border);border-top:3px solid var(--rw-amber);padding:var(--rw-pad-md) var(--rw-pad-lg);line-height:2;white-space:pre-wrap;font-size:14px;color:var(--rw-text-2)">{{ bible_text }}</div>
   {% else %}
-    <div style="color:var(--rw-text-3)">{% trans "هیچ ناوەڕۆکی بایبڵێک نییە." %}</div>
+  <div style="padding:var(--rw-pad-lg) 0;text-align:center;color:var(--rw-text-3)">
+    <div style="font-size:28px;margin-bottom:12px;opacity:.3">📖</div>
+    <div style="font-size:13px;font-weight:600;color:var(--rw-text-2)">{% trans "هیچ ناوەڕۆکی بایبڵێک نییە" %}</div>
+    <div style="font-size:12px;margin-top:4px">{% trans "ناوەڕۆکی بایبڵ لە کاتی دروستکردنی پێداچوونەوەکەدا زیادبکە" %}</div>
+  </div>
   {% endif %}
+
 </div>

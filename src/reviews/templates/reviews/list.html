@@ -1,14 +1,13 @@
 {% extends "base.html" %}
-{% comment %} ════════════════════════════════════════════════════════
-   RWANGA — reviews/list.html
-   All reviews the current user can access, grouped by project.
+{% comment %}
+RWANGA — reviews/list.html
+All reviews the current user can access, grouped by project.
 
-   Context:
-     reviews        — QuerySet[Review] visible to user
-     active_project — Project|None (if coming from a project context)
-     can_create     — bool (director / superuser)
-   ════════════════════════════════════════════════════════ {% endcomment %}
- 
+Context:
+  reviews        — QuerySet[Review] visible to user
+  active_project — Project|None (if coming from a project context)
+  can_create     — bool (director / superuser)
+{% endcomment %}
 {% load static i18n %}
 
 {% block title %}{% trans "پێداچوونەوەکان" %}{% endblock %}
@@ -16,7 +15,7 @@
 {% block content %}
 <div id="rw-content" style="overflow-y:auto;flex:1">
 
-  {% comment %} ── Page header ── {% endcomment %}
+  {# Page header #}
   <div style="padding:var(--rw-pad-lg) var(--rw-pad-lg) var(--rw-pad-md);background:var(--rw-surface);border-bottom:1px solid var(--rw-border);display:flex;align-items:center;gap:var(--rw-pad-md)">
     <div style="display:flex;align-items:center;gap:16px">
       <div style="width:44px;height:44px;background:#7C3AED;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">📋</div>
@@ -37,7 +36,7 @@
     </div>
   </div>
 
-  {% comment %} ── Status filter strip ── {% endcomment %}
+  {# Status filter strip #}
   <div style="padding:var(--rw-pad-sm) var(--rw-pad-lg);background:var(--rw-surface-2);border-bottom:1px solid var(--rw-border);display:flex;align-items:center;gap:0">
     <div class="rw-filter-row" style="margin-bottom:0">
       <button class="rw-f-btn active" onclick="rwFilterReviews('all',this)">{% trans "هەموو" %}</button>
@@ -60,13 +59,13 @@
         <div style="display:flex;align-items:stretch;background:var(--rw-surface);border-bottom:1px solid var(--rw-border-2);transition:background var(--rw-t);border-inline-start:4px solid transparent"
              class="rv-row rv-row-{{ review.status }}">
 
-          {% comment %} Status accent bar color via inline override {% endcomment %}
-          {% comment %} Draft=border-2, in_review=amber, delivered=vis, closed=pink {% endcomment %}
+          {# Status accent bar color via inline override #}
+          {# Draft=border-2, in_review=amber, delivered=vis, closed=pink #}
 
-          {% comment %} Left: main info {% endcomment %}
+          {# Left: main info #}
           <div style="flex:1;padding:var(--rw-pad-md);min-width:0">
             <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
-              {% comment %} Status badge {% endcomment %}
+              {# Status badge #}
               {% if review.status == 'draft' %}
               <span style="display:inline-block;padding:3px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;background:var(--rw-surface-3);color:var(--rw-text-2);border:1px solid var(--rw-border)">{% trans "پێشنووس" %}</span>
               {% elif review.status == 'in_review' %}
@@ -77,16 +76,16 @@
               <span style="display:inline-block;padding:3px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;background:var(--rw-pink-dim);color:var(--rw-shoot);border:1px solid rgba(247,37,133,.25)">{% trans "داخراوە" %}</span>
               {% endif %}
 
-              {% comment %} Version tag {% endcomment %}
+              {# Version tag #}
               <span style="font-family:var(--rw-font-en);font-size:11px;font-weight:600;color:var(--rw-text-3);background:var(--rw-surface-2);border:1px solid var(--rw-border);padding:2px 8px">v{{ review.version }}</span>
 
-              {% comment %} Project pill {% endcomment %}
+              {# Project pill #}
               <span style="font-size:12px;color:var(--rw-text-3)">{{ review.project.title }}</span>
             </div>
 
             <div style="font-size:15px;font-weight:700;color:var(--rw-text);margin-bottom:6px">{{ review.title }}</div>
 
-            {% comment %} Decision stats row {% endcomment %}
+            {# Decision stats row #}
             <div style="display:flex;align-items:center;gap:20px;font-size:12px;color:var(--rw-text-2)">
               <span>
                 <span style="font-family:var(--rw-font-en);font-weight:700;color:var(--rw-text)">{{ review.decisions.count }}</span>
@@ -108,7 +107,7 @@
             </div>
           </div>
 
-          {% comment %} Right: author + date {% endcomment %}
+          {# Right: author + date #}
           <div style="flex-shrink:0;padding:var(--rw-pad-md) var(--rw-pad-md);border-inline-start:1px solid var(--rw-border);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;min-width:120px">
             <div class="rw-avatar" style="width:36px;height:36px;font-size:13px">
               {{ review.author.first_name|first|upper }}{{ review.author.last_name|first|upper }}
@@ -132,7 +131,7 @@
   </div>
 </div>
 
-{% comment %} Modal container {% endcomment %}
+{# Modal container #}
 <div id="rw-modal-container"></div>
 
 <script>
@@ -145,5 +144,3 @@ function rwFilterReviews(status, btn) {
 }
 </script>
 {% endblock %}
-
-

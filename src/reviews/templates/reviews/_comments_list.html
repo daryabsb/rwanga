@@ -1,13 +1,36 @@
+{% comment %}
+RWANGA — reviews/_comments_list.html
+Comments tab partial. Loaded via HTMX into #rv-tab-content in detail.html.
+
+Context:
+  review   — BibleReview instance
+  comments — QuerySet[InlineComment] (top-level, on decisions)
+{% endcomment %}
 {% load i18n %}
+
 {% if comments %}
-  <div style="padding:16px;display:flex;flex-direction:column;gap:10px">
-    {% for comment in comments %}
-      <div style="background:var(--rw-surface);border:1px solid var(--rw-border);padding:10px 12px">
-        <div style="font-size:12px;color:var(--rw-text-3)">{{ comment.author.get_full_name }} · {{ comment.created_at|timesince }} {% trans "ago" %}</div>
-        <div style="font-size:13px;color:var(--rw-text);margin-top:4px">{{ comment.body }}</div>
+<div style="display:flex;flex-direction:column;gap:0">
+  {% for comment in comments %}
+  <div style="background:var(--rw-surface);border-bottom:1px solid var(--rw-border-2);padding:var(--rw-pad-sm) var(--rw-pad-md)">
+    <div style="display:flex;align-items:flex-start;gap:10px">
+      <div class="rw-avatar" style="width:30px;height:30px;font-size:11px;flex-shrink:0;margin-top:2px">
+        {{ comment.author.first_name|first|upper }}{{ comment.author.last_name|first|upper }}
       </div>
-    {% endfor %}
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+          <span style="font-size:12px;font-weight:700;color:var(--rw-text)">{{ comment.author.get_full_name }}</span>
+          <span style="font-size:10px;color:var(--rw-text-3)" dir="ltr">{{ comment.created_at|timesince }} {% trans "پێش" %}</span>
+        </div>
+        <div style="font-size:13px;color:var(--rw-text-2);line-height:1.7">{{ comment.body }}</div>
+      </div>
+    </div>
   </div>
+  {% endfor %}
+</div>
 {% else %}
-  <div style="padding:16px;color:var(--rw-text-3)">{% trans "No comments yet." %}</div>
+<div style="padding:var(--rw-pad-lg);text-align:center;color:var(--rw-text-3)">
+  <div style="font-size:28px;margin-bottom:12px;opacity:.3">💬</div>
+  <div style="font-size:13px;font-weight:600;color:var(--rw-text-2)">{% trans "هێشتا لێدوانێک نییە" %}</div>
+  <div style="font-size:12px;margin-top:4px">{% trans "لێدوانەکانی بڕیارەکان لێرە دەردەکەون" %}</div>
+</div>
 {% endif %}

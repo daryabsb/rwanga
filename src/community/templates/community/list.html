@@ -1,14 +1,13 @@
 {% extends "base.html" %}
-{% comment %} ════════════════════════════════════════════════════════
-   RWANGA — community/list.html
-   Community sessions list — external sandbox.
+{% comment %}
+RWANGA — community/list.html
+Community sessions list — external sandbox.
 
-   Context:
-     sessions       — QuerySet[CommunitySession]
-     active_project — Project|None
-     can_create     — bool
-   ════════════════════════════════════════════════════════ {% endcomment %}
- 
+Context:
+  sessions       — QuerySet[CommunitySession]
+  active_project — Project|None
+  can_create     — bool
+{% endcomment %}
 {% load static i18n %}
 
 {% block title %}{% trans "کۆمیونیتی" %}{% endblock %}
@@ -16,7 +15,7 @@
 {% block content %}
 <div id="rw-content" style="overflow-y:auto;flex:1">
 
-  {% comment %} ── Page header ── {% endcomment %}
+  {# Page header #}
   <div style="padding:var(--rw-pad-lg) var(--rw-pad-lg) var(--rw-pad-md);background:var(--rw-surface);border-bottom:1px solid var(--rw-border);display:flex;align-items:center;gap:var(--rw-pad-md)">
     <div style="display:flex;align-items:center;gap:16px">
       <div style="width:44px;height:44px;background:#0D9488;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">◎</div>
@@ -37,7 +36,7 @@
     </div>
   </div>
 
-  {% comment %} ── Filter strip ── {% endcomment %}
+  {# Filter strip #}
   <div style="padding:var(--rw-pad-sm) var(--rw-pad-lg);background:var(--rw-surface-2);border-bottom:1px solid var(--rw-border);display:flex;align-items:center;gap:0">
     <div class="rw-filter-row" style="margin-bottom:0">
       <button class="rw-f-btn active" onclick="rwFilterSessions('all',this)">{% trans "هەموو" %}</button>
@@ -58,7 +57,7 @@
       <a href="{% url 'community:detail' session.pk %}" style="text-decoration:none;display:block" data-status="{{ session.status }}">
         <div style="background:var(--rw-surface);padding:var(--rw-pad-md);transition:background var(--rw-t);height:100%;display:flex;flex-direction:column;gap:12px;border-top:3px solid #0D9488">
 
-          {% comment %} Status + project row {% endcomment %}
+          {# Status + project row #}
           <div style="display:flex;align-items:center;gap:8px">
             {% if session.status == 'open' %}
             <span style="display:inline-block;padding:2px 8px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;background:rgba(13,148,136,.1);color:#0D9488;border:1px solid rgba(13,148,136,.3)">{% trans "کراوەیە" %}</span>
@@ -68,15 +67,15 @@
             <span style="font-size:12px;color:var(--rw-text-3)">{{ session.project.title }}</span>
           </div>
 
-          {% comment %} Session title {% endcomment %}
+          {# Session title #}
           <div style="font-size:15px;font-weight:700;color:var(--rw-text);line-height:1.4">{{ session.title }}</div>
 
-          {% comment %} Description snippet {% endcomment %}
+          {# Description snippet #}
           {% if session.description %}
           <p style="font-size:13px;color:var(--rw-text-2);line-height:1.6;margin:0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">{{ session.description }}</p>
           {% endif %}
 
-          {% comment %} Stats row {% endcomment %}
+          {# Stats row #}
           <div style="display:flex;gap:16px;font-size:12px;color:var(--rw-text-3);margin-top:auto;padding-top:10px;border-top:1px solid var(--rw-border-2)">
             <span>
               <span style="font-family:var(--rw-font-en);font-weight:700;color:var(--rw-text-2)">{{ session.comments.count }}</span>
@@ -114,5 +113,3 @@ function rwFilterSessions(status, btn) {
 }
 </script>
 {% endblock %}
-
-

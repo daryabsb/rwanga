@@ -1,53 +1,26 @@
-
 {% extends "base.html" %}
+{% comment %}
+RWANGA — reviews/chain_viewer.html
+Chain Viewer — visual escalation timeline for decision chains
+Shows how a decision evolves across scenes with intensity encoding.
+
+Context:
+  review           — BibleReview instance
+  project          — Project instance
+  chain_decisions  — QuerySet ordered by chain_order
+  chain_id         — string (e.g. "D15")
+  chain_name       — string (e.g. "ناڕاستەوخۆیی")
+{% endcomment %}
 {% load static i18n %}
 
-{% block title %}زنجیرە {{ chain_id }} — {{ project.title }}{% endblock %}
+{% block title %}{% trans "زنجیرە" %} {{ chain_id }} — {{ project.title }}{% endblock %}
 
 {% block extra_css %}
 <style>
 /* ══════════════════════════════════════════════════════
    CHAIN VIEWER — component CSS
-   Uses var(--rw-*) tokens from rwanga.css
+   Uses var(--rw-*) tokens from rwanga-ds.css
    ══════════════════════════════════════════════════════ */
-
-/* ── TOP BAR ── */
-.cv-topbar {
-  background: var(--rw-surface);
-  border-bottom: 1px solid var(--rw-border);
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 0 var(--rw-pad-md);
-  height: 52px;
-  flex-shrink: 0;
-}
-.cv-back {
-  font-size: 12px;
-  color: var(--rw-text-2);
-  cursor: pointer;
-  padding: 6px 12px;
-  border: 1px solid var(--rw-border);
-  background: var(--rw-surface-2);
-  font-family: var(--rw-font);
-  text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-}
-.cv-back:hover { color: var(--rw-text); border-color: var(--rw-text-3); }
-.cv-chain-title {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--rw-pink);
-  flex: 1;
-}
-.cv-chain-id {
-  font-family: var(--rw-font-en);
-  font-size: 11px;
-  color: var(--rw-text-3);
-  direction: ltr;
-}
 
 /* ── CHAIN HERO ── */
 .cv-hero {
@@ -106,9 +79,7 @@
   flex-shrink: 0;
 }
 .cv-node:hover { transform: translateY(-3px); }
-.cv-node.selected .cv-node-box {
-  border-color: var(--rw-amber);
-}
+.cv-node.selected .cv-node-box { border-color: var(--rw-amber); }
 
 .cv-node-box {
   width: 110px;
@@ -124,34 +95,16 @@
 }
 
 /* Intensity visual encoding — NON-NEGOTIABLE */
-.cv-node.intensity-low .cv-node-box {
-  height: 90px;
-  border-color: var(--rw-border);
-  opacity: 0.75;
-}
-.cv-node.intensity-medium .cv-node-box {
-  height: 110px;
-  border-color: rgba(212, 165, 116, 0.4);
-  border-width: 2px;
-}
-.cv-node.intensity-peak .cv-node-box {
-  height: 140px;
-  border-color: var(--rw-amber);
-  border-width: 3px;
-}
+.cv-node.intensity-low .cv-node-box    { height: 90px; border-color: var(--rw-border); opacity: 0.75; }
+.cv-node.intensity-medium .cv-node-box { height: 110px; border-color: rgba(212, 165, 116, 0.4); border-width: 2px; }
+.cv-node.intensity-peak .cv-node-box   { height: 140px; border-color: var(--rw-amber); border-width: 3px; }
 .cv-node.intensity-collapse .cv-node-box {
   height: 100px;
   border-color: #E63946;
   border-width: 2px;
   border-style: dashed;
   opacity: 0.7;
-  background: repeating-linear-gradient(
-    -45deg,
-    var(--rw-surface),
-    var(--rw-surface) 4px,
-    rgba(230, 57, 70, 0.03) 4px,
-    rgba(230, 57, 70, 0.03) 8px
-  );
+  background: repeating-linear-gradient(-45deg, var(--rw-surface), var(--rw-surface) 4px, rgba(230,57,70,.03) 4px, rgba(230,57,70,.03) 8px);
 }
 .cv-node.intensity-collapse-sustained .cv-node-box {
   height: 95px;
@@ -159,13 +112,7 @@
   border-width: 2px;
   border-style: dotted;
   opacity: 0.6;
-  background: repeating-linear-gradient(
-    -45deg,
-    var(--rw-surface),
-    var(--rw-surface) 3px,
-    rgba(230, 57, 70, 0.04) 3px,
-    rgba(230, 57, 70, 0.04) 6px
-  );
+  background: repeating-linear-gradient(-45deg, var(--rw-surface), var(--rw-surface) 3px, rgba(230,57,70,.04) 3px, rgba(230,57,70,.04) 6px);
 }
 
 .cv-scene-num {
@@ -176,14 +123,8 @@
   margin-bottom: 4px;
 }
 .cv-node.intensity-collapse .cv-scene-num,
-.cv-node.intensity-collapse-sustained .cv-scene-num {
-  color: #E63946;
-  opacity: 0.8;
-}
-.cv-node.intensity-peak .cv-scene-num {
-  color: var(--rw-amber);
-  font-size: 22px;
-}
+.cv-node.intensity-collapse-sustained .cv-scene-num { color: #E63946; opacity: 0.8; }
+.cv-node.intensity-peak .cv-scene-num { color: var(--rw-amber); font-size: 22px; }
 
 .cv-intensity-label {
   font-family: var(--rw-font-en);
@@ -194,9 +135,9 @@
   padding: 2px 6px;
   margin-bottom: 2px;
 }
-.cv-int-low { color: var(--rw-text-3); }
-.cv-int-medium { color: var(--rw-amber); opacity: 0.8; }
-.cv-int-peak { color: var(--rw-amber); background: var(--rw-amber-dim); border-radius: 2px; }
+.cv-int-low      { color: var(--rw-text-3); }
+.cv-int-medium   { color: var(--rw-amber); opacity: 0.8; }
+.cv-int-peak     { color: var(--rw-amber); background: var(--rw-amber-dim); border-radius: 2px; }
 .cv-int-collapse { color: #E63946; opacity: 0.7; }
 
 /* Below-node labels */
@@ -217,20 +158,20 @@
 .cv-arrow-line {
   width: 100%;
   height: 2px;
-  background: linear-gradient(90deg, rgba(212, 165, 116, 0.15), rgba(212, 165, 116, 0.5), rgba(212, 165, 116, 0.15));
+  background: linear-gradient(90deg, rgba(212,165,116,.15), rgba(212,165,116,.5), rgba(212,165,116,.15));
   position: relative;
 }
 .cv-arrow-line::after {
   content: '▶';
   position: absolute;
-  left: -4px;
+  inset-inline-start: -4px;
   top: -8px;
   font-size: 12px;
   color: var(--rw-amber);
   opacity: 0.6;
 }
 .cv-arrow.to-collapse .cv-arrow-line {
-  background: linear-gradient(90deg, rgba(212, 165, 116, 0.3), rgba(230, 57, 70, 0.4));
+  background: linear-gradient(90deg, rgba(212,165,116,.3), rgba(230,57,70,.4));
 }
 .cv-arrow.to-collapse .cv-arrow-line::after { color: #E63946; }
 .cv-arrow-label {
@@ -261,10 +202,10 @@
 .cv-esc-fill {
   position: absolute;
   top: 0;
-  right: 0;
+  inset-inline-end: 0;
   height: 100%;
   border-radius: 2px;
-  background: linear-gradient(90deg, rgba(212, 165, 116, 0.2) 0%, var(--rw-amber) 55%, var(--rw-pink) 70%, #E63946 85%, rgba(230, 57, 70, 0.4) 100%);
+  background: linear-gradient(90deg, rgba(212,165,116,.2) 0%, var(--rw-amber) 55%, var(--rw-pink) 70%, #E63946 85%, rgba(230,57,70,.4) 100%);
 }
 .cv-esc-labels {
   display: flex;
@@ -291,7 +232,7 @@
   align-items: center;
   gap: 14px;
   padding: 16px 20px;
-  border-bottom: 1px solid var(--rw-border-2);
+  border-bottom: 1px solid var(--rw-border);
 }
 .cv-detail-scene {
   font-family: var(--rw-font-en);
@@ -299,12 +240,7 @@
   font-weight: 700;
   color: var(--rw-amber);
 }
-.cv-detail-title {
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--rw-text);
-  flex: 1;
-}
+.cv-detail-title { font-size: 16px; font-weight: 700; color: var(--rw-text); flex: 1; }
 .cv-detail-close {
   width: 32px;
   height: 32px;
@@ -326,11 +262,7 @@
   gap: 16px;
   margin-bottom: 20px;
 }
-.cv-dg-item {
-  background: var(--rw-surface-2);
-  padding: 12px;
-  border: 1px solid var(--rw-border-2);
-}
+.cv-dg-item { background: var(--rw-surface-2); padding: 12px; border: 1px solid var(--rw-border); }
 .cv-dg-label {
   font-size: 9px;
   font-weight: 700;
@@ -357,19 +289,8 @@
   margin-bottom: 6px;
   font-family: var(--rw-font-en);
 }
-.cv-detail-lens-text {
-  font-size: 14px;
-  color: var(--rw-text);
-  line-height: 1.8;
-  font-family: var(--rw-font);
-}
-
-.cv-detail-analysis {
-  font-size: 13px;
-  color: var(--rw-text-2);
-  line-height: 1.8;
-  margin-bottom: 16px;
-}
+.cv-detail-lens-text { font-size: 14px; color: var(--rw-text); line-height: 1.8; font-family: var(--rw-font); }
+.cv-detail-analysis { font-size: 13px; color: var(--rw-text-2); line-height: 1.8; margin-bottom: 16px; }
 
 .cv-detail-link {
   display: inline-flex;
@@ -386,165 +307,143 @@
   transition: all 0.12s;
   text-decoration: none;
 }
-.cv-detail-link:hover { background: rgba(212, 165, 116, 0.12); border-color: var(--rw-amber); }
-
-/* ── FOOTER ── */
-.cv-footer {
-  background: var(--rw-surface);
-  border-top: 1px solid var(--rw-border);
-  padding: 12px var(--rw-pad-md);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 11px;
-  color: var(--rw-text-3);
-  flex-shrink: 0;
-  margin-top: auto;
-}
-.cv-footer-brand {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-weight: 700;
-  color: var(--rw-text-2);
-}
-
-/* ── EMPTY STATE ── */
-.cv-empty {
-  text-align: center;
-  padding: 80px 20px;
-  color: var(--rw-text-3);
-}
-.cv-empty p:first-child { font-size: 18px; margin-bottom: 8px; }
-.cv-empty p:last-child { font-size: 13px; }
+.cv-detail-link:hover { background: rgba(212,165,116,.12); border-color: var(--rw-amber); }
 
 /* ── SCROLLABLE BODY ── */
-.cv-body {
-  flex: 1;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-}
+.cv-body { flex: 1; overflow-y: auto; display: flex; flex-direction: column; }
 </style>
 {% endblock %}
 
 {% block content %}
+<div class="d-flex flex-column flex-grow-1 overflow-hidden">
 
-
-<div class="cv-topbar">
-  <a class="cv-back" href="{% url 'projects:review_workbench' project.id review.id %}">← بگەڕێوە بۆ پێداچوونەوە</a>
-  <div class="cv-chain-title">زنجیرە: {{ chain_id }} — {{ chain_name }}</div>
-  <div class="cv-chain-id" style="font-family:var(--rw-font-en);direction:ltr">{{ chain_id }} · {{ chain_decisions.count }} scenes · {{ review.version|default:"v03" }}</div>
-</div>
-
-{% if chain_decisions %}
-
-
-<div class="cv-hero">
-  <div class="cv-hero-label">DECISION CHAIN</div>
-  <div class="cv-hero-title">{{ chain_id }} — {{ chain_name }}</div>
-  {% with first=chain_decisions.first %}
-  {% if first.decision_text %}
-  <div class="cv-hero-sub">{{ first.decision_text|truncatewords:30 }}</div>
-  {% endif %}
-  {% endwith %}
-</div>
-
-<div class="cv-body">
-
-
-<div class="cv-timeline-wrap">
-  <div class="cv-timeline" id="cv-timeline">
-    {% for d in chain_decisions %}
-
-    
-    {% if not forloop.first %}
-    <div class="cv-arrow{% if d.intensity == 'collapse' or d.intensity == 'collapse-sustained' %} to-collapse{% endif %}">
-      <div class="cv-arrow-line"></div>
-      {% if d.transition_label %}
-      <div class="cv-arrow-label">{{ d.transition_label }}</div>
-      {% endif %}
+  {# Top bar #}
+  <div class="d-flex align-items-center gap-3 px-4 bg-rw-surface"
+       style="height:52px;flex-shrink:0;border-bottom:1px solid var(--rw-border)">
+    <a class="rw-btn rw-btn-ghost rw-btn-sm"
+       href="{% url 'projects:review_workbench' project.id review.id %}">
+      ← {% trans "بگەڕێوە بۆ پێداچوونەوە" %}
+    </a>
+    <div class="fw-bold flex-grow-1" style="font-size:14px;color:var(--rw-pink)">
+      {% trans "زنجیرە:" %} {{ chain_id }} — {{ chain_name }}
     </div>
+    <bdi dir="ltr" class="rw-font-en" style="font-size:11px;color:var(--rw-text-3)">
+      {{ chain_id }} · {{ chain_decisions.count }} scenes · {{ review.version|default:"v03" }}
+    </bdi>
+  </div>
+
+  {% if chain_decisions %}
+
+  {# Hero #}
+  <div class="cv-hero">
+    <div class="cv-hero-label">DECISION CHAIN</div>
+    <div class="cv-hero-title">{{ chain_id }} — {{ chain_name }}</div>
+    {% with first=chain_decisions.first %}
+    {% if first.decision_text %}
+    <div class="cv-hero-sub">{{ first.decision_text|truncatewords:30 }}</div>
     {% endif %}
+    {% endwith %}
+  </div>
 
-    
-    <div class="cv-node intensity-{{ d.intensity|default:'medium' }}" onclick="cvShowDetail({{ forloop.counter0 }})">
-      <div class="cv-node-box">
-        <div class="cv-scene-num">{{ d.scene.scene_number|default:"?" }}</div>
-        <div class="cv-intensity-label cv-int-{{ d.intensity|default:'medium' }}">{{ d.intensity|default:"—"|upper }}</div>
+  <div class="cv-body">
+
+    {# Timeline #}
+    <div class="cv-timeline-wrap">
+      <div class="cv-timeline" id="cv-timeline">
+        {% for d in chain_decisions %}
+
+        {% if not forloop.first %}
+        <div class="cv-arrow{% if d.intensity == 'collapse' or d.intensity == 'collapse-sustained' %} to-collapse{% endif %}">
+          <div class="cv-arrow-line"></div>
+          {% if d.transition_label %}
+          <div class="cv-arrow-label">{{ d.transition_label }}</div>
+          {% endif %}
+        </div>
+        {% endif %}
+
+        <div class="cv-node intensity-{{ d.intensity|default:'medium' }}"
+             onclick="cvShowDetail({{ forloop.counter0 }})">
+          <div class="cv-node-box">
+            <div class="cv-scene-num">{{ d.scene.scene_number|default:"?" }}</div>
+            <div class="cv-intensity-label cv-int-{{ d.intensity|default:'medium' }}">
+              {{ d.intensity|default:"—"|upper }}
+            </div>
+          </div>
+          <div class="cv-node-below">
+            <div class="cv-expr-type">{{ d.expression_type|default:"—" }}</div>
+            <div class="cv-func">{{ d.function_label|default:"" }}</div>
+          </div>
+        </div>
+
+        {% endfor %}
       </div>
-      <div class="cv-node-below">
-        <div class="cv-expr-type">{{ d.expression_type|default:"—" }}</div>
-        <div class="cv-func">{{ d.function_label|default:"" }}</div>
+    </div>
+
+    {# Escalation bar #}
+    <div class="cv-esc-bar">
+      <div class="cv-esc-track">
+        <div class="cv-esc-fill" style="width:100%"></div>
+      </div>
+      <div class="cv-esc-labels">
+        <span>ESTABLISH</span>
+        <span>ENFORCE</span>
+        <span>PEAK</span>
+        <span>FRACTURE</span>
+        <span>SUSPEND</span>
       </div>
     </div>
 
-    {% endfor %}
-  </div>
-</div>
-
-
-<div class="cv-esc-bar">
-  <div class="cv-esc-track">
-    <div class="cv-esc-fill" style="width:100%"></div>
-  </div>
-  <div class="cv-esc-labels">
-    <span>ESTABLISH</span>
-    <span>ENFORCE</span>
-    <span>PEAK</span>
-    <span>FRACTURE</span>
-    <span>SUSPEND</span>
-  </div>
-</div>
-
-
-<div class="cv-detail" id="cv-detail">
-  <div class="cv-detail-header">
-    <div class="cv-detail-scene" id="cd-scene"></div>
-    <div class="cv-detail-title" id="cd-title"></div>
-    <div class="cv-detail-close" onclick="cvCloseDetail()">✕</div>
-  </div>
-  <div class="cv-detail-body">
-    <div class="cv-detail-grid">
-      <div class="cv-dg-item"><div class="cv-dg-label">TYPE</div><div class="cv-dg-value" id="cd-type"></div></div>
-      <div class="cv-dg-item"><div class="cv-dg-label">INTENSITY</div><div class="cv-dg-value" id="cd-intensity"></div></div>
-      <div class="cv-dg-item"><div class="cv-dg-label">FUNCTION</div><div class="cv-dg-value" id="cd-function"></div></div>
-      <div class="cv-dg-item"><div class="cv-dg-label">TRANSITION</div><div class="cv-dg-value" id="cd-transition"></div></div>
+    {# Detail panel #}
+    <div class="cv-detail" id="cv-detail">
+      <div class="cv-detail-header">
+        <div class="cv-detail-scene" id="cd-scene"></div>
+        <div class="cv-detail-title" id="cd-title"></div>
+        <div class="cv-detail-close" onclick="cvCloseDetail()">✕</div>
+      </div>
+      <div class="cv-detail-body">
+        <div class="cv-detail-grid">
+          <div class="cv-dg-item"><div class="cv-dg-label">TYPE</div><div class="cv-dg-value" id="cd-type"></div></div>
+          <div class="cv-dg-item"><div class="cv-dg-label">INTENSITY</div><div class="cv-dg-value" id="cd-intensity"></div></div>
+          <div class="cv-dg-item"><div class="cv-dg-label">FUNCTION</div><div class="cv-dg-value" id="cd-function"></div></div>
+          <div class="cv-dg-item"><div class="cv-dg-label">TRANSITION</div><div class="cv-dg-value" id="cd-transition"></div></div>
+        </div>
+        <div class="cv-detail-lens">
+          <div class="cv-detail-lens-label">LENS</div>
+          <div class="cv-detail-lens-text" id="cd-lens"></div>
+        </div>
+        <div class="cv-detail-analysis" id="cd-analysis"></div>
+        <a class="cv-detail-link" id="cd-link" href="#">{% trans "سکریپت ببینە" %} ←</a>
+      </div>
     </div>
-    <div class="cv-detail-lens">
-      <div class="cv-detail-lens-label">LENS</div>
-      <div class="cv-detail-lens-text" id="cd-lens"></div>
+
+  </div>{# /cv-body #}
+
+  {% else %}
+
+  <div class="text-center py-5" style="color:var(--rw-text-3)">
+    <p class="fs-5 mb-2">{% trans "هیچ بڕیارێک لەم زنجیرەیەدا نییە" %}</p>
+    <p style="font-size:13px">{% trans "داتای زنجیرە هێشتا پڕنەکراوەتەوە." %}</p>
+  </div>
+
+  {% endif %}
+
+  {# Footer #}
+  <div class="d-flex align-items-center justify-content-between px-4 bg-rw-surface"
+       style="height:44px;flex-shrink:0;border-top:1px solid var(--rw-border);font-size:11px;color:var(--rw-text-3);margin-top:auto">
+    <div class="d-flex align-items-center gap-2 fw-bold" style="color:var(--rw-text-2)">
+      <span>
+        <span style="color:var(--rw-pink);font-weight:700">{% trans "ڕوانگە" %}</span>
+        — {% trans "پلاتفۆرمی پێشبەرهەمهێنانی سینەمای کوردی" %}
+      </span>
     </div>
-    <div class="cv-detail-analysis" id="cd-analysis"></div>
-    <a class="cv-detail-link" id="cd-link" href="#">سکریپت ببینە ←</a>
+    <bdi dir="ltr" class="rw-font-en">{{ chain_id }} chain · {{ review.version|default:"v03" }} · {% now "Y-m-d" %}</bdi>
   </div>
-</div>
 
 </div>
-
-{% else %}
-
-
-<div class="cv-empty">
-  <p>هیچ بڕیارێک لەم زنجیرەیەدا نییە</p>
-  <p>داتای زنجیرە هێشتا پڕنەکراوەتەوە.</p>
-</div>
-
-{% endif %}
-
-
-<div class="cv-footer">
-  <div class="cv-footer-brand">
-    <span><span style="color:var(--rw-pink);font-weight:700">ڕوانگە</span> — پلاتفۆرمی پێشبەرهەمهێنانی سینەمای کوردی</span>
-  </div>
-  <div style="font-family:var(--rw-font-en);direction:ltr;display:inline-block">{{ chain_id }} chain · {{ review.version|default:"v03" }} · {% now "Y-m-d" %}</div>
-</div>
-
 {% endblock %}
 
 {% block extra_js %}
 <script>
-/* Chain detail data — built from Django context */
 var cvChainData = [
   {% for d in chain_decisions %}
   {
@@ -562,11 +461,8 @@ var cvChainData = [
 
 function cvShowDetail(i) {
   var d = cvChainData[i];
-  /* Select node */
   document.querySelectorAll('.cv-node').forEach(function(n) { n.classList.remove('selected'); });
   document.querySelectorAll('.cv-node')[i].classList.add('selected');
-
-  /* Fill detail */
   document.getElementById('cd-scene').textContent = d.scene;
   document.getElementById('cd-title').textContent = d.title;
   document.getElementById('cd-type').textContent = d.type;
@@ -575,7 +471,6 @@ function cvShowDetail(i) {
   document.getElementById('cd-transition').textContent = d.transition;
   document.getElementById('cd-lens').textContent = d.lens;
   document.getElementById('cd-analysis').textContent = d.analysis;
-
   var panel = document.getElementById('cv-detail');
   panel.classList.add('open');
   panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -586,7 +481,6 @@ function cvCloseDetail() {
   document.querySelectorAll('.cv-node').forEach(function(n) { n.classList.remove('selected'); });
 }
 
-/* Auto-select peak node on load (find intensity-peak, or fallback to middle node) */
 document.addEventListener('DOMContentLoaded', function() {
   var nodes = document.querySelectorAll('.cv-node');
   if (nodes.length === 0) return;

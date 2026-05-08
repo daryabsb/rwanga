@@ -1,13 +1,13 @@
-{# ════════════════════════════════════════════════════════
-   RWANGA — community/_comment_thread.html
-   Threaded comment list + compose box.
-   HTMX-swappable: target #cm-thread
+{% comment %}
+RWANGA — community/_comment_thread.html
+Threaded comment list + compose box.
+HTMX-swappable: target #cm-thread
 
-   Context:
-     comments    — QuerySet[CommunityComment] top-level
-     session     — CommunitySession
-     can_comment — bool
-   ════════════════════════════════════════════════════════ #}
+Context:
+  comments    — QuerySet[CommunityComment] top-level
+  session     — CommunitySession
+  can_comment — bool
+{% endcomment %}
 {% load i18n %}
 
 <div style="display:flex;flex-direction:column;gap:0">
@@ -117,7 +117,7 @@
 
 </div>
 
-{# ── Compose box ── #}
+{# Compose box #}
 {% if can_comment %}
 <div style="border-top:1px solid var(--rw-border);padding:var(--rw-pad-sm) var(--rw-pad-md);background:var(--rw-surface);flex-shrink:0;position:sticky;bottom:0">
   <form hx-post="{% url 'community:comment' session.pk %}"

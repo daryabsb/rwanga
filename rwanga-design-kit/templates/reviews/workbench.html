@@ -552,7 +552,7 @@ Context:
 {% block content %}
 <div class="d-flex flex-column flex-grow-1 overflow-hidden">
 
-  {# ── Workbench header ── #}
+  {# Workbench header #}
   <div class="d-flex align-items-center gap-3 px-4 bg-rw-surface"
        style="height:52px;flex-shrink:0;border-bottom:1px solid var(--rw-border)">
     <div class="fw-bold flex-grow-1" style="font-size:15px">
@@ -563,7 +563,7 @@ Context:
     </bdi>
   </div>
 
-  {# ── Tabs ── #}
+  {# Tabs #}
   <div class="rwb-tabs" id="rwb-tabs">
     <button class="rwb-tab active" onclick="rwbTab('active',this)">
       {% trans "بڕیارە نوێیەکان" %} <span class="rwb-tab-count">{{ active_decisions.count }}</span>
@@ -574,10 +574,10 @@ Context:
     <button class="rwb-tab" onclick="rwbTab('bible',this)">{% trans "بایبڵ" %}</button>
   </div>
 
-  {# ── Split panel ── #}
+  {# Split panel #}
   <div class="rwb-split">
 
-    {# ═══ LEFT PANEL — decision panes ═══ #}
+    {# LEFT PANEL — decision panes #}
     <div class="rwb-left">
 
       {# Tab 1: Active decisions #}
@@ -679,7 +679,7 @@ Context:
 
     </div>{# /rwb-left #}
 
-    {# ═══ RIGHT PANEL — bible / script (always visible) ═══ #}
+    {# RIGHT PANEL — bible / script (always visible) #}
     <div class="rwb-right">
       <div class="rwb-right-tabs">
         <div class="rwb-right-tab active" onclick="rwbRight('rbible',this)">{% trans "بایبڵ" %}</div>
@@ -733,7 +733,7 @@ Context:
 
   </div>{# /rwb-split #}
 
-  {# ── Footer ── #}
+  {# Footer #}
   <div class="d-flex align-items-center justify-content-between px-4 bg-rw-surface"
        style="height:44px;flex-shrink:0;border-top:1px solid var(--rw-border);font-size:11px;color:var(--rw-text-3)">
     <span>{% trans "دروستکراوە لە" %} <span style="color:var(--rw-pink);font-weight:700">{% trans "ڕوانگە" %}</span> — {% trans "پلاتفۆرمی پێشبەرهەمهێنانی سینەمای کوردی" %}</span>

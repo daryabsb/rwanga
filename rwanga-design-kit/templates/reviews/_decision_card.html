@@ -1,12 +1,12 @@
-{# ════════════════════════════════════════════════════════
-   RWANGA — reviews/_decision_card.html
-   Single ReviewDecision card. HTMX-swappable via id="decision-{{ decision.pk }}"
+{% comment %}
+RWANGA — reviews/_decision_card.html
+Single ReviewDecision card. HTMX-swappable via id="decision-{{ decision.pk }}"
 
-   Context:
-     decision   — ReviewDecision instance
-     can_review — bool (can lock/reject)
-     can_manage — bool (can re-open)
-   ════════════════════════════════════════════════════════ #}
+Context:
+  decision   — ReviewDecision instance
+  can_review — bool (can lock/reject)
+  can_manage — bool (can re-open)
+{% endcomment %}
 {% load i18n %}
 
 <div id="decision-{{ decision.pk }}"
@@ -57,7 +57,7 @@
 
   </div>
 
-  {# ── Action bar ── only shown to reviewers on proposed decisions #}
+  {# Action bar ── only shown to reviewers on proposed decisions #}
   {% if can_review and decision.status == 'proposed' %}
   <div style="padding:var(--rw-pad-xs) var(--rw-pad-md);border-top:1px solid var(--rw-border-2);background:var(--rw-surface-2);display:flex;gap:8px;align-items:center">
     <form method="post" action="{% url 'reviews:decision_action' decision.pk 'lock' %}"

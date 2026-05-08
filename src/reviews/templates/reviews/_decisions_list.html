@@ -1,8 +1,105 @@
+{% comment %}
+RWANGA — reviews/_decisions_list.html
+Decisions tab partial. Loaded via HTMX into #rv-tab-content in detail.html.
+
+Context:
+  review     — BibleReview instance
+  decisions  — QuerySet[ReviewDecision]
+  can_review — bool
+  can_manage — bool
+{% endcomment %}
 {% load i18n %}
+
 {% if decisions %}
+<div style="display:flex;flex-direction:column;gap:0;border-bottom:1px solid var(--rw-border)">
   {% for decision in decisions %}
-    {% include "reviews/_decision_card.html" with decision=decision can_review=can_review can_manage=can_manage %}
+  {% url 'reviews:decision_action' decision.pk 'lock' as lock_url %}
+  {% url 'reviews:decision_action' decision.pk 'reject' as reject_url %}
+  {% url 'reviews:decision_action' decision.pk 'repropose' as repropose_url %}
+  <div id="decision-{{ decision.pk }}"
+       style="background:var(--rw-surface);border:1px solid var(--rw-border);border-bottom:none;border-inline-start:4px solid {% if decision.status == 'locked' %}#00A896{% elif decision.status == 'rejected' %}var(--rw-shoot){% else %}var(--rw-amber){% endif %}">
+
+    <div style="padding:var(--rw-pad-md)">
+
+      {# Header row #}
+      <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:10px">
+        <div style="flex:1;min-width:0">
+          <div style="font-size:15px;font-weight:700;color:var(--rw-text);margin-bottom:4px;line-height:1.4">{{ decision.topic }}</div>
+          {% if decision.scene %}
+          <div style="font-size:11px;color:var(--rw-text-3)">
+            <span style="font-family:var(--rw-font-en);font-weight:700;color:var(--rw-amber)">{{ decision.scene.scene_number }}</span>
+            {{ decision.scene.int_ext }}. {{ decision.scene.location_name }} — {{ decision.scene.time_of_day }}
+          </div>
+          {% endif %}
+        </div>
+
+        {# Status badge #}
+        {% if decision.status == 'proposed' %}
+        <span style="display:inline-block;padding:3px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;background:var(--rw-amber-dim);color:var(--rw-amber);border:1px solid rgba(212,165,116,.3);flex-shrink:0">{% trans "پێشنیاز" %}</span>
+        {% elif decision.status == 'locked' %}
+        <span style="display:inline-block;padding:3px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;background:rgba(0,168,150,.1);color:#00A896;border:1px solid rgba(0,168,150,.3);flex-shrink:0">{% trans "جێگیرکراو" %}</span>
+        {% elif decision.status == 'rejected' %}
+        <span style="display:inline-block;padding:3px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;background:var(--rw-pink-dim);color:var(--rw-shoot);border:1px solid rgba(247,37,133,.25);flex-shrink:0">{% trans "ڕەتکراوە" %}</span>
+        {% endif %}
+      </div>
+
+      {# Decision text #}
+      <div style="font-size:14px;color:var(--rw-text-2);line-height:1.7;margin-bottom:12px;padding:12px 16px;background:var(--rw-surface-2);border-inline-start:3px solid var(--rw-border)">
+        {{ decision.decision_text }}
+      </div>
+
+      {# Metadata #}
+      <div style="display:flex;align-items:center;gap:16px;font-size:11px;color:var(--rw-text-3)">
+        <span>{% trans "پێشنیازکراوە لەلایەن" %} <strong style="color:var(--rw-text-2)">{{ decision.proposed_by.get_full_name }}</strong></span>
+        <span dir="ltr" style="font-family:var(--rw-font-en)">{{ decision.created_at|date:"Y-m-d" }}</span>
+        {% if decision.status == 'locked' and decision.locked_by %}
+        <span>·</span>
+        <span>{% trans "جێگیرکراوە لەلایەن" %} <strong style="color:#00A896">{{ decision.locked_by.get_full_name }}</strong></span>
+        {% elif decision.status == 'rejected' and decision.rejected_by %}
+        <span>·</span>
+        <span>{% trans "ڕەتکراوە لەلایەن" %} <strong style="color:var(--rw-shoot)">{{ decision.rejected_by.get_full_name }}</strong></span>
+        {% endif %}
+      </div>
+
+    </div>
+
+    {# Action bar for proposed decisions #}
+    {% if can_review and decision.status == 'proposed' %}
+    <div style="padding:var(--rw-pad-xs) var(--rw-pad-md);border-top:1px solid var(--rw-border-2);background:var(--rw-surface-2);display:flex;gap:8px;align-items:center">
+      <form method="post" action="{{ lock_url|default:'#' }}" hx-post="{{ lock_url|default:'#' }}" hx-target="#decision-{{ decision.pk }}" hx-swap="outerHTML">
+        {% csrf_token %}
+        <button type="submit" class="rw-btn" style="background:rgba(0,168,150,.12);color:#00A896;border:1px solid rgba(0,168,150,.3);padding:7px 16px;font-size:12px">
+          ✓ {% trans "جێگیرکردن" %}
+        </button>
+      </form>
+      <form method="post" action="{{ reject_url|default:'#' }}" hx-post="{{ reject_url|default:'#' }}" hx-target="#decision-{{ decision.pk }}" hx-swap="outerHTML">
+        {% csrf_token %}
+        <button type="submit" class="rw-btn" style="background:var(--rw-pink-dim);color:var(--rw-shoot);border:1px solid rgba(247,37,133,.25);padding:7px 16px;font-size:12px">
+          ✕ {% trans "ڕەتکردنەوە" %}
+        </button>
+      </form>
+    </div>
+    {% endif %}
+
+    {# Re-propose for rejected decisions #}
+    {% if can_manage and decision.status == 'rejected' %}
+    <div style="padding:var(--rw-pad-xs) var(--rw-pad-md);border-top:1px solid var(--rw-border-2);background:var(--rw-surface-2);display:flex;gap:8px;align-items:center">
+      <form method="post" action="{{ repropose_url|default:'#' }}" hx-post="{{ repropose_url|default:'#' }}" hx-target="#decision-{{ decision.pk }}" hx-swap="outerHTML">
+        {% csrf_token %}
+        <button type="submit" class="rw-btn rw-btn-ghost" style="padding:7px 16px;font-size:12px">
+          ↺ {% trans "دووبارە پێشنیازکردن" %}
+        </button>
+      </form>
+    </div>
+    {% endif %}
+
+  </div>
   {% endfor %}
+</div>
 {% else %}
-  <div style="padding:16px;color:var(--rw-text-3)">{% trans "No decisions yet." %}</div>
+<div style="padding:var(--rw-pad-lg);text-align:center;color:var(--rw-text-3)">
+  <div style="font-size:28px;margin-bottom:12px;opacity:.3">📋</div>
+  <div style="font-size:13px;font-weight:600;color:var(--rw-text-2)">{% trans "هێشتا بڕیارێک نییە" %}</div>
+  <div style="font-size:12px;margin-top:4px">{% trans "بڕیارەکان لەگەڵ پێداچوونەوەکەدا زیادبکە" %}</div>
+</div>
 {% endif %}

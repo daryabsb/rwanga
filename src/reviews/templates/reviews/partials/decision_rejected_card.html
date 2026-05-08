@@ -1,5 +1,24 @@
-<div class="rw-decision" style="background:#17171C;border:1px solid #2C2C38;margin-bottom:10px;padding:14px">
-  <div style="font-weight:700;color:#EDEAD8">{{ decision.topic }}</div>
-  <div style="color:#78788C">{{ decision.decision_text }}</div>
-  <span style="display:inline-block;margin-top:8px;padding:2px 8px;background:#F7F7FA;border:1px solid #DCDCE8;color:#A0A0B8">Rejected</span>
+{% comment %}
+RWANGA — reviews/partials/decision_rejected_card.html
+Compact rejected-decision card. Used in summary/reporting views.
+
+Context:
+  decision — ReviewDecision instance (status=rejected)
+{% endcomment %}
+{% load i18n %}
+
+<div style="background:var(--rw-surface);border:1px solid var(--rw-border);margin-bottom:6px;border-inline-start:4px solid var(--rw-shoot)">
+  <div style="display:flex;align-items:center;gap:10px;padding:12px var(--rw-pad-md)">
+    <span style="display:inline-block;padding:2px 8px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;background:var(--rw-pink-dim);color:var(--rw-shoot);border:1px solid rgba(247,37,133,.25);flex-shrink:0">{% trans "ڕەتکراوە" %}</span>
+    <div style="font-size:14px;font-weight:600;color:var(--rw-text);flex:1;min-width:0;opacity:.7">{{ decision.topic }}</div>
+    {% if decision.rejected_by %}
+    <span style="font-size:11px;color:var(--rw-text-3);flex-shrink:0">{{ decision.rejected_by.get_full_name }}</span>
+    {% endif %}
+  </div>
+  {% if decision.decision_text %}
+  <div style="padding:0 var(--rw-pad-md) 12px;font-size:13px;color:var(--rw-text-3);line-height:1.7">{{ decision.decision_text }}</div>
+  {% endif %}
+  {% if decision.reject_comment %}
+  <div style="margin:0 var(--rw-pad-md) 12px;font-size:12px;color:var(--rw-text-3);font-style:italic;padding-inline-start:12px;border-inline-start:2px solid var(--rw-border)">{{ decision.reject_comment }}</div>
+  {% endif %}
 </div>

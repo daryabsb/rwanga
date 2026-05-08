@@ -1,5 +1,24 @@
-<div class="rw-decision" style="background:#17171C;border:1px solid #2C2C38;margin-bottom:10px;padding:14px">
-  <div style="font-weight:700;color:#EDEAD8">{{ decision.topic }}</div>
-  <div style="color:#78788C">{{ decision.decision_text }}</div>
-  <span style="display:inline-block;margin-top:8px;padding:2px 8px;background:rgba(212,165,116,.12);border:1px solid rgba(212,165,116,.3);color:#D4A574">Locked</span>
+{% comment %}
+RWANGA — reviews/partials/decision_locked_card.html
+Compact locked-decision card. Used in summary/reporting views.
+
+Context:
+  decision — ReviewDecision instance (status=locked)
+{% endcomment %}
+{% load i18n %}
+
+<div style="background:var(--rw-surface);border:1px solid var(--rw-border);margin-bottom:6px;border-inline-start:4px solid #00A896">
+  <div style="display:flex;align-items:center;gap:10px;padding:12px var(--rw-pad-md)">
+    <span style="display:inline-block;padding:2px 8px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;background:rgba(0,168,150,.1);color:#00A896;border:1px solid rgba(0,168,150,.3);flex-shrink:0">{% trans "جێگیر" %}</span>
+    <div style="font-size:14px;font-weight:600;color:var(--rw-text);flex:1;min-width:0">{{ decision.topic }}</div>
+    {% if decision.locked_by %}
+    <span style="font-size:11px;color:var(--rw-text-3);flex-shrink:0">{{ decision.locked_by.get_full_name }}</span>
+    {% endif %}
+  </div>
+  {% if decision.decision_text %}
+  <div style="padding:0 var(--rw-pad-md) 12px;font-size:13px;color:var(--rw-text-2);line-height:1.7">{{ decision.decision_text }}</div>
+  {% endif %}
+  {% if decision.lock_comment %}
+  <div style="margin:0 var(--rw-pad-md) 12px;font-size:12px;color:var(--rw-text-3);font-style:italic;padding-inline-start:12px;border-inline-start:2px solid var(--rw-border)">{{ decision.lock_comment }}</div>
+  {% endif %}
 </div>

@@ -1,19 +1,18 @@
 {% extends "base.html" %}
-{% comment %} ════════════════════════════════════════════════════════
-   RWANGA — reviews/detail.html
-   Full review detail: decisions, scene evals, comments, bible.
+{% comment %}
+RWANGA — reviews/detail.html
+Full review detail: decisions, scene evals, comments, bible.
 
-   Context:
-     review         — Review instance
-     project        — Project instance
-     active_tab     — 'decisions'|'evaluations'|'comments'|'bible'
-     decisions      — QuerySet[ReviewDecision]
-     evaluations    — QuerySet[SceneEvaluation]
-     comments       — QuerySet[InlineComment] (threaded)
-     can_manage     — bool (director / superuser)
-     can_review     — bool (reviewer role)
-   ════════════════════════════════════════════════════════ {% endcomment %}
- 
+Context:
+  review         — Review instance
+  project        — Project instance
+  active_tab     — 'decisions'|'evaluations'|'comments'|'bible'
+  decisions      — QuerySet[ReviewDecision]
+  evaluations    — QuerySet[SceneEvaluation]
+  comments       — QuerySet[InlineComment] (threaded)
+  can_manage     — bool (director / superuser)
+  can_review     — bool (reviewer role)
+{% endcomment %}
 {% load static i18n %}
 
 {% block title %}{{ review.title }} — {% trans "پێداچوونەوە" %}{% endblock %}
@@ -21,21 +20,21 @@
 {% block content %}
 <div id="rw-content" style="display:flex;flex-direction:column;flex:1;overflow:hidden">
 
-  {% comment %} ── Review topbar ── {% endcomment %}
+  {# Review topbar #}
   <div style="background:var(--rw-surface);border-bottom:1px solid var(--rw-border);padding:0 var(--rw-pad-lg);height:72px;display:flex;align-items:center;gap:16px;flex-shrink:0">
 
-    {% comment %} Back {% endcomment %}
+    {# Back #}
     <a href="{% url 'reviews:list' %}" class="rw-crumb-back" style="background:var(--rw-surface-2);color:var(--rw-text-2);border:1px solid var(--rw-border)">
       ‹ {% trans "پێداچوونەوەکان" %}
     </a>
 
-    {% comment %} Title + version {% endcomment %}
+    {# Title + version #}
     <div style="flex:1;min-width:0">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
         <span style="font-size:18px;font-weight:700;color:var(--rw-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ review.title }}</span>
         <span style="font-family:var(--rw-font-en);font-size:11px;font-weight:600;color:var(--rw-text-3);background:var(--rw-surface-2);border:1px solid var(--rw-border);padding:2px 8px;flex-shrink:0">v{{ review.version }}</span>
 
-        {% comment %} Status badge {% endcomment %}
+        {# Status badge #}
         {% if review.status == 'draft' %}
         <span style="display:inline-block;padding:3px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;background:var(--rw-surface-3);color:var(--rw-text-2);border:1px solid var(--rw-border);flex-shrink:0">{% trans "پێشنووس" %}</span>
         {% elif review.status == 'in_review' %}
@@ -51,7 +50,7 @@
       </div>
     </div>
 
-    {% comment %} Action buttons {% endcomment %}
+    {# Action buttons #}
     <div style="display:flex;gap:8px;flex-shrink:0">
       {% if can_manage %}
       <div class="dropdown">
@@ -90,7 +89,7 @@
     </div>
   </div>
 
-  {% comment %} ── Stats strip ── {% endcomment %}
+  {# Stats strip #}
   <div class="rw-stats" style="margin:0;border-radius:0;border-inline:none;border-top:none;flex-shrink:0">
     <div class="rw-stat">
       <div class="rw-stat-val">{{ decisions.count }}</div>
@@ -114,44 +113,42 @@
     </div>
   </div>
 
-  {% comment %} ── Tab bar ── {% endcomment %}
+  {# Tab bar #}
   <div class="rw-mod-tabs" style="flex-shrink:0" role="tablist">
-    <button type="button" class="rw-mod-tab {% if active_tab == 'decisions' %}active{% endif %}"
-            hx-get="{% url 'reviews:decisions_tab' review.pk %}"
+    <button class="rw-mod-tab {% if active_tab == 'decisions' %}active{% endif %}"
+            hx-get="{% url 'reviews:tab' review.pk 'decisions' %}"
             hx-target="#rv-tab-content"
-            hx-swap="innerHTML">
+            hx-push-url="true">
       {% trans "بڕیارەکان" %}
       {% if decisions.count %}<span style="font-family:var(--rw-font-en);font-size:10px;background:var(--rw-amber-dim);color:var(--rw-amber);padding:1px 6px;border:1px solid rgba(212,165,116,.3);margin-inline-start:6px">{{ decisions.count }}</span>{% endif %}
     </button>
-    <button type="button" class="rw-mod-tab {% if active_tab == 'evaluations' %}active{% endif %}"
-            hx-get="{% url 'reviews:evaluations_tab' review.pk %}"
+    <button class="rw-mod-tab {% if active_tab == 'evaluations' %}active{% endif %}"
+            hx-get="{% url 'reviews:tab' review.pk 'evaluations' %}"
             hx-target="#rv-tab-content"
-            hx-swap="innerHTML">
+            hx-push-url="true">
       {% trans "هەڵسەنگاندنی دیمەنەکان" %}
     </button>
-    <button type="button" class="rw-mod-tab {% if active_tab == 'comments' %}active{% endif %}"
-            hx-get="{% url 'reviews:comments_tab' review.pk %}"
+    <button class="rw-mod-tab {% if active_tab == 'comments' %}active{% endif %}"
+            hx-get="{% url 'reviews:tab' review.pk 'comments' %}"
             hx-target="#rv-tab-content"
-            hx-swap="innerHTML">
+            hx-push-url="true">
       {% trans "لێدوانەکان" %}
     </button>
-    <button type="button" class="rw-mod-tab {% if active_tab == 'bible' %}active{% endif %}"
-            hx-get="{% url 'reviews:bible_tab' review.pk %}"
+    <button class="rw-mod-tab {% if active_tab == 'bible' %}active{% endif %}"
+            hx-get="{% url 'reviews:tab' review.pk 'bible' %}"
             hx-target="#rv-tab-content"
-            hx-swap="innerHTML">
+            hx-push-url="true">
       {% trans "بایبڵ" %}
     </button>
   </div>
 
-  {% comment %} ── Tab content ── {% endcomment %}
+  {# Tab content #}
   <div class="rw-tab-content" id="rv-tab-content" style="flex:1;overflow-y:auto">
     {% include active_tab_template %}
   </div>
 
 </div>
 
-{% comment %} Modal container {% endcomment %}
+{# Modal container #}
 <div id="rw-modal-container"></div>
 {% endblock %}
-
-
