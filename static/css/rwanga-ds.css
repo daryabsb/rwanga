@@ -371,6 +371,18 @@ html, body {
 .rw-btn:hover  { opacity: 0.88; }
 .rw-btn:active { opacity: 0.75; }
 
+/* Size modifier — small (used in inline action rows, table rows, etc.) */
+.rw-btn-sm {
+  font-size: 11px;
+  padding: 4px 10px;
+}
+
+/* Size modifier — large (used on auth-page primary submit buttons, hero CTAs) */
+.rw-btn-lg {
+  font-size: 15px;
+  padding: 12px 28px;
+}
+
 .rw-btn-primary { background: var(--rw-pink);  color: #fff; }
 .rw-btn-amber   { background: var(--rw-amber); color: #fff; }
 .rw-btn-ghost   {
@@ -981,6 +993,23 @@ html, body {
 
 .rw-auth-title { font-size: 28px; font-weight: 700; color: var(--rw-text); }
 .rw-auth-sub   { font-size: 14px; color: var(--rw-text-2); line-height: 1.6; }
+.rw-auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--rw-text-3);
+}
+.rw-auth-divider::before,
+.rw-auth-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--rw-border);
+}
 
 /* ── 28. MISC UTILITIES ─────────────────────────────────── */
 /* Text colour helpers (brand palette) */

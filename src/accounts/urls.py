@@ -27,23 +27,43 @@ def logout_view(request):
 
 
 def profile(request):
-    return HttpResponse("profile")
+    return render(request, "accounts/profile.html", {})
 
 
 def settings(request):
-    return HttpResponse("settings")
+    return render(request, "accounts/settings.html", {})
 
 
 def team(request):
-    return HttpResponse("team")
+    return render(request, "accounts/team.html", {})
 
 
 def contacts(request, project_id):
-    return HttpResponse(f"contacts {project_id}")
+    return render(request, "accounts/contacts.html", {"project_id": project_id})
 
 
 def invite_row(request):
     return HttpResponse("<div></div>")
+
+
+def invite_modal(request):
+    return HttpResponse("")
+
+
+def edit_member_modal(request, pk):
+    return HttpResponse("")
+
+
+def resend_invite(request, pk):
+    return redirect("accounts:team")
+
+
+def cancel_invite(request, pk):
+    return redirect("accounts:team")
+
+
+def delete_account(request):
+    return HttpResponse("")
 
 
 urlpatterns = [
@@ -57,4 +77,9 @@ urlpatterns = [
     path("team/", team, name="team"),
     path("contacts/<uuid:project_id>/", contacts, name="contacts"),
     path("invite-row/", invite_row, name="invite_row"),
+    path("invite-modal/", invite_modal, name="invite_modal"),
+    path("member/<int:pk>/edit/", edit_member_modal, name="edit_member_modal"),
+    path("invite/<int:pk>/resend/", resend_invite, name="resend_invite"),
+    path("invite/<int:pk>/cancel/", cancel_invite, name="cancel_invite"),
+    path("delete/", delete_account, name="delete_account"),
 ]

@@ -1,4 +1,22 @@
-<div style="display:grid;grid-template-columns:2fr 1fr;gap:10px;margin-bottom:10px">
-  <input class="rw-form-input" type="email" name="email" placeholder="member@studio.com">
-  <input class="rw-form-input" type="text" name="role" placeholder="Role">
+{% load i18n %}
+{# Single pending invitation row — HTMX partial for accounts:invite_row #}
+{# Context: invite — ProjectMembership instance (accepted_at=None) #}
+<div class="d-flex align-items-center gap-3 px-3 py-3"
+     style="border-bottom:1px solid var(--rw-border-2)">
+  <div class="flex-grow-1">
+    <div class="fw-semibold" style="font-size:13px;color:var(--rw-text)">{{ invite.user.email }}</div>
+    <div class="mt-1" style="font-size:11px;color:var(--rw-text-3)">
+      {{ invite.project.title }} — {{ invite.get_role_type_display }}
+      · {% trans "نێردراوە" %} {{ invite.invited_at|timesince }} {% trans "پێش" %}
+    </div>
+  </div>
+  <form method="post" action="{% url 'accounts:resend_invite' invite.pk %}">
+    {% csrf_token %}
+    <button type="submit" class="rw-btn rw-btn-ghost rw-btn-sm">{% trans "دووبارە نێردن" %}</button>
+  </form>
+  <form method="post" action="{% url 'accounts:cancel_invite' invite.pk %}">
+    {% csrf_token %}
+    <button type="submit" class="rw-btn rw-btn-sm"
+            style="background:var(--rw-pink-dim);color:var(--rw-shoot);border:1px solid rgba(247,37,133,.2)">{% trans "هەڵوەشاندنەوە" %}</button>
+  </form>
 </div>

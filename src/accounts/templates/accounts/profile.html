@@ -1,5 +1,6 @@
 {% extends "base.html" %}
-{% comment %} ════════════════════════════════════════════════════════
+{% load static i18n %}
+{% comment %}
    RWANGA — accounts/profile.html
    User profile — info, studio, memberships.
 
@@ -7,89 +8,95 @@
      user         — User instance
      studio       — Studio instance
      memberships  — QuerySet[ProjectMembership] user's active memberships
-   ════════════════════════════════════════════════════════ {% endcomment %}
-{% load static i18n %}
+{% endcomment %}
 
 {% block title %}{% trans "پرۆفایل" %}{% endblock %}
 
 {% block content %}
-<div id="rw-content" style="overflow-y:auto;flex:1;padding:var(--rw-pad-lg)">
+<div class="p-4 p-lg-5" style="max-width:800px;margin:0 auto">
 
-  {% comment %} ── User info card ── {% endcomment %}
-  <div class="rw-section-hdr">{% trans "زانیاری هەژمار" %}</div>
-  <div class="rw-card" style="display:flex;align-items:center;gap:var(--rw-pad-md)">
-    <div class="rw-avatar" style="width:72px;height:72px;font-size:26px;flex-shrink:0">
+  {# User info card #}
+  <div class="rw-section-hdr mb-3">{% trans "زانیاری هەژمار" %}</div>
+  <div class="rw-card d-flex align-items-center gap-3 mb-4">
+    <div class="rw-avatar flex-shrink-0" style="width:72px;height:72px;font-size:26px">
       {{ user.first_name|first|upper }}{{ user.last_name|first|upper }}
     </div>
-    <div style="flex:1">
-      <div style="font-size:20px;font-weight:700;margin-bottom:4px">
+    <div class="flex-grow-1">
+      <div class="fw-bold mb-1" style="font-size:20px">
         {{ user.get_full_name|default:user.nickname|default:user.email }}
       </div>
       {% if user.nickname %}
-      <div style="font-size:13px;color:var(--rw-amber);margin-bottom:4px">@{{ user.nickname }}</div>
+      <div class="mb-1" style="font-size:13px;color:var(--rw-amber)">@{{ user.nickname }}</div>
       {% endif %}
       <div style="font-size:13px;color:var(--rw-text-2)">{{ user.email }}</div>
     </div>
     <a href="{% url 'accounts:settings' %}" class="rw-btn rw-btn-ghost">
-      ⚙ {% trans "دەستکاریکردن" %}
+      <svg width="16" height="16" viewBox="0 0 24 24" class="ico"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.5"/><line x1="12" y1="3" x2="12" y2="8.5"/><line x1="12" y1="15.5" x2="12" y2="21"/><line x1="3" y1="12" x2="8.5" y2="12"/><line x1="15.5" y1="12" x2="21" y2="12"/><line x1="5.6" y1="5.6" x2="9.4" y2="9.4"/><line x1="14.6" y1="14.6" x2="18.4" y2="18.4"/><line x1="18.4" y1="5.6" x2="14.6" y2="9.4"/><line x1="9.4" y1="14.6" x2="5.6" y2="18.4"/></svg>
+      {% trans "دەستکاریکردن" %}
     </a>
   </div>
 
-  {% comment %} ── Studio info card ── {% endcomment %}
+  {# Studio info card #}
   {% if studio %}
-  <div class="rw-section-hdr">{% trans "ستودیۆ" %}</div>
-  <div class="rw-card">
-    <div class="rw-grid-2">
-      <div>
-        <div class="rw-field-label">{% trans "ناوی ستودیۆ" %}</div>
-        <div class="rw-field-val" style="margin-bottom:var(--rw-pad-sm)">{{ studio.name }}</div>
+  <div class="rw-section-hdr mb-3">{% trans "ستودیۆ" %}</div>
+  <div class="rw-card mb-4">
+    <div class="row g-3">
+      <div class="col-md-6">
+        <div class="rw-overline mb-1">{% trans "ناوی ستودیۆ" %}</div>
+        <div class="mb-3" style="font-size:14px;color:var(--rw-text)">{{ studio.name }}</div>
 
-        <div class="rw-field-label">{% trans "ناونیشانی ستودیۆ" %}</div>
-        <div class="rw-field-val" style="margin-bottom:var(--rw-pad-sm);font-family:var(--rw-font-en)">{{ studio.slug }}</div>
+        <div class="rw-overline mb-1">{% trans "ناونیشانی ستودیۆ" %}</div>
+        <div class="rw-font-en" style="font-size:14px;color:var(--rw-text)">{{ studio.slug }}</div>
       </div>
-      <div>
-        <div class="rw-field-label">{% trans "زمان" %}</div>
-        <div class="rw-field-val" style="margin-bottom:var(--rw-pad-sm)">{{ studio.get_language_display|default:studio.language }}</div>
+      <div class="col-md-6">
+        <div class="rw-overline mb-1">{% trans "زمان" %}</div>
+        <div class="mb-3" style="font-size:14px;color:var(--rw-text)">{{ studio.get_language_display|default:studio.language }}</div>
 
-        <div class="rw-field-label">{% trans "کاتژمێری ناوچە" %}</div>
-        <div class="rw-field-val" style="font-family:var(--rw-font-en)">{{ studio.timezone }}</div>
+        <div class="rw-overline mb-1">{% trans "کاتژمێری ناوچە" %}</div>
+        <div class="rw-font-en" style="font-size:14px;color:var(--rw-text)">{{ studio.timezone }}</div>
       </div>
     </div>
   </div>
   {% endif %}
 
-  {% comment %} ── Project memberships ── {% endcomment %}
-  <div class="rw-section-hdr">{% trans "ئەندامێتی پڕۆژەکان" %}</div>
+  {# Project memberships #}
+  <div class="rw-section-hdr mb-3">{% trans "ئەندامێتی پڕۆژەکان" %}</div>
   {% if memberships %}
-  <div style="background:var(--rw-surface);border:1px solid var(--rw-border)">
-    <table style="width:100%;border-collapse:collapse">
+  <div style="overflow-x:auto">
+    <table class="rw-tbl">
       <thead>
         <tr>
-          <th style="padding:12px 16px;text-align:start;font-size:10px;font-weight:700;color:var(--rw-text-3);text-transform:uppercase;letter-spacing:.9px;background:var(--rw-surface-2);border-bottom:1px solid var(--rw-border)">{% trans "پڕۆژە" %}</th>
-          <th style="padding:12px 16px;text-align:start;font-size:10px;font-weight:700;color:var(--rw-text-3);text-transform:uppercase;letter-spacing:.9px;background:var(--rw-surface-2);border-bottom:1px solid var(--rw-border)">{% trans "ڕۆڵ" %}</th>
-          <th style="padding:12px 16px;text-align:start;font-size:10px;font-weight:700;color:var(--rw-text-3);text-transform:uppercase;letter-spacing:.9px;background:var(--rw-surface-2);border-bottom:1px solid var(--rw-border)">{% trans "بەخشراوە" %}</th>
-          <th style="padding:12px 16px;text-align:start;font-size:10px;font-weight:700;color:var(--rw-text-3);text-transform:uppercase;letter-spacing:.9px;background:var(--rw-surface-2);border-bottom:1px solid var(--rw-border)">{% trans "بارودۆخ" %}</th>
+          <th class="px-3 py-2">{% trans "پڕۆژە" %}</th>
+          <th class="px-3 py-2">{% trans "ڕۆڵ" %}</th>
+          <th class="px-3 py-2">{% trans "بەخشراوە" %}</th>
+          <th class="px-3 py-2">{% trans "بارودۆخ" %}</th>
         </tr>
       </thead>
       <tbody>
         {% for m in memberships %}
-        <tr style="border-bottom:1px solid var(--rw-border-2)">
-          <td style="padding:14px 16px">
-            <a href="{% url 'projects:dashboard' m.project.pk %}" style="font-size:13px;font-weight:600;color:var(--rw-amber)">{{ m.project.title }}</a>
+        <tr class="rw-tbl-row">
+          <td class="px-3 py-2">
+            <a href="{% url 'projects:dashboard' m.project.pk %}" class="fw-semibold text-rw-amber" style="font-size:13px">{{ m.project.title }}</a>
           </td>
-          <td style="padding:14px 16px;font-size:13px;color:var(--rw-text-2)">
+          <td class="px-3 py-2" style="font-size:13px;color:var(--rw-text-2)">
             {{ m.get_role_type_display }}
             {% if m.department_role %} — {{ m.department_role }}{% endif %}
           </td>
-          <td style="padding:14px 16px;font-size:12px;color:var(--rw-text-3);font-family:var(--rw-font-en)">
-            {{ m.accepted_at|date:"Y-m-d"|default:"—" }}
+          <td class="px-3 py-2">
+            <bdi dir="ltr" class="rw-font-en" style="font-size:12px;color:var(--rw-text-3)">{{ m.accepted_at|date:"Y-m-d"|default:"—" }}</bdi>
           </td>
-          <td style="padding:14px 16px">
+          <td class="px-3 py-2">
             {% if m.is_active %}
-            <span class="rw-badge" style="background:rgba(0,168,150,.12);color:var(--rw-vis);border:1px solid rgba(0,168,150,.25)">{% trans "چالاک" %}</span>
+            <span class="rw-badge rw-badge-ok">{% trans "چالاک" %}</span>
             {% else %}
-            <span class="rw-badge rw-badge-v">{% trans "ناچالاک" %}</span>
+            <span class="rw-badge rw-badge-mute">{% trans "ناچالاک" %}</span>
             {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="4" class="p-0">
+            {% include "components/_empty_state.html" with title=_("هێشتا ئەندامی پڕۆژەیەک نیت") sub=_("کاتێک بانگهێشتت کرا، لێرە دەردەکەوێت") %}
           </td>
         </tr>
         {% endfor %}
@@ -97,7 +104,7 @@
     </table>
   </div>
   {% else %}
-  {% include "components/_empty_state.html" with icon="◎" title=_("هێشتا ئەندامی پڕۆژەیەک نیت") sub=_("کاتێک بانگهێشتت کرا، لێرە دەردەکەوێت") %}
+  {% include "components/_empty_state.html" with title=_("هێشتا ئەندامی پڕۆژەیەک نیت") sub=_("کاتێک بانگهێشتت کرا، لێرە دەردەکەوێت") %}
   {% endif %}
 
 </div>

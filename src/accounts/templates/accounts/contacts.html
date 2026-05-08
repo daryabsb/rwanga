@@ -1,61 +1,63 @@
 {% extends "base.html" %}
-{% comment %} ════════════════════════════════════════════════════════
+{% load static i18n %}
+{% comment %}
    RWANGA — accounts/contacts.html
    Project-scoped crew contact directory.
 
    Context:
      project   — Project instance
      members   — QuerySet[ProjectMembership] for this project
-   ════════════════════════════════════════════════════════ {% endcomment %}
-{% load static i18n %}
+{% endcomment %}
 
 {% block title %}{% trans "پەیوەندییەکان" %} — {{ project.title }}{% endblock %}
 
 {% block content %}
-<div id="rw-content" style="overflow-y:auto;flex:1">
 
   {% include "components/_breadcrumb.html" with project=project current=_("پەیوەندییەکان") %}
 
-  <div style="padding:var(--rw-pad-lg)">
-
-    {% comment %} ── Header ── {% endcomment %}
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--rw-pad-lg)">
-      <div>
-        <h1 style="font-size:20px;font-weight:700;margin-bottom:4px">{% trans "تیمی پڕۆژە" %}</h1>
-        <p style="font-size:13px;color:var(--rw-text-2)">{{ members.count }} {% trans "ئەندام" %}</p>
-      </div>
-      <button class="rw-btn rw-btn-primary"
-              hx-get="{% url 'accounts:invite_modal' %}?project={{ project.pk }}"
-              hx-target="#rw-modal-container" hx-swap="innerHTML">
-        + {% trans "زیادکردنی ئەندام" %}
-      </button>
+  {# Header #}
+  <div class="d-flex align-items-center justify-content-between px-4 py-3 bg-rw-surface"
+       style="border-bottom:1px solid var(--rw-border)">
+    <div>
+      <h1 class="fs-4 fw-bold mb-1">{% trans "تیمی پڕۆژە" %}</h1>
+      <p class="mb-0" style="font-size:12px;color:var(--rw-text-2)">
+        <bdi dir="ltr" class="rw-font-en">{{ members.count }}</bdi> {% trans "ئەندام" %}
+      </p>
     </div>
+    <button class="rw-btn rw-btn-primary"
+            hx-get="{% url 'accounts:invite_modal' %}?project={{ project.pk }}"
+            hx-target="#rw-modal-container" hx-swap="innerHTML">
+      + {% trans "زیادکردنی ئەندام" %}
+    </button>
+  </div>
 
-    {% comment %} ── Group by department ── {% endcomment %}
+  {# Group by department #}
+  <div class="p-4">
     {% regroup members by department_role as dept_groups %}
     {% for group in dept_groups %}
-    <div class="rw-section-hdr">{{ group.grouper|default:_("بێ بەش") }}</div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1px;background:var(--rw-border);border:1px solid var(--rw-border);margin-bottom:var(--rw-pad-md)">
+    <div class="rw-section-hdr mb-3">{{ group.grouper|default:_("بێ بەش") }}</div>
+    <div class="mb-4"
+         style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1px;background:var(--rw-border);border:1px solid var(--rw-border)">
       {% for m in group.list %}
-      <div style="background:var(--rw-surface);padding:var(--rw-pad-md)">
-        <div style="display:flex;align-items:center;gap:14px;margin-bottom:12px">
-          <div class="rw-avatar" style="width:44px;height:44px;font-size:16px;flex-shrink:0">
+      <div style="background:var(--rw-surface)" class="p-3">
+        <div class="d-flex align-items-center gap-3 mb-3">
+          <div class="rw-avatar flex-shrink-0" style="width:44px;height:44px;font-size:16px">
             {{ m.user.first_name|first|upper }}{{ m.user.last_name|first|upper }}
           </div>
           <div>
-            <div style="font-size:14px;font-weight:700;color:var(--rw-text)">{{ m.user.get_full_name|default:m.user.nickname }}</div>
-            <div style="font-size:11px;color:var(--rw-amber);margin-top:2px">{{ m.get_role_type_display }}</div>
+            <div class="fw-bold" style="font-size:14px;color:var(--rw-text)">{{ m.user.get_full_name|default:m.user.nickname }}</div>
+            <div class="mt-1" style="font-size:11px;color:var(--rw-amber)">{{ m.get_role_type_display }}</div>
           </div>
         </div>
-        <div style="display:flex;flex-direction:column;gap:6px">
-          <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--rw-text-2)">
-            <span style="color:var(--rw-text-3);font-size:14px">✉</span>
-            <a href="mailto:{{ m.user.email }}" style="color:var(--rw-text-2);font-family:var(--rw-font-en)">{{ m.user.email }}</a>
+        <div class="d-flex flex-column gap-2">
+          <div class="d-flex align-items-center gap-2" style="font-size:12px;color:var(--rw-text-2)">
+            <svg width="14" height="14" viewBox="0 0 24 24" class="ico flex-shrink-0" style="color:var(--rw-text-3)"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            <a href="mailto:{{ m.user.email }}" class="rw-font-en" style="color:var(--rw-text-2)">{{ m.user.email }}</a>
           </div>
           {% if m.user.phone %}
-          <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--rw-text-2)">
-            <span style="color:var(--rw-text-3);font-size:14px">☎</span>
-            <a href="tel:{{ m.user.phone }}" style="color:var(--rw-text-2);font-family:var(--rw-font-en)">{{ m.user.phone }}</a>
+          <div class="d-flex align-items-center gap-2" style="font-size:12px;color:var(--rw-text-2)">
+            <svg width="14" height="14" viewBox="0 0 24 24" class="ico flex-shrink-0" style="color:var(--rw-text-3)"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.62 3.38 2 2 0 0 1 3.62 1h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 8.64a16 16 0 0 0 7.07 7.07l.97-1.97a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            <a href="tel:{{ m.user.phone }}" class="rw-font-en" style="color:var(--rw-text-2)">{{ m.user.phone }}</a>
           </div>
           {% endif %}
         </div>
@@ -63,11 +65,8 @@
       {% endfor %}
     </div>
     {% empty %}
-    {% include "components/_empty_state.html" with icon="◎" title=_("هێشتا ئەندامێک نییە") sub=_("یەکێکی بانگهێشت بکە بۆ پێدانی دەستڕاگەیشتن") cta_text=_("بانگهێشتکردن") %}
+    {% include "components/_empty_state.html" with title=_("هێشتا ئەندامێک نییە") sub=_("یەکێکی بانگهێشت بکە بۆ پێدانی دەستڕاگەیشتن") cta_text=_("بانگهێشتکردن") %}
     {% endfor %}
-
   </div>
-</div>
 
-<div id="rw-modal-container"></div>
 {% endblock %}

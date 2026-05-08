@@ -1,4 +1,6 @@
-{# ════════════════════════════════════════════════════════
+{% extends "base.html" %}
+{% load static i18n %}
+{% comment %}
    RWANGA — accounts/team.html
    Studio team management. All crew + reviewers across projects.
 
@@ -6,20 +8,18 @@
      studio       — Studio instance
      members      — QuerySet[ProjectMembership] grouped by project
      invitations  — QuerySet[ProjectMembership] pending (accepted_at=None)
-   ════════════════════════════════════════════════════════ #}
-{% extends "base.html" %}
-{% load static i18n %}
+{% endcomment %}
 
 {% block title %}{% trans "تیمی ستودیۆ" %}{% endblock %}
 
 {% block content %}
-<div id="rw-content" style="overflow-y:auto;flex:1;padding:var(--rw-pad-lg)">
 
-  {# ── Header ── #}
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--rw-pad-lg)">
+  {# Header #}
+  <div class="d-flex align-items-center justify-content-between px-4 py-3 bg-rw-surface"
+       style="border-bottom:1px solid var(--rw-border)">
     <div>
-      <h1 style="font-size:22px;font-weight:700;margin-bottom:4px">{% trans "تیمی ستودیۆ" %}</h1>
-      <p style="font-size:13px;color:var(--rw-text-2)">{{ studio.name }}</p>
+      <h1 class="fs-4 fw-bold mb-1">{% trans "تیمی ستودیۆ" %}</h1>
+      <p class="mb-0" style="font-size:12px;color:var(--rw-text-2)">{{ studio.name }}</p>
     </div>
     <button class="rw-btn rw-btn-primary"
             hx-get="{% url 'accounts:invite_modal' %}"
@@ -29,106 +29,108 @@
     </button>
   </div>
 
-  {# ── Filter bar ── #}
-  <div class="rw-filter-row" style="margin-bottom:var(--rw-pad-md)">
-    <button class="rw-f-btn active"
-            hx-get="{% url 'accounts:team' %}?filter=all"
-            hx-target="#rw-team-table" hx-swap="innerHTML">{% trans "هەموو" %}</button>
-    <button class="rw-f-btn"
-            hx-get="{% url 'accounts:team' %}?filter=crew"
-            hx-target="#rw-team-table" hx-swap="innerHTML">{% trans "تیمی کار" %}</button>
-    <button class="rw-f-btn"
-            hx-get="{% url 'accounts:team' %}?filter=reviewer"
-            hx-target="#rw-team-table" hx-swap="innerHTML">{% trans "پێداچوونەوەکار" %}</button>
+  {# Filter strip #}
+  <div class="d-flex align-items-center px-4 py-2"
+       style="background:var(--rw-surface-2);border-bottom:1px solid var(--rw-border)">
+    <div class="rw-filter-row">
+      <button class="rw-f-btn active"
+              hx-get="{% url 'accounts:team' %}?filter=all"
+              hx-target="#rw-team-table" hx-swap="innerHTML">{% trans "هەموو" %}</button>
+      <button class="rw-f-btn"
+              hx-get="{% url 'accounts:team' %}?filter=crew"
+              hx-target="#rw-team-table" hx-swap="innerHTML">{% trans "تیمی کار" %}</button>
+      <button class="rw-f-btn"
+              hx-get="{% url 'accounts:team' %}?filter=reviewer"
+              hx-target="#rw-team-table" hx-swap="innerHTML">{% trans "پێداچوونەوەکار" %}</button>
+    </div>
   </div>
 
-  {# ── Members table ── #}
-  <div id="rw-team-table">
-    <div style="background:var(--rw-surface);border:1px solid var(--rw-border)">
-      <table style="width:100%;border-collapse:collapse">
-        <thead>
-          <tr>
-            <th style="padding:12px 16px;text-align:start;font-size:10px;font-weight:700;color:var(--rw-text-3);text-transform:uppercase;letter-spacing:.9px;background:var(--rw-surface-2);border-bottom:1px solid var(--rw-border)">{% trans "ئەندام" %}</th>
-            <th style="padding:12px 16px;text-align:start;font-size:10px;font-weight:700;color:var(--rw-text-3);text-transform:uppercase;letter-spacing:.9px;background:var(--rw-surface-2);border-bottom:1px solid var(--rw-border)">{% trans "جۆری ڕۆڵ" %}</th>
-            <th style="padding:12px 16px;text-align:start;font-size:10px;font-weight:700;color:var(--rw-text-3);text-transform:uppercase;letter-spacing:.9px;background:var(--rw-surface-2);border-bottom:1px solid var(--rw-border)">{% trans "بەش" %}</th>
-            <th style="padding:12px 16px;text-align:start;font-size:10px;font-weight:700;color:var(--rw-text-3);text-transform:uppercase;letter-spacing:.9px;background:var(--rw-surface-2);border-bottom:1px solid var(--rw-border)">{% trans "پڕۆژە" %}</th>
-            <th style="padding:12px 16px;text-align:start;font-size:10px;font-weight:700;color:var(--rw-text-3);text-transform:uppercase;letter-spacing:.9px;background:var(--rw-surface-2);border-bottom:1px solid var(--rw-border)">{% trans "بارودۆخ" %}</th>
-            <th style="padding:12px 16px;background:var(--rw-surface-2);border-bottom:1px solid var(--rw-border)"></th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for m in members %}
-          <tr style="border-bottom:1px solid var(--rw-border-2);transition:background var(--rw-t)">
-            <td style="padding:14px 16px">
-              <div style="display:flex;align-items:center;gap:12px">
-                <div class="rw-avatar" style="width:32px;height:32px;font-size:12px;flex-shrink:0">
-                  {{ m.user.first_name|first|upper }}{{ m.user.last_name|first|upper }}
-                </div>
-                <div>
-                  <div style="font-size:13px;font-weight:600;color:var(--rw-text)">{{ m.user.get_full_name|default:m.user.nickname }}</div>
-                  <div style="font-size:11px;color:var(--rw-text-3)">{{ m.user.email }}</div>
-                </div>
+  {# Members table #}
+  <div id="rw-team-table" style="overflow-x:auto">
+    <table class="rw-tbl">
+      <thead>
+        <tr>
+          <th class="px-3 py-2">{% trans "ئەندام" %}</th>
+          <th class="px-3 py-2">{% trans "جۆری ڕۆڵ" %}</th>
+          <th class="px-3 py-2">{% trans "بەش" %}</th>
+          <th class="px-3 py-2">{% trans "پڕۆژە" %}</th>
+          <th class="px-3 py-2">{% trans "بارودۆخ" %}</th>
+          <th class="px-3 py-2"></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for m in members %}
+        <tr class="rw-tbl-row">
+          <td class="px-3 py-2">
+            <div class="d-flex align-items-center gap-3">
+              <div class="rw-avatar flex-shrink-0" style="width:32px;height:32px;font-size:12px">
+                {{ m.user.first_name|first|upper }}{{ m.user.last_name|first|upper }}
               </div>
-            </td>
-            <td style="padding:14px 16px;font-size:13px;color:var(--rw-text-2)">{{ m.get_role_type_display }}</td>
-            <td style="padding:14px 16px;font-size:13px;color:var(--rw-text-2)">{{ m.department_role|default:"—" }}</td>
-            <td style="padding:14px 16px">
-              <a href="{% url 'projects:dashboard' m.project.pk %}" style="font-size:13px;color:var(--rw-amber)">{{ m.project.title }}</a>
-            </td>
-            <td style="padding:14px 16px">
-              {% if not m.accepted_at %}
-              <span class="rw-badge" style="background:var(--rw-amber-dim);color:var(--rw-amber);border:1px solid rgba(212,165,116,.25)">{% trans "چاوەڕوانی" %}</span>
-              {% elif m.is_active %}
-              <span class="rw-badge" style="background:rgba(0,168,150,.12);color:var(--rw-vis);border:1px solid rgba(0,168,150,.25)">{% trans "چالاک" %}</span>
-              {% else %}
-              <span class="rw-badge rw-badge-v">{% trans "ناچالاک" %}</span>
-              {% endif %}
-            </td>
-            <td style="padding:14px 16px">
-              <button class="rw-btn rw-btn-ghost" style="padding:5px 12px;font-size:11px"
-                      hx-get="{% url 'accounts:edit_member_modal' m.pk %}"
-                      hx-target="#rw-modal-container" hx-swap="innerHTML">{% trans "دەستکاری" %}</button>
-            </td>
-          </tr>
-          {% empty %}
-          <tr>
-            <td colspan="6" style="padding:var(--rw-pad-xl);text-align:center;color:var(--rw-text-3);font-size:13px">
-              {% trans "هێشتا ئەندامێک نییە. یەکێک بانگهێشت بکە." %}
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
+              <div>
+                <div class="fw-semibold" style="font-size:13px;color:var(--rw-text)">{{ m.user.get_full_name|default:m.user.nickname }}</div>
+                <div style="font-size:11px;color:var(--rw-text-3)">{{ m.user.email }}</div>
+              </div>
+            </div>
+          </td>
+          <td class="px-3 py-2" style="font-size:13px;color:var(--rw-text-2)">{{ m.get_role_type_display }}</td>
+          <td class="px-3 py-2" style="font-size:13px;color:var(--rw-text-2)">{{ m.department_role|default:"—" }}</td>
+          <td class="px-3 py-2">
+            <a href="{% url 'projects:dashboard' m.project.pk %}" class="text-rw-amber" style="font-size:13px">{{ m.project.title }}</a>
+          </td>
+          <td class="px-3 py-2">
+            {% if not m.accepted_at %}
+            <span class="rw-badge rw-badge-warn">{% trans "چاوەڕوانی" %}</span>
+            {% elif m.is_active %}
+            <span class="rw-badge rw-badge-ok">{% trans "چالاک" %}</span>
+            {% else %}
+            <span class="rw-badge rw-badge-mute">{% trans "ناچالاک" %}</span>
+            {% endif %}
+          </td>
+          <td class="px-3 py-2">
+            <button class="rw-btn rw-btn-ghost rw-btn-sm"
+                    hx-get="{% url 'accounts:edit_member_modal' m.pk %}"
+                    hx-target="#rw-modal-container" hx-swap="innerHTML">{% trans "دەستکاری" %}</button>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="6" class="p-0">
+            {% include "components/_empty_state.html" with title=_("هێشتا ئەندامێک نییە. یەکێک بانگهێشت بکە.") %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
   </div>
 
-  {# ── Pending invitations ── #}
+  {# Pending invitations #}
   {% if invitations %}
-  <div class="rw-section-hdr" style="margin-top:var(--rw-pad-lg)">{% trans "بانگهێشتنامەی چاوەڕوان" %}</div>
-  <div style="background:var(--rw-surface);border:1px solid var(--rw-border)">
-    {% for inv in invitations %}
-    <div style="display:flex;align-items:center;gap:16px;padding:14px 16px;border-bottom:1px solid var(--rw-border-2)">
-      <div style="flex:1">
-        <div style="font-size:13px;font-weight:600;color:var(--rw-text)">{{ inv.user.email }}</div>
-        <div style="font-size:11px;color:var(--rw-text-3);margin-top:2px">
-          {{ inv.project.title }} — {{ inv.get_role_type_display }}
-          · {% trans "نێردراوە" %} {{ inv.invited_at|timesince }} {% trans "پێش" %}
+  <div class="px-4 pt-4">
+    <div class="rw-section-hdr mb-3">{% trans "بانگهێشتنامەی چاوەڕوان" %}</div>
+    <div style="background:var(--rw-surface);border:1px solid var(--rw-border)">
+      {% for inv in invitations %}
+      <div class="d-flex align-items-center gap-3 px-3 py-3"
+           style="border-bottom:1px solid var(--rw-border-2)">
+        <div class="flex-grow-1">
+          <div class="fw-semibold" style="font-size:13px;color:var(--rw-text)">{{ inv.user.email }}</div>
+          <div class="mt-1" style="font-size:11px;color:var(--rw-text-3)">
+            {{ inv.project.title }} — {{ inv.get_role_type_display }}
+            · {% trans "نێردراوە" %} {{ inv.invited_at|timesince }} {% trans "پێش" %}
+          </div>
         </div>
+        <form method="post" action="{% url 'accounts:resend_invite' inv.pk %}">
+          {% csrf_token %}
+          <button type="submit" class="rw-btn rw-btn-ghost rw-btn-sm">{% trans "دووبارە نێردن" %}</button>
+        </form>
+        <form method="post" action="{% url 'accounts:cancel_invite' inv.pk %}">
+          {% csrf_token %}
+          <button type="submit" class="rw-btn rw-btn-sm"
+                  style="background:var(--rw-pink-dim);color:var(--rw-shoot);border:1px solid rgba(247,37,133,.2)">{% trans "هەڵوەشاندنەوە" %}</button>
+        </form>
       </div>
-      <form method="post" action="{% url 'accounts:resend_invite' inv.pk %}">
-        {% csrf_token %}
-        <button type="submit" class="rw-btn rw-btn-ghost" style="padding:5px 12px;font-size:11px">{% trans "دووبارە نێردن" %}</button>
-      </form>
-      <form method="post" action="{% url 'accounts:cancel_invite' inv.pk %}">
-        {% csrf_token %}
-        <button type="submit" class="rw-btn" style="padding:5px 12px;font-size:11px;background:var(--rw-pink-dim);color:var(--rw-shoot);border:1px solid rgba(247,37,133,.2)">{% trans "هەڵوەشاندنەوە" %}</button>
-      </form>
+      {% endfor %}
     </div>
-    {% endfor %}
   </div>
   {% endif %}
 
-</div>
-
-<div id="rw-modal-container"></div>
 {% endblock %}
