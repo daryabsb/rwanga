@@ -13,82 +13,95 @@
 {% block title %}{% trans "ئایننامەکان" %} — {{ project.title }}{% endblock %}
 
 {% block content %}
-<div id="rw-content" style="overflow-y:auto;flex:1">
+<div class="flex-grow-1 overflow-auto">
 
-  {% include "components/_breadcrumb.html" with project=project current=_("ئایننامەکان") %}
+  {% include "components/_breadcrumb.html" with project=project current="ئایننامەکان" %}
 
-  <div style="padding:var(--rw-pad-lg)">
-
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--rw-pad-lg)">
-      <div>
-        <h1 style="font-size:20px;font-weight:700;margin-bottom:4px">{% trans "ئایننامەکان" %}</h1>
-        <p style="font-size:13px;color:var(--rw-text-2)">{% trans "ئایننامەی پێیەکی ڕۆژانەی وێنەگرتن" %}</p>
-      </div>
-      <button class="rw-btn rw-btn-primary"
-              hx-get="{% url 'scheduling:generate_call_sheet_modal' project.pk %}"
-              hx-target="#rw-modal-container" hx-swap="innerHTML">
-        + {% trans "دروستکردنی ئایننامە" %}
-      </button>
+  {# ── Page header ── #}
+  <div class="d-flex align-items-center justify-content-between px-4 py-3 bg-rw-surface"
+       style="border-bottom:1px solid var(--rw-border)">
+    <div>
+      <h1 class="fs-4 fw-bold mb-1">{% trans "ئایننامەکان" %}</h1>
+      <p class="mb-0" style="font-size:12px;color:var(--rw-text-2)">{% trans "ئایننامەی پێیەکی ڕۆژانەی وێنەگرتن" %}</p>
     </div>
+    <button class="rw-btn rw-btn-primary"
+            hx-get="{% url 'scheduling:generate_call_sheet_modal' project.pk %}"
+            hx-target="#rw-modal-container" hx-swap="innerHTML">
+      + {% trans "دروستکردنی ئایننامە" %}
+    </button>
+  </div>
 
+  {# ── Content ── #}
+  <div class="p-4">
     {% if call_sheets %}
-    <div style="background:var(--rw-surface);border:1px solid var(--rw-border)">
+    <div id="list-body" style="background:var(--rw-surface);border:1px solid var(--rw-border)">
       {% for cs in call_sheets %}
-      <div style="display:flex;align-items:center;gap:16px;padding:18px var(--rw-pad-md);border-bottom:1px solid var(--rw-border-2)">
+      <div class="d-flex align-items-center gap-3 px-4 py-3"
+           style="border-bottom:1px solid var(--rw-border)">
 
         {# Day indicator #}
-        <div style="width:56px;height:56px;flex-shrink:0;background:{% if cs.shoot_day.day_number <= 3 %}var(--rw-script){% else %}var(--rw-break){% endif %};display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px">
-          <div style="font-size:18px;font-weight:700;color:#fff;font-family:var(--rw-font-en)">{{ cs.shoot_day.day_number }}</div>
-          <div style="font-size:8px;font-weight:700;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:.5px">{% trans "ڕۆژ" %}</div>
+        <div class="d-flex flex-column align-items-center justify-content-center gap-1 flex-shrink-0"
+             style="width:56px;height:56px;background:{% if cs.shoot_day.day_number <= 3 %}var(--rw-script){% else %}var(--rw-break){% endif %}">
+          <div class="rw-font-en fw-bold" style="font-size:18px;color:#fff">{{ cs.shoot_day.day_number }}</div>
+          <div class="rw-overline" style="color:rgba(255,255,255,.7);font-size:8px">{% trans "ڕۆژ" %}</div>
         </div>
 
         {# Details #}
-        <div style="flex:1;min-width:0">
-          <div style="font-size:14px;font-weight:700;color:var(--rw-text);margin-bottom:4px">
+        <div class="flex-grow-1" style="min-width:0">
+          <div class="fw-bold mb-1" style="font-size:14px">
             {% trans "ئایننامەی ڕۆژی" %} {{ cs.shoot_day.day_number }}
             {% if cs.shoot_day.date %}
-            — <span style="font-family:var(--rw-font-en);font-weight:400" dir="ltr">{{ cs.shoot_day.date|date:"l، j F Y" }}</span>
+            — <bdi dir="ltr" class="rw-font-en" style="font-weight:400">{{ cs.shoot_day.date|date:"l، j F Y" }}</bdi>
             {% endif %}
           </div>
-          <div style="display:flex;gap:var(--rw-pad-md);font-size:12px;color:var(--rw-text-3);flex-wrap:wrap">
+          <div class="d-flex flex-wrap gap-3" style="font-size:12px;color:var(--rw-text-3)">
             {% if cs.general_call %}
-            <span>{% trans "کاتی گشتی:" %} <span dir="ltr" style="font-family:var(--rw-font-en)">{{ cs.general_call|time:"H:i" }}</span></span>
+            <span>{% trans "کاتی گشتی:" %} <bdi dir="ltr" class="rw-font-en">{{ cs.general_call|time:"H:i" }}</bdi></span>
             {% endif %}
             {% if cs.location %}
-            <span>📍 {{ cs.location.name }}</span>
+            <span>
+              <svg width="12" height="12" viewBox="0 0 24 24" class="ico" style="width:12px;height:12px">
+                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+                <circle cx="12" cy="9" r="2.5"/>
+              </svg>
+              {{ cs.location.name }}
+            </span>
             {% endif %}
           </div>
           {% if cs.sent_at %}
-          <div style="font-size:11px;color:var(--rw-vis);margin-top:4px">
+          <div class="mt-1" style="font-size:11px;color:var(--rw-vis)">
             ✓ {% trans "نێردراوە" %} {{ cs.sent_at|timesince }} {% trans "پێش" %}
           </div>
           {% else %}
-          <div style="font-size:11px;color:var(--rw-text-3);margin-top:4px">{% trans "هێشتا نەنێردراوە" %}</div>
+          <div class="mt-1" style="font-size:11px;color:var(--rw-text-3)">{% trans "هێشتا نەنێردراوە" %}</div>
           {% endif %}
         </div>
 
         {# Actions #}
-        <div style="display:flex;gap:8px;flex-shrink:0">
+        <div class="d-flex gap-2 flex-shrink-0">
           {% if cs.pdf %}
-          <a href="{{ cs.pdf.url }}" target="_blank" class="rw-btn rw-btn-ghost" style="padding:7px 14px;font-size:12px">
+          <a href="{{ cs.pdf.url }}" target="_blank" class="rw-btn rw-btn-ghost rw-btn-sm">
             ↗ {% trans "PDF" %}
           </a>
           {% else %}
-          <button class="rw-btn rw-btn-ghost" style="padding:7px 14px;font-size:12px"
+          <button class="rw-btn rw-btn-ghost rw-btn-sm"
                   hx-post="{% url 'scheduling:generate_pdf' project.pk cs.pk %}"
                   hx-swap="outerHTML" hx-target="closest div">
             {% trans "دروستکردنی PDF" %}
           </button>
           {% endif %}
 
-          <button class="rw-btn rw-btn-ghost rw-btn-ai" style="padding:7px 14px;font-size:12px"
+          <button class="rw-btn rw-btn-ghost rw-btn-sm"
                   hx-post="{% url 'scheduling:send_whatsapp' project.pk cs.pk %}"
                   hx-swap="none"
                   hx-confirm="{% trans 'بە WhatsApp بنێرە؟' %}">
-            📱 {% trans "WhatsApp" %}
+            <svg width="14" height="14" viewBox="0 0 24 24" class="ico" style="width:14px;height:14px">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+            {% trans "WhatsApp" %}
           </button>
 
-          <button class="rw-btn rw-btn-ghost" style="padding:7px 14px;font-size:12px"
+          <button class="rw-btn rw-btn-ghost rw-btn-sm"
                   hx-get="{% url 'scheduling:call_sheet_detail' project.pk cs.pk %}"
                   hx-target="#rw-modal-container" hx-swap="innerHTML">
             {% trans "بینین" %}
@@ -99,11 +112,9 @@
       {% endfor %}
     </div>
     {% else %}
-    {% include "components/_empty_state.html" with icon="📋" title=_("هێشتا ئایننامەیەک نییە") sub=_("خشتەی وێنەگرتن دروست بکە و ئایننامەی بۆ تیمت بنێرە") cta_text=_("دروستکردنی ئایننامە") %}
+    {% include "components/_empty_state.html" with icon_svg="<svg width='40' height='40' viewBox='0 0 24 24' class='ico'><rect x='5' y='2' width='14' height='20' rx='1'/><line x1='9' y1='7' x2='15' y2='7'/><line x1='9' y1='11' x2='15' y2='11'/><line x1='9' y1='15' x2='13' y2='15'/></svg>" title="هێشتا ئایننامەیەک نییە" sub="خشتەی وێنەگرتن دروست بکە و ئایننامەی بۆ تیمت بنێرە" %}
     {% endif %}
-
   </div>
-</div>
 
-<div id="rw-modal-container"></div>
+</div>
 {% endblock %}

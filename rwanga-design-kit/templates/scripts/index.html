@@ -1,6 +1,7 @@
 {# ════════════════════════════════════════════════════════
    RWANGA — scripts/index.html
    Script list for the project.
+   Pattern: LIST
 
    Context:
      project        — Project instance
@@ -13,80 +14,93 @@
 {% block title %}{% trans "دەستنووسەکان" %} — {{ project.title }}{% endblock %}
 
 {% block content %}
-<div id="rw-content" style="overflow-y:auto;flex:1">
 
-  {% include "components/_breadcrumb.html" with project=project current=_("دەستنووسەکان") %}
+  {% include "components/_breadcrumb.html" with project=project current="دەستنووسەکان" %}
 
-  <div style="padding:var(--rw-pad-lg)">
-
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--rw-pad-lg)">
-      <div>
-        <h1 style="font-size:20px;font-weight:700;margin-bottom:4px">{% trans "دەستنووسەکان" %}</h1>
-        <p style="font-size:13px;color:var(--rw-text-2)">{{ project.title }}</p>
-      </div>
-      <a href="{% url 'scripts:upload' project.pk %}" class="rw-btn rw-btn-primary">
-        + {% trans "بارکردنی دەستنووس" %}
-      </a>
+  {# Header #}
+  <div class="d-flex align-items-center justify-content-between px-4 py-3 bg-rw-surface"
+       style="border-bottom:1px solid var(--rw-border)">
+    <div>
+      <h1 class="fs-4 fw-bold mb-1">{% trans "دەستنووسەکان" %}</h1>
+      <p class="mb-0" style="font-size:12px;color:var(--rw-text-2)">{{ project.title }}</p>
     </div>
-
-    {% if scripts %}
-    <div style="background:var(--rw-surface);border:1px solid var(--rw-border)">
-      <table style="width:100%;border-collapse:collapse">
-        <thead>
-          <tr>
-            <th style="padding:12px 16px;text-align:start;font-size:10px;font-weight:700;color:var(--rw-text-3);text-transform:uppercase;letter-spacing:.9px;background:var(--rw-surface-2);border-bottom:1px solid var(--rw-border)">{% trans "ناو" %}</th>
-            <th style="padding:12px 16px;text-align:start;font-size:10px;font-weight:700;color:var(--rw-text-3);text-transform:uppercase;letter-spacing:.9px;background:var(--rw-surface-2);border-bottom:1px solid var(--rw-border)">{% trans "جۆر" %}</th>
-            <th style="padding:12px 16px;text-align:start;font-size:10px;font-weight:700;color:var(--rw-text-3);text-transform:uppercase;letter-spacing:.9px;background:var(--rw-surface-2);border-bottom:1px solid var(--rw-border)">{% trans "دیمەن" %}</th>
-            <th style="padding:12px 16px;text-align:start;font-size:10px;font-weight:700;color:var(--rw-text-3);text-transform:uppercase;letter-spacing:.9px;background:var(--rw-surface-2);border-bottom:1px solid var(--rw-border)">{% trans "بارودۆخ" %}</th>
-            <th style="padding:12px 16px;text-align:start;font-size:10px;font-weight:700;color:var(--rw-text-3);text-transform:uppercase;letter-spacing:.9px;background:var(--rw-surface-2);border-bottom:1px solid var(--rw-border)">{% trans "بارکراوە" %}</th>
-            <th style="padding:12px 16px;background:var(--rw-surface-2);border-bottom:1px solid var(--rw-border)"></th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for script in scripts %}
-          <tr style="border-bottom:1px solid var(--rw-border-2);cursor:pointer;transition:background var(--rw-t)"
-              onclick="location.href='{% url 'scripts:breakdown' project.pk %}'">
-            <td style="padding:14px 16px">
-              <div style="font-size:13px;font-weight:600;color:var(--rw-text)">{{ script.filename|default:script.title }}</div>
-              {% if script.description %}
-              <div style="font-size:11px;color:var(--rw-text-3);margin-top:2px">{{ script.description|truncatechars:60 }}</div>
-              {% endif %}
-            </td>
-            <td style="padding:14px 16px">
-              <span class="rw-badge rw-badge-v" style="font-family:var(--rw-font-en);font-size:10px">
-                {{ script.file_type|upper|default:"—" }}
-              </span>
-            </td>
-            <td style="padding:14px 16px;font-family:var(--rw-font-en);font-size:13px;color:var(--rw-text-2)">
-              {{ script.scene_count|default:"—" }}
-            </td>
-            <td style="padding:14px 16px">
-              {% if script.status == 'parsed' %}
-              <span class="rw-badge" style="background:rgba(0,168,150,.12);color:var(--rw-vis);border:1px solid rgba(0,168,150,.25)">{% trans "داڕشتراوە" %}</span>
-              {% elif script.status == 'parsing' %}
-              <span class="rw-badge" style="background:var(--rw-amber-dim);color:var(--rw-amber);border:1px solid rgba(212,165,116,.25)">{% trans "داڕشتن..." %}</span>
-              {% else %}
-              <span class="rw-badge rw-badge-v">{% trans "چاوەڕوانی" %}</span>
-              {% endif %}
-            </td>
-            <td style="padding:14px 16px;font-family:var(--rw-font-en);font-size:12px;color:var(--rw-text-3)">
-              {{ script.created_at|date:"Y-m-d" }}
-            </td>
-            <td style="padding:14px 16px;text-align:end">
-              <a href="{% url 'scripts:breakdown' project.pk %}"
-                 class="rw-btn rw-btn-ghost" style="padding:5px 12px;font-size:11px">
-                {% trans "داڕشتن" %} →
-              </a>
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-    {% else %}
-    {% include "components/_empty_state.html" with icon="📝" title=_("هێشتا دەستنووسێک بارنەکراوە") sub=_("دەستنووسەکەت بار بکە — AI بە خۆی دیمەن، کەسایەتی و شوێنەکان دەناسێتەوە") cta_text=_("بارکردنی دەستنووس") cta_url="scripts:upload" cta_project=project.pk %}
-    {% endif %}
-
+    <a href="{% url 'scripts:upload' project.pk %}" class="rw-btn rw-btn-primary">
+      + {% trans "بارکردنی دەستنووس" %}
+    </a>
   </div>
-</div>
+
+  {# Filter strip #}
+  <div class="d-flex align-items-center px-4 py-2"
+       style="background:var(--rw-surface-2);border-bottom:1px solid var(--rw-border)">
+    <div class="rw-filter-row">
+      <button class="rw-f-btn active"
+              hx-get="?filter=all" hx-target="#list-body" hx-swap="innerHTML">
+        {% trans "هەموو" %}
+      </button>
+    </div>
+    <span class="ms-auto" style="font-size:11px;color:var(--rw-text-3)">
+      {{ scripts|length }} {% trans "دەستنووس" %}
+    </span>
+  </div>
+
+  {# Table #}
+  <div id="list-body" style="overflow-x:auto">
+    <table class="rw-tbl">
+      <thead>
+        <tr>
+          <th class="px-3 py-2">{% trans "ناو" %}</th>
+          <th class="px-3 py-2">{% trans "جۆر" %}</th>
+          <th class="px-3 py-2">{% trans "دیمەن" %}</th>
+          <th class="px-3 py-2">{% trans "بارودۆخ" %}</th>
+          <th class="px-3 py-2">{% trans "بارکراوە" %}</th>
+          <th class="px-3 py-2"></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for script in scripts %}
+        <tr class="rw-tbl-row"
+            onclick="location.href='{% url 'scripts:breakdown' project.pk %}'">
+          <td class="px-3 py-2">
+            <div class="fw-semibold" style="font-size:13px">{{ script.filename|default:script.title }}</div>
+            {% if script.description %}
+            <div style="font-size:11px;color:var(--rw-text-3);margin-top:2px">{{ script.description|truncatechars:60 }}</div>
+            {% endif %}
+          </td>
+          <td class="px-3 py-2">
+            <span class="rw-badge rw-badge-v rw-font-en" style="font-size:10px">
+              {{ script.file_type|upper|default:"—" }}
+            </span>
+          </td>
+          <td class="px-3 py-2 rw-font-en" style="font-size:13px;color:var(--rw-text-2)">
+            {{ script.scene_count|default:"—" }}
+          </td>
+          <td class="px-3 py-2">
+            {% if script.status == 'parsed' %}
+            <span class="rw-badge rw-badge-ok">{% trans "داڕشتراوە" %}</span>
+            {% elif script.status == 'parsing' %}
+            <span class="rw-badge rw-badge-warn">{% trans "داڕشتن..." %}</span>
+            {% else %}
+            <span class="rw-badge rw-badge-mute">{% trans "چاوەڕوانی" %}</span>
+            {% endif %}
+          </td>
+          <td class="px-3 py-2" style="font-size:12px;color:var(--rw-text-3)">
+            <bdi dir="ltr" class="rw-font-en">{{ script.created_at|date:"Y-m-d" }}</bdi>
+          </td>
+          <td class="px-3 py-2" style="text-align:end">
+            <a href="{% url 'scripts:breakdown' project.pk %}" class="rw-btn rw-btn-ghost rw-btn-sm">
+              {% trans "داڕشتن" %} →
+            </a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="6" class="p-0">
+            {% include "components/_empty_state.html" with title="هێشتا دەستنووسێک بارنەکراوە" sub="دەستنووسەکەت بار بکە — AI بە خۆی دیمەن، کەسایەتی و شوێنەکان دەناسێتەوە" cta_text="بارکردنی دەستنووس" cta_url="scripts:upload" cta_project=project.pk %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
 {% endblock %}

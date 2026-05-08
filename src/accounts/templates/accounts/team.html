@@ -45,62 +45,9 @@
     </div>
   </div>
 
-  {# Members table #}
+  {# Members table — partial loaded inline; HTMX filter swaps innerHTML #}
   <div id="rw-team-table" style="overflow-x:auto">
-    <table class="rw-tbl">
-      <thead>
-        <tr>
-          <th class="px-3 py-2">{% trans "ئەندام" %}</th>
-          <th class="px-3 py-2">{% trans "جۆری ڕۆڵ" %}</th>
-          <th class="px-3 py-2">{% trans "بەش" %}</th>
-          <th class="px-3 py-2">{% trans "پڕۆژە" %}</th>
-          <th class="px-3 py-2">{% trans "بارودۆخ" %}</th>
-          <th class="px-3 py-2"></th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for m in members %}
-        <tr class="rw-tbl-row">
-          <td class="px-3 py-2">
-            <div class="d-flex align-items-center gap-3">
-              <div class="rw-avatar flex-shrink-0" style="width:32px;height:32px;font-size:12px">
-                {{ m.user.first_name|first|upper }}{{ m.user.last_name|first|upper }}
-              </div>
-              <div>
-                <div class="fw-semibold" style="font-size:13px;color:var(--rw-text)">{{ m.user.get_full_name|default:m.user.nickname }}</div>
-                <div style="font-size:11px;color:var(--rw-text-3)">{{ m.user.email }}</div>
-              </div>
-            </div>
-          </td>
-          <td class="px-3 py-2" style="font-size:13px;color:var(--rw-text-2)">{{ m.get_role_type_display }}</td>
-          <td class="px-3 py-2" style="font-size:13px;color:var(--rw-text-2)">{{ m.department_role|default:"—" }}</td>
-          <td class="px-3 py-2">
-            <a href="{% url 'projects:dashboard' m.project.pk %}" class="text-rw-amber" style="font-size:13px">{{ m.project.title }}</a>
-          </td>
-          <td class="px-3 py-2">
-            {% if not m.accepted_at %}
-            <span class="rw-badge rw-badge-warn">{% trans "چاوەڕوانی" %}</span>
-            {% elif m.is_active %}
-            <span class="rw-badge rw-badge-ok">{% trans "چالاک" %}</span>
-            {% else %}
-            <span class="rw-badge rw-badge-mute">{% trans "ناچالاک" %}</span>
-            {% endif %}
-          </td>
-          <td class="px-3 py-2">
-            <button class="rw-btn rw-btn-ghost rw-btn-sm"
-                    hx-get="{% url 'accounts:edit_member_modal' m.pk %}"
-                    hx-target="#rw-modal-container" hx-swap="innerHTML">{% trans "دەستکاری" %}</button>
-          </td>
-        </tr>
-        {% empty %}
-        <tr>
-          <td colspan="6" class="p-0">
-            {% include "components/_empty_state.html" with title=_("هێشتا ئەندامێک نییە. یەکێک بانگهێشت بکە.") %}
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+    {% include "accounts/_team_table.html" %}
   </div>
 
   {# Pending invitations #}

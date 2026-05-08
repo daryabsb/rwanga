@@ -14,129 +14,144 @@
 {% block title %}{% trans "پرۆگرەس" %}{% endblock %}
 
 {% block content %}
-<div id="rw-content" style="overflow-y:auto;flex:1;padding:var(--rw-pad-lg)">
 
   {# ── Header ── #}
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--rw-pad-lg)">
+  <div class="d-flex align-items-center justify-content-between px-4 py-3 bg-rw-surface"
+       style="border-bottom:1px solid var(--rw-border)">
     <div>
-      <h1 style="font-size:22px;font-weight:700;margin-bottom:4px">{% trans "پرۆگرەسی پڕۆژە" %}</h1>
-      <p style="font-size:13px;color:var(--rw-text-2)">
+      <h1 class="fs-4 fw-bold mb-1">{% trans "پرۆگرەسی پڕۆژە" %}</h1>
+      <p class="mb-0" style="font-size:13px;color:var(--rw-text-2)">
         {% trans "فازی ئێستا:" %}
-        <span style="color:var(--rw-amber);font-weight:700;font-family:var(--rw-font-en)">{{ current_phase }}</span>
+        <bdi dir="ltr" class="rw-font-en" style="color:var(--rw-amber);font-weight:700">{{ current_phase }}</bdi>
       </p>
     </div>
-    <div style="display:flex;gap:8px">
+    <div class="d-flex gap-2">
       <a href="{% url 'progress:tasks' %}" class="rw-btn rw-btn-ghost">{% trans "هەموو تاسکەکان" %}</a>
       <a href="{% url 'progress:gaps' %}" class="rw-btn rw-btn-ghost">{% trans "گاپ و بلۆکەرەکان" %}</a>
     </div>
   </div>
 
-  {# ── Task stats ── #}
-  <div class="rw-stats" style="margin-bottom:var(--rw-pad-lg)">
-    <div class="rw-stat">
-      <div class="rw-stat-val" style="color:var(--rw-text-2)">{{ tasks_summary.pending|default:"0" }}</div>
-      <div class="rw-stat-lbl">{% trans "چاوەڕوانی" %}</div>
-    </div>
-    <div class="rw-stat">
-      <div class="rw-stat-val" style="color:var(--rw-amber)">{{ tasks_summary.in_progress|default:"0" }}</div>
-      <div class="rw-stat-lbl">{% trans "لە کارەوە" %}</div>
-    </div>
-    <div class="rw-stat">
-      <div class="rw-stat-val" style="color:var(--rw-vis)">{{ tasks_summary.completed|default:"0" }}</div>
-      <div class="rw-stat-lbl">{% trans "تەواوبوو" %}</div>
-    </div>
-    <div class="rw-stat">
-      <div class="rw-stat-val" style="color:var(--rw-shoot)">{{ tasks_summary.blocked|default:"0" }}</div>
-      <div class="rw-stat-lbl">{% trans "بلۆک" %}</div>
-    </div>
-  </div>
+  <div class="px-4 py-4 d-flex flex-column gap-4">
 
-  {# ── Open gaps / blockers ── #}
-  {% if open_gaps %}
-  <div class="rw-section-hdr" style="color:var(--rw-shoot)">
-    {% trans "گاپ و بلۆکەرەکانی کراوە" %} ({{ open_gaps.count }})
-  </div>
-  {% for gap in open_gaps %}
-  {% if gap.severity == 'critical' %}
-  <div class="rw-warn" style="margin-bottom:8px">
-    <span class="rw-warn-icon">⚠</span>
-    <div style="flex:1">
-      <div style="font-size:13px;font-weight:700;color:var(--rw-shoot);margin-bottom:3px">{{ gap.title }}</div>
-      <div class="rw-warn-text" style="font-size:12px">{{ gap.description|truncatechars:120 }}</div>
-      <div style="font-size:10px;color:var(--rw-text-3);margin-top:4px;font-family:var(--rw-font-en)">
-        {{ gap.gap_type }} · {{ gap.phase }}
+    {# ── Task stats ── #}
+    <div class="rw-stats">
+      <div class="rw-stat">
+        <div class="rw-stat-val" style="color:var(--rw-text-2)">{{ tasks_summary.pending|default:"0" }}</div>
+        <div class="rw-stat-lbl mt-1">{% trans "چاوەڕوانی" %}</div>
+      </div>
+      <div class="rw-stat">
+        <div class="rw-stat-val" style="color:var(--rw-amber)">{{ tasks_summary.in_progress|default:"0" }}</div>
+        <div class="rw-stat-lbl mt-1">{% trans "لە کارەوە" %}</div>
+      </div>
+      <div class="rw-stat">
+        <div class="rw-stat-val" style="color:var(--rw-vis)">{{ tasks_summary.completed|default:"0" }}</div>
+        <div class="rw-stat-lbl mt-1">{% trans "تەواوبوو" %}</div>
+      </div>
+      <div class="rw-stat">
+        <div class="rw-stat-val" style="color:var(--rw-shoot)">{{ tasks_summary.blocked|default:"0" }}</div>
+        <div class="rw-stat-lbl mt-1">{% trans "بلۆک" %}</div>
       </div>
     </div>
-    <a href="{% url 'progress:gaps' %}" class="rw-btn rw-btn-ghost" style="padding:5px 12px;font-size:11px;flex-shrink:0">{% trans "بینین" %}</a>
-  </div>
-  {% else %}
-  <div class="rw-card" style="margin-bottom:8px;border-inline-start:3px solid var(--rw-amber)">
-    <div style="display:flex;align-items:flex-start;gap:12px">
-      <div style="flex:1">
-        <div style="font-size:13px;font-weight:600;color:var(--rw-text);margin-bottom:3px">{{ gap.title }}</div>
-        <div style="font-size:12px;color:var(--rw-text-2)">{{ gap.description|truncatechars:100 }}</div>
-      </div>
-      <span class="rw-badge rw-badge-v" style="font-size:9px;flex-shrink:0">{{ gap.severity }}</span>
-    </div>
-  </div>
-  {% endif %}
-  {% endfor %}
-  {% endif %}
 
-  {# ── Recent updates ── #}
-  <div class="rw-section-hdr" style="margin-top:var(--rw-pad-md)">{% trans "نوێترین نوێکاریەکان" %}</div>
-  <div style="background:var(--rw-surface);border:1px solid var(--rw-border)">
-    {% for update in recent_updates %}
-    <div style="display:flex;gap:16px;padding:14px var(--rw-pad-md);border-bottom:1px solid var(--rw-border-2)">
-      <div style="font-size:20px;flex-shrink:0">
-        {% if update.update_type == 'status_change' %}🔄
-        {% elif update.update_type == 'implementation' %}⚙
-        {% elif update.update_type == 'fix' %}🔧
-        {% elif update.update_type == 'note' %}📝
-        {% else %}💬{% endif %}
+    {# ── Open gaps / blockers ── #}
+    {% if open_gaps %}
+    <div>
+      <div class="rw-section-hdr mb-3" style="color:var(--rw-shoot)">
+        {% trans "گاپ و بلۆکەرەکانی کراوە" %} ({{ open_gaps.count }})
       </div>
-      <div style="flex:1;min-width:0">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px">
-          {% if update.task %}
-          <a href="{% url 'progress:task_detail' update.task.pk %}"
-             style="font-size:12px;font-weight:600;color:var(--rw-amber)">{{ update.task.title|truncatechars:40 }}</a>
-          {% endif %}
-          <span class="rw-badge rw-badge-v" style="font-size:9px">{{ update.get_update_type_display }}</span>
+      <div class="d-flex flex-column gap-2">
+        {% for gap in open_gaps %}
+        {% if gap.severity == 'critical' %}
+        <div class="rw-alert rw-alert-err">
+          <span class="rw-alert-icon">⚠</span>
+          <div class="rw-alert-text flex-grow-1">
+            <div class="rw-alert-title">{{ gap.title }}</div>
+            {{ gap.description|truncatechars:120 }}
+            <div class="mt-1" style="font-size:10px;color:var(--rw-text-3)">
+              <bdi dir="ltr" class="rw-font-en">{{ gap.gap_type }} · {{ gap.phase }}</bdi>
+            </div>
+          </div>
+          <a href="{% url 'progress:gaps' %}" class="rw-btn rw-btn-ghost rw-btn-sm flex-shrink-0">{% trans "بینین" %}</a>
         </div>
-        <div style="font-size:13px;color:var(--rw-text-2);line-height:1.5">{{ update.body|truncatechars:100 }}</div>
-        <div style="font-size:11px;color:var(--rw-text-3);margin-top:4px;font-family:var(--rw-font-en)" dir="ltr">
-          {{ update.created_at|date:"Y-m-d H:i" }}
+        {% else %}
+        <div class="rw-card rw-card-amber">
+          <div class="d-flex align-items-flex-start gap-3">
+            <div class="flex-grow-1">
+              <div class="fw-semibold mb-1" style="font-size:13px;color:var(--rw-text)">{{ gap.title }}</div>
+              <div style="font-size:12px;color:var(--rw-text-2)">{{ gap.description|truncatechars:100 }}</div>
+            </div>
+            <span class="rw-badge rw-badge-mute flex-shrink-0" style="font-size:9px">{{ gap.severity }}</span>
+          </div>
         </div>
+        {% endif %}
+        {% endfor %}
       </div>
     </div>
-    {% empty %}
-    <div style="padding:var(--rw-pad-lg);text-align:center;color:var(--rw-text-3);font-size:13px">
-      {% trans "هێشتا نوێکارییەک نییە" %}
-    </div>
-    {% endfor %}
-  </div>
+    {% endif %}
 
-  {# ── Quick links ── #}
-  <div class="rw-section-hdr" style="margin-top:var(--rw-pad-lg)">{% trans "بەستنەرەکانی خێرا" %}</div>
-  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1px;background:var(--rw-border);border:1px solid var(--rw-border)">
-    {% for item in "tasks,updates,gaps,decisions,agent_reports,changelog,diagrams,docs"|split:"," %}
-    <a href="{% url 'progress:'|add:item %}" style="text-decoration:none">
-      <div style="background:var(--rw-surface);padding:var(--rw-pad-md);text-align:center;transition:background var(--rw-t)">
-        <div style="font-size:11px;font-weight:600;color:var(--rw-text-2)">
-          {% if item == "tasks" %}{% trans "تاسکەکان" %}
-          {% elif item == "updates" %}{% trans "نوێکاریەکان" %}
-          {% elif item == "gaps" %}{% trans "گاپەکان" %}
-          {% elif item == "decisions" %}{% trans "بڕیارەکان" %}
-          {% elif item == "agent_reports" %}{% trans "ڕاپۆرتی ئەیجەنت" %}
-          {% elif item == "changelog" %}{% trans "گۆڕانکاری" %}
-          {% elif item == "diagrams" %}{% trans "دیئاگرامەکان" %}
-          {% elif item == "docs" %}{% trans "بەڵگەکان" %}
-          {% endif %}
+    {# ── Recent updates ── #}
+    <div>
+      <div class="rw-section-hdr mb-3">{% trans "نوێترین نوێکاریەکان" %}</div>
+      <div style="background:var(--rw-surface);border:1px solid var(--rw-border)">
+        {% for update in recent_updates %}
+        <div class="d-flex gap-3 px-3 py-3" style="border-bottom:1px solid var(--rw-border-2)">
+          <div class="flex-shrink-0" style="font-size:18px;padding-top:2px">
+            {% if update.update_type == 'status_change' %}
+            <svg width="18" height="18" viewBox="0 0 24 24" class="ico" style="color:var(--rw-amber)"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+            {% elif update.update_type == 'implementation' %}
+            <svg width="18" height="18" viewBox="0 0 24 24" class="ico" style="color:var(--rw-vis)"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41"/><path d="M4.93 4.93l1.41 1.41"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="M19.07 19.07l-1.41-1.41"/><path d="M4.93 19.07l1.41-1.41"/><path d="M2 12h2"/><path d="M20 12h2"/></svg>
+            {% elif update.update_type == 'fix' %}
+            <svg width="18" height="18" viewBox="0 0 24 24" class="ico" style="color:var(--rw-plan)"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+            {% else %}
+            <svg width="18" height="18" viewBox="0 0 24 24" class="ico" style="color:var(--rw-text-3)"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            {% endif %}
+          </div>
+          <div class="flex-grow-1" style="min-width:0">
+            <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+              {% if update.task %}
+              <a href="{% url 'progress:task_detail' update.task.pk %}"
+                 style="font-size:12px;font-weight:600;color:var(--rw-amber)">{{ update.task.title|truncatechars:40 }}</a>
+              {% endif %}
+              <span class="rw-badge rw-badge-mute" style="font-size:9px">{{ update.get_update_type_display }}</span>
+            </div>
+            <div style="font-size:13px;color:var(--rw-text-2);line-height:1.5">{{ update.body|truncatechars:100 }}</div>
+            <div class="mt-1 rw-font-en" dir="ltr" style="font-size:11px;color:var(--rw-text-3)">
+              {{ update.created_at|date:"Y-m-d H:i" }}
+            </div>
+          </div>
         </div>
+        {% empty %}
+        <div class="px-4 py-4 text-center" style="color:var(--rw-text-3);font-size:13px">
+          {% trans "هێشتا نوێکارییەک نییە" %}
+        </div>
+        {% endfor %}
       </div>
-    </a>
-    {% endfor %}
+    </div>
+
+    {# ── Quick links ── #}
+    <div>
+      <div class="rw-section-hdr mb-3">{% trans "بەستنەرەکانی خێرا" %}</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1px;background:var(--rw-border);border:1px solid var(--rw-border)">
+        {% for item in "tasks,updates,gaps,decisions,agent_reports,changelog,diagrams,docs"|split:"," %}
+        <a href="{% url 'progress:'|add:item %}" class="text-decoration-none">
+          <div class="bg-rw-surface px-3 py-3 text-center" style="transition:background var(--rw-t)">
+            <div class="rw-overline" style="color:var(--rw-text-2)">
+              {% if item == "tasks" %}{% trans "تاسکەکان" %}
+              {% elif item == "updates" %}{% trans "نوێکاریەکان" %}
+              {% elif item == "gaps" %}{% trans "گاپەکان" %}
+              {% elif item == "decisions" %}{% trans "بڕیارەکان" %}
+              {% elif item == "agent_reports" %}{% trans "ڕاپۆرتی ئەیجەنت" %}
+              {% elif item == "changelog" %}{% trans "گۆڕانکاری" %}
+              {% elif item == "diagrams" %}{% trans "دیئاگرامەکان" %}
+              {% elif item == "docs" %}{% trans "بەڵگەکان" %}
+              {% endif %}
+            </div>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+
   </div>
 
-</div>
 {% endblock %}

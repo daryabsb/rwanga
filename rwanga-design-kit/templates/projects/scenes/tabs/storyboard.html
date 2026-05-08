@@ -10,10 +10,8 @@
    ════════════════════════════════════════════════════════ #}
 {% load i18n %}
 
-<div style="padding:var(--rw-pad-lg)">
-
   {# ── Header actions ── #}
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--rw-pad-md)">
+  <div class="d-flex align-items-center justify-content-between mb-3">
     <div style="font-size:13px;color:var(--rw-text-2)">
       {{ storyboard_frames.count }} {% trans "فریم" %}
     </div>
@@ -25,7 +23,8 @@
   </div>
 
   {% if storyboard_frames %}
-  <div class="rw-sb-grid" id="rw-sb-sortable">
+  <div class="rw-sb-grid" id="rw-sb-sortable"
+       style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:1px;background:var(--rw-border);border:1px solid var(--rw-border)">
     {% for frame in storyboard_frames %}
     <div class="rw-sb-card" data-frame-id="{{ frame.pk }}"
          onclick="RW.openStoryboardModal('{{ frame.pk }}')">
@@ -38,9 +37,9 @@
         <span style="font-size:10px">{{ frame.shot.setup.letter|default:"" }}</span>
         {% endif %}
       </div>
-      <div class="rw-sb-meta">
-        <div class="rw-sb-num">
-          {{ frame.shot.number }}
+      <div class="rw-sb-meta p-2">
+        <div class="rw-sb-num d-flex align-items-center gap-1">
+          <bdi dir="ltr" class="rw-font-en">{{ frame.shot.number }}</bdi>
           {% if frame.shot.shot_type == 'dialogue' %}
           <span class="rw-badge rw-badge-d" style="font-size:9px">{% trans "دیالۆگ" %}</span>
           {% elif frame.shot.shot_type == 'insert' %}
@@ -51,10 +50,10 @@
         </div>
         <div class="rw-sb-style">{{ frame.shot.style }}</div>
         {% if frame.shot.lens %}
-        <span class="rw-sb-lens" dir="ltr">{{ frame.shot.lens }}</span>
+        <bdi class="rw-sb-lens rw-font-en" dir="ltr">{{ frame.shot.lens }}</bdi>
         {% endif %}
         {% if frame.ai_generated %}
-        <div style="margin-top:6px"><span class="rw-ai-badge">AI</span></div>
+        <div class="mt-1"><span class="rw-ai-badge">AI</span></div>
         {% endif %}
       </div>
     </div>
@@ -76,10 +75,8 @@
   </script>
 
   {% else %}
-  <div class="rw-empty">
-    <div class="rw-empty-icon">🖼</div>
-    <div class="rw-empty-title">{% trans "هێشتا فریمێک نییە" %}</div>
-    <div class="rw-empty-sub">{% trans "وێنەکان بار بکە یان لە لێدانەکانەوە فریم دروست بکە" %}</div>
+  {% include "components/_empty_state.html" with icon_svg="storyboard" title="هێشتا فریمێک نییە" sub="وێنەکان بار بکە یان لە لێدانەکانەوە فریم دروست بکە" %}
+  <div class="text-center mt-3">
     <button class="rw-btn rw-btn-primary"
             hx-get="{% url 'shots:upload_storyboard_modal' project.pk scene.pk %}"
             hx-target="#rw-modal-container" hx-swap="innerHTML">
@@ -87,5 +84,3 @@
     </button>
   </div>
   {% endif %}
-
-</div>

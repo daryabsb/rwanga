@@ -18,7 +18,7 @@
 
   {% comment %} ── Toolbar ── {% endcomment %}
   <div style="height:56px;background:var(--rw-surface);border-bottom:1px solid var(--rw-border);display:flex;align-items:center;padding:0 var(--rw-pad-md);gap:12px;flex-shrink:0;position:sticky;top:0;z-index:10">
-    {% include "components/_breadcrumb.html" with project=project current=_("ستریپبۆرد") inline=True %}
+    {% include "components/_breadcrumb.html" with project=project current="ستریپبۆرد" inline=True %}
     <div style="flex:1"></div>
     <div style="font-size:13px;color:var(--rw-text-2)">{{ strips|length }} {% trans "ستریپ" %}</div>
     <button class="rw-btn rw-btn-ghost" id="sb-save-btn" style="display:none"
@@ -106,7 +106,7 @@
     {% endif %}
 
     {% empty %}
-    {% include "components/_empty_state.html" with icon="≡" title=_("هێشتا ستریپبۆردێک نییە") sub=_("دیمەنەکان زیاد بکە و خشتەی وێنەگرتن دروست بکە") %}
+    {% include "components/_empty_state.html" with icon="≡" title="هێشتا ستریپبۆردێک نییە" sub="دیمەنەکان زیاد بکە و خشتەی وێنەگرتن دروست بکە" %}
     {% endfor %}
   </div>
 

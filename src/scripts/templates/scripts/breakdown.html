@@ -15,7 +15,7 @@
 {% block content %}
 <div id="rw-content" style="overflow-y:auto;flex:1">
 
-  {% include "components/_breadcrumb.html" with project=project current=_("داڕشتن") %}
+  {% include "components/_breadcrumb.html" with project=project current="داڕشتن" %}
 
   <div style="padding:var(--rw-pad-lg)">
 
@@ -26,7 +26,7 @@
         <p style="font-size:13px;color:var(--rw-text-2)">{% trans "ئێلیمێنتەکانی دەرکراو بە AI لە دەستنووس" %}</p>
       </div>
       <div style="display:flex;gap:8px">
-        {% include "components/_ai_progress.html" with label=_("دووبارە کردنەوەی داڕشتن") url="ai_engine:run_breakdown" project_pk=project.pk %}
+        {% include "components/_ai_progress.html" with label="دووبارە کردنەوەی داڕشتن" url="ai_engine:run_breakdown" project_pk=project.pk %}
         <button class="rw-btn rw-btn-ghost rw-btn-ai"
                 hx-post="{% url 'ai_engine:run_breakdown' project.pk %}"
                 hx-target="#rw-ai-status" hx-indicator=".htmx-indicator">
@@ -131,7 +131,7 @@
     {% endif %}
 
     {% else %}
-    {% include "components/_empty_state.html" with icon="🏷" title=_("هێشتا داڕشتنێک نییە") sub=_("دەستنووسێک بار بکە و AI بۆت دەیداڕێژێت") cta_text=_("بارکردنی دەستنووس") cta_url="scripts:upload" cta_project=project.pk %}
+    {% include "components/_empty_state.html" with icon="🏷" title="هێشتا داڕشتنێک نییە" sub="دەستنووسێک بار بکە و AI بۆت دەیداڕێژێت" cta_text="بارکردنی دەستنووس" cta_url="scripts:upload" cta_project=project.pk %}
     {% endif %}
 
   </div>

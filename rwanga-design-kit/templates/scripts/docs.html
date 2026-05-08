@@ -1,6 +1,7 @@
 {# ════════════════════════════════════════════════════════
    RWANGA — scripts/docs.html
    Script documents — treatments, synopses, notes.
+   Pattern: LIST
 
    Context:
      project        — Project instance
@@ -13,62 +14,107 @@
 {% block title %}{% trans "بەڵگەکان" %} — {{ project.title }}{% endblock %}
 
 {% block content %}
-<div id="rw-content" style="overflow-y:auto;flex:1">
 
-  {% include "components/_breadcrumb.html" with project=project current=_("بەڵگەکان") %}
+  {% include "components/_breadcrumb.html" with project=project current="بەڵگەکان" %}
 
-  <div style="padding:var(--rw-pad-lg)">
-
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--rw-pad-lg)">
-      <div>
-        <h1 style="font-size:20px;font-weight:700;margin-bottom:4px">{% trans "بەڵگەکان" %}</h1>
-        <p style="font-size:13px;color:var(--rw-text-2)">{% trans "تریتمێنت، پوختە و تێبینییەکانی پڕۆژە" %}</p>
-      </div>
-      <button class="rw-btn rw-btn-primary"
-              hx-get="{% url 'scripts:create_doc_modal' project.pk %}"
-              hx-target="#rw-modal-container" hx-swap="innerHTML">
-        + {% trans "بەڵگەی نوێ" %}
-      </button>
+  {# Header #}
+  <div class="d-flex align-items-center justify-content-between px-4 py-3 bg-rw-surface"
+       style="border-bottom:1px solid var(--rw-border)">
+    <div>
+      <h1 class="fs-4 fw-bold mb-1">{% trans "بەڵگەکان" %}</h1>
+      <p class="mb-0" style="font-size:12px;color:var(--rw-text-2)">
+        {% trans "تریتمێنت، پوختە و تێبینییەکانی پڕۆژە" %}
+      </p>
     </div>
-
-    {% if documents %}
-    <div style="background:var(--rw-surface);border:1px solid var(--rw-border)">
-      {% for doc in documents %}
-      <div style="display:flex;align-items:center;gap:16px;padding:16px var(--rw-pad-md);border-bottom:1px solid var(--rw-border-2);cursor:pointer;transition:background var(--rw-t)"
-           hx-get="{% url 'scripts:doc_detail' project.pk doc.pk %}"
-           hx-target="#rw-modal-container" hx-swap="innerHTML">
-        <div style="font-size:28px;width:40px;flex-shrink:0;text-align:center">
-          {% if doc.doc_type == 'treatment' %}📋
-          {% elif doc.doc_type == 'synopsis' %}📄
-          {% elif doc.doc_type == 'notes' %}📝
-          {% else %}📃{% endif %}
-        </div>
-        <div style="flex:1;min-width:0">
-          <div style="font-size:14px;font-weight:700;color:var(--rw-text);margin-bottom:3px">{{ doc.title }}</div>
-          <div style="font-size:11px;color:var(--rw-text-3)">
-            {{ doc.get_doc_type_display }} &nbsp;·&nbsp;
-            {% trans "نووسەر:" %} {{ doc.author.get_full_name|default:doc.author.nickname }} &nbsp;·&nbsp;
-            {{ doc.updated_at|timesince }} {% trans "پێش" %}
-          </div>
-        </div>
-        <div style="display:flex;gap:8px;align-items:center;flex-shrink:0">
-          <span style="font-size:11px;color:var(--rw-text-3);font-family:var(--rw-font-en)">
-            {{ doc.updated_at|date:"Y-m-d" }}
-          </span>
-          <button class="rw-btn rw-btn-ghost" style="padding:5px 12px;font-size:11px"
-                  onclick="event.stopPropagation()"
-                  hx-get="{% url 'scripts:edit_doc_modal' project.pk doc.pk %}"
-                  hx-target="#rw-modal-container" hx-swap="innerHTML">{% trans "دەستکاری" %}</button>
-        </div>
-      </div>
-      {% endfor %}
-    </div>
-    {% else %}
-    {% include "components/_empty_state.html" with icon="📄" title=_("هێشتا بەڵگەیەک نییە") sub=_("تریتمێنت، پوختە یان تێبینییەکانت زیاد بکە") %}
-    {% endif %}
-
+    <button class="rw-btn rw-btn-primary"
+            hx-get="{% url 'scripts:create_doc_modal' project.pk %}"
+            hx-target="#rw-modal-container"
+            hx-swap="innerHTML">
+      + {% trans "بەڵگەی نوێ" %}
+    </button>
   </div>
-</div>
 
-<div id="rw-modal-container"></div>
+  {# Filter strip #}
+  <div class="d-flex align-items-center px-4 py-2"
+       style="background:var(--rw-surface-2);border-bottom:1px solid var(--rw-border)">
+    <div class="rw-filter-row">
+      <button class="rw-f-btn active">{% trans "هەموو" %}</button>
+    </div>
+    <span class="ms-auto" style="font-size:11px;color:var(--rw-text-3)">
+      {{ documents|length }} {% trans "بەڵگە" %}
+    </span>
+  </div>
+
+  {# Document list #}
+  <div id="list-body" style="overflow-x:auto">
+    <table class="rw-tbl">
+      <thead>
+        <tr>
+          <th class="px-3 py-2">{% trans "ناو" %}</th>
+          <th class="px-3 py-2">{% trans "جۆر" %}</th>
+          <th class="px-3 py-2">{% trans "نووسەر" %}</th>
+          <th class="px-3 py-2">{% trans "نوێکراوەتەوە" %}</th>
+          <th class="px-3 py-2"></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for doc in documents %}
+        <tr class="rw-tbl-row"
+            hx-get="{% url 'scripts:doc_detail' project.pk doc.pk %}"
+            hx-target="#rw-modal-container"
+            hx-swap="innerHTML">
+          <td class="px-3 py-2">
+            <div class="d-flex align-items-center gap-2">
+              {# Doc type icon #}
+              {% if doc.doc_type == 'treatment' %}
+              <svg width="18" height="18" viewBox="0 0 24 24" class="ico flex-shrink-0">
+                <path d="M4 6l16-3v4H4z"/>
+                <rect x="2" y="7" width="20" height="14" rx="1"/>
+                <line x1="7" y1="3.5" x2="5" y2="7"/><line x1="11" y1="2.7" x2="9" y2="7"/>
+                <line x1="15" y1="1.9" x2="13" y2="7"/><line x1="19" y1="1.1" x2="17" y2="7"/>
+              </svg>
+              {% else %}
+              <svg width="18" height="18" viewBox="0 0 24 24" class="ico flex-shrink-0">
+                <rect x="2" y="4" width="20" height="16" rx="1"/>
+                <line x1="2" y1="8" x2="22" y2="8"/><line x1="2" y1="16" x2="22" y2="16"/>
+                <line x1="6" y1="4" x2="6" y2="8"/><line x1="10" y1="4" x2="10" y2="8"/>
+                <line x1="14" y1="4" x2="14" y2="8"/><line x1="18" y1="4" x2="18" y2="8"/>
+                <line x1="6" y1="16" x2="6" y2="20"/><line x1="10" y1="16" x2="10" y2="20"/>
+                <line x1="14" y1="16" x2="14" y2="20"/><line x1="18" y1="16" x2="18" y2="20"/>
+              </svg>
+              {% endif %}
+              <span class="fw-bold" style="font-size:14px">{{ doc.title }}</span>
+            </div>
+          </td>
+          <td class="px-3 py-2">
+            <span class="rw-badge rw-badge-mute" style="font-size:10px">{{ doc.get_doc_type_display }}</span>
+          </td>
+          <td class="px-3 py-2" style="font-size:12px;color:var(--rw-text-2)">
+            {{ doc.author.get_full_name|default:doc.author.nickname }}
+          </td>
+          <td class="px-3 py-2" style="font-size:11px;color:var(--rw-text-3)">
+            <bdi dir="ltr" class="rw-font-en">{{ doc.updated_at|date:"Y-m-d" }}</bdi>
+            <span class="d-block" style="font-size:10px">{{ doc.updated_at|timesince }} {% trans "پێش" %}</span>
+          </td>
+          <td class="px-3 py-2" style="text-align:end">
+            <button class="rw-btn rw-btn-ghost rw-btn-sm"
+                    onclick="event.stopPropagation()"
+                    hx-get="{% url 'scripts:edit_doc_modal' project.pk doc.pk %}"
+                    hx-target="#rw-modal-container"
+                    hx-swap="innerHTML">
+              {% trans "دەستکاری" %}
+            </button>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="5" class="p-0">
+            {% include "components/_empty_state.html" with title="هێشتا بەڵگەیەک نییە" sub="تریتمێنت، پوختە یان تێبینییەکانت زیاد بکە" %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
 {% endblock %}

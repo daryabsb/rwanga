@@ -1,6 +1,7 @@
 {# ════════════════════════════════════════════════════════
    RWANGA — scripts/breakdown.html
    Script breakdown — AI-extracted elements per scene.
+   Pattern: LIST (with stats + card grid sections)
 
    Context:
      project        — Project instance
@@ -13,83 +14,100 @@
 {% block title %}{% trans "داڕشتن" %} — {{ project.title }}{% endblock %}
 
 {% block content %}
-<div id="rw-content" style="overflow-y:auto;flex:1">
 
-  {% include "components/_breadcrumb.html" with project=project current=_("داڕشتن") %}
+  {% include "components/_breadcrumb.html" with project=project current="داڕشتن" %}
 
-  <div style="padding:var(--rw-pad-lg)">
-
-    {# ── Header ── #}
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--rw-pad-lg)">
-      <div>
-        <h1 style="font-size:20px;font-weight:700;margin-bottom:4px">{% trans "داڕشتنی دەستنووس" %}</h1>
-        <p style="font-size:13px;color:var(--rw-text-2)">{% trans "ئێلیمێنتەکانی دەرکراو بە AI لە دەستنووس" %}</p>
-      </div>
-      <div style="display:flex;gap:8px">
-        {% include "components/_ai_progress.html" with label=_("دووبارە کردنەوەی داڕشتن") url="ai_engine:run_breakdown" project_pk=project.pk %}
-        <button class="rw-btn rw-btn-ghost rw-btn-ai"
-                hx-post="{% url 'ai_engine:run_breakdown' project.pk %}"
-                hx-target="#rw-ai-status" hx-indicator=".htmx-indicator">
-          🤖 {% trans "دووبارە کردنەوەی داڕشتن" %}
-        </button>
-      </div>
+  {# Header #}
+  <div class="d-flex align-items-center justify-content-between px-4 py-3 bg-rw-surface"
+       style="border-bottom:1px solid var(--rw-border)">
+    <div>
+      <h1 class="fs-4 fw-bold mb-1">{% trans "داڕشتنی دەستنووس" %}</h1>
+      <p class="mb-0" style="font-size:12px;color:var(--rw-text-2)">
+        {% trans "ئێلیمێنتەکانی دەرکراو بە AI لە دەستنووس" %}
+      </p>
     </div>
-
-    {# ── Stats ── #}
-    <div class="rw-stats" style="margin-bottom:var(--rw-pad-lg)">
-      <div class="rw-stat">
-        <div class="rw-stat-val">{{ breakdown.scene_count|default:"0" }}</div>
-        <div class="rw-stat-lbl">{% trans "دیمەن" %}</div>
-      </div>
-      <div class="rw-stat">
-        <div class="rw-stat-val">{{ breakdown.characters|length }}</div>
-        <div class="rw-stat-lbl">{% trans "کەسایەتی" %}</div>
-      </div>
-      <div class="rw-stat">
-        <div class="rw-stat-val">{{ breakdown.locations|length }}</div>
-        <div class="rw-stat-lbl">{% trans "شوێن" %}</div>
-      </div>
-      <div class="rw-stat">
-        <div class="rw-stat-val">{{ breakdown.props|length }}</div>
-        <div class="rw-stat-lbl">{% trans "کەلوپەل" %}</div>
-      </div>
-      <div class="rw-stat">
-        <div class="rw-stat-val">{{ breakdown.sfx|length|add:breakdown.vfx|length }}</div>
-        <div class="rw-stat-lbl">{% trans "دەنگ / VFX" %}</div>
-      </div>
+    <div class="d-flex gap-2">
+      {% include "components/_ai_progress.html" with label="دووبارە کردنەوەی داڕشتن" url="ai_engine:run_breakdown" project_pk=project.pk %}
+      <button class="rw-btn rw-btn-ai"
+              hx-post="{% url 'ai_engine:run_breakdown' project.pk %}"
+              hx-target="#rw-ai-status"
+              hx-indicator=".htmx-indicator">
+        <svg width="16" height="16" viewBox="0 0 24 24" class="ico" style="display:inline-block;vertical-align:middle">
+          <circle cx="12" cy="12" r="9"/>
+          <circle cx="12" cy="12" r="2.5"/>
+          <circle cx="12" cy="5.5" r="1.5"/><circle cx="12" cy="18.5" r="1.5"/>
+          <circle cx="5.5" cy="12" r="1.5"/><circle cx="18.5" cy="12" r="1.5"/>
+          <circle cx="7.7" cy="7.7" r="1.5"/><circle cx="16.3" cy="16.3" r="1.5"/>
+          <circle cx="16.3" cy="7.7" r="1.5"/><circle cx="7.7" cy="16.3" r="1.5"/>
+        </svg>
+        {% trans "دووبارە کردنەوەی داڕشتن" %}
+      </button>
     </div>
+  </div>
+
+  {# Stats strip #}
+  <div class="rw-stats mx-4 mt-4 mb-3">
+    <div class="rw-stat">
+      <div class="rw-stat-val">{{ breakdown.scene_count|default:"0" }}</div>
+      <div class="rw-stat-lbl mt-1">{% trans "دیمەن" %}</div>
+    </div>
+    <div class="rw-stat">
+      <div class="rw-stat-val">{{ breakdown.characters|length }}</div>
+      <div class="rw-stat-lbl mt-1">{% trans "کەسایەتی" %}</div>
+    </div>
+    <div class="rw-stat">
+      <div class="rw-stat-val">{{ breakdown.locations|length }}</div>
+      <div class="rw-stat-lbl mt-1">{% trans "شوێن" %}</div>
+    </div>
+    <div class="rw-stat">
+      <div class="rw-stat-val">{{ breakdown.props|length }}</div>
+      <div class="rw-stat-lbl mt-1">{% trans "کەلوپەل" %}</div>
+    </div>
+    <div class="rw-stat">
+      <div class="rw-stat-val">{{ breakdown.sfx|length|add:breakdown.vfx|length }}</div>
+      <div class="rw-stat-lbl mt-1">{% trans "دەنگ / VFX" %}</div>
+    </div>
+  </div>
+
+  <div class="px-4 pb-4">
 
     {% if breakdown %}
 
-    {# ── Characters ── #}
+    {# Characters #}
     {% if breakdown.characters %}
-    <div class="rw-section-hdr">{% trans "کەسایەتییەکان" %}</div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1px;background:var(--rw-border);border:1px solid var(--rw-border);margin-bottom:var(--rw-pad-lg)">
+    <div class="rw-section-hdr mb-3">{% trans "کەسایەتییەکان" %}</div>
+    <div class="mb-4" style="display:grid;
+                              grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
+                              gap:1px;
+                              background:var(--rw-border);
+                              border:1px solid var(--rw-border)">
       {% for char in breakdown.characters %}
       <div style="background:var(--rw-surface);padding:var(--rw-pad-md)">
-        <div style="font-size:14px;font-weight:700;color:var(--rw-text);margin-bottom:6px">{{ char.name }}</div>
+        <div class="fw-bold mb-1" style="font-size:14px">{{ char.name }}</div>
         <div style="font-size:11px;color:var(--rw-text-3)">
           {{ char.scene_count }} {% trans "دیمەن" %}
         </div>
         {% if char.description %}
-        <div style="font-size:12px;color:var(--rw-text-2);margin-top:8px;line-height:1.5">{{ char.description|truncatechars:80 }}</div>
+        <div class="mt-2" style="font-size:12px;color:var(--rw-text-2);line-height:1.5">{{ char.description|truncatechars:80 }}</div>
         {% endif %}
       </div>
       {% endfor %}
     </div>
     {% endif %}
 
-    {# ── Locations ── #}
+    {# Locations #}
     {% if breakdown.locations %}
-    <div class="rw-section-hdr">{% trans "شوێنەکان" %}</div>
-    <div style="background:var(--rw-surface);border:1px solid var(--rw-border);margin-bottom:var(--rw-pad-lg)">
+    <div class="rw-section-hdr mb-3">{% trans "شوێنەکان" %}</div>
+    <div class="mb-4" style="background:var(--rw-surface);border:1px solid var(--rw-border)">
       {% for loc in breakdown.locations %}
-      <div style="display:flex;align-items:center;gap:16px;padding:14px 16px;border-bottom:1px solid var(--rw-border-2)">
-        <span style="font-size:11px;font-weight:700;color:var(--rw-text-3);min-width:32px;text-align:center;font-family:var(--rw-font-en)">
+      <div class="d-flex align-items-center gap-3 px-3 py-2"
+           style="border-bottom:1px solid var(--rw-border-2)">
+        <span class="rw-font-en fw-bold text-center"
+              style="font-size:11px;color:var(--rw-text-3);min-width:32px">
           {{ loc.int_ext }}
         </span>
-        <div style="flex:1">
-          <div style="font-size:13px;font-weight:600;color:var(--rw-text)">{{ loc.name }}</div>
+        <div class="flex-grow-1">
+          <div class="fw-semibold" style="font-size:13px">{{ loc.name }}</div>
         </div>
         <div style="font-size:11px;color:var(--rw-text-3)">{{ loc.scene_count }} {% trans "دیمەن" %}</div>
       </div>
@@ -97,45 +115,46 @@
     </div>
     {% endif %}
 
-    {# ── Props ── #}
+    {# Props #}
     {% if breakdown.props %}
-    <div class="rw-section-hdr">{% trans "کەلوپەلەکان" %}</div>
-    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:var(--rw-pad-lg)">
+    <div class="rw-section-hdr mb-3">{% trans "کەلوپەلەکان" %}</div>
+    <div class="d-flex flex-wrap gap-2 mb-4">
       {% for prop in breakdown.props %}
-      <div style="padding:6px 14px;background:var(--rw-surface);border:1px solid var(--rw-border);font-size:12px;color:var(--rw-text-2)">
+      <div class="px-3 py-1" style="background:var(--rw-surface);border:1px solid var(--rw-border);font-size:12px;color:var(--rw-text-2)">
         {{ prop.name }}
-        <span style="color:var(--rw-text-3);margin-inline-start:6px;font-family:var(--rw-font-en)">×{{ prop.scene_count }}</span>
+        <span class="rw-font-en" style="color:var(--rw-text-3);margin-inline-start:6px">×{{ prop.scene_count }}</span>
       </div>
       {% endfor %}
     </div>
     {% endif %}
 
-    {# ── SFX ── #}
+    {# SFX #}
     {% if breakdown.sfx %}
-    <div class="rw-section-hdr">{% trans "ئەفێکتی دەنگ" %}</div>
-    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:var(--rw-pad-lg)">
+    <div class="rw-section-hdr mb-3">{% trans "ئەفێکتی دەنگ" %}</div>
+    <div class="d-flex flex-wrap gap-2 mb-4">
       {% for fx in breakdown.sfx %}
-      <div style="padding:6px 14px;background:var(--rw-surface);border:1px solid var(--rw-border);font-size:12px;color:var(--rw-text-2)">{{ fx.name }}</div>
+      <div class="px-3 py-1" style="background:var(--rw-surface);border:1px solid var(--rw-border);font-size:12px;color:var(--rw-text-2)">{{ fx.name }}</div>
       {% endfor %}
     </div>
     {% endif %}
 
-    {# ── VFX ── #}
+    {# VFX #}
     {% if breakdown.vfx %}
-    <div class="rw-section-hdr">{% trans "ئەفێکتی بینراو" %}</div>
-    <div style="display:flex;flex-wrap:wrap;gap:8px">
+    <div class="rw-section-hdr mb-3">{% trans "ئەفێکتی بینراو" %}</div>
+    <div class="d-flex flex-wrap gap-2">
       {% for fx in breakdown.vfx %}
-      <div style="padding:6px 14px;background:var(--rw-surface);border:1px solid var(--rw-border);font-size:12px;color:var(--rw-text-2)">{{ fx.name }}</div>
+      <div class="px-3 py-1" style="background:var(--rw-surface);border:1px solid var(--rw-border);font-size:12px;color:var(--rw-text-2)">{{ fx.name }}</div>
       {% endfor %}
     </div>
     {% endif %}
 
     {% else %}
-    {% include "components/_empty_state.html" with icon="🏷" title=_("هێشتا داڕشتنێک نییە") sub=_("دەستنووسێک بار بکە و AI بۆت دەیداڕێژێت") cta_text=_("بارکردنی دەستنووس") cta_url="scripts:upload" cta_project=project.pk %}
+    {% include "components/_empty_state.html" with title="هێشتا داڕشتنێک نییە" sub="دەستنووسێک بار بکە و AI بۆت دەیداڕێژێت" cta_text="بارکردنی دەستنووس" cta_url="scripts:upload" cta_project=project.pk %}
     {% endif %}
 
   </div>
-</div>
 
-<div id="rw-ai-status" style="position:fixed;bottom:var(--rw-pad-md);inset-inline-end:var(--rw-pad-md);width:360px;z-index:200"></div>
+  <div id="rw-ai-status"
+       style="position:fixed;bottom:var(--rw-pad-md);inset-inline-end:var(--rw-pad-md);width:360px;z-index:200"></div>
+
 {% endblock %}

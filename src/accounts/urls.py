@@ -35,7 +35,8 @@ def settings(request):
 
 
 def team(request):
-    return render(request, "accounts/team.html", {})
+    template = "accounts/_team_table.html" if getattr(request, "htmx", False) else "accounts/team.html"
+    return render(request, template, {})
 
 
 def contacts(request, project_id):

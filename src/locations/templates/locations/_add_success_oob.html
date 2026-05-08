@@ -1,4 +1,26 @@
+{% load i18n %}
+{# HTMX OOB swap — returned after successful location creation. #}
+{# Clears the modal and injects a toast; replaces the location list body. #}
+{# Context: locations (updated QuerySet[Location]) #}
+
+{# Clear modal #}
 <div id="rw-modal-container" hx-swap-oob="innerHTML"></div>
+
+{# Refresh location list panel #}
 <div id="rw-location-list" hx-swap-oob="innerHTML">
   {% include "locations/_location_list.html" with locations=locations %}
+</div>
+
+{# Toast — success feedback #}
+<div id="rw-toast-container" hx-swap-oob="afterbegin">
+  <div class="rw-toast t-ok">
+    <span class="rw-toast-icon">&#x2713;</span>
+    <div class="rw-toast-body">
+      <div class="rw-toast-title">{% trans "تەواوبوو" %}</div>
+      <div class="rw-toast-msg">{% trans "شوێنەکە زیاد کرا" %}</div>
+    </div>
+    <button class="rw-toast-close"
+            onclick="this.closest('.rw-toast').remove()">&#x2715;</button>
+    <div class="rw-toast-bar"></div>
+  </div>
 </div>

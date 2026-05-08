@@ -1,13 +1,12 @@
 {# ════════════════════════════════════════════════════════
-   RWANGA — projects/list.html  (updated)
-   Studio lobby — projects + Reviews & Community tiles.
+   RWANGA — projects/list.html
+   Studio lobby — the first page after login.
+   Pick which project workspace to enter.
 
    Context:
-     owned_projects   — QuerySet[Project]
-     member_projects  — QuerySet[Project]
-     invitations      — QuerySet[ProjectMembership] pending
-     active_reviews_count   — int
-     active_sessions_count  — int
+     owned_projects   — QuerySet[Project] owned by user's studio
+     member_projects  — QuerySet[Project] where user has ProjectMembership
+     invitations      — QuerySet[ProjectMembership] pending (accepted_at=None)
    ════════════════════════════════════════════════════════ #}
 {% extends "base.html" %}
 {% load static i18n %}
@@ -15,40 +14,42 @@
 {% block title %}{% trans "پڕۆژەکان" %}{% endblock %}
 
 {% block content %}
-<div id="rw-content" style="overflow-y:auto;flex:1">
 
   {# ── Page header ── #}
-  <div style="padding:var(--rw-pad-lg) var(--rw-pad-lg) var(--rw-pad-md);background:var(--rw-surface);border-bottom:1px solid var(--rw-border);display:flex;align-items:center;gap:var(--rw-pad-md)">
+  <div class="d-flex align-items-center gap-3 px-4 py-3 bg-rw-surface"
+       style="border-bottom:1px solid var(--rw-border)">
     <div>
-      <h1 style="font-size:24px;font-weight:700;margin-bottom:4px">{% trans "ستودیۆ" %}</h1>
-      <p style="font-size:13px;color:var(--rw-text-2)">{% trans "پڕۆژەکانت هەڵبژێرە یان پڕۆژەی نوێ دروست بکە" %}</p>
+      <h1 class="fs-4 fw-bold mb-1">{% trans "ستودیۆ" %}</h1>
+      <p class="mb-0" style="font-size:13px;color:var(--rw-text-2)">{% trans "پڕۆژەکانت هەڵبژێرە یان پڕۆژەی نوێ دروست بکە" %}</p>
     </div>
-    <a href="{% url 'projects:create_wizard' %}" class="rw-btn rw-btn-primary" style="margin-inline-start:auto">
+    <a href="{% url 'projects:create_wizard' %}" class="rw-btn rw-btn-primary ms-auto">
       + {% trans "پڕۆژەی نوێ" %}
     </a>
   </div>
 
-  <div style="padding:var(--rw-pad-lg)">
+  <div class="px-4 py-4">
 
     {# ── Pending invitations ── #}
     {% if invitations %}
-    <div style="margin-bottom:var(--rw-pad-lg)">
+    <div class="mb-4">
       <div class="rw-section-hdr">{% trans "بانگهێشتنامەکان" %}</div>
       {% for inv in invitations %}
-      <div class="rw-warn" style="background:var(--rw-amber-dim);border-color:rgba(212,165,116,.3);border-inline-start-color:var(--rw-amber)">
-        <span class="rw-warn-icon" style="color:var(--rw-amber)">✉</span>
-        <div style="flex:1">
-          <div style="font-size:13px;font-weight:700;color:var(--rw-text)">{{ inv.project.title }}</div>
+      <div class="rw-alert rw-alert-warn d-flex align-items-center gap-3 mb-2">
+        <span class="rw-alert-icon">✉</span>
+        <div class="flex-grow-1">
+          <div class="fw-bold" style="font-size:13px;color:var(--rw-text)">{{ inv.project.title }}</div>
           <div style="font-size:12px;color:var(--rw-text-2);margin-top:2px">
             {% trans "ڕۆڵ:" %} {{ inv.get_role_type_display }} — {{ inv.project.studio.name }}
           </div>
         </div>
-        <div style="display:flex;gap:8px;align-items:center">
-          <form method="post" action="{% url 'accounts:accept_invite' inv.pk %}">{% csrf_token %}
-            <button type="submit" class="rw-btn rw-btn-amber" style="padding:7px 16px;font-size:12px">{% trans "قبووڵکردن" %}</button>
+        <div class="d-flex gap-2 align-items-center">
+          <form method="post" action="{% url 'accounts:accept_invite' inv.pk %}">
+            {% csrf_token %}
+            <button type="submit" class="rw-btn rw-btn-amber rw-btn-sm">{% trans "قبووڵکردن" %}</button>
           </form>
-          <form method="post" action="{% url 'accounts:decline_invite' inv.pk %}">{% csrf_token %}
-            <button type="submit" class="rw-btn rw-btn-ghost" style="padding:7px 16px;font-size:12px">{% trans "ڕەتکردنەوە" %}</button>
+          <form method="post" action="{% url 'accounts:decline_invite' inv.pk %}">
+            {% csrf_token %}
+            <button type="submit" class="rw-btn rw-btn-ghost rw-btn-sm">{% trans "ڕەتکردنەوە" %}</button>
           </form>
         </div>
       </div>
@@ -59,112 +60,72 @@
     {# ── Owned projects ── #}
     <div class="rw-section-hdr">{% trans "پڕۆژەکانی من" %}</div>
     {% if owned_projects %}
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1px;background:var(--rw-border);border:1px solid var(--rw-border);margin-bottom:var(--rw-pad-lg)">
+    <div class="mb-4" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1px;background:var(--rw-border);border:1px solid var(--rw-border)">
       {% for project in owned_projects %}
-      <a href="{% url 'projects:dashboard' project.pk %}" style="text-decoration:none;display:block">
-        <div class="rw-card" style="margin:0;cursor:pointer;transition:background var(--rw-t);height:100%">
-          <div style="display:flex;gap:16px;align-items:flex-start">
-            <div style="width:56px;height:56px;flex-shrink:0;background:var(--rw-script);display:flex;align-items:center;justify-content:center;font-size:24px">
-              {% if project.cover %}<img src="{{ project.cover.url }}" style="width:100%;height:100%;object-fit:cover">{% else %}🎬{% endif %}
-            </div>
-            <div style="flex:1;min-width:0">
-              <div style="font-size:15px;font-weight:700;color:var(--rw-text);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ project.title }}</div>
-              <div style="font-size:12px;color:var(--rw-text-2);margin-bottom:8px">{{ project.get_project_type_display }}</div>
-              <div style="display:flex;gap:16px;font-size:11px;color:var(--rw-text-3)">
-                <span>{{ project.scenes.count }} {% trans "دیمەن" %}</span>
-                <span>{{ project.updated_at|timesince }} {% trans "پێش" %}</span>
-              </div>
+      <a href="{% url 'projects:dashboard' project.pk %}" class="rw-session-card d-flex flex-column gap-3 p-3 text-decoration-none">
+        <div class="d-flex gap-3 align-items-start">
+          <div class="rw-proj-cover d-flex align-items-center justify-content-center flex-shrink-0">
+            {% if project.cover %}
+            <img src="{{ project.cover.url }}" alt="{{ project.title }}" style="width:100%;height:100%;object-fit:cover">
+            {% else %}
+            <svg width="28" height="28" viewBox="0 0 24 24" class="ico">
+              <rect x="2" y="4" width="20" height="16" rx="1"/>
+              <line x1="2" y1="8" x2="22" y2="8"/><line x1="2" y1="16" x2="22" y2="16"/>
+              <line x1="6" y1="4" x2="6" y2="8"/><line x1="10" y1="4" x2="10" y2="8"/>
+              <line x1="14" y1="4" x2="14" y2="8"/><line x1="18" y1="4" x2="18" y2="8"/>
+              <line x1="6" y1="16" x2="6" y2="20"/><line x1="10" y1="16" x2="10" y2="20"/>
+              <line x1="14" y1="16" x2="14" y2="20"/><line x1="18" y1="16" x2="18" y2="20"/>
+            </svg>
+            {% endif %}
+          </div>
+          <div class="flex-grow-1" style="min-width:0">
+            <div class="fw-bold text-truncate" style="font-size:15px;color:var(--rw-text);margin-bottom:4px">{{ project.title }}</div>
+            <div style="font-size:12px;color:var(--rw-text-2);margin-bottom:8px">{{ project.get_project_type_display }}</div>
+            <div class="d-flex gap-3" style="font-size:11px;color:var(--rw-text-3)">
+              <span>{{ project.scenes.count }} {% trans "دیمەن" %}</span>
+              <span>{{ project.updated_at|timesince }} {% trans "پێش" %}</span>
             </div>
           </div>
-          {% if project.logline %}
-          <p style="font-size:12px;color:var(--rw-text-2);margin-top:12px;line-height:1.6;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">{{ project.logline }}</p>
-          {% endif %}
         </div>
+        {% if project.logline %}
+        <p class="mb-0" style="font-size:12px;color:var(--rw-text-2);line-height:1.6;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">{{ project.logline }}</p>
+        {% endif %}
       </a>
       {% endfor %}
-      <a href="{% url 'projects:create_wizard' %}" style="text-decoration:none;display:block">
-        <div style="background:var(--rw-surface);cursor:pointer;transition:background var(--rw-t);height:100%;min-height:120px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;color:var(--rw-text-3);padding:var(--rw-pad-md)">
-          <div style="font-size:36px;opacity:.3">+</div>
-          <div style="font-size:13px;font-weight:600">{% trans "پڕۆژەی نوێ دروست بکە" %}</div>
-        </div>
+
+      {# New project card #}
+      <a href="{% url 'projects:create_wizard' %}"
+         class="d-flex align-items-center justify-content-center flex-column gap-3 p-3 text-decoration-none"
+         style="background:var(--rw-surface);min-height:120px;color:var(--rw-text-3)">
+        <div style="font-size:36px;opacity:.3">+</div>
+        <div style="font-size:13px;font-weight:600">{% trans "پڕۆژەی نوێ دروست بکە" %}</div>
       </a>
     </div>
     {% else %}
-    {% include "components/_empty_state.html" with icon="🎬" title=_("هێشتا پڕۆژەت نییە") sub=_("یەکەمین پڕۆژەی فیلمیت دروست بکە") cta_text=_("دەستپێکردن") cta_url="projects:create_wizard" %}
+    {% include "components/_empty_state.html" with icon_svg="film-frame" title="هێشتا پڕۆژەت نییە" sub="یەکەمین پڕۆژەی فیلمیت دروست بکە" cta_text="دەستپێکردن" cta_url="projects:create_wizard" %}
     {% endif %}
-
-    {# ══════════════════════════════════════════════════
-       REVIEWS + COMMUNITY TILES
-       Two feature-section tiles, always visible.
-       ══════════════════════════════════════════════════ #}
-    <div class="rw-section-hdr" style="margin-top:var(--rw-pad-md)">{% trans "هاوکاری و کۆمیونیتی" %}</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--rw-border);border:1px solid var(--rw-border);margin-bottom:var(--rw-pad-lg)">
-
-      {# Reviews tile #}
-      <a href="{% url 'reviews:list' %}" style="text-decoration:none;display:block">
-        <div style="background:var(--rw-surface);padding:var(--rw-pad-lg);transition:background var(--rw-t);border-top:4px solid #7C3AED;cursor:pointer;height:100%;display:flex;flex-direction:column;gap:var(--rw-pad-sm)">
-          <div style="display:flex;align-items:center;gap:14px">
-            <div style="width:52px;height:52px;background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.25);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">📋</div>
-            <div>
-              <div style="font-size:17px;font-weight:700;color:var(--rw-text);margin-bottom:4px">{% trans "پێداچوونەوەکان" %}</div>
-              <div style="font-size:12px;color:var(--rw-text-2)">{% trans "پێداچوونەوەی بایبڵ، بڕیارەکان، هەڵسەنگاندنی دیمەن" %}</div>
-            </div>
-          </div>
-          <div style="display:flex;align-items:center;gap:16px;font-size:12px;color:var(--rw-text-3);padding-top:var(--rw-pad-xs);border-top:1px solid var(--rw-border-2)">
-            {% if active_reviews_count %}
-            <span>
-              <span style="font-family:var(--rw-font-en);font-size:20px;font-weight:700;color:#7C3AED">{{ active_reviews_count }}</span>
-              {% trans "پێداچوونەوەی چالاک" %}
-            </span>
-            {% else %}
-            <span style="color:var(--rw-text-3)">{% trans "هێشتا پێداچوونەوەیەک نییە" %}</span>
-            {% endif %}
-            <span style="margin-inline-start:auto;font-size:18px;color:#7C3AED">→</span>
-          </div>
-        </div>
-      </a>
-
-      {# Community tile #}
-      <a href="{% url 'community:list' %}" style="text-decoration:none;display:block">
-        <div style="background:var(--rw-surface);padding:var(--rw-pad-lg);transition:background var(--rw-t);border-top:4px solid #0D9488;cursor:pointer;height:100%;display:flex;flex-direction:column;gap:var(--rw-pad-sm)">
-          <div style="display:flex;align-items:center;gap:14px">
-            <div style="width:52px;height:52px;background:rgba(13,148,136,.1);border:1px solid rgba(13,148,136,.25);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">◎</div>
-            <div>
-              <div style="font-size:17px;font-weight:700;color:var(--rw-text);margin-bottom:4px">{% trans "کۆمیونیتی" %}</div>
-              <div style="font-size:12px;color:var(--rw-text-2)">{% trans "دانیشتنەکانی کۆمیونیتی و لێدوانەکانی دەرەکی" %}</div>
-            </div>
-          </div>
-          <div style="display:flex;align-items:center;gap:16px;font-size:12px;color:var(--rw-text-3);padding-top:var(--rw-pad-xs);border-top:1px solid var(--rw-border-2)">
-            {% if active_sessions_count %}
-            <span>
-              <span style="font-family:var(--rw-font-en);font-size:20px;font-weight:700;color:#0D9488">{{ active_sessions_count }}</span>
-              {% trans "دانیشتنی چالاک" %}
-            </span>
-            {% else %}
-            <span style="color:var(--rw-text-3)">{% trans "هێشتا دانیشتنێک نییە" %}</span>
-            {% endif %}
-            <span style="margin-inline-start:auto;font-size:18px;color:#0D9488">→</span>
-          </div>
-        </div>
-      </a>
-
-    </div>
 
     {# ── Member projects ── #}
     {% if member_projects %}
     <div class="rw-section-hdr">{% trans "پڕۆژەکانی تیم" %}</div>
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1px;background:var(--rw-border);border:1px solid var(--rw-border)">
       {% for project in member_projects %}
-      <a href="{% url 'projects:dashboard' project.pk %}" style="text-decoration:none;display:block">
-        <div class="rw-card" style="margin:0;cursor:pointer;transition:background var(--rw-t)">
-          <div style="display:flex;gap:16px;align-items:flex-start">
-            <div style="width:48px;height:48px;flex-shrink:0;background:var(--rw-break);display:flex;align-items:center;justify-content:center;font-size:20px">🎬</div>
-            <div style="flex:1;min-width:0">
-              <div style="font-size:14px;font-weight:700;color:var(--rw-text);margin-bottom:4px">{{ project.title }}</div>
-              <div style="font-size:12px;color:var(--rw-text-2)">{{ project.studio.name }}</div>
-              <div style="font-size:11px;color:var(--rw-text-3);margin-top:6px">{{ project.scenes.count }} {% trans "دیمەن" %}</div>
-            </div>
-          </div>
+      <a href="{% url 'projects:dashboard' project.pk %}" class="rw-session-card d-flex gap-3 align-items-start p-3 text-decoration-none">
+        <div class="rw-proj-cover d-flex align-items-center justify-content-center flex-shrink-0"
+             style="background:var(--rw-break)">
+          <svg width="28" height="28" viewBox="0 0 24 24" class="ico">
+            <rect x="2" y="4" width="20" height="16" rx="1"/>
+            <line x1="2" y1="8" x2="22" y2="8"/><line x1="2" y1="16" x2="22" y2="16"/>
+            <line x1="6" y1="4" x2="6" y2="8"/><line x1="10" y1="4" x2="10" y2="8"/>
+            <line x1="14" y1="4" x2="14" y2="8"/><line x1="18" y1="4" x2="18" y2="8"/>
+            <line x1="6" y1="16" x2="6" y2="20"/><line x1="10" y1="16" x2="10" y2="20"/>
+            <line x1="14" y1="16" x2="14" y2="20"/><line x1="18" y1="16" x2="18" y2="20"/>
+          </svg>
+        </div>
+        <div class="flex-grow-1" style="min-width:0">
+          <div class="fw-bold" style="font-size:14px;color:var(--rw-text);margin-bottom:4px">{{ project.title }}</div>
+          <div style="font-size:12px;color:var(--rw-text-2)">{{ project.studio.name }}</div>
+          <div style="font-size:11px;color:var(--rw-text-3);margin-top:6px">{{ project.scenes.count }} {% trans "دیمەن" %}</div>
         </div>
       </a>
       {% endfor %}
@@ -172,5 +133,4 @@
     {% endif %}
 
   </div>
-</div>
 {% endblock %}

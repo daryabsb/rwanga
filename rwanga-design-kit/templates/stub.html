@@ -1,13 +1,22 @@
 {# ════════════════════════════════════════════════════════
-   RWANGA — stub.html
-   Shared stub for URL names that exist but have no real page yet.
-
-   Context:
-     stub_name   — string  module name shown in placeholder
+   RWANGA — stub.html (Design System v1.0)
+   Placeholder for URL names that exist but have no real page yet.
+   Context: stub_name — module name
    ════════════════════════════════════════════════════════ #}
 {% extends "base.html" %}
+{% load i18n %}
 {% block content %}
-<div id="rw-content" style="padding:var(--rw-pad-lg)">
-  <p style="color:var(--rw-text-2)">{{ stub_name }} — coming soon</p>
+<div class="d-flex flex-column align-items-center justify-content-center py-5 px-4"
+     style="min-height:60vh">
+  <div class="rw-empty">
+    <div class="rw-empty-icon" style="opacity:.2">
+      <svg width="48" height="48" viewBox="0 0 24 24" class="ico">
+        <rect x="2" y="4" width="20" height="16" rx="1"/>
+        <line x1="2" y1="8" x2="22" y2="8"/><line x1="2" y1="16" x2="22" y2="16"/>
+      </svg>
+    </div>
+    <div class="rw-empty-title mt-3">{{ stub_name }}</div>
+    <div class="rw-empty-sub mt-2">{% trans "ئەم بەشە بەم نزیکانە دێت" %}</div>
+  </div>
 </div>
 {% endblock %}

@@ -12,98 +12,112 @@
 {% block title %}{% trans "تاسکەکان" %} — Progress{% endblock %}
 
 {% block content %}
-<div id="rw-content" style="overflow-y:auto;flex:1;padding:var(--rw-pad-lg)">
 
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--rw-pad-md)">
-    <h1 style="font-size:20px;font-weight:700">{% trans "تاسکەکان" %}</h1>
+  {# ── Header ── #}
+  <div class="d-flex align-items-center justify-content-between px-4 py-3 bg-rw-surface"
+       style="border-bottom:1px solid var(--rw-border)">
+    <div>
+      <h1 class="fs-4 fw-bold mb-0">{% trans "تاسکەکان" %}</h1>
+    </div>
     <a href="{% url 'progress:dashboard' %}" class="rw-btn rw-btn-ghost">← {% trans "داشبۆرد" %}</a>
   </div>
 
-  {# ── Filters ── #}
-  <div style="display:flex;gap:var(--rw-pad-sm);flex-wrap:wrap;margin-bottom:var(--rw-pad-md)">
-    <select class="rw-form-input" name="phase" style="width:auto;padding:8px 14px;font-size:12px"
-            hx-get="{% url 'progress:tasks' %}" hx-target="#rw-tasks-table" hx-swap="innerHTML" hx-trigger="change" hx-include="[name='status'],[name='app_name'],[name='priority']">
+  {# ── Filter strip ── #}
+  <div class="d-flex align-items-center gap-2 px-4 py-2 flex-wrap"
+       style="background:var(--rw-surface-2);border-bottom:1px solid var(--rw-border)">
+    <select class="rw-form-input" name="phase" style="width:auto;font-size:12px"
+            hx-get="{% url 'progress:tasks' %}" hx-target="#rw-tasks-table" hx-swap="innerHTML"
+            hx-trigger="change" hx-include="[name='status'],[name='app_name'],[name='priority']">
       <option value="">{% trans "هەموو فاز" %}</option>
       {% for p in "P0,P1,P2,P3,P4,P5,P6,P7"|split:"," %}
       <option value="{{ p }}" {% if filters.phase == p %}selected{% endif %}>{{ p }}</option>
       {% endfor %}
     </select>
-    <select class="rw-form-input" name="status" style="width:auto;padding:8px 14px;font-size:12px"
-            hx-get="{% url 'progress:tasks' %}" hx-target="#rw-tasks-table" hx-swap="innerHTML" hx-trigger="change" hx-include="[name='phase'],[name='app_name'],[name='priority']">
+    <select class="rw-form-input" name="status" style="width:auto;font-size:12px"
+            hx-get="{% url 'progress:tasks' %}" hx-target="#rw-tasks-table" hx-swap="innerHTML"
+            hx-trigger="change" hx-include="[name='phase'],[name='app_name'],[name='priority']">
       <option value="">{% trans "هەموو بارودۆخ" %}</option>
       <option value="pending"     {% if filters.status == 'pending'     %}selected{% endif %}>{% trans "چاوەڕوانی" %}</option>
       <option value="in_progress" {% if filters.status == 'in_progress' %}selected{% endif %}>{% trans "لە کارەوە" %}</option>
       <option value="completed"   {% if filters.status == 'completed'   %}selected{% endif %}>{% trans "تەواوبوو" %}</option>
       <option value="blocked"     {% if filters.status == 'blocked'     %}selected{% endif %}>{% trans "بلۆک" %}</option>
     </select>
-    <select class="rw-form-input" name="priority" style="width:auto;padding:8px 14px;font-size:12px"
-            hx-get="{% url 'progress:tasks' %}" hx-target="#rw-tasks-table" hx-swap="innerHTML" hx-trigger="change" hx-include="[name='phase'],[name='status'],[name='app_name']">
+    <select class="rw-form-input" name="priority" style="width:auto;font-size:12px"
+            hx-get="{% url 'progress:tasks' %}" hx-target="#rw-tasks-table" hx-swap="innerHTML"
+            hx-trigger="change" hx-include="[name='phase'],[name='status'],[name='app_name']">
       <option value="">{% trans "هەموو پریۆریتی" %}</option>
       <option value="critical" {% if filters.priority == 'critical' %}selected{% endif %}>{% trans "سەرەکی" %}</option>
       <option value="high"     {% if filters.priority == 'high'     %}selected{% endif %}>{% trans "بەرز" %}</option>
       <option value="normal"   {% if filters.priority == 'normal'   %}selected{% endif %}>{% trans "ئاساییی" %}</option>
       <option value="low"      {% if filters.priority == 'low'      %}selected{% endif %}>{% trans "کەم" %}</option>
     </select>
-    <input class="rw-form-input" type="text" name="app_name" placeholder="{% trans 'ناوی ئەپ...' %}"
+    <input class="rw-form-input rw-font-en" type="text" name="app_name"
+           placeholder="{% trans 'ناوی ئەپ...' %}"
            value="{{ filters.app_name|default:'' }}"
-           style="width:160px;padding:8px 14px;font-size:12px;font-family:var(--rw-font-en)"
+           style="width:160px;font-size:12px"
            hx-get="{% url 'progress:tasks' %}" hx-target="#rw-tasks-table" hx-swap="innerHTML"
            hx-trigger="input changed delay:400ms" hx-include="[name='phase'],[name='status'],[name='priority']">
+    <span class="ms-auto" style="font-size:11px;color:var(--rw-text-3)">{{ tasks.count }} {% trans "تاسک" %}</span>
   </div>
 
   {# ── Task table ── #}
-  <div id="rw-tasks-table">
-    <div style="background:var(--rw-surface);border:1px solid var(--rw-border)">
-      <table style="width:100%;border-collapse:collapse">
-        <thead>
-          <tr>
-            <th style="padding:12px 16px;text-align:start;font-size:10px;font-weight:700;color:var(--rw-text-3);text-transform:uppercase;letter-spacing:.9px;background:var(--rw-surface-2);border-bottom:1px solid var(--rw-border)">{% trans "تایتڵ" %}</th>
-            <th style="padding:12px 16px;text-align:start;font-size:10px;font-weight:700;color:var(--rw-text-3);text-transform:uppercase;letter-spacing:.9px;background:var(--rw-surface-2);border-bottom:1px solid var(--rw-border)">{% trans "فاز" %}</th>
-            <th style="padding:12px 16px;text-align:start;font-size:10px;font-weight:700;color:var(--rw-text-3);text-transform:uppercase;letter-spacing:.9px;background:var(--rw-surface-2);border-bottom:1px solid var(--rw-border)">{% trans "ئەپ" %}</th>
-            <th style="padding:12px 16px;text-align:start;font-size:10px;font-weight:700;color:var(--rw-text-3);text-transform:uppercase;letter-spacing:.9px;background:var(--rw-surface-2);border-bottom:1px solid var(--rw-border)">{% trans "بارودۆخ" %}</th>
-            <th style="padding:12px 16px;text-align:start;font-size:10px;font-weight:700;color:var(--rw-text-3);text-transform:uppercase;letter-spacing:.9px;background:var(--rw-surface-2);border-bottom:1px solid var(--rw-border)">{% trans "پریۆریتی" %}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for task in tasks %}
-          <tr style="border-bottom:1px solid var(--rw-border-2);cursor:pointer;transition:background var(--rw-t)"
-              onclick="location.href='{% url 'progress:task_detail' task.pk %}'">
-            <td style="padding:14px 16px">
-              <div style="font-size:13px;font-weight:600;color:var(--rw-text)">{{ task.title }}</div>
-              {% if task.description %}
-              <div style="font-size:11px;color:var(--rw-text-3);margin-top:2px">{{ task.description|truncatechars:60 }}</div>
-              {% endif %}
-            </td>
-            <td style="padding:14px 16px;font-family:var(--rw-font-en);font-size:13px;color:var(--rw-amber)">{{ task.phase }}</td>
-            <td style="padding:14px 16px;font-family:var(--rw-font-en);font-size:12px;color:var(--rw-text-2)">{{ task.app_name|default:"—" }}</td>
-            <td style="padding:14px 16px">
-              {% if task.status == 'completed' %}
-              <span class="rw-badge" style="background:rgba(0,168,150,.12);color:var(--rw-vis);border:1px solid rgba(0,168,150,.25);font-size:9px">{% trans "تەواوبوو" %}</span>
-              {% elif task.status == 'in_progress' %}
-              <span class="rw-badge" style="background:var(--rw-amber-dim);color:var(--rw-amber);border:1px solid rgba(212,165,116,.25);font-size:9px">{% trans "لە کارەوە" %}</span>
-              {% elif task.status == 'blocked' %}
-              <span class="rw-badge" style="background:var(--rw-pink-dim);color:var(--rw-shoot);border:1px solid rgba(247,37,133,.25);font-size:9px">{% trans "بلۆک" %}</span>
-              {% else %}
-              <span class="rw-badge rw-badge-v" style="font-size:9px">{% trans "چاوەڕوانی" %}</span>
-              {% endif %}
-            </td>
-            <td style="padding:14px 16px">
-              {% if task.priority == 'critical' %}
-              <span class="rw-badge" style="background:var(--rw-pink-dim);color:var(--rw-shoot);border:1px solid rgba(247,37,133,.25);font-size:9px">{% trans "سەرەکی" %}</span>
-              {% elif task.priority == 'high' %}
-              <span class="rw-badge" style="background:var(--rw-amber-dim);color:var(--rw-amber);border:1px solid rgba(212,165,116,.25);font-size:9px">{% trans "بەرز" %}</span>
-              {% else %}
-              <span class="rw-badge rw-badge-v" style="font-size:9px">{{ task.priority }}</span>
-              {% endif %}
-            </td>
-          </tr>
-          {% empty %}
-          <tr><td colspan="5" style="padding:var(--rw-pad-xl);text-align:center;color:var(--rw-text-3);font-size:13px">{% trans "هیچ تاسکێک نەدۆزرایەوە" %}</td></tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
+  <div id="rw-tasks-table" style="overflow-x:auto">
+    <table class="rw-tbl">
+      <thead>
+        <tr>
+          <th class="px-3 py-2">{% trans "تایتڵ" %}</th>
+          <th class="px-3 py-2">{% trans "فاز" %}</th>
+          <th class="px-3 py-2">{% trans "ئەپ" %}</th>
+          <th class="px-3 py-2">{% trans "بارودۆخ" %}</th>
+          <th class="px-3 py-2">{% trans "پریۆریتی" %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for task in tasks %}
+        <tr class="rw-tbl-row"
+            onclick="location.href='{% url 'progress:task_detail' task.pk %}'">
+          <td class="px-3 py-2">
+            <div class="fw-semibold" style="font-size:13px;color:var(--rw-text)">{{ task.title }}</div>
+            {% if task.description %}
+            <div class="mt-1" style="font-size:11px;color:var(--rw-text-3)">{{ task.description|truncatechars:60 }}</div>
+            {% endif %}
+          </td>
+          <td class="px-3 py-2">
+            <bdi dir="ltr" class="rw-font-en" style="font-size:13px;color:var(--rw-amber)">{{ task.phase }}</bdi>
+          </td>
+          <td class="px-3 py-2">
+            <bdi dir="ltr" class="rw-font-en" style="font-size:12px;color:var(--rw-text-2)">{{ task.app_name|default:"—" }}</bdi>
+          </td>
+          <td class="px-3 py-2">
+            {% if task.status == 'completed' %}
+            <span class="rw-badge rw-badge-ok">{% trans "تەواوبوو" %}</span>
+            {% elif task.status == 'in_progress' %}
+            <span class="rw-badge rw-badge-warn">{% trans "لە کارەوە" %}</span>
+            {% elif task.status == 'blocked' %}
+            <span class="rw-badge rw-badge-err">{% trans "بلۆک" %}</span>
+            {% else %}
+            <span class="rw-badge rw-badge-mute">{% trans "چاوەڕوانی" %}</span>
+            {% endif %}
+          </td>
+          <td class="px-3 py-2">
+            {% if task.priority == 'critical' %}
+            <span class="rw-badge rw-badge-err">{% trans "سەرەکی" %}</span>
+            {% elif task.priority == 'high' %}
+            <span class="rw-badge rw-badge-warn">{% trans "بەرز" %}</span>
+            {% else %}
+            <span class="rw-badge rw-badge-mute">{{ task.priority }}</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="5" class="p-0">
+            {% include "components/_empty_state.html" with title="هیچ تاسکێک نەدۆزرایەوە" %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
   </div>
 
-</div>
 {% endblock %}

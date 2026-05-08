@@ -16,7 +16,7 @@
 {% block content %}
 <div id="rw-content" style="overflow-y:auto;flex:1">
 
-  {% include "components/_breadcrumb.html" with project=project current=_("لیستی لێدانەکان") %}
+  {% include "components/_breadcrumb.html" with project=project current="لیستی لێدانەکان" %}
 
   <div style="padding:var(--rw-pad-lg)">
 
@@ -105,7 +105,7 @@
         </tbody>
       </table>
       {% else %}
-      {% include "components/_empty_state.html" with icon="🎯" title=_("هیچ لێدانێک نەدۆزرایەوە") sub=_("فلتەر دەستکاری بکە یان لێدانی نوێ زیاد بکە") %}
+      {% include "components/_empty_state.html" with icon="🎯" title="هیچ لێدانێک نەدۆزرایەوە" sub="فلتەر دەستکاری بکە یان لێدانی نوێ زیاد بکە" %}
       {% endif %}
     </div>
 

@@ -1,23 +1,48 @@
 {% load i18n %}
+{# HTMX partial — location list body. Rendered into #rw-location-list in locations/list.html. #}
+{# Context: locations (QuerySet[Location]) #}
+
 {% if locations %}
 {% for loc in locations %}
 <div class="rw-scene-item" id="loc-card-{{ loc.pk }}"
      onclick="RW.focusLocation({{ loc.pk }}, {{ loc.latitude|default:'null' }}, {{ loc.longitude|default:'null' }})">
-  <div style="font-size:20px;flex-shrink:0">📍</div>
-  <div style="flex:1;min-width:0">
-    <div style="font-size:13px;font-weight:700;color:var(--rw-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ loc.name }}</div>
-    {% if loc.address %}<div style="font-size:11px;color:var(--rw-text-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ loc.address }}</div>{% endif %}
+
+  <svg width="20" height="20" viewBox="0 0 24 24" class="ico flex-shrink-0">
+    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+    <circle cx="12" cy="9" r="2.5"/>
+  </svg>
+
+  <div class="flex-grow-1" style="min-width:0">
+    <div class="fw-bold"
+         style="font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+      {{ loc.name }}
+    </div>
+    {% if loc.address %}
+    <div style="font-size:11px;color:var(--rw-text-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+      {{ loc.address }}
+    </div>
+    {% endif %}
+    {% if loc.projects_count %}
+    <div style="font-size:10px;color:var(--rw-amber);margin-top:2px">
+      {{ loc.projects_count }} {% trans "پڕۆژە" %}
+    </div>
+    {% endif %}
   </div>
-  <button class="rw-btn rw-btn-ghost" style="padding:4px 10px;font-size:11px;flex-shrink:0"
+
+  <button class="rw-btn rw-btn-ghost rw-btn-sm flex-shrink-0"
           onclick="event.stopPropagation()"
           hx-get="{% url 'locations:edit_modal' loc.pk %}"
-          hx-target="#rw-modal-container" hx-swap="innerHTML">✎</button>
+          hx-target="#rw-modal-container"
+          hx-swap="innerHTML">
+    <svg width="14" height="14" viewBox="0 0 24 24" class="ico">
+      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+    </svg>
+  </button>
+
 </div>
 {% endfor %}
+
 {% else %}
-<div class="rw-empty" style="padding:var(--rw-pad-lg)">
-  <div class="rw-empty-icon">📍</div>
-  <div class="rw-empty-title" style="font-size:14px">{% trans "شوێنێک نییە" %}</div>
-  <div class="rw-empty-sub" style="font-size:12px">{% trans "شوێنی یەکەم زیاد بکە" %}</div>
-</div>
+{% include "components/_empty_state.html" with title="شوێنێک نییە" sub="شوێنی یەکەم زیاد بکە" %}
 {% endif %}

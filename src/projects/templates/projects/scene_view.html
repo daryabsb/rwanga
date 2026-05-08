@@ -49,10 +49,7 @@
   <div class="rw-scene-main">
 
     {% comment %} Breadcrumb {% endcomment %}
-    {% include "components/_breadcrumb.html" with
-       crumbs=crumbs
-       current=scene.number|stringformat:"s"
-       location=scene.heading %}
+    {% include "components/_breadcrumb.html" with crumbs=crumbs current=scene.number|stringformat:"s" location=scene.heading %}
 
     {% comment %} Scene topbar {% endcomment %}
     <div class="rw-scene-topbar">

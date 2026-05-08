@@ -12,37 +12,14 @@ Context:
 {% endcomment %}
 {% load static i18n %}
 
-{% block title %}پێداچوونەوە — {{ project.title }}{% endblock %}
+{% block title %}{% trans "پێداچوونەوە" %} — {{ project.title }}{% endblock %}
 
 {% block extra_css %}
 <style>
 /* ══════════════════════════════════════════════════════
    REVIEW WORKBENCH — component CSS
-   Uses var(--rw-*) tokens from rwanga.css
+   Uses var(--rw-*) tokens from rwanga-ds.css
    ══════════════════════════════════════════════════════ */
-
-/* ── WORKBENCH HEADER ── */
-.rwb-header {
-  background: var(--rw-surface);
-  border-bottom: 1px solid var(--rw-border);
-  padding: 12px var(--rw-pad-md);
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-shrink: 0;
-}
-.rwb-title {
-  font-size: 15px;
-  font-weight: 700;
-  color: var(--rw-text);
-  flex: 1;
-}
-.rwb-meta {
-  font-family: var(--rw-font-en);
-  font-size: 11px;
-  color: var(--rw-text-3);
-  direction: ltr;
-}
 
 /* ── TABS ── */
 .rwb-tabs {
@@ -91,7 +68,7 @@ Context:
 .rwb-split {
   display: flex;
   flex: 1;
-  min-height: 0; /* critical for flex overflow */
+  min-height: 0;
   overflow: hidden;
 }
 .rwb-left {
@@ -291,7 +268,7 @@ Context:
 .rwb-locked-body {
   display: none;
   padding: 12px 16px 14px;
-  border-top: 1px solid var(--rw-border-2);
+  border-top: 1px solid var(--rw-border);
 }
 .rwb-locked-body.open { display: block; }
 .rwb-locked-text {
@@ -309,7 +286,6 @@ Context:
 }
 
 /* ── BIBLE (full read) ── */
-/* ── BIBLE VIEWER — Filmustage-style sectioned reader ── */
 .rwb-split.bb-mode .rwb-right { display: none; }
 .rwb-split.bb-mode .rwb-left {
   padding: 0;
@@ -453,7 +429,7 @@ Context:
 .bb-table td {
   padding: 10px 14px;
   color: var(--rw-text-2);
-  border-bottom: 1px solid var(--rw-border-2, var(--rw-border));
+  border-bottom: 1px solid var(--rw-border);
   line-height: 1.7;
   vertical-align: top;
 }
@@ -466,7 +442,7 @@ Context:
 .bb-prop {
   margin-bottom: 24px;
   padding-bottom: 20px;
-  border-bottom: 1px solid var(--rw-border-2, var(--rw-border));
+  border-bottom: 1px solid var(--rw-border);
 }
 .bb-prop:last-child { border-bottom: none; }
 .bb-prop-name {
@@ -570,192 +546,201 @@ Context:
   color: var(--rw-text-2);
   font-style: italic;
 }
-
-/* ── FOOTER ── */
-.rwb-footer {
-  background: var(--rw-surface);
-  border-top: 1px solid var(--rw-border);
-  padding: 10px var(--rw-pad-md);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 11px;
-  color: var(--rw-text-3);
-  flex-shrink: 0;
-}
 </style>
 {% endblock %}
 
 {% block content %}
+<div class="d-flex flex-column flex-grow-1 overflow-hidden">
 
-{# ── Workbench header ── #}
-<div class="rwb-header">
-  <div class="rwb-title">ڕوانگە — {{ project.title }} — پێداچوونەوە</div>
-  <div class="rwb-meta">review {{ review.version|default:"v03" }} · bible {{ review.bible_version|default:"v3.0" }}</div>
-</div>
+  {# ── Workbench header ── #}
+  <div class="d-flex align-items-center gap-3 px-4 bg-rw-surface"
+       style="height:52px;flex-shrink:0;border-bottom:1px solid var(--rw-border)">
+    <div class="fw-bold flex-grow-1" style="font-size:15px">
+      {% trans "ڕوانگە" %} — {{ project.title }} — {% trans "پێداچوونەوە" %}
+    </div>
+    <bdi dir="ltr" class="rw-font-en" style="font-size:11px;color:var(--rw-text-3)">
+      review {{ review.version|default:"v03" }} · bible {{ review.bible_version|default:"v3.0" }}
+    </bdi>
+  </div>
 
-{# ── Tabs ── #}
-<div class="rwb-tabs" id="rwb-tabs">
-  <button class="rwb-tab active" onclick="rwbTab('active',this)">بڕیارە نوێیەکان <span class="rwb-tab-count">{{ active_decisions.count }}</span></button>
-  <button class="rwb-tab" onclick="rwbTab('locked',this)">بڕیارە جێگیرکراوەکان <span class="rwb-tab-count dim">{{ locked_decisions.count }}</span></button>
-  <button class="rwb-tab" onclick="rwbTab('bible',this)">بایبڵ</button>
-</div>
+  {# ── Tabs ── #}
+  <div class="rwb-tabs" id="rwb-tabs">
+    <button class="rwb-tab active" onclick="rwbTab('active',this)">
+      {% trans "بڕیارە نوێیەکان" %} <span class="rwb-tab-count">{{ active_decisions.count }}</span>
+    </button>
+    <button class="rwb-tab" onclick="rwbTab('locked',this)">
+      {% trans "بڕیارە جێگیرکراوەکان" %} <span class="rwb-tab-count dim">{{ locked_decisions.count }}</span>
+    </button>
+    <button class="rwb-tab" onclick="rwbTab('bible',this)">{% trans "بایبڵ" %}</button>
+  </div>
 
-{# ── Split panel ── #}
-<div class="rwb-split">
+  {# ── Split panel ── #}
+  <div class="rwb-split">
 
-  {# ═══ LEFT PANEL — decision panes ═══ #}
-  <div class="rwb-left">
+    {# ═══ LEFT PANEL — decision panes ═══ #}
+    <div class="rwb-left">
 
-    {# Tab 1: Active decisions #}
-    <div class="rwb-pane active" id="rwb-active">
-      {% for d in active_decisions %}
-      <div class="rwb-card" data-section="{{ d.chain_id|default:'general' }}" onclick="rwbSelect(this, '{{ d.chain_id|default:'general' }}')">
-        <div class="rwb-card-body">
-          <div class="rwb-card-topic">{{ d.topic }}</div>
-          <div class="rwb-card-text">{{ d.decision_text }}</div>
-          <div class="rwb-chips">
-            {% if d.scene %}
-            <span class="rwb-chip rwb-chip-scene">دیمەن {{ d.scene.scene_number }}</span>
-            {% endif %}
-            {% if d.chain_id %}
-            <a href="{% url 'projects:review_chain' project.id review.id d.chain_id %}" class="rwb-chip rwb-chip-chain" onclick="event.stopPropagation()">زنجیرەی {{ d.chain_id }}</a>
-            {% endif %}
-            {% if d.expression_type %}
-            <span class="rwb-chip rwb-chip-expr {{ d.expression_type }}">{{ d.expression_type }}</span>
-            {% endif %}
-            {% if d.intensity %}
-            <div class="rwb-intensity">
-              <div class="rwb-int-bar">
-                <div class="rwb-int-dot{% if d.intensity == 'low' or d.intensity == 'medium' or d.intensity == 'peak' or d.intensity == 'collapse' %} on{% endif %}"></div>
-                <div class="rwb-int-dot{% if d.intensity == 'medium' or d.intensity == 'peak' or d.intensity == 'collapse' %} on{% endif %}"></div>
-                <div class="rwb-int-dot{% if d.intensity == 'peak' or d.intensity == 'collapse' %} on{% if d.intensity == 'peak' %} peak{% endif %}{% endif %}"></div>
-                <div class="rwb-int-dot{% if d.intensity == 'collapse' %} on collapse{% endif %}"></div>
+      {# Tab 1: Active decisions #}
+      <div class="rwb-pane active" id="rwb-active">
+        {% for d in active_decisions %}
+        <div class="rwb-card" data-section="{{ d.chain_id|default:'general' }}"
+             onclick="rwbSelect(this, '{{ d.chain_id|default:'general' }}')">
+          <div class="rwb-card-body">
+            <div class="rwb-card-topic">{{ d.topic }}</div>
+            <div class="rwb-card-text">{{ d.decision_text }}</div>
+            <div class="rwb-chips">
+              {% if d.scene %}
+              <span class="rwb-chip rwb-chip-scene">{% trans "دیمەن" %} {{ d.scene.scene_number }}</span>
+              {% endif %}
+              {% if d.chain_id %}
+              <a href="{% url 'projects:review_chain' project.id review.id d.chain_id %}"
+                 class="rwb-chip rwb-chip-chain" onclick="event.stopPropagation()">
+                {% trans "زنجیرەی" %} {{ d.chain_id }}
+              </a>
+              {% endif %}
+              {% if d.expression_type %}
+              <span class="rwb-chip rwb-chip-expr {{ d.expression_type }}">{{ d.expression_type }}</span>
+              {% endif %}
+              {% if d.intensity %}
+              <div class="rwb-intensity">
+                <div class="rwb-int-bar">
+                  <div class="rwb-int-dot{% if d.intensity == 'low' or d.intensity == 'medium' or d.intensity == 'peak' or d.intensity == 'collapse' %} on{% endif %}"></div>
+                  <div class="rwb-int-dot{% if d.intensity == 'medium' or d.intensity == 'peak' or d.intensity == 'collapse' %} on{% endif %}"></div>
+                  <div class="rwb-int-dot{% if d.intensity == 'peak' or d.intensity == 'collapse' %} on{% if d.intensity == 'peak' %} peak{% endif %}{% endif %}"></div>
+                  <div class="rwb-int-dot{% if d.intensity == 'collapse' %} on collapse{% endif %}"></div>
+                </div>
+                <span>{{ d.intensity }}</span>
               </div>
-              <span>{{ d.intensity }}</span>
+              {% endif %}
             </div>
+          </div>
+          <div class="rwb-actions">
+            <button class="rwb-btn rwb-btn-accept"
+                    hx-patch="{% url 'reviews:lock-decision' review.id d.id %}"
+                    hx-target="closest .rwb-card"
+                    hx-swap="outerHTML"
+                    onclick="event.stopPropagation()">✓ {% trans "پەسەندکردن" %}</button>
+            <button class="rwb-btn rwb-btn-reject"
+                    hx-patch="{% url 'reviews:reject-decision' review.id d.id %}"
+                    hx-target="closest .rwb-card"
+                    hx-swap="outerHTML"
+                    onclick="event.stopPropagation()">✗ {% trans "ڕەتکردنەوە" %}</button>
+            <button class="rwb-btn rwb-btn-comment"
+                    onclick="event.stopPropagation();rwbComment(this)">
+              <svg width="14" height="14" viewBox="0 0 24 24" class="ico" style="width:14px;height:14px">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+              </svg>
+              {% trans "تێبینی" %}
+            </button>
+          </div>
+          <div class="rwb-comment">
+            <textarea placeholder="{% trans 'تێبینیت لێرە بنووسە...' %}"></textarea>
+          </div>
+        </div>
+        {% empty %}
+        <div class="text-center py-5" style="color:var(--rw-text-3)">
+          <p class="fs-5 mb-2">{% trans "هیچ بڕیارێکی نوێ نییە" %}</p>
+          <p style="font-size:13px">{% trans "هەموو بڕیارەکان جێگیرکراون یان ڕەتکراونەتەوە." %}</p>
+        </div>
+        {% endfor %}
+      </div>
+
+      {# Tab 2: Locked decisions #}
+      <div class="rwb-pane" id="rwb-locked">
+        {% for d in locked_decisions %}
+        <div class="rwb-locked">
+          <div class="rwb-locked-hdr" onclick="rwbToggle(this)">
+            <span class="rwb-locked-topic">{{ d.topic }}</span>
+            <span class="rwb-locked-badge">{% trans "جێگیر" %}</span>
+            <span class="rwb-locked-chevron">›</span>
+          </div>
+          <div class="rwb-locked-body">
+            <div class="rwb-locked-text">{{ d.decision_text }}</div>
+            {% if d.lock_comment %}
+            <div class="rwb-locked-comment">{{ d.lock_comment }}</div>
             {% endif %}
           </div>
         </div>
-        <div class="rwb-actions">
-          <button class="rwb-btn rwb-btn-accept"
-                  hx-patch="{% url 'reviews:lock-decision' review.id d.id %}"
-                  hx-target="closest .rwb-card"
-                  hx-swap="outerHTML"
-                  onclick="event.stopPropagation()">✓ پەسەندکردن</button>
-          <button class="rwb-btn rwb-btn-reject"
-                  hx-patch="{% url 'reviews:reject-decision' review.id d.id %}"
-                  hx-target="closest .rwb-card"
-                  hx-swap="outerHTML"
-                  onclick="event.stopPropagation()">✗ ڕەتکردنەوە</button>
-          <button class="rwb-btn rwb-btn-comment" onclick="event.stopPropagation();rwbComment(this)">💬 تێبینی</button>
+        {% empty %}
+        <div class="text-center py-5" style="color:var(--rw-text-3)">
+          <p>{% trans "هیچ بڕیارێکی جێگیرکراو نییە هێشتا." %}</p>
         </div>
-        <div class="rwb-comment">
-          <textarea placeholder="تێبینیت لێرە بنووسە..."></textarea>
+        {% endfor %}
+      </div>
+
+      {# Tab 3: Full bible — Filmustage-style sectioned viewer #}
+      <div class="rwb-pane" id="rwb-bible">
+        <div class="bb-layout">
+          <nav class="bb-sidebar" id="bb-toc"></nav>
+          <div class="bb-main" id="bb-content"></div>
         </div>
       </div>
-      {% empty %}
-      <div style="text-align:center;padding:60px 20px;color:var(--rw-text-3)">
-        <p style="font-size:18px;margin-bottom:8px">هیچ بڕیارێکی نوێ نییە</p>
-        <p style="font-size:13px">هەموو بڕیارەکان جێگیرکراون یان ڕەتکراونەتەوە.</p>
-      </div>
-      {% endfor %}
-    </div>
+      {{ review.content|json_script:"bb-data" }}
 
-    {# Tab 2: Locked decisions #}
-    <div class="rwb-pane" id="rwb-locked">
-      {% for d in locked_decisions %}
-      <div class="rwb-locked">
-        <div class="rwb-locked-hdr" onclick="rwbToggle(this)">
-          <span class="rwb-locked-topic">{{ d.topic }}</span>
-          <span class="rwb-locked-badge">جێگیر</span>
-          <span class="rwb-locked-chevron">›</span>
+    </div>{# /rwb-left #}
+
+    {# ═══ RIGHT PANEL — bible / script (always visible) ═══ #}
+    <div class="rwb-right">
+      <div class="rwb-right-tabs">
+        <div class="rwb-right-tab active" onclick="rwbRight('rbible',this)">{% trans "بایبڵ" %}</div>
+        <div class="rwb-right-tab" onclick="rwbRight('rscript',this)">{% trans "سکریپت" %}</div>
+      </div>
+
+      {# Bible sections #}
+      <div class="rwb-rpane active" id="rwb-rbible">
+        <div class="rwb-bsection" data-section="D">
+          <h3>{% trans "سیستمی ناڵی — D15 ناڕاستەوخۆیی" %}</h3>
+          <p>{% trans "هەر پەیوەندییەکی ناڵی بە سیستمێکەوە ناڕاستەوخۆ ئەنجام دەدرێت. ئەو هەرگیز ڕاستەوخۆ کار ناکات لەسەر ڕاستی." %}</p>
         </div>
-        <div class="rwb-locked-body">
-          <div class="rwb-locked-text">{{ d.decision_text }}</div>
-          {% if d.lock_comment %}
-          <div class="rwb-locked-comment">{{ d.lock_comment }}</div>
-          {% endif %}
+        <div class="rwb-bsection" data-section="A">
+          <h3>{% trans "گەشە — چیرۆکی تایبەتی خۆی" %}</h3>
+          <p>{% trans "گەشە تەنها قوربانی نییە. شەکرەبایی و نەخۆشییەکەی، ماسکەکەی، شەربەتەکەی — هەموو ئەمانە بەشی ئەرکی ڕێبازین." %}</p>
+        </div>
+        <div class="rwb-bsection" data-section="B">
+          <h3>{% trans "جیهانی فیزیکی — شتەکان چیرۆک دەگێڕن" %}</h3>
+          <p>{% trans "سۆفا، دەرگای قفڵکراو، خانووی باخچە — هەر شتێک لە فیلمەکەدا بارگی ستراکچەری هەڵدەگرێت." %}</p>
+        </div>
+        <div class="rwb-bsection" data-section="C">
+          <h3>{% trans "ئاوازی فیلم — چوارچێوە" %}</h3>
+          <p>{% trans "تویستی کۆتایی هەموو شتێک دەگۆڕێتەوە. مۆنتاژی سەرەتا ئامادەکاری کۆتاییە. لە ٥ خولەکی کۆتاییدا بڕیار دەدرێت." %}</p>
+        </div>
+        <div class="rwb-bsection" data-section="general">
+          <h3>{{ project.title }}</h3>
+          <p>{% trans "بڕیارێک هەڵبژێرە بۆ ئەوەی بەشی پەیوەندیدار لەم پانێلەدا نیشان بدرێت." %}</p>
         </div>
       </div>
-      {% empty %}
-      <div style="text-align:center;padding:60px 20px;color:var(--rw-text-3)">
-        <p>هیچ بڕیارێکی جێگیرکراو نییە هێشتا.</p>
-      </div>
-      {% endfor %}
-    </div>
 
-    {# Tab 3: Full bible — Filmustage-style sectioned viewer #}
-    <div class="rwb-pane" id="rwb-bible">
-      <div class="bb-layout">
-        <nav class="bb-sidebar" id="bb-toc"></nav>
-        <div class="bb-main" id="bb-content"></div>
+      {# Script panel #}
+      <div class="rwb-rpane" id="rwb-rscript">
+        <div class="rwb-script-line scene-hdr">{% trans "دیمەنی ٣ — ژووری ناڵی — شەو" %}</div>
+        <div class="rwb-script-line act">{% trans "ناڵی لە تەختی مۆبایلەکەی سەیر دەکات. دوای ئەوەی بە گەشە قسەی کرد، تەلەفۆنەکە دادەنێت و ئەپی AI دەکاتەوە." %}</div>
+        <div class="rwb-script-line char">{% trans "ناڵی" %}</div>
+        <div class="rwb-script-line dlg">{% trans "ئەوەی ئەمشەو قسەی کردین... ئایا ئەو ڕاستگۆ بوو؟" %}</div>
+        <div class="rwb-script-line char">AI</div>
+        <div class="rwb-script-line dlg">{% trans "بەپێی شیکردنەوەی دەنگ — ئاستی دڵنیایی ٧٨٪ بوو." %}</div>
+        <div class="rwb-script-line scene-hdr" style="margin-top:24px">{% trans "دیمەنی ١٣ — ناوی خانوو — ڕۆژ" %}</div>
+        <div class="rwb-script-line act">{% trans "ناڵی لە ژوورێکی دیکەوە بە نهێنی تەلەفۆن بۆ AI دەکات." %}</div>
+        <div class="rwb-script-line char">{% trans "ناڵی" %}</div>
+        <div class="rwb-script-line dlg">{% trans "ئەو قسەی کرد لەبارەی ئەوەی ئەویشنەوە بۆ ئەوەی کە بەسەر چووبوو... واتا چی؟" %}</div>
+        <div class="rwb-script-line char">AI</div>
+        <div class="rwb-script-line dlg">{% trans "واز لە خوێندنەوەی مێشکی مرۆڤەکان بهێنە." %}</div>
+        <div class="rwb-script-line scene-hdr" style="margin-top:24px">{% trans "دیمەنی ٢١ — ژووری نیشتەجێبوون — ئێوارە" %}</div>
+        <div class="rwb-script-line act">{% trans "ناڵی ڕاهێنانی چیخۆڤ بەڕێوە دەبات. ئەکتەرەکان لەسەر سۆفا ئەکتەری دەکەن." %}</div>
+        <div class="rwb-script-line char">{% trans "ناڵی" %}</div>
+        <div class="rwb-script-line dlg">{% trans "باشە، بیربکەنەوە ئەمە ساتی ڕاستییە. نینا ڕاستییەکە دەزانێت. ئێوە — ئەو ڕاستییە ناکارە." %}</div>
       </div>
-    </div>
-    {{ review.content|json_script:"bb-data" }}
+    </div>{# /rwb-right #}
 
-  </div>{# /rwb-left #}
+  </div>{# /rwb-split #}
 
-  {# ═══ RIGHT PANEL — bible / script (always visible) ═══ #}
-  <div class="rwb-right">
-    <div class="rwb-right-tabs">
-      <div class="rwb-right-tab active" onclick="rwbRight('rbible',this)">بایبڵ</div>
-      <div class="rwb-right-tab" onclick="rwbRight('rscript',this)">سکریپت</div>
-    </div>
+  {# ── Footer ── #}
+  <div class="d-flex align-items-center justify-content-between px-4 bg-rw-surface"
+       style="height:44px;flex-shrink:0;border-top:1px solid var(--rw-border);font-size:11px;color:var(--rw-text-3)">
+    <span>{% trans "دروستکراوە لە" %} <span style="color:var(--rw-pink);font-weight:700">{% trans "ڕوانگە" %}</span> — {% trans "پلاتفۆرمی پێشبەرهەمهێنانی سینەمای کوردی" %}</span>
+    <bdi dir="ltr" class="rw-font-en">{{ review.version|default:"v03" }} · {% now "Y-m-d" %}</bdi>
+  </div>
 
-    {# Bible sections #}
-    <div class="rwb-rpane active" id="rwb-rbible">
-      <div class="rwb-bsection" data-section="D">
-        <h3>سیستمی ناڵی — D15 ناڕاستەوخۆیی</h3>
-        <p>هەر پەیوەندییەکی ناڵی بە سیستمێکەوە ناڕاستەوخۆ ئەنجام دەدرێت. ئەو هەرگیز ڕاستەوخۆ کار ناکات لەسەر ڕاستی.</p>
-      </div>
-      <div class="rwb-bsection" data-section="A">
-        <h3>گەشە — چیرۆکی تایبەتی خۆی</h3>
-        <p>گەشە تەنها قوربانی نییە. شەکرەبایی و نەخۆشییەکەی، ماسکەکەی، شەربەتەکەی — هەموو ئەمانە بەشی ئەرکی ڕێبازین.</p>
-      </div>
-      <div class="rwb-bsection" data-section="B">
-        <h3>جیهانی فیزیکی — شتەکان چیرۆک دەگێڕن</h3>
-        <p>سۆفا، دەرگای قفڵکراو، خانووی باخچە — هەر شتێک لە فیلمەکەدا بارگی ستراکچەری هەڵدەگرێت.</p>
-      </div>
-      <div class="rwb-bsection" data-section="C">
-        <h3>ئاوازی فیلم — چوارچێوە</h3>
-        <p>تویستی کۆتایی هەموو شتێک دەگۆڕێتەوە. مۆنتاژی سەرەتا ئامادەکاری کۆتاییە. لە ٥ خولەکی کۆتاییدا بڕیار دەدرێت.</p>
-      </div>
-      <div class="rwb-bsection" data-section="general">
-        <h3>{{ project.title }}</h3>
-        <p>بڕیارێک هەڵبژێرە بۆ ئەوەی بەشی پەیوەندیدار لەم پانێلەدا نیشان بدرێت.</p>
-      </div>
-    </div>
-
-    {# Script panel #}
-    <div class="rwb-rpane" id="rwb-rscript">
-      <div class="rwb-script-line scene-hdr">دیمەنی ٣ — ژووری ناڵی — شەو</div>
-      <div class="rwb-script-line act">ناڵی لە تەختی مۆبایلەکەی سەیر دەکات. دوای ئەوەی بە گەشە قسەی کرد، تەلەفۆنەکە دادەنێت و ئەپی AI دەکاتەوە.</div>
-      <div class="rwb-script-line char">ناڵی</div>
-      <div class="rwb-script-line dlg">ئەوەی ئەمشەو قسەی کردین... ئایا ئەو ڕاستگۆ بوو؟</div>
-      <div class="rwb-script-line char">AI</div>
-      <div class="rwb-script-line dlg">بەپێی شیکردنەوەی دەنگ — ئاستی دڵنیایی ٧٨٪ بوو.</div>
-      <div class="rwb-script-line scene-hdr" style="margin-top:24px">دیمەنی ١٣ — ناوی خانوو — ڕۆژ</div>
-      <div class="rwb-script-line act">ناڵی لە ژوورێکی دیکەوە بە نهێنی تەلەفۆن بۆ AI دەکات.</div>
-      <div class="rwb-script-line char">ناڵی</div>
-      <div class="rwb-script-line dlg">ئەو قسەی کرد لەبارەی ئەوەی ئەویشنەوە بۆ ئەوەی کە بەسەر چووبوو... واتا چی؟</div>
-      <div class="rwb-script-line char">AI</div>
-      <div class="rwb-script-line dlg">واز لە خوێندنەوەی مێشکی مرۆڤەکان بهێنە.</div>
-      <div class="rwb-script-line scene-hdr" style="margin-top:24px">دیمەنی ٢١ — ژووری نیشتەجێبوون — ئێوارە</div>
-      <div class="rwb-script-line act">ناڵی ڕاهێنانی چیخۆڤ بەڕێوە دەبات. ئەکتەرەکان لەسەر سۆفا ئەکتەری دەکەن.</div>
-      <div class="rwb-script-line char">ناڵی</div>
-      <div class="rwb-script-line dlg">باشە، بیربکەنەوە ئەمە ساتی ڕاستییە. نینا ڕاستییەکە دەزانێت. ئێوە — ئەو ڕاستییە ناکارە.</div>
-    </div>
-  </div>{# /rwb-right #}
-
-</div>{# /rwb-split #}
-
-{# ── Footer ── #}
-<div class="rwb-footer">
-  <span>دروستکراوە لە <span style="color:var(--rw-pink);font-weight:700">ڕوانگە</span> — پلاتفۆرمی پێشبەرهەمهێنانی سینەمای کوردی</span>
-  <span class="en">{{ review.version|default:"v03" }} · {% now "Y-m-d" %}</span>
 </div>
-
 {% endblock %}
 
 {% block extra_js %}
@@ -766,7 +751,6 @@ function rwbTab(id, btn) {
   document.querySelectorAll('.rwb-left .rwb-pane').forEach(function(p){ p.classList.remove('active'); });
   btn.classList.add('active');
   document.getElementById('rwb-' + id).classList.add('active');
-  /* Bible mode — full-width, hide right panel */
   var split = document.querySelector('.rwb-split');
   if (id === 'bible') {
     split.classList.add('bb-mode');
@@ -813,8 +797,6 @@ function rwbComment(btn) {
 
 /* ═══════════════════════════════════════════════════
    BIBLE VIEWER — Filmustage-style sectioned reader
-   Parses markdown-style bible content into formatted
-   sections with TOC sidebar and proper typography.
    ═══════════════════════════════════════════════════ */
 
 function _esc(t) {
@@ -835,21 +817,15 @@ function bbInit() {
   } else if (data && typeof data === 'object') {
     content = data.content || '';
     title = data.title || '';
-    /* if content is still a dict/object, try to extract text */
-    if (typeof content === 'object') {
-      content = JSON.stringify(content);
-    }
+    if (typeof content === 'object') { content = JSON.stringify(content); }
   }
   if (!content) return;
 
-  /* normalize: replace literal \n sequences with real newlines */
   content = content.replace(/\\n/g, '\n');
-
   var sections = bbParse(content);
   var mainEl = document.getElementById('bb-content');
   var tocEl = document.getElementById('bb-toc');
 
-  /* ── render main ── */
   var html = '';
   if (title) {
     html += '<div class="bb-doc-title">' + _esc(title) + '</div>';
@@ -858,8 +834,7 @@ function bbInit() {
   sections.forEach(function(s) { html += bbSection(s); });
   mainEl.innerHTML = html;
 
-  /* ── render TOC ── */
-  var toc = '<div class="bb-toc-head">بەشەکان</div>';
+  var toc = '<div class="bb-toc-head">{% trans "بەشەکان" %}</div>';
   sections.forEach(function(s) {
     if (!s.title) return;
     var label = s.title.replace(/\s*\([^)]+\)\s*$/, '');
@@ -867,34 +842,15 @@ function bbInit() {
   });
   tocEl.innerHTML = toc;
 
-  /* activate first */
   var first = tocEl.querySelector('.bb-toc-item');
   if (first) first.classList.add('active');
-
-  /* scroll spy */
   mainEl.addEventListener('scroll', function() { bbSpy(); });
 }
 
-/* ── Parse content into sections ── */
 function bbParse(text) {
-  /*
-   * The bible content may arrive in different newline states:
-   *   - real \n from JSON.parse
-   *   - literal two-char \n from double-escaping
-   *   - mixed
-   * Normalize everything to real newlines first.
-   */
   text = text.replace(/\\n/g, '\n');
   text = text.replace(/\r\n/g, '\n');
-
-  /*
-   * Insert * * * separators before section patterns the source omits.
-   * We look for Header\n--- patterns that are NOT already preceded by * * *.
-   * Also inject before known standalone headers (چیرۆکەکە).
-   */
-  /* Pattern A: any Header\n--- that isn't already after * * * */
   text = text.replace(/\n(?!\s*\*\s*\*\s*\*)(\n*[^\n*|>_][^\n]*\n-{3,})/g, '\n\n* * *\n\n$1');
-  /* Pattern B: story header — no dashes, standalone title */
   text = text.replace(/\n(?!\s*\*\s*\*\s*\*)\n*(چیرۆکەکە)\s*\n/g, '\n\n* * *\n\n$1\n');
 
   var chunks = text.split(/\n\s*\*\s*\*\s*\*\s*\n/);
@@ -903,35 +859,22 @@ function bbParse(text) {
   chunks.forEach(function(chunk, i) {
     chunk = chunk.trim();
     if (!chunk) return;
-
     var title = '', body = chunk, enName = '';
-
-    /* header: line followed by --- dashes */
     var m = chunk.match(/^([^\n]+)\n-{3,}\s*\n?([\s\S]*)/);
-    if (m) {
-      title = m[1].trim();
-      body = (m[2] || '').trim();
-    } else {
-      /* short first line as implicit header */
+    if (m) { title = m[1].trim(); body = (m[2] || '').trim(); }
+    else {
       var lines = chunk.split('\n');
       var fl = lines[0].trim();
       if (fl.length < 70 && lines.length > 1 && !/^[|>*_]/.test(fl)) {
-        title = fl;
-        body = lines.slice(1).join('\n').trim();
+        title = fl; body = lines.slice(1).join('\n').trim();
       }
     }
-
-    /* detect **تێبینی:** as title */
     if (!title) {
       var nm = body.match(/^\*\*(.+?)[:：]\*\*\s*([\s\S]*)/);
       if (nm) { title = nm[1].trim(); body = nm[2].trim(); }
     }
-
-    /* English sub-name from parentheses */
     var enM = title.match(/\(([^)]+)\)/);
     if (enM) enName = enM[1];
-
-    /* detect section type */
     var type = 'general';
     if (/Core Statement|پوختەی سەرەکی/.test(title)) type = 'core';
     else if (/Logline|کورتەی چیرۆک/.test(title)) type = 'logline';
@@ -940,17 +883,13 @@ function bbParse(text) {
     else if (/تێبینی/.test(title)) type = 'note';
     else if (/خشتەی دیمەنەکان|Scene Table/.test(title)) type = 'scene-table';
     else if (/چیرۆکەکە/.test(title)) type = 'story';
-
     out.push({ id: 'bb-s' + i, title: title, enName: enName, body: body, type: type });
   });
-
   return out;
 }
 
-/* ── Render a section ── */
 function bbSection(s) {
   var h = '<div class="bb-section" id="' + s.id + '">';
-
   if (s.title) {
     h += '<div class="bb-section-hdr">';
     h += '<div class="bb-section-title">' + _esc(s.title) + '</div>';
@@ -958,23 +897,18 @@ function bbSection(s) {
     h += '<div class="bb-section-rule"></div>';
     h += '</div>';
   }
-
   switch (s.type) {
-    case 'core':      h += bbCore(s.body); break;
-    case 'logline':   h += bbLogline(s.body); break;
-    case 'characters':h += bbTable(s.body); break;
-    case 'props':     h += bbProps(s.body); break;
-    case 'note':      h += '<div class="bb-note">' + _esc(s.body) + '</div>'; break;
-    case 'scene-table':
-      h += bbParas(s.body); break;
-    default:          h += bbParas(s.body); break;
+    case 'core':       h += bbCore(s.body); break;
+    case 'logline':    h += bbLogline(s.body); break;
+    case 'characters': h += bbTable(s.body); break;
+    case 'props':      h += bbProps(s.body); break;
+    case 'note':       h += '<div class="bb-note">' + _esc(s.body) + '</div>'; break;
+    default:           h += bbParas(s.body); break;
   }
-
   h += '</div>';
   return h;
 }
 
-/* ── Core Statement (blockquote) ── */
 function bbCore(body) {
   var lines = body.split('\n'), q = [], rest = [];
   lines.forEach(function(l) {
@@ -988,9 +922,7 @@ function bbCore(body) {
   return h;
 }
 
-/* ── Logline (paragraphs + metadata) ── */
 function bbLogline(body) {
-  /* try double-newline split; fall back to single if only 1 chunk */
   var paras = body.split(/\n\n+/);
   if (paras.length <= 1) paras = body.split(/\n/);
   var h = '';
@@ -998,31 +930,24 @@ function bbLogline(body) {
     p = p.trim();
     if (!p) return;
     var mm = p.match(/^\*\*(.+?)[:：]\*\*\s*(.+)/);
-    if (mm) {
-      h += '<div class="bb-meta-row">' + _esc(mm[1]) + ': <span>' + _esc(mm[2]) + '</span></div>';
-    } else {
-      h += '<p class="bb-para">' + bbInline(p) + '</p>';
-    }
+    if (mm) h += '<div class="bb-meta-row">' + _esc(mm[1]) + ': <span>' + _esc(mm[2]) + '</span></div>';
+    else h += '<p class="bb-para">' + bbInline(p) + '</p>';
   });
   return h;
 }
 
-/* ── Table (characters) ── */
 function bbTable(body) {
   var lines = body.split('\n').filter(function(l) { return l.trim(); });
   var tLines = [], oLines = [];
   lines.forEach(function(l) {
     var t = l.trim();
-    /* detect pipe-delimited rows: must have at least 2 pipes */
     (t.charAt(0) === '|' || (t.indexOf('|') > 0 && (t.match(/\|/g)||[]).length >= 2))
       ? tLines.push(t) : oLines.push(l);
   });
   if (!tLines.length) return bbParas(body);
-
   var h = '<div class="bb-table-wrap"><table class="bb-table">';
   var isFirst = true;
   tLines.forEach(function(row) {
-    /* skip separator: line with only pipes, dashes, colons, spaces */
     if (/^\|[\s\-:|]+\|?\s*$/.test(row)) return;
     if (/^[-:||\s]+$/.test(row)) return;
     var cells = row.split('|').filter(function(c) { return c.trim() !== ''; });
@@ -1041,7 +966,6 @@ function bbTable(body) {
   return h;
 }
 
-/* ── Props (bold name + description) ── */
 function bbProps(body) {
   var parts = body.split(/\n(?=\*\*)/), h = '';
   parts.forEach(function(part) {
@@ -1060,45 +984,33 @@ function bbProps(body) {
   return h;
 }
 
-/* ── Generic paragraphs ── */
 function bbParas(body) {
-  /* try double-newline split; fall back to single if only 1 chunk */
   var paras = body.split(/\n\n+/);
   if (paras.length <= 1) paras = body.split(/\n/);
   var h = '';
   paras.forEach(function(p) {
     p = p.trim();
     if (!p) return;
-    /* metadata line */
     var mm = p.match(/^\*\*(.+?)[:：]\*\*\s*(.+)/);
-    if (mm) {
-      h += '<div class="bb-meta-row">' + _esc(mm[1]) + ': <span>' + _esc(mm[2]) + '</span></div>';
-      return;
-    }
-    /* italic note */
+    if (mm) { h += '<div class="bb-meta-row">' + _esc(mm[1]) + ': <span>' + _esc(mm[2]) + '</span></div>'; return; }
     if (p.startsWith('_') && p.endsWith('_')) {
-      h += '<div class="bb-note">' + _esc(p.replace(/^_\(?|_\)?$/g, '').replace(/^\(|\)$/g, '')) + '</div>';
-      return;
+      h += '<div class="bb-note">' + _esc(p.replace(/^_\(?|_\)?$/g, '').replace(/^\(|\)$/g, '')) + '</div>'; return;
     }
-    /* blockquote */
     if (p.match(/^>/m)) {
       var qt = p.replace(/^>\s*/gm, '').replace(/^"|"$/g, '');
-      h += '<div class="bb-quote">' + _esc(qt) + '</div>';
-      return;
+      h += '<div class="bb-quote">' + _esc(qt) + '</div>'; return;
     }
     h += '<p class="bb-para">' + bbInline(p) + '</p>';
   });
   return h;
 }
 
-/* ── Inline formatting ── */
 function bbInline(text) {
   text = _esc(text);
   text = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
   return text;
 }
 
-/* ── TOC navigation ── */
 function bbNav(el) {
   document.querySelectorAll('.bb-toc-item').forEach(function(t) { t.classList.remove('active'); });
   el.classList.add('active');
@@ -1106,7 +1018,6 @@ function bbNav(el) {
   if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-/* ── Scroll spy ── */
 function bbSpy() {
   var main = document.getElementById('bb-content');
   var items = document.querySelectorAll('.bb-toc-item');

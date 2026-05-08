@@ -13,7 +13,7 @@
 
 {% block content %}
 
-  {% include "components/_breadcrumb.html" with project=project current=_("پەیوەندییەکان") %}
+  {% include "components/_breadcrumb.html" with project=project current="پەیوەندییەکان" %}
 
   {# Header #}
   <div class="d-flex align-items-center justify-content-between px-4 py-3 bg-rw-surface"
@@ -35,7 +35,7 @@
   <div class="p-4">
     {% regroup members by department_role as dept_groups %}
     {% for group in dept_groups %}
-    <div class="rw-section-hdr mb-3">{{ group.grouper|default:_("بێ بەش") }}</div>
+    <div class="rw-section-hdr mb-3">{{ group.grouper|default:"بێ بەش" }}</div>
     <div class="mb-4"
          style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1px;background:var(--rw-border);border:1px solid var(--rw-border)">
       {% for m in group.list %}
@@ -65,7 +65,7 @@
       {% endfor %}
     </div>
     {% empty %}
-    {% include "components/_empty_state.html" with title=_("هێشتا ئەندامێک نییە") sub=_("یەکێکی بانگهێشت بکە بۆ پێدانی دەستڕاگەیشتن") cta_text=_("بانگهێشتکردن") %}
+    {% include "components/_empty_state.html" with title="هێشتا ئەندامێک نییە" sub="یەکێکی بانگهێشت بکە بۆ پێدانی دەستڕاگەیشتن" cta_text="بانگهێشتکردن" %}
     {% endfor %}
   </div>
 

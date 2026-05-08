@@ -11,11 +11,9 @@
    ════════════════════════════════════════════════════════ #}
 {% load i18n %}
 
-<div style="padding:var(--rw-pad-lg)">
-
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--rw-pad-md)">
-    <h2 style="font-size:16px;font-weight:700">{% trans "جلوبەرگ و گریم" %}</h2>
-    <button class="rw-btn rw-btn-primary"
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <h2 class="fs-6 fw-bold mb-0">{% trans "جلوبەرگ و گریم" %}</h2>
+    <button class="rw-btn rw-btn-primary rw-btn-sm"
             hx-get="{% url 'departments:add_wardrobe_modal' project.pk scene.pk %}"
             hx-target="#rw-modal-container" hx-swap="innerHTML">
       + {% trans "زیادکردن" %}
@@ -24,38 +22,35 @@
 
   {% if wardrobe_items %}
 
-  {# Character colour palette — cycle through section colours #}
-  {% with char_colors="var(--rw-break),var(--rw-plan),var(--rw-vis),var(--rw-script),var(--rw-shoot)" %}
-
-  <div class="rw-wardrobe-grid">
+  <div class="rw-wardrobe-grid"
+       style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1px;background:var(--rw-border);border:1px solid var(--rw-border)">
     {% for character in characters %}
-    {% with forloop.counter0|divisibleby:"1" as dummy %}
-    <div class="rw-wc-card"
-         style="border-top-color:{% cycle 'var(--rw-break)' 'var(--rw-plan)' 'var(--rw-vis)' 'var(--rw-script)' 'var(--rw-shoot)' %}">
-      <div class="rw-wc-name">{{ character.name }}</div>
+    <div class="rw-wc-card p-3"
+         style="background:var(--rw-surface);border-top:3px solid {% cycle 'var(--rw-break)' 'var(--rw-plan)' 'var(--rw-vis)' 'var(--rw-script)' 'var(--rw-shoot)' %}">
+      <div class="rw-wc-name fw-bold mb-3" style="font-size:14px;color:var(--rw-text)">{{ character.name }}</div>
 
       {% for item in wardrobe_items %}{% if item.character_id == character.pk %}
-      <div style="margin-bottom:var(--rw-pad-md);padding-bottom:var(--rw-pad-sm);border-bottom:1px solid var(--rw-border-2)">
-        <div style="font-size:12px;font-weight:700;color:var(--rw-amber);margin-bottom:8px">{{ item.outfit_name }}</div>
+      <div class="mb-3 pb-3" style="border-bottom:1px solid var(--rw-border)">
+        <div class="fw-bold mb-2" style="font-size:12px;color:var(--rw-amber)">{{ item.outfit_name }}</div>
 
         {% if item.description %}
-        <div class="rw-wc-row">
-          <strong>{% trans "وەسف" %}</strong>
-          <span>{{ item.description }}</span>
+        <div class="d-flex gap-2 mb-1">
+          <strong style="font-size:11px;color:var(--rw-text-3);flex-shrink:0">{% trans "وەسف" %}</strong>
+          <span style="font-size:12px;color:var(--rw-text-2)">{{ item.description }}</span>
         </div>
         {% endif %}
 
         {% if item.notes %}
-        <div class="rw-wc-note">{{ item.notes }}</div>
+        <div class="rw-notes-block mt-2" style="font-size:11px">{{ item.notes }}</div>
         {% endif %}
 
         {% if item.image %}
         <img src="{{ item.image.url }}" alt="{{ item.outfit_name }}"
-             style="width:100%;margin-top:10px;object-fit:cover;max-height:140px">
+             class="w-100 mt-2" style="object-fit:cover;max-height:140px;display:block">
         {% endif %}
 
-        <div style="margin-top:8px">
-          <button class="rw-btn rw-btn-ghost" style="padding:4px 10px;font-size:11px"
+        <div class="mt-2">
+          <button class="rw-btn rw-btn-ghost rw-btn-sm"
                   hx-get="{% url 'departments:edit_wardrobe_modal' project.pk item.pk %}"
                   hx-target="#rw-modal-container" hx-swap="innerHTML">✎</button>
         </div>
@@ -63,27 +58,22 @@
       {% endif %}{% endfor %}
 
       {# Add outfit button for this character #}
-      <button class="rw-btn rw-btn-ghost" style="width:100%;justify-content:center;font-size:12px"
+      <button class="rw-btn rw-btn-ghost rw-btn-sm w-100 justify-content-center"
               hx-get="{% url 'departments:add_wardrobe_modal' project.pk scene.pk %}?character={{ character.pk }}"
               hx-target="#rw-modal-container" hx-swap="innerHTML">
         + {% trans "زیادکردنی جل" %}
       </button>
     </div>
-    {% endwith %}
     {% empty %}
-    <div style="grid-column:span 2;padding:var(--rw-pad-lg);text-align:center;color:var(--rw-text-3)">
+    <div class="p-4 text-center" style="color:var(--rw-text-3)">
       {% trans "کەسایەتییەک لە ئەم دیمەنەدا نییە" %}
     </div>
     {% endfor %}
   </div>
 
-  {% endwith %}
-
   {% else %}
-  <div class="rw-empty" style="padding:var(--rw-pad-xl) var(--rw-pad-md)">
-    <div class="rw-empty-icon">👗</div>
-    <div class="rw-empty-title">{% trans "هێشتا تێبینی جلوبەرگێک نییە" %}</div>
-    <div class="rw-empty-sub">{% trans "جلوبەرگی هەر کەسایەتییەک بۆ ئەم دیمەنە زیاد بکە" %}</div>
+  {% include "components/_empty_state.html" with icon_svg="wardrobe" title="هێشتا تێبینی جلوبەرگێک نییە" sub="جلوبەرگی هەر کەسایەتییەک بۆ ئەم دیمەنە زیاد بکە" %}
+  <div class="text-center mt-3">
     <button class="rw-btn rw-btn-primary"
             hx-get="{% url 'departments:add_wardrobe_modal' project.pk scene.pk %}"
             hx-target="#rw-modal-container" hx-swap="innerHTML">
@@ -91,5 +81,3 @@
     </button>
   </div>
   {% endif %}
-
-</div>

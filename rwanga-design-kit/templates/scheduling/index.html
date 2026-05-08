@@ -13,32 +13,32 @@
 {% block title %}{% trans "خشتەی وێنەگرتن" %} — {{ project.title }}{% endblock %}
 
 {% block content %}
-<div id="rw-content" style="display:flex;flex:1;overflow:hidden">
+<div class="d-flex flex-grow-1 overflow-hidden">
 
   {# ── Day selector panel ── #}
-  <aside style="width:220px;background:var(--rw-surface);border-inline-start:1px solid var(--rw-border);display:flex;flex-direction:column;flex-shrink:0">
-    <div style="padding:var(--rw-pad-md) var(--rw-pad-sm) var(--rw-pad-xs);font-size:10px;font-weight:700;color:var(--rw-text-3);text-transform:uppercase;letter-spacing:1.2px;border-bottom:1px solid var(--rw-border)">
+  <aside class="rw-scene-panel d-none d-md-flex flex-column overflow-hidden">
+    <div class="rw-overline px-3 py-2" style="border-bottom:1px solid var(--rw-border)">
       {% trans "ڕۆژەکانی وێنەگرتن" %}
     </div>
-    <div style="flex:1;overflow-y:auto;padding:8px 0">
+    <div class="flex-grow-1 overflow-auto">
       {% for day in shoot_days %}
       <div class="rw-scene-item {% if forloop.first %}active{% endif %}"
            hx-get="{% url 'scheduling:day_detail' project.pk day.pk %}"
            hx-target="#rw-sched-main" hx-swap="innerHTML">
         <span class="rw-sc-num" dir="ltr">{{ day.day_number }}</span>
-        <div style="flex:1;min-width:0">
-          <div class="rw-sc-loc" style="font-family:var(--rw-font-en)">{{ day.date|date:"M j" }}</div>
+        <div class="flex-grow-1" style="min-width:0">
+          <div class="rw-sc-loc rw-font-en">{{ day.date|date:"M j" }}</div>
           <div class="rw-sc-time">{{ day.blocks.count }} {% trans "بلۆک" %}</div>
         </div>
       </div>
       {% empty %}
-      <div style="padding:var(--rw-pad-md);text-align:center;color:var(--rw-text-3);font-size:12px">
+      <div class="p-3 text-center" style="font-size:12px;color:var(--rw-text-3)">
         {% trans "ڕۆژی وێنەگرتن نییە" %}
       </div>
       {% endfor %}
     </div>
-    <div style="padding:12px;border-top:1px solid var(--rw-border)">
-      <button class="rw-btn rw-btn-primary" style="width:100%;justify-content:center"
+    <div class="p-3" style="border-top:1px solid var(--rw-border)">
+      <button class="rw-btn rw-btn-primary w-100 justify-content-center"
               hx-get="{% url 'scheduling:add_day_modal' project.pk %}"
               hx-target="#rw-modal-container" hx-swap="innerHTML">
         + {% trans "ڕۆژی نوێ" %}
@@ -47,37 +47,45 @@
   </aside>
 
   {# ── Main schedule content ── #}
-  <div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+  <div class="flex-grow-1 d-flex flex-column overflow-hidden">
 
     {# Header bar #}
-    <div style="height:56px;background:var(--rw-surface);border-bottom:1px solid var(--rw-border);display:flex;align-items:center;padding:0 var(--rw-pad-md);gap:16px;flex-shrink:0">
-      <h1 style="font-size:18px;font-weight:700;flex:1">{% trans "خشتەی وێنەگرتن" %}</h1>
-      <div style="font-size:13px;color:var(--rw-text-2)">
+    <div class="d-flex align-items-center gap-3 px-4 bg-rw-surface"
+         style="height:56px;flex-shrink:0;border-bottom:1px solid var(--rw-border)">
+      <h1 class="fs-5 fw-bold flex-grow-1 mb-0">{% trans "خشتەی وێنەگرتن" %}</h1>
+      <span style="font-size:13px;color:var(--rw-text-2)">
         {{ shoot_days.count }} {% trans "ڕۆژ" %}
-      </div>
+      </span>
       <a href="{% url 'scheduling:stripboard' project.pk %}" class="rw-btn rw-btn-ghost">
-        ≡ {% trans "ستریپبۆرد" %}
+        <svg width="16" height="16" viewBox="0 0 24 24" class="ico" style="width:16px;height:16px">
+          <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/>
+          <line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+        {% trans "ستریپبۆرد" %}
       </a>
       <a href="{% url 'scheduling:call_sheets' project.pk %}" class="rw-btn rw-btn-amber">
-        📋 {% trans "ئایننامەکان" %}
+        <svg width="16" height="16" viewBox="0 0 24 24" class="ico" style="width:16px;height:16px">
+          <rect x="5" y="2" width="14" height="20" rx="1"/>
+          <line x1="9" y1="7" x2="15" y2="7"/>
+          <line x1="9" y1="11" x2="15" y2="11"/>
+          <line x1="9" y1="15" x2="13" y2="15"/>
+        </svg>
+        {% trans "ئایننامەکان" %}
       </a>
     </div>
 
     {# Schedule content swapped by day selection #}
-    <div id="rw-sched-main" style="flex:1;overflow-y:auto;padding:var(--rw-pad-lg)">
+    <div id="rw-sched-main" class="flex-grow-1 overflow-auto p-4">
       {% if shoot_days %}
-      {# Load first day by default #}
-      <div style="text-align:center;color:var(--rw-text-3);padding:var(--rw-pad-xl);font-size:13px">
+      <div class="text-center py-5" style="color:var(--rw-text-3);font-size:13px">
         {% trans "ڕۆژێک هەڵبژێرە" %}
       </div>
       {% else %}
-      {% include "components/_empty_state.html" with icon="📅" title=_("هێشتا خشتەیەک نییە") sub=_("ڕۆژی وێنەگرتنی یەکەم زیاد بکە") cta_text=_("دروستکردنی خشتە") %}
+      {% include "components/_empty_state.html" with icon_svg="<svg width='40' height='40' viewBox='0 0 24 24' class='ico'><circle cx='12' cy='12' r='9'/><circle cx='12' cy='12' r='2.5'/><circle cx='12' cy='5.5' r='1.5'/><circle cx='12' cy='18.5' r='1.5'/><circle cx='5.5' cy='12' r='1.5'/><circle cx='18.5' cy='12' r='1.5'/><circle cx='7.7' cy='7.7' r='1.5'/><circle cx='16.3' cy='16.3' r='1.5'/><circle cx='16.3' cy='7.7' r='1.5'/><circle cx='7.7' cy='16.3' r='1.5'/></svg>" title="هێشتا خشتەیەک نییە" sub="ڕۆژی وێنەگرتنی یەکەم زیاد بکە" %}
       {% endif %}
     </div>
 
   </div>
 
 </div>
-
-<div id="rw-modal-container"></div>
 {% endblock %}

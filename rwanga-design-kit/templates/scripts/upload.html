@@ -1,12 +1,12 @@
 {# ════════════════════════════════════════════════════════
    RWANGA — scripts/upload.html
    Script upload + AI breakdown trigger.
-   After upload: Celery task queued, WebSocket streams progress.
+   Pattern: FORM / EDIT
 
    Context:
-     project       — Project instance
+     project         — Project instance
      existing_script — Script|None
-     active_jobs   — QuerySet[AIJob] currently running
+     active_jobs     — QuerySet[AIJob] currently running
    ════════════════════════════════════════════════════════ #}
 {% extends "base.html" %}
 {% load static i18n %}
@@ -14,16 +14,14 @@
 {% block title %}{% trans "بارکردنی دەستنووس" %} — {{ project.title }}{% endblock %}
 
 {% block content %}
-<div style="flex:1;overflow-y:auto;background:var(--rw-bg)">
+<div class="flex-grow-1 overflow-auto p-4 p-lg-5" style="background:var(--rw-bg)">
 
-  {% include "components/_breadcrumb.html" with
-     crumbs=crumbs
-     current=_("بارکردنی دەستنووس") %}
+  {% include "components/_breadcrumb.html" with crumbs=crumbs current="بارکردنی دەستنووس" %}
 
-  <div style="padding:var(--rw-pad-lg);max-width:720px">
+  <div style="max-width:720px;margin:0 auto">
 
-    <h1 style="font-size:26px;font-weight:700;margin-bottom:8px">{% trans "دەستنووسەکەت بار بکە" %}</h1>
-    <p style="color:var(--rw-text-2);font-size:14px;margin-bottom:var(--rw-pad-lg);line-height:1.7">
+    <h1 class="fw-bold mb-2" style="font-size:26px">{% trans "دەستنووسەکەت بار بکە" %}</h1>
+    <p class="mb-4" style="color:var(--rw-text-2);font-size:14px;line-height:1.7">
       {% trans "دوای بارکردن، AI بە خۆی دەستنووسەکە دادەشکێنێت:" %}
       {% trans "دیمەنەکان، کەسایەتییەکان، شوێنەکان، کەلوپەل، جلوبەرگ، و کاتی شاشە." %}
       {% trans "دەرهێنەر دواتر ئەنجامەکە پشکنی و چاکی دەکاتەوە." %}
@@ -37,33 +35,46 @@
     </div>
 
     {% if existing_script %}
-    {# ── Existing script — show replace option ── #}
-    <div class="rw-card" style="margin-bottom:var(--rw-pad-md);border-inline-start:4px solid var(--rw-amber)">
-      <div class="rw-card-title">{% trans "دەستنووسی ئێستا" %}</div>
-      <div style="display:flex;align-items:center;gap:16px">
-        <span style="font-size:32px">📄</span>
+    {# Existing script — show replace option #}
+    <div class="rw-card mb-3" style="border-inline-start:4px solid var(--rw-amber)">
+      <div class="rw-card-title mb-3">{% trans "دەستنووسی ئێستا" %}</div>
+      <div class="d-flex align-items-center gap-3">
+        <svg width="32" height="32" viewBox="0 0 24 24" class="ico flex-shrink-0">
+          <path d="M4 6l16-3v4H4z"/>
+          <rect x="2" y="7" width="20" height="14" rx="1"/>
+          <line x1="7" y1="3.5" x2="5" y2="7"/><line x1="11" y1="2.7" x2="9" y2="7"/>
+          <line x1="15" y1="1.9" x2="13" y2="7"/><line x1="19" y1="1.1" x2="17" y2="7"/>
+        </svg>
         <div>
-          <div style="font-size:14px;font-weight:600">{{ existing_script.filename }}</div>
+          <div class="fw-semibold" style="font-size:14px">{{ existing_script.filename }}</div>
           <div style="font-size:12px;color:var(--rw-text-2)">
             {{ existing_script.scene_count }} {% trans "دیمەن" %} ·
-            {{ existing_script.created_at|date:"Y/m/d" }}
+            <bdi dir="ltr" class="rw-font-en">{{ existing_script.created_at|date:"Y/m/d" }}</bdi>
           </div>
         </div>
-        <div style="margin-inline-start:auto;display:flex;gap:8px">
+        <div class="d-flex gap-2 ms-auto">
           <a href="{% url 'scripts:breakdown' project.pk %}" class="rw-btn rw-btn-ghost">
             {% trans "بینینی داڕشتن" %}
           </a>
           <button class="rw-btn rw-btn-ai"
                   hx-post="{% url 'ai_engine:rerun_breakdown' existing_script.pk %}"
                   hx-target="#rw-ai-status">
-            🤖 {% trans "داڕشتنی دووبارە" %}
+            <svg width="14" height="14" viewBox="0 0 24 24" class="ico" style="display:inline-block;vertical-align:middle">
+              <circle cx="12" cy="12" r="9"/>
+              <circle cx="12" cy="12" r="2.5"/>
+              <circle cx="12" cy="5.5" r="1.5"/><circle cx="12" cy="18.5" r="1.5"/>
+              <circle cx="5.5" cy="12" r="1.5"/><circle cx="18.5" cy="12" r="1.5"/>
+              <circle cx="7.7" cy="7.7" r="1.5"/><circle cx="16.3" cy="16.3" r="1.5"/>
+              <circle cx="16.3" cy="7.7" r="1.5"/><circle cx="7.7" cy="16.3" r="1.5"/>
+            </svg>
+            {% trans "داڕشتنی دووبارە" %}
           </button>
         </div>
       </div>
     </div>
     {% endif %}
 
-    {# ── Upload zone ── #}
+    {# Upload zone #}
     <form method="post"
           enctype="multipart/form-data"
           action="{% url 'scripts:upload' project.pk %}"
@@ -83,8 +94,14 @@
                    document.getElementById('rw-file-input').files=event.dataTransfer.files;
                    document.getElementById('rw-upload-form').submit()">
         <div class="rw-upload-icon" id="rw-upload-spinner">
-          <span class="htmx-indicator" style="font-size:40px;display:none">⟳</span>
-          <span class="htmx-default">📄</span>
+          <span class="rw-spin rw-spin-sm htmx-indicator"
+                style="border-color:rgba(212,165,116,.2);border-top-color:var(--rw-amber)"></span>
+          <svg width="40" height="40" viewBox="0 0 24 24" class="ico htmx-default">
+            <path d="M4 6l16-3v4H4z"/>
+            <rect x="2" y="7" width="20" height="14" rx="1"/>
+            <line x1="7" y1="3.5" x2="5" y2="7"/><line x1="11" y1="2.7" x2="9" y2="7"/>
+            <line x1="15" y1="1.9" x2="13" y2="7"/><line x1="19" y1="1.1" x2="17" y2="7"/>
+          </svg>
         </div>
         <div class="rw-upload-title" id="rw-upload-filename">
           {% trans "دەستنووسەکەت لێرە بکێشە" %}
@@ -104,36 +121,64 @@
              id="rw-file-input"
              name="script_file"
              accept=".fdx,.fountain,.pdf,.docx"
-             style="display:none"
+             class="d-none"
              onchange="
                document.getElementById('rw-upload-filename').textContent = this.files[0]?.name || '';
                document.getElementById('rw-upload-form').dispatchEvent(new Event('submit'))">
 
     </form>
 
-    {# ── What AI does ── #}
-    <div style="margin-top:var(--rw-pad-lg)">
-      <div class="rw-section-hdr">{% trans "AI چی دەکات" %}</div>
+    {# What AI does #}
+    <div class="mt-4">
+      <div class="rw-section-hdr mb-3">{% trans "AI چی دەکات" %}</div>
       {% for item in ai_steps %}
-      <div style="display:flex;gap:16px;padding:16px 0;border-bottom:1px solid var(--rw-border-2)">
-        <span style="font-size:22px;width:32px;flex-shrink:0">{{ item.icon }}</span>
+      <div class="d-flex gap-3 py-3" style="border-bottom:1px solid var(--rw-border-2)">
+        <span class="flex-shrink-0" style="font-size:22px;width:32px">{{ item.icon }}</span>
         <div>
-          <div style="font-size:14px;font-weight:600;margin-bottom:4px">{{ item.title }}</div>
+          <div class="fw-semibold mb-1" style="font-size:14px">{{ item.title }}</div>
           <div style="font-size:12px;color:var(--rw-text-2);line-height:1.6">{{ item.desc }}</div>
         </div>
       </div>
       {% empty %}
-      <div style="display:flex;gap:16px;padding:16px 0;border-bottom:1px solid var(--rw-border-2)">
-        <span style="font-size:22px;width:32px">🎬</span>
-        <div><div style="font-size:14px;font-weight:600;margin-bottom:4px">{% trans "دیمەن و کەسایەتی" %}</div><div style="font-size:12px;color:var(--rw-text-2)">{% trans "هەموو دیمەنەکان، کەسایەتییەکان، و شوێنەکان دادەشکێنرێن." %}</div></div>
+      <div class="d-flex gap-3 py-3" style="border-bottom:1px solid var(--rw-border-2)">
+        <svg width="22" height="22" viewBox="0 0 24 24" class="ico flex-shrink-0">
+          <rect x="2" y="4" width="20" height="16" rx="1"/>
+          <line x1="2" y1="8" x2="22" y2="8"/><line x1="2" y1="16" x2="22" y2="16"/>
+          <line x1="6" y1="4" x2="6" y2="8"/><line x1="10" y1="4" x2="10" y2="8"/>
+          <line x1="14" y1="4" x2="14" y2="8"/><line x1="18" y1="4" x2="18" y2="8"/>
+          <line x1="6" y1="16" x2="6" y2="20"/><line x1="10" y1="16" x2="10" y2="20"/>
+          <line x1="14" y1="16" x2="14" y2="20"/><line x1="18" y1="16" x2="18" y2="20"/>
+        </svg>
+        <div>
+          <div class="fw-semibold mb-1" style="font-size:14px">{% trans "دیمەن و کەسایەتی" %}</div>
+          <div style="font-size:12px;color:var(--rw-text-2)">{% trans "هەموو دیمەنەکان، کەسایەتییەکان، و شوێنەکان دادەشکێنرێن." %}</div>
+        </div>
       </div>
-      <div style="display:flex;gap:16px;padding:16px 0;border-bottom:1px solid var(--rw-border-2)">
-        <span style="font-size:22px;width:32px">🏷</span>
-        <div><div style="font-size:14px;font-weight:600;margin-bottom:4px">{% trans "داڕشتنی خۆکار" %}</div><div style="font-size:12px;color:var(--rw-text-2)">{% trans "کەلوپەل، جلوبەرگ، SFX، VFX خۆکار دەناسرێتەوە." %}</div></div>
+      <div class="d-flex gap-3 py-3" style="border-bottom:1px solid var(--rw-border-2)">
+        <svg width="22" height="22" viewBox="0 0 24 24" class="ico flex-shrink-0">
+          <rect x="3" y="3" width="18" height="18" rx="1"/>
+          <line x1="3" y1="10" x2="21" y2="10"/>
+          <line x1="10" y1="10" x2="10" y2="21"/>
+          <circle cx="6.5" cy="6.5" r="1.5"/><circle cx="16" cy="16" r="1.5"/>
+        </svg>
+        <div>
+          <div class="fw-semibold mb-1" style="font-size:14px">{% trans "داڕشتنی خۆکار" %}</div>
+          <div style="font-size:12px;color:var(--rw-text-2)">{% trans "کەلوپەل، جلوبەرگ، SFX، VFX خۆکار دەناسرێتەوە." %}</div>
+        </div>
       </div>
-      <div style="display:flex;gap:16px;padding:16px 0">
-        <span style="font-size:22px;width:32px">📅</span>
-        <div><div style="font-size:14px;font-weight:600;margin-bottom:4px">{% trans "کاتی شاشە" %}</div><div style="font-size:12px;color:var(--rw-text-2)">{% trans "کاتی تاقمینی هەر دیمەنێک لە بنەماوەی پرسیار کرا." %}</div></div>
+      <div class="d-flex gap-3 py-3">
+        <svg width="22" height="22" viewBox="0 0 24 24" class="ico flex-shrink-0">
+          <circle cx="12" cy="12" r="9"/>
+          <circle cx="12" cy="12" r="2.5"/>
+          <circle cx="12" cy="5.5" r="1.5"/><circle cx="12" cy="18.5" r="1.5"/>
+          <circle cx="5.5" cy="12" r="1.5"/><circle cx="18.5" cy="12" r="1.5"/>
+          <circle cx="7.7" cy="7.7" r="1.5"/><circle cx="16.3" cy="16.3" r="1.5"/>
+          <circle cx="16.3" cy="7.7" r="1.5"/><circle cx="7.7" cy="16.3" r="1.5"/>
+        </svg>
+        <div>
+          <div class="fw-semibold mb-1" style="font-size:14px">{% trans "کاتی شاشە" %}</div>
+          <div style="font-size:12px;color:var(--rw-text-2)">{% trans "کاتی تاقمینی هەر دیمەنێک لە بنەماوەی پرسیار کرا." %}</div>
+        </div>
       </div>
       {% endfor %}
     </div>

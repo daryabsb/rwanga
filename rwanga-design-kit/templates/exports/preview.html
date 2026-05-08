@@ -1,212 +1,133 @@
 <!DOCTYPE html>
-<html lang="ku" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ڕوانگە — Export Templates Preview</title>
+<title>Rwanga — Export Templates Preview</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-/* ── RESET & SHELL ── */
+/* ── SWITCHER SHELL ── */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Inter',sans-serif;background:#0F0F12;color:#EDEAD8;font-size:14px;min-height:100vh;}
-
-/* ── SWITCHER BAR ── */
 #switcher{
   position:sticky;top:0;z-index:200;
   background:#17171C;border-bottom:1px solid #2C2C38;
   display:flex;align-items:center;gap:0;padding:0 20px;height:52px;
-  overflow-x:auto;
 }
-#switcher::-webkit-scrollbar{height:0;}
-.sw-logo{
-  width:36px;height:36px;background:#F72585;
-  display:flex;align-items:center;justify-content:center;
-  font-size:16px;font-weight:700;color:#fff;font-family:'Cairo',sans-serif;
-  margin-inline-end:16px;flex-shrink:0;
-}
-.sw-label{font-size:11px;font-weight:700;color:#40404E;text-transform:uppercase;letter-spacing:1.2px;margin-inline-end:20px;white-space:nowrap;flex-shrink:0;}
-.sw-btn{
-  padding:0 20px;height:52px;font-size:13px;font-weight:600;
-  background:none;border:none;border-bottom:3px solid transparent;
-  color:#78788C;cursor:pointer;transition:color .12s,border-color .12s;
-  white-space:nowrap;font-family:'Inter',sans-serif;flex-shrink:0;
-}
+.sw-logo{width:36px;height:36px;background:#F72585;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#fff;font-family:'Cairo',sans-serif;margin-inline-end:16px;flex-shrink:0;}
+.sw-label{font-size:12px;font-weight:700;color:#40404E;text-transform:uppercase;letter-spacing:1px;margin-inline-end:20px;white-space:nowrap;}
+.sw-btn{padding:0 20px;height:52px;font-size:13px;font-weight:600;background:none;border:none;border-bottom:3px solid transparent;color:#78788C;cursor:pointer;transition:color .12s,border-color .12s;white-space:nowrap;font-family:'Inter',sans-serif;}
 .sw-btn:hover{color:#EDEAD8;}
 .sw-btn.active{color:#D4A574;border-bottom-color:#D4A574;}
 .sw-spacer{flex:1;}
-.sw-note{font-size:11px;color:#40404E;white-space:nowrap;flex-shrink:0;}
+.sw-note{font-size:11px;color:#40404E;white-space:nowrap;}
 
-/* ── PANELS ── */
+/* ── PREVIEW PANELS ── */
 .preview-panel{display:none;}
 .preview-panel.active{display:block;}
 
-/* ════════════════════════════════════════════════════
-   SHARED PDF WRAPPER — simulates A4 on screen
-   ════════════════════════════════════════════════════ */
-.pdf-wrap{background:#D8D8DC;padding:32px;min-height:calc(100vh - 52px);}
+/* ════════════════════════════════════
+   SHARED PRINT / PDF WRAPPER
+   Simulates A4 page on screen
+   ════════════════════════════════════ */
+.pdf-wrap{
+  background:#E8E8EC;
+  padding:32px;
+  min-height:calc(100vh - 52px);
+}
 .pdf-page{
-  background:#fff;max-width:210mm;margin:0 auto;
-  padding:14mm 12mm 18mm;min-height:297mm;
+  background:#fff;
+  max-width:210mm;
+  margin:0 auto;
+  padding:14mm 12mm 18mm;
+  min-height:297mm;
   font-family:'Cairo','Noto Sans Arabic',Arial,sans-serif;
-  font-size:11pt;color:#0F0F12;direction:rtl;line-height:1.5;
+  font-size:11pt;
+  color:#0F0F12;
+  direction:rtl;
+  line-height:1.5;
 }
-.pdf-page-landscape{max-width:297mm;min-height:210mm;}
-.en{font-family:'Inter','Helvetica Neue',Arial,sans-serif;direction:ltr;unicode-bidi:isolate;}
+.pdf-page-landscape{
+  max-width:297mm;
+  min-height:210mm;
+}
 
-/* ════════════════════════════════════════════════════
-   CALL SHEET — CSS variables (print-safe)
-   ════════════════════════════════════════════════════ */
-.cs-page{
-  --rw-pink:#F72585;--rw-amber:#9A5520;--rw-surface:#F7F7FA;
-  --rw-border:#DCDCE8;--rw-text:#0F0F12;--rw-text-2:#5C5C70;--rw-text-3:#A0A0B8;
-}
+/* ════ CALL SHEET STYLES ════ */
 .cs-header{border-bottom:3pt solid #F72585;padding-bottom:10pt;margin-bottom:14pt;}
-.cs-header-row{display:table;width:100%;}
-.cs-logo-cell{display:table-cell;vertical-align:middle;width:60pt;}
-.cs-info-cell{display:table-cell;vertical-align:middle;padding-inline-start:12pt;}
-.cs-day-cell{display:table-cell;vertical-align:middle;text-align:end;width:80pt;}
-.cs-logo-mark{
-  display:inline-block;width:48pt;height:48pt;background:#F72585;
-  color:#fff;font-family:'Cairo',sans-serif;font-size:22pt;font-weight:700;
-  text-align:center;line-height:48pt;
-}
+.cs-header-row{display:flex;align-items:center;gap:16pt;}
+.cs-logo-mark{width:48pt;height:48pt;background:#F72585;color:#fff;font-family:'Cairo',sans-serif;font-size:22pt;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .cs-logo-name{font-size:8pt;font-weight:700;color:#5C5C70;text-transform:uppercase;letter-spacing:1.2pt;margin-top:3pt;}
+.cs-project-info{flex:1;}
 .cs-project-title{font-size:17pt;font-weight:700;color:#0F0F12;line-height:1.2;}
 .cs-project-sub{font-size:9.5pt;color:#5C5C70;margin-top:2pt;}
-.cs-day-badge{
-  display:inline-block;width:52pt;height:52pt;background:#F72585;
-  color:#fff;font-family:'Inter',sans-serif;font-size:22pt;font-weight:700;
-  text-align:center;line-height:52pt;
-}
+.cs-day-col{text-align:end;}
+.cs-day-badge{display:inline-flex;align-items:center;justify-content:center;width:52pt;height:52pt;background:#F72585;color:#fff;font-family:'Inter',sans-serif;font-size:22pt;font-weight:700;}
 .cs-day-label{font-size:8pt;color:#A0A0B8;text-align:center;margin-top:3pt;text-transform:uppercase;letter-spacing:0.8pt;}
 
-.cs-call-hero{
-  background:#F7F7FA;border:2pt solid #F72585;
-  padding:14pt 20pt;margin-bottom:14pt;
-  display:table;width:100%;
-}
-.cs-call-left{display:table-cell;vertical-align:middle;}
-.cs-call-right{display:table-cell;vertical-align:middle;text-align:end;}
+.cs-call-hero{background:#F7F7FA;border:2pt solid #F72585;padding:14pt 20pt;margin-bottom:14pt;display:flex;align-items:center;justify-content:space-between;}
 .cs-call-label{font-size:9pt;font-weight:700;color:#F72585;text-transform:uppercase;letter-spacing:1.2pt;margin-bottom:4pt;}
 .cs-call-time{font-family:'Inter',sans-serif;font-size:36pt;font-weight:700;color:#F72585;line-height:1;direction:ltr;}
 .cs-call-date{font-size:11pt;color:#5C5C70;margin-top:4pt;}
-.cs-weather-icon{font-size:22pt;line-height:1;}
+.cs-weather{text-align:end;}
+.cs-weather-icon{font-size:22pt;}
 .cs-weather-temp{font-family:'Inter',sans-serif;font-size:13pt;font-weight:700;color:#0F0F12;}
 .cs-weather-desc{font-size:10pt;color:#5C5C70;}
 
 .cs-section{margin-bottom:14pt;}
-.cs-section-title{
-  font-size:8pt;font-weight:700;color:#A0A0B8;text-transform:uppercase;
-  letter-spacing:1.2pt;padding-bottom:4pt;border-bottom:1pt solid #DCDCE8;margin-bottom:8pt;
-}
+.cs-section-title{font-size:8pt;font-weight:700;color:#A0A0B8;text-transform:uppercase;letter-spacing:1.2pt;padding-bottom:4pt;border-bottom:1pt solid #DCDCE8;margin-bottom:8pt;}
 
-.cs-loc-box{display:table;width:100%;border:1pt solid #DCDCE8;background:#F7F7FA;}
-.cs-loc-main{display:table-cell;vertical-align:top;padding:10pt 14pt;width:75%;}
-.cs-loc-qr{
-  display:table-cell;vertical-align:middle;width:80pt;text-align:center;
-  border-inline-start:1pt solid #DCDCE8;padding:10pt;
-}
+.cs-loc-box{display:flex;border:1pt solid #DCDCE8;background:#F7F7FA;}
+.cs-loc-main{flex:1;padding:10pt 14pt;}
+.cs-loc-qr{width:80pt;flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;border-inline-start:1pt solid #DCDCE8;padding:10pt;}
 .cs-loc-name{font-size:13pt;font-weight:700;color:#0F0F12;margin-bottom:4pt;}
 .cs-loc-addr{font-size:10pt;color:#5C5C70;margin-bottom:6pt;line-height:1.5;}
 .cs-loc-link{font-family:'Inter',sans-serif;font-size:8.5pt;color:#9A5520;direction:ltr;display:inline-block;}
-.cs-qr-box{
-  width:60pt;height:60pt;border:1pt dashed #DCDCE8;
-  display:inline-flex;align-items:center;justify-content:center;
-  font-family:'Inter',sans-serif;font-size:9pt;font-weight:700;color:#A0A0B8;
-}
+.cs-qr-box{width:60pt;height:60pt;border:1pt dashed #DCDCE8;display:flex;align-items:center;justify-content:center;font-family:'Inter',sans-serif;font-size:9pt;font-weight:700;color:#A0A0B8;}
 .cs-qr-label{font-size:7pt;color:#A0A0B8;margin-top:4pt;text-align:center;}
 
 .cs-table{width:100%;border-collapse:collapse;font-size:10pt;}
-.cs-table th{
-  background:#F7F7FA;border:1pt solid #DCDCE8;padding:6pt 10pt;
-  text-align:start;font-size:8pt;font-weight:700;color:#A0A0B8;
-  text-transform:uppercase;letter-spacing:0.8pt;
-}
+.cs-table th{background:#F7F7FA;border:1pt solid #DCDCE8;padding:6pt 10pt;text-align:start;font-size:8pt;font-weight:700;color:#A0A0B8;text-transform:uppercase;letter-spacing:0.8pt;}
 .cs-table td{border:1pt solid #DCDCE8;padding:8pt 10pt;vertical-align:top;font-size:10pt;color:#0F0F12;}
 .cs-table tr:nth-child(even) td{background:#F7F7FA;}
-.cs-table tr.rw-break td{background:#FFF8F0;color:#5C5C70;font-style:italic;font-size:9pt;}
-.cs-scene-chip{
-  display:inline-block;background:#9A5520;color:#fff;
-  font-family:'Inter',sans-serif;font-size:8.5pt;font-weight:700;padding:1pt 6pt;
-}
-.cs-int-ext{
-  display:inline-block;border:1pt solid #DCDCE8;
-  font-family:'Inter',sans-serif;font-size:8pt;font-weight:700;
-  color:#5C5C70;padding:0pt 4pt;margin-inline-start:4pt;
-}
+.cs-table tr.break-row td{background:#FFF8F0;color:#5C5C70;font-style:italic;font-size:9pt;}
+.cs-scene-chip{display:inline-block;background:#9A5520;color:#fff;font-family:'Inter',sans-serif;font-size:8.5pt;font-weight:700;padding:1pt 6pt;}
+.cs-int-ext{display:inline-block;border:1pt solid #DCDCE8;font-family:'Inter',sans-serif;font-size:8pt;font-weight:700;color:#5C5C70;padding:0pt 4pt;margin-inline-start:4pt;}
 .cs-calltime{font-family:'Inter',sans-serif;font-weight:700;color:#F72585;font-size:11pt;direction:ltr;}
-
-.cs-crew-note{display:table;width:100%;border:1pt solid #DCDCE8;margin-bottom:6pt;}
-.cs-crew-dept{
-  display:table-cell;vertical-align:top;width:90pt;
-  padding:8pt 12pt;background:#F7F7FA;border-inline-end:1pt solid #DCDCE8;
-  font-size:9pt;font-weight:700;color:#5C5C70;text-transform:uppercase;letter-spacing:0.6pt;
-}
-.cs-crew-body{display:table-cell;vertical-align:top;padding:8pt 12pt;font-size:10pt;color:#0F0F12;line-height:1.6;}
-
-.cs-footer{
-  margin-top:20pt;padding-top:8pt;border-top:1pt solid #DCDCE8;
-  display:table;width:100%;font-size:8pt;color:#A0A0B8;
-}
-.cs-footer-left{display:table-cell;vertical-align:middle;}
-.cs-footer-right{display:table-cell;vertical-align:middle;text-align:end;}
+.cs-crew-note{display:flex;border:1pt solid #DCDCE8;margin-bottom:6pt;}
+.cs-crew-dept{width:90pt;flex-shrink:0;padding:8pt 12pt;background:#F7F7FA;border-inline-end:1pt solid #DCDCE8;font-size:9pt;font-weight:700;color:#5C5C70;text-transform:uppercase;letter-spacing:0.6pt;}
+.cs-crew-body{padding:8pt 12pt;font-size:10pt;color:#0F0F12;line-height:1.6;}
+.cs-footer{margin-top:20pt;padding-top:8pt;border-top:1pt solid #DCDCE8;display:flex;justify-content:space-between;font-size:8pt;color:#A0A0B8;}
 .cs-footer-brand{font-weight:700;color:#F72585;}
+.en{font-family:'Inter',sans-serif;direction:ltr;unicode-bidi:isolate;}
 
-/* ════════════════════════════════════════════════════
-   SHOT LIST — CSS
-   ════════════════════════════════════════════════════ */
-.sl-header{display:table;width:100%;border-bottom:2.5pt solid #F72585;padding-bottom:8pt;margin-bottom:12pt;}
-.sl-logo-cell{display:table-cell;vertical-align:middle;width:46pt;}
-.sl-info-cell{display:table-cell;vertical-align:middle;padding-inline-start:10pt;}
-.sl-right-cell{display:table-cell;vertical-align:middle;text-align:end;}
-.sl-logo-mark{
-  display:inline-block;width:38pt;height:38pt;background:#F72585;
-  color:#fff;font-family:'Cairo',sans-serif;font-size:17pt;font-weight:700;
-  text-align:center;line-height:38pt;
-}
+/* ════ SHOT LIST STYLES ════ */
+.sl-header{display:flex;align-items:center;gap:10pt;border-bottom:2.5pt solid #F72585;padding-bottom:8pt;margin-bottom:12pt;}
+.sl-logo{width:38pt;height:38pt;background:#F72585;color:#fff;font-family:'Cairo',sans-serif;font-size:17pt;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.sl-proj{flex:1;}
 .sl-proj-title{font-size:15pt;font-weight:700;color:#0F0F12;}
 .sl-proj-sub{font-size:9pt;color:#5C5C70;margin-top:2pt;}
+.sl-doc-right{text-align:end;}
 .sl-doc-label{font-size:9pt;font-weight:700;color:#A0A0B8;text-transform:uppercase;letter-spacing:1pt;}
 .sl-doc-meta{font-size:8.5pt;color:#A0A0B8;margin-top:3pt;}
 
-.sl-scene-hdr{
-  display:table;width:100%;background:#0F0F12;color:#fff;
-  padding:7pt 10pt;margin-top:14pt;
-}
+.sl-scene-hdr{display:flex;align-items:center;justify-content:space-between;background:#0F0F12;color:#fff;padding:7pt 10pt;margin-top:14pt;}
 .sl-scene-hdr:first-of-type{margin-top:0;}
-.sl-scene-hdr-left{display:table-cell;vertical-align:middle;}
-.sl-scene-hdr-right{display:table-cell;vertical-align:middle;text-align:end;font-size:8.5pt;color:rgba(255,255,255,.55);}
-.sl-scene-num{
-  display:inline-block;background:#F72585;color:#fff;
-  font-family:'Inter',sans-serif;font-size:11pt;font-weight:700;
-  padding:2pt 8pt;margin-inline-end:8pt;direction:ltr;
-}
-.sl-int-ext{
-  display:inline-block;border:1pt solid rgba(255,255,255,.35);
-  font-family:'Inter',sans-serif;font-size:8pt;font-weight:700;
-  color:rgba(255,255,255,.8);padding:1pt 6pt;margin-inline-end:6pt;
-}
-.sl-scene-name{font-size:11pt;font-weight:700;color:#fff;display:inline;}
-.sl-scene-time{font-size:9pt;color:rgba(255,255,255,.55);margin-inline-start:8pt;display:inline;}
+.sl-scene-num{display:inline-block;background:#F72585;color:#fff;font-family:'Inter',sans-serif;font-size:11pt;font-weight:700;padding:2pt 8pt;margin-inline-end:8pt;direction:ltr;}
+.sl-int-ext{display:inline-block;border:1pt solid rgba(255,255,255,.35);font-family:'Inter',sans-serif;font-size:8pt;font-weight:700;color:rgba(255,255,255,.8);padding:1pt 6pt;margin-inline-end:6pt;}
+.sl-scene-name{font-size:11pt;font-weight:700;color:#fff;}
+.sl-scene-time{font-size:9pt;color:rgba(255,255,255,.6);margin-inline-start:8pt;}
+.sl-scene-right{font-size:8.5pt;color:rgba(255,255,255,.5);}
 
 .sl-table{width:100%;border-collapse:collapse;font-size:9.5pt;}
 .sl-table thead tr{background:#EEEEF6;}
-.sl-table th{
-  padding:5pt 8pt;text-align:start;font-size:7.5pt;font-weight:700;
-  color:#A0A0B8;text-transform:uppercase;letter-spacing:0.7pt;
-  border:1pt solid #DCDCE8;white-space:nowrap;
-}
+.sl-table th{padding:5pt 8pt;text-align:start;font-size:7.5pt;font-weight:700;color:#A0A0B8;text-transform:uppercase;letter-spacing:0.7pt;border:1pt solid #DCDCE8;white-space:nowrap;}
 .sl-table td{padding:7pt 8pt;border:1pt solid #DCDCE8;vertical-align:top;font-size:9.5pt;color:#0F0F12;line-height:1.5;}
 .sl-table tbody tr:nth-child(even) td{background:#F7F7FA;}
 .sl-table tbody tr.s-d{border-inline-end:3pt solid #C9A800;}
 .sl-table tbody tr.s-v{border-inline-end:3pt solid #A0A0B8;}
 .sl-table tbody tr.s-i{border-inline-end:3pt solid #1E3FAF;}
 .sl-shot-num{font-family:'Inter',sans-serif;font-size:11pt;font-weight:700;color:#9A5520;white-space:nowrap;direction:ltr;display:inline-block;}
-.sl-setup-chip{
-  display:inline-block;background:#EEEEF6;border:1pt solid #DCDCE8;
-  font-family:'Inter',sans-serif;font-size:8pt;font-weight:700;
-  color:#5C5C70;padding:0pt 5pt;margin-inline-start:4pt;
-}
+.sl-setup{display:inline-block;background:#EEEEF6;border:1pt solid #DCDCE8;font-family:'Inter',sans-serif;font-size:8pt;font-weight:700;color:#5C5C70;padding:0pt 5pt;margin-inline-start:4pt;}
 .sl-badge{display:inline-block;padding:1pt 6pt;font-size:7.5pt;font-weight:700;text-transform:uppercase;letter-spacing:0.4pt;white-space:nowrap;}
 .sl-badge-d{background:rgba(201,168,0,.1);color:#7A6000;border:1pt solid rgba(201,168,0,.3);}
 .sl-badge-v{background:#EEEEF6;color:#5C5C70;border:1pt solid #DCDCE8;}
@@ -214,213 +135,149 @@ body{font-family:'Inter',sans-serif;background:#0F0F12;color:#EDEAD8;font-size:1
 .sl-lens{font-family:'Inter',sans-serif;font-size:9pt;font-weight:600;color:#5C5C70;direction:ltr;display:inline-block;}
 .sl-desc{font-size:9pt;color:#5C5C70;line-height:1.5;margin-top:2pt;}
 .sl-notes{font-size:8.5pt;color:#A0A0B8;font-style:italic;margin-top:3pt;}
-.sl-summary td{background:#EEEEF6 !important;font-size:8.5pt;color:#5C5C70;font-style:italic;padding:5pt 8pt;border-top:1.5pt solid #DCDCE8;}
-
-.sl-totals{display:table;width:100%;border:1pt solid #DCDCE8;background:#F7F7FA;margin-top:16pt;}
-.sl-total-cell{display:table-cell;padding:10pt 14pt;text-align:center;border-inline-start:1pt solid #DCDCE8;}
+.sl-summary td{background:#EEEEF6!important;font-size:8.5pt;color:#5C5C70;font-style:italic;padding:5pt 8pt;border-top:1.5pt solid #DCDCE8;}
+.sl-totals{display:flex;border:1pt solid #DCDCE8;background:#F7F7FA;margin-top:16pt;}
+.sl-total-cell{flex:1;padding:10pt 14pt;text-align:center;border-inline-start:1pt solid #DCDCE8;}
 .sl-total-cell:first-child{border-inline-start:none;}
-.sl-total-val{font-family:'Inter',sans-serif;font-size:18pt;font-weight:700;color:#9A5520;line-height:1;direction:ltr;display:block;}
+.sl-total-val{font-family:'Inter',sans-serif;font-size:18pt;font-weight:700;color:#9A5520;line-height:1;direction:ltr;}
 .sl-total-lbl{font-size:8pt;font-weight:700;color:#A0A0B8;text-transform:uppercase;letter-spacing:0.8pt;margin-top:4pt;}
-
-.sl-footer{
-  margin-top:14pt;padding-top:7pt;border-top:1pt solid #DCDCE8;
-  display:table;width:100%;font-size:7.5pt;color:#A0A0B8;
-}
-.sl-footer-left{display:table-cell;vertical-align:middle;}
-.sl-footer-right{display:table-cell;vertical-align:middle;text-align:end;}
+.sl-footer{margin-top:14pt;padding-top:7pt;border-top:1pt solid #DCDCE8;display:flex;justify-content:space-between;font-size:7.5pt;color:#A0A0B8;}
 .sl-footer-brand{font-weight:700;color:#F72585;}
 
-/* ════════════════════════════════════════════════════
-   SCENE VIEWER — dark UI tokens
-   ════════════════════════════════════════════════════ */
+/* ════ SCENE VIEWER STYLES ════ */
+.sv-wrap{background:#0F0F12;min-height:calc(100vh - 52px);}
 :root{
-  --sv-bg:#0F0F12;--sv-surface:#17171C;--sv-s2:#1E1E26;--sv-s3:#26262E;
+  --sv-bg:#0F0F12;--sv-surface:#17171C;--sv-surface-2:#1E1E26;--sv-surface-3:#26262E;
   --sv-border:#2C2C38;--sv-border-2:#222230;
   --sv-text:#EDEAD8;--sv-text-2:#78788C;--sv-text-3:#40404E;
   --sv-amber:#D4A574;--sv-amber-dim:rgba(212,165,116,.10);
   --sv-pink:#F72585;--sv-vis:#00A896;--sv-break:#2D5BE3;
-  --sv-t:.12s ease;--sv-r:2px;
 }
-.sv-wrap{background:var(--sv-bg);direction:rtl;font-family:'Cairo','Noto Sans Arabic',system-ui,sans-serif;}
-.sv-wrap .en{font-family:'Inter','Helvetica Neue',Arial,sans-serif;direction:ltr;unicode-bidi:isolate;}
-
-/* top bar */
-.sv-topbar{
-  position:sticky;top:52px;z-index:90;background:var(--sv-surface);
-  border-bottom:1px solid var(--sv-border);display:flex;align-items:center;
-  gap:12px;padding:0 20px;height:52px;
-}
-.sv-logo-mark{
-  width:36px;height:36px;background:var(--sv-pink);color:#fff;
-  font-family:'Cairo',sans-serif;font-size:16px;font-weight:700;
-  display:flex;align-items:center;justify-content:center;flex-shrink:0;
-}
+.sv-wrap .rw-topbar{position:sticky;top:52px;z-index:90;background:var(--sv-surface);border-bottom:1px solid var(--sv-border);display:flex;align-items:center;gap:12px;padding:0 20px;height:52px;}
+.sv-logo-mark{width:36px;height:36px;background:var(--sv-pink);color:#fff;font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:center;font-family:'Cairo',sans-serif;flex-shrink:0;}
 .sv-topbar-title{font-size:14px;font-weight:700;color:var(--sv-text);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.sv-topbar-btn{
-  width:36px;height:36px;background:var(--sv-s2);border:1px solid var(--sv-border);
-  color:var(--sv-text-2);font-size:16px;display:flex;align-items:center;justify-content:center;
-  border-radius:var(--sv-r);cursor:pointer;transition:color var(--sv-t),border-color var(--sv-t);
-  flex-shrink:0;
-}
-.sv-topbar-btn:hover{color:var(--sv-text);border-color:var(--sv-text-3);}
+.sv-topbar-btn{width:36px;height:36px;background:var(--sv-surface-2);border:1px solid var(--sv-border);color:var(--sv-text-2);font-size:16px;display:flex;align-items:center;justify-content:center;border-radius:2px;cursor:pointer;}
 
-/* offline notice */
-.sv-offline{
-  background:var(--sv-surface);border:1px solid var(--sv-border);
-  border-inline-start:4px solid var(--sv-text-3);
-  padding:10px 14px;font-size:11px;color:var(--sv-text-3);line-height:1.6;
-  margin:16px 24px 0;
-}
-
-/* hero */
 .sv-hero{background:var(--sv-surface);border-bottom:1px solid var(--sv-border);padding:28px 24px 20px;}
 .sv-hero-num{font-family:'Inter',sans-serif;font-size:11px;font-weight:700;color:var(--sv-pink);text-transform:uppercase;letter-spacing:1.4px;margin-bottom:6px;}
-.sv-hero-title{font-size:24px;font-weight:700;color:var(--sv-text);line-height:1.2;margin-bottom:10px;}
+.sv-hero-title{font-size:24px;font-weight:700;color:var(--sv-text);line-height:1.2;margin-bottom:10px;font-family:'Cairo',sans-serif;}
 .sv-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;}
-.sv-chip{
-  display:inline-flex;align-items:center;gap:4px;padding:4px 10px;
-  background:var(--sv-s2);border:1px solid var(--sv-border);
-  font-size:11px;font-weight:600;color:var(--sv-text-2);border-radius:var(--sv-r);
-}
+.sv-chip{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;background:var(--sv-surface-2);border:1px solid var(--sv-border);font-size:11px;font-weight:600;color:var(--sv-text-2);border-radius:2px;font-family:'Cairo',sans-serif;}
 .sv-chip.ie{background:var(--sv-amber-dim);border-color:rgba(212,165,116,.3);color:var(--sv-amber);font-family:'Inter',sans-serif;}
-.sv-synopsis{font-size:14px;color:var(--sv-text-2);line-height:1.7;max-width:720px;border-inline-start:3px solid var(--sv-border);padding-inline-start:14px;}
+.sv-synopsis{font-size:14px;color:var(--sv-text-2);line-height:1.7;max-width:720px;border-inline-start:3px solid var(--sv-border);padding-inline-start:14px;font-family:'Cairo',sans-serif;}
 
-/* stats strip */
 .sv-stats{display:flex;border-bottom:1px solid var(--sv-border);background:var(--sv-surface);}
 .sv-stat{flex:1;padding:16px 12px;text-align:center;border-inline-start:1px solid var(--sv-border);}
 .sv-stat:first-child{border-inline-start:none;}
 .sv-stat-val{font-family:'Inter',sans-serif;font-size:26px;font-weight:700;color:var(--sv-amber);line-height:1;margin-bottom:4px;}
-.sv-stat-lbl{font-size:9px;font-weight:700;color:var(--sv-text-3);text-transform:uppercase;letter-spacing:1px;}
+.sv-stat-lbl{font-size:9px;font-weight:700;color:var(--sv-text-3);text-transform:uppercase;letter-spacing:1px;font-family:'Cairo',sans-serif;}
 
-/* main tabs */
-.sv-tabs{
-  display:flex;background:var(--sv-surface);border-bottom:1px solid var(--sv-border);
-  overflow-x:auto;padding:0 8px;position:sticky;top:104px;z-index:80;
-}
-.sv-tabs::-webkit-scrollbar{height:0;}
-.sv-tab{
-  display:flex;align-items:center;padding:0 16px;height:48px;
-  font-size:12px;font-weight:600;color:var(--sv-text-2);white-space:nowrap;
-  border:none;background:none;border-bottom:3px solid transparent;
-  transition:color var(--sv-t),border-color var(--sv-t);cursor:pointer;
-}
+.sv-tabs{display:flex;background:var(--sv-surface);border-bottom:1px solid var(--sv-border);overflow-x:auto;padding:0 8px;position:sticky;top:104px;z-index:80;}
+.sv-tab{display:flex;align-items:center;padding:0 16px;height:48px;font-size:12px;font-weight:600;color:var(--sv-text-2);white-space:nowrap;border:none;background:none;border-bottom:3px solid transparent;transition:color .12s,border-color .12s;cursor:pointer;font-family:'Cairo',sans-serif;}
 .sv-tab:hover{color:var(--sv-text);}
 .sv-tab.active{color:var(--sv-amber);border-bottom-color:var(--sv-amber);}
 .sv-pane{display:none;padding:28px 24px;}
 .sv-pane.active{display:block;}
 .sv-sec-hdr{font-size:10px;font-weight:700;color:var(--sv-text-3);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--sv-border);}
 
-/* shot accordion */
 .sv-shot-item{background:var(--sv-surface);border:1px solid var(--sv-border);border-bottom:none;}
 .sv-shot-item:last-child{border-bottom:1px solid var(--sv-border);}
-.sv-shot-hdr{display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer;transition:background var(--sv-t);user-select:none;}
-.sv-shot-hdr:hover,.sv-shot-hdr.open{background:var(--sv-s2);}
+.sv-shot-hdr{display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer;transition:background .12s;}
+.sv-shot-hdr:hover,.sv-shot-hdr.open{background:var(--sv-surface-2);}
 .sv-snum{font-family:'Inter',sans-serif;font-size:14px;font-weight:700;color:var(--sv-amber);min-width:40px;direction:ltr;flex-shrink:0;}
-.sv-sstyle{font-size:13px;font-weight:600;color:var(--sv-text);flex:1;}
+.sv-sstyle{font-size:13px;font-weight:600;color:var(--sv-text);flex:1;font-family:'Cairo',sans-serif;}
 .sv-smeta{display:flex;align-items:center;gap:8px;flex-shrink:0;}
-.sv-badge{display:inline-block;padding:2px 7px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;border-radius:var(--sv-r);}
+.sv-badge{display:inline-block;padding:2px 7px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;border-radius:2px;}
 .sv-badge-d{background:rgba(245,215,110,.12);color:#F5D76E;border:1px solid rgba(245,215,110,.25);}
-.sv-badge-v{background:var(--sv-s3);color:var(--sv-text-2);border:1px solid var(--sv-border);}
+.sv-badge-v{background:var(--sv-surface-3);color:var(--sv-text-2);border:1px solid var(--sv-border);}
 .sv-badge-i{background:rgba(45,91,227,.12);color:#7FA8FF;border:1px solid rgba(45,91,227,.25);}
-.sv-lens-tag{font-family:'Inter',sans-serif;font-size:11px;font-weight:600;color:var(--sv-text-3);background:var(--sv-s3);padding:2px 7px;border:1px solid var(--sv-border);direction:ltr;}
-.sv-dur-tag{font-family:'Inter',sans-serif;font-size:11px;color:var(--sv-text-3);}
-.sv-chevron{font-size:12px;color:var(--sv-text-3);flex-shrink:0;transition:transform var(--sv-t);}
+.sv-lens{font-family:'Inter',sans-serif;font-size:11px;font-weight:600;color:var(--sv-text-3);background:var(--sv-surface-3);padding:2px 7px;border:1px solid var(--sv-border);direction:ltr;display:inline-block;}
+.sv-chevron{font-size:12px;color:var(--sv-text-3);flex-shrink:0;transition:transform .12s;}
 .sv-shot-hdr.open .sv-chevron{transform:rotate(90deg);}
-.sv-shot-body{display:none;padding:16px 20px 20px;border-top:1px solid var(--sv-border-2);background:var(--sv-s2);}
+.sv-shot-body{display:none;padding:16px 20px 20px;border-top:1px solid var(--sv-border-2);background:var(--sv-surface-2);}
 .sv-shot-body.open{display:block;}
-.sv-shot-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:14px;}
+.sv-grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:14px;}
 .sv-flbl{font-size:9px;font-weight:700;color:var(--sv-text-3);text-transform:uppercase;letter-spacing:.9px;margin-bottom:4px;}
-.sv-fval{font-size:13px;color:var(--sv-text);line-height:1.6;}
-.sv-sdesc{font-size:13px;color:var(--sv-text-2);line-height:1.7;margin-bottom:14px;}
-.sv-notes-block{background:var(--sv-amber-dim);border-inline-start:3px solid var(--sv-amber);padding:10px 14px;font-size:12px;color:var(--sv-text-2);line-height:1.6;margin-top:10px;}
-.sv-sb-thumb{aspect-ratio:16/9;background:var(--sv-s3);border:1px solid var(--sv-border);display:flex;align-items:center;justify-content:center;color:var(--sv-text-3);font-size:11px;font-family:'Inter',sans-serif;margin-top:12px;}
+.sv-fval{font-size:13px;color:var(--sv-text);line-height:1.6;font-family:'Cairo',sans-serif;}
+.sv-sdesc{font-size:13px;color:var(--sv-text-2);line-height:1.7;margin-bottom:14px;font-family:'Cairo',sans-serif;}
+.sv-notes-block{background:var(--sv-amber-dim);border-inline-start:3px solid var(--sv-amber);padding:10px 14px;font-size:12px;color:var(--sv-text-2);line-height:1.6;margin-top:10px;font-family:'Cairo',sans-serif;}
+.sv-sb-thumb{aspect-ratio:16/9;background:var(--sv-surface-3);border:1px solid var(--sv-border);display:flex;align-items:center;justify-content:center;color:var(--sv-text-3);font-size:11px;font-family:'Inter',sans-serif;margin-top:12px;}
 
-/* floor plan */
 .sv-fp-wrap{background:var(--sv-surface);border:1px solid var(--sv-border);overflow:auto;}
-.sv-fp-legend{margin-top:12px;font-size:11px;color:var(--sv-text-3);display:flex;gap:20px;flex-wrap:wrap;}
+.sv-fp-legend{margin-top:12px;font-size:11px;color:var(--sv-text-3);display:flex;gap:20px;flex-wrap:wrap;font-family:'Cairo',sans-serif;}
 
-/* dept tabs */
 .sv-dept-tabs{display:flex;border-bottom:1px solid var(--sv-border);margin-bottom:16px;flex-wrap:wrap;}
-.sv-dept-tab{padding:9px 16px;font-size:12px;font-weight:600;color:var(--sv-text-2);background:none;border:none;border-bottom:2px solid transparent;transition:color var(--sv-t),border-color var(--sv-t);cursor:pointer;white-space:nowrap;}
+.sv-dept-tab{padding:9px 16px;font-size:12px;font-weight:600;color:var(--sv-text-2);background:none;border:none;border-bottom:2px solid transparent;transition:color .12s,border-color .12s;cursor:pointer;white-space:nowrap;font-family:'Cairo',sans-serif;}
 .sv-dept-tab:hover{color:var(--sv-text);}
 .sv-dept-tab.active{color:var(--sv-amber);border-bottom-color:var(--sv-amber);}
 .sv-dept-pane{display:none;}
 .sv-dept-pane.active{display:block;}
 
-/* lighting / sound list */
-.sv-list-wrap{background:var(--sv-surface);border:1px solid var(--sv-border);}
+.sv-light-list{background:var(--sv-surface);border:1px solid var(--sv-border);}
 .sv-light-item{display:flex;gap:14px;align-items:flex-start;padding:12px 14px;border-bottom:1px solid var(--sv-border-2);}
 .sv-light-item:last-child{border-bottom:none;}
 .sv-lshot{font-family:'Inter',sans-serif;font-size:12px;font-weight:700;color:var(--sv-amber);min-width:36px;flex-shrink:0;direction:ltr;}
 .sv-lbody{flex:1;}
-.sv-lnote{font-size:13px;color:var(--sv-text-2);line-height:1.6;margin-bottom:4px;}
+.sv-lnote{font-size:13px;color:var(--sv-text-2);line-height:1.6;margin-bottom:4px;font-family:'Cairo',sans-serif;}
 .sv-lmeta{font-family:'Inter',sans-serif;font-size:11px;color:var(--sv-text-3);direction:ltr;display:inline-block;}
 
-/* checklist */
-.sv-checklist{background:var(--sv-surface);border:1px solid var(--sv-border);}
+.sv-check-list{display:flex;flex-direction:column;background:var(--sv-surface);border:1px solid var(--sv-border);}
 .sv-check-item{display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-bottom:1px solid var(--sv-border-2);}
 .sv-check-item:last-child{border-bottom:none;}
 .sv-check-item input{width:16px;height:16px;margin-top:2px;accent-color:var(--sv-amber);flex-shrink:0;cursor:pointer;}
-.sv-ci-name{font-size:13px;font-weight:600;color:var(--sv-text);margin-bottom:2px;}
-.sv-ci-note{font-size:11px;color:var(--sv-text-2);line-height:1.5;}
+.sv-ci-name{font-size:13px;font-weight:600;color:var(--sv-text);margin-bottom:2px;font-family:'Cairo',sans-serif;}
+.sv-ci-note{font-size:11px;color:var(--sv-text-2);line-height:1.5;font-family:'Cairo',sans-serif;}
 
-/* wardrobe */
 .sv-wc-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--sv-border);}
 .sv-wc-card{background:var(--sv-surface);padding:16px;border-top:4px solid var(--sv-amber);}
-.sv-wc-char{font-size:15px;font-weight:700;color:var(--sv-text);margin-bottom:10px;}
-.sv-wc-outfit{font-size:13px;color:var(--sv-amber);font-weight:600;margin-bottom:6px;}
-.sv-wc-desc{font-size:12px;color:var(--sv-text-2);line-height:1.6;}
+.sv-wc-char{font-size:15px;font-weight:700;color:var(--sv-text);margin-bottom:10px;font-family:'Cairo',sans-serif;}
+.sv-wc-outfit{font-size:13px;color:var(--sv-amber);font-weight:600;margin-bottom:6px;font-family:'Cairo',sans-serif;}
+.sv-wc-desc{font-size:12px;color:var(--sv-text-2);line-height:1.6;font-family:'Cairo',sans-serif;}
 
-/* schedule */
 .sv-sched-list{background:var(--sv-surface);border:1px solid var(--sv-border);}
 .sv-sched-row{display:grid;grid-template-columns:80px 1fr;gap:12px;padding:14px 16px;border-bottom:1px solid var(--sv-border-2);align-items:start;}
 .sv-sched-row:last-child{border-bottom:none;}
 .sv-stime{font-family:'Inter',sans-serif;font-size:11px;color:var(--sv-text-3);direction:ltr;}
 .sv-sdur{font-weight:700;font-size:12px;color:var(--sv-text-2);margin-top:2px;font-family:'Inter',sans-serif;}
-.sv-stitle{font-size:14px;font-weight:700;color:var(--sv-text);}
+.sv-stitle{font-size:14px;font-weight:700;color:var(--sv-text);font-family:'Cairo',sans-serif;}
 
-/* footer */
-.sv-footer{
-  background:var(--sv-surface);border-top:1px solid var(--sv-border);
-  padding:16px 24px;display:flex;align-items:center;justify-content:space-between;
-  gap:12px;font-size:11px;color:var(--sv-text-3);flex-wrap:wrap;
-}
-.sv-footer-brand{display:flex;align-items:center;gap:8px;font-weight:700;color:var(--sv-text-2);}
+.sv-offline{background:var(--sv-surface);border:1px solid var(--sv-border);border-inline-start:4px solid var(--sv-text-3);padding:10px 14px;font-size:11px;color:var(--sv-text-3);line-height:1.6;margin:12px 24px 0;font-family:'Cairo',sans-serif;}
+.sv-footer{background:var(--sv-surface);border-top:1px solid var(--sv-border);padding:16px 24px;display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:11px;color:var(--sv-text-3);flex-wrap:wrap;}
+.sv-footer-brand{display:flex;align-items:center;gap:8px;font-weight:700;color:var(--sv-text-2);font-family:'Cairo',sans-serif;}
 </style>
 </head>
 <body>
 
-<!-- ══ SWITCHER ══ -->
+<!-- SWITCHER -->
 <div id="switcher">
   <div class="sw-logo">ڕ</div>
   <span class="sw-label">Export Templates</span>
-  <button class="sw-btn active" onclick="showPanel('cs',this)">Call Sheet PDF</button>
-  <button class="sw-btn" onclick="showPanel('sl',this)">Shot List PDF</button>
-  <button class="sw-btn" onclick="showPanel('sv',this)">Scene Viewer</button>
+  <button class="sw-btn active" onclick="show('cs',this)">Call Sheet PDF</button>
+  <button class="sw-btn" onclick="show('sl',this)">Shot List PDF</button>
+  <button class="sw-btn" onclick="show('sv',this)">Scene Viewer</button>
   <div class="sw-spacer"></div>
-  <span class="sw-note">Mock data · Django renders at runtime</span>
+  <span class="sw-note">Mock data · Django renders these at runtime</span>
 </div>
 
-
-<!-- ══════════════════════════════════════════════════════
-     PANEL 1 — CALL SHEET PDF
-     ══════════════════════════════════════════════════════ -->
+<!-- ══════════════════════════════════════════════
+     PANEL 1: CALL SHEET PDF
+     ══════════════════════════════════════════════ -->
 <div class="preview-panel active" id="panel-cs">
 <div class="pdf-wrap">
-<div class="pdf-page cs-page">
+<div class="pdf-page">
 
   <!-- LETTERHEAD -->
   <div class="cs-header">
     <div class="cs-header-row">
-      <div class="cs-logo-cell">
+      <div>
         <div class="cs-logo-mark">ڕ</div>
         <div class="cs-logo-name">ڕوانگە</div>
       </div>
-      <div class="cs-info-cell">
+      <div class="cs-project-info">
         <div class="cs-project-title">میوانێکی نادیار</div>
         <div class="cs-project-sub">فیلمی کورت — ستودیۆی سەروەر مهەدین</div>
       </div>
-      <div class="cs-day-cell">
+      <div class="cs-day-col">
         <div class="cs-day-badge">3</div>
         <div class="cs-day-label">ڕۆژی وێنەگرتن</div>
       </div>
@@ -429,12 +286,12 @@ body{font-family:'Inter',sans-serif;background:#0F0F12;color:#EDEAD8;font-size:1
 
   <!-- GENERAL CALL -->
   <div class="cs-call-hero">
-    <div class="cs-call-left">
+    <div>
       <div class="cs-call-label">کاتی گشتی</div>
       <div class="cs-call-time">06:30</div>
       <div class="cs-call-date">یەکشەممە، ١٢ی مایس ٢٠٢٦</div>
     </div>
-    <div class="cs-call-right">
+    <div class="cs-weather">
       <div class="cs-weather-icon">⛅</div>
       <div class="cs-weather-temp">22°C</div>
       <div class="cs-weather-desc">هەوای خۆش، کەمێک هەور</div>
@@ -461,71 +318,15 @@ body{font-family:'Inter',sans-serif;background:#0F0F12;color:#EDEAD8;font-size:1
   <div class="cs-section">
     <div class="cs-section-title">خشتەی ڕۆژ</div>
     <table class="cs-table">
-      <thead>
-        <tr>
-          <th style="width:60pt">کات</th>
-          <th style="width:48pt">ماوە</th>
-          <th style="width:52pt">دیمەن</th>
-          <th>بابەت</th>
-          <th>کەسایەتی</th>
-        </tr>
-      </thead>
+      <thead><tr><th style="width:60pt">کات</th><th style="width:48pt">ماوە</th><th style="width:52pt">دیمەن</th><th>بابەت</th><th>کەسایەتی</th></tr></thead>
       <tbody>
-        <tr>
-          <td><span class="en">06:30</span></td>
-          <td><span class="en">30min</span></td>
-          <td>—</td>
-          <td>ئامادەکردنی ئامێرەکان و ڕووناکی</td>
-          <td style="font-size:9.5pt;color:#5C5C70">تەکنیکی</td>
-        </tr>
-        <tr>
-          <td><span class="en">07:00</span></td>
-          <td><span class="en">45min</span></td>
-          <td><span class="cs-scene-chip">12</span><span class="cs-int-ext">INT</span></td>
-          <td>
-            ژووری خواردن — ئامادەکردنی A
-            <div style="font-size:8.5pt;color:#5C5C70;margin-top:3pt;font-style:italic">لێدانەکانی 12.1 تا 12.4</div>
-          </td>
-          <td style="font-size:9.5pt;color:#5C5C70">ناڵی، گەشە</td>
-        </tr>
-        <tr>
-          <td><span class="en">07:45</span></td>
-          <td><span class="en">60min</span></td>
-          <td><span class="cs-scene-chip">12</span><span class="cs-int-ext">INT</span></td>
-          <td>ژووری خواردن — ئامادەکردنی B و C</td>
-          <td style="font-size:9.5pt;color:#5C5C70">ناڵی، گەشە، هەواڵبەر</td>
-        </tr>
-        <tr class="rw-break">
-          <td><span class="en">09:00</span></td>
-          <td><span class="en">15min</span></td>
-          <td>—</td>
-          <td>پشوو — چای و خواردنی سەرەتا</td>
-          <td>—</td>
-        </tr>
-        <tr>
-          <td><span class="en">09:15</span></td>
-          <td><span class="en">90min</span></td>
-          <td><span class="cs-scene-chip">12</span><span class="cs-int-ext">INT</span></td>
-          <td>
-            بەشی دووەمی دیمەن — ئامادەکردنی D و E
-            <div style="font-size:8.5pt;color:#5C5C70;margin-top:3pt;font-style:italic">دیالۆگی سەرەکی</div>
-          </td>
-          <td style="font-size:9.5pt;color:#5C5C70">ناڵی، گەشە</td>
-        </tr>
-        <tr class="rw-break">
-          <td><span class="en">10:45</span></td>
-          <td><span class="en">60min</span></td>
-          <td>—</td>
-          <td>پشووی ناوەڕاست — خواردن</td>
-          <td>—</td>
-        </tr>
-        <tr>
-          <td><span class="en">11:45</span></td>
-          <td><span class="en">120min</span></td>
-          <td><span class="cs-scene-chip">14</span><span class="cs-int-ext">EXT</span></td>
-          <td>دەرەوەی خانوو — بەشی کۆتایی</td>
-          <td style="font-size:9.5pt;color:#5C5C70">ناڵی، هەواڵبەر</td>
-        </tr>
+        <tr><td><span class="en">06:30</span></td><td><span class="en">30min</span></td><td>—</td><td>ئامادەکردنی ئامێرەکان و ڕووناکی</td><td style="font-size:9.5pt;color:#5C5C70">تەکنیکی</td></tr>
+        <tr><td><span class="en">07:00</span></td><td><span class="en">45min</span></td><td><span class="cs-scene-chip">12</span><span class="cs-int-ext">INT</span></td><td>ژووری خواردن — ئامادەکردنی A<div style="font-size:8.5pt;color:#5C5C70;margin-top:3pt;font-style:italic">لێدانەکانی 12.1 تا 12.4</div></td><td style="font-size:9.5pt;color:#5C5C70">ناڵی، گەشە</td></tr>
+        <tr><td><span class="en">07:45</span></td><td><span class="en">60min</span></td><td><span class="cs-scene-chip">12</span><span class="cs-int-ext">INT</span></td><td>ژووری خواردن — ئامادەکردنی B و C</td><td style="font-size:9.5pt;color:#5C5C70">ناڵی، گەشە، هەواڵبەر</td></tr>
+        <tr class="break-row"><td><span class="en">09:00</span></td><td><span class="en">15min</span></td><td>—</td><td>پشوو — چای و خواردنی سەرەتا</td><td>—</td></tr>
+        <tr><td><span class="en">09:15</span></td><td><span class="en">90min</span></td><td><span class="cs-scene-chip">12</span><span class="cs-int-ext">INT</span></td><td>بەشی دووەمی دیمەن — ئامادەکردنی D و E<div style="font-size:8.5pt;color:#5C5C70;margin-top:3pt;font-style:italic">دیالۆگی سەرەکی</div></td><td style="font-size:9.5pt;color:#5C5C70">ناڵی، گەشە</td></tr>
+        <tr class="break-row"><td><span class="en">10:45</span></td><td><span class="en">60min</span></td><td>—</td><td>پشووی ناوەڕاست — خواردن</td><td>—</td></tr>
+        <tr><td><span class="en">11:45</span></td><td><span class="en">120min</span></td><td><span class="cs-scene-chip">14</span><span class="cs-int-ext">EXT</span></td><td>دەرەوەی خانوو — بەشی کۆتایی</td><td style="font-size:9.5pt;color:#5C5C70">ناڵی، هەواڵبەر</td></tr>
       </tbody>
     </table>
   </div>
@@ -534,33 +335,11 @@ body{font-family:'Inter',sans-serif;background:#0F0F12;color:#EDEAD8;font-size:1
   <div class="cs-section">
     <div class="cs-section-title">کاتی گەیشتنی کەسایەتیەکان</div>
     <table class="cs-table">
-      <thead>
-        <tr>
-          <th>کەسایەتی</th>
-          <th>ئەکتەر / ئەکترێس</th>
-          <th style="width:70pt">کاتی گەیشتن</th>
-          <th>تێبینی</th>
-        </tr>
-      </thead>
+      <thead><tr><th>کەسایەتی</th><th>ئەکتەر / ئەکترێس</th><th style="width:70pt">کاتی گەیشتن</th><th>تێبینی</th></tr></thead>
       <tbody>
-        <tr>
-          <td><strong>ناڵی</strong></td>
-          <td>سەروەر ئەحمەد</td>
-          <td><div class="cs-calltime">06:00</div></td>
-          <td style="font-size:9.5pt;color:#5C5C70">جل و بەرگی تایبەت — سووت و تاری</td>
-        </tr>
-        <tr>
-          <td><strong>گەشە</strong></td>
-          <td>هانا کەریم</td>
-          <td><div class="cs-calltime">06:15</div></td>
-          <td style="font-size:9.5pt;color:#5C5C70">پرووی ئەندامکردن بکرێت</td>
-        </tr>
-        <tr>
-          <td><strong>هەواڵبەر</strong></td>
-          <td>ئاکام یوسف</td>
-          <td><div class="cs-calltime">07:30</div></td>
-          <td style="font-size:9.5pt;color:#5C5C70">تەنها بۆ ئامادەکردنی B</td>
-        </tr>
+        <tr><td><strong>ناڵی</strong></td><td>سەروەر ئەحمەد</td><td><div class="cs-calltime">06:00</div></td><td style="font-size:9.5pt;color:#5C5C70">جل و بەرگی تایبەت — سووت و تاری</td></tr>
+        <tr><td><strong>گەشە</strong></td><td>هانا کەریم</td><td><div class="cs-calltime">06:15</div></td><td style="font-size:9.5pt;color:#5C5C70">پرووی ئەندامکردن بکرێت</td></tr>
+        <tr><td><strong>هەواڵبەر</strong></td><td>ئاکام یوسف</td><td><div class="cs-calltime">07:30</div></td><td style="font-size:9.5pt;color:#5C5C70">تەنها بۆ ئامادەکردنی B</td></tr>
       </tbody>
     </table>
   </div>
@@ -568,26 +347,15 @@ body{font-family:'Inter',sans-serif;background:#0F0F12;color:#EDEAD8;font-size:1
   <!-- CREW NOTES -->
   <div class="cs-section">
     <div class="cs-section-title">تێبینیەکانی بەشەکان</div>
-    <div class="cs-crew-note">
-      <div class="cs-crew-dept">ڕووناکی</div>
-      <div class="cs-crew-body">کتێبی ڕووناکی دیمەنی ١٢ پێویستی بە گۆڕینی ڕووناکی دوو ئامادەکردن هەیە. ٢٧٠٠K بۆ ئامادەکردنی A و C، ٥٦٠٠K بۆ ئامادەکردنی B.</div>
-    </div>
-    <div class="cs-crew-note">
-      <div class="cs-crew-dept">دەنگ</div>
-      <div class="cs-crew-body">باپیشکی کاری سەرەکیی دیمەن. ژووری خواردن دەنگی هاوچەرخ دەدات — سووڕمەی ئامێری تازەبووکردنەوە پێویستە. بارەی دەنگ ٤٢dB.</div>
-    </div>
-    <div class="cs-crew-note">
-      <div class="cs-crew-dept">تایبەتمەندی</div>
-      <div class="cs-crew-body">مەسەلەی مایدەی گوڵ لازمە. ئەو بۆرییە تازەیەی کە لەم هەفتەیەدا سیفاریش کراوە لەبەردەم دیمەن بگەیێتە وێنەگرتن.</div>
-    </div>
+    <div class="cs-crew-note"><div class="cs-crew-dept">ڕووناکی</div><div class="cs-crew-body">کتێبی ڕووناکی دیمەنی ١٢ پێویستی بە گۆڕینی ڕووناکی دوو ئامادەکردن هەیە. ٢٧٠٠K بۆ ئامادەکردنی A و C، ٥٦٠٠K بۆ ئامادەکردنی B.</div></div>
+    <div class="cs-crew-note"><div class="cs-crew-dept">دەنگ</div><div class="cs-crew-body">باپیشکی کاری سەرەکیی دیمەن. ژووری خواردن دەنگی هاوچەرخ دەدات — سووڕمەی ئامێری تازەبووکردنەوە پێویستە. بارەی دەنگ ٤٢dB.</div></div>
+    <div class="cs-crew-note"><div class="cs-crew-dept">تایبەتمەندی</div><div class="cs-crew-body">مەسەلەی مایدەی گوڵ لازمە. ئەو بۆرییە تازەیەی کە لەم هەفتەیەدا سیفاریش کراوە لەبەردەم دیمەن بگەیێتە وێنەگرتن.</div></div>
   </div>
 
   <!-- FOOTER -->
   <div class="cs-footer">
-    <div class="cs-footer-left">
-      دروستکراوە لە <span class="cs-footer-brand">ڕوانگە</span> — پلاتفۆرمی پێشبەرهەمهێنانی سینەمای کوردی
-    </div>
-    <div class="cs-footer-right"><span class="en">2026-05-01 09:14</span></div>
+    <span>دروستکراوە لە <span class="cs-footer-brand">ڕوانگە</span> — پلاتفۆرمی پێشبەرهەمهێنانی سینەمای کوردی</span>
+    <span class="en">2026-05-01 09:14</span>
   </div>
 
 </div><!-- /pdf-page -->
@@ -595,258 +363,110 @@ body{font-family:'Inter',sans-serif;background:#0F0F12;color:#EDEAD8;font-size:1
 </div><!-- /panel-cs -->
 
 
-<!-- ══════════════════════════════════════════════════════
-     PANEL 2 — SHOT LIST PDF
-     ══════════════════════════════════════════════════════ -->
+<!-- ══════════════════════════════════════════════
+     PANEL 2: SHOT LIST PDF
+     ══════════════════════════════════════════════ -->
 <div class="preview-panel" id="panel-sl">
 <div class="pdf-wrap">
-<div class="pdf-page pdf-page-landscape">
+<div class="pdf-page pdf-page-landscape" style="font-family:'Cairo','Noto Sans Arabic',Arial,sans-serif;color:#0F0F12;direction:rtl;font-size:10pt;line-height:1.4;">
 
   <!-- HEADER -->
   <div class="sl-header">
-    <div class="sl-logo-cell">
-      <div class="sl-logo-mark">ڕ</div>
-    </div>
-    <div class="sl-info-cell">
+    <div class="sl-logo">ڕ</div>
+    <div class="sl-proj">
       <div class="sl-proj-title">میوانێکی نادیار</div>
       <div class="sl-proj-sub">فیلمی کورت — ستودیۆی سەروەر مهەدین</div>
     </div>
-    <div class="sl-right-cell">
+    <div class="sl-doc-right">
       <div class="sl-doc-label">لیستی لێدانەکان</div>
-      <div class="sl-doc-meta">بەروار: <span class="en">2026-05-01</span></div>
+      <div class="sl-doc-meta">بەروار: <span style="font-family:'Inter',sans-serif">2026-05-01</span></div>
       <div class="sl-doc-meta">32 دیمەن</div>
     </div>
   </div>
 
   <!-- SCENE 5 -->
   <div class="sl-scene-hdr">
-    <div class="sl-scene-hdr-left">
-      <span class="sl-scene-num">5</span>
-      <span class="sl-int-ext">EXT</span>
-      <span class="sl-scene-name">گەڕەکی کۆن — پەیاوڕێگا</span>
-      <span class="sl-scene-time">— ڕۆژ</span>
-    </div>
-    <div class="sl-scene-hdr-right">4 لێدان · 2.5 لاپەڕە</div>
+    <div><span class="sl-scene-num">5</span><span class="sl-int-ext">EXT</span><span class="sl-scene-name">گەڕەکی کۆن — پەیاوڕێگا</span><span class="sl-scene-time">— ڕۆژ</span></div>
+    <div class="sl-scene-right">4 لێدان · 2.5 لاپەڕە</div>
   </div>
   <table class="sl-table">
-    <thead>
-      <tr>
-        <th style="width:46pt">لێدان</th>
-        <th style="width:46pt">جۆر</th>
-        <th style="width:34pt">ئامادەکردن</th>
-        <th style="width:38pt">لێنس</th>
-        <th style="width:70pt">جووڵانی کامێرا</th>
-        <th style="width:32pt">ماوە</th>
-        <th>وەسف</th>
-        <th style="width:90pt">تێبینی</th>
-      </tr>
-    </thead>
+    <thead><tr><th style="width:46pt">لێدان</th><th style="width:46pt">جۆر</th><th style="width:34pt">ئامادەکردن</th><th style="width:38pt">لێنس</th><th style="width:70pt">جووڵانی کامێرا</th><th style="width:32pt">ماوە</th><th>وەسف</th><th style="width:90pt">تێبینی</th></tr></thead>
     <tbody>
-      <tr class="s-v">
-        <td><span class="sl-shot-num">5.1</span></td>
-        <td><span class="sl-badge sl-badge-v">بینراو</span></td>
-        <td><span class="sl-setup-chip">A</span></td>
-        <td><span class="sl-lens">24mm</span></td>
-        <td>شووتی بەربەست</td>
-        <td><span class="sl-lens">8s</span></td>
-        <td>
-          دیمەنی گشتی گەڕەکی کۆن
-          <div class="sl-desc">ناڵی لە دووریەوە دێت. کامێرا لێی دووردەکەوێتەوە.</div>
-        </td>
-        <td><span class="sl-notes">ئارەزووی ئەرزەبابی مووسیقا لێرە</span></td>
-      </tr>
-      <tr class="s-d">
-        <td><span class="sl-shot-num">5.2</span></td>
-        <td><span class="sl-badge sl-badge-d">دیالۆگ</span></td>
-        <td><span class="sl-setup-chip">B</span></td>
-        <td><span class="sl-lens">85mm</span></td>
-        <td>ئاڵاسای دواوەی سەر — ناڵی</td>
-        <td><span class="sl-lens">12s</span></td>
-        <td>
-          کلۆز-ئەپی ناڵی — بۆ تەلەفۆن دەتەوێت
-          <div class="sl-desc">دووری کام رووی دیالۆگ.</div>
-        </td>
-        <td><span class="sl-notes">تەوبلێبووی خواستی ڕۆشنایی دیارتر بکرێت</span></td>
-      </tr>
-      <tr class="s-d">
-        <td><span class="sl-shot-num">5.3</span></td>
-        <td><span class="sl-badge sl-badge-d">دیالۆگ</span></td>
-        <td><span class="sl-setup-chip">B</span></td>
-        <td><span class="sl-lens">85mm</span></td>
-        <td>ئاڵاسای دواوەی سەر — گەشە</td>
-        <td><span class="sl-lens">14s</span></td>
-        <td>کلۆز-ئەپی گەشە — وەڵامی دەداتەوە</td>
-        <td>—</td>
-      </tr>
-      <tr class="s-i">
-        <td><span class="sl-shot-num">5.4</span></td>
-        <td><span class="sl-badge sl-badge-i">داخڵکردن</span></td>
-        <td><span class="sl-setup-chip">C</span></td>
-        <td><span class="sl-lens">50mm</span></td>
-        <td>ئایستا</td>
-        <td><span class="sl-lens">4s</span></td>
-        <td>داخڵکردنی دەستەکەی تەلەفۆن</td>
-        <td><span class="sl-notes">فۆکەسی ماکرۆ پێویستە</span></td>
-      </tr>
-      <tr class="sl-summary">
-        <td colspan="8">4 لێدان — دیمەنی 5 — EXT. گەڕەکی کۆن — ڕۆژ</td>
-      </tr>
+      <tr class="s-v"><td><span class="sl-shot-num">5.1</span></td><td><span class="sl-badge sl-badge-v">بینراو</span></td><td><span class="sl-setup">A</span></td><td><span class="sl-lens">24mm</span></td><td>شووتی بەربەست</td><td><span class="sl-lens">8s</span></td><td>دیمەنی گشتی گەڕەکی کۆن<div class="sl-desc">ناڵی لە دووریەوە دێت. کامێرا لێی دووردەکەوێتەوە.</div></td><td><span class="sl-notes">ئارەزووی ئەرزەبابی مووسیقا لێرە</span></td></tr>
+      <tr class="s-d"><td><span class="sl-shot-num">5.2</span></td><td><span class="sl-badge sl-badge-d">دیالۆگ</span></td><td><span class="sl-setup">B</span></td><td><span class="sl-lens">85mm</span></td><td>ئاڵاسای دواوەی سەر — ناڵی</td><td><span class="sl-lens">12s</span></td><td>کلۆز-ئەپی ناڵی — بۆ تەلەفۆن دەتەوێت<div class="sl-desc">دووری کام رووی دیالۆگ.</div></td><td><span class="sl-notes">تەوبلێبووی خواستی ڕۆشنایی دیارتر بکرێت</span></td></tr>
+      <tr class="s-d"><td><span class="sl-shot-num">5.3</span></td><td><span class="sl-badge sl-badge-d">دیالۆگ</span></td><td><span class="sl-setup">B</span></td><td><span class="sl-lens">85mm</span></td><td>ئاڵاسای دواوەی سەر — گەشە</td><td><span class="sl-lens">14s</span></td><td>کلۆز-ئەپی گەشە — وەڵامی دەداتەوە</td><td>—</td></tr>
+      <tr class="s-i"><td><span class="sl-shot-num">5.4</span></td><td><span class="sl-badge sl-badge-i">داخڵکردن</span></td><td><span class="sl-setup">C</span></td><td><span class="sl-lens">50mm</span></td><td>ئایستا</td><td><span class="sl-lens">4s</span></td><td>داخڵکردنی دەستەکەی تەلەفۆن</td><td><span class="sl-notes">فۆکەسی ماکرۆ پێویستە</span></td></tr>
+      <tr class="sl-summary"><td colspan="8">4 لێدان — دیمەنی 5 — EXT. گەڕەکی کۆن — ڕۆژ</td></tr>
     </tbody>
   </table>
 
   <!-- SCENE 12 -->
   <div class="sl-scene-hdr">
-    <div class="sl-scene-hdr-left">
-      <span class="sl-scene-num">12</span>
-      <span class="sl-int-ext">INT</span>
-      <span class="sl-scene-name">خانووی باخچەی گوڵ — ژووری خواردن</span>
-      <span class="sl-scene-time">— ئێوارە</span>
-    </div>
-    <div class="sl-scene-hdr-right">6 لێدان · 4.0 لاپەڕە</div>
+    <div><span class="sl-scene-num">12</span><span class="sl-int-ext">INT</span><span class="sl-scene-name">خانووی باخچەی گوڵ — ژووری خواردن</span><span class="sl-scene-time">— ئێوارە</span></div>
+    <div class="sl-scene-right">6 لێدان · 4.0 لاپەڕە</div>
   </div>
   <table class="sl-table">
-    <thead>
-      <tr>
-        <th style="width:46pt">لێدان</th>
-        <th style="width:46pt">جۆر</th>
-        <th style="width:34pt">ئامادەکردن</th>
-        <th style="width:38pt">لێنس</th>
-        <th style="width:70pt">جووڵانی کامێرا</th>
-        <th style="width:32pt">ماوە</th>
-        <th>وەسف</th>
-        <th style="width:90pt">تێبینی</th>
-      </tr>
-    </thead>
+    <thead><tr><th style="width:46pt">لێدان</th><th style="width:46pt">جۆر</th><th style="width:34pt">ئامادەکردن</th><th style="width:38pt">لێنس</th><th style="width:70pt">جووڵانی کامێرا</th><th style="width:32pt">ماوە</th><th>وەسف</th><th style="width:90pt">تێبینی</th></tr></thead>
     <tbody>
-      <tr class="s-v">
-        <td><span class="sl-shot-num">12.1</span></td>
-        <td><span class="sl-badge sl-badge-v">بینراو</span></td>
-        <td><span class="sl-setup-chip">A</span></td>
-        <td><span class="sl-lens">35mm</span></td>
-        <td>ئاڵاسایی کۆتای</td>
-        <td><span class="sl-lens">10s</span></td>
-        <td>
-          دیمەنی داخستنی ژووری خواردن
-          <div class="sl-desc">مایدەی بەیانیخواردن ئامادەیە. کەس نیە.</div>
-        </td>
-        <td>—</td>
-      </tr>
-      <tr class="s-d">
-        <td><span class="sl-shot-num">12.2</span></td>
-        <td><span class="sl-badge sl-badge-d">دیالۆگ</span></td>
-        <td><span class="sl-setup-chip">B</span></td>
-        <td><span class="sl-lens">50mm</span></td>
-        <td>دوو-شات — ئایستا</td>
-        <td><span class="sl-lens">45s</span></td>
-        <td>
-          ناڵی و گەشە — دیالۆگی سەرەکی
-          <div class="sl-desc">مایدە نێوانیانەوە.</div>
-        </td>
-        <td><span class="sl-notes">پێویستی بە وردکاریی بیوکاری هەیە</span></td>
-      </tr>
-      <tr class="s-d">
-        <td><span class="sl-shot-num">12.3</span></td>
-        <td><span class="sl-badge sl-badge-d">دیالۆگ</span></td>
-        <td><span class="sl-setup-chip">C</span></td>
-        <td><span class="sl-lens">85mm</span></td>
-        <td>ئاڵاسای دواوەی سەر — ناڵی</td>
-        <td><span class="sl-lens">20s</span></td>
-        <td>کلۆز-ئەپی ناڵی — گوێ دەگرێت</td>
-        <td>—</td>
-      </tr>
-      <tr class="s-d">
-        <td><span class="sl-shot-num">12.4</span></td>
-        <td><span class="sl-badge sl-badge-d">دیالۆگ</span></td>
-        <td><span class="sl-setup-chip">C</span></td>
-        <td><span class="sl-lens">85mm</span></td>
-        <td>ئاڵاسای دواوەی سەر — گەشە</td>
-        <td><span class="sl-lens">18s</span></td>
-        <td>کلۆز-ئەپی گەشە — دەیوێت باس بکات</td>
-        <td>—</td>
-      </tr>
-      <tr class="s-d">
-        <td><span class="sl-shot-num">12.5</span></td>
-        <td><span class="sl-badge sl-badge-d">دیالۆگ</span></td>
-        <td><span class="sl-setup-chip">D</span></td>
-        <td><span class="sl-lens">40mm</span></td>
-        <td>پەنجارەی باوەش</td>
-        <td><span class="sl-lens">30s</span></td>
-        <td>
-          دیالۆگی کۆتایی
-          <div class="sl-desc">هاتنەژوورەوەی بەهاو دەستی دووهەمیان.</div>
-        </td>
-        <td><span class="sl-notes">دیزۆڵڤی ئاهەستە</span></td>
-      </tr>
-      <tr class="s-i">
-        <td><span class="sl-shot-num">12.6</span></td>
-        <td><span class="sl-badge sl-badge-i">داخڵکردن</span></td>
-        <td><span class="sl-setup-chip">E</span></td>
-        <td><span class="sl-lens">100mm</span></td>
-        <td>ئایستا — ماکرۆ</td>
-        <td><span class="sl-lens">5s</span></td>
-        <td>داخڵکردنی مەسەلەی گوڵ</td>
-        <td><span class="sl-notes">گوڵی سووری رووس پێویستە</span></td>
-      </tr>
-      <tr class="sl-summary">
-        <td colspan="8">6 لێدان — دیمەنی 12 — INT. خانووی باخچەی گوڵ — ئێوارە</td>
-      </tr>
+      <tr class="s-v"><td><span class="sl-shot-num">12.1</span></td><td><span class="sl-badge sl-badge-v">بینراو</span></td><td><span class="sl-setup">A</span></td><td><span class="sl-lens">35mm</span></td><td>ئاڵاسایی کۆتای</td><td><span class="sl-lens">10s</span></td><td>دیمەنی داخستنی ژووری خواردن<div class="sl-desc">مایدەی بەیانیخواردن ئامادەیە. کەس نیە.</div></td><td>—</td></tr>
+      <tr class="s-d"><td><span class="sl-shot-num">12.2</span></td><td><span class="sl-badge sl-badge-d">دیالۆگ</span></td><td><span class="sl-setup">B</span></td><td><span class="sl-lens">50mm</span></td><td>دوو-شات — ئایستا</td><td><span class="sl-lens">45s</span></td><td>ناڵی و گەشە — دیالۆگی سەرەکی<div class="sl-desc">مایدە نێوانیانەوە.</div></td><td><span class="sl-notes">پێویستی بە وردکاریی بیوکاری هەیە</span></td></tr>
+      <tr class="s-d"><td><span class="sl-shot-num">12.3</span></td><td><span class="sl-badge sl-badge-d">دیالۆگ</span></td><td><span class="sl-setup">C</span></td><td><span class="sl-lens">85mm</span></td><td>ئاڵاسای دواوەی سەر — ناڵی</td><td><span class="sl-lens">20s</span></td><td>کلۆز-ئەپی ناڵی — گوێ دەگرێت</td><td>—</td></tr>
+      <tr class="s-d"><td><span class="sl-shot-num">12.4</span></td><td><span class="sl-badge sl-badge-d">دیالۆگ</span></td><td><span class="sl-setup">C</span></td><td><span class="sl-lens">85mm</span></td><td>ئاڵاسای دواوەی سەر — گەشە</td><td><span class="sl-lens">18s</span></td><td>کلۆز-ئەپی گەشە — دەیوێت باس بکات</td><td>—</td></tr>
+      <tr class="s-d"><td><span class="sl-shot-num">12.5</span></td><td><span class="sl-badge sl-badge-d">دیالۆگ</span></td><td><span class="sl-setup">D</span></td><td><span class="sl-lens">40mm</span></td><td>پەنجارەی باوەش — دواوەی سەر</td><td><span class="sl-lens">30s</span></td><td>دیالۆگی کۆتایی<div class="sl-desc">هاتنەژوورەوەی بەهاو دەستی دووهەمیان.</div></td><td><span class="sl-notes">دیزۆڵڤی ئاهەستە</span></td></tr>
+      <tr class="s-i"><td><span class="sl-shot-num">12.6</span></td><td><span class="sl-badge sl-badge-i">داخڵکردن</span></td><td><span class="sl-setup">E</span></td><td><span class="sl-lens">100mm</span></td><td>ئایستا — ماکرۆ</td><td><span class="sl-lens">5s</span></td><td>داخڵکردنی مەسەلەی گوڵ</td><td><span class="sl-notes">گوڵی سووری رووس پێویستە</span></td></tr>
+      <tr class="sl-summary"><td colspan="8">6 لێدان — دیمەنی 12 — INT. خانووی باخچەی گوڵ — ئێوارە</td></tr>
     </tbody>
   </table>
 
   <!-- TOTALS -->
   <div class="sl-totals">
-    <div class="sl-total-cell"><span class="sl-total-val">32</span><div class="sl-total-lbl">دیمەن</div></div>
-    <div class="sl-total-cell"><span class="sl-total-val">187</span><div class="sl-total-lbl">لێدان</div></div>
-    <div class="sl-total-cell"><span class="sl-total-val">43</span><div class="sl-total-lbl">ئامادەکردن</div></div>
-    <div class="sl-total-cell"><span class="sl-total-val">98.5</span><div class="sl-total-lbl">لاپەڕە</div></div>
+    <div class="sl-total-cell"><div class="sl-total-val">32</div><div class="sl-total-lbl">دیمەن</div></div>
+    <div class="sl-total-cell"><div class="sl-total-val">187</div><div class="sl-total-lbl">لێدان</div></div>
+    <div class="sl-total-cell"><div class="sl-total-val">43</div><div class="sl-total-lbl">ئامادەکردن</div></div>
+    <div class="sl-total-cell"><div class="sl-total-val">98.5</div><div class="sl-total-lbl">لاپەڕە</div></div>
   </div>
 
-  <!-- FOOTER -->
   <div class="sl-footer">
-    <div class="sl-footer-left">دروستکراوە لە <span class="sl-footer-brand">ڕوانگە</span> — پلاتفۆرمی پێشبەرهەمهێنانی سینەمای کوردی</div>
-    <div class="sl-footer-right"><span class="en">2026-05-01 09:14</span></div>
+    <span>دروستکراوە لە <span class="sl-footer-brand">ڕوانگە</span> — پلاتفۆرمی پێشبەرهەمهێنانی سینەمای کوردی</span>
+    <span style="font-family:'Inter',sans-serif">2026-05-01 09:14</span>
   </div>
 
-</div><!-- /pdf-page -->
-</div><!-- /pdf-wrap -->
+</div></div>
 </div><!-- /panel-sl -->
 
 
-<!-- ══════════════════════════════════════════════════════
-     PANEL 3 — SCENE VIEWER (dark, interactive)
-     ══════════════════════════════════════════════════════ -->
+<!-- ══════════════════════════════════════════════
+     PANEL 3: SCENE VIEWER
+     ══════════════════════════════════════════════ -->
 <div class="preview-panel" id="panel-sv">
-<div class="sv-wrap">
+<div class="sv-wrap" dir="rtl">
 
-  <!-- TOP BAR -->
-  <div class="sv-topbar">
+  <!-- Top bar -->
+  <div class="rw-topbar" style="background:var(--sv-surface);border-bottom:1px solid var(--sv-border);display:flex;align-items:center;gap:12px;padding:0 20px;height:52px;position:sticky;top:52px;z-index:90;">
     <div class="sv-logo-mark">ڕ</div>
     <div class="sv-topbar-title">ڕوانگە — میوانێکی نادیار — دیمەنی ١٢</div>
     <div style="flex:1"></div>
-    <button class="sv-topbar-btn" id="sv-theme-btn" onclick="svToggleTheme()" title="گۆڕینی ڕووکار">☀</button>
-    <button class="sv-topbar-btn" onclick="window.print()" title="چاپکردن">⎙</button>
+    <div class="sv-topbar-btn" id="sv-theme-btn" style="cursor:pointer" onclick="svToggleTheme()">☀</div>
+    <div class="sv-topbar-btn" onclick="window.print()">⎙</div>
   </div>
 
-  <!-- OFFLINE NOTICE -->
-  <div class="sv-offline">
-    ⚠ کۆپیی دەرخراو — لەوانەیە نوێ نەبێت. بۆ دەست بە وەشانی تازەوە بگرن بڕۆن بۆ سەکۆی ڕوانگە.
-    <span style="float:inline-end;font-family:'Inter',sans-serif;direction:ltr">v3 · 2026-05-01 09:14</span>
-  </div>
+  <!-- Offline notice -->
+  <div class="sv-offline">⚠ کۆپیی دەرخراو — لەوانەیە نوێ نەبێت. بۆ دەست بە وەشانی تازەوە بگرن بڕۆن بۆ سەکۆی ڕوانگە. <span style="float:inline-end;font-family:'Inter',sans-serif;direction:ltr">v3 · 2026-05-01 09:14</span></div>
 
-  <!-- SCENE HERO -->
+  <!-- Scene hero -->
   <div class="sv-hero">
-    <div class="sv-hero-num">ڕوانگە · میوانێکی نادیار · دیمەنی <span class="en">12</span></div>
+    <div class="sv-hero-num">ڕوانگە · میوانێکی نادیار · دیمەنی <span style="font-family:'Inter',sans-serif">12</span></div>
     <h1 class="sv-hero-title">INT. خانووی باخچەی گوڵ — ژووری خواردن — ئێوارە</h1>
     <div class="sv-chips">
       <span class="sv-chip ie">INT</span>
       <span class="sv-chip">📍 خانووی باخچەی گوڵ</span>
       <span class="sv-chip">🕐 ئێوارە</span>
-      <span class="sv-chip"><span class="en">4.0</span> لاپەڕە</span>
+      <span class="sv-chip"><span style="font-family:'Inter',sans-serif">4.0</span> لاپەڕە</span>
     </div>
     <p class="sv-synopsis">ناڵی و گەشە دوای چەند ساڵ لەیەکدی دووردەکەوتبوون، ئەمشەو لە خوێندنی ماوبەسەر، ئاشنا دەبنەوە. دیالۆگ بە کووتایی دەگات بۆ ئەوەی ئایا دەتوانن بگەڕێنەوە.</p>
   </div>
 
-  <!-- STATS -->
+  <!-- Stats -->
   <div class="sv-stats">
     <div class="sv-stat"><div class="sv-stat-val">6</div><div class="sv-stat-lbl">لێدان</div></div>
     <div class="sv-stat"><div class="sv-stat-val">5</div><div class="sv-stat-lbl">ئامادەکردن</div></div>
@@ -854,22 +474,22 @@ body{font-family:'Inter',sans-serif;background:#0F0F12;color:#EDEAD8;font-size:1
     <div class="sv-stat"><div class="sv-stat-val">2</div><div class="sv-stat-lbl">کەسایەتی</div></div>
   </div>
 
-  <!-- MAIN TABS -->
-  <div class="sv-tabs" id="sv-main-tabs">
-    <button class="sv-tab active" data-pane="shots">لێدانەکان</button>
-    <button class="sv-tab" data-pane="fp">نەخشەی زەوی</button>
-    <button class="sv-tab" data-pane="depts">بەشەکان</button>
-    <button class="sv-tab" data-pane="sched">خشتە</button>
+  <!-- Tabs -->
+  <div class="sv-tabs" id="sv-tabs">
+    <button class="sv-tab active" onclick="svTab('shots',this)">لێدانەکان</button>
+    <button class="sv-tab" onclick="svTab('fp',this)">نەخشەی زەوی</button>
+    <button class="sv-tab" onclick="svTab('depts',this)">بەشەکان</button>
+    <button class="sv-tab" onclick="svTab('sched',this)">خشتە</button>
   </div>
 
-  <!-- ── SHOTS PANE ── -->
-  <div class="sv-pane active" id="svp-shots">
+  <!-- SHOTS PANE -->
+  <div class="sv-pane active" id="sv-shots">
     <div class="sv-sec-hdr">لیستی لێدانەکان · دیمەنی ١٢</div>
     <div id="sv-shot-list"></div>
   </div>
 
-  <!-- ── FLOOR PLAN PANE ── -->
-  <div class="sv-pane" id="svp-fp">
+  <!-- FLOOR PLAN PANE -->
+  <div class="sv-pane" id="sv-fp">
     <div class="sv-sec-hdr">نەخشەی زەوی و بلۆکینگ</div>
     <div class="sv-fp-wrap">
       <svg id="sv-fp-svg" viewBox="0 0 640 460" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-height:480px;display:block;"></svg>
@@ -881,60 +501,33 @@ body{font-family:'Inter',sans-serif;background:#0F0F12;color:#EDEAD8;font-size:1
     </div>
   </div>
 
-  <!-- ── DEPARTMENTS PANE ── -->
-  <div class="sv-pane" id="svp-depts">
+  <!-- DEPARTMENTS PANE -->
+  <div class="sv-pane" id="sv-depts">
     <div class="sv-sec-hdr">بەشەکان</div>
     <div class="sv-dept-tabs">
-      <button class="sv-dept-tab active" data-dept="light">ڕووناکی</button>
-      <button class="sv-dept-tab" data-dept="sound">دەنگ</button>
-      <button class="sv-dept-tab" data-dept="props">تایبەتمەندی</button>
-      <button class="sv-dept-tab" data-dept="ward">جل و بەرگ</button>
-      <button class="sv-dept-tab" data-dept="cont">بەردەوامی</button>
+      <button class="sv-dept-tab active" onclick="svDept('light',this)">ڕووناکی</button>
+      <button class="sv-dept-tab" onclick="svDept('sound',this)">دەنگ</button>
+      <button class="sv-dept-tab" onclick="svDept('props',this)">تایبەتمەندی</button>
+      <button class="sv-dept-tab" onclick="svDept('ward',this)">جل و بەرگ</button>
+      <button class="sv-dept-tab" onclick="svDept('cont',this)">بەردەوامی</button>
     </div>
-
-    <!-- Lighting -->
     <div class="sv-dept-pane active" id="svd-light">
-      <div class="sv-list-wrap">
-        <div class="sv-light-item">
-          <div class="sv-lshot">12.1</div>
-          <div class="sv-lbody"><div class="sv-lnote">کتێبی ئاهەستەی ڕووناکی. ڕووناکی ئێوارەی خۆش لە پەنجەرە. کتێبی ئاهەستە — 2700K.</div><span class="sv-lmeta">2700K · بایدن فرێم، کتێبی ئاهەستە</span></div>
-        </div>
-        <div class="sv-light-item">
-          <div class="sv-lshot">12.2</div>
-          <div class="sv-lbody"><div class="sv-lnote">دوو-شات: ڕووناکی هاوپشت بۆ هەردووکیان. گریم-لایتی زۆر بچووک لەگەڵ کتێبی سەرووی ناسمووی.</div><span class="sv-lmeta">3200K · گریم-لایت، ئاسۆی باوەش</span></div>
-        </div>
-        <div class="sv-light-item">
-          <div class="sv-lshot">12.3</div>
-          <div class="sv-lbody"><div class="sv-lnote">کلۆز-ئەپی ناڵی — رووناکی تووندتر لە ئاراستەی بچووکی بڕۆ. ١٢deg کتێبی باوەش.</div><span class="sv-lmeta">2700K · فرێنێڵ بچووک</span></div>
-        </div>
-        <div class="sv-light-item">
-          <div class="sv-lshot">12.5</div>
-          <div class="sv-lbody"><div class="sv-lnote">دیالۆگی کۆتایی — کتێبی ئاهەستە — ڕووناکی کەمدەبێتەوە لە ١۰۰٪ بۆ ٣۰٪ لە ٣۰چرکەیدا.</div><span class="sv-lmeta">2200K · دیمر</span></div>
-        </div>
+      <div class="sv-light-list">
+        <div class="sv-light-item"><div class="sv-lshot">12.1</div><div class="sv-lbody"><div class="sv-lnote">کتێبی ئاهەستەی ڕووناکی. ڕووناکی ئێوارەی خۆش لە پەنجەرە. کتێبی ئاهەستە — 2700K.</div><span class="sv-lmeta">2700K · بایدن فرێم، کتێبی ئاهەستە</span></div></div>
+        <div class="sv-light-item"><div class="sv-lshot">12.2</div><div class="sv-lbody"><div class="sv-lnote">دوو-شات: ڕووناکی هاوپشت بۆ هەردووکیان. گریم-لایتی زۆر بچووک لەگەڵ کتێبی سەرووی ناسمووی.</div><span class="sv-lmeta">3200K · گریم-لایت، ئاسۆی باوەش</span></div></div>
+        <div class="sv-light-item"><div class="sv-lshot">12.3</div><div class="sv-lbody"><div class="sv-lnote">کلۆز-ئەپی ناڵی — رووناکی تووندتر لە ئاراستەی بچووکی بڕۆ. ١٢deg کتێبی باوەش.</div><span class="sv-lmeta">2700K · فرێنێڵ بچووک</span></div></div>
+        <div class="sv-light-item"><div class="sv-lshot">12.5</div><div class="sv-lbody"><div class="sv-lnote">دیالۆگی کۆتایی — کتێبی ئاهەستە — ڕووناکی کەمدەبێتەوە لە ١۰۰٪ بۆ ٣۰٪ لە ٣۰چرکەیدا.</div><span class="sv-lmeta">2200K · دیمر</span></div></div>
       </div>
     </div>
-
-    <!-- Sound -->
     <div class="sv-dept-pane" id="svd-sound">
-      <div class="sv-list-wrap">
-        <div class="sv-light-item">
-          <div class="sv-lshot">12.1</div>
-          <div class="sv-lbody"><div class="sv-lnote">دەنگی ژووری بچووک. بارەی دەنگ ٤٢dB — پێویستی بە بارەی پایرەکی هەیە.</div><span class="sv-lmeta">room_tone</span></div>
-        </div>
-        <div class="sv-light-item">
-          <div class="sv-lshot">12.2</div>
-          <div class="sv-lbody"><div class="sv-lnote">دیالۆگ — ئەودیۆی گیرسووکی باوەشی. دوو باوەشی لاپێل سادەبکرێن — ناڵی و گەشە.</div><span class="sv-lmeta">dialogue</span></div>
-        </div>
-        <div class="sv-light-item">
-          <div class="sv-lshot">12.6</div>
-          <div class="sv-lbody"><div class="sv-lnote">دەنگی سادەکردنەوەی مایدەی گوڵ. دەنگی گوڵی ناسمووی پێویستە.</div><span class="sv-lmeta">sfx</span></div>
-        </div>
+      <div class="sv-light-list">
+        <div class="sv-light-item"><div class="sv-lshot">12.1</div><div class="sv-lbody"><div class="sv-lnote">دەنگی ژووری بچووک. بارەی دەنگ ٤٢dB — پێویستی بە بارەی پایرەکی هەیە.</div><span class="sv-lmeta">room_tone</span></div></div>
+        <div class="sv-light-item"><div class="sv-lshot">12.2</div><div class="sv-lbody"><div class="sv-lnote">دیالۆگ — ئەودیۆی گیرسووکی باوەشی. دوو باوەشی لاپێل سادەبکرێن — ناڵی و گەشە.</div><span class="sv-lmeta">dialogue</span></div></div>
+        <div class="sv-light-item"><div class="sv-lshot">12.6</div><div class="sv-lbody"><div class="sv-lnote">دەنگی سادەکردنەوەی مایدەی گوڵ. دەنگی گوڵی ناسمووی پێویستە.</div><span class="sv-lmeta">sfx</span></div></div>
       </div>
     </div>
-
-    <!-- Props -->
     <div class="sv-dept-pane" id="svd-props">
-      <div class="sv-checklist">
+      <div class="sv-check-list">
         <div class="sv-check-item"><input type="checkbox" checked><div><div class="sv-ci-name">مایدەی باخچەی گوڵ</div><div class="sv-ci-note">وردەکاری · <span style="color:var(--sv-vis)">on_set</span></div></div></div>
         <div class="sv-check-item"><input type="checkbox"><div><div class="sv-ci-name">گوڵی سووری رووس</div><div class="sv-ci-note">گوڵ · <span style="color:var(--sv-amber)">sourced</span></div></div></div>
         <div class="sv-check-item"><input type="checkbox" checked><div><div class="sv-ci-name">گلاسی شەرابی</div><div class="sv-ci-note">وردەکاری · <span style="color:var(--sv-vis)">on_set</span></div></div></div>
@@ -943,26 +536,14 @@ body{font-family:'Inter',sans-serif;background:#0F0F12;color:#EDEAD8;font-size:1
         <div class="sv-check-item"><input type="checkbox" checked><div><div class="sv-ci-name">تەلەفۆنی ناڵی</div><div class="sv-ci-note">پرۆپ · <span style="color:var(--sv-vis)">on_set</span></div></div></div>
       </div>
     </div>
-
-    <!-- Wardrobe -->
     <div class="sv-dept-pane" id="svd-ward">
       <div class="sv-wc-grid">
-        <div class="sv-wc-card">
-          <div class="sv-wc-char">ناڵی</div>
-          <div class="sv-wc-outfit">سووتی تاری</div>
-          <div class="sv-wc-desc">سووت و تایی تاری — سەردەمی پاشکشتنەوەی ناڵی نیشان دەدات. گوڵیکراو — قەبارەی ٤٢R.</div>
-        </div>
-        <div class="sv-wc-card">
-          <div class="sv-wc-char">گەشە</div>
-          <div class="sv-wc-outfit">کراسی سووری شەوان</div>
-          <div class="sv-wc-desc">کراسی سوور — شوخ بەڵام ئارام. مووی کراوەی باشترە.</div>
-        </div>
+        <div class="sv-wc-card"><div class="sv-wc-char">ناڵی</div><div class="sv-wc-outfit">سووتی تاری</div><div class="sv-wc-desc">سووت و تایی تاری — سەردەمی پاشکشتنەوەی ناڵی نیشان دەدات. گوڵیکراو — قەبارەی ٤٢R.</div></div>
+        <div class="sv-wc-card"><div class="sv-wc-char">گەشە</div><div class="sv-wc-outfit">کراسی سووری شەوان</div><div class="sv-wc-desc">کراسی سوور — شوخ بەڵام ئارام. مووی کراوەی باشترە.</div></div>
       </div>
     </div>
-
-    <!-- Continuity -->
     <div class="sv-dept-pane" id="svd-cont">
-      <div class="sv-checklist">
+      <div class="sv-check-list">
         <div class="sv-check-item"><input type="checkbox" checked><div><div class="sv-ci-name">ناڵی لە باشووری ژووری دەچێتەژوورەوە. ژاکێتی تێیەکە.</div><div class="sv-ci-note" style="color:var(--sv-vis)">↓ بەشدارکردن</div></div></div>
         <div class="sv-check-item"><input type="checkbox" checked><div><div class="sv-ci-name">گەشە لە باکووری ژووری دەچێتەژوورەوە. بە جلوبەرگی ئێوارەیی.</div><div class="sv-ci-note" style="color:var(--sv-vis)">↓ بەشدارکردن</div></div></div>
         <div class="sv-check-item"><input type="checkbox"><div><div class="sv-ci-name">ناڵی بے ژاکێتی ژووری دەهێڵێتەوە.</div><div class="sv-ci-note" style="color:var(--sv-amber)">↑ دەرچوون</div></div></div>
@@ -972,8 +553,8 @@ body{font-family:'Inter',sans-serif;background:#0F0F12;color:#EDEAD8;font-size:1
     </div>
   </div>
 
-  <!-- ── SCHEDULE PANE ── -->
-  <div class="sv-pane" id="svp-sched">
+  <!-- SCHEDULE PANE -->
+  <div class="sv-pane" id="sv-sched">
     <div class="sv-sec-hdr">خشتەی دیمەن</div>
     <div class="sv-sched-list">
       <div class="sv-sched-row"><div><div class="sv-stime">07:00</div><div class="sv-sdur">45min</div></div><div><div class="sv-stitle">ئامادەکردنی A — دیمەنی داخستن</div></div></div>
@@ -983,232 +564,167 @@ body{font-family:'Inter',sans-serif;background:#0F0F12;color:#EDEAD8;font-size:1
     </div>
   </div>
 
-  <!-- FOOTER -->
+  <!-- Footer -->
   <div class="sv-footer">
     <div class="sv-footer-brand">
       <div class="sv-logo-mark" style="width:28px;height:28px;font-size:12px">ڕ</div>
       <span><span style="color:#F72585">ڕوانگە</span> — پلاتفۆرمی پێشبەرهەمهێنانی سینەمای کوردی</span>
     </div>
-    <div>
-      <span style="color:var(--sv-text-3)">وەشان 3 ·</span>
-      <span class="en" style="font-size:11px"> 2026-05-01 09:14</span>
-      <span style="color:#F72585;margin-inline-start:10px">● کۆپیی دەرخراو</span>
-    </div>
+    <div><span style="color:var(--sv-text-3)">وەشان 3 ·</span> <span style="font-family:'Inter',sans-serif">2026-05-01 09:14</span> <span style="color:#F72585;margin-inline-start:10px">● کۆپیی دەرخراو</span></div>
   </div>
 
 </div><!-- /sv-wrap -->
 </div><!-- /panel-sv -->
 
-
 <script>
-/* ════════════════════════════════════════════════════════
-   SWITCHER
-   ════════════════════════════════════════════════════════ */
-function showPanel(id, btn) {
-  document.querySelectorAll('.preview-panel').forEach(function(p){ p.classList.remove('active'); });
-  document.querySelectorAll('.sw-btn').forEach(function(b){ b.classList.remove('active'); });
+/* ── SWITCHER ── */
+function show(id, btn) {
+  document.querySelectorAll('.preview-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.sw-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('panel-' + id).classList.add('active');
   if (btn) btn.classList.add('active');
-  if (id === 'sv') svInit();
 }
 
-/* ════════════════════════════════════════════════════════
-   SCENE VIEWER — MAIN TABS
-   ════════════════════════════════════════════════════════ */
-document.querySelectorAll('#sv-main-tabs .sv-tab').forEach(function(btn) {
-  btn.addEventListener('click', function() {
-    document.querySelectorAll('#sv-main-tabs .sv-tab').forEach(function(b){ b.classList.remove('active'); });
-    document.querySelectorAll('.sv-pane').forEach(function(p){ p.classList.remove('active'); });
-    btn.classList.add('active');
-    var paneId = 'svp-' + btn.dataset.pane;
-    var pane = document.getElementById(paneId);
-    if (pane) pane.classList.add('active');
-    if (btn.dataset.pane === 'fp') svRenderFP();
-  });
-});
+/* ── SCENE VIEWER TABS ── */
+function svTab(id, btn) {
+  document.querySelectorAll('#sv-tabs .sv-tab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.sv-pane').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('sv-' + id).classList.add('active');
+  if (id === 'fp') svRenderFP();
+}
 
-/* ════════════════════════════════════════════════════════
-   SCENE VIEWER — DEPT TABS
-   ════════════════════════════════════════════════════════ */
-document.querySelectorAll('.sv-dept-tab').forEach(function(btn) {
-  btn.addEventListener('click', function() {
-    document.querySelectorAll('.sv-dept-tab').forEach(function(b){ b.classList.remove('active'); });
-    document.querySelectorAll('.sv-dept-pane').forEach(function(p){ p.classList.remove('active'); });
-    btn.classList.add('active');
-    var pane = document.getElementById('svd-' + btn.dataset.dept);
-    if (pane) pane.classList.add('active');
-  });
-});
+/* ── DEPT TABS ── */
+function svDept(id, btn) {
+  document.querySelectorAll('.sv-dept-tab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.sv-dept-pane').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('svd-' + id).classList.add('active');
+}
 
-/* ════════════════════════════════════════════════════════
-   SHOT ACCORDION — build from data + toggle
-   ════════════════════════════════════════════════════════ */
-var SHOTS = [
-  {n:'12.1',type:'visual',  style:'دیمەنی داخستن — سەرتاسەری ژوور',      lens:'35mm',movement:'ئاڵاسایی کۆتای',      dur:'10s',setup:'A',desc:'مایدەی بەیانیخواردن ئامادەیە. کەس نیە هێشتا. ڕووناکی ئێوارەی خۆش لە پەنجەرەوە دێت.',notes:''},
-  {n:'12.2',type:'dialogue',style:'دوو-شاتی ناڵی و گەشە',                 lens:'50mm',movement:'ئایستا',               dur:'45s',setup:'B',desc:'دیالۆگی سەرەکی — مایدە نێوانیانەوە. هەردووکیان ئاراستەی چاوی یەکدی ناکەن.',notes:'پێویستی بە وردکاریی بیوکاری هەیە — ناڵی ئەگەری کەلیت بگۆڕێت'},
-  {n:'12.3',type:'dialogue',style:'کلۆز-ئەپی ناڵی',                        lens:'85mm',movement:'ئاڵاسای دواوەی سەر',  dur:'20s',setup:'C',desc:'کلۆز-ئەپی ناڵی — گوێ دەگرێت. هەستی ئاگاداری لە چاوەکانی دیاره.',notes:''},
-  {n:'12.4',type:'dialogue',style:'کلۆز-ئەپی گەشە',                        lens:'85mm',movement:'ئاڵاسای دواوەی سەر',  dur:'18s',setup:'C',desc:'کلۆز-ئەپی گەشە — باسی دەکات. ئارامە، بەڵام بە بیرەوەری.',notes:''},
-  {n:'12.5',type:'dialogue',style:'دیالۆگی کۆتایی — بە پەنجارەی باوەش',   lens:'40mm',movement:'پەنجارەی باوەش',      dur:'30s',setup:'D',desc:'هاتنەژوورەوەی بەهاو دەستی دووهەمیان. سایەی دواوە سووڕدەکاتەوە.',notes:'دیزۆڵڤی ئاهەستە لە دوای ئەم شاتە'},
-  {n:'12.6',type:'insert',  style:'داخڵکردنی مەسەلەی گوڵ',                 lens:'100mm',movement:'ئایستا — ماکرۆ',    dur:'5s', setup:'E',desc:'داخڵکردنی مەسەلەی گوڵی سووری رووس — ئاماژەی سمبۆلی.',notes:'گوڵی سووری رووس پێویستە'}
-];
-
-(function buildShots(){
-  var list = document.getElementById('sv-shot-list');
-  SHOTS.forEach(function(s){
-    var bc = s.type === 'dialogue' ? 'sv-badge-d' : s.type === 'insert' ? 'sv-badge-i' : 'sv-badge-v';
-    var bl = s.type === 'dialogue' ? 'دیالۆگ' : s.type === 'insert' ? 'داخڵکردن' : 'بینراو';
-    var bid = 'svb-' + s.n.replace('.','_');
-    var el = document.createElement('div');
+/* ── SHOT ACCORDION ── */
+(function buildShots() {
+  const shots = [
+    {n:'12.1',type:'visual',style:'دیمەنی داخستن — سەرتاسەری ژوور',lens:'35mm',movement:'ئاڵاسایی کۆتای',dur:'10s',desc:'مایدەی بەیانیخواردن ئامادەیە. کەس نیە هێشتا. ڕووناکی ئێوارەی خۆش لە پەنجەرەوە دێت.',notes:'',setup:'A'},
+    {n:'12.2',type:'dialogue',style:'دوو-شاتی ناڵی و گەشە',lens:'50mm',movement:'ئایستا',dur:'45s',desc:'دیالۆگی سەرەکی — مایدە نێوانیانەوە. هەردووکیان ئاراستەی چاوی یەکدی ناکەن.',notes:'پێویستی بە وردکاریی بیوکاری هەیە — ناڵی ئەگەری کەلیت بگۆڕێت',setup:'B'},
+    {n:'12.3',type:'dialogue',style:'کلۆز-ئەپی ناڵی',lens:'85mm',movement:'ئاڵاسای دواوەی سەر',dur:'20s',desc:'کلۆز-ئەپی ناڵی — گوێ دەگرێت. هەستی ئاگاداری لە چاوەکانی دیاره.',notes:'',setup:'C'},
+    {n:'12.4',type:'dialogue',style:'کلۆز-ئەپی گەشە',lens:'85mm',movement:'ئاڵاسای دواوەی سەر',dur:'18s',desc:'کلۆز-ئەپی گەشە — باسی دەکات. ئارامە، بەڵام بە بیرەوەری.',notes:'',setup:'C'},
+    {n:'12.5',type:'dialogue',style:'دیالۆگی کۆتایی — بە پەنجارەی باوەش',lens:'40mm',movement:'پەنجارەی باوەش',dur:'30s',desc:'هاتنەژوورەوەی بەهاو دەستی دووهەمیان. سایەی دواوە سووڕدەکاتەوە.',notes:'دیزۆڵڤی ئاهەستە لە دوای ئەم شاتە',setup:'D'},
+    {n:'12.6',type:'insert',style:'داخڵکردنی مەسەلەی گوڵ',lens:'100mm',movement:'ئایستا — ماکرۆ',dur:'5s',desc:'داخڵکردنی مەسەلەی گوڵی سووری رووس — ئاماژەی سمبۆلی.',notes:'گوڵی سووری رووس پێویستە',setup:'E'}
+  ];
+  const list = document.getElementById('sv-shot-list');
+  shots.forEach(function(s) {
+    const bc = s.type==='dialogue'?'sv-badge-d':s.type==='insert'?'sv-badge-i':'sv-badge-v';
+    const bl = s.type==='dialogue'?'دیالۆگ':s.type==='insert'?'داخڵکردن':'بینراو';
+    const bid = 'svb-'+s.n.replace('.','_');
+    const el = document.createElement('div');
     el.className = 'sv-shot-item';
-    el.innerHTML =
-      '<div class="sv-shot-hdr" data-bid="'+bid+'">'
-        +'<div class="sv-snum en">'+s.n+'</div>'
-        +'<div class="sv-sstyle">'+s.style+'</div>'
-        +'<div class="sv-smeta">'
-          +'<span class="sv-badge '+bc+'">'+bl+'</span>'
-          +(s.lens ? '<span class="sv-lens-tag en">'+s.lens+'</span>' : '')
-          +(s.dur  ? '<span class="sv-dur-tag en">'+s.dur+'</span>'   : '')
-        +'</div>'
-        +'<span class="sv-chevron">›</span>'
-      +'</div>'
+    el.innerHTML = '<div class="sv-shot-hdr" onclick="svToggle(this,\''+bid+'\')">'
+      +'<div class="sv-snum">'+s.n+'</div>'
+      +'<div class="sv-sstyle">'+s.style+'</div>'
+      +'<div class="sv-smeta"><span class="sv-badge '+bc+'">'+bl+'</span>'
+      +(s.lens?'<span class="sv-lens">'+s.lens+'</span>':'')
+      +(s.dur?'<span style="font-family:\'Inter\',sans-serif;font-size:11px;color:var(--sv-text-3)">'+s.dur+'</span>':'')
+      +'</div><span class="sv-chevron">›</span></div>'
       +'<div class="sv-shot-body" id="'+bid+'">'
-        +'<div class="sv-shot-grid">'
-          +(s.movement ? '<div><div class="sv-flbl">جووڵانی کامێرا</div><div class="sv-fval">'+s.movement+'</div></div>' : '')
-          +(s.setup    ? '<div><div class="sv-flbl">ئامادەکردن</div><div class="sv-fval en">'+s.setup+'</div></div>'    : '')
-          +(s.lens     ? '<div><div class="sv-flbl">لێنس</div><div class="sv-fval en">'+s.lens+'</div></div>'           : '')
-          +(s.dur      ? '<div><div class="sv-flbl">ماوە</div><div class="sv-fval en">'+s.dur+'</div></div>'            : '')
-        +'</div>'
-        +(s.desc  ? '<div class="sv-sdesc">'+s.desc+'</div>' : '')
-        +(s.notes ? '<div class="sv-notes-block">'+s.notes+'</div>' : '')
-        +'<div class="sv-sb-thumb">STORYBOARD · '+s.n+'</div>'
+      +'<div class="sv-grid2">'
+      +(s.movement?'<div><div class="sv-flbl">جووڵانی کامێرا</div><div class="sv-fval">'+s.movement+'</div></div>':'')
+      +(s.setup?'<div><div class="sv-flbl">ئامادەکردن</div><div class="sv-fval"><span style="font-family:\'Inter\',sans-serif">'+s.setup+'</span></div></div>':'')
+      +(s.lens?'<div><div class="sv-flbl">لێنس</div><div class="sv-fval"><span style="font-family:\'Inter\',sans-serif;direction:ltr;display:inline-block">'+s.lens+'</span></div></div>':'')
+      +(s.dur?'<div><div class="sv-flbl">ماوە</div><div class="sv-fval"><span style="font-family:\'Inter\',sans-serif;direction:ltr;display:inline-block">'+s.dur+'</span></div></div>':'')
+      +'</div>'
+      +(s.desc?'<div class="sv-sdesc">'+s.desc+'</div>':'')
+      +(s.notes?'<div class="sv-notes-block">'+s.notes+'</div>':'')
+      +'<div class="sv-sb-thumb">STORYBOARD · '+s.n+'</div>'
       +'</div>';
-    el.querySelector('.sv-shot-hdr').addEventListener('click', function(){
-      var body = document.getElementById(this.dataset.bid);
-      if (!body) return;
-      var open = body.classList.contains('open');
-      body.classList.toggle('open', !open);
-      this.classList.toggle('open', !open);
-    });
     list.appendChild(el);
   });
 })();
 
-/* ════════════════════════════════════════════════════════
-   FLOOR PLAN RENDERER
-   ════════════════════════════════════════════════════════ */
-var FP_DATA = {
-  room_width:8, room_height:5.5,
-  furniture:[
-    {x:2.5,y:1.8,w:3.0,h:1.4,label:'مایدە'},
-    {x:2.2,y:1.5,w:0.8,h:0.8,label:''},{x:5.5,y:1.5,w:0.8,h:0.8,label:''},
-    {x:2.2,y:3.2,w:0.8,h:0.8,label:''},{x:5.5,y:3.2,w:0.8,h:0.8,label:''},
-    {x:0.3,y:3.8,w:2.2,h:0.9,label:'سۆفا'},
-    {x:6.8,y:0.5,w:0.9,h:2.5,label:'ڕیزمان'},
-    {x:3.0,y:0.0,w:2.0,h:0.3,label:'پەنجەرە'}
-  ],
-  cameras:[
-    {letter:'A',x:4.0,y:4.8,tx:4.0,ty:2.5},
-    {letter:'B',x:7.2,y:2.5,tx:4.0,ty:2.5},
-    {letter:'C',x:0.4,y:2.5,tx:3.5,ty:2.5},
-    {letter:'D',x:1.2,y:0.6,tx:4.5,ty:2.8},
-    {letter:'E',x:4.0,y:3.5,tx:4.0,ty:1.5}
-  ],
-  paths:[
-    {pts:[{x:5.2,y:2.0},{x:5.2,y:3.8},{x:1.8,y:3.8}]},
-    {pts:[{x:2.8,y:2.0},{x:2.8,y:4.2}]}
-  ]
-};
+function svToggle(hdr, bid) {
+  const body = document.getElementById(bid);
+  if (!body) return;
+  const open = body.classList.contains('open');
+  body.classList.toggle('open', !open);
+  hdr.classList.toggle('open', !open);
+}
 
-var fpRendered = false;
-function svRenderFP(){
-  if (fpRendered) return;
-  fpRendered = true;
-  var fp = FP_DATA;
-  var PM=72, PAD=32;
-  var W=fp.room_width*PM, H=fp.room_height*PM;
-  var VW=W+PAD*2, VH=H+PAD*2;
-  var svg = document.getElementById('sv-fp-svg');
+/* ── FLOOR PLAN ── */
+function svRenderFP() {
+  const fp = {
+    room_width:8, room_height:5.5,
+    furniture:[
+      {x:2.5,y:1.8,w:3.0,h:1.4,label:'مایدە'},
+      {x:2.2,y:1.5,w:0.8,h:0.8,label:''},
+      {x:5.5,y:1.5,w:0.8,h:0.8,label:''},
+      {x:2.2,y:3.2,w:0.8,h:0.8,label:''},
+      {x:5.5,y:3.2,w:0.8,h:0.8,label:''},
+      {x:0.3,y:3.8,w:2.2,h:0.9,label:'سۆفا'},
+      {x:6.8,y:0.5,w:0.9,h:2.5,label:'ڕیزمان'},
+      {x:3.0,y:0.0,w:2.0,h:0.3,label:'پەنجەرە'}
+    ],
+    cameras:[
+      {letter:'A',x:4.0,y:4.8,target_x:4.0,target_y:2.5},
+      {letter:'B',x:7.2,y:2.5,target_x:4.0,target_y:2.5},
+      {letter:'C',x:0.4,y:2.5,target_x:3.5,target_y:2.5},
+      {letter:'D',x:1.2,y:0.6,target_x:4.5,target_y:2.8},
+      {letter:'E',x:4.0,y:3.5,target_x:4.0,target_y:1.5}
+    ],
+    paths:[
+      {points:[{x:5.2,y:2.0},{x:5.2,y:3.8},{x:1.8,y:3.8}]},
+      {points:[{x:2.8,y:2.0},{x:2.8,y:4.2}]}
+    ]
+  };
+  const PM=72,PAD=32,W=fp.room_width*PM,H=fp.room_height*PM,VW=W+PAD*2,VH=H+PAD*2;
+  const svg=document.getElementById('sv-fp-svg');
   svg.setAttribute('viewBox','0 0 '+VW+' '+VH);
-  var C={bg:'#17171C',s2:'#1E1E26',border:'#2C2C38',text:'#EDEAD8',text3:'#40404E',amber:'#D4A574',blue:'#2D5BE3',green:'#00A896'};
-  var s='';
-  // bg
-  s+='<rect x="0" y="0" width="'+VW+'" height="'+VH+'" fill="'+C.bg+'"/>';
-  // room
-  s+='<rect x="'+PAD+'" y="'+PAD+'" width="'+W+'" height="'+H+'" fill="'+C.s2+'" stroke="'+C.border+'" stroke-width="2"/>';
-  // grid
-  s+='<g stroke="'+C.border+'" stroke-width="0.5" opacity="0.35">';
-  for(var x=PAD;x<=PAD+W;x+=PM) s+='<line x1="'+x+'" y1="'+PAD+'" x2="'+x+'" y2="'+(PAD+H)+'"/>';
-  for(var y=PAD;y<=PAD+H;y+=PM) s+='<line x1="'+PAD+'" y1="'+y+'" x2="'+(PAD+W)+'" y2="'+y+'"/>';
+  let s='';
+  s+='<rect x="0" y="0" width="'+VW+'" height="'+VH+'" fill="#0F0F12"/>';
+  s+='<rect x="'+PAD+'" y="'+PAD+'" width="'+W+'" height="'+H+'" fill="#1E1E26" stroke="#2C2C38" stroke-width="2"/>';
+  s+='<g stroke="#2C2C38" stroke-width="0.5" opacity="0.4">';
+  for(let x=PAD;x<=PAD+W;x+=PM) s+='<line x1="'+x+'" y1="'+PAD+'" x2="'+x+'" y2="'+(PAD+H)+'"/>';
+  for(let y=PAD;y<=PAD+H;y+=PM) s+='<line x1="'+PAD+'" y1="'+y+'" x2="'+(PAD+W)+'" y2="'+y+'"/>';
   s+='</g>';
-  // furniture
-  fp.furniture.forEach(function(f){
-    var fx=PAD+f.x*PM, fy=PAD+f.y*PM, fw=(f.w||1)*PM, fh=(f.h||0.6)*PM;
-    s+='<rect x="'+fx+'" y="'+fy+'" width="'+fw+'" height="'+fh+'" fill="'+C.blue+'" opacity="0.22" stroke="'+C.blue+'" stroke-width="1"/>';
-    if(f.label) s+='<text x="'+(fx+fw/2)+'" y="'+(fy+fh/2+4)+'" text-anchor="middle" font-family="monospace" font-size="10" fill="'+C.text+'" opacity="0.65">'+f.label+'</text>';
-  });
-  // paths
-  fp.paths.forEach(function(path){
-    if(!path.pts||path.pts.length<2) return;
-    var pts=path.pts.map(function(p){ return (PAD+p.x*PM)+','+(PAD+p.y*PM); }).join(' ');
-    s+='<polyline points="'+pts+'" fill="none" stroke="'+C.green+'" stroke-width="2" stroke-dasharray="6,4" opacity="0.7"/>';
-  });
-  // cameras
-  fp.cameras.forEach(function(cam){
-    var cx=PAD+cam.x*PM, cy=PAD+cam.y*PM;
-    s+='<circle cx="'+cx+'" cy="'+cy+'" r="11" fill="'+C.amber+'" opacity="0.92"/>';
-    s+='<text x="'+cx+'" y="'+(cy+4)+'" text-anchor="middle" font-family="monospace" font-size="9" font-weight="700" fill="#0F0F12">'+cam.letter+'</text>';
-    if(cam.tx!==undefined){
-      var tx=PAD+cam.tx*PM, ty=PAD+cam.ty*PM;
-      s+='<line x1="'+cx+'" y1="'+cy+'" x2="'+tx+'" y2="'+ty+'" stroke="'+C.amber+'" stroke-width="1.5" opacity="0.45" stroke-dasharray="4,3"/>';
-    }
-  });
-  // dimension labels
-  s+='<text x="'+(PAD+W/2)+'" y="'+(PAD+H+20)+'" text-anchor="middle" font-family="monospace" font-size="10" fill="'+C.text3+'">'+fp.room_width+'m</text>';
-  s+='<text x="'+(PAD-14)+'" y="'+(PAD+H/2)+'" text-anchor="middle" font-family="monospace" font-size="10" fill="'+C.text3+'" transform="rotate(-90,'+(PAD-14)+','+(PAD+H/2)+')">'+fp.room_height+'m</text>';
-  svg.innerHTML = s;
+  fp.furniture.forEach(function(f){const fx=PAD+f.x*PM,fy=PAD+f.y*PM,fw=(f.w||1)*PM,fh=(f.h||0.6)*PM;s+='<rect x="'+fx+'" y="'+fy+'" width="'+fw+'" height="'+fh+'" fill="#2D5BE3" opacity="0.22" stroke="#2D5BE3" stroke-width="1"/>';if(f.label)s+='<text x="'+(fx+fw/2)+'" y="'+(fy+fh/2+4)+'" text-anchor="middle" font-family="Cairo,sans-serif" font-size="10" fill="#EDEAD8" opacity="0.7">'+f.label+'</text>';});
+  fp.paths.forEach(function(p){if(!p.points||p.points.length<2)return;const pts=p.points.map(function(pt){return(PAD+pt.x*PM)+','+(PAD+pt.y*PM);}).join(' ');s+='<polyline points="'+pts+'" fill="none" stroke="#00A896" stroke-width="2" stroke-dasharray="6,4" opacity="0.7"/>';});
+  fp.cameras.forEach(function(c){const cx=PAD+c.x*PM,cy=PAD+c.y*PM;if(c.target_x!==undefined){const tx=PAD+c.target_x*PM,ty=PAD+c.target_y*PM;s+='<line x1="'+cx+'" y1="'+cy+'" x2="'+tx+'" y2="'+ty+'" stroke="#D4A574" stroke-width="1.5" opacity="0.45" stroke-dasharray="4,3"/>';}s+='<circle cx="'+cx+'" cy="'+cy+'" r="11" fill="#D4A574" opacity="0.95"/>';s+='<text x="'+cx+'" y="'+(cy+4)+'" text-anchor="middle" font-family="monospace" font-size="10" font-weight="700" fill="#0F0F12">'+c.letter+'</text>';});
+  s+='<text x="'+(PAD+W/2)+'" y="'+(PAD+H+20)+'" text-anchor="middle" font-family="monospace" font-size="10" fill="#40404E">'+fp.room_width+'m</text>';
+  s+='<text x="'+(PAD-16)+'" y="'+(PAD+H/2)+'" text-anchor="middle" font-family="monospace" font-size="10" fill="#40404E" transform="rotate(-90,'+(PAD-16)+','+(PAD+H/2)+')">'+fp.room_height+'m</text>';
+  svg.innerHTML=s;
 }
 
-/* ════════════════════════════════════════════════════════
-   THEME TOGGLE (scene viewer wrapper)
-   ════════════════════════════════════════════════════════ */
-var svDark = true;
-function svToggleTheme(){
-  svDark = !svDark;
-  var wrap = document.querySelector('.sv-wrap');
-  var btn  = document.getElementById('sv-theme-btn');
-  if(svDark){
-    wrap.style.setProperty('--sv-bg','#0F0F12');
-    wrap.style.setProperty('--sv-surface','#17171C');
-    wrap.style.setProperty('--sv-s2','#1E1E26');
-    wrap.style.setProperty('--sv-s3','#26262E');
-    wrap.style.setProperty('--sv-border','#2C2C38');
-    wrap.style.setProperty('--sv-border-2','#222230');
-    wrap.style.setProperty('--sv-text','#EDEAD8');
-    wrap.style.setProperty('--sv-text-2','#78788C');
-    wrap.style.setProperty('--sv-text-3','#40404E');
-    wrap.style.setProperty('--sv-amber','#D4A574');
-    wrap.style.setProperty('--sv-amber-dim','rgba(212,165,116,.10)');
-    if(btn) btn.textContent='☀';
+/* ── THEME ── */
+function svToggleTheme() {
+  const wrap = document.querySelector('.sv-wrap');
+  const isDark = getComputedStyle(document.documentElement).getPropertyValue('--sv-bg').trim() === '#0F0F12';
+  if (isDark) {
+    document.documentElement.style.setProperty('--sv-bg','#F7F7FA');
+    document.documentElement.style.setProperty('--sv-surface','#FFFFFF');
+    document.documentElement.style.setProperty('--sv-surface-2','#F0F0F6');
+    document.documentElement.style.setProperty('--sv-surface-3','#E8E8F2');
+    document.documentElement.style.setProperty('--sv-border','#DCDCE8');
+    document.documentElement.style.setProperty('--sv-border-2','#EBEBF4');
+    document.documentElement.style.setProperty('--sv-text','#0F0F12');
+    document.documentElement.style.setProperty('--sv-text-2','#5C5C70');
+    document.documentElement.style.setProperty('--sv-text-3','#A0A0B8');
+    document.documentElement.style.setProperty('--sv-amber','#9A5520');
+    document.documentElement.style.setProperty('--sv-amber-dim','rgba(154,85,32,.08)');
+    document.getElementById('sv-theme-btn').textContent = '☾';
   } else {
-    wrap.style.setProperty('--sv-bg','#F7F7FA');
-    wrap.style.setProperty('--sv-surface','#FFFFFF');
-    wrap.style.setProperty('--sv-s2','#F0F0F6');
-    wrap.style.setProperty('--sv-s3','#E8E8F2');
-    wrap.style.setProperty('--sv-border','#DCDCE8');
-    wrap.style.setProperty('--sv-border-2','#EBEBF4');
-    wrap.style.setProperty('--sv-text','#0F0F12');
-    wrap.style.setProperty('--sv-text-2','#5C5C70');
-    wrap.style.setProperty('--sv-text-3','#A0A0B8');
-    wrap.style.setProperty('--sv-amber','#9A5520');
-    wrap.style.setProperty('--sv-amber-dim','rgba(154,85,32,.08)');
-    if(btn) btn.textContent='☾';
+    document.documentElement.style.setProperty('--sv-bg','#0F0F12');
+    document.documentElement.style.setProperty('--sv-surface','#17171C');
+    document.documentElement.style.setProperty('--sv-surface-2','#1E1E26');
+    document.documentElement.style.setProperty('--sv-surface-3','#26262E');
+    document.documentElement.style.setProperty('--sv-border','#2C2C38');
+    document.documentElement.style.setProperty('--sv-border-2','#222230');
+    document.documentElement.style.setProperty('--sv-text','#EDEAD8');
+    document.documentElement.style.setProperty('--sv-text-2','#78788C');
+    document.documentElement.style.setProperty('--sv-text-3','#40404E');
+    document.documentElement.style.setProperty('--sv-amber','#D4A574');
+    document.documentElement.style.setProperty('--sv-amber-dim','rgba(212,165,116,.10)');
+    document.getElementById('sv-theme-btn').textContent = '☀';
   }
-  fpRendered = false; // re-render with correct bg colour
-  if(document.getElementById('svp-fp').classList.contains('active')) svRenderFP();
 }
-
-/* init on first open */
-function svInit(){ /* already wired above */ }
 </script>
 </body>
 </html>

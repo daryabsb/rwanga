@@ -15,7 +15,7 @@
 {% block content %}
 <div id="rw-content" style="overflow-y:auto;flex:1">
 
-  {% include "components/_breadcrumb.html" with project=project current=_("دەستنووسەکان") %}
+  {% include "components/_breadcrumb.html" with project=project current="دەستنووسەکان" %}
 
   <div style="padding:var(--rw-pad-lg)">
 
@@ -84,7 +84,7 @@
       </table>
     </div>
     {% else %}
-    {% include "components/_empty_state.html" with icon="📝" title=_("هێشتا دەستنووسێک بارنەکراوە") sub=_("دەستنووسەکەت بار بکە — AI بە خۆی دیمەن، کەسایەتی و شوێنەکان دەناسێتەوە") cta_text=_("بارکردنی دەستنووس") cta_url="scripts:upload" cta_project=project.pk %}
+    {% include "components/_empty_state.html" with icon="📝" title="هێشتا دەستنووسێک بارنەکراوە" sub="دەستنووسەکەت بار بکە — AI بە خۆی دیمەن، کەسایەتی و شوێنەکان دەناسێتەوە" cta_text="بارکردنی دەستنووس" cta_url="scripts:upload" cta_project=project.pk %}
     {% endif %}
 
   </div>

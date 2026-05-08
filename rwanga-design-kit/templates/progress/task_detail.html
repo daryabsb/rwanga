@@ -14,117 +14,122 @@
 {% block title %}{{ task.title }} — Progress{% endblock %}
 
 {% block content %}
-<div id="rw-content" style="overflow-y:auto;flex:1;padding:var(--rw-pad-lg)">
 
-  {# ── Breadcrumb ── #}
-  <div style="margin-bottom:var(--rw-pad-lg)">
-    <a href="{% url 'progress:tasks' %}" style="font-size:13px;color:var(--rw-amber)">← {% trans "تاسکەکان" %}</a>
-  </div>
-
-  {# ── Task header ── #}
-  <div class="rw-card" style="margin-bottom:var(--rw-pad-lg)">
-    <div style="display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap">
-      <div style="flex:1;min-width:0">
-        <h1 style="font-size:20px;font-weight:700;margin-bottom:8px">{{ task.title }}</h1>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-          <span class="rw-badge" style="font-family:var(--rw-font-en);font-size:10px;background:var(--rw-amber-dim);color:var(--rw-amber);border:1px solid rgba(212,165,116,.25)">{{ task.phase }}</span>
-          {% if task.app_name %}<span class="rw-badge rw-badge-v" style="font-family:var(--rw-font-en);font-size:10px">{{ task.app_name }}</span>{% endif %}
-          {% if task.task_type %}<span class="rw-badge rw-badge-v" style="font-size:10px">{{ task.task_type }}</span>{% endif %}
-        </div>
-      </div>
-      <div style="display:flex;gap:8px;align-items:center">
-        {# Status badge #}
-        {% if task.status == 'completed' %}
-        <span class="rw-badge" style="background:rgba(0,168,150,.12);color:var(--rw-vis);border:1px solid rgba(0,168,150,.25);padding:6px 14px">{% trans "تەواوبوو" %}</span>
-        {% elif task.status == 'in_progress' %}
-        <span class="rw-badge" style="background:var(--rw-amber-dim);color:var(--rw-amber);border:1px solid rgba(212,165,116,.25);padding:6px 14px">{% trans "لە کارەوە" %}</span>
-        {% elif task.status == 'blocked' %}
-        <span class="rw-badge" style="background:var(--rw-pink-dim);color:var(--rw-shoot);border:1px solid rgba(247,37,133,.25);padding:6px 14px">{% trans "بلۆک" %}</span>
-        {% else %}
-        <span class="rw-badge rw-badge-v" style="padding:6px 14px">{% trans "چاوەڕوانی" %}</span>
-        {% endif %}
-        <button class="rw-btn rw-btn-ghost"
-                hx-get="{% url 'progress:update_task_status_modal' task.pk %}"
-                hx-target="#rw-modal-container" hx-swap="innerHTML">{% trans "گۆڕینی بارودۆخ" %}</button>
+  {# ── Header ── #}
+  <div class="d-flex align-items-center justify-content-between px-4 py-3 bg-rw-surface"
+       style="border-bottom:1px solid var(--rw-border)">
+    <div>
+      <a href="{% url 'progress:tasks' %}" class="rw-btn rw-btn-ghost rw-btn-sm mb-2">← {% trans "تاسکەکان" %}</a>
+      <h1 class="fs-4 fw-bold mb-1">{{ task.title }}</h1>
+      <div class="d-flex gap-2 flex-wrap align-items-center">
+        <span class="rw-badge rw-badge-warn rw-font-en">{{ task.phase }}</span>
+        {% if task.app_name %}<span class="rw-badge rw-badge-mute rw-font-en">{{ task.app_name }}</span>{% endif %}
+        {% if task.task_type %}<span class="rw-badge rw-badge-mute">{{ task.task_type }}</span>{% endif %}
       </div>
     </div>
+    <div class="d-flex gap-2 align-items-center flex-shrink-0">
+      {% if task.status == 'completed' %}
+      <span class="rw-badge rw-badge-ok px-3 py-2">{% trans "تەواوبوو" %}</span>
+      {% elif task.status == 'in_progress' %}
+      <span class="rw-badge rw-badge-warn px-3 py-2">{% trans "لە کارەوە" %}</span>
+      {% elif task.status == 'blocked' %}
+      <span class="rw-badge rw-badge-err px-3 py-2">{% trans "بلۆک" %}</span>
+      {% else %}
+      <span class="rw-badge rw-badge-mute px-3 py-2">{% trans "چاوەڕوانی" %}</span>
+      {% endif %}
+      <button class="rw-btn rw-btn-ghost"
+              hx-get="{% url 'progress:update_task_status_modal' task.pk %}"
+              hx-target="#rw-modal-container" hx-swap="innerHTML">{% trans "گۆڕینی بارودۆخ" %}</button>
+    </div>
+  </div>
+
+  <div class="px-4 py-4 d-flex flex-column gap-4">
+
+    {# ── Description ── #}
     {% if task.description %}
-    <p style="font-size:14px;color:var(--rw-text-2);line-height:1.7;margin-top:var(--rw-pad-sm)">{{ task.description }}</p>
+    <p style="font-size:14px;color:var(--rw-text-2);line-height:1.7;margin:0">{{ task.description }}</p>
     {% endif %}
-  </div>
 
-  {# ── Blocked by ── #}
-  {% if blocked_by %}
-  <div class="rw-section-hdr">{% trans "دوای ئەم تاسکانەوە" %}</div>
-  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:var(--rw-pad-lg)">
-    {% for dep in blocked_by %}
-    <a href="{% url 'progress:task_detail' dep.pk %}"
-       style="padding:8px 14px;background:var(--rw-surface);border:1px solid var(--rw-border);font-size:12px;color:var(--rw-text-2);text-decoration:none">
-      {{ dep.title }}
-      {% if dep.status == 'completed' %}<span style="color:var(--rw-vis)"> ✓</span>{% endif %}
-    </a>
-    {% endfor %}
-  </div>
-  {% endif %}
-
-  <div class="rw-grid-2">
-
-    {# ── Updates timeline ── #}
+    {# ── Blocked by ── #}
+    {% if blocked_by %}
     <div>
-      <div class="rw-section-hdr">{% trans "نوێکاریەکان" %}</div>
-      <div style="background:var(--rw-surface);border:1px solid var(--rw-border)">
-        {% for update in updates %}
-        <div style="display:flex;gap:12px;padding:14px var(--rw-pad-md);border-bottom:1px solid var(--rw-border-2)">
-          <div style="font-size:18px;flex-shrink:0">
-            {% if update.update_type == 'status_change' %}🔄
-            {% elif update.update_type == 'implementation' %}⚙
-            {% elif update.update_type == 'fix' %}🔧
-            {% else %}📝{% endif %}
-          </div>
-          <div style="flex:1">
-            <div style="display:flex;gap:8px;align-items:center;margin-bottom:4px">
-              <span class="rw-badge rw-badge-v" style="font-size:9px">{{ update.get_update_type_display }}</span>
-              <span style="font-size:11px;color:var(--rw-text-3);font-family:var(--rw-font-en)" dir="ltr">{{ update.created_at|date:"Y-m-d H:i" }}</span>
-            </div>
-            <p style="font-size:13px;color:var(--rw-text-2);line-height:1.6">{{ update.body }}</p>
-            {% if update.files_affected %}
-            <div style="margin-top:6px;font-size:11px;color:var(--rw-text-3);font-family:var(--rw-font-en)" dir="ltr">
-              {% for f in update.files_affected %}{{ f }}{% if not forloop.last %}, {% endif %}{% endfor %}
-            </div>
-            {% endif %}
-          </div>
-        </div>
-        {% empty %}
-        <div style="padding:var(--rw-pad-md);text-align:center;color:var(--rw-text-3);font-size:13px">{% trans "هێشتا نوێکارییەک نییە" %}</div>
+      <div class="rw-section-hdr mb-2">{% trans "دوای ئەم تاسکانەوە" %}</div>
+      <div class="d-flex gap-2 flex-wrap">
+        {% for dep in blocked_by %}
+        <a href="{% url 'progress:task_detail' dep.pk %}"
+           class="rw-btn rw-btn-ghost rw-btn-sm text-decoration-none">
+          {{ dep.title }}
+          {% if dep.status == 'completed' %}<span style="color:var(--rw-vis)"> ✓</span>{% endif %}
+        </a>
         {% endfor %}
       </div>
     </div>
+    {% endif %}
 
-    {# ── Change records ── #}
-    <div>
-      <div class="rw-section-hdr">{% trans "تۆماری گۆڕانکاری" %}</div>
-      <div style="background:var(--rw-surface);border:1px solid var(--rw-border)">
-        {% for change in changes %}
-        <div style="padding:14px var(--rw-pad-md);border-bottom:1px solid var(--rw-border-2)">
-          <div style="display:flex;gap:8px;align-items:center;margin-bottom:4px">
-            <span class="rw-badge rw-badge-v" style="font-family:var(--rw-font-en);font-size:9px">{{ change.change_type }}</span>
-            <span style="font-size:11px;color:var(--rw-amber);font-family:var(--rw-font-en)">{{ change.app_name }}</span>
+    {# ── Two-column: updates + changes ── #}
+    <div class="row g-3">
+
+      {# Updates timeline #}
+      <div class="col-12 col-md-6">
+        <div class="rw-section-hdr mb-2">{% trans "نوێکاریەکان" %}</div>
+        <div style="background:var(--rw-surface);border:1px solid var(--rw-border)">
+          {% for update in updates %}
+          <div class="d-flex gap-3 px-3 py-3" style="border-bottom:1px solid var(--rw-border-2)">
+            <div class="flex-shrink-0" style="font-size:16px;padding-top:2px">
+              {% if update.update_type == 'status_change' %}
+              <svg width="16" height="16" viewBox="0 0 24 24" class="ico" style="color:var(--rw-amber)"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+              {% elif update.update_type == 'implementation' %}
+              <svg width="16" height="16" viewBox="0 0 24 24" class="ico" style="color:var(--rw-vis)"><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/></svg>
+              {% elif update.update_type == 'fix' %}
+              <svg width="16" height="16" viewBox="0 0 24 24" class="ico" style="color:var(--rw-plan)"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+              {% else %}
+              <svg width="16" height="16" viewBox="0 0 24 24" class="ico" style="color:var(--rw-text-3)"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              {% endif %}
+            </div>
+            <div class="flex-grow-1">
+              <div class="d-flex gap-2 align-items-center mb-1 flex-wrap">
+                <span class="rw-badge rw-badge-mute" style="font-size:9px">{{ update.get_update_type_display }}</span>
+                <bdi dir="ltr" class="rw-font-en ms-auto" style="font-size:11px;color:var(--rw-text-3)">{{ update.created_at|date:"Y-m-d H:i" }}</bdi>
+              </div>
+              <p class="mb-0" style="font-size:13px;color:var(--rw-text-2);line-height:1.6">{{ update.body }}</p>
+              {% if update.files_affected %}
+              <div class="mt-2 d-flex gap-1 flex-wrap">
+                {% for f in update.files_affected %}
+                <code class="rw-font-en" dir="ltr" style="font-size:10px;background:var(--rw-surface-2);border:1px solid var(--rw-border);padding:2px 6px;color:var(--rw-text-3)">{{ f }}</code>
+                {% endfor %}
+              </div>
+              {% endif %}
+            </div>
           </div>
-          <p style="font-size:12px;color:var(--rw-text-2);line-height:1.5;margin-bottom:4px">{{ change.description }}</p>
-          {% if change.commit_hash %}
-          <code style="font-size:10px;color:var(--rw-text-3);font-family:var(--rw-font-en)" dir="ltr">{{ change.commit_hash|slice:":8" }}</code>
-          {% endif %}
-          <div style="font-size:11px;color:var(--rw-text-3);margin-top:4px;font-family:var(--rw-font-en)" dir="ltr">{{ change.created_at|date:"Y-m-d H:i" }}</div>
+          {% empty %}
+          <div class="px-3 py-4 text-center" style="color:var(--rw-text-3);font-size:13px">{% trans "هێشتا نوێکارییەک نییە" %}</div>
+          {% endfor %}
         </div>
-        {% empty %}
-        <div style="padding:var(--rw-pad-md);text-align:center;color:var(--rw-text-3);font-size:13px">{% trans "هێشتا گۆڕانکارییەک نییە" %}</div>
-        {% endfor %}
       </div>
-    </div>
 
+      {# Change records #}
+      <div class="col-12 col-md-6">
+        <div class="rw-section-hdr mb-2">{% trans "تۆماری گۆڕانکاری" %}</div>
+        <div style="background:var(--rw-surface);border:1px solid var(--rw-border)">
+          {% for change in changes %}
+          <div class="px-3 py-3" style="border-bottom:1px solid var(--rw-border-2)">
+            <div class="d-flex gap-2 align-items-center mb-1 flex-wrap">
+              <span class="rw-badge rw-badge-mute rw-font-en" style="font-size:9px">{{ change.change_type }}</span>
+              <span class="rw-font-en" style="font-size:11px;color:var(--rw-amber)">{{ change.app_name }}</span>
+              {% if change.commit_hash %}
+              <code class="rw-font-en" dir="ltr" style="font-size:10px;background:var(--rw-surface-2);border:1px solid var(--rw-border);padding:2px 6px;color:var(--rw-text-3)">{{ change.commit_hash|slice:":8" }}</code>
+              {% endif %}
+            </div>
+            <p class="mb-1" style="font-size:12px;color:var(--rw-text-2);line-height:1.5">{{ change.description }}</p>
+            <bdi dir="ltr" class="rw-font-en" style="font-size:11px;color:var(--rw-text-3)">{{ change.created_at|date:"Y-m-d H:i" }}</bdi>
+          </div>
+          {% empty %}
+          <div class="px-3 py-4 text-center" style="color:var(--rw-text-3);font-size:13px">{% trans "هێشتا گۆڕانکارییەک نییە" %}</div>
+          {% endfor %}
+        </div>
+      </div>
+
+    </div>
   </div>
 
-</div>
-
-<div id="rw-modal-container"></div>
 {% endblock %}

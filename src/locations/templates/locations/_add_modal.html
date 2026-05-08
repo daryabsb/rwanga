@@ -1,17 +1,107 @@
-<div class="modal fade" id="addLocationModal" tabindex="-1">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Add location</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body">
-        <form method="post" hx-post="{% url 'locations:add_modal' %}" hx-target="#rw-modal-container" hx-swap="innerHTML">
-          {% csrf_token %}
-          {{ form.as_p }}
-          <button class="rw-btn rw-btn-primary" type="submit">Save</button>
-        </form>
-      </div>
+{% load i18n %}
+{# HTMX partial — add location modal. Rendered by LocationAddModalView. #}
+{# Context: form (LocationCreateForm) #}
+
+<div class="rw-modal-backdrop"
+     hx-on:click="if(event.target===this) document.getElementById('rw-modal-container').innerHTML=''">
+  <div class="rw-modal" onclick="event.stopPropagation()" role="dialog" aria-modal="true"
+       aria-labelledby="rw-add-loc-title">
+
+    <div class="rw-modal-header">
+      <span class="rw-modal-title" id="rw-add-loc-title">
+        <svg width="16" height="16" viewBox="0 0 24 24" class="ico me-2"
+             style="vertical-align:-2px">
+          <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+          <circle cx="12" cy="9" r="2.5"/>
+        </svg>
+        {% trans "شوێنی نوێ زیاد بکە" %}
+      </span>
+      <button class="rw-modal-close"
+              onclick="document.getElementById('rw-modal-container').innerHTML=''"
+              aria-label="{% trans 'داخستن' %}">&#x2715;</button>
     </div>
+
+    <div class="rw-modal-body">
+      <form id="rw-add-loc-form"
+            hx-post="{% url 'locations:add_modal' %}"
+            hx-target="#rw-modal-container"
+            hx-swap="innerHTML">
+        {% csrf_token %}
+
+        {# Name (required) #}
+        <div class="mb-3">
+          <label class="rw-form-label" for="id_name">{% trans "ناوی شوێن" %}</label>
+          <input class="rw-form-input{% if form.name.errors %} is-invalid{% endif %}"
+                 type="text" id="id_name" name="name"
+                 value="{{ form.name.value|default:'' }}"
+                 placeholder="{% trans 'ناوی شوێنەکەت بنووسە...' %}"
+                 autocomplete="off">
+          {% if form.name.errors %}
+          <div style="font-size:11px;color:var(--rw-shoot);margin-top:4px">{{ form.name.errors.0 }}</div>
+          {% endif %}
+        </div>
+
+        {# Description #}
+        <div class="mb-3">
+          <label class="rw-form-label" for="id_description">{% trans "وەسف" %}</label>
+          <textarea class="rw-form-input{% if form.description.errors %} is-invalid{% endif %}"
+                    id="id_description" name="description" rows="2"
+                    placeholder="{% trans 'وەسفی شوێن (ئارەزوومەند)...' %}">{{ form.description.value|default:'' }}</textarea>
+          {% if form.description.errors %}
+          <div style="font-size:11px;color:var(--rw-shoot);margin-top:4px">{{ form.description.errors.0 }}</div>
+          {% endif %}
+        </div>
+
+        {# Address #}
+        <div class="mb-3">
+          <label class="rw-form-label" for="id_address">{% trans "ناونیشان" %}</label>
+          <input class="rw-form-input{% if form.address.errors %} is-invalid{% endif %}"
+                 type="text" id="id_address" name="address"
+                 value="{{ form.address.value|default:'' }}"
+                 placeholder="{% trans 'ناونیشانی ڕاستەقینە (ئارەزوومەند)...' %}">
+          {% if form.address.errors %}
+          <div style="font-size:11px;color:var(--rw-shoot);margin-top:4px">{{ form.address.errors.0 }}</div>
+          {% endif %}
+        </div>
+
+        {# INT/EXT + Time of Day — side by side #}
+        <div class="d-flex gap-3 mb-3">
+          <div class="flex-grow-1">
+            <label class="rw-form-label" for="id_int_ext">{% trans "ناوەوە / دەرەوە" %}</label>
+            <select class="rw-form-input" id="id_int_ext" name="int_ext">
+              {% for val, label in form.fields.int_ext.choices %}
+              <option value="{{ val }}"
+                      {% if form.int_ext.value == val %}selected{% endif %}>
+                {{ label }}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="flex-grow-1">
+            <label class="rw-form-label" for="id_time_of_day">{% trans "کاتی ڕۆژ" %}</label>
+            <select class="rw-form-input" id="id_time_of_day" name="time_of_day">
+              {% for val, label in form.fields.time_of_day.choices %}
+              <option value="{{ val }}"
+                      {% if form.time_of_day.value == val %}selected{% endif %}>
+                {{ label }}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+      </form>
+    </div>
+
+    <div class="rw-modal-footer">
+      <button onclick="document.getElementById('rw-modal-container').innerHTML=''"
+              class="rw-btn rw-btn-ghost">
+        {% trans "هەڵوەشاندنەوە" %}
+      </button>
+      <button type="submit" form="rw-add-loc-form" class="rw-btn rw-btn-primary">
+        + {% trans "شوێن زیاد بکە" %}
+      </button>
+    </div>
+
   </div>
 </div>

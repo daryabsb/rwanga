@@ -3,13 +3,7 @@
    Uses rw-empty-* classes from rwanga-ds.css.
 
    Usage:
-     {% verbatim %}{% include "components/_empty_state.html" with
-        icon_svg="<svg ...>...</svg>"
-        title=_("هیچ لێدانێک نییە")
-        sub=_("یەکەم لێدان زیاد بکە بۆ دەستپێکردن")
-        cta_label=_("+ زیادکردنی لێدان")
-        cta_url=add_url
-        cta_htmx=True %}{% endverbatim %}
+     {% verbatim %}{% include "components/_empty_state.html" with icon_svg="<svg ...>...</svg>" title="هیچ لێدانێک نییە" sub="یەکەم لێدان زیاد بکە بۆ دەستپێکردن" cta_label="+ زیادکردنی لێدان" cta_url=add_url cta_htmx=True %}{% endverbatim %}
 {% endcomment %}
 {% load i18n %}
 <div class="rw-empty d-flex flex-column align-items-center gap-3 py-5 px-4">

@@ -11,61 +11,62 @@
 {% block title %}{% trans "بەڵگەکان" %} — Progress{% endblock %}
 
 {% block content %}
-<div id="rw-content" style="overflow-y:auto;flex:1;padding:var(--rw-pad-lg)">
 
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--rw-pad-lg)">
-    <h1 style="font-size:20px;font-weight:700">{% trans "نسخەی بەڵگەکان" %}</h1>
+  {# ── Header ── #}
+  <div class="d-flex align-items-center justify-content-between px-4 py-3 bg-rw-surface"
+       style="border-bottom:1px solid var(--rw-border)">
+    <h1 class="fs-4 fw-bold mb-0">{% trans "نسخەی بەڵگەکان" %}</h1>
     <a href="{% url 'progress:dashboard' %}" class="rw-btn rw-btn-ghost">← {% trans "داشبۆرد" %}</a>
   </div>
 
-  {% if documents %}
-  <div style="background:var(--rw-surface);border:1px solid var(--rw-border)">
-    <table style="width:100%;border-collapse:collapse">
+  {# ── Docs table ── #}
+  <div style="overflow-x:auto">
+    <table class="rw-tbl">
       <thead>
         <tr>
-          <th style="padding:12px 16px;text-align:start;font-size:10px;font-weight:700;color:var(--rw-text-3);text-transform:uppercase;letter-spacing:.9px;background:var(--rw-surface-2);border-bottom:1px solid var(--rw-border)">{% trans "بەڵگە" %}</th>
-          <th style="padding:12px 16px;text-align:start;font-size:10px;font-weight:700;color:var(--rw-text-3);text-transform:uppercase;letter-spacing:.9px;background:var(--rw-surface-2);border-bottom:1px solid var(--rw-border)">{% trans "نسخە" %}</th>
-          <th style="padding:12px 16px;text-align:start;font-size:10px;font-weight:700;color:var(--rw-text-3);text-transform:uppercase;letter-spacing:.9px;background:var(--rw-surface-2);border-bottom:1px solid var(--rw-border)">{% trans "فاز" %}</th>
-          <th style="padding:12px 16px;text-align:start;font-size:10px;font-weight:700;color:var(--rw-text-3);text-transform:uppercase;letter-spacing:.9px;background:var(--rw-surface-2);border-bottom:1px solid var(--rw-border)">{% trans "گۆڕانکاری" %}</th>
-          <th style="padding:12px 16px;text-align:start;font-size:10px;font-weight:700;color:var(--rw-text-3);text-transform:uppercase;letter-spacing:.9px;background:var(--rw-surface-2);border-bottom:1px solid var(--rw-border)">{% trans "بەروار" %}</th>
-          <th style="padding:12px 16px;background:var(--rw-surface-2);border-bottom:1px solid var(--rw-border)"></th>
+          <th class="px-3 py-2">{% trans "بەڵگە" %}</th>
+          <th class="px-3 py-2">{% trans "نسخە" %}</th>
+          <th class="px-3 py-2">{% trans "فاز" %}</th>
+          <th class="px-3 py-2">{% trans "گۆڕانکاری" %}</th>
+          <th class="px-3 py-2">{% trans "بەروار" %}</th>
+          <th class="px-3 py-2"></th>
         </tr>
       </thead>
       <tbody>
         {% for doc in documents %}
-        <tr style="border-bottom:1px solid var(--rw-border-2);transition:background var(--rw-t)">
-          <td style="padding:14px 16px">
-            <div style="font-size:13px;font-weight:600;color:var(--rw-text);font-family:var(--rw-font-en)" dir="ltr">{{ doc.document_name }}</div>
+        <tr class="rw-tbl-row">
+          <td class="px-3 py-2">
+            <bdi dir="ltr" class="rw-font-en fw-semibold" style="font-size:13px;color:var(--rw-text)">{{ doc.document_name }}</bdi>
           </td>
-          <td style="padding:14px 16px">
-            <span class="rw-badge rw-badge-v" style="font-family:var(--rw-font-en);font-size:10px" dir="ltr">v{{ doc.version }}</span>
+          <td class="px-3 py-2">
+            <bdi dir="ltr" class="rw-badge rw-badge-mute rw-font-en" style="font-size:10px">v{{ doc.version }}</bdi>
           </td>
-          <td style="padding:14px 16px">
-            <span style="font-family:var(--rw-font-en);font-size:12px;color:var(--rw-amber)">{{ doc.phase }}</span>
+          <td class="px-3 py-2">
+            <bdi dir="ltr" class="rw-font-en" style="font-size:12px;color:var(--rw-amber)">{{ doc.phase }}</bdi>
           </td>
-          <td style="padding:14px 16px;font-size:12px;color:var(--rw-text-2);max-width:280px">
+          <td class="px-3 py-2" style="max-width:280px;font-size:12px;color:var(--rw-text-2)">
             {{ doc.change_summary|truncatechars:70 }}
           </td>
-          <td style="padding:14px 16px;font-size:12px;color:var(--rw-text-3);font-family:var(--rw-font-en);white-space:nowrap" dir="ltr">
-            {{ doc.created_at|date:"Y-m-d H:i" }}
+          <td class="px-3 py-2">
+            <bdi dir="ltr" class="rw-font-en" style="font-size:12px;color:var(--rw-text-3);white-space:nowrap">{{ doc.created_at|date:"Y-m-d H:i" }}</bdi>
           </td>
-          <td style="padding:14px 16px">
-            <button class="rw-btn rw-btn-ghost" style="padding:5px 12px;font-size:11px"
+          <td class="px-3 py-2">
+            <button class="rw-btn rw-btn-ghost rw-btn-sm"
                     hx-get="{% url 'progress:doc_detail' doc.pk %}"
                     hx-target="#rw-modal-container" hx-swap="innerHTML">
               {% trans "بینین" %}
             </button>
           </td>
         </tr>
+        {% empty %}
+        <tr>
+          <td colspan="6" class="p-0">
+            {% include "components/_empty_state.html" with title="هێشتا بەڵگەیەک نییە" sub="نسخەی بەڵگەکانی پڕۆژە لێرە دەردەکەون" %}
+          </td>
+        </tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
-  {% else %}
-  {% include "components/_empty_state.html" with icon="📄" title=_("هێشتا بەڵگەیەک نییە") sub=_("نسخەی بەڵگەکانی پڕۆژە لێرە دەردەکەون") %}
-  {% endif %}
 
-</div>
-
-<div id="rw-modal-container"></div>
 {% endblock %}

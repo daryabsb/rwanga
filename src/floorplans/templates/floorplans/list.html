@@ -1,83 +1,103 @@
 {% extends "base.html" %}
-{% comment %} ════════════════════════════════════════════════════════
-   RWANGA — floorplans/list.html
-   All floor plans for the project.
-
-   Context:
-     project        — Project instance
-     floorplans     — QuerySet[FloorPlan]
-     active_section — 'v'
-   ════════════════════════════════════════════════════════ {% endcomment %}
 {% load static i18n %}
+{% comment %}
+════════════════════════════════════════════════════════
+RWANGA — floorplans/list.html
+All floor plans for the project.
+Pattern: CARD GRID
+
+Context:
+  project        — Project instance
+  floorplans     — QuerySet[FloorPlan]
+  active_section — 'v'
+════════════════════════════════════════════════════════
+{% endcomment %}
 
 {% block title %}{% trans "نەخشەکانی ژوور" %} — {{ project.title }}{% endblock %}
 
 {% block content %}
-<div id="rw-content" style="overflow-y:auto;flex:1">
 
-  {% include "components/_breadcrumb.html" with project=project current=_("نەخشەکانی ژوور") %}
+  {% include "components/_breadcrumb.html" with project=project current="نەخشەکانی ژوور" %}
 
-  <div style="padding:var(--rw-pad-lg)">
-
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--rw-pad-lg)">
-      <div>
-        <h1 style="font-size:20px;font-weight:700;margin-bottom:4px">{% trans "نەخشەکانی ژوور" %}</h1>
-        <p style="font-size:13px;color:var(--rw-text-2)">{{ floorplans.count }} {% trans "نەخشە" %}</p>
-      </div>
+  {# Header #}
+  <div class="d-flex align-items-center justify-content-between px-4 py-3 bg-rw-surface"
+       style="border-bottom:1px solid var(--rw-border)">
+    <div>
+      <h1 class="fs-4 fw-bold mb-1">{% trans "نەخشەکانی ژوور" %}</h1>
+      <p class="mb-0" style="font-size:12px;color:var(--rw-text-2)">
+        {{ floorplans.count }} {% trans "نەخشە" %}
+      </p>
     </div>
+  </div>
 
+  {# Grid #}
+  <div class="p-4">
     {% if floorplans %}
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1px;background:var(--rw-border);border:1px solid var(--rw-border)">
+    <div style="display:grid;
+                grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+                gap:1px;
+                background:var(--rw-border);
+                border:1px solid var(--rw-border)">
       {% for fp in floorplans %}
       <a href="{% url 'projects:scene' project.pk fp.scene_id %}?tab=floorplan"
-         style="text-decoration:none;display:block">
-        <div style="background:var(--rw-surface);cursor:pointer;transition:background var(--rw-t);padding:0">
+         class="rw-session-card d-flex flex-column"
+         style="text-decoration:none">
 
-          {% comment %} SVG thumbnail preview {% endcomment %}
-          <div style="aspect-ratio:16/9;background:var(--rw-surface-2);display:flex;align-items:center;justify-content:center;border-bottom:1px solid var(--rw-border);overflow:hidden;position:relative">
-            {% if fp.svg_preview %}
-            <img src="{{ fp.svg_preview }}" style="width:100%;height:100%;object-fit:cover">
-            {% else %}
-            <div style="display:flex;flex-direction:column;align-items:center;gap:6px;opacity:.4">
-              <span style="font-size:32px">⌂</span>
-              <span style="font-size:10px;color:var(--rw-text-3);font-family:var(--rw-font-en)" dir="ltr">
-                {{ fp.room_width }}m × {{ fp.room_height }}m
-              </span>
-            </div>
-            {% endif %}
-            {% if fp.ai_generated %}
-            <div style="position:absolute;top:8px;inset-inline-end:8px">
-              <span class="rw-ai-badge">AI</span>
-            </div>
-            {% endif %}
+        {# SVG thumbnail preview #}
+        <div style="aspect-ratio:16/9;
+                    background:var(--rw-surface-2);
+                    display:flex;
+                    align-items:center;
+                    justify-content:center;
+                    border-bottom:1px solid var(--rw-border);
+                    overflow:hidden;
+                    position:relative">
+          {% if fp.svg_preview %}
+          <img src="{{ fp.svg_preview }}" style="width:100%;height:100%;object-fit:cover">
+          {% else %}
+          <div class="d-flex flex-column align-items-center gap-1" style="opacity:.4">
+            <svg width="32" height="32" viewBox="0 0 24 24" class="ico">
+              <rect x="3" y="3" width="18" height="18" rx="1"/>
+              <line x1="3" y1="10" x2="21" y2="10"/>
+              <line x1="10" y1="10" x2="10" y2="21"/>
+              <circle cx="6.5" cy="6.5" r="1.5"/><circle cx="16" cy="16" r="1.5"/>
+            </svg>
+            <bdi dir="ltr" class="rw-font-en" style="font-size:10px;color:var(--rw-text-3)">
+              {{ fp.room_width }}m × {{ fp.room_height }}m
+            </bdi>
           </div>
-
-          {% comment %} Metadata {% endcomment %}
-          <div style="padding:var(--rw-pad-sm) var(--rw-pad-md)">
-            <div style="font-size:13px;font-weight:700;color:var(--rw-text);margin-bottom:4px">
-              {% trans "دیمەنی" %} {{ fp.scene.number }} — {{ fp.scene.int_ext }}. {{ fp.scene.location_name }}
-            </div>
-            <div style="display:flex;align-items:center;justify-content:space-between">
-              <div style="font-size:11px;color:var(--rw-text-3)">
-                {{ fp.name }}
-                {% if fp.cameras %}
-                · {{ fp.cameras|length }} {% trans "کامێرا" %}
-                {% endif %}
-              </div>
-              <div style="font-size:11px;color:var(--rw-text-3);font-family:var(--rw-font-en)">
-                {{ fp.updated_at|timesince }} {% trans "پێش" %}
-              </div>
-            </div>
+          {% endif %}
+          {% if fp.ai_generated %}
+          <div style="position:absolute;top:8px;inset-inline-end:8px">
+            <span class="rw-ai-badge">AI</span>
           </div>
-
+          {% endif %}
         </div>
+
+        {# Metadata #}
+        <div class="px-3 py-2">
+          <div class="fw-bold mb-1" style="font-size:13px">
+            {% trans "دیمەنی" %} {{ fp.scene.number }} — {{ fp.scene.int_ext }}. {{ fp.scene.location_name }}
+          </div>
+          <div class="d-flex align-items-center justify-content-between">
+            <div style="font-size:11px;color:var(--rw-text-3)">
+              {{ fp.name }}
+              {% if fp.cameras %}
+              · {{ fp.cameras|length }} {% trans "کامێرا" %}
+              {% endif %}
+            </div>
+            <div class="rw-font-en" style="font-size:11px;color:var(--rw-text-3)">
+              {{ fp.updated_at|timesince }} {% trans "پێش" %}
+            </div>
+          </div>
+        </div>
+
       </a>
       {% endfor %}
     </div>
     {% else %}
-    {% include "components/_empty_state.html" with icon="⌂" title=_("هێشتا نەخشەی ژوورێک نییە") sub=_("بۆ هەر دیمەنێک نەخشەی ژوور دروست بکە لە تابی نەخشەی ژووری دیمەن") %}
+    {% include "components/_empty_state.html" with title="هێشتا نەخشەی ژوورێک نییە" sub="بۆ هەر دیمەنێک نەخشەی ژوور دروست بکە لە تابی نەخشەی ژووری دیمەن" %}
     {% endif %}
-
   </div>
-</div>
+
 {% endblock %}

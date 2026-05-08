@@ -11,55 +11,82 @@
 {% block title %}{% trans "نوێکاریەکان" %} — Progress{% endblock %}
 
 {% block content %}
-<div id="rw-content" style="overflow-y:auto;flex:1;padding:var(--rw-pad-lg)">
 
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--rw-pad-lg)">
-    <h1 style="font-size:20px;font-weight:700">{% trans "فیدی نوێکاریەکان" %}</h1>
+  {# ── Header ── #}
+  <div class="d-flex align-items-center justify-content-between px-4 py-3 bg-rw-surface"
+       style="border-bottom:1px solid var(--rw-border)">
+    <h1 class="fs-4 fw-bold mb-0">{% trans "فیدی نوێکاریەکان" %}</h1>
     <a href="{% url 'progress:dashboard' %}" class="rw-btn rw-btn-ghost">← {% trans "داشبۆرد" %}</a>
   </div>
 
-  <div style="background:var(--rw-surface);border:1px solid var(--rw-border)">
-    {% for update in updates %}
-    <div style="display:flex;gap:16px;padding:16px var(--rw-pad-md);border-bottom:1px solid var(--rw-border-2)">
-      <div style="font-size:20px;flex-shrink:0;padding-top:2px">
-        {% if update.update_type == 'status_change' %}🔄
-        {% elif update.update_type == 'implementation' %}⚙
-        {% elif update.update_type == 'fix' %}🔧
-        {% elif update.update_type == 'note' %}📝
-        {% elif update.update_type == 'question' %}❓
-        {% else %}💬{% endif %}
-      </div>
-      <div style="flex:1;min-width:0">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;flex-wrap:wrap">
-          <span class="rw-badge rw-badge-v" style="font-size:9px">{{ update.get_update_type_display }}</span>
-          {% if update.task %}
-          <a href="{% url 'progress:task_detail' update.task.pk %}"
-             style="font-size:12px;font-weight:600;color:var(--rw-amber)">{{ update.task.title|truncatechars:40 }}</a>
-          {% endif %}
-          <span style="font-size:11px;color:var(--rw-text-3);font-family:var(--rw-font-en);margin-inline-start:auto" dir="ltr">
-            {{ update.created_at|date:"Y-m-d H:i" }}
-          </span>
-        </div>
-        <p style="font-size:13px;color:var(--rw-text-2);line-height:1.6;margin-bottom:0">{{ update.body }}</p>
-        {% if update.files_affected %}
-        <div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap">
-          {% for f in update.files_affected %}
-          <code style="font-size:10px;background:var(--rw-surface-2);border:1px solid var(--rw-border);padding:2px 6px;color:var(--rw-text-3);font-family:var(--rw-font-en)" dir="ltr">{{ f }}</code>
-          {% endfor %}
-        </div>
-        {% endif %}
-        {% if update.tests_run %}
-        <div style="margin-top:6px;font-size:11px;color:var(--rw-vis)">
-          ✓ {% trans "تێستەکان:" %}
-          {% for t in update.tests_run %}<span style="font-family:var(--rw-font-en)" dir="ltr">{{ t }}</span>{% if not forloop.last %}, {% endif %}{% endfor %}
-        </div>
-        {% endif %}
-      </div>
-    </div>
-    {% empty %}
-    {% include "components/_empty_state.html" with icon="📝" title=_("هێشتا نوێکارییەک نییە") sub=_("نوێکاریەکان لێرە دەردەکەون کاتێک ئەیجەنتەکان کار دەکەن") %}
-    {% endfor %}
+  {# ── Feed ── #}
+  <div style="overflow-x:auto">
+    <table class="rw-tbl">
+      <thead>
+        <tr>
+          <th class="px-3 py-2" style="width:36px"></th>
+          <th class="px-3 py-2">{% trans "جۆر" %}</th>
+          <th class="px-3 py-2">{% trans "تاسک" %}</th>
+          <th class="px-3 py-2">{% trans "بابەت" %}</th>
+          <th class="px-3 py-2">{% trans "بەروار" %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for update in updates %}
+        <tr class="rw-tbl-row">
+          <td class="px-3 py-2">
+            {% if update.update_type == 'status_change' %}
+            <svg width="16" height="16" viewBox="0 0 24 24" class="ico" style="color:var(--rw-amber)"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+            {% elif update.update_type == 'implementation' %}
+            <svg width="16" height="16" viewBox="0 0 24 24" class="ico" style="color:var(--rw-vis)"><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/></svg>
+            {% elif update.update_type == 'fix' %}
+            <svg width="16" height="16" viewBox="0 0 24 24" class="ico" style="color:var(--rw-plan)"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+            {% elif update.update_type == 'question' %}
+            <svg width="16" height="16" viewBox="0 0 24 24" class="ico" style="color:var(--rw-text-2)"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            {% else %}
+            <svg width="16" height="16" viewBox="0 0 24 24" class="ico" style="color:var(--rw-text-3)"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            {% endif %}
+          </td>
+          <td class="px-3 py-2">
+            <span class="rw-badge rw-badge-mute" style="font-size:9px">{{ update.get_update_type_display }}</span>
+          </td>
+          <td class="px-3 py-2">
+            {% if update.task %}
+            <a href="{% url 'progress:task_detail' update.task.pk %}"
+               style="font-size:12px;font-weight:600;color:var(--rw-amber)">{{ update.task.title|truncatechars:40 }}</a>
+            {% else %}
+            <span style="color:var(--rw-text-3)">—</span>
+            {% endif %}
+          </td>
+          <td class="px-3 py-2" style="max-width:340px">
+            <p class="mb-0" style="font-size:13px;color:var(--rw-text-2);line-height:1.5">{{ update.body|truncatechars:120 }}</p>
+            {% if update.files_affected %}
+            <div class="d-flex gap-1 flex-wrap mt-1">
+              {% for f in update.files_affected %}
+              <code class="rw-font-en" dir="ltr" style="font-size:10px;background:var(--rw-surface-2);border:1px solid var(--rw-border);padding:2px 5px;color:var(--rw-text-3)">{{ f }}</code>
+              {% endfor %}
+            </div>
+            {% endif %}
+            {% if update.tests_run %}
+            <div class="mt-1" style="font-size:11px;color:var(--rw-vis)">
+              ✓ {% trans "تێستەکان:" %}
+              {% for t in update.tests_run %}<bdi dir="ltr" class="rw-font-en">{{ t }}</bdi>{% if not forloop.last %}, {% endif %}{% endfor %}
+            </div>
+            {% endif %}
+          </td>
+          <td class="px-3 py-2">
+            <bdi dir="ltr" class="rw-font-en" style="font-size:11px;color:var(--rw-text-3);white-space:nowrap">{{ update.created_at|date:"Y-m-d H:i" }}</bdi>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="5" class="p-0">
+            {% include "components/_empty_state.html" with title="هێشتا نوێکارییەک نییە" sub="نوێکاریەکان لێرە دەردەکەون کاتێک ئەیجەنتەکان کار دەکەن" %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
   </div>
 
-</div>
 {% endblock %}

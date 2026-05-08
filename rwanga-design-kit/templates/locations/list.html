@@ -1,13 +1,16 @@
-{# ════════════════════════════════════════════════════════
-   RWANGA — locations/list.html
-   Location management with Leaflet.js map.
-   Global — not project-scoped.
-
-   Context:
-     locations  — QuerySet[Location]
-   ════════════════════════════════════════════════════════ #}
 {% extends "base.html" %}
 {% load static i18n %}
+{% comment %}
+════════════════════════════════════════════════════════
+RWANGA — locations/list.html
+Location management with Leaflet.js map.
+Pattern: SPLIT VIEW (map + list panel)
+Global — not project-scoped.
+
+Context:
+  locations  — QuerySet[Location]
+════════════════════════════════════════════════════════
+{% endcomment %}
 
 {% block title %}{% trans "شوێنەکان" %}{% endblock %}
 
@@ -17,46 +20,69 @@
 {% endblock %}
 
 {% block content %}
-<div id="rw-content" style="display:flex;flex:1;overflow:hidden">
+<div class="d-flex flex-grow-1 overflow-hidden">
 
-  {# ── Map panel (top / left depending on layout) ── #}
-  <div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+  {# Main area — map #}
+  <div class="flex-grow-1 d-flex flex-column overflow-hidden">
 
     {# Toolbar #}
-    <div style="height:56px;background:var(--rw-surface);border-bottom:1px solid var(--rw-border);display:flex;align-items:center;padding:0 var(--rw-pad-md);gap:12px;flex-shrink:0">
-      <h1 style="font-size:18px;font-weight:700;flex:1">{% trans "شوێنەکان" %}</h1>
-      <button class="rw-btn rw-btn-primary"
+    <div class="d-flex align-items-center px-3 py-2 bg-rw-surface gap-3"
+         style="height:56px;flex-shrink:0;border-bottom:1px solid var(--rw-border)">
+      <div class="d-flex align-items-center gap-2">
+        <svg width="20" height="20" viewBox="0 0 24 24" class="ico">
+          <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+          <circle cx="12" cy="9" r="2.5"/>
+        </svg>
+        <h1 class="fs-5 fw-bold mb-0">{% trans "شوێنەکان" %}</h1>
+      </div>
+      <button class="rw-btn rw-btn-primary ms-auto"
               hx-get="{% url 'locations:add_modal' %}"
-              hx-target="#rw-modal-container" hx-swap="innerHTML">
+              hx-target="#rw-modal-container"
+              hx-swap="innerHTML">
         + {% trans "شوێنی نوێ" %}
       </button>
     </div>
 
     {# Map #}
-    <div id="rw-map" style="flex:1;min-height:300px;background:var(--rw-surface-2)"></div>
+    <div id="rw-map" class="flex-grow-1" style="min-height:300px;background:var(--rw-surface-2)"></div>
 
   </div>
 
-  {# ── Locations list panel ── #}
-  <aside style="width:320px;background:var(--rw-surface);border-inline-start:1px solid var(--rw-border);display:flex;flex-direction:column;flex-shrink:0;overflow:hidden">
-    <div style="padding:var(--rw-pad-sm) var(--rw-pad-md);border-bottom:1px solid var(--rw-border)">
+  {# Locations list panel #}
+  <aside class="rw-scene-panel d-none d-md-flex flex-column overflow-hidden"
+         style="width:320px">
+
+    {# Search #}
+    <div class="px-3 py-2" style="border-bottom:1px solid var(--rw-border)">
       <input type="search"
              placeholder="{% trans 'گەڕان...' %}"
-             style="width:100%;background:var(--rw-surface-2);border:1px solid var(--rw-border);color:var(--rw-text);font-family:var(--rw-font);font-size:13px;padding:9px 12px;outline:none"
+             class="rw-form-input"
+             style="width:100%"
              hx-get="{% url 'locations:list' %}"
-             hx-target="#rw-location-list" hx-swap="innerHTML"
-             hx-trigger="input changed delay:300ms" name="q">
+             hx-target="#rw-location-list"
+             hx-swap="innerHTML"
+             hx-trigger="input changed delay:300ms"
+             name="q">
     </div>
-    <div id="rw-location-list" style="flex:1;overflow-y:auto">
+
+    {# List #}
+    <div id="rw-location-list" class="flex-grow-1 overflow-auto">
       {% if locations %}
       {% for loc in locations %}
       <div class="rw-scene-item" id="loc-card-{{ loc.pk }}"
            onclick="RW.focusLocation({{ loc.pk }}, {{ loc.latitude|default:'null' }}, {{ loc.longitude|default:'null' }})">
-        <div style="font-size:20px;flex-shrink:0">📍</div>
-        <div style="flex:1;min-width:0">
-          <div style="font-size:13px;font-weight:700;color:var(--rw-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ loc.name }}</div>
+        <svg width="20" height="20" viewBox="0 0 24 24" class="ico flex-shrink-0">
+          <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+          <circle cx="12" cy="9" r="2.5"/>
+        </svg>
+        <div class="flex-grow-1" style="min-width:0">
+          <div class="fw-bold" style="font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+            {{ loc.name }}
+          </div>
           {% if loc.address %}
-          <div style="font-size:11px;color:var(--rw-text-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ loc.address }}</div>
+          <div style="font-size:11px;color:var(--rw-text-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+            {{ loc.address }}
+          </div>
           {% endif %}
           {% if loc.projects_count %}
           <div style="font-size:10px;color:var(--rw-amber);margin-top:2px">
@@ -64,25 +90,26 @@
           </div>
           {% endif %}
         </div>
-        <button class="rw-btn rw-btn-ghost" style="padding:4px 10px;font-size:11px;flex-shrink:0"
+        <button class="rw-btn rw-btn-ghost rw-btn-sm flex-shrink-0"
                 onclick="event.stopPropagation()"
                 hx-get="{% url 'locations:edit_modal' loc.pk %}"
-                hx-target="#rw-modal-container" hx-swap="innerHTML">✎</button>
+                hx-target="#rw-modal-container"
+                hx-swap="innerHTML">
+          <svg width="14" height="14" viewBox="0 0 24 24" class="ico">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+          </svg>
+        </button>
       </div>
       {% endfor %}
       {% else %}
-      <div class="rw-empty" style="padding:var(--rw-pad-lg)">
-        <div class="rw-empty-icon">📍</div>
-        <div class="rw-empty-title" style="font-size:14px">{% trans "شوێنێک نییە" %}</div>
-        <div class="rw-empty-sub" style="font-size:12px">{% trans "شوێنی یەکەم زیاد بکە" %}</div>
-      </div>
+      {% include "components/_empty_state.html" with title="شوێنێک نییە" sub="شوێنی یەکەم زیاد بکە" %}
       {% endif %}
     </div>
+
   </aside>
 
 </div>
-
-<div id="rw-modal-container"></div>
 
 {% block extra_js %}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
@@ -116,4 +143,5 @@
 })();
 </script>
 {% endblock %}
+
 {% endblock %}

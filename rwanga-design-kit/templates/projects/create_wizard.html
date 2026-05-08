@@ -16,176 +16,199 @@
 {% block title %}{% trans "پڕۆژەی نوێ" %}{% endblock %}
 
 {% block content %}
-<div style="flex:1;overflow-y:auto;background:var(--rw-bg)">
+<div class="flex-grow-1 overflow-auto p-4 p-lg-5" style="background:var(--rw-bg)">
+  <div style="max-width:640px;margin:0 auto">
 
-  {# ── Wizard step bar ── #}
-  <div class="rw-wizard-steps">
-    {% with steps=wizard_steps %}
-    {% for s in steps %}
-    <div class="rw-wizard-step {% if step == s.num %}active{% elif step > s.num %}done{% endif %}">
-      <span class="rw-step-num">{% if step > s.num %}✓{% else %}{{ s.num }}{% endif %}</span>
-      {{ s.label }}
-    </div>
-    {% endfor %}
-    {% endwith %}
-  </div>
-
-  {# ── Wizard content ── #}
-  <div class="rw-wizard-content" id="rw-wizard-body">
-
-    {% if step == 1 %}
-    {# STEP 1 — Basics #}
-    <h2 style="font-size:22px;font-weight:700;margin-bottom:var(--rw-pad-md)">{% trans "بنەڕەتەکانی پڕۆژە" %}</h2>
-    <form id="rw-wizard-form"
-          hx-post="{% url 'projects:create_step' 1 %}"
-          hx-target="#rw-wizard-body"
-          hx-swap="innerHTML">
-      {% csrf_token %}
-
-      <label class="rw-form-label">{% trans "ناوی پڕۆژە (کوردی)" %}</label>
-      <input class="rw-form-input" type="text" name="title" placeholder="میوانێکی نادیار" required>
-
-      <label class="rw-form-label">{% trans "ناوی پڕۆژە (لاتینی)" %}</label>
-      <input class="rw-form-input" type="text" name="title_latin" placeholder="Mysterious Guest">
-
-      <label class="rw-form-label">{% trans "جۆری پڕۆژە" %}</label>
-      <select class="rw-form-input" name="project_type">
-        <option value="feature">{% trans "فیلمی درێژ" %}</option>
-        <option value="short">{% trans "فیلمی کورت" %}</option>
-        <option value="episode">{% trans "ئێپیزۆدی تەلەویزیۆن" %}</option>
-        <option value="music_video">{% trans "فیدیۆی گۆرانی" %}</option>
-        <option value="commercial">{% trans "ڕیکلام" %}</option>
-      </select>
-
-      <label class="rw-form-label">{% trans "ناوی دەرهێنەر" %}</label>
-      <input class="rw-form-input" type="text" name="director_name" placeholder="سەروەر موحەدین">
-
-      <label class="rw-form-label">{% trans "لۆگلاین (ئارەزووی نییە)" %}</label>
-      <textarea class="rw-form-input" name="logline" rows="3"
-                placeholder="{% trans 'چیرۆکەکە بە کورتی...' %}"></textarea>
-
-    </form>
-
-    {% elif step == 2 %}
-    {# STEP 2 — Script Upload #}
-    <h2 style="font-size:22px;font-weight:700;margin-bottom:8px">{% trans "بارکردنی دەستنووس" %}</h2>
-    <p style="color:var(--rw-text-2);margin-bottom:var(--rw-pad-md);font-size:14px">
-      {% trans "AI بە خۆی دەستنووسەکە دادەشکێنێت — دیمەن، کەسایەتی، شوێن، و کەلوپەل دەناسێتەوە." %}
-    </p>
-    <form id="rw-wizard-form"
-          hx-post="{% url 'projects:create_step' 2 %}"
-          hx-target="#rw-wizard-body"
-          hx-encoding="multipart/form-data">
-      {% csrf_token %}
-      <input type="hidden" name="project_id" value="{{ project.pk }}">
-
-      <div class="rw-upload-zone"
-           id="rw-upload-zone"
-           onclick="document.getElementById('rw-script-file').click()"
-           ondragover="event.preventDefault();this.classList.add('drag-over')"
-           ondragleave="this.classList.remove('drag-over')"
-           ondrop="event.preventDefault();this.classList.remove('drag-over');handleDrop(event)">
-        <div class="rw-upload-icon">📄</div>
-        <div class="rw-upload-title">{% trans "دەستنووسەکەت لێرە بکێشە" %}</div>
-        <div class="rw-upload-sub">{% trans "یان کلیک بکە بۆ هەڵبژاردن" %}</div>
-        <div class="rw-upload-formats">
-          <span class="rw-format-chip">.fdx</span>
-          <span class="rw-format-chip">.fountain</span>
-          <span class="rw-format-chip">.pdf</span>
-          <span class="rw-format-chip">.docx</span>
-        </div>
+    {# ── Wizard step bar ── #}
+    <div class="rw-wizard-bar mb-4">
+      {% with steps=wizard_steps %}
+      {% for s in steps %}
+      <div class="rw-wiz-step {% if step > s.num %}done{% elif step == s.num %}active{% endif %}">
+        <div class="rw-wiz-num">{% if step > s.num %}✓{% else %}{{ s.num }}{% endif %}</div>
+        {{ s.label }}
       </div>
-      <input type="file" id="rw-script-file" name="script_file"
-             accept=".fdx,.fountain,.pdf,.docx" style="display:none"
-             onchange="document.getElementById('rw-wizard-form').dispatchEvent(new Event('submit'))">
-    </form>
-
-    <div style="margin-top:var(--rw-pad-md);padding-top:var(--rw-pad-md);border-top:1px solid var(--rw-border)">
-      <button class="rw-btn rw-btn-ghost"
-              hx-post="{% url 'projects:create_step' 2 %}"
-              hx-target="#rw-wizard-body"
-              hx-vals='{"skip": true, "project_id": "{{ project.pk }}"}'>
-        {% trans "بگوزەرێ — دواتر زیاد دەکەم" %}
-      </button>
-    </div>
-
-    {% elif step == 3 %}
-    {# STEP 3 — Module Selection #}
-    <h2 style="font-size:22px;font-weight:700;margin-bottom:8px">{% trans "مۆدیولەکان چالاک بکە" %}</h2>
-    <p style="color:var(--rw-text-2);margin-bottom:var(--rw-pad-md);font-size:14px">
-      {% trans "دواتر دەتوانیت بگۆڕیت." %}
-    </p>
-    <form id="rw-wizard-form"
-          hx-post="{% url 'projects:create_step' 3 %}"
-          hx-target="#rw-wizard-body">
-      {% csrf_token %}
-      <input type="hidden" name="project_id" value="{{ project.pk }}">
-
-      {% for module in available_modules %}
-      <label style="display:flex;align-items:center;gap:14px;padding:16px;background:var(--rw-surface);border:1px solid var(--rw-border);margin-bottom:2px;cursor:pointer">
-        <input type="checkbox" name="modules" value="{{ module.key }}"
-               {% if module.required or module.default %}checked{% endif %}
-               {% if module.required %}disabled{% endif %}
-               style="width:18px;height:18px;accent-color:var(--rw-amber)">
-        <span style="font-size:22px">{{ module.icon }}</span>
-        <div>
-          <div style="font-size:14px;font-weight:600">{{ module.name }}</div>
-          <div style="font-size:12px;color:var(--rw-text-2)">{{ module.desc }}</div>
-        </div>
-        {% if module.ai %}<span class="rw-ai-badge" style="margin-inline-start:auto">AI</span>{% endif %}
-        {% if module.rwanga %}<span class="rw-rw-exclusive" style="margin-inline-start:auto">ڕوانگە ✦</span>{% endif %}
-      </label>
+      {% if not forloop.last %}<div class="rw-wiz-connector"></div>{% endif %}
       {% endfor %}
-    </form>
-
-    {% elif step == 4 %}
-    {# STEP 4 — Team Invites #}
-    <h2 style="font-size:22px;font-weight:700;margin-bottom:8px">{% trans "تیمەکەت بانگ بکە" %}</h2>
-    <p style="color:var(--rw-text-2);margin-bottom:var(--rw-pad-md);font-size:14px">
-      {% trans "ئارەزووی نییە — دواتر دەتوانیت زیاد بکەی." %}
-    </p>
-    <form id="rw-wizard-form"
-          hx-post="{% url 'projects:create_step' 4 %}"
-          hx-target="#rw-wizard-body">
-      {% csrf_token %}
-      <input type="hidden" name="project_id" value="{{ project.pk }}">
-
-      <div id="rw-invite-list">
-        {% include "accounts/_invite_row.html" %}
-      </div>
-
-      <button type="button" class="rw-btn rw-btn-ghost"
-              hx-get="{% url 'accounts:invite_row' %}"
-              hx-target="#rw-invite-list"
-              hx-swap="beforeend">
-        + {% trans "ئەندامی تر زیاد بکە" %}
-      </button>
-    </form>
-    {% endif %}
-
-    {# ── Wizard footer nav ── #}
-    <div style="display:flex;justify-content:space-between;margin-top:var(--rw-pad-lg);padding-top:var(--rw-pad-md);border-top:1px solid var(--rw-border)">
-      {% if step > 1 %}
-      <button class="rw-btn rw-btn-ghost"
-              hx-get="{% url 'projects:create_wizard' %}?step={{ step|add:'-1' }}&project={{ project.pk }}"
-              hx-target="#rw-wizard-body">
-        ← {% trans "پێشوو" %}
-      </button>
-      {% else %}<div></div>{% endif %}
-
-      {% if step < 4 %}
-      <button class="rw-btn rw-btn-primary"
-              form="rw-wizard-form"
-              type="submit">
-        {% trans "دواتر" %} →
-      </button>
-      {% else %}
-      <a href="{% url 'projects:dashboard' project.pk %}" class="rw-btn rw-btn-primary">
-        {% trans "چوونە پڕۆژەکەوە" %} →
-      </a>
-      {% endif %}
+      {% endwith %}
     </div>
 
-  </div>{# /wizard-content #}
+    {# ── Wizard content ── #}
+    <div id="rw-wizard-body">
+
+      {% if step == 1 %}
+      {# STEP 1 — Basics #}
+      <div class="rw-section-hdr mb-4">{% trans "بنەڕەتەکانی پڕۆژە" %}</div>
+      <form id="rw-wizard-form"
+            hx-post="{% url 'projects:create_step' 1 %}"
+            hx-target="#rw-wizard-body"
+            hx-swap="innerHTML">
+        {% csrf_token %}
+
+        <div class="mb-3">
+          <label class="rw-form-label">{% trans "ناوی پڕۆژە (کوردی)" %}</label>
+          <input class="rw-form-input" type="text" name="title" placeholder="میوانێکی نادیار" required>
+        </div>
+
+        <div class="mb-3">
+          <label class="rw-form-label">{% trans "ناوی پڕۆژە (لاتینی)" %}</label>
+          <input class="rw-form-input rw-font-en" type="text" name="title_latin" placeholder="Mysterious Guest">
+        </div>
+
+        <div class="mb-3">
+          <label class="rw-form-label">{% trans "جۆری پڕۆژە" %}</label>
+          <select class="rw-form-input" name="project_type">
+            <option value="feature">{% trans "فیلمی درێژ" %}</option>
+            <option value="short">{% trans "فیلمی کورت" %}</option>
+            <option value="episode">{% trans "ئێپیزۆدی تەلەویزیۆن" %}</option>
+            <option value="music_video">{% trans "فیدیۆی گۆرانی" %}</option>
+            <option value="commercial">{% trans "ڕیکلام" %}</option>
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label class="rw-form-label">{% trans "ناوی دەرهێنەر" %}</label>
+          <input class="rw-form-input" type="text" name="director_name" placeholder="سەروەر موحەدین">
+        </div>
+
+        <div class="mb-3">
+          <label class="rw-form-label">{% trans "لۆگلاین (ئارەزووی نییە)" %}</label>
+          <textarea class="rw-form-input" name="logline" rows="3"
+                    placeholder="{% trans 'چیرۆکەکە بە کورتی...' %}"></textarea>
+        </div>
+
+      </form>
+
+      {% elif step == 2 %}
+      {# STEP 2 — Script Upload #}
+      <div class="rw-section-hdr mb-2">{% trans "بارکردنی دەستنووس" %}</div>
+      <p class="mb-4" style="color:var(--rw-text-2);font-size:14px">
+        {% trans "AI بە خۆی دەستنووسەکە دادەشکێنێت — دیمەن، کەسایەتی، شوێن، و کەلوپەل دەناسێتەوە." %}
+      </p>
+      <form id="rw-wizard-form"
+            hx-post="{% url 'projects:create_step' 2 %}"
+            hx-target="#rw-wizard-body"
+            hx-encoding="multipart/form-data">
+        {% csrf_token %}
+        <input type="hidden" name="project_id" value="{{ project.pk }}">
+
+        <div class="rw-upload-zone mb-3"
+             id="rw-upload-zone"
+             onclick="document.getElementById('rw-script-file').click()"
+             ondragover="event.preventDefault();this.classList.add('drag-over')"
+             ondragleave="this.classList.remove('drag-over')"
+             ondrop="event.preventDefault();this.classList.remove('drag-over');handleDrop(event)">
+          <div class="rw-upload-icon">
+            <svg width="40" height="40" viewBox="0 0 24 24" class="ico">
+              <rect x="4" y="2" width="16" height="20" rx="1"/>
+              <line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="13" y2="16"/>
+            </svg>
+          </div>
+          <div class="rw-upload-title">{% trans "دەستنووسەکەت لێرە بکێشە" %}</div>
+          <div class="rw-upload-sub">{% trans "یان کلیک بکە بۆ هەڵبژاردن" %}</div>
+          <div class="rw-upload-formats d-flex gap-2 mt-2">
+            <span class="rw-format-chip">.fdx</span>
+            <span class="rw-format-chip">.fountain</span>
+            <span class="rw-format-chip">.pdf</span>
+            <span class="rw-format-chip">.docx</span>
+          </div>
+        </div>
+        <input type="file" id="rw-script-file" name="script_file"
+               accept=".fdx,.fountain,.pdf,.docx" class="d-none"
+               onchange="document.getElementById('rw-wizard-form').dispatchEvent(new Event('submit'))">
+      </form>
+
+      <div class="mt-3 pt-3" style="border-top:1px solid var(--rw-border)">
+        <button class="rw-btn rw-btn-ghost"
+                hx-post="{% url 'projects:create_step' 2 %}"
+                hx-target="#rw-wizard-body"
+                hx-vals='{"skip": true, "project_id": "{{ project.pk }}"}'>
+          {% trans "بگوزەرێ — دواتر زیاد دەکەم" %}
+        </button>
+      </div>
+
+      {% elif step == 3 %}
+      {# STEP 3 — Module Selection #}
+      <div class="rw-section-hdr mb-2">{% trans "مۆدیولەکان چالاک بکە" %}</div>
+      <p class="mb-4" style="color:var(--rw-text-2);font-size:14px">
+        {% trans "دواتر دەتوانیت بگۆڕیت." %}
+      </p>
+      <form id="rw-wizard-form"
+            hx-post="{% url 'projects:create_step' 3 %}"
+            hx-target="#rw-wizard-body">
+        {% csrf_token %}
+        <input type="hidden" name="project_id" value="{{ project.pk }}">
+
+        {% for module in available_modules %}
+        <label class="d-flex align-items-center gap-3 mb-1 px-4 py-3"
+               style="background:var(--rw-surface);border:1px solid var(--rw-border);cursor:pointer">
+          <input type="checkbox" name="modules" value="{{ module.key }}"
+                 {% if module.required or module.default %}checked{% endif %}
+                 {% if module.required %}disabled{% endif %}
+                 style="width:18px;height:18px;accent-color:var(--rw-amber);flex-shrink:0">
+          <div class="flex-grow-1">
+            <div style="font-size:14px;font-weight:600">{{ module.name }}</div>
+            <div style="font-size:12px;color:var(--rw-text-2)">{{ module.desc }}</div>
+          </div>
+          {% if module.ai %}<span class="rw-ai-badge ms-auto">AI</span>{% endif %}
+          {% if module.rwanga %}<span class="rw-rw-exclusive ms-auto">ڕوانگە ✦</span>{% endif %}
+        </label>
+        {% endfor %}
+      </form>
+
+      {% elif step == 4 %}
+      {# STEP 4 — Team Invites #}
+      <div class="rw-section-hdr mb-2">{% trans "تیمەکەت بانگ بکە" %}</div>
+      <p class="mb-4" style="color:var(--rw-text-2);font-size:14px">
+        {% trans "ئارەزووی نییە — دواتر دەتوانیت زیاد بکەی." %}
+      </p>
+      <form id="rw-wizard-form"
+            hx-post="{% url 'projects:create_step' 4 %}"
+            hx-target="#rw-wizard-body">
+        {% csrf_token %}
+        <input type="hidden" name="project_id" value="{{ project.pk }}">
+
+        <div id="rw-invite-list">
+          {% include "accounts/_invite_row.html" %}
+        </div>
+
+        <button type="button" class="rw-btn rw-btn-ghost mt-2"
+                hx-get="{% url 'accounts:invite_row' %}"
+                hx-target="#rw-invite-list"
+                hx-swap="beforeend">
+          + {% trans "ئەندامی تر زیاد بکە" %}
+        </button>
+      </form>
+      {% endif %}
+
+      {# ── Wizard footer nav ── #}
+      <div class="rw-wizard-footer d-flex justify-content-between mt-4 pt-3"
+           style="border-top:1px solid var(--rw-border)">
+        {% if step > 1 %}
+        <button class="rw-btn rw-btn-ghost"
+                hx-get="{% url 'projects:create_wizard' %}?step={{ step|add:'-1' }}&project={{ project.pk }}"
+                hx-target="#rw-wizard-body">
+          ← {% trans "پێشوو" %}
+        </button>
+        {% else %}<div></div>{% endif %}
+
+        <div class="flex-grow-1 text-center" style="font-size:12px;color:var(--rw-text-3);align-self:center">
+          {% trans "هەنگاو" %} {{ step }} {% trans "لە" %} 4
+        </div>
+
+        {% if step < 4 %}
+        <button class="rw-btn rw-btn-primary"
+                form="rw-wizard-form"
+                type="submit">
+          {% trans "دواتر" %} →
+        </button>
+        {% else %}
+        <a href="{% url 'projects:dashboard' project.pk %}" class="rw-btn rw-btn-primary">
+          {% trans "چوونە پڕۆژەکەوە" %} →
+        </a>
+        {% endif %}
+      </div>
+
+    </div>{# /rw-wizard-body #}
+  </div>
 </div>
 {% endblock %}
