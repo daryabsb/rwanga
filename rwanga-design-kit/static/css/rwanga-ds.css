@@ -1086,28 +1086,41 @@ html, body {
   /* Hide scene panel; open via bottom sheet / offcanvas */
   .rw-scene-panel { display: none; }
 
-  /* Rail becomes a bottom tab bar */
+  /* Rail becomes a bottom tab bar — flex-direction: row !important overrides Bootstrap's flex-column utility */
   .rw-rail {
     position: fixed;
     bottom: 0;
     inset-inline-start: 0;
     inset-inline-end: 0;
-    width: 100%;
-    height: 60px;
-    flex-direction: row;
+    width: 100% !important;
+    height: auto !important;
+    flex-direction: row !important;
     justify-content: space-around;
     align-items: center;
-    padding: 0;
-    border-top: 1px solid rgba(255,255,255,.06);
+    padding: 6px 8px !important;
+    gap: 4px !important;
+    border-top: 1px solid var(--rw-border);
     z-index: 200;
+    overflow-x: auto;
   }
 
   /* Hide rail logo on mobile; it's in topnav */
   .rw-rail-logo { display: none !important; }
   .rw-rail-sep  { display: none !important; }
 
-  /* Hide rail spacer + bottom extras on mobile */
-  .rw-rail .rw-rail-theme { display: none; }
+  /* Hide rail theme toggle on mobile — accessible via topnav */
+  .rw-rail-theme { display: none !important; }
+
+  /* Active-state accent: move from left bar to top bar */
+  .rw-rail-icon.active::before {
+    inset-inline-start: auto;
+    top: 0;
+    bottom: auto;
+    left: 8px;
+    right: 8px;
+    width: auto;
+    height: 2px;
+  }
 
   /* App shell: column on mobile */
   .rw-app { flex-direction: column; }
