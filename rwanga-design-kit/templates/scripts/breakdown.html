@@ -1,4 +1,5 @@
-{# ════════════════════════════════════════════════════════
+{% extends "base.html" %}
+{% comment %}
    RWANGA — scripts/breakdown.html
    Script breakdown — AI-extracted elements per scene.
    Pattern: LIST (with stats + card grid sections)
@@ -7,8 +8,7 @@
      project        — Project instance
      breakdown      — dict: {characters, locations, props, sfx, vfx, scene_count}
      active_section — 'b'
-   ════════════════════════════════════════════════════════ #}
-{% extends "base.html" %}
+{% endcomment %}
 {% load static i18n %}
 
 {% block title %}{% trans "داڕشتن" %} — {{ project.title }}{% endblock %}
@@ -27,9 +27,10 @@
       </p>
     </div>
     <div class="d-flex gap-2">
-      {% include "components/_ai_progress.html" with label="دووبارە کردنەوەی داڕشتن" url="ai_engine:run_breakdown" project_pk=project.pk %}
+      {% include "components/_ai_progress.html" with label="دووبارە کردنەوەی داڕشتن" %}
+      {% url 'ai_engine:rerun_breakdown' project.pk as rerun_url %}
       <button class="rw-btn rw-btn-ai"
-              hx-post="{% url 'ai_engine:run_breakdown' project.pk %}"
+              hx-post="{{ rerun_url|default:'#' }}"
               hx-target="#rw-ai-status"
               hx-indicator=".htmx-indicator">
         <svg width="16" height="16" viewBox="0 0 24 24" class="ico" style="display:inline-block;vertical-align:middle">

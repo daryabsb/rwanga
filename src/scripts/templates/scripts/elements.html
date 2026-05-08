@@ -1,30 +1,34 @@
 {% extends "base.html" %}
-{% comment %} ════════════════════════════════════════════════════════
+{% comment %}
    RWANGA — scripts/elements.html
    All script elements — browsable, filterable list.
+   Pattern: LIST (with card grid sections per element type)
 
    Context:
      project        — Project instance
      elements       — dict keyed by type: characters, locations, props, sfx, vfx
      active_section — 'b'
-   ════════════════════════════════════════════════════════ {% endcomment %}
+{% endcomment %}
 {% load static i18n %}
 
 {% block title %}{% trans "ئێلیمێنتەکان" %} — {{ project.title }}{% endblock %}
 
 {% block content %}
-<div id="rw-content" style="overflow-y:auto;flex:1">
 
   {% include "components/_breadcrumb.html" with project=project current="ئێلیمێنتەکان" %}
 
-  <div style="padding:var(--rw-pad-lg)">
-
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--rw-pad-md)">
-      <h1 style="font-size:20px;font-weight:700">{% trans "ئێلیمێنتەکان" %}</h1>
+  {# Header #}
+  <div class="d-flex align-items-center justify-content-between px-4 py-3 bg-rw-surface"
+       style="border-bottom:1px solid var(--rw-border)">
+    <div>
+      <h1 class="fs-4 fw-bold mb-0">{% trans "ئێلیمێنتەکان" %}</h1>
     </div>
+  </div>
 
-    {% comment %} ── Filter bar ── {% endcomment %}
-    <div class="rw-filter-row" style="margin-bottom:var(--rw-pad-lg)">
+  {# Filter strip #}
+  <div class="d-flex align-items-center px-4 py-2"
+       style="background:var(--rw-surface-2);border-bottom:1px solid var(--rw-border)">
+    <div class="rw-filter-row">
       <button class="rw-f-btn active" id="filter-all"
               hx-get="{% url 'scripts:elements' project.pk %}?type=all"
               hx-target="#rw-elements-body" hx-swap="innerHTML"
@@ -50,12 +54,16 @@
               hx-target="#rw-elements-body" hx-swap="innerHTML"
               onclick="setFilter(this)">{% trans "ئەفێکتی بینراو" %}</button>
     </div>
-
-    {% comment %} ── Elements body ── {% endcomment %}
-    <div id="rw-elements-body">{% include "scripts/_elements_body.html" %}</div>
   </div>
-</div>
 
+  {# Elements body #}
+  <div id="rw-elements-body" class="px-4 py-4">
+    {% include "scripts/_elements_body.html" %}
+  </div>
+
+{% endblock %}
+
+{% block extra_js %}
 <script>
 function setFilter(btn) {
   document.querySelectorAll('.rw-filter-row .rw-f-btn').forEach(b => b.classList.remove('active'));

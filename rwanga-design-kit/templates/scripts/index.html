@@ -1,4 +1,5 @@
-{# ════════════════════════════════════════════════════════
+{% extends "base.html" %}
+{% comment %}
    RWANGA — scripts/index.html
    Script list for the project.
    Pattern: LIST
@@ -7,8 +8,7 @@
      project        — Project instance
      scripts        — QuerySet[Script]
      active_section — 's'
-   ════════════════════════════════════════════════════════ #}
-{% extends "base.html" %}
+{% endcomment %}
 {% load static i18n %}
 
 {% block title %}{% trans "دەستنووسەکان" %} — {{ project.title }}{% endblock %}

@@ -1,4 +1,5 @@
-{# ════════════════════════════════════════════════════════
+{% extends "base.html" %}
+{% comment %}
    RWANGA — scripts/docs.html
    Script documents — treatments, synopses, notes.
    Pattern: LIST
@@ -7,8 +8,7 @@
      project        — Project instance
      documents      — list of script-related documents
      active_section — 's'
-   ════════════════════════════════════════════════════════ #}
-{% extends "base.html" %}
+{% endcomment %}
 {% load static i18n %}
 
 {% block title %}{% trans "بەڵگەکان" %} — {{ project.title }}{% endblock %}
@@ -26,8 +26,9 @@
         {% trans "تریتمێنت، پوختە و تێبینییەکانی پڕۆژە" %}
       </p>
     </div>
+    {% url 'scripts:create_doc_modal' project.pk as create_doc_url %}
     <button class="rw-btn rw-btn-primary"
-            hx-get="{% url 'scripts:create_doc_modal' project.pk %}"
+            hx-get="{{ create_doc_url|default:'#' }}"
             hx-target="#rw-modal-container"
             hx-swap="innerHTML">
       + {% trans "بەڵگەی نوێ" %}
@@ -59,8 +60,9 @@
       </thead>
       <tbody>
         {% for doc in documents %}
+        {% url 'scripts:doc_detail' project.pk doc.pk as doc_detail_url %}
         <tr class="rw-tbl-row"
-            hx-get="{% url 'scripts:doc_detail' project.pk doc.pk %}"
+            hx-get="{{ doc_detail_url|default:'#' }}"
             hx-target="#rw-modal-container"
             hx-swap="innerHTML">
           <td class="px-3 py-2">
@@ -97,9 +99,10 @@
             <span class="d-block" style="font-size:10px">{{ doc.updated_at|timesince }} {% trans "پێش" %}</span>
           </td>
           <td class="px-3 py-2" style="text-align:end">
+            {% url 'scripts:edit_doc_modal' project.pk doc.pk as edit_doc_url %}
             <button class="rw-btn rw-btn-ghost rw-btn-sm"
                     onclick="event.stopPropagation()"
-                    hx-get="{% url 'scripts:edit_doc_modal' project.pk doc.pk %}"
+                    hx-get="{{ edit_doc_url|default:'#' }}"
                     hx-target="#rw-modal-container"
                     hx-swap="innerHTML">
               {% trans "دەستکاری" %}

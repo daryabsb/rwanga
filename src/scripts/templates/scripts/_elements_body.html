@@ -1,27 +1,29 @@
 {% load i18n %}
 {% if elements.characters %}
-<div class="rw-section-hdr">{% trans "کەسایەتییەکان" %}</div>
-<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1px;background:var(--rw-border);border:1px solid var(--rw-border);margin-bottom:var(--rw-pad-lg)">
+<div class="rw-section-hdr mb-3">{% trans "کەسایەتییەکان" %}</div>
+<div class="mb-4" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1px;background:var(--rw-border);border:1px solid var(--rw-border)">
   {% for el in elements.characters %}
-  <div style="background:var(--rw-surface);padding:var(--rw-pad-md)">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-      <span style="font-size:14px;font-weight:700;color:var(--rw-text)">{{ el.name }}</span>
+  {% url 'scripts:element_detail' project.pk 'character' el.pk as el_url %}
+  <div class="rw-session-card d-flex flex-column gap-1 p-3" style="cursor:pointer" hx-get="{{ el_url|default:'#' }}" hx-target="#rw-modal-container" hx-swap="innerHTML">
+    <div class="d-flex align-items-center justify-content-between mb-1">
+      <span class="fw-bold" style="font-size:14px">{{ el.name }}</span>
       <span class="rw-badge rw-badge-d" style="font-size:9px">{% trans "کەسایەتی" %}</span>
     </div>
     <div style="font-size:11px;color:var(--rw-text-3)">{{ el.scene_count }} {% trans "دیمەن" %}</div>
-    {% if el.description %}<div style="font-size:12px;color:var(--rw-text-2);margin-top:6px;line-height:1.5">{{ el.description|truncatechars:60 }}</div>{% endif %}
+    {% if el.description %}<div class="mt-1" style="font-size:12px;color:var(--rw-text-2);line-height:1.5">{{ el.description|truncatechars:60 }}</div>{% endif %}
   </div>
   {% endfor %}
 </div>
 {% endif %}
 
 {% if elements.locations %}
-<div class="rw-section-hdr">{% trans "شوێنەکان" %}</div>
-<div style="background:var(--rw-surface);border:1px solid var(--rw-border);margin-bottom:var(--rw-pad-lg)">
+<div class="rw-section-hdr mb-3">{% trans "شوێنەکان" %}</div>
+<div class="mb-4" style="background:var(--rw-surface);border:1px solid var(--rw-border)">
   {% for el in elements.locations %}
-  <div style="display:flex;align-items:center;gap:14px;padding:14px 16px;border-bottom:1px solid var(--rw-border-2)">
-    <span class="rw-badge rw-badge-i" style="min-width:32px;text-align:center;font-family:var(--rw-font-en)">{{ el.int_ext }}</span>
-    <span style="flex:1;font-size:13px;font-weight:600;color:var(--rw-text)">{{ el.name }}</span>
+  {% url 'scripts:element_detail' project.pk 'location' el.pk as el_url %}
+  <div class="d-flex align-items-center gap-3 px-3 py-2 rw-tbl-row" style="cursor:pointer" hx-get="{{ el_url|default:'#' }}" hx-target="#rw-modal-container" hx-swap="innerHTML">
+    <span class="rw-badge rw-badge-i rw-font-en" style="min-width:32px;text-align:center">{{ el.int_ext }}</span>
+    <span class="flex-grow-1 fw-semibold" style="font-size:13px">{{ el.name }}</span>
     <span style="font-size:11px;color:var(--rw-text-3)">{{ el.scene_count }} {% trans "دیمەن" %}</span>
   </div>
   {% endfor %}
@@ -29,16 +31,35 @@
 {% endif %}
 
 {% if elements.props %}
-<div class="rw-section-hdr">{% trans "کەلوپەلەکان" %}</div>
-<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:var(--rw-pad-lg)">
+<div class="rw-section-hdr mb-3">{% trans "کەلوپەلەکان" %}</div>
+<div class="d-flex flex-wrap gap-2 mb-4">
   {% for el in elements.props %}
-  <div style="padding:8px 16px;background:var(--rw-surface);border:1px solid var(--rw-border);font-size:13px;color:var(--rw-text-2)">
-    {{ el.name }} <span style="color:var(--rw-text-3);margin-inline-start:6px;font-size:11px;font-family:var(--rw-font-en)">×{{ el.scene_count }}</span>
+  {% url 'scripts:element_detail' project.pk 'prop' el.pk as el_url %}
+  <div class="px-3 py-2 rw-tbl-row" style="cursor:pointer;background:var(--rw-surface);border:1px solid var(--rw-border);font-size:13px;color:var(--rw-text-2)" hx-get="{{ el_url|default:'#' }}" hx-target="#rw-modal-container" hx-swap="innerHTML">
+    {{ el.name }}<span class="rw-font-en" style="color:var(--rw-text-3);margin-inline-start:6px;font-size:11px">×{{ el.scene_count }}</span>
   </div>
   {% endfor %}
 </div>
 {% endif %}
 
-{% if not elements.characters and not elements.locations and not elements.props %}
-{% include "components/_empty_state.html" with icon="◇" title="هێشتا ئێلیمێنتێک نییە" sub="داڕشتنی دەستنووس ئێلیمێنتەکان دەدۆزێتەوە" %}
+{% if elements.sfx %}
+<div class="rw-section-hdr mb-3">{% trans "ئەفێکتی دەنگ" %}</div>
+<div class="d-flex flex-wrap gap-2 mb-4">
+  {% for el in elements.sfx %}
+  <div class="px-3 py-1" style="background:var(--rw-surface);border:1px solid var(--rw-border);font-size:12px;color:var(--rw-text-2)">{{ el.name }}</div>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% if elements.vfx %}
+<div class="rw-section-hdr mb-3">{% trans "ئەفێکتی بینراو" %}</div>
+<div class="d-flex flex-wrap gap-2 mb-4">
+  {% for el in elements.vfx %}
+  <div class="px-3 py-1" style="background:var(--rw-surface);border:1px solid var(--rw-border);font-size:12px;color:var(--rw-text-2)">{{ el.name }}</div>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% if not elements.characters and not elements.locations and not elements.props and not elements.sfx and not elements.vfx %}
+{% include "components/_empty_state.html" with title="هێشتا ئێلیمێنتێک نییە" sub="داڕشتنی دەستنووس ئێلیمێنتەکان دەدۆزێتەوە" %}
 {% endif %}

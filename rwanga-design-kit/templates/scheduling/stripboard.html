@@ -1,4 +1,5 @@
-{# ════════════════════════════════════════════════════════
+{% extends "base.html" %}
+{% comment %}
    RWANGA — scheduling/stripboard.html
    Full stripboard — industry-standard schedule visualisation.
    Each scene is a coloured draggable strip.
@@ -7,8 +8,7 @@
      project        — Project instance
      strips         — ordered list of scenes + day breaks
      active_section — 'p'
-   ════════════════════════════════════════════════════════ #}
-{% extends "base.html" %}
+{% endcomment %}
 {% load static i18n %}
 
 {% block title %}{% trans "ستریپبۆرد" %} — {{ project.title }}{% endblock %}
@@ -16,20 +16,22 @@
 {% block content %}
 <div class="flex-grow-1 overflow-auto">
 
-  {# ── Toolbar ── #}
+  {# Toolbar #}
   <div class="d-flex align-items-center gap-3 px-4 bg-rw-surface"
        style="height:56px;flex-shrink:0;border-bottom:1px solid var(--rw-border);position:sticky;top:0;z-index:10">
     {% include "components/_breadcrumb.html" with project=project current="ستریپبۆرد" inline=True %}
     <span class="ms-auto" style="font-size:13px;color:var(--rw-text-2)">
       {{ strips|length }} {% trans "ستریپ" %}
     </span>
+    {% url 'scheduling:reorder_strips' project.pk as reorder_url %}
+    {% url 'scheduling:export_pdf' project.pk as sched_export_url %}
     <button class="rw-btn rw-btn-ghost" id="sb-save-btn" style="display:none"
-            hx-post="{% url 'scheduling:reorder_strips' project.pk %}"
+            hx-post="{{ reorder_url|default:'#' }}"
             hx-vals="js:{order: SB.getOrder()}"
             hx-swap="none">
       ✓ {% trans "پاشەکەوتکردنی ڕیز" %}
     </button>
-    <a href="{% url 'scheduling:export_pdf' project.pk %}" class="rw-btn rw-btn-ghost">
+    <a href="{{ sched_export_url|default:'#' }}" class="rw-btn rw-btn-ghost">
       ↗ {% trans "PDF" %}
     </a>
     <a href="{% url 'scheduling:call_sheets' project.pk %}" class="rw-btn rw-btn-amber">
@@ -43,7 +45,7 @@
     </a>
   </div>
 
-  {# ── Column headers ── #}
+  {# Column headers #}
   <div class="px-4 bg-rw-surface"
        style="display:grid;grid-template-columns:40px 48px 56px 1fr auto auto;gap:0;border-bottom:2px solid var(--rw-border);padding-top:10px;padding-bottom:10px;position:sticky;top:56px;z-index:9">
     <div class="rw-overline">{% trans "ڕۆژ" %}</div>
@@ -54,12 +56,12 @@
     <div class="rw-overline pe-3">{% trans "کەسایەتی" %}</div>
   </div>
 
-  {# ── Strips ── #}
+  {# Strips #}
   <div id="rw-stripboard" class="px-4">
     {% for strip in strips %}
 
     {% if strip.is_day_break %}
-    {# ── Day break marker ── #}
+    {# Day break marker #}
     <div class="d-grid align-items-center py-3 gap-3"
          style="grid-template-columns:40px 1fr;border-top:2px solid var(--rw-border);margin-top:8px"
          data-strip-id="{{ strip.pk }}" data-type="day_break">
@@ -75,7 +77,7 @@
       </div>
     </div>
     {% else %}
-    {# ── Scene strip ── #}
+    {# Scene strip #}
     <div class="rw-strip-row"
          data-strip-id="{{ strip.scene.pk }}" data-type="scene"
          style="display:grid;grid-template-columns:40px 48px 56px 1fr auto auto;gap:0;align-items:center;

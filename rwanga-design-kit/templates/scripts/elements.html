@@ -1,4 +1,5 @@
-{# ════════════════════════════════════════════════════════
+{% extends "base.html" %}
+{% comment %}
    RWANGA — scripts/elements.html
    All script elements — browsable, filterable list.
    Pattern: LIST (with card grid sections per element type)
@@ -7,8 +8,7 @@
      project        — Project instance
      elements       — dict keyed by type: characters, locations, props, sfx, vfx
      active_section — 'b'
-   ════════════════════════════════════════════════════════ #}
-{% extends "base.html" %}
+{% endcomment %}
 {% load static i18n %}
 
 {% block title %}{% trans "ئێلیمێنتەکان" %} — {{ project.title }}{% endblock %}
@@ -68,9 +68,10 @@
                 background:var(--rw-border);
                 border:1px solid var(--rw-border)">
       {% for el in elements.characters %}
+      {% url 'scripts:element_detail' project.pk 'character' el.pk as el_char_url %}
       <div class="rw-session-card d-flex flex-column gap-1 p-3"
            style="cursor:pointer"
-           hx-get="{% url 'scripts:element_detail' project.pk 'character' el.pk %}"
+           hx-get="{{ el_char_url|default:'#' }}"
            hx-target="#rw-modal-container" hx-swap="innerHTML">
         <div class="d-flex align-items-center justify-content-between mb-1">
           <span class="fw-bold" style="font-size:14px">{{ el.name }}</span>
@@ -89,9 +90,10 @@
     <div class="rw-section-hdr mb-3">{% trans "شوێنەکان" %}</div>
     <div class="mb-4" style="background:var(--rw-surface);border:1px solid var(--rw-border)">
       {% for el in elements.locations %}
+      {% url 'scripts:element_detail' project.pk 'location' el.pk as el_loc_url %}
       <div class="d-flex align-items-center gap-3 px-3 py-2 rw-tbl-row"
            style="cursor:pointer"
-           hx-get="{% url 'scripts:element_detail' project.pk 'location' el.pk %}"
+           hx-get="{{ el_loc_url|default:'#' }}"
            hx-target="#rw-modal-container" hx-swap="innerHTML">
         <span class="rw-badge rw-badge-i rw-font-en"
               style="min-width:32px;text-align:center">{{ el.int_ext }}</span>
@@ -106,9 +108,10 @@
     <div class="rw-section-hdr mb-3">{% trans "کەلوپەلەکان" %}</div>
     <div class="d-flex flex-wrap gap-2 mb-4">
       {% for el in elements.props %}
+      {% url 'scripts:element_detail' project.pk 'prop' el.pk as el_prop_url %}
       <div class="px-3 py-2 rw-tbl-row"
            style="cursor:pointer;background:var(--rw-surface);border:1px solid var(--rw-border);font-size:13px;color:var(--rw-text-2)"
-           hx-get="{% url 'scripts:element_detail' project.pk 'prop' el.pk %}"
+           hx-get="{{ el_prop_url|default:'#' }}"
            hx-target="#rw-modal-container" hx-swap="innerHTML">
         {{ el.name }}
         <span class="rw-font-en" style="color:var(--rw-text-3);margin-inline-start:6px;font-size:11px">×{{ el.scene_count }}</span>

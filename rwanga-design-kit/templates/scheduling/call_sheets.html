@@ -1,4 +1,5 @@
-{# ════════════════════════════════════════════════════════
+{% extends "base.html" %}
+{% comment %}
    RWANGA — scheduling/call_sheets.html
    Call sheet list — view, download PDF, send via WhatsApp.
 
@@ -6,8 +7,7 @@
      project        — Project instance
      call_sheets    — QuerySet[CallSheet]
      active_section — 'sh'
-   ════════════════════════════════════════════════════════ #}
-{% extends "base.html" %}
+{% endcomment %}
 {% load static i18n %}
 
 {% block title %}{% trans "ئایننامەکان" %} — {{ project.title }}{% endblock %}
@@ -17,21 +17,22 @@
 
   {% include "components/_breadcrumb.html" with project=project current="ئایننامەکان" %}
 
-  {# ── Page header ── #}
+  {# Page header #}
   <div class="d-flex align-items-center justify-content-between px-4 py-3 bg-rw-surface"
        style="border-bottom:1px solid var(--rw-border)">
     <div>
       <h1 class="fs-4 fw-bold mb-1">{% trans "ئایننامەکان" %}</h1>
       <p class="mb-0" style="font-size:12px;color:var(--rw-text-2)">{% trans "ئایننامەی پێیەکی ڕۆژانەی وێنەگرتن" %}</p>
     </div>
+    {% url 'scheduling:generate_call_sheet_modal' project.pk as gen_cs_url %}
     <button class="rw-btn rw-btn-primary"
-            hx-get="{% url 'scheduling:generate_call_sheet_modal' project.pk %}"
+            hx-get="{{ gen_cs_url|default:'#' }}"
             hx-target="#rw-modal-container" hx-swap="innerHTML">
       + {% trans "دروستکردنی ئایننامە" %}
     </button>
   </div>
 
-  {# ── Content ── #}
+  {# Content #}
   <div class="p-4">
     {% if call_sheets %}
     <div id="list-body" style="background:var(--rw-surface);border:1px solid var(--rw-border)">
@@ -39,14 +40,14 @@
       <div class="d-flex align-items-center gap-3 px-4 py-3"
            style="border-bottom:1px solid var(--rw-border)">
 
-        {# Day indicator #}
+        {# day indicator #}
         <div class="d-flex flex-column align-items-center justify-content-center gap-1 flex-shrink-0"
              style="width:56px;height:56px;background:{% if cs.shoot_day.day_number <= 3 %}var(--rw-script){% else %}var(--rw-break){% endif %}">
           <div class="rw-font-en fw-bold" style="font-size:18px;color:#fff">{{ cs.shoot_day.day_number }}</div>
           <div class="rw-overline" style="color:rgba(255,255,255,.7);font-size:8px">{% trans "ڕۆژ" %}</div>
         </div>
 
-        {# Details #}
+        {# details #}
         <div class="flex-grow-1" style="min-width:0">
           <div class="fw-bold mb-1" style="font-size:14px">
             {% trans "ئایننامەی ڕۆژی" %} {{ cs.shoot_day.day_number }}
@@ -77,22 +78,24 @@
           {% endif %}
         </div>
 
-        {# Actions #}
+        {# actions #}
         <div class="d-flex gap-2 flex-shrink-0">
           {% if cs.pdf %}
           <a href="{{ cs.pdf.url }}" target="_blank" class="rw-btn rw-btn-ghost rw-btn-sm">
             ↗ {% trans "PDF" %}
           </a>
           {% else %}
+          {% url 'scheduling:generate_pdf' project.pk cs.pk as gen_pdf_url %}
           <button class="rw-btn rw-btn-ghost rw-btn-sm"
-                  hx-post="{% url 'scheduling:generate_pdf' project.pk cs.pk %}"
+                  hx-post="{{ gen_pdf_url|default:'#' }}"
                   hx-swap="outerHTML" hx-target="closest div">
             {% trans "دروستکردنی PDF" %}
           </button>
           {% endif %}
 
+          {% url 'scheduling:send_whatsapp' project.pk cs.pk as send_wa_url %}
           <button class="rw-btn rw-btn-ghost rw-btn-sm"
-                  hx-post="{% url 'scheduling:send_whatsapp' project.pk cs.pk %}"
+                  hx-post="{{ send_wa_url|default:'#' }}"
                   hx-swap="none"
                   hx-confirm="{% trans 'بە WhatsApp بنێرە؟' %}">
             <svg width="14" height="14" viewBox="0 0 24 24" class="ico" style="width:14px;height:14px">
@@ -101,8 +104,9 @@
             {% trans "WhatsApp" %}
           </button>
 
+          {% url 'scheduling:call_sheet_detail' project.pk cs.pk as cs_detail_url %}
           <button class="rw-btn rw-btn-ghost rw-btn-sm"
-                  hx-get="{% url 'scheduling:call_sheet_detail' project.pk cs.pk %}"
+                  hx-get="{{ cs_detail_url|default:'#' }}"
                   hx-target="#rw-modal-container" hx-swap="innerHTML">
             {% trans "بینین" %}
           </button>

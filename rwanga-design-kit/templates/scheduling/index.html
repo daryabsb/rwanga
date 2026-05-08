@@ -1,4 +1,5 @@
-{# ════════════════════════════════════════════════════════
+{% extends "base.html" %}
+{% comment %}
    RWANGA — scheduling/index.html
    Shooting schedule overview — shoot day list with strips.
 
@@ -6,8 +7,7 @@
      project        — Project instance
      shoot_days     — QuerySet[ShootDay]
      active_section — 'p'
-   ════════════════════════════════════════════════════════ #}
-{% extends "base.html" %}
+{% endcomment %}
 {% load static i18n %}
 
 {% block title %}{% trans "خشتەی وێنەگرتن" %} — {{ project.title }}{% endblock %}
@@ -15,15 +15,16 @@
 {% block content %}
 <div class="d-flex flex-grow-1 overflow-hidden">
 
-  {# ── Day selector panel ── #}
+  {# Day selector panel #}
   <aside class="rw-scene-panel d-none d-md-flex flex-column overflow-hidden">
     <div class="rw-overline px-3 py-2" style="border-bottom:1px solid var(--rw-border)">
       {% trans "ڕۆژەکانی وێنەگرتن" %}
     </div>
     <div class="flex-grow-1 overflow-auto">
       {% for day in shoot_days %}
+      {% url 'scheduling:day_detail' project.pk day.pk as day_detail_url %}
       <div class="rw-scene-item {% if forloop.first %}active{% endif %}"
-           hx-get="{% url 'scheduling:day_detail' project.pk day.pk %}"
+           hx-get="{{ day_detail_url|default:'#' }}"
            hx-target="#rw-sched-main" hx-swap="innerHTML">
         <span class="rw-sc-num" dir="ltr">{{ day.day_number }}</span>
         <div class="flex-grow-1" style="min-width:0">
@@ -38,18 +39,19 @@
       {% endfor %}
     </div>
     <div class="p-3" style="border-top:1px solid var(--rw-border)">
+      {% url 'scheduling:add_day_modal' project.pk as add_day_url %}
       <button class="rw-btn rw-btn-primary w-100 justify-content-center"
-              hx-get="{% url 'scheduling:add_day_modal' project.pk %}"
+              hx-get="{{ add_day_url|default:'#' }}"
               hx-target="#rw-modal-container" hx-swap="innerHTML">
         + {% trans "ڕۆژی نوێ" %}
       </button>
     </div>
   </aside>
 
-  {# ── Main schedule content ── #}
+  {# Main schedule content #}
   <div class="flex-grow-1 d-flex flex-column overflow-hidden">
 
-    {# Header bar #}
+    {# header bar #}
     <div class="d-flex align-items-center gap-3 px-4 bg-rw-surface"
          style="height:56px;flex-shrink:0;border-bottom:1px solid var(--rw-border)">
       <h1 class="fs-5 fw-bold flex-grow-1 mb-0">{% trans "خشتەی وێنەگرتن" %}</h1>
@@ -74,7 +76,7 @@
       </a>
     </div>
 
-    {# Schedule content swapped by day selection #}
+    {# schedule content swapped by day selection #}
     <div id="rw-sched-main" class="flex-grow-1 overflow-auto p-4">
       {% if shoot_days %}
       <div class="text-center py-5" style="color:var(--rw-text-3);font-size:13px">

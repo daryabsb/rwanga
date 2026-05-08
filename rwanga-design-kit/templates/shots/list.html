@@ -1,4 +1,5 @@
-{# ════════════════════════════════════════════════════════
+{% extends "base.html" %}
+{% comment %}
    RWANGA — shots/list.html
    Project-wide shot list — all scenes, all shots, filterable.
    Pattern: LIST (with inline edit + type filters)
@@ -8,8 +9,7 @@
      shots          — QuerySet[Shot] (all scenes)
      filters        — dict: current filter state
      active_section — 'v'
-   ════════════════════════════════════════════════════════ #}
-{% extends "base.html" %}
+{% endcomment %}
 {% load static i18n %}
 
 {% block title %}{% trans "لیستی لێدانەکان" %} — {{ project.title }}{% endblock %}
@@ -28,7 +28,8 @@
       </p>
     </div>
     <div class="d-flex gap-2">
-      <a href="{% url 'shots:export_pdf' project.pk %}" class="rw-btn rw-btn-ghost">
+      {% url 'shots:export_pdf' project.pk as export_pdf_url %}
+      <a href="{{ export_pdf_url|default:'#' }}" class="rw-btn rw-btn-ghost">
         ↗ {% trans "PDF" %}
       </a>
     </div>
@@ -94,7 +95,7 @@
       <tbody>
         {% for shot in shots %}
         <tr class="rw-tbl-row"
-            hx-get="{% url 'shots:edit_row' shot.pk %}"
+            hx-get="{% url 'shots:edit' project.pk shot.pk %}"
             hx-target="closest tr"
             hx-swap="outerHTML">
           <td class="px-3 py-2">

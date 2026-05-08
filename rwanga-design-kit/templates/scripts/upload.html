@@ -1,4 +1,5 @@
-{# ════════════════════════════════════════════════════════
+{% extends "base.html" %}
+{% comment %}
    RWANGA — scripts/upload.html
    Script upload + AI breakdown trigger.
    Pattern: FORM / EDIT
@@ -7,8 +8,7 @@
      project         — Project instance
      existing_script — Script|None
      active_jobs     — QuerySet[AIJob] currently running
-   ════════════════════════════════════════════════════════ #}
-{% extends "base.html" %}
+{% endcomment %}
 {% load static i18n %}
 
 {% block title %}{% trans "بارکردنی دەستنووس" %} — {{ project.title }}{% endblock %}

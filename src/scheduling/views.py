@@ -8,52 +8,34 @@ from src.projects.models import Project
 class SchedulingIndexView(View):
     def get(self, request, project_pk):
         project = get_object_or_404(Project, id=project_pk)
-        return render(
-            request,
-            "stub.html",
-            {
-                "project": project,
-                "active_project": project,
-                "active_section": "p",
-                "stub_name": "Scheduling",
-                "icon": "📅",
-                "subtitle": "Scheduling board placeholder.",
-            },
-        )
+        return render(request, 'scheduling/index.html', {
+            'project': project,
+            'active_project': project,
+            'active_section': 'p',
+            'shoot_days': [],
+        })
 
 
 class StripboardView(View):
     def get(self, request, project_pk):
         project = get_object_or_404(Project, id=project_pk)
-        return render(
-            request,
-            "stub.html",
-            {
-                "project": project,
-                "active_project": project,
-                "active_section": "p",
-                "stub_name": "Stripboard",
-                "icon": "≡",
-                "subtitle": "Stripboard placeholder.",
-            },
-        )
+        return render(request, 'scheduling/stripboard.html', {
+            'project': project,
+            'active_project': project,
+            'active_section': 'p',
+            'strips': [],
+        })
 
 
 class CallSheetsView(View):
     def get(self, request, project_pk):
         project = get_object_or_404(Project, id=project_pk)
-        return render(
-            request,
-            "stub.html",
-            {
-                "project": project,
-                "active_project": project,
-                "active_section": "sh",
-                "stub_name": "Call sheets",
-                "icon": "📋",
-                "subtitle": "Call sheet module placeholder.",
-            },
-        )
+        return render(request, 'scheduling/call_sheets.html', {
+            'project': project,
+            'active_project': project,
+            'active_section': 'sh',
+            'call_sheets': [],
+        })
 
 
 class SchedulingOptimizeView(View):

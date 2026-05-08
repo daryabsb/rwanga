@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% comment %} ════════════════════════════════════════════════════════
+{% comment %}
    RWANGA — scheduling/stripboard.html
    Full stripboard — industry-standard schedule visualisation.
    Each scene is a coloured draggable strip.
@@ -8,56 +8,68 @@
      project        — Project instance
      strips         — ordered list of scenes + day breaks
      active_section — 'p'
-   ════════════════════════════════════════════════════════ {% endcomment %}
+{% endcomment %}
 {% load static i18n %}
 
 {% block title %}{% trans "ستریپبۆرد" %} — {{ project.title }}{% endblock %}
 
 {% block content %}
-<div id="rw-content" style="overflow-y:auto;flex:1">
+<div class="flex-grow-1 overflow-auto">
 
-  {% comment %} ── Toolbar ── {% endcomment %}
-  <div style="height:56px;background:var(--rw-surface);border-bottom:1px solid var(--rw-border);display:flex;align-items:center;padding:0 var(--rw-pad-md);gap:12px;flex-shrink:0;position:sticky;top:0;z-index:10">
+  {# Toolbar #}
+  <div class="d-flex align-items-center gap-3 px-4 bg-rw-surface"
+       style="height:56px;flex-shrink:0;border-bottom:1px solid var(--rw-border);position:sticky;top:0;z-index:10">
     {% include "components/_breadcrumb.html" with project=project current="ستریپبۆرد" inline=True %}
-    <div style="flex:1"></div>
-    <div style="font-size:13px;color:var(--rw-text-2)">{{ strips|length }} {% trans "ستریپ" %}</div>
+    <span class="ms-auto" style="font-size:13px;color:var(--rw-text-2)">
+      {{ strips|length }} {% trans "ستریپ" %}
+    </span>
+    {% url 'scheduling:reorder_strips' project.pk as reorder_url %}
+    {% url 'scheduling:export_pdf' project.pk as sched_export_url %}
     <button class="rw-btn rw-btn-ghost" id="sb-save-btn" style="display:none"
-            hx-post="{% url 'scheduling:reorder_strips' project.pk %}"
+            hx-post="{{ reorder_url|default:'#' }}"
             hx-vals="js:{order: SB.getOrder()}"
             hx-swap="none">
       ✓ {% trans "پاشەکەوتکردنی ڕیز" %}
     </button>
-    <a href="{% url 'scheduling:export_pdf' project.pk %}" class="rw-btn rw-btn-ghost">
+    <a href="{{ sched_export_url|default:'#' }}" class="rw-btn rw-btn-ghost">
       ↗ {% trans "PDF" %}
     </a>
     <a href="{% url 'scheduling:call_sheets' project.pk %}" class="rw-btn rw-btn-amber">
-      📋 {% trans "ئایننامەکان" %}
+      <svg width="16" height="16" viewBox="0 0 24 24" class="ico" style="width:16px;height:16px">
+        <rect x="5" y="2" width="14" height="20" rx="1"/>
+        <line x1="9" y1="7" x2="15" y2="7"/>
+        <line x1="9" y1="11" x2="15" y2="11"/>
+        <line x1="9" y1="15" x2="13" y2="15"/>
+      </svg>
+      {% trans "ئایننامەکان" %}
     </a>
   </div>
 
-  {% comment %} ── Column headers ── {% endcomment %}
-  <div style="display:grid;grid-template-columns:40px 48px 56px 1fr auto auto;gap:0;background:var(--rw-surface-2);border-bottom:2px solid var(--rw-border);padding:10px var(--rw-pad-md);position:sticky;top:56px;z-index:9">
-    <div style="font-size:9px;font-weight:700;color:var(--rw-text-3);text-transform:uppercase;letter-spacing:.9px">{% trans "ڕۆژ" %}</div>
-    <div style="font-size:9px;font-weight:700;color:var(--rw-text-3);text-transform:uppercase;letter-spacing:.9px">{% trans "دیمەن" %}</div>
-    <div style="font-size:9px;font-weight:700;color:var(--rw-text-3);text-transform:uppercase;letter-spacing:.9px">{% trans "ناو/دەر" %}</div>
-    <div style="font-size:9px;font-weight:700;color:var(--rw-text-3);text-transform:uppercase;letter-spacing:.9px">{% trans "شوێن" %}</div>
-    <div style="font-size:9px;font-weight:700;color:var(--rw-text-3);text-transform:uppercase;letter-spacing:.9px">{% trans "لاپەڕە" %}</div>
-    <div style="font-size:9px;font-weight:700;color:var(--rw-text-3);text-transform:uppercase;letter-spacing:.9px">{% trans "کەسایەتی" %}</div>
+  {# Column headers #}
+  <div class="px-4 bg-rw-surface"
+       style="display:grid;grid-template-columns:40px 48px 56px 1fr auto auto;gap:0;border-bottom:2px solid var(--rw-border);padding-top:10px;padding-bottom:10px;position:sticky;top:56px;z-index:9">
+    <div class="rw-overline">{% trans "ڕۆژ" %}</div>
+    <div class="rw-overline">{% trans "دیمەن" %}</div>
+    <div class="rw-overline">{% trans "ناو/دەر" %}</div>
+    <div class="rw-overline">{% trans "شوێن" %}</div>
+    <div class="rw-overline pe-3">{% trans "لاپەڕە" %}</div>
+    <div class="rw-overline pe-3">{% trans "کەسایەتی" %}</div>
   </div>
 
-  {% comment %} ── Strips ── {% endcomment %}
-  <div id="rw-stripboard" style="padding:0 var(--rw-pad-md)">
+  {# Strips #}
+  <div id="rw-stripboard" class="px-4">
     {% for strip in strips %}
 
     {% if strip.is_day_break %}
-    {% comment %} ── Day break marker ── {% endcomment %}
-    <div style="display:grid;grid-template-columns:40px 1fr;gap:12px;align-items:center;padding:16px 0 8px;border-top:2px solid var(--rw-border);margin-top:8px"
+    {# Day break marker #}
+    <div class="d-grid align-items-center py-3 gap-3"
+         style="grid-template-columns:40px 1fr;border-top:2px solid var(--rw-border);margin-top:8px"
          data-strip-id="{{ strip.pk }}" data-type="day_break">
-      <div style="font-size:11px;font-weight:700;color:var(--rw-shoot);text-align:center">{{ strip.day_number }}</div>
+      <div class="text-center fw-bold" style="font-size:11px;color:var(--rw-shoot)">{{ strip.day_number }}</div>
       <div>
-        <div style="font-size:12px;font-weight:700;color:var(--rw-text)">
+        <div class="fw-bold" style="font-size:12px">
           {% trans "ڕۆژی وێنەگرتنی" %} {{ strip.day_number }}
-          {% if strip.date %} — <span style="font-family:var(--rw-font-en)" dir="ltr">{{ strip.date|date:"l، j F" }}</span>{% endif %}
+          {% if strip.date %} — <bdi dir="ltr" class="rw-font-en">{{ strip.date|date:"l، j F" }}</bdi>{% endif %}
         </div>
         {% if strip.notes %}
         <div style="font-size:11px;color:var(--rw-text-3);margin-top:2px">{{ strip.notes }}</div>
@@ -65,53 +77,52 @@
       </div>
     </div>
     {% else %}
-    {% comment %} ── Scene strip ── {% endcomment %}
-    {% with int_col="var(--rw-break)" ext_col="var(--rw-vis)" %}
+    {# Scene strip #}
     <div class="rw-strip-row"
          data-strip-id="{{ strip.scene.pk }}" data-type="scene"
          style="display:grid;grid-template-columns:40px 48px 56px 1fr auto auto;gap:0;align-items:center;
-                background:var(--rw-surface);border-bottom:1px solid var(--rw-border-2);
-                border-inline-start:4px solid {% if strip.scene.int_ext == 'EXT' %}{{ ext_col }}{% else %}{{ int_col }}{% endif %};
-                cursor:grab;transition:background var(--rw-t);padding:14px var(--rw-pad-sm)">
-      <div style="font-size:11px;font-family:var(--rw-font-en);color:var(--rw-text-3);text-align:center">
+                background:var(--rw-surface);border-bottom:1px solid var(--rw-border);
+                border-inline-start:4px solid {% if strip.scene.int_ext == 'EXT' %}var(--rw-vis){% else %}var(--rw-break){% endif %};
+                cursor:grab;transition:background var(--rw-t);padding:14px 8px">
+      <div class="text-center rw-font-en" dir="ltr" style="font-size:11px;color:var(--rw-text-3)">
         {{ strip.day_number|default:"—" }}
       </div>
       <div>
         <a href="{% url 'projects:scene' project.pk strip.scene.pk %}"
-           style="font-size:14px;font-weight:700;color:var(--rw-amber)" dir="ltr">
+           class="rw-font-en fw-bold" dir="ltr" style="font-size:14px;color:var(--rw-amber)">
           {{ strip.scene.number }}
         </a>
       </div>
       <div>
-        <span class="rw-badge {% if strip.scene.int_ext == 'EXT' %}rw-badge-i{% else %}rw-badge-v{% endif %}"
-              style="font-family:var(--rw-font-en);font-size:9px">
+        <span class="rw-badge {% if strip.scene.int_ext == 'EXT' %}rw-badge-i{% else %}rw-badge-v{% endif %} rw-font-en"
+              style="font-size:9px">
           {{ strip.scene.int_ext }}
         </span>
         <div style="font-size:9px;color:var(--rw-text-3);margin-top:3px">{{ strip.scene.time_of_day }}</div>
       </div>
       <div>
-        <div style="font-size:13px;color:var(--rw-text);font-weight:500">{{ strip.scene.location_name }}</div>
+        <div class="fw-500" style="font-size:13px">{{ strip.scene.location_name }}</div>
         {% if strip.scene.description %}
         <div style="font-size:11px;color:var(--rw-text-3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:300px">{{ strip.scene.description|truncatechars:60 }}</div>
         {% endif %}
       </div>
-      <div style="font-size:12px;color:var(--rw-text-2);padding:0 var(--rw-pad-sm);font-family:var(--rw-font-en)" dir="ltr">
+      <div class="px-3 rw-font-en" dir="ltr" style="font-size:12px;color:var(--rw-text-2)">
         {{ strip.scene.page_count|default:"—" }}
       </div>
-      <div style="font-size:11px;color:var(--rw-text-2);padding:0 var(--rw-pad-sm);max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+      <div class="px-3" style="font-size:11px;color:var(--rw-text-2);max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
         {% for char in strip.scene.characters.all %}{{ char.name }}{% if not forloop.last %}، {% endif %}{% endfor %}
       </div>
     </div>
-    {% endwith %}
     {% endif %}
 
     {% empty %}
-    {% include "components/_empty_state.html" with icon="≡" title="هێشتا ستریپبۆردێک نییە" sub="دیمەنەکان زیاد بکە و خشتەی وێنەگرتن دروست بکە" %}
+    {% include "components/_empty_state.html" with icon_svg="<svg width='40' height='40' viewBox='0 0 24 24' class='ico'><circle cx='12' cy='12' r='9'/><circle cx='12' cy='12' r='2.5'/><circle cx='12' cy='5.5' r='1.5'/><circle cx='12' cy='18.5' r='1.5'/><circle cx='5.5' cy='12' r='1.5'/><circle cx='18.5' cy='12' r='1.5'/><circle cx='7.7' cy='7.7' r='1.5'/><circle cx='16.3' cy='16.3' r='1.5'/><circle cx='16.3' cy='7.7' r='1.5'/><circle cx='7.7' cy='16.3' r='1.5'/></svg>" title="هێشتا ستریپبۆردێک نییە" sub="دیمەنەکان زیاد بکە و خشتەی وێنەگرتن دروست بکە" %}
     {% endfor %}
   </div>
 
 </div>
 
+{% block extra_js %}
 <script>
 const SB = {
   getOrder() {
@@ -129,4 +140,5 @@ if (typeof Sortable !== 'undefined') {
   });
 }
 </script>
+{% endblock %}
 {% endblock %}

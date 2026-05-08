@@ -1,4 +1,5 @@
-{# ════════════════════════════════════════════════════════
+{% extends "base.html" %}
+{% comment %}
    RWANGA — shots/storyboards.html
    Project-wide storyboard gallery.
    Pattern: CARD GRID (rw-sb-* classes)
@@ -7,8 +8,7 @@
      project           — Project instance
      storyboard_frames — QuerySet[StoryboardFrame] (all scenes)
      active_section    — 'v'
-   ════════════════════════════════════════════════════════ #}
-{% extends "base.html" %}
+{% endcomment %}
 {% load static i18n %}
 
 {% block title %}{% trans "ستۆری‌بۆردەکان" %} — {{ project.title }}{% endblock %}

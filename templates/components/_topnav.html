@@ -31,6 +31,7 @@
             data-s="s"
             hx-get="{% url 'scripts:index' active_project.pk %}"
             hx-target="#rw-content"
+            hx-select="#rw-content"
             hx-push-url="true">
       {% trans "دەستنووس" %}
     </button>
@@ -38,6 +39,7 @@
             data-s="b"
             hx-get="{% url 'scripts:breakdown' active_project.pk %}"
             hx-target="#rw-content"
+            hx-select="#rw-content"
             hx-push-url="true">
       {% trans "داڕشتن" %}
     </button>
@@ -45,6 +47,7 @@
             data-s="v"
             hx-get="{% url 'shots:list' active_project.pk %}"
             hx-target="#rw-content"
+            hx-select="#rw-content"
             hx-push-url="true">
       {% trans "بینراوکردن" %}
     </button>
@@ -52,6 +55,7 @@
             data-s="p"
             hx-get="{% url 'scheduling:stripboard' active_project.pk %}"
             hx-target="#rw-content"
+            hx-select="#rw-content"
             hx-push-url="true">
       {% trans "ڕێنوێس" %}
     </button>
@@ -59,6 +63,7 @@
             data-s="sh"
             hx-get="{% url 'scheduling:call_sheets' active_project.pk %}"
             hx-target="#rw-content"
+            hx-select="#rw-content"
             hx-push-url="true">
       {% trans "وێنەگرتن" %}
     </button>
