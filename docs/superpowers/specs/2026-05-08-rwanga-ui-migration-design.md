@@ -28,7 +28,7 @@ The platform is local-only, not live. No external users to protect. Backend rout
 - Rollback for an in-progress phase = `git checkout -- <files>`. Rollback for a committed phase = `git revert <commit>`.
 - Nothing pushed to remote until the user explicitly says so.
 
-### The 7-point per-template audit (mandatory before deploy)
+### The 8-point per-template audit (mandatory before deploy)
 
 For every template in a phase, check:
 
@@ -39,8 +39,9 @@ For every template in a phase, check:
 5. **Static refs** — every `{% static '...' %}` target file must exist.
 6. **HTMX endpoints** — `hx-get` / `hx-post` / `hx-put` / `hx-delete` URLs must resolve AND endpoints must return a partial, not a full page.
 7. **Block names** — template's `{% block %}` names must match the blocks defined in `base.html`.
+8. **No legacy UI references** — no template should reference the legacy `rwanga.css` via `{% static 'css/rwanga.css' %}`, no `<link>` to legacy stylesheets, no legacy class names that the new `rwanga-ds.css` doesn't define. The new system serves *only* the new design; legacy must not co-exist after its phase is replaced.
 
-A small Python audit script (~50 LOC) automates checks 1, 2, 3, 5, 6, 7. Check 4 (context vars) requires manual view inspection.
+A small Python audit script (~50 LOC) automates checks 1, 2, 3, 5, 6, 7, 8. Check 4 (context vars) requires manual view inspection.
 
 ### "Hit a wall" escape hatch
 
@@ -76,7 +77,7 @@ These follow the LIST / SPLIT VIEW / SCENE-VIEW patterns from AGENT-PATTERNS.md,
 | 6 | Projects (the heart) | 6 page templates + 10 scene tabs | high | project dashboard, scene view, all 10 tabs |
 | 7 | Reviews + Community | 11 design-kit + 6 live-only review partials + 1 live-only community partial | high | review workbench, chain viewer, community list |
 | 8 | Progress + Departments | 10 progress + 5 dept tabs + 5 dept partials (most live-only restyle work) | medium | progress dashboard, departments tabs in scene view |
-| 9 | Final QA + cleanup | smoke-test full flow, decide `rwanga.css.bak` fate, remove old `rwanga.css` reference if any | none | full user flow works end-to-end |
+| 9 | Final QA + legacy purge | smoke-test full flow, **delete `static/css/rwanga.css`**, delete any `.bak`, grep-confirm zero references to legacy CSS or legacy class names anywhere in the repo | none | full user flow works end-to-end with only the new design alive |
 
 **Why this order:**
 - Phase 1 first validates the CSS pipeline + design system rendering on a *new* page before anything live can break.
@@ -125,7 +126,7 @@ Session sweep at end of each working session: `git status` clean for migration s
 - Pushing to remote. All commits stay local until user says push.
 - Backend feature additions beyond stub views needed to satisfy template URL refs.
 - React / SPA conversion. HTMX stays as the interaction layer.
-- The legacy `rwanga.css` is replaced by `rwanga-ds.css`; old file is preserved as `.bak` only through Phase 9 cleanup, then removed.
+- The legacy `rwanga.css` is replaced by `rwanga-ds.css`. Held as `.bak` only as a transient safety net during phase rollouts; **deleted in Phase 9**. No legacy CSS, no legacy class names, no legacy templates may remain after Phase 9 — the system serves only the new design with the glowing icons.
 
 ---
 
@@ -136,7 +137,8 @@ Session sweep at end of each working session: `git status` clean for migration s
 - Smoke test: login → project list → project dashboard → scene view → switch through all 10 tabs → workbench → community — all render correctly with new design system.
 - No raw `{# ... #}` text leaks visible anywhere in rendered UI.
 - No raw `#` placeholders for URLs that should have stubs.
-- Working tree clean at end. No `.bak` files remaining in `static/css/` (cleanup in Phase 9).
+- **Legacy UI fully purged:** `static/css/rwanga.css` deleted; no `.bak` left; `grep -r` shows zero references to legacy CSS path or legacy class names; only `rwanga-ds.css` is loaded by any template.
+- Working tree clean at end.
 
 ---
 
