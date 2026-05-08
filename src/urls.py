@@ -1,8 +1,8 @@
 from django.conf import settings
 from django.contrib import admin
 from django.conf.urls.static import static
+from django.shortcuts import redirect, render
 from django.urls import include, path
-from django.views.generic import RedirectView
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -16,8 +16,14 @@ class HealthAPIView(APIView):
         return Response({"status": "ok"})
 
 
+def landing_view(request):
+    if request.user.is_authenticated:
+        return redirect("projects:list")
+    return render(request, "landing.html")
+
+
 urlpatterns = [
-    path("", RedirectView.as_view(url="/projects/", permanent=False)),
+    path("", landing_view, name="landing"),
     path("admin/", admin.site.urls),
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),
