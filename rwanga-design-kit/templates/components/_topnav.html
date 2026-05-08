@@ -1,135 +1,122 @@
-{# ════════════════════════════════════════════════════════
-   RWANGA — components/_topnav.html  (updated)
-   Two nav modes:
-     • production mode  — 5 section tabs (default, inside a project)
-     • reviews mode     — Project | Reviews | Community (when nav_mode='reviews' or 'community')
-
-   Context:
-     active_project    — Project|None
-     active_section    — 's'|'b'|'v'|'p'|'sh'|None
-     nav_mode          — 'production'|'reviews'|'community'|None
-     request.user
-   ════════════════════════════════════════════════════════ #}
+{% comment %}
+   RWANGA — components/_topnav.html (Design System v1.0)
+   Top navigation: project identity + section tabs + user area.
+   Context: active_project, active_section, active_scene, request.user
+   Sections: s=script, b=breakdown, v=visualize, p=plan, sh=shoot, rv=review
+{% endcomment %}
 {% load i18n %}
-<nav class="rw-topnav" role="navigation" aria-label="{% trans 'ناڤیگەیشنی پڕۆژە' %}">
+<nav class="rw-topnav d-flex align-items-center"
+     role="navigation"
+     aria-label="{% trans 'ناڤیگەیشنی پڕۆژە' %}">
 
   {% if active_project %}
-  {# Project identity — always shown when inside a project #}
-  <a href="{% url 'projects:dashboard' active_project.pk %}" class="rw-topnav-project">
-    <div class="rw-project-thumb"
+  {% comment %} Project identity {% endcomment %}
+  <a href="{% url 'projects:dashboard' active_project.pk %}"
+     class="rw-topnav-project d-flex align-items-center gap-2 px-3 h-100 text-decoration-none">
+    <div class="rw-project-thumb d-flex align-items-center justify-content-center rounded-1"
          style="{% if active_project.cover %}background-image:url({{ active_project.cover.url }});background-size:cover{% endif %}">
+      {% if not active_project.cover %}
+      <svg width="16" height="16" viewBox="0 0 24 24" class="ico" style="color:#fff">
+        <rect x="2" y="4" width="20" height="16" rx="1"/>
+        <line x1="2" y1="8" x2="22" y2="8"/><line x1="2" y1="16" x2="22" y2="16"/>
+      </svg>
+      {% endif %}
     </div>
     <span class="rw-project-name">{{ active_project.title }}</span>
   </a>
-  {% endif %}
 
-  {# ── NAV MODE SWITCH ── #}
-  {% if nav_mode == 'reviews' or nav_mode == 'community' %}
-
-  {# Secondary nav: Project | Reviews | Community #}
-  <div class="rw-section-tabs" role="tablist">
-    {% if active_project %}
-    <a class="rw-sec-tab {% if nav_mode == 'production' %}active{% endif %}"
-       style="text-decoration:none"
-       href="{% url 'projects:dashboard' active_project.pk %}">
-      {% trans "پڕۆژە" %}
-    </a>
-    {% endif %}
-    <a class="rw-sec-tab {% if nav_mode == 'reviews' %}active{% endif %}"
-       data-s="rv"
-       style="text-decoration:none;{% if nav_mode == 'reviews' %}color:#7C3AED;border-bottom-color:#7C3AED{% endif %}"
-       href="{% if active_project %}{% url 'reviews:project_list' active_project.pk %}{% else %}{% url 'reviews:list' %}{% endif %}">
-      {% trans "پێداچوونەوە" %}
-    </a>
-    <a class="rw-sec-tab {% if nav_mode == 'community' %}active{% endif %}"
-       data-s="cm"
-       style="text-decoration:none;{% if nav_mode == 'community' %}color:#0D9488;border-bottom-color:#0D9488{% endif %}"
-       href="{% if active_project %}{% url 'community:project_list' active_project.pk %}{% else %}{% url 'community:list' %}{% endif %}">
-      {% trans "کۆمیونیتی" %}
-    </a>
-  </div>
-
-  {% else %}
-
-  {# Default production tabs — only shown inside project context #}
-  {% if active_project %}
-  <div class="rw-section-tabs" role="tablist">
-    <button class="rw-sec-tab {% if active_section == 's' %}active{% endif %}"
+  {% comment %} Section tabs {% endcomment %}
+  <div class="d-flex align-items-center gap-1 h-100 overflow-x-auto px-2" role="tablist">
+    <button class="rw-sec-tab d-flex align-items-center px-3 {% if active_section == 's' %}active{% endif %}"
             data-s="s"
             hx-get="{% url 'scripts:index' active_project.pk %}"
-            hx-target="#rw-content" hx-push-url="true">
+            hx-target="#rw-content"
+            hx-push-url="true">
       {% trans "دەستنووس" %}
     </button>
-    <button class="rw-sec-tab {% if active_section == 'b' %}active{% endif %}"
+    <button class="rw-sec-tab d-flex align-items-center px-3 {% if active_section == 'b' %}active{% endif %}"
             data-s="b"
             hx-get="{% url 'scripts:breakdown' active_project.pk %}"
-            hx-target="#rw-content" hx-push-url="true">
+            hx-target="#rw-content"
+            hx-push-url="true">
       {% trans "داڕشتن" %}
     </button>
-    <button class="rw-sec-tab {% if active_section == 'v' %}active{% endif %}"
+    <button class="rw-sec-tab d-flex align-items-center px-3 {% if active_section == 'v' %}active{% endif %}"
             data-s="v"
             hx-get="{% url 'shots:list' active_project.pk %}"
-            hx-target="#rw-content" hx-push-url="true">
+            hx-target="#rw-content"
+            hx-push-url="true">
       {% trans "بینراوکردن" %}
     </button>
-    <button class="rw-sec-tab {% if active_section == 'p' %}active{% endif %}"
+    <button class="rw-sec-tab d-flex align-items-center px-3 {% if active_section == 'p' %}active{% endif %}"
             data-s="p"
             hx-get="{% url 'scheduling:stripboard' active_project.pk %}"
-            hx-target="#rw-content" hx-push-url="true">
+            hx-target="#rw-content"
+            hx-push-url="true">
       {% trans "ڕێنوێس" %}
     </button>
-    <button class="rw-sec-tab {% if active_section == 'sh' %}active{% endif %}"
+    <button class="rw-sec-tab d-flex align-items-center px-3 {% if active_section == 'sh' %}active{% endif %}"
             data-s="sh"
             hx-get="{% url 'scheduling:call_sheets' active_project.pk %}"
-            hx-target="#rw-content" hx-push-url="true">
+            hx-target="#rw-content"
+            hx-push-url="true">
       {% trans "وێنەگرتن" %}
     </button>
+    {% if active_project.latest_review %}
+    <a class="rw-sec-tab d-flex align-items-center px-3 text-decoration-none {% if active_section == 'rv' %}active{% endif %}"
+       href="{% url 'projects:review_workbench' active_project.pk active_project.latest_review.pk %}"
+       data-s="rv">
+      {% trans "پێداچوونەوە" %}
+    </a>
+    {% endif %}
   </div>
   {% endif %}
 
-  {% endif %}
+  {% comment %} Spacer {% endcomment %}
+  <div class="flex-grow-1"></div>
 
-  <div class="rw-topnav-spacer"></div>
+  {% comment %} End area {% endcomment %}
+  <div class="d-flex align-items-center gap-3 px-3 h-100">
 
-  <div class="rw-topnav-end">
-
-    {# AI action button — context-aware #}
+    {# AI action — shown when on a scene view #}
     {% if active_scene %}
-    <button class="rw-btn rw-btn-ghost rw-btn-ai"
+    <button class="rw-btn rw-btn-ai d-inline-flex align-items-center gap-2 px-3 py-2"
             hx-post="{% url 'ai_engine:generate_scene' active_scene.pk %}"
             hx-target="#rw-ai-status"
             hx-indicator="#rw-ai-spinner">
-      <span id="rw-ai-spinner" class="htmx-indicator">⟳</span>
-      🤖 {% trans "AI دروستکردن" %}
+      <span id="rw-ai-spinner" class="rw-spin rw-spin-sm htmx-indicator"
+            style="border-color:rgba(212,165,116,.2);border-top-color:var(--rw-amber)"></span>
+      {% trans "AI دروستکردن" %}
     </button>
-    {% endif %}
 
-    {% if active_scene %}
-    <a href="{% url 'exports:scene_viewer' active_scene.pk %}" class="rw-btn rw-btn-amber">
-      ↗ {% trans "دەرهێنانی HTML" %}
+    <a href="{% url 'exports:scene_viewer' active_scene.pk %}"
+       class="rw-btn rw-btn-amber d-inline-flex align-items-center gap-2 px-3 py-2">
+      {% trans "دەرهێنانی HTML" %}
     </a>
     {% endif %}
 
+    {# Separator #}
     <div style="width:1px;height:24px;background:var(--rw-border);flex-shrink:0"></div>
 
+    {# Studio name #}
     <span style="font-size:12px;color:var(--rw-text-2);white-space:nowrap">
       {{ request.user.studio.name|default:request.user.get_full_name }}
     </span>
 
+    {# User avatar + dropdown #}
     <div class="dropdown">
-      <button class="rw-avatar" data-bs-toggle="dropdown" aria-expanded="false">
+      <button class="rw-avatar d-flex align-items-center justify-content-center"
+              data-bs-toggle="dropdown"
+              aria-expanded="false">
         {{ request.user.first_name|first|upper }}{{ request.user.last_name|first|upper }}
       </button>
-      <ul class="dropdown-menu dropdown-menu-end" style="background:var(--rw-surface);border:1px solid var(--rw-border);border-radius:var(--rw-r)">
-        <li><a class="dropdown-item" href="{% url 'accounts:profile' %}" style="color:var(--rw-text);font-size:13px">{% trans "پرۆفایل" %}</a></li>
-        <li><a class="dropdown-item" href="{% url 'accounts:settings' %}" style="color:var(--rw-text);font-size:13px">{% trans "ڕێکخستن" %}</a></li>
-        <li><hr class="dropdown-divider" style="border-color:var(--rw-border)"></li>
-        <li><a class="dropdown-item" href="{% url 'accounts:logout' %}" style="color:var(--rw-text-2);font-size:13px">{% trans "دەرچوون" %}</a></li>
+      <ul class="dropdown-menu dropdown-menu-end">
+        <li><a class="dropdown-item" href="{% url 'accounts:profile' %}" style="font-size:13px">{% trans "پرۆفایل" %}</a></li>
+        <li><a class="dropdown-item" href="{% url 'accounts:settings' %}" style="font-size:13px">{% trans "ڕێکخستن" %}</a></li>
+        <li><hr class="dropdown-divider"></li>
+        <li><a class="dropdown-item" href="{% url 'accounts:logout' %}" style="font-size:13px">{% trans "دەرچوون" %}</a></li>
       </ul>
     </div>
 
-    <button class="rw-btn-icon rw-btn js-theme-toggle"
-            onclick="RW.themeToggle()"
-            title="{% trans 'گۆڕینی شێوازی ڕووکار' %}">☀</button>
   </div>
 </nav>

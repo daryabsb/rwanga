@@ -1,11 +1,32 @@
+{% comment %}
+   RWANGA — _toast.html (Design System v1.0)
+   OOB swapped via HTMX from Django views.
+   Uses rw-toast-* classes from rwanga-ds.css.
 
-<div class="rw-toast {{ type|default:'info' }}"
-     hx-swap-oob="beforeend:#rw-toasts"
-     x-data
-     x-init="setTimeout(() => $el.remove(), 4000)">
-  <span style="font-size:16px;font-weight:700;flex-shrink:0">
-    {% if type == 'success' %}✓{% elif type == 'error' %}✕{% elif type == 'warning' %}⚠{% else %}·{% endif %}
-  </span>
-  {{ message }}
+   Types: ok | err | warn | info
+   Context: toast = {type, title, msg}
+
+   Usage in view:
+     return render(request, 'app/_row.html', {
+         'item': item,
+         'toast': {'type': 'ok', 'title': 'تەواوبوو', 'msg': 'پاشەکەوت کرا'}
+     })
+{% endcomment %}
+{% if toast %}
+<div id="rw-toast-container" hx-swap-oob="afterbegin">
+  <div class="rw-toast t-{{ toast.type|default:'info' }}"
+       x-data
+       x-init="setTimeout(() => $el.remove(), 4200)">
+    <span class="rw-toast-icon">
+      {% if toast.type == 'ok' %}&#x2713;{% elif toast.type == 'err' %}&#x2715;{% elif toast.type == 'warn' %}&#x26A0;{% else %}&#x2022;{% endif %}
+    </span>
+    <div class="rw-toast-body">
+      <div class="rw-toast-title">{{ toast.title }}</div>
+      <div class="rw-toast-msg">{{ toast.msg }}</div>
+    </div>
+    <button class="rw-toast-close"
+            onclick="this.closest('.rw-toast').remove()">&#x2715;</button>
+    <div class="rw-toast-bar"></div>
+  </div>
 </div>
-
+{% endif %}

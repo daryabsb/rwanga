@@ -1,10 +1,35 @@
+{% comment %}
+   RWANGA — _breadcrumb.html (Design System v1.0)
+   Uses rw-breadcrumb / rw-crumb-* classes from rwanga-ds.css.
 
-<div class="rw-breadcrumb" aria-label="breadcrumb">
+   Context:
+     crumbs  — list of {label, url} dicts
+     current — current page label
+     location — optional sub-label
+   Usage:
+     {% verbatim %}{% include "components/_breadcrumb.html"
+        with crumbs=crumbs current=scene.heading location=scene.location_name %}{% endverbatim %}
+{% endcomment %}
+{% load i18n %}
+<div class="rw-breadcrumb d-flex align-items-center gap-2 px-4"
+     aria-label="{% trans 'شوێنی پەڕە' %}">
   {% for crumb in crumbs %}
-    <a href="{{ crumb.url }}" class="rw-crumb-back">← {{ crumb.label }}</a>
+    {% if forloop.first %}
+    <a href="{{ crumb.url }}"
+       class="rw-crumb-back d-inline-flex align-items-center gap-1 px-2 py-1 rounded-1">
+      &#x2190; {{ crumb.label }}
+    </a>
+    {% else %}
     <span class="rw-crumb-sep">/</span>
+    <a href="{{ crumb.url }}" class="rw-crumb-node">{{ crumb.label }}</a>
+    {% endif %}
   {% endfor %}
-  <span class="rw-crumb-node">{{ current }}</span>
-  {% if location %}<span class="rw-crumb-sep">/</span><span class="rw-crumb-leaf">{{ location }}</span>{% endif %}
+  {% if current %}
+  <span class="rw-crumb-sep">/</span>
+  <span class="rw-crumb-leaf">{{ current }}</span>
+  {% endif %}
+  {% if location %}
+  <span class="rw-crumb-sep">/</span>
+  <span class="rw-crumb-leaf">{{ location }}</span>
+  {% endif %}
 </div>
-

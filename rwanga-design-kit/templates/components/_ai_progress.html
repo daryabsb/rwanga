@@ -1,43 +1,42 @@
-{# ════════════════════════════════════════════════════
-   _ai_progress.html
-   Real-time AI job status — connected via WebSocket.
-   Rendered server-side when a Celery task is queued.
-   Updated client-side via RWJobSocket.updateProgress().
+{% comment %}
+   RWANGA — _ai_progress.html (Design System v1.0)
+   AI job progress — polls via HTMX every 2s.
+   Uses rw-ai-thinking-* classes from rwanga-ds.css.
 
    Context:
-     job      — AIJob model instance
-     job.id   — UUID
-     job.type — 'breakdown' | 'storyboard' | 'floorplan' | 'schedule'
-     job.step — current human-readable step label
-     job.progress — 0–100
-   ════════════════════════════════════════════════════ #}
+     task_id   — Celery task UUID
+     job_label — human-readable label (e.g. "داڕشتنی دەستنووس")
+     steps     — list of {label, status} dicts
+                 status: 'done' | 'active' | '' (pending)
+{% endcomment %}
 {% load i18n %}
-<div class="rw-ai-progress" data-job-id="{{ job.id }}"
-     data-refresh-url="{% url 'ai_engine:job_result' job.id %}"
-     data-refresh-target="#rw-ai-result-{{ job.id }}"
-     id="rw-job-{{ job.id }}">
+<div class="rw-ai-thinking"
+     id="rw-job-{{ task_id }}"
+     hx-get="{% url 'ai_engine:job_status' task_id %}"
+     hx-trigger="every 2s"
+     hx-target="this"
+     hx-swap="outerHTML">
 
-  <div class="rw-ai-progress-title">
-    <span style="animation: spin 1s linear infinite; display:inline-block">⟳</span>
-    {% if job.type == 'breakdown' %}🏷 {% trans "داڕشتنی دەستنووس ئەنجامدەدات..." %}
-    {% elif job.type == 'storyboard' %}🖼 {% trans "ستۆری‌بۆرد دروستدەکرێت..." %}
-    {% elif job.type == 'floorplan' %}📐 {% trans "نەخشەی ژوور دروستدەکرێت..." %}
-    {% elif job.type == 'schedule' %}📅 {% trans "خشتە چاکدەکرێت..." %}
-    {% else %}🤖 {% trans "AI کاردەکات..." %}
-    {% endif %}
+  <div class="rw-ai-thinking-header">
+    <div class="rw-ai-pulse">
+      <span></span><span></span><span></span>
+    </div>
+    {% trans "AI دەهوڕێت" %} — {{ job_label }}
   </div>
 
-  <div class="rw-ai-progress-bar">
-    <div class="rw-ai-progress-fill" style="width: {{ job.progress|default:5 }}%"></div>
+  <div class="rw-progress-bar rw-progress-indeterminate">
+    <div class="rw-progress-fill"></div>
   </div>
 
-  <div class="rw-ai-step">{{ job.step|default:'' }}</div>
+  {% if steps %}
+  <div class="rw-ai-step-list">
+    {% for step in steps %}
+    <div class="rw-ai-step {{ step.status }}">
+      <div class="rw-ai-step-dot"></div>
+      {{ step.label }}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
 
 </div>
-
-{# Result placeholder — filled by WebSocket on completion #}
-<div id="rw-ai-result-{{ job.id }}"></div>
-
-<style>
-@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-</style>

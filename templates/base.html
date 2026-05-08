@@ -1,14 +1,14 @@
-{% comment %} ════════════════════════════════════════════════════════
-   RWANGA — base.html
+{% comment %}
+   RWANGA — base.html (Design System v1.0)
    Every page extends this. Provides:
    - Bootstrap 5 RTL (swaps to LTR when LANGUAGE_BIDI=False)
-   - Sidebar rail
-   - Top navigation
-   - Toast container
-   - WebSocket + HTMX init
+   - 56px icon rail (always dark)
+   - Top navigation with section tabs
+   - Toast + modal containers
+   - HTMX + BS5 JS init
    Context vars expected:
      request.user, active_project (optional), active_section (optional)
-   ════════════════════════════════════════════════════════ {% endcomment %}
+{% endcomment %}
 {% load static i18n %}
 <!DOCTYPE html>
 <html lang="{{ LANGUAGE_CODE|default:'ku' }}"
@@ -17,17 +17,15 @@
       data-bs-theme="dark">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}ڕوانگە{% endblock %} — ڕوانگە</title>
   <meta name="description" content="{% block meta_description %}پلاتفۆرمی پێش‌بەرهەمهێنانی فیلمی کوردی{% endblock %}">
 
-  <meta name="htmx-config" content='{"defaultSwapStyle":"outerHTML"}'>
-  {% comment %} Bootstrap 5 — single stylesheet, handles RTL/LTR via dir attribute on <html> {% endcomment %}
+  {# Bootstrap 5 RTL — local copy in static/vendor/bootstrap/ #}
   <link rel="stylesheet" href="{% static 'vendor/bootstrap/bootstrap.rtl.min.css' %}">
 
-  {% comment %} Rwanga design system — overrides BS5 {% endcomment %}
-  <link rel="stylesheet" href="{% static 'css/rwanga.css' %}">
-  <script src="{% static 'htmx/htmx.min.js' %}"></script>
+  {# Rwanga design system v1.0 — replaces old rwanga.css #}
+  <link rel="stylesheet" href="{% static 'css/rwanga-ds.css' %}">
 
   {% block extra_css %}{% endblock %}
 </head>
@@ -35,39 +33,48 @@
 <body data-project-id="{{ active_project.id|default:'' }}"
       class="{% block body_class %}{% endblock %}">
 
-{% comment %} ── Toast container (populated by rwanga.js / HTMX OOB swaps) ── {% endcomment %}
-<div class="rw-toast-container" id="rw-toasts"
-     hx-swap-oob="true"></div>
+{% comment %} App shell {% endcomment %}
+<div class="rw-app d-flex">
 
-{% comment %} ── App shell ── {% endcomment %}
-<div class="rw-app">
+  {% comment %} RAIL — always first child (= right in RTL, left in LTR) {% endcomment %}
+  <aside class="rw-rail d-flex flex-column align-items-center py-3 gap-1">
+    {% include "components/_sidebar.html" %}
+  </aside>
 
-  {% comment %} ── ICON RAIL ── first in DOM = rightmost in RTL, leftmost in LTR {% endcomment %}
-  {% include "components/_sidebar.html" %}
+  {% comment %} MAIN AREA {% endcomment %}
+  <div class="rw-main flex-grow-1 d-flex flex-column">
 
-  {% comment %} ── MAIN AREA ── {% endcomment %}
-  <div class="rw-main">
-
-    {% comment %} ── TOP NAV ── {% endcomment %}
+    {% comment %} TOP NAV {% endcomment %}
     {% include "components/_topnav.html" %}
 
-    {% comment %} ── PAGE CONTENT ── {% endcomment %}
-    {% block content %}{% endblock %}
+    {% comment %} BREADCRUMB (optional — pages include via block) {% endcomment %}
+    {% block breadcrumb %}{% endblock %}
 
-  </div>{% comment %} /rw-main {% endcomment %}
+    {% comment %} PAGE CONTENT {% endcomment %}
+    <div id="rw-content" class="flex-grow-1 overflow-auto">
+      {% block content %}{% endblock %}
+    </div>
 
-</div>{% comment %} /rw-app {% endcomment %}
+  </div>{# /rw-main #}
+
+</div>{# /rw-app #}
+
+{% comment %} Toast container (populated via HTMX OOB swaps) {% endcomment %}
+<div id="rw-toast-container" class="rw-toast-container"></div>
+
+{% comment %} Modal container (populated via HTMX) {% endcomment %}
 <div id="rw-modal-container"></div>
-<div id="rw-notif-panel"></div>
 
-{% comment %} ── SCRIPTS ── {% endcomment %}
+{% comment %} SCRIPTS — all local, no CDN {% endcomment %}
 <script src="{% static 'vendor/bootstrap/bootstrap.bundle.min.js' %}"></script>
+<script src="{% static 'htmx/htmx.min.js' %}"></script>
 <script src="{% static 'js/rwanga.js' %}"></script>
 {% block floorplan_js %}{% endblock %}
 {% block extra_js %}{% endblock %}
 
+{# HTMX config: push CSRF header on every request #}
+<meta name="htmx-config" content='{"defaultSwapStyle":"outerHTML"}'>
 {% csrf_token %}
 
 </body>
 </html>
-

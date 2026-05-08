@@ -1,31 +1,45 @@
-{# ════════════════════════════════════════════════════
-   _empty_state.html
-   Usage: {% include "components/_empty_state.html" with
-            icon="📋"
-            title="هیچ لێدانێک نییە"
-            sub="یەکەم لێدان زیاد بکە بۆ دەستپێکردن"
-            cta_label="+ زیادکردنی لێدان"
-            cta_url=add_url
-            cta_htmx=True %}
-   ════════════════════════════════════════════════════ #}
+{% comment %}
+   RWANGA — _empty_state.html (Design System v1.0)
+   Uses rw-empty-* classes from rwanga-ds.css.
+
+   Usage:
+     {% verbatim %}{% include "components/_empty_state.html" with
+        icon_svg="<svg ...>...</svg>"
+        title=_("هیچ لێدانێک نییە")
+        sub=_("یەکەم لێدان زیاد بکە بۆ دەستپێکردن")
+        cta_label=_("+ زیادکردنی لێدان")
+        cta_url=add_url
+        cta_htmx=True %}{% endverbatim %}
+{% endcomment %}
 {% load i18n %}
-<div class="rw-empty">
-  {% if icon %}<div class="rw-empty-icon">{{ icon }}</div>{% endif %}
+<div class="rw-empty d-flex flex-column align-items-center gap-3 py-5 px-4">
+
+  {% if icon_svg %}
+  <div class="rw-empty-icon">{{ icon_svg }}</div>
+  {% elif icon %}
+  <div class="rw-empty-icon">{{ icon }}</div>
+  {% endif %}
+
   <div class="rw-empty-title">{{ title }}</div>
-  {% if sub %}<div class="rw-empty-sub">{{ sub }}</div>{% endif %}
+
+  {% if sub %}
+  <div class="rw-empty-sub mx-auto">{{ sub }}</div>
+  {% endif %}
+
   {% if cta_label %}
     {% if cta_htmx %}
-    <button class="rw-btn rw-btn-primary"
+    <button class="rw-btn rw-btn-primary d-inline-flex align-items-center gap-2 px-3 py-2 mt-2"
             hx-get="{{ cta_url }}"
             hx-target="#rw-modal-container"
-            hx-swap="innerHTML"
-            style="margin-top:8px">
+            hx-swap="innerHTML">
       {{ cta_label }}
     </button>
     {% else %}
-    <a href="{{ cta_url }}" class="rw-btn rw-btn-primary" style="margin-top:8px">
+    <a href="{{ cta_url }}"
+       class="rw-btn rw-btn-primary d-inline-flex align-items-center gap-2 px-3 py-2 mt-2">
       {{ cta_label }}
     </a>
     {% endif %}
   {% endif %}
+
 </div>

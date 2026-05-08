@@ -1,21 +1,31 @@
+{% comment %}
+   RWANGA — _modal.html (Design System v1.0)
+   Generic modal shell. Loaded via HTMX into #rw-modal-container.
+   Uses rw-modal-* classes from rwanga-ds.css.
 
+   Usage in view:
+     return render(request, 'components/_modal.html', {
+         'title': 'زیادکردنی لێدان',
+         'body_template': 'shots/_shot_form.html',
+         'size': 'sm',  # sm | lg | danger
+     })
+{% endcomment %}
 {% load i18n %}
 
+<div class="rw-modal-backdrop"
+     hx-on:click="if(event.target===this) document.getElementById('rw-modal-container').innerHTML=''">
 
-<div class="rw-modal-backdrop" id="rw-modal-container"
-     onclick="if(event.target===this) rwCloseModal()"
-     hx-swap-oob="innerHTML:#rw-modal-container">
-
-  <div class="rw-modal {% if size == 'sm' %}rw-modal-sm{% elif size == 'lg' %}rw-modal-lg{% elif size == 'xl' %}rw-modal-xl{% endif %}"
+  <div class="rw-modal {% if size == 'sm' %}rw-modal-sm{% elif size == 'lg' %}rw-modal-lg{% endif %} {% if danger %}rw-modal-danger{% endif %}"
        role="dialog"
        aria-modal="true"
-       aria-labelledby="rw-modal-title">
+       aria-labelledby="rw-modal-title"
+       onclick="event.stopPropagation()">
 
     <div class="rw-modal-header">
-      <span id="rw-modal-title" style="font-size:16px;font-weight:700">{{ title }}</span>
-      <button onclick="rwCloseModal()"
-              style="background:none;border:none;color:var(--rw-text-2);font-size:20px;cursor:pointer;line-height:1"
-              aria-label="{% trans 'داخستن' %}">✕</button>
+      <span class="rw-modal-title" id="rw-modal-title">{{ title }}</span>
+      <button class="rw-modal-close"
+              onclick="document.getElementById('rw-modal-container').innerHTML=''"
+              aria-label="{% trans 'داخستن' %}">&#x2715;</button>
     </div>
 
     <div class="rw-modal-body" id="rw-modal-body">
@@ -28,10 +38,12 @@
 
     {% block modal_footer %}
     <div class="rw-modal-footer">
-      <button onclick="rwCloseModal()" class="rw-btn rw-btn-ghost">
-        {% trans "داخستن" %}
+      <button onclick="document.getElementById('rw-modal-container').innerHTML=''"
+              class="rw-btn rw-btn-ghost d-inline-flex align-items-center px-3 py-2">
+        {% trans "هەڵوەشاندنەوە" %}
       </button>
-      <button type="submit" form="rw-modal-form" class="rw-btn rw-btn-primary">
+      <button type="submit" form="rw-modal-form"
+              class="rw-btn {% if danger %}rw-btn-primary{% else %}rw-btn-primary{% endif %} d-inline-flex align-items-center px-3 py-2">
         {% trans "پاشەکەوتکردن" %}
       </button>
     </div>
@@ -41,18 +53,10 @@
 </div>
 
 <script>
-function rwCloseModal() {
-  document.getElementById('rw-modal-container').innerHTML = '';
-}
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') rwCloseModal();
+document.addEventListener('keydown', function _rwModalEsc(e) {
+  if (e.key === 'Escape') {
+    document.getElementById('rw-modal-container').innerHTML = '';
+    document.removeEventListener('keydown', _rwModalEsc);
+  }
 });
 </script>
-
-
-<style>
-.rw-modal-sm { max-width: 380px; }
-.rw-modal-lg { max-width: 720px; }
-.rw-modal-xl { max-width: 960px; }
-</style>
-

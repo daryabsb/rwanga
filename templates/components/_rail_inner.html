@@ -1,82 +1,193 @@
-{% comment %} ════════════════════════════════════════════════════════
-   RWANGA — components/_rail_inner.html
-   Shared rail icon list — used by both the desktop aside
-   and the mobile offcanvas body.
-   ════════════════════════════════════════════════════════ {% endcomment %}
+{% comment %}
+   RWANGA — components/_rail_inner.html (Design System v1.0)
+   Shared rail icon list — currently unused by the live shell
+   (templates/components/_sidebar.html inlines its own SVGs),
+   but kept available for any future offcanvas / mobile rail
+   reuse so icons stay DRY in one place.
+
+   Icons are 28x28 SVGs matching the rwanga-ds.css icon style
+   (1.5px stroke, currentColor, rounded line caps via CSS).
+
+   Context:
+     request, active_project, unread_count (optional),
+     pending_decisions_count (optional), active_sessions_count (optional),
+     offcanvas (boolean) — when truthy, the brand-mark logo is hidden
+                           because an offcanvas header has its own.
+{% endcomment %}
 {% load i18n %}
 
 {% comment %} Brand mark — only show in desktop rail (offcanvas header has its own) {% endcomment %}
 {% if not offcanvas %}
-<a href="{% url 'projects:list' %}" class="rw-rail-logo" title="ڕوانگە">ڕ</a>
+<a href="{% url 'projects:list' %}"
+   class="rw-rail-logo d-flex align-items-center justify-content-center rounded-1 mb-2"
+   title="ڕوانگە">ڕ</a>
 {% endif %}
 
-{% comment %} Projects {% endcomment %}
+{% comment %} Projects — Film frame {% endcomment %}
 <a href="{% url 'projects:list' %}"
-   class="rw-rail-icon {% if request.resolver_match.app_name == 'projects' and not nav_mode %}active{% endif %}"
+   class="rw-rail-icon d-flex align-items-center justify-content-center {% if request.resolver_match.app_name == 'projects' and not active_project %}active{% endif %}"
    title="{% trans 'پڕۆژەکان' %}">
-  ⊞
+  <svg width="28" height="28" viewBox="0 0 24 24" class="ico" fill="none" stroke="currentColor" stroke-width="1.5">
+    <rect x="2" y="4" width="20" height="16" rx="1"/>
+    <line x1="2" y1="8" x2="22" y2="8"/><line x1="2" y1="16" x2="22" y2="16"/>
+    <line x1="6" y1="4" x2="6" y2="8"/><line x1="10" y1="4" x2="10" y2="8"/>
+    <line x1="14" y1="4" x2="14" y2="8"/><line x1="18" y1="4" x2="18" y2="8"/>
+    <line x1="6" y1="16" x2="6" y2="20"/><line x1="10" y1="16" x2="10" y2="20"/>
+    <line x1="14" y1="16" x2="14" y2="20"/><line x1="18" y1="16" x2="18" y2="20"/>
+  </svg>
 </a>
 
-{% comment %} Team {% endcomment %}
+{% comment %} Team — People {% endcomment %}
 <a href="{% url 'accounts:team' %}"
-   class="rw-rail-icon {% if request.resolver_match.app_name == 'accounts' %}active{% endif %}"
+   class="rw-rail-icon d-flex align-items-center justify-content-center {% if request.resolver_match.app_name == 'accounts' %}active{% endif %}"
    title="{% trans 'تیم' %}">
-  ◎
+  <svg width="28" height="28" viewBox="0 0 24 24" class="ico" fill="none" stroke="currentColor" stroke-width="1.5">
+    <circle cx="9" cy="7" r="3"/>
+    <path d="M3 21v-1a6 6 0 0 1 12 0v1"/>
+    <path d="M16 3.13a4 4 0 0 1 0 7.75M21 21v-1a4 4 0 0 0-3-3.85"/>
+  </svg>
 </a>
 
-{% comment %} Locations {% endcomment %}
+{% comment %} Locations — Pin {% endcomment %}
 <a href="{% url 'locations:list' %}"
-   class="rw-rail-icon {% if request.resolver_match.app_name == 'locations' %}active{% endif %}"
+   class="rw-rail-icon d-flex align-items-center justify-content-center {% if request.resolver_match.app_name == 'locations' %}active{% endif %}"
    title="{% trans 'شوێنەکان' %}">
-  ◈
+  <svg width="28" height="28" viewBox="0 0 24 24" class="ico" fill="none" stroke="currentColor" stroke-width="1.5">
+    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+    <circle cx="12" cy="9" r="2.5"/>
+  </svg>
 </a>
 
-<div class="rw-rail-sep"></div>
+{% comment %} Scripts — Document {% endcomment %}
+<a href="{% url 'scripts:index' %}"
+   class="rw-rail-icon d-flex align-items-center justify-content-center {% if request.resolver_match.app_name == 'scripts' %}active{% endif %}"
+   title="{% trans 'دەستنووس' %}">
+  <svg width="28" height="28" viewBox="0 0 24 24" class="ico" fill="none" stroke="currentColor" stroke-width="1.5">
+    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+    <polyline points="14 2 14 8 20 8"/>
+    <line x1="8" y1="13" x2="16" y2="13"/>
+    <line x1="8" y1="17" x2="16" y2="17"/>
+    <line x1="8" y1="9" x2="11" y2="9"/>
+  </svg>
+</a>
 
-{% comment %} Reviews — purple accent when active, badge for pending decisions {% endcomment %}
+{% comment %} Shots — Camera viewfinder {% endcomment %}
+<a href="{% url 'shots:list' %}"
+   class="rw-rail-icon d-flex align-items-center justify-content-center {% if request.resolver_match.app_name == 'shots' %}active{% endif %}"
+   title="{% trans 'لێدانەکان' %}">
+  <svg width="28" height="28" viewBox="0 0 24 24" class="ico" fill="none" stroke="currentColor" stroke-width="1.5">
+    <path d="M23 7l-7 5 7 5V7z"/>
+    <rect x="1" y="5" width="15" height="14" rx="2"/>
+  </svg>
+</a>
+
+{% comment %} Scheduling — Calendar grid {% endcomment %}
+<a href="{% url 'scheduling:index' %}"
+   class="rw-rail-icon d-flex align-items-center justify-content-center {% if request.resolver_match.app_name == 'scheduling' %}active{% endif %}"
+   title="{% trans 'بەرنامە' %}">
+  <svg width="28" height="28" viewBox="0 0 24 24" class="ico" fill="none" stroke="currentColor" stroke-width="1.5">
+    <rect x="3" y="4" width="18" height="18" rx="2"/>
+    <line x1="16" y1="2" x2="16" y2="6"/>
+    <line x1="8" y1="2" x2="8" y2="6"/>
+    <line x1="3" y1="10" x2="21" y2="10"/>
+  </svg>
+</a>
+
+{% comment %} Departments — Layers (lighting/sound/props/wardrobe/continuity) {% endcomment %}
+<a href="{% url 'departments:lighting' %}"
+   class="rw-rail-icon d-flex align-items-center justify-content-center {% if request.resolver_match.app_name == 'departments' %}active{% endif %}"
+   title="{% trans 'بەشەکان' %}">
+  <svg width="28" height="28" viewBox="0 0 24 24" class="ico" fill="none" stroke="currentColor" stroke-width="1.5">
+    <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+    <polyline points="2 17 12 22 22 17"/>
+    <polyline points="2 12 12 17 22 12"/>
+  </svg>
+</a>
+
+<div class="rw-rail-sep mx-auto my-1"></div>
+
+{% comment %} Reviews — Check frame, with pending-decisions badge {% endcomment %}
 <a href="{% url 'reviews:list' %}"
-   class="rw-rail-icon {% if nav_mode == 'reviews' %}rv-active active{% endif %}"
+   class="rw-rail-icon d-flex align-items-center justify-content-center {% if request.resolver_match.app_name == 'reviews' %}active rv-active{% endif %}"
    title="{% trans 'پێداچوونەوەکان' %}"
    style="position:relative">
-  📋
+  <svg width="28" height="28" viewBox="0 0 24 24" class="ico" fill="none" stroke="currentColor" stroke-width="1.5">
+    <path d="M9 11l3 3L22 4"/>
+    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+  </svg>
   {% if pending_decisions_count %}
-  <span style="position:absolute;top:4px;inset-inline-end:4px;min-width:16px;height:16px;background:var(--rv-purple);color:#fff;font-family:var(--rw-font-en);font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;border-radius:100px;padding:0 3px">{{ pending_decisions_count }}</span>
+  <span class="rw-rail-badge" aria-label="{% trans 'بڕیارە چاوەڕوانیەکان' %}">{{ pending_decisions_count }}</span>
   {% endif %}
 </a>
 
-{% comment %} Community — teal accent when active, badge for open sessions {% endcomment %}
+{% comment %} Community — Chat bubbles, with active-sessions badge {% endcomment %}
 <a href="{% url 'community:list' %}"
-   class="rw-rail-icon {% if nav_mode == 'community' %}cm-active active{% endif %}"
+   class="rw-rail-icon d-flex align-items-center justify-content-center {% if request.resolver_match.app_name == 'community' %}active cm-active{% endif %}"
    title="{% trans 'کۆمیونیتی' %}"
    style="position:relative">
-  💬
+  <svg width="28" height="28" viewBox="0 0 24 24" class="ico" fill="none" stroke="currentColor" stroke-width="1.5">
+    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+  </svg>
   {% if active_sessions_count %}
-  <span style="position:absolute;top:4px;inset-inline-end:4px;min-width:16px;height:16px;background:var(--cm-teal);color:#fff;font-family:var(--rw-font-en);font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;border-radius:100px;padding:0 3px">{{ active_sessions_count }}</span>
+  <span class="rw-rail-badge" aria-label="{% trans 'گفتوگۆی چالاک' %}">{{ active_sessions_count }}</span>
   {% endif %}
 </a>
 
-<div class="rw-rail-sep"></div>
-
-{% comment %} Settings {% endcomment %}
-<a href="{% url 'accounts:settings' %}"
-   class="rw-rail-icon {% if request.resolver_match.url_name == 'settings' %}active{% endif %}"
-   title="{% trans 'ڕێکخستن' %}">
-  ⚙
+{% comment %} Progress — Bar chart {% endcomment %}
+<a href="{% url 'progress:dashboard' %}"
+   class="rw-rail-icon d-flex align-items-center justify-content-center {% if request.resolver_match.app_name == 'progress' %}active{% endif %}"
+   title="{% trans 'پێشکەوتن' %}">
+  <svg width="28" height="28" viewBox="0 0 24 24" class="ico" fill="none" stroke="currentColor" stroke-width="1.5">
+    <line x1="6" y1="20" x2="6" y2="12"/>
+    <line x1="12" y1="20" x2="12" y2="4"/>
+    <line x1="18" y1="20" x2="18" y2="14"/>
+    <line x1="3" y1="20" x2="21" y2="20"/>
+  </svg>
 </a>
 
-<div class="rw-rail-spacer"></div>
+<div class="rw-rail-sep mx-auto my-1"></div>
 
-{% comment %} Notification bell {% endcomment %}
-<button class="rw-rail-icon" style="position:relative" title="{% trans 'ئاگادارکردنەوەکان' %}"
+{% comment %} Settings — Aperture {% endcomment %}
+<a href="{% url 'accounts:settings' %}"
+   class="rw-rail-icon d-flex align-items-center justify-content-center {% if request.resolver_match.url_name == 'settings' %}active{% endif %}"
+   title="{% trans 'ڕێکخستن' %}">
+  <svg width="28" height="28" viewBox="0 0 24 24" class="ico" fill="none" stroke="currentColor" stroke-width="1.5">
+    <circle cx="12" cy="12" r="9"/>
+    <circle cx="12" cy="12" r="3.5"/>
+    <line x1="12" y1="3" x2="12" y2="8.5"/><line x1="12" y1="15.5" x2="12" y2="21"/>
+    <line x1="3" y1="12" x2="8.5" y2="12"/><line x1="15.5" y1="12" x2="21" y2="12"/>
+    <line x1="5.6" y1="5.6" x2="9.4" y2="9.4"/><line x1="14.6" y1="14.6" x2="18.4" y2="18.4"/>
+    <line x1="18.4" y1="5.6" x2="14.6" y2="9.4"/><line x1="9.4" y1="14.6" x2="5.6" y2="18.4"/>
+  </svg>
+</a>
+
+{% comment %} Spacer — pushes bottom items to the foot of the rail {% endcomment %}
+<div class="flex-grow-1"></div>
+
+{% comment %} Notifications — Bell, opens panel via HTMX {% endcomment %}
+<button class="rw-rail-icon d-flex align-items-center justify-content-center"
+        title="{% trans 'ئاگادارکردنەوەکان' %}"
         hx-get="{% url 'notifications:panel' %}"
-        hx-target="#rw-notif-panel"
-        hx-swap="outerHTML">
-  🔔
+        hx-target="#rw-modal-container"
+        hx-swap="innerHTML"
+        style="position:relative">
+  <svg width="28" height="28" viewBox="0 0 24 24" class="ico" fill="none" stroke="currentColor" stroke-width="1.5">
+    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+    <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+  </svg>
   <span class="rw-notif-badge" id="rw-notif-count"
-        {% if unread_count == 0 %}style="display:none"{% endif %}></span>
+        {% if not unread_count or unread_count == 0 %}style="display:none"{% endif %}></span>
 </button>
 
-{% comment %} Theme toggle {% endcomment %}
-<button class="rw-rail-theme js-theme-toggle"
+{% comment %} Theme toggle — Sun/moon, JS swaps icon based on data-theme {% endcomment %}
+<button class="rw-rail-theme d-flex align-items-center justify-content-center js-theme-toggle"
         onclick="RW.themeToggle()"
-        title="{% trans 'گۆڕینی شێوازی ڕووکار' %}">☀</button>
+        title="{% trans 'گۆڕینی شێوازی ڕووکار' %}">
+  <svg width="20" height="20" viewBox="0 0 24 24" class="ico" fill="none" stroke="currentColor" stroke-width="1.5">
+    <circle cx="12" cy="12" r="5"/>
+    <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+    <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+  </svg>
+</button>
