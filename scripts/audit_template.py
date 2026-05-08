@@ -40,7 +40,7 @@ DJ_CLOSE = re.compile(r"#\}")
 def collect_url_names() -> set[str]:
     names: set[str] = set()
     for urls_py in SRC.rglob("urls.py"):
-        if "api" in urls_py.parts:
+        if urls_py.parent.name == "api":
             continue
         text = urls_py.read_text(encoding="utf-8")
         m = re.search(r'app_name\s*=\s*["\']([^"\']+)["\']', text)
