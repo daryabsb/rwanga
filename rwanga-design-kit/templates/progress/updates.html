@@ -1,25 +1,21 @@
-{# ════════════════════════════════════════════════════════
-   RWANGA — progress/updates.html
-   Chronological feed of all progress updates.
-
-   Context:
-     updates — QuerySet[ProgressUpdate] chronological
-   ════════════════════════════════════════════════════════ #}
 {% extends "base.html" %}
+{% comment %} RWANGA — progress/updates.html
+   Chronological feed of all progress updates.
+   Context: updates — QuerySet[ProgressUpdate] chronological {% endcomment %}
 {% load static i18n %}
 
 {% block title %}{% trans "نوێکاریەکان" %} — Progress{% endblock %}
 
 {% block content %}
 
-  {# ── Header ── #}
+  {# Header #}
   <div class="d-flex align-items-center justify-content-between px-4 py-3 bg-rw-surface"
        style="border-bottom:1px solid var(--rw-border)">
     <h1 class="fs-4 fw-bold mb-0">{% trans "فیدی نوێکاریەکان" %}</h1>
     <a href="{% url 'progress:dashboard' %}" class="rw-btn rw-btn-ghost">← {% trans "داشبۆرد" %}</a>
   </div>
 
-  {# ── Feed ── #}
+  {# Feed #}
   <div style="overflow-x:auto">
     <table class="rw-tbl">
       <thead>
@@ -52,7 +48,8 @@
           </td>
           <td class="px-3 py-2">
             {% if update.task %}
-            <a href="{% url 'progress:task_detail' update.task.pk %}"
+            {% url 'progress:task_detail' update.task.pk as task_url %}
+            <a href="{{ task_url|default:'#' }}"
                style="font-size:12px;font-weight:600;color:var(--rw-amber)">{{ update.task.title|truncatechars:40 }}</a>
             {% else %}
             <span style="color:var(--rw-text-3)">—</span>

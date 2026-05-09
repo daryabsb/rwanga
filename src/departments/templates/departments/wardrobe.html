@@ -1,8 +1,45 @@
 {% extends "base.html" %}
+{% comment %} RWANGA — departments/wardrobe.html
+   Wardrobe department page. Full page for a project's wardrobe items.
+   Context: project, grouped (character -> items), active_project, active_section {% endcomment %}
+{% load i18n %}
+
+{% block title %}{% trans "جلوبەرگ و گریم" %} — {{ project.title }}{% endblock %}
+
 {% block content %}
-<div class="rw-card" style="padding:16px">
-  <h2>Wardrobe</h2>
-  <form hx-post="" hx-target="#wardrobe-list" hx-swap="innerHTML" method="post" enctype="multipart/form-data">{% csrf_token %}{{ form.as_p }}<button class="rw-btn rw-btn-primary" type="submit">Add</button></form>
-  <div id="wardrobe-list">{% include "departments/partials/wardrobe_list.html" %}</div>
-</div>
+
+  {# Page header #}
+  <div class="d-flex align-items-center justify-content-between px-4 py-3 bg-rw-surface"
+       style="border-bottom:1px solid var(--rw-border)">
+    <div>
+      <a href="{% url 'projects:dashboard' project.pk %}"
+         class="rw-btn rw-btn-ghost rw-btn-sm mb-2">← {{ project.title }}</a>
+      <h1 class="fs-4 fw-bold mb-0">{% trans "جلوبەرگ و گریم" %}</h1>
+    </div>
+    <button class="rw-btn rw-btn-primary rw-btn-sm"
+            hx-get="{% url 'departments:wardrobe' project.pk %}"
+            hx-target="#rw-modal-container"
+            hx-swap="innerHTML">
+      + {% trans "زیادکردن" %}
+    </button>
+  </div>
+
+  {# Add form #}
+  <div class="px-4 py-3 bg-rw-surface" style="border-bottom:1px solid var(--rw-border)">
+    <form hx-post="" hx-target="#wardrobe-list" hx-swap="innerHTML"
+          method="post" enctype="multipart/form-data"
+          class="d-flex gap-2 align-items-end flex-wrap">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button class="rw-btn rw-btn-primary" type="submit">+ {% trans "زیادکردن" %}</button>
+    </form>
+  </div>
+
+  {# Wardrobe items list #}
+  <div class="px-4 py-4">
+    <div id="wardrobe-list">
+      {% include "departments/partials/wardrobe_list.html" %}
+    </div>
+  </div>
+
 {% endblock %}

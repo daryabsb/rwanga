@@ -1,21 +1,14 @@
-{# ════════════════════════════════════════════════════════
-   RWANGA — progress/task_detail.html
-   Individual task — updates, dependencies, change records.
-
-   Context:
-     task       — ProgressTask instance
-     updates    — QuerySet[ProgressUpdate] linked to this task
-     blocked_by — QuerySet[ProgressTask] (M2M)
-     changes    — QuerySet[ChangeRecord] linked to this task
-   ════════════════════════════════════════════════════════ #}
 {% extends "base.html" %}
+{% comment %} RWANGA — progress/task_detail.html
+   Individual task — updates, dependencies, change records.
+   Context: task, updates, blocked_by, changes {% endcomment %}
 {% load static i18n %}
 
 {% block title %}{{ task.title }} — Progress{% endblock %}
 
 {% block content %}
 
-  {# ── Header ── #}
+  {# Header #}
   <div class="d-flex align-items-center justify-content-between px-4 py-3 bg-rw-surface"
        style="border-bottom:1px solid var(--rw-border)">
     <div>
@@ -37,26 +30,28 @@
       {% else %}
       <span class="rw-badge rw-badge-mute px-3 py-2">{% trans "چاوەڕوانی" %}</span>
       {% endif %}
+      {% url 'progress:update_task_status_modal' task.pk as status_modal_url %}
       <button class="rw-btn rw-btn-ghost"
-              hx-get="{% url 'progress:update_task_status_modal' task.pk %}"
+              hx-get="{{ status_modal_url|default:'#' }}"
               hx-target="#rw-modal-container" hx-swap="innerHTML">{% trans "گۆڕینی بارودۆخ" %}</button>
     </div>
   </div>
 
   <div class="px-4 py-4 d-flex flex-column gap-4">
 
-    {# ── Description ── #}
+    {# Description #}
     {% if task.description %}
     <p style="font-size:14px;color:var(--rw-text-2);line-height:1.7;margin:0">{{ task.description }}</p>
     {% endif %}
 
-    {# ── Blocked by ── #}
+    {# Blocked by #}
     {% if blocked_by %}
     <div>
       <div class="rw-section-hdr mb-2">{% trans "دوای ئەم تاسکانەوە" %}</div>
       <div class="d-flex gap-2 flex-wrap">
         {% for dep in blocked_by %}
-        <a href="{% url 'progress:task_detail' dep.pk %}"
+        {% url 'progress:task_detail' dep.pk as dep_url %}
+        <a href="{{ dep_url|default:'#' }}"
            class="rw-btn rw-btn-ghost rw-btn-sm text-decoration-none">
           {{ dep.title }}
           {% if dep.status == 'completed' %}<span style="color:var(--rw-vis)"> ✓</span>{% endif %}
@@ -66,7 +61,7 @@
     </div>
     {% endif %}
 
-    {# ── Two-column: updates + changes ── #}
+    {# Two-column: updates + changes #}
     <div class="row g-3">
 
       {# Updates timeline #}

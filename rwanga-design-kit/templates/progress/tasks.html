@@ -1,19 +1,14 @@
-{# ════════════════════════════════════════════════════════
-   RWANGA — progress/tasks.html
-   Full task list with filters.
-
-   Context:
-     tasks    — QuerySet[ProgressTask]
-     filters  — dict: phase, status, app_name, priority
-   ════════════════════════════════════════════════════════ #}
 {% extends "base.html" %}
-{% load static i18n %}
+{% comment %} RWANGA — progress/tasks.html
+   Full task list with filters.
+   Context: tasks — QuerySet[ProgressTask], filters — dict: phase, status, app_name, priority {% endcomment %}
+{% load static i18n progress_filters %}
 
 {% block title %}{% trans "تاسکەکان" %} — Progress{% endblock %}
 
 {% block content %}
 
-  {# ── Header ── #}
+  {# Header #}
   <div class="d-flex align-items-center justify-content-between px-4 py-3 bg-rw-surface"
        style="border-bottom:1px solid var(--rw-border)">
     <div>
@@ -22,7 +17,7 @@
     <a href="{% url 'progress:dashboard' %}" class="rw-btn rw-btn-ghost">← {% trans "داشبۆرد" %}</a>
   </div>
 
-  {# ── Filter strip ── #}
+  {# Filter strip #}
   <div class="d-flex align-items-center gap-2 px-4 py-2 flex-wrap"
        style="background:var(--rw-surface-2);border-bottom:1px solid var(--rw-border)">
     <select class="rw-form-input" name="phase" style="width:auto;font-size:12px"
@@ -60,7 +55,7 @@
     <span class="ms-auto" style="font-size:11px;color:var(--rw-text-3)">{{ tasks.count }} {% trans "تاسک" %}</span>
   </div>
 
-  {# ── Task table ── #}
+  {# Task table #}
   <div id="rw-tasks-table" style="overflow-x:auto">
     <table class="rw-tbl">
       <thead>
@@ -74,8 +69,9 @@
       </thead>
       <tbody>
         {% for task in tasks %}
+        {% url 'progress:task_detail' task.pk as task_url %}
         <tr class="rw-tbl-row"
-            onclick="location.href='{% url 'progress:task_detail' task.pk %}'">
+            onclick="location.href='{{ task_url|default:'#' }}'">
           <td class="px-3 py-2">
             <div class="fw-semibold" style="font-size:13px;color:var(--rw-text)">{{ task.title }}</div>
             {% if task.description %}

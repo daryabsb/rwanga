@@ -1,26 +1,21 @@
-{# ════════════════════════════════════════════════════════
-   RWANGA — progress/gaps.html
-   Open gaps and blockers list.
-
-   Context:
-     gaps     — QuerySet[GapBlocker]
-     filters  — dict: severity, status, gap_type
-   ════════════════════════════════════════════════════════ #}
 {% extends "base.html" %}
+{% comment %} RWANGA — progress/gaps.html
+   Open gaps and blockers list.
+   Context: gaps — QuerySet[GapBlocker], filters — dict: severity, status, gap_type {% endcomment %}
 {% load static i18n %}
 
 {% block title %}{% trans "گاپ و بلۆکەرەکان" %} — Progress{% endblock %}
 
 {% block content %}
 
-  {# ── Header ── #}
+  {# Header #}
   <div class="d-flex align-items-center justify-content-between px-4 py-3 bg-rw-surface"
        style="border-bottom:1px solid var(--rw-border)">
     <h1 class="fs-4 fw-bold mb-0">{% trans "گاپ و بلۆکەرەکان" %}</h1>
     <a href="{% url 'progress:dashboard' %}" class="rw-btn rw-btn-ghost">← {% trans "داشبۆرد" %}</a>
   </div>
 
-  {# ── Filter strip ── #}
+  {# Filter strip #}
   <div class="d-flex align-items-center gap-2 px-4 py-2 flex-wrap"
        style="background:var(--rw-surface-2);border-bottom:1px solid var(--rw-border)">
     <select class="rw-form-input" name="severity" style="width:auto;font-size:12px"
@@ -42,7 +37,7 @@
     <span class="ms-auto" style="font-size:11px;color:var(--rw-text-3)">{{ gaps.count }} {% trans "گاپ" %}</span>
   </div>
 
-  {# ── Gaps table ── #}
+  {# Gaps table #}
   <div id="rw-gaps-list" style="overflow-x:auto">
     <table class="rw-tbl">
       <thead>
@@ -66,8 +61,9 @@
             <div class="mt-1" style="font-size:11px;color:var(--rw-vis)">✓ {{ gap.resolution|truncatechars:60 }}</div>
             {% endif %}
             {% if gap.related_task %}
+            {% url 'progress:task_detail' gap.related_task.pk as gap_task_url %}
             <div class="mt-1">
-              <a href="{% url 'progress:task_detail' gap.related_task.pk %}" style="font-size:11px;color:var(--rw-text-3)">
+              <a href="{{ gap_task_url|default:'#' }}" style="font-size:11px;color:var(--rw-text-3)">
                 {% trans "تاسک:" %} {{ gap.related_task.title|truncatechars:40 }}
               </a>
             </div>

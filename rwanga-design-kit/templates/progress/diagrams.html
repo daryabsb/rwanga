@@ -1,25 +1,17 @@
-{# ════════════════════════════════════════════════════════
-   RWANGA — progress/diagrams.html
-   System diagrams viewer — Mermaid or SVG.
-   Uses SPLIT VIEW pattern (panel + main content).
-
-   Context:
-     current_diagram — SystemDiagram (is_current=True)
-     all_diagrams    — QuerySet[SystemDiagram]
-   ════════════════════════════════════════════════════════ #}
 {% extends "base.html" %}
+{% comment %} RWANGA — progress/diagrams.html
+   System diagrams viewer — Mermaid or SVG.
+   Context: current_diagram — SystemDiagram, all_diagrams — QuerySet[SystemDiagram] {% endcomment %}
 {% load static i18n %}
 
 {% block title %}{% trans "دیئاگرامەکان" %} — Progress{% endblock %}
 
-{% block extra_css %}
-<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
-{% endblock %}
+{% comment %} mermaid@10 CDN removed — add to static/vendor if needed {% endcomment %}
 
 {% block content %}
 <div class="d-flex flex-grow-1 overflow-hidden">
 
-  {# ── Main content area — FIRST IN DOM (right in RTL) ── #}
+  {# Main content area — FIRST IN DOM (right in RTL) #}
   <div class="flex-grow-1 d-flex flex-column overflow-hidden">
 
     {# Toolbar #}
@@ -57,15 +49,16 @@
     </div>
   </div>
 
-  {# ── Diagram selector panel — SECOND IN DOM (left in RTL) ── #}
+  {# Diagram selector panel — SECOND IN DOM (left in RTL) #}
   <aside class="rw-scene-panel d-none d-md-flex flex-column overflow-hidden">
     <div class="px-3 py-2 rw-overline" style="border-bottom:1px solid var(--rw-border)">
       {% trans "دیئاگرامەکان" %}
     </div>
     <div class="flex-grow-1 overflow-auto">
       {% for diagram in all_diagrams %}
+      {% url 'progress:diagram_detail' diagram.pk as diagram_url %}
       <div class="rw-scene-item {% if diagram.is_current %}active{% endif %}"
-           hx-get="{% url 'progress:diagram_detail' diagram.pk %}"
+           hx-get="{{ diagram_url|default:'#' }}"
            hx-target="#rw-diagram-content" hx-swap="innerHTML">
         <div style="flex:1;min-width:0">
           <div class="rw-sc-loc">{{ diagram.title }}</div>
@@ -85,9 +78,4 @@
 
 </div>
 
-{% block extra_js %}
-<script>
-  mermaid.initialize({ startOnLoad: true, theme: 'dark', darkMode: true });
-</script>
-{% endblock %}
 {% endblock %}

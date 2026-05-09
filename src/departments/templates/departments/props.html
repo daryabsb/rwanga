@@ -1,14 +1,57 @@
 {% extends "base.html" %}
+{% comment %} RWANGA — departments/props.html
+   Props department page. Full page for a project's props checklist.
+   Context: project, props (QuerySet), active_project, active_section {% endcomment %}
+{% load i18n %}
+
+{% block title %}{% trans "کەلوپەلەکان" %} — {{ project.title }}{% endblock %}
+
 {% block content %}
-<div class="rw-card" style="padding:16px">
-  <h2>Props</h2>
-  <div>
-    <button hx-get="?category=" hx-target="#props-list" hx-swap="innerHTML">All</button>
-    <button hx-get="?category=A" hx-target="#props-list" hx-swap="innerHTML">A</button>
-    <button hx-get="?category=B" hx-target="#props-list" hx-swap="innerHTML">B</button>
-    <button hx-get="?category=C" hx-target="#props-list" hx-swap="innerHTML">C</button>
+
+  {# Page header #}
+  <div class="d-flex align-items-center justify-content-between px-4 py-3 bg-rw-surface"
+       style="border-bottom:1px solid var(--rw-border)">
+    <div>
+      <a href="{% url 'projects:dashboard' project.pk %}"
+         class="rw-btn rw-btn-ghost rw-btn-sm mb-2">← {{ project.title }}</a>
+      <h1 class="fs-4 fw-bold mb-0">{% trans "کەلوپەلەکان" %}</h1>
+    </div>
+    <div class="d-flex gap-2 align-items-center">
+      <button class="rw-btn rw-btn-ghost rw-btn-sm"
+              hx-get="?category="
+              hx-target="#props-list"
+              hx-swap="innerHTML">{% trans "هەموو" %}</button>
+      <button class="rw-btn rw-btn-ghost rw-btn-sm"
+              hx-get="?category=A"
+              hx-target="#props-list"
+              hx-swap="innerHTML">A</button>
+      <button class="rw-btn rw-btn-ghost rw-btn-sm"
+              hx-get="?category=B"
+              hx-target="#props-list"
+              hx-swap="innerHTML">B</button>
+      <button class="rw-btn rw-btn-ghost rw-btn-sm"
+              hx-get="?category=C"
+              hx-target="#props-list"
+              hx-swap="innerHTML">C</button>
+    </div>
   </div>
-  <form hx-post="" hx-target="#props-list" hx-swap="innerHTML" method="post" enctype="multipart/form-data">{% csrf_token %}{{ form.as_p }}<button class="rw-btn rw-btn-primary" type="submit">Add</button></form>
-  <div id="props-list">{% include "departments/partials/props_list.html" %}</div>
-</div>
+
+  {# Add form #}
+  <div class="px-4 py-3 bg-rw-surface" style="border-bottom:1px solid var(--rw-border)">
+    <form hx-post="" hx-target="#props-list" hx-swap="innerHTML"
+          method="post" enctype="multipart/form-data"
+          class="d-flex gap-2 align-items-end flex-wrap">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button class="rw-btn rw-btn-primary" type="submit">+ {% trans "کەلوپەلی نوێ" %}</button>
+    </form>
+  </div>
+
+  {# Props list #}
+  <div class="px-4 py-4">
+    <div id="props-list">
+      {% include "departments/partials/props_list.html" %}
+    </div>
+  </div>
+
 {% endblock %}

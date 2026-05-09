@@ -9,14 +9,11 @@ class LightingView(View):
         project = get_object_or_404(Project, id=project_pk)
         return render(
             request,
-            "stub.html",
+            "departments/lighting.html",
             {
                 "project": project,
                 "active_project": project,
                 "active_section": "sh",
-                "stub_name": "Lighting",
-                "icon": "💡",
-                "subtitle": "Lighting notes placeholder.",
             },
         )
 
@@ -26,14 +23,11 @@ class SoundView(View):
         project = get_object_or_404(Project, id=project_pk)
         return render(
             request,
-            "stub.html",
+            "departments/sound.html",
             {
                 "project": project,
                 "active_project": project,
                 "active_section": "sh",
-                "stub_name": "Sound",
-                "icon": "🔊",
-                "subtitle": "Sound notes placeholder.",
             },
         )
 
@@ -43,14 +37,11 @@ class PropsView(View):
         project = get_object_or_404(Project, id=project_pk)
         return render(
             request,
-            "stub.html",
+            "departments/props.html",
             {
                 "project": project,
                 "active_project": project,
                 "active_section": "sh",
-                "stub_name": "Props",
-                "icon": "🎭",
-                "subtitle": "Props checklist placeholder.",
             },
         )
 
@@ -60,14 +51,11 @@ class WardrobeView(View):
         project = get_object_or_404(Project, id=project_pk)
         return render(
             request,
-            "stub.html",
+            "departments/wardrobe.html",
             {
                 "project": project,
                 "active_project": project,
                 "active_section": "sh",
-                "stub_name": "Wardrobe",
-                "icon": "👗",
-                "subtitle": "Wardrobe workspace placeholder.",
             },
         )
 
@@ -77,13 +65,30 @@ class ContinuityView(View):
         project = get_object_or_404(Project, id=project_pk)
         return render(
             request,
-            "stub.html",
+            "departments/continuity.html",
             {
                 "project": project,
                 "active_project": project,
                 "active_section": "sh",
-                "stub_name": "Continuity",
-                "icon": "🔗",
-                "subtitle": "Continuity checklist placeholder.",
             },
         )
+
+
+def toggle_continuity_view(request, project_pk, item_pk):
+    return render(request, "departments/partials/continuity_list.html", {})
+
+
+def toggle_prop_view(request, project_pk, prop_pk):
+    return render(request, "departments/partials/props_list.html", {})
+
+
+def edit_lighting_modal_view(request, pk):
+    return render(request, "departments/lighting.html", {})
+
+
+def edit_sound_modal_view(request, pk):
+    return render(request, "departments/sound.html", {})
+
+
+def edit_wardrobe_modal_view(request, pk):
+    return render(request, "departments/wardrobe.html", {})

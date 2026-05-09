@@ -1,4 +1,41 @@
+{% comment %} RWANGA — departments/partials/sound_list.html
+   HTMX partial: sound notes grouped by scene.
+   Context: grouped (scene -> notes) {% endcomment %}
+{% load i18n %}
+
 {% for scene, notes in grouped.items %}
-<div class="rw-card" style="margin-top:8px;padding:8px"><strong>Scene {{ scene.number }}</strong>
-<ul>{% for note in notes %}<li>{{ note.shot.number }} - {{ note.note }} ({{ note.sound_type }})</li>{% endfor %}</ul></div>
-{% empty %}<p>No sound notes.</p>{% endfor %}
+<div class="rw-card mb-3" style="border:1px solid var(--rw-border)">
+  <div class="d-flex align-items-center gap-2 px-3 py-2"
+       style="border-bottom:1px solid var(--rw-border);background:var(--rw-surface-2)">
+    <span class="rw-badge rw-badge-warn rw-font-en" style="font-size:9px">{% trans "دیمەنی" %} {{ scene.number }}</span>
+    <span class="fw-semibold" style="font-size:13px;color:var(--rw-text)">{{ scene.int_ext }}. {{ scene.location_name }}</span>
+  </div>
+  <div class="rw-sound-list" style="border-top:1px solid var(--rw-border)">
+    {% for note in notes %}
+    <div class="rw-sound-item d-flex align-items-start gap-3 px-3 py-3"
+         style="border-bottom:1px solid var(--rw-border)">
+      <div class="rw-si-icon flex-shrink-0" style="color:var(--rw-text-2);font-size:16px">
+        {% if note.sound_type == 'dialogue' %}
+        <svg width="18" height="18" viewBox="0 0 24 24" class="ico"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        {% else %}
+        <svg width="18" height="18" viewBox="0 0 24 24" class="ico">
+          <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+          <path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/>
+        </svg>
+        {% endif %}
+      </div>
+      <div class="flex-grow-1">
+        <div class="rw-si-title fw-bold mb-1"
+             style="font-size:12px;color:{% if note.sound_type == 'critical' %}var(--rw-shoot){% else %}var(--rw-text){% endif %}">
+          {% if note.shot %}{% trans "لێدانی" %} <bdi dir="ltr" class="rw-font-en">{{ note.shot.number }}</bdi> — {% endif %}
+          {{ note.get_sound_type_display }}
+        </div>
+        <div class="rw-si-desc" style="font-size:13px;color:var(--rw-text-2)">{{ note.note }}</div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% empty %}
+{% include "components/_empty_state.html" with title="هێشتا تێبینی دەنگێک نییە" sub="پێداویستییەکانی دەنگ بۆ دیمەنەکان تۆمار بکە" %}
+{% endfor %}

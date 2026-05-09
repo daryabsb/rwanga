@@ -1,25 +1,21 @@
-{# ════════════════════════════════════════════════════════
-   RWANGA — progress/agent_reports.html
-   Agent session reports.
-
-   Context:
-     reports — QuerySet[AgentReport]
-   ════════════════════════════════════════════════════════ #}
 {% extends "base.html" %}
+{% comment %} RWANGA — progress/agent_reports.html
+   Agent session reports.
+   Context: reports — QuerySet[AgentReport] {% endcomment %}
 {% load static i18n %}
 
 {% block title %}{% trans "ڕاپۆرتی ئەیجەنت" %} — Progress{% endblock %}
 
 {% block content %}
 
-  {# ── Header ── #}
+  {# Header #}
   <div class="d-flex align-items-center justify-content-between px-4 py-3 bg-rw-surface"
        style="border-bottom:1px solid var(--rw-border)">
     <h1 class="fs-4 fw-bold mb-0">{% trans "ڕاپۆرتی ئەیجەنت" %}</h1>
     <a href="{% url 'progress:dashboard' %}" class="rw-btn rw-btn-ghost">← {% trans "داشبۆرد" %}</a>
   </div>
 
-  {# ── Report accordion list ── #}
+  {# Report accordion list #}
   <div class="px-4 py-4 d-flex flex-column gap-2">
     {% for report in reports %}
     <details style="background:var(--rw-surface);border:1px solid var(--rw-border)">

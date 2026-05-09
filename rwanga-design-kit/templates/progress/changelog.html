@@ -1,25 +1,21 @@
-{# ════════════════════════════════════════════════════════
-   RWANGA — progress/changelog.html
-   Change record timeline.
-
-   Context:
-     changes — QuerySet[ChangeRecord]
-   ════════════════════════════════════════════════════════ #}
 {% extends "base.html" %}
+{% comment %} RWANGA — progress/changelog.html
+   Change record timeline.
+   Context: changes — QuerySet[ChangeRecord] {% endcomment %}
 {% load static i18n %}
 
 {% block title %}{% trans "تۆماری گۆڕانکاری" %} — Progress{% endblock %}
 
 {% block content %}
 
-  {# ── Header ── #}
+  {# Header #}
   <div class="d-flex align-items-center justify-content-between px-4 py-3 bg-rw-surface"
        style="border-bottom:1px solid var(--rw-border)">
     <h1 class="fs-4 fw-bold mb-0">{% trans "تۆماری گۆڕانکاری" %}</h1>
     <a href="{% url 'progress:dashboard' %}" class="rw-btn rw-btn-ghost">← {% trans "داشبۆرد" %}</a>
   </div>
 
-  {# ── Changelog table ── #}
+  {# Changelog table #}
   <div style="overflow-x:auto">
     <table class="rw-tbl">
       <thead>
@@ -58,8 +54,9 @@
             <div class="mt-1" style="font-size:11px;color:var(--rw-text-3);font-style:italic">{{ change.diff_summary }}</div>
             {% endif %}
             {% if change.task %}
+            {% url 'progress:task_detail' change.task.pk as change_task_url %}
             <div class="mt-1">
-              <a href="{% url 'progress:task_detail' change.task.pk %}" style="font-size:11px;color:var(--rw-text-3)">
+              <a href="{{ change_task_url|default:'#' }}" style="font-size:11px;color:var(--rw-text-3)">
                 {% trans "تاسک:" %} {{ change.task.title|truncatechars:50 }}
               </a>
             </div>

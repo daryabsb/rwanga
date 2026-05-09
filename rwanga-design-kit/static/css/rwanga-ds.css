@@ -893,6 +893,17 @@ html, body {
 .rw-empty-title { font-size: 18px; font-weight: 700; color: var(--rw-text); }
 .rw-empty-sub   { font-size: 14px; color: var(--rw-text-2); max-width: 360px; line-height: 1.6; }
 
+/* Checklist (used in departments/partials/{continuity,props}_list.html) */
+.rw-checklist { display: flex; flex-direction: column; gap: 1px; background: var(--rw-border); border: 1px solid var(--rw-border); }
+.rw-check-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 14px;
+  background: var(--rw-surface);
+  font-size: 13px; color: var(--rw-text);
+}
+.rw-check-item.checked { color: var(--rw-text-2); text-decoration: line-through; }
+.rw-check-item input[type="checkbox"] { accent-color: var(--rw-amber); width: 16px; height: 16px; flex-shrink: 0; cursor: pointer; }
+
 /* ── 22. TOASTS ─────────────────────────────────────────── */
 .rw-toast-container {
   position: fixed;

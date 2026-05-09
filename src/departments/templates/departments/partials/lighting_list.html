@@ -1,4 +1,30 @@
+{% comment %} RWANGA — departments/partials/lighting_list.html
+   HTMX partial: lighting notes grouped by scene.
+   Context: grouped (scene -> notes) {% endcomment %}
+{% load i18n %}
+
 {% for scene, notes in grouped.items %}
-<div class="rw-card" style="margin-top:8px;padding:8px"><strong>Scene {{ scene.number }}</strong>
-<ul>{% for note in notes %}<li>{{ note.shot.number }} - {{ note.note }} {% if note.color_temp %}({{ note.color_temp }}){% endif %}</li>{% endfor %}</ul></div>
-{% empty %}<p>No lighting notes.</p>{% endfor %}
+<div class="rw-card mb-3" style="border:1px solid var(--rw-border)">
+  <div class="d-flex align-items-center gap-2 px-3 py-2"
+       style="border-bottom:1px solid var(--rw-border);background:var(--rw-surface-2)">
+    <span class="rw-badge rw-badge-warn rw-font-en" style="font-size:9px">{% trans "دیمەنی" %} {{ scene.number }}</span>
+    <span class="fw-semibold" style="font-size:13px;color:var(--rw-text)">{{ scene.int_ext }}. {{ scene.location_name }}</span>
+  </div>
+  <div class="rw-light-grid p-3"
+       style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px">
+    {% for note in notes %}
+    <div class="rw-light-card p-3" style="background:var(--rw-surface-2);border:1px solid var(--rw-border)">
+      <div class="rw-light-num mb-1" style="font-size:11px;color:var(--rw-text-3)">
+        {% trans "لێدانی" %} <bdi dir="ltr" class="rw-font-en">{{ note.shot.number }}</bdi>
+      </div>
+      {% if note.color_temp %}
+      <div class="rw-font-en mb-2" dir="ltr" style="font-size:10px;color:var(--rw-amber)">{{ note.color_temp }}</div>
+      {% endif %}
+      <div class="rw-light-note" style="font-size:13px;color:var(--rw-text-2);line-height:1.6">{{ note.note }}</div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% empty %}
+{% include "components/_empty_state.html" with title="هێشتا تێبینی ڕووناکییەک نییە" sub="بۆ هەر لێدانێک تێبینی ڕووناکی زیاد بکە" %}
+{% endfor %}

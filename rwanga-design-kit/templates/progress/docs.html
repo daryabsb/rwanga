@@ -1,25 +1,21 @@
-{# ════════════════════════════════════════════════════════
-   RWANGA — progress/docs.html
-   Document version history.
-
-   Context:
-     documents — QuerySet[DocumentVersion]
-   ════════════════════════════════════════════════════════ #}
 {% extends "base.html" %}
+{% comment %} RWANGA — progress/docs.html
+   Document version history.
+   Context: documents — QuerySet[DocumentVersion] {% endcomment %}
 {% load static i18n %}
 
 {% block title %}{% trans "بەڵگەکان" %} — Progress{% endblock %}
 
 {% block content %}
 
-  {# ── Header ── #}
+  {# Header #}
   <div class="d-flex align-items-center justify-content-between px-4 py-3 bg-rw-surface"
        style="border-bottom:1px solid var(--rw-border)">
     <h1 class="fs-4 fw-bold mb-0">{% trans "نسخەی بەڵگەکان" %}</h1>
     <a href="{% url 'progress:dashboard' %}" class="rw-btn rw-btn-ghost">← {% trans "داشبۆرد" %}</a>
   </div>
 
-  {# ── Docs table ── #}
+  {# Docs table #}
   <div style="overflow-x:auto">
     <table class="rw-tbl">
       <thead>
@@ -51,8 +47,9 @@
             <bdi dir="ltr" class="rw-font-en" style="font-size:12px;color:var(--rw-text-3);white-space:nowrap">{{ doc.created_at|date:"Y-m-d H:i" }}</bdi>
           </td>
           <td class="px-3 py-2">
+            {% url 'progress:doc_detail' doc.pk as doc_url %}
             <button class="rw-btn rw-btn-ghost rw-btn-sm"
-                    hx-get="{% url 'progress:doc_detail' doc.pk %}"
+                    hx-get="{{ doc_url|default:'#' }}"
                     hx-target="#rw-modal-container" hx-swap="innerHTML">
               {% trans "بینین" %}
             </button>

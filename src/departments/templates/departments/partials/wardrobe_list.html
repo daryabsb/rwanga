@@ -1,4 +1,44 @@
-{% for character, items in grouped.items %}
-<div class="rw-card" style="margin-top:8px;padding:8px"><strong>{{ character.name }}</strong>
-<ul>{% for item in items %}<li>{{ item.outfit_name }} (Scene {{ item.scene.number }})</li>{% endfor %}</ul></div>
-{% empty %}<p>No wardrobe items.</p>{% endfor %}
+{% comment %} RWANGA — departments/partials/wardrobe_list.html
+   HTMX partial: wardrobe items grouped by character.
+   Context: grouped (character -> items) {% endcomment %}
+{% load i18n %}
+
+{% if grouped %}
+<div class="rw-wardrobe-grid"
+     style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1px;background:var(--rw-border);border:1px solid var(--rw-border)">
+  {% for character, items in grouped.items %}
+  <div class="rw-wc-card p-3"
+       style="background:var(--rw-surface);border-top:3px solid {% cycle 'var(--rw-break)' 'var(--rw-plan)' 'var(--rw-vis)' 'var(--rw-script)' 'var(--rw-shoot)' %}">
+    <div class="rw-wc-name fw-bold mb-3" style="font-size:14px;color:var(--rw-text)">{{ character.name }}</div>
+    {% for item in items %}
+    <div class="mb-3 pb-3" style="border-bottom:1px solid var(--rw-border)">
+      <div class="fw-bold mb-2" style="font-size:12px;color:var(--rw-amber)">{{ item.outfit_name }}</div>
+      {% if item.description %}
+      <div class="d-flex gap-2 mb-1">
+        <strong style="font-size:11px;color:var(--rw-text-3);flex-shrink:0">{% trans "وەسف" %}</strong>
+        <span style="font-size:12px;color:var(--rw-text-2)">{{ item.description }}</span>
+      </div>
+      {% endif %}
+      {% if item.notes %}
+      <div class="rw-notes-block mt-2" style="font-size:11px">{{ item.notes }}</div>
+      {% endif %}
+      {% if item.image %}
+      <img src="{{ item.image.url }}" alt="{{ item.outfit_name }}"
+           class="w-100 mt-2" style="object-fit:cover;max-height:140px;display:block">
+      {% endif %}
+      <div class="mt-2">
+        {% url 'departments:edit_wardrobe_modal' item.pk as edit_u %}
+        <button class="rw-btn rw-btn-ghost rw-btn-sm"
+                hx-get="{{ edit_u|default:'#' }}"
+                hx-target="#rw-modal-container"
+                hx-swap="innerHTML"
+                aria-label="{% trans 'دەستکاری' %}">✎</button>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+{% include "components/_empty_state.html" with title="هێشتا تێبینی جلوبەرگێک نییە" sub="جلوبەرگی هەر کەسایەتییەک بۆ پڕۆژەکە زیاد بکە" %}
+{% endif %}

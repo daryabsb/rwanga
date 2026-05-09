@@ -1,21 +1,14 @@
-{# ════════════════════════════════════════════════════════
-   RWANGA — progress/dashboard.html
-   Progress tracking dashboard. Darya's monitoring page.
-
-   Context:
-     tasks_summary   — dict {pending, in_progress, completed, blocked}
-     recent_updates  — QuerySet[ProgressUpdate] last 10
-     current_phase   — string e.g. "P1"
-     open_gaps       — QuerySet[GapBlocker] status=open
-   ════════════════════════════════════════════════════════ #}
 {% extends "base.html" %}
+{% comment %} RWANGA — progress/dashboard.html
+   Progress tracking dashboard. Darya's monitoring page.
+   Context: tasks_summary, recent_updates, current_phase, open_gaps {% endcomment %}
 {% load static i18n %}
 
 {% block title %}{% trans "پرۆگرەس" %}{% endblock %}
 
 {% block content %}
 
-  {# ── Header ── #}
+  {# Header #}
   <div class="d-flex align-items-center justify-content-between px-4 py-3 bg-rw-surface"
        style="border-bottom:1px solid var(--rw-border)">
     <div>
@@ -33,7 +26,7 @@
 
   <div class="px-4 py-4 d-flex flex-column gap-4">
 
-    {# ── Task stats ── #}
+    {# Task stats #}
     <div class="rw-stats">
       <div class="rw-stat">
         <div class="rw-stat-val" style="color:var(--rw-text-2)">{{ tasks_summary.pending|default:"0" }}</div>
@@ -53,7 +46,7 @@
       </div>
     </div>
 
-    {# ── Open gaps / blockers ── #}
+    {# Open gaps / blockers #}
     {% if open_gaps %}
     <div>
       <div class="rw-section-hdr mb-3" style="color:var(--rw-shoot)">
@@ -89,7 +82,7 @@
     </div>
     {% endif %}
 
-    {# ── Recent updates ── #}
+    {# Recent updates #}
     <div>
       <div class="rw-section-hdr mb-3">{% trans "نوێترین نوێکاریەکان" %}</div>
       <div style="background:var(--rw-surface);border:1px solid var(--rw-border)">
@@ -109,7 +102,8 @@
           <div class="flex-grow-1" style="min-width:0">
             <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
               {% if update.task %}
-              <a href="{% url 'progress:task_detail' update.task.pk %}"
+              {% url 'progress:task_detail' update.task.pk as task_url %}
+              <a href="{{ task_url|default:'#' }}"
                  style="font-size:12px;font-weight:600;color:var(--rw-amber)">{{ update.task.title|truncatechars:40 }}</a>
               {% endif %}
               <span class="rw-badge rw-badge-mute" style="font-size:9px">{{ update.get_update_type_display }}</span>
@@ -128,27 +122,18 @@
       </div>
     </div>
 
-    {# ── Quick links ── #}
+    {# Quick links #}
     <div>
       <div class="rw-section-hdr mb-3">{% trans "بەستنەرەکانی خێرا" %}</div>
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1px;background:var(--rw-border);border:1px solid var(--rw-border)">
-        {% for item in "tasks,updates,gaps,decisions,agent_reports,changelog,diagrams,docs"|split:"," %}
-        <a href="{% url 'progress:'|add:item %}" class="text-decoration-none">
-          <div class="bg-rw-surface px-3 py-3 text-center" style="transition:background var(--rw-t)">
-            <div class="rw-overline" style="color:var(--rw-text-2)">
-              {% if item == "tasks" %}{% trans "تاسکەکان" %}
-              {% elif item == "updates" %}{% trans "نوێکاریەکان" %}
-              {% elif item == "gaps" %}{% trans "گاپەکان" %}
-              {% elif item == "decisions" %}{% trans "بڕیارەکان" %}
-              {% elif item == "agent_reports" %}{% trans "ڕاپۆرتی ئەیجەنت" %}
-              {% elif item == "changelog" %}{% trans "گۆڕانکاری" %}
-              {% elif item == "diagrams" %}{% trans "دیئاگرامەکان" %}
-              {% elif item == "docs" %}{% trans "بەڵگەکان" %}
-              {% endif %}
-            </div>
-          </div>
-        </a>
-        {% endfor %}
+        <a href="{% url 'progress:tasks' %}" class="text-decoration-none"><div class="bg-rw-surface px-3 py-3 text-center" style="transition:background var(--rw-t)"><div class="rw-overline" style="color:var(--rw-text-2)">{% trans "تاسکەکان" %}</div></div></a>
+        <a href="{% url 'progress:updates' %}" class="text-decoration-none"><div class="bg-rw-surface px-3 py-3 text-center" style="transition:background var(--rw-t)"><div class="rw-overline" style="color:var(--rw-text-2)">{% trans "نوێکاریەکان" %}</div></div></a>
+        <a href="{% url 'progress:gaps' %}" class="text-decoration-none"><div class="bg-rw-surface px-3 py-3 text-center" style="transition:background var(--rw-t)"><div class="rw-overline" style="color:var(--rw-text-2)">{% trans "گاپەکان" %}</div></div></a>
+        <a href="{% url 'progress:decisions' %}" class="text-decoration-none"><div class="bg-rw-surface px-3 py-3 text-center" style="transition:background var(--rw-t)"><div class="rw-overline" style="color:var(--rw-text-2)">{% trans "بڕیارەکان" %}</div></div></a>
+        <a href="{% url 'progress:agent_reports' %}" class="text-decoration-none"><div class="bg-rw-surface px-3 py-3 text-center" style="transition:background var(--rw-t)"><div class="rw-overline" style="color:var(--rw-text-2)">{% trans "ڕاپۆرتی ئەیجەنت" %}</div></div></a>
+        <a href="{% url 'progress:changelog' %}" class="text-decoration-none"><div class="bg-rw-surface px-3 py-3 text-center" style="transition:background var(--rw-t)"><div class="rw-overline" style="color:var(--rw-text-2)">{% trans "گۆڕانکاری" %}</div></div></a>
+        <a href="{% url 'progress:diagrams' %}" class="text-decoration-none"><div class="bg-rw-surface px-3 py-3 text-center" style="transition:background var(--rw-t)"><div class="rw-overline" style="color:var(--rw-text-2)">{% trans "دیئاگرامەکان" %}</div></div></a>
+        <a href="{% url 'progress:docs' %}" class="text-decoration-none"><div class="bg-rw-surface px-3 py-3 text-center" style="transition:background var(--rw-t)"><div class="rw-overline" style="color:var(--rw-text-2)">{% trans "بەڵگەکان" %}</div></div></a>
       </div>
     </div>
 
