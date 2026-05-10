@@ -72,6 +72,13 @@ class Studio(SoftDeleteModel, Versioned, BaseModel):
     timezone = models.CharField(max_length=50, default="Asia/Baghdad")
     plan = models.CharField(max_length=20, default="free")
     subscription_tier = models.CharField(max_length=20, default="beta")
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="created_studios",
+    )
     specialty = models.CharField(max_length=32, choices=SPECIALTY_CHOICES, default="feature_films")
     studio_api_key_hash = models.CharField(max_length=128, blank=True, db_index=True)
     studio_api_key_last_four = models.CharField(max_length=4, blank=True)
