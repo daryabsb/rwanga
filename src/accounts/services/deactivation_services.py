@@ -1,3 +1,4 @@
+from datetime import timedelta
 from django.db import transaction
 from django.utils import timezone
 from src.accounts.models import StudioMembership, Studio
@@ -12,8 +13,11 @@ def deactivate_account(user, by_user):
         s.snapshot_on_delete = snapshot_related(s, depth=2)
         s.save(update_fields=["snapshot_on_delete"])
         s.soft_delete(by_user=by_user)
+    now = timezone.now()
     StudioMembership.all_with_deleted.filter(user=user).update(
-        deleted_at=timezone.now(), deleted_by=by_user,
+        deleted_at=now,
+        deleted_by=by_user,
+        recovery_grace_until=now + timedelta(days=StudioMembership.GRACE_DAYS),
     )
     user.is_active = False
     user.save(update_fields=["is_active"])

@@ -15,3 +15,17 @@ class DeactivationTest(TestCase):
         from src.accounts.models import Studio
         self.assertEqual(Studio.objects.filter(memberships__user=u).count(), 0)
         self.assertEqual(Studio.all_with_deleted.filter(memberships__user=u).count(), 2)
+
+    def test_deactivate_sets_recovery_grace_on_memberships(self):
+        from datetime import timedelta
+        from django.utils import timezone
+        u = User.objects.create_user(email="dead2@x.com", password="x")
+        create_studio_for_user(u, name="Second2")
+        deactivate_account(u, by_user=u)
+        from src.accounts.models import StudioMembership
+        memberships = StudioMembership.all_with_deleted.filter(user=u)
+        self.assertGreater(memberships.count(), 0)
+        for m in memberships:
+            self.assertIsNotNone(m.recovery_grace_until)
+            delta = m.recovery_grace_until - m.deleted_at
+            self.assertAlmostEqual(delta, timedelta(days=30), delta=timedelta(seconds=2))
