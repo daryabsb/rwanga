@@ -35,6 +35,7 @@ def list_studios_for_user(user):
     return Studio.objects.filter(memberships__user=user, memberships__status="active").distinct()
 
 
+@transaction.atomic
 def soft_delete_studio(studio, by_user):
     if studio.memberships.filter(is_primary=True).exists():
         raise ValueError("Cannot delete primary studio without account deactivation")
