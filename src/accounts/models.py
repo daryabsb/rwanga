@@ -4,6 +4,7 @@ from django.db import models
 
 from src.accounts.managers import UserManager
 from src.core.models import BaseModel
+from src.core.mixins import SoftDeleteModel
 
 
 class User(PermissionsMixin, AbstractBaseUser):
@@ -52,7 +53,7 @@ class User(PermissionsMixin, AbstractBaseUser):
         return ""
 
 
-class Studio(BaseModel):
+class Studio(SoftDeleteModel, BaseModel):
     name = models.CharField(max_length=200)
     slug = models.SlugField(unique=True)
     logo = models.ImageField(upload_to="studios/logos/", blank=True)
