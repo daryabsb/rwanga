@@ -1,3 +1,6 @@
+import hashlib
+import secrets
+
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.conf import settings
 from django.db import models
@@ -54,6 +57,14 @@ class User(PermissionsMixin, AbstractBaseUser):
 
 
 class Studio(SoftDeleteModel, Versioned, BaseModel):
+    SPECIALTY_CHOICES = [
+        ("feature_films", "Feature Films"),
+        ("documentary", "Documentary"),
+        ("commercial", "Commercial"),
+        ("mixed", "Mixed"),
+        ("other", "Other"),
+    ]
+
     name = models.CharField(max_length=200)
     slug = models.SlugField(unique=True)
     logo = models.ImageField(upload_to="studios/logos/", blank=True)
@@ -61,12 +72,23 @@ class Studio(SoftDeleteModel, Versioned, BaseModel):
     timezone = models.CharField(max_length=50, default="Asia/Baghdad")
     plan = models.CharField(max_length=20, default="free")
     subscription_tier = models.CharField(max_length=20, default="beta")
+    specialty = models.CharField(max_length=32, choices=SPECIALTY_CHOICES, default="feature_films")
+    studio_api_key_hash = models.CharField(max_length=128, blank=True, db_index=True)
+    studio_api_key_last_four = models.CharField(max_length=4, blank=True)
+    snapshot_on_delete = models.JSONField(null=True, blank=True)
 
     class Meta:
         ordering = ["name"]
 
     def __str__(self):
         return self.name
+
+    def generate_studio_api_key(self):
+        token = "rws_" + secrets.token_urlsafe(32)
+        self.studio_api_key_hash = hashlib.sha256(token.encode()).hexdigest()
+        self.studio_api_key_last_four = token[-4:]
+        self.save(update_fields=["studio_api_key_hash", "studio_api_key_last_four"])
+        return token
 
 
 class ProjectMembership(BaseModel):
