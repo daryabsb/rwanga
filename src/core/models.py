@@ -71,7 +71,7 @@ class ProductionLog(models.Model):
         choices=[("user", "user"), ("ai_agent", "ai_agent"), ("system", "system"), ("external_mcp", "external_mcp")],
         default="system",
     )
-    actor_id = models.UUIDField(null=True, blank=True)
+    actor_id = models.CharField(max_length=64, blank=True, db_index=True)
     actor_name = models.CharField(max_length=128, blank=True)
     event_type = models.CharField(max_length=64, db_index=True)
     target_type = models.CharField(max_length=64, blank=True)

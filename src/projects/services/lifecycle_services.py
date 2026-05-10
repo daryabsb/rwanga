@@ -21,10 +21,10 @@ def create_project(studio, user, name, project_type, slug=None, **metadata):
         created_by=user, owner=user, status="draft", **metadata,
     )
     log_event(
-        event_type="project_created", actor_type="user", actor_id=None,
+        event_type="project_created", actor_type="user", actor_id=str(user.id),
         actor_name=user.email, studio=studio, project=project,
         target_type="projects.Project", target_id=project.id,
-        payload={"actor_user_id": str(user.id), "name": name, "project_type": project_type},
+        payload={"name": name, "project_type": project_type},
     )
     return project
 
@@ -36,9 +36,9 @@ def change_project_status(project, new_status, by_user):
     project.status_changed_by = by_user
     project.save(update_fields=["status", "status_changed_at", "status_changed_by"])
     log_event(
-        event_type="project_status_changed", actor_type="user", actor_id=None,
+        event_type="project_status_changed", actor_type="user", actor_id=str(by_user.id),
         actor_name=by_user.email, studio=project.studio, project=project,
-        payload={"actor_user_id": str(by_user.id), "old": old, "new": new_status},
+        payload={"old": old, "new": new_status},
     )
 
 
@@ -49,8 +49,7 @@ def soft_delete_project(project, by_user):
     project.save(update_fields=["snapshot_on_delete"])
     project.soft_delete(by_user=by_user)
     log_event(
-        event_type="project_soft_deleted", actor_type="user", actor_id=None,
+        event_type="project_soft_deleted", actor_type="user", actor_id=str(by_user.id),
         actor_name=by_user.email, studio=project.studio, project=project,
         target_type="projects.Project", target_id=project.id,
-        payload={"actor_user_id": str(by_user.id)},
     )

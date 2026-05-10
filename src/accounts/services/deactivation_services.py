@@ -23,6 +23,6 @@ def deactivate_account(user, by_user):
     user.save(update_fields=["is_active"])
     log_event(
         event_type="account_deactivated", actor_type="user",
-        actor_id=None, actor_name=by_user.email,
-        payload={"actor_user_id": str(by_user.id), "target_user_id": str(user.id)},
+        actor_id=str(by_user.id), actor_name=by_user.email,
+        payload={"target_user_id": str(user.id)},
     )

@@ -66,7 +66,7 @@ class ProjectInvitationTest(TestCase):
         accept_project_invitation(m.magic_link_token, by_user=target)
         log = ProductionLog.objects.filter(event_type="project_invitation_accepted").first()
         self.assertIsNotNone(log)
-        self.assertEqual(log.payload["actor_user_id"], str(target.id))
+        self.assertEqual(log.actor_id, str(target.id))
 
     def test_reject_project_invitation_logs_event(self):
         from src.accounts.services.invitation_services import (

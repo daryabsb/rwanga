@@ -13,9 +13,9 @@ def invite_to_studio(studio, user, role, tier, invited_by):
     )
     log_event(
         event_type="studio_invitation_sent", actor_type="user",
-        actor_id=None, actor_name=invited_by.email,
+        actor_id=str(invited_by.id), actor_name=invited_by.email,
         studio=studio,
-        payload={"actor_user_id": str(invited_by.id), "invited_user_id": str(user.id), "role": role, "tier": tier},
+        payload={"invited_user_id": str(user.id), "role": role, "tier": tier},
     )
     return m
 
@@ -28,9 +28,8 @@ def accept_studio_invitation(token, by_user):
     m.save(update_fields=["status", "accepted_at", "magic_link_token"])
     log_event(
         event_type="studio_invitation_accepted", actor_type="user",
-        actor_id=None, actor_name=by_user.email,
+        actor_id=str(by_user.id), actor_name=by_user.email,
         studio=m.studio,
-        payload={"actor_user_id": str(by_user.id)},
     )
     return m
 
@@ -41,8 +40,8 @@ def reject_studio_invitation(token, by_user):
     m.delete()
     log_event(
         event_type="studio_invitation_rejected", actor_type="user",
-        actor_id=None, actor_name=by_user.email,
-        payload={"actor_user_id": str(by_user.id), "studio_id": str(studio_id)},
+        actor_id=str(by_user.id), actor_name=by_user.email,
+        payload={"studio_id": str(studio_id)},
     )
 
 
@@ -55,9 +54,9 @@ def invite_to_project(project, user, role_type, tier, department, invited_by):
     )
     log_event(
         event_type="project_invitation_sent", actor_type="user",
-        actor_id=None, actor_name=invited_by.email,
+        actor_id=str(invited_by.id), actor_name=invited_by.email,
         studio=project.studio, project=project,
-        payload={"actor_user_id": str(invited_by.id), "invited_user_id": str(user.id), "role_type": role_type, "tier": tier},
+        payload={"invited_user_id": str(user.id), "role_type": role_type, "tier": tier},
     )
     return m
 
@@ -70,9 +69,8 @@ def accept_project_invitation(token, by_user):
     m.save(update_fields=["status", "accepted_at", "magic_link_token"])
     log_event(
         event_type="project_invitation_accepted", actor_type="user",
-        actor_id=None, actor_name=by_user.email,
+        actor_id=str(by_user.id), actor_name=by_user.email,
         studio=m.project.studio, project=m.project,
-        payload={"actor_user_id": str(by_user.id)},
     )
     return m
 
@@ -86,9 +84,8 @@ def reject_project_invitation(token, by_user):
     m.delete()
     log_event(
         event_type="project_invitation_rejected", actor_type="user",
-        actor_id=None, actor_name=by_user.email,
+        actor_id=str(by_user.id), actor_name=by_user.email,
         payload={
-            "actor_user_id": str(by_user.id),
             "project_id": str(project_id),
             "studio_id": str(studio_id),
         },

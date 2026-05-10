@@ -23,10 +23,10 @@ def create_studio_for_user(user, name, specialty="feature_films", is_primary=Fal
         is_primary=is_primary, accepted_at=timezone.now(), status="active",
     )
     log_event(
-        event_type="studio_created", actor_type="user", actor_id=None,
+        event_type="studio_created", actor_type="user", actor_id=str(user.id),
         actor_name=user.email, studio=studio,
         target_type="accounts.Studio", target_id=studio.id,
-        payload={"actor_user_id": str(user.id), "name": name, "specialty": specialty, "is_primary": is_primary},
+        payload={"name": name, "specialty": specialty, "is_primary": is_primary},
     )
     return studio
 
@@ -44,10 +44,9 @@ def soft_delete_studio(studio, by_user):
     studio.save(update_fields=["snapshot_on_delete"])
     studio.soft_delete(by_user=by_user)
     log_event(
-        event_type="studio_soft_deleted", actor_type="user", actor_id=None,
+        event_type="studio_soft_deleted", actor_type="user", actor_id=str(by_user.id),
         actor_name=by_user.email, studio=studio,
         target_type="accounts.Studio", target_id=studio.id,
-        payload={"actor_user_id": str(by_user.id)},
     )
 
 
@@ -69,10 +68,9 @@ def transfer_ownership(studio, from_user, to_user):
     from_membership.role = "member"
     from_membership.save(update_fields=["role"])
     log_event(
-        event_type="ownership_transferred", actor_type="user", actor_id=None,
+        event_type="ownership_transferred", actor_type="user", actor_id=str(from_user.id),
         actor_name=from_user.email, studio=studio,
         payload={
-            "actor_user_id": str(from_user.id),
             "from_user_id": str(from_user.id),
             "to_user_id": str(to_user.id),
         },

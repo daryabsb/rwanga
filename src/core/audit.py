@@ -11,7 +11,7 @@ def log_event(
     return ProductionLog.objects.create(
         event_type=event_type,
         actor_type=actor_type,
-        actor_id=actor_id,
+        actor_id=actor_id or "",
         actor_name=actor_name,
         studio=studio,
         project=project,
