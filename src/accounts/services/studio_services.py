@@ -50,7 +50,13 @@ def soft_delete_studio(studio, by_user):
     )
 
 
+@transaction.atomic
 def transfer_ownership(studio, from_user, to_user):
+    from_membership = StudioMembership.objects.filter(
+        studio=studio, user=from_user, role="owner",
+    ).first()
+    if from_membership is None:
+        raise ValueError("from_user is not an owner of this studio")
     target_membership, _ = StudioMembership.objects.get_or_create(
         studio=studio, user=to_user,
         defaults={"role": "owner", "tier": "production", "status": "active",
@@ -59,8 +65,14 @@ def transfer_ownership(studio, from_user, to_user):
     if target_membership.role != "owner":
         target_membership.role = "owner"
         target_membership.save(update_fields=["role"])
+    from_membership.role = "member"
+    from_membership.save(update_fields=["role"])
     log_event(
-        event_type="ownership_granted", actor_type="user", actor_id=None,
+        event_type="ownership_transferred", actor_type="user", actor_id=None,
         actor_name=from_user.email, studio=studio,
-        payload={"actor_user_id": str(from_user.id), "granted_to": str(to_user.id)},
+        payload={
+            "actor_user_id": str(from_user.id),
+            "from_user_id": str(from_user.id),
+            "to_user_id": str(to_user.id),
+        },
     )
