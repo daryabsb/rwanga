@@ -14,7 +14,7 @@ class StudioMembershipTest(TestCase):
         self.assertEqual(m.tier, "production")
 
     def test_only_one_primary_per_user(self):
-        s2 = Studio.objects.create(name="S2", slug="s-2")
-        StudioMembership.objects.create(user=self.user, studio=self.studio, is_primary=True)
+        # Signal auto-creates "My Studio" as the primary when User is created.
+        # Attempting a second is_primary membership must raise IntegrityError.
         with self.assertRaises(IntegrityError):
-            StudioMembership.objects.create(user=self.user, studio=s2, is_primary=True)
+            StudioMembership.objects.create(user=self.user, studio=self.studio, is_primary=True)
