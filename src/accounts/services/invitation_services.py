@@ -68,9 +68,28 @@ def accept_project_invitation(token, by_user):
     m.accepted_at = timezone.now()
     m.magic_link_token = None
     m.save(update_fields=["status", "accepted_at", "magic_link_token"])
+    log_event(
+        event_type="project_invitation_accepted", actor_type="user",
+        actor_id=None, actor_name=by_user.email,
+        studio=m.project.studio, project=m.project,
+        payload={"actor_user_id": str(by_user.id)},
+    )
     return m
 
 
 def reject_project_invitation(token, by_user):
     m = ProjectMembership.objects.get(magic_link_token=token, user=by_user)
+    project = m.project
+    studio = project.studio
+    project_id = project.id
+    studio_id = studio.id
     m.delete()
+    log_event(
+        event_type="project_invitation_rejected", actor_type="user",
+        actor_id=None, actor_name=by_user.email,
+        payload={
+            "actor_user_id": str(by_user.id),
+            "project_id": str(project_id),
+            "studio_id": str(studio_id),
+        },
+    )
