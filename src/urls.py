@@ -1,14 +1,17 @@
 from django.conf import settings
 from django.contrib import admin
 from django.conf.urls.static import static
+from django.contrib.auth.decorators import login_not_required
 from django.shortcuts import redirect, render
 from django.urls import include, path
+from django.utils.decorators import method_decorator
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 
+@method_decorator(login_not_required, name="dispatch")
 class HealthAPIView(APIView):
     permission_classes = [AllowAny]
 
@@ -16,6 +19,7 @@ class HealthAPIView(APIView):
         return Response({"status": "ok"})
 
 
+@login_not_required
 def landing_view(request):
     if request.user.is_authenticated:
         return redirect("projects:list")
@@ -25,8 +29,16 @@ def landing_view(request):
 urlpatterns = [
     path("", landing_view, name="landing"),
     path("admin/", admin.site.urls),
-    path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
-    path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),
+    path(
+        "api/schema/",
+        login_not_required(SpectacularAPIView.as_view()),
+        name="schema",
+    ),
+    path(
+        "api/docs/",
+        login_not_required(SpectacularSwaggerView.as_view(url_name="schema")),
+        name="swagger-ui",
+    ),
     path("api/v1/health/", HealthAPIView.as_view(), name="health-api"),
     path("api/v1/accounts/", include("src.accounts.api.urls")),
     path("api/v1/projects/", include("src.projects.api.urls")),

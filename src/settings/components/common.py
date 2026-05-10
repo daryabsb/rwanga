@@ -59,6 +59,7 @@ MIDDLEWARE = [
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "allauth.account.middleware.AccountMiddleware",
+    "django.contrib.auth.middleware.LoginRequiredMiddleware",
     "django_htmx.middleware.HtmxMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
@@ -101,7 +102,7 @@ TEMPLATES = [
     }
 ]
 
-LOGIN_URL = "/accounts/login/"
+LOGIN_URL = "/"
 LOGIN_REDIRECT_URL = "/projects/"
 LOGOUT_REDIRECT_URL = "/accounts/login/"
 AUTH_USER_MODEL = "accounts.User"
