@@ -10,7 +10,8 @@ class SubscriptionModelTest(TestCase):
     def test_subscription_default_pro_trial(self):
         u = User.objects.create_user(email="b@x.com", password="x")
         s = create_studio_for_user(u, name="B")
-        sub = Subscription.objects.create(owner_studio=s, owner_user=u)
+        # Subscription is auto-created by the post_save signal on Studio
+        sub = Subscription.objects.get(owner_studio=s)
         self.assertEqual(sub.plan, "pro")
         self.assertEqual(sub.status, "trial")
         self.assertAlmostEqual(
