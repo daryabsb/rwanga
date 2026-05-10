@@ -167,3 +167,38 @@ class SignupProfile(BaseModel):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="signup_profile")
     nickname = models.CharField(max_length=100, blank=True)
     gender = models.CharField(max_length=16, choices=Gender.choices, blank=True)
+
+
+class StudioMembership(SoftDeleteModel, BaseModel):
+    studio = models.ForeignKey(Studio, on_delete=models.CASCADE, related_name="memberships")
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="studio_memberships")
+    ROLE_CHOICES = [
+        ("owner", "Owner"), ("admin", "Admin"), ("member", "Member"),
+        ("auditor", "Auditor"), ("reviewer", "Reviewer"),
+    ]
+    role = models.CharField(max_length=16, choices=ROLE_CHOICES, default="member")
+    TIER_CHOICES = [("production", "production"), ("community", "community")]
+    tier = models.CharField(max_length=16, choices=TIER_CHOICES, default="production")
+    permissions = models.JSONField(default=dict, blank=True)
+    STATUS_CHOICES = [("pending", "pending"), ("active", "active"), ("suspended", "suspended")]
+    status = models.CharField(max_length=16, choices=STATUS_CHOICES, default="active")
+    is_primary = models.BooleanField(default=False)
+    invited_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="+",
+    )
+    invited_at = models.DateTimeField(null=True, blank=True)
+    accepted_at = models.DateTimeField(null=True, blank=True)
+    magic_link_token = models.CharField(max_length=64, blank=True, unique=True, null=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user"],
+                condition=models.Q(is_primary=True),
+                name="one_primary_studio_per_user",
+            ),
+            models.UniqueConstraint(
+                fields=["studio", "user"],
+                name="unique_studio_user",
+            ),
+        ]
