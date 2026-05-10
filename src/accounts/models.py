@@ -98,7 +98,7 @@ class Studio(SoftDeleteModel, Versioned, BaseModel):
         return token
 
 
-class ProjectMembership(BaseModel):
+class ProjectMembership(SoftDeleteModel, BaseModel):
     ROLE_CHOICES = [
         ("director", "دەرهێنەر"),
         ("production_team", "تیمی بەرهەمهێنان"),
@@ -139,6 +139,19 @@ class ProjectMembership(BaseModel):
     )
     invited_at = models.DateTimeField(null=True, blank=True)
     accepted_at = models.DateTimeField(null=True, blank=True)
+
+    # v2 new fields (alias-and-add — existing fields preserved above)
+    TIER_CHOICES = [("production", "production"), ("community", "community")]
+    tier = models.CharField(max_length=16, choices=TIER_CHOICES, default="production")
+    permissions = models.JSONField(default=dict, blank=True)
+    STATUS_CHOICES = [
+        ("pending", "pending"),
+        ("active", "active"),
+        ("completed_with_project", "completed_with_project"),
+        ("removed", "removed"),
+    ]
+    status = models.CharField(max_length=24, choices=STATUS_CHOICES, default="active")
+    magic_link_token = models.CharField(max_length=64, blank=True, unique=True, null=True)
 
 
 class ConsultantProfile(BaseModel):
