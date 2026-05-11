@@ -30,8 +30,24 @@ def navigation_context(request):
         project__owner=request.user,
     ).count()
 
+    # Studio switcher context
+    from src.accounts.models import Studio
+    user_studios_qs = Studio.objects.filter(
+        memberships__user=request.user, memberships__status="active",
+    ).distinct()
+    primary_m = request.user.studio_memberships.filter(is_primary=True, status="active").first()
+    primary_studio = primary_m.studio if primary_m else None
+    active_studio = getattr(request, "active_studio", None)
+    is_in_primary_studio = (
+        active_studio is not None and primary_studio is not None
+        and active_studio.id == primary_studio.id
+    )
+
     return {
         "nav_mode": nav_mode,
         "pending_decisions_count": pending_decisions_count,
         "active_sessions_count": active_sessions_count,
+        "user_studios": user_studios_qs,
+        "primary_studio": primary_studio,
+        "is_in_primary_studio": is_in_primary_studio,
     }

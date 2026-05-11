@@ -1,0 +1,16 @@
+{% load i18n %}
+<li><h6 class="dropdown-header" style="font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--rw-text-2);padding-top:8px">{% trans "Studios" %}</h6></li>
+{% for s in user_studios %}
+<li>
+  <form method="post" action="{% url 'accounts:switch_studio' %}" class="d-inline w-100">
+    {% csrf_token %}
+    <input type="hidden" name="studio_id" value="{{ s.id }}">
+    <button type="submit" class="dropdown-item d-flex align-items-center gap-2" style="font-size:13px">
+      {% if primary_studio and s.id == primary_studio.id %}<span style="color:var(--rw-amber)" title="{% trans 'Primary' %}">★</span>{% else %}<span style="width:14px;display:inline-block"></span>{% endif %}
+      <span class="flex-grow-1 text-truncate">{{ s.name }}</span>
+      {% if active_studio and s.id == active_studio.id %}<span style="font-size:10px;color:var(--rw-amber)">● {% trans "active" %}</span>{% endif %}
+    </button>
+  </form>
+</li>
+{% endfor %}
+<li><a class="dropdown-item" href="#" data-action="create-studio" style="font-size:13px">+ {% trans "New studio" %}</a></li>

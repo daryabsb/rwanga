@@ -119,6 +119,8 @@
         <li><a class="dropdown-item" href="{% url 'accounts:profile' %}" style="font-size:13px">{% trans "پرۆفایل" %}</a></li>
         <li><a class="dropdown-item" href="{% url 'accounts:settings' %}" style="font-size:13px">{% trans "ڕێکخستن" %}</a></li>
         <li><hr class="dropdown-divider"></li>
+        {% include "components/_studio_switcher.html" %}
+        <li><hr class="dropdown-divider"></li>
         <li><a class="dropdown-item" href="{% url 'accounts:logout' %}" style="font-size:13px">{% trans "دەرچوون" %}</a></li>
       </ul>
     </div>

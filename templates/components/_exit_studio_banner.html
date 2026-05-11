@@ -1,0 +1,10 @@
+{% load i18n %}
+{% if request.user.is_authenticated and not is_in_primary_studio and active_studio %}
+<div class="rw-exit-banner d-flex align-items-center justify-content-between px-3 py-2" style="background:var(--rw-bg-2);border-bottom:1px solid var(--rw-border);font-size:12px;color:var(--rw-text-2)">
+  <span>{% trans "You're working in" %} <strong style="color:var(--rw-text)">{{ active_studio.name }}</strong></span>
+  <form method="post" action="{% url 'accounts:exit_studio' %}" class="m-0">
+    {% csrf_token %}
+    <button type="submit" class="rw-btn-link" style="background:none;border:none;color:var(--rw-amber);font-size:12px;cursor:pointer;padding:0">{% trans "Exit" %}</button>
+  </form>
+</div>
+{% endif %}
