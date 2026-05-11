@@ -6,8 +6,10 @@ from src.accounts.models import (
     ProjectMembership,
     SignupProfile,
     Studio,
+    StudioMembership,
     User,
 )
+from src.billing.api.serializers import SubscriptionSerializer
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -22,9 +24,37 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class StudioSerializer(serializers.ModelSerializer):
+    subscription = SubscriptionSerializer(read_only=True)
+    is_primary = serializers.SerializerMethodField()
+    member_count = serializers.SerializerMethodField()
+
     class Meta:
         model = Studio
-        fields = "__all__"
+        fields = [
+            "id", "name", "slug", "specialty", "logo", "language", "timezone",
+            "created_at", "updated_at",
+            "studio_api_key_last_four",
+            "subscription",
+            "is_primary",
+            "member_count",
+        ]
+        read_only_fields = [
+            "id", "slug", "created_at", "updated_at",
+            "studio_api_key_last_four", "subscription", "is_primary", "member_count",
+        ]
+
+    def get_is_primary(self, obj):
+        request = self.context.get("request")
+        if request and request.user and request.user.is_authenticated:
+            return StudioMembership.objects.filter(
+                studio=obj,
+                user=request.user,
+                is_primary=True,
+            ).exists()
+        return False
+
+    def get_member_count(self, obj):
+        return obj.memberships.filter(status="active").count()
 
 
 class ProjectMembershipSerializer(serializers.ModelSerializer):

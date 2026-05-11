@@ -1,10 +1,13 @@
 from django.test import TestCase
 from rest_framework.test import APIClient
+from src.accounts.models import User
 
 
 class AccountsApiTests(TestCase):
     def setUp(self):
         self.client = APIClient()
+        self.user = User.objects.create_user(email="testapi@x.com", password="x")
+        self.client.force_authenticate(self.user)
 
     def test_create_studio(self):
         payload = {"name": "Studio API", "slug": "studio-api"}
