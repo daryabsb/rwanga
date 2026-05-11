@@ -1,9 +1,11 @@
 from allauth.account.views import LoginView as AllauthLoginView
 from django.contrib.auth import logout
-from django.http import HttpResponse
-from django.shortcuts import redirect, render
-from django.urls import path
+from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse, HttpResponseRedirect
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import path, reverse
 from django.views import View
+from src.accounts.models import Studio
 
 app_name = "accounts"
 
@@ -67,6 +69,26 @@ def delete_account(request):
     return HttpResponse("")
 
 
+@login_required
+def switch_studio(request):
+    if request.method != "POST":
+        return HttpResponseRedirect(reverse("projects:list"))
+    sid = request.POST.get("studio_id")
+    studio = get_object_or_404(
+        Studio, id=sid, memberships__user=request.user, memberships__status="active",
+    )
+    request.session["active_studio_id"] = str(studio.id)
+    return HttpResponseRedirect(reverse("projects:list"))
+
+
+@login_required
+def exit_studio(request):
+    primary = request.user.studio_memberships.filter(is_primary=True).first()
+    if primary:
+        request.session["active_studio_id"] = str(primary.studio_id)
+    return HttpResponseRedirect(reverse("projects:list"))
+
+
 urlpatterns = [
     path("", LoginView.as_view(), name="index"),
     path("login/", LoginView.as_view(), name="login"),
@@ -83,4 +105,6 @@ urlpatterns = [
     path("invite/<uuid:pk>/resend/", resend_invite, name="resend_invite"),
     path("invite/<uuid:pk>/cancel/", cancel_invite, name="cancel_invite"),
     path("delete/", delete_account, name="delete_account"),
+    path("switch-studio/", switch_studio, name="switch_studio"),
+    path("exit-studio/", exit_studio, name="exit_studio"),
 ]
