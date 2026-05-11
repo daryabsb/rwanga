@@ -1,4 +1,5 @@
 from django.contrib.auth.decorators import login_required
+from django.db.models import Q
 from django.shortcuts import render
 from django.utils import timezone
 
@@ -22,20 +23,25 @@ def home(request):
 
     studio = getattr(request, "active_studio", None)
 
-    # Recent projects: 5 most recently updated in the active studio
-    recent_projects = []
-    if studio:
-        recent_projects = list(
-            Project.objects.filter(studio=studio)
-            .order_by("-updated_at")[:5]
+    # Recent projects across ALL studios the user has access to (owner OR member).
+    # Not scoped to active_studio — legacy projects may live under different studios
+    # than the auto-created "My Studio".
+    recent_projects = list(
+        Project.objects.filter(
+            Q(owner=request.user)
+            | Q(created_by=request.user)
+            | Q(memberships__user=request.user)
         )
+        .distinct()
+        .order_by("-updated_at")[:5]
+    )
 
-    # Recent activity: 8 most recent production_log entries scoped to active studio
-    recent_activity = []
-    if studio:
-        recent_activity = list(
-            ProductionLog.objects.filter(studio=studio).order_by("-timestamp")[:8]
-        )
+    # Recent activity: events done by this user OR happening in their active studio.
+    recent_activity_qs = ProductionLog.objects.filter(
+        Q(actor_id=str(request.user.id))
+        | (Q(studio=studio) if studio else Q(pk__in=[]))
+    ).order_by("-timestamp")
+    recent_activity = list(recent_activity_qs[:8])
 
     context = {
         "greeting": greeting,
