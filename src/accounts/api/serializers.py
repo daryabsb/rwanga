@@ -60,7 +60,34 @@ class StudioSerializer(serializers.ModelSerializer):
 class ProjectMembershipSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProjectMembership
-        fields = "__all__"
+        fields = [
+            "id",
+            "user",
+            "project",
+            "role_type",
+            "role",
+            "department_role",
+            "review_scope",
+            "is_active",
+            # v2 fields
+            "tier",
+            "status",
+            "permissions",
+            # invitation tracking
+            "invited_by",
+            "invited_at",
+            "accepted_at",
+            # base timestamps
+            "created_at",
+            "updated_at",
+        ]
+        read_only_fields = [
+            "id",
+            "created_at",
+            "updated_at",
+            "invited_at",
+            "accepted_at",
+        ]
 
 
 class ConsultantProfileSerializer(serializers.ModelSerializer):

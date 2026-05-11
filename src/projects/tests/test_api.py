@@ -13,6 +13,7 @@ class ProjectsApiTests(TestCase):
             email="api-owner@example.com", password="pass12345"
         )
         self.studio = Studio.objects.create(name="Studio API", slug="studio-api")
+        self.client.force_authenticate(user=self.user)
 
     def test_create_project(self):
         payload = {

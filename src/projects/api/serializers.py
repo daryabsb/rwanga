@@ -7,8 +7,8 @@ from src.projects.services import ProjectsService
 
 class ProjectSerializer(serializers.ModelSerializer):
     title_latin = serializers.CharField(required=False, allow_blank=True, write_only=True)
-    project_type = serializers.CharField(required=False, allow_blank=True, write_only=True)
-    logline = serializers.CharField(required=False, allow_blank=True, write_only=True)
+    project_type = serializers.CharField(required=False, allow_blank=True)
+    logline = serializers.CharField(required=False, allow_blank=True)
     director_name = serializers.CharField(required=False, allow_blank=True, write_only=True)
 
     class Meta:
@@ -16,24 +16,47 @@ class ProjectSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "studio",
+            # alias pair: owner (legacy) + created_by (v2)
             "owner",
+            "created_by",
+            # alias pair: title (legacy) + name (v2)
             "title",
+            "name",
+            "name_latin",
             "slug",
             "synopsis",
+            # v2 typed status
             "status",
+            "status_changed_at",
+            "status_changed_by",
+            "project_type",
+            # bible (legacy, review flow)
             "canonical_bible",
             "bible_version",
             "bible_status",
             "bible_finalized_at",
             "bible_finalized_by",
+            # v2 metadata
+            "logline",
+            "language",
+            "target_rating",
+            "director_credit",
+            "poster",
+            "estimated_shoot_start",
+            "estimated_length_minutes",
+            "ai_context_notes",
+            # base
             "created_at",
             "updated_at",
+            # write-only legacy compatibility
             "title_latin",
-            "project_type",
-            "logline",
             "director_name",
         ]
-        read_only_fields = []
+        read_only_fields = [
+            "id", "slug", "created_at", "updated_at",
+            "status_changed_at", "status_changed_by",
+            "bible_version", "bible_finalized_at", "bible_finalized_by",
+        ]
 
     def create(self, validated_data):
         request = self.context.get("request")

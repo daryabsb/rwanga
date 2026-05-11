@@ -11,6 +11,15 @@ class ProjectsService:
         return Project.objects.select_related("studio", "owner").all()
 
     @staticmethod
+    def list_projects_for_user(user):
+        if user is None or not getattr(user, "is_authenticated", False):
+            return Project.objects.none()
+        from django.db import models as _m
+        return Project.objects.select_related("studio", "owner", "created_by").filter(
+            _m.Q(owner=user) | _m.Q(created_by=user) | _m.Q(memberships__user=user)
+        ).distinct()
+
+    @staticmethod
     def get_project(project_id):
         return get_object_or_404(Project.objects.select_related("studio", "owner"), id=project_id)
 

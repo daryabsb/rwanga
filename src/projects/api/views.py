@@ -19,7 +19,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        return ProjectsService.list_projects()
+        return ProjectsService.list_projects_for_user(user=self.request.user)
 
     def perform_create(self, serializer):
         serializer.save()
