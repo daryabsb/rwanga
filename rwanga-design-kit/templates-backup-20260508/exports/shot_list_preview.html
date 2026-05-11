@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="ku" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لیستی لێدانەکان — میوانێکی نادیار</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --rw-bg:#FFFFFF; --rw-surface:#F7F7FA; --rw-surface-2:#EEEEF6;
+  --rw-border:#DCDCE8; --rw-text:#0F0F12; --rw-text-2:#5C5C70; --rw-text-3:#A0A0B8;
+  --rw-amber:#9A5520; --rw-pink:#F72585; --rw-break:#1E3FAF;
+  --rw-font:'Cairo','Noto Sans Arabic',Arial,sans-serif;
+  --rw-font-en:'Inter','Helvetica Neue',Arial,sans-serif;
+}
+@page { size: A4 landscape; margin: 10mm 12mm 16mm 12mm; }
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+html { font-size:10pt; }
+body { font-family:var(--rw-font); color:var(--rw-text); background:var(--rw-bg); line-height:1.4; direction:rtl; padding:10mm 12mm; max-width:297mm; margin:0 auto; }
+.en, bdi { font-family:var(--rw-font-en); direction:ltr; unicode-bidi:isolate; }
+
+/* HEADER */
+.rw-header { display:table; width:100%; border-bottom:2.5pt solid var(--rw-pink); padding-bottom:8pt; margin-bottom:12pt; }
+.rw-header-logo-cell { display:table-cell; vertical-align:middle; width:46pt; }
+.rw-header-info-cell { display:table-cell; vertical-align:middle; padding-inline-start:10pt; }
+.rw-header-right-cell { display:table-cell; vertical-align:middle; text-align:end; }
+.rw-logo-mark { display:inline-block; width:38pt; height:38pt; background:var(--rw-pink); color:#fff; font-family:var(--rw-font); font-size:17pt; font-weight:700; text-align:center; line-height:38pt; }
+.rw-project-title { font-size:15pt; font-weight:700; color:var(--rw-text); line-height:1.2; }
+.rw-project-sub { font-size:9pt; color:var(--rw-text-2); margin-top:2pt; }
+.rw-doc-label { font-size:9pt; font-weight:700; color:var(--rw-text-3); text-transform:uppercase; letter-spacing:1pt; }
+.rw-doc-meta { font-size:8.5pt; color:var(--rw-text-3); margin-top:3pt; }
+
+/* SCENE HEADER */
+.rw-scene-hdr { display:table; width:100%; background:var(--rw-text); color:#fff; padding:7pt 10pt; margin-top:14pt; }
+.rw-scene-hdr-left { display:table-cell; vertical-align:middle; }
+.rw-scene-hdr-right { display:table-cell; vertical-align:middle; text-align:end; font-size:8.5pt; color:rgba(255,255,255,.6); }
+.rw-scene-num { display:inline-block; background:var(--rw-pink); color:#fff; font-family:var(--rw-font-en); font-size:11pt; font-weight:700; padding:2pt 8pt; margin-inline-end:8pt; direction:ltr; }
+.rw-scene-int-ext { display:inline-block; border:1pt solid rgba(255,255,255,.35); font-family:var(--rw-font-en); font-size:8pt; font-weight:700; color:rgba(255,255,255,.8); padding:1pt 6pt; margin-inline-end:6pt; }
+.rw-scene-name { display:inline; font-size:11pt; font-weight:700; color:#fff; }
+.rw-scene-time { display:inline; font-size:9pt; color:rgba(255,255,255,.6); margin-inline-start:8pt; }
+
+/* SHOT TABLE */
+.rw-shot-table { width:100%; border-collapse:collapse; font-size:9.5pt; margin-bottom:0; }
+.rw-shot-table thead tr { background:var(--rw-surface-2); }
+.rw-shot-table th { padding:5pt 8pt; text-align:start; font-size:7.5pt; font-weight:700; color:var(--rw-text-3); text-transform:uppercase; letter-spacing:0.7pt; border:1pt solid var(--rw-border); white-space:nowrap; }
+.rw-shot-table td { padding:7pt 8pt; border:1pt solid var(--rw-border); vertical-align:top; font-size:9.5pt; color:var(--rw-text); line-height:1.5; }
+.rw-shot-table tbody tr:nth-child(even) td { background:var(--rw-surface); }
+.rw-shot-table tbody tr.s-d { border-inline-end:3pt solid #C9A800; }
+.rw-shot-table tbody tr.s-v { border-inline-end:3pt solid var(--rw-text-3); }
+.rw-shot-table tbody tr.s-i { border-inline-end:3pt solid var(--rw-break); }
+.rw-shot-num { font-family:var(--rw-font-en); font-size:11pt; font-weight:700; color:var(--rw-amber); white-space:nowrap; direction:ltr; display:inline-block; }
+.rw-setup-chip { display:inline-block; background:var(--rw-surface-2); border:1pt solid var(--rw-border); font-family:var(--rw-font-en); font-size:8pt; font-weight:700; color:var(--rw-text-2); padding:0pt 5pt; margin-inline-start:4pt; }
+.rw-badge { display:inline-block; padding:1pt 6pt; font-size:7.5pt; font-weight:700; text-transform:uppercase; letter-spacing:0.4pt; white-space:nowrap; }
+.rw-badge-d { background:rgba(201,168,0,.1); color:#7A6000; border:1pt solid rgba(201,168,0,.3); }
+.rw-badge-v { background:var(--rw-surface-2); color:var(--rw-text-2); border:1pt solid var(--rw-border); }
+.rw-badge-i { background:rgba(30,63,175,.08); color:var(--rw-break); border:1pt solid rgba(30,63,175,.25); }
+.rw-lens { font-family:var(--rw-font-en); font-size:9pt; font-weight:600; color:var(--rw-text-2); direction:ltr; display:inline-block; }
+.rw-desc { font-size:9pt; color:var(--rw-text-2); line-height:1.5; margin-top:2pt; }
+.rw-notes { font-size:8.5pt; color:var(--rw-text-3); font-style:italic; margin-top:3pt; line-height:1.5; }
+.rw-summary-row td { background:var(--rw-surface-2)!important; font-size:8.5pt; color:var(--rw-text-2); font-style:italic; padding:5pt 8pt; border-top:1.5pt solid var(--rw-border); }
+
+/* TOTALS */
+.rw-totals { margin-top:16pt; display:table; width:100%; border:1pt solid var(--rw-border); background:var(--rw-surface); }
+.rw-totals-cell { display:table-cell; vertical-align:middle; padding:10pt 14pt; border-inline-start:1pt solid var(--rw-border); text-align:center; }
+.rw-totals-cell:first-child { border-inline-start:none; }
+.rw-totals-val { font-family:var(--rw-font-en); font-size:18pt; font-weight:700; color:var(--rw-amber); line-height:1; direction:ltr; display:block; }
+.rw-totals-lbl { font-size:8pt; font-weight:700; color:var(--rw-text-3); text-transform:uppercase; letter-spacing:0.8pt; margin-top:4pt; }
+
+/* FOOTER */
+.rw-footer { margin-top:14pt; padding-top:7pt; border-top:1pt solid var(--rw-border); display:table; width:100%; font-size:7.5pt; color:var(--rw-text-3); }
+.rw-footer-left { display:table-cell; vertical-align:middle; }
+.rw-footer-right { display:table-cell; vertical-align:middle; text-align:end; }
+.rw-footer-brand { font-weight:700; color:var(--rw-pink); }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="rw-header">
+  <div class="rw-header-logo-cell"><div class="rw-logo-mark">ڕ</div></div>
+  <div class="rw-header-info-cell">
+    <div class="rw-project-title">میوانێکی نادیار</div>
+    <div class="rw-project-sub">فیلمی کورت — ستودیۆی سەروەر مهەدین</div>
+  </div>
+  <div class="rw-header-right-cell">
+    <div class="rw-doc-label">لیستی لێدانەکان</div>
+    <div class="rw-doc-meta">بەروار: <bdi>2026-05-01</bdi></div>
+    <div class="rw-doc-meta">32 دیمەن</div>
+  </div>
+</div>
+
+<!-- SCENE 5 -->
+<div class="rw-scene-hdr">
+  <div class="rw-scene-hdr-left">
+    <span class="rw-scene-num">5</span>
+    <span class="rw-scene-int-ext">EXT</span>
+    <span class="rw-scene-name">گەڕەکی کۆن — پەیاوڕێگا</span>
+    <span class="rw-scene-time">— ڕۆژ</span>
+  </div>
+  <div class="rw-scene-hdr-right">4 لێدان · <bdi>2.5</bdi> لاپەڕە</div>
+</div>
+<table class="rw-shot-table">
+  <thead>
+    <tr>
+      <th style="width:46pt">لێدان</th>
+      <th style="width:46pt">جۆر</th>
+      <th style="width:34pt">ئامادەکردن</th>
+      <th style="width:38pt">لێنس</th>
+      <th style="width:70pt">جووڵانی کامێرا</th>
+      <th style="width:32pt">ماوە</th>
+      <th>وەسف</th>
+      <th style="width:90pt">تێبینی</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr class="s-v">
+      <td><span class="rw-shot-num">5.1</span></td>
+      <td><span class="rw-badge rw-badge-v">بینراو</span></td>
+      <td><span class="rw-setup-chip">A</span></td>
+      <td><span class="rw-lens">24mm</span></td>
+      <td>شووتی بەربەست — بینرا دێت</td>
+      <td><span class="rw-lens">8s</span></td>
+      <td>
+        دیمەنی گشتی گەڕەکی کۆن
+        <div class="rw-desc">ناڵی لە دووریەوە دێت. کامێرا لێی دووردەکەوێتەوە.</div>
+      </td>
+      <td><span class="rw-notes">ئارەزووی ئەرزەبابی مووسیقا لێرە</span></td>
+    </tr>
+    <tr class="s-d">
+      <td><span class="rw-shot-num">5.2</span></td>
+      <td><span class="rw-badge rw-badge-d">دیالۆگ</span></td>
+      <td><span class="rw-setup-chip">B</span></td>
+      <td><span class="rw-lens">85mm</span></td>
+      <td>ئاڵاسای دواوەی سەر — ناڵی</td>
+      <td><span class="rw-lens">12s</span></td>
+      <td>
+        کلۆز-ئەپی ناڵی — بۆ تەلەفۆن دەتەوێت
+        <div class="rw-desc">دووری کام رووی دیالۆگ. ئاسۆی باوەش تووند.</div>
+      </td>
+      <td><span class="rw-notes">تەوبلێبووی خواستی ڕۆشنایی دیارتر بکرێت</span></td>
+    </tr>
+    <tr class="s-d">
+      <td><span class="rw-shot-num">5.3</span></td>
+      <td><span class="rw-badge rw-badge-d">دیالۆگ</span></td>
+      <td><span class="rw-setup-chip">B</span></td>
+      <td><span class="rw-lens">85mm</span></td>
+      <td>ئاڵاسای دواوەی سەر — گەشە</td>
+      <td><span class="rw-lens">14s</span></td>
+      <td>
+        کلۆز-ئەپی گەشە — وەڵامی دەداتەوە
+        <div class="rw-desc">ئایرزەی گەشە. چاوی ناگرێتەوە.</div>
+      </td>
+      <td>—</td>
+    </tr>
+    <tr class="s-i">
+      <td><span class="rw-shot-num">5.4</span></td>
+      <td><span class="rw-badge rw-badge-i">داخڵکردن</span></td>
+      <td><span class="rw-setup-chip">C</span></td>
+      <td><span class="rw-lens">50mm</span></td>
+      <td>ئایستا</td>
+      <td><span class="rw-lens">4s</span></td>
+      <td>داخڵکردنی دەستەکەی تەلەفۆن</td>
+      <td><span class="rw-notes">فۆکەسی ماکرۆ پێویستە</span></td>
+    </tr>
+    <tr class="rw-summary-row">
+      <td colspan="8">4 لێدان — دیمەنی 5 — EXT. گەڕەکی کۆن — ڕۆژ</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- SCENE 12 -->
+<div class="rw-scene-hdr">
+  <div class="rw-scene-hdr-left">
+    <span class="rw-scene-num">12</span>
+    <span class="rw-scene-int-ext">INT</span>
+    <span class="rw-scene-name">خانووی باخچەی گوڵ — ژووری خواردن</span>
+    <span class="rw-scene-time">— ئێوارە</span>
+  </div>
+  <div class="rw-scene-hdr-right">6 لێدان · <bdi>4.0</bdi> لاپەڕە</div>
+</div>
+<table class="rw-shot-table">
+  <thead>
+    <tr>
+      <th style="width:46pt">لێدان</th>
+      <th style="width:46pt">جۆر</th>
+      <th style="width:34pt">ئامادەکردن</th>
+      <th style="width:38pt">لێنس</th>
+      <th style="width:70pt">جووڵانی کامێرا</th>
+      <th style="width:32pt">ماوە</th>
+      <th>وەسف</th>
+      <th style="width:90pt">تێبینی</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr class="s-v">
+      <td><span class="rw-shot-num">12.1</span></td>
+      <td><span class="rw-badge rw-badge-v">بینراو</span></td>
+      <td><span class="rw-setup-chip">A</span></td>
+      <td><span class="rw-lens">35mm</span></td>
+      <td>ئاڵاسایی کۆتای — سەرتاسەری ژوور</td>
+      <td><span class="rw-lens">10s</span></td>
+      <td>
+        دیمەنی داخستنی ژووری خواردن
+        <div class="rw-desc">مایدەی بەیانیخواردن ئامادەیە. کەس نیە هێشتا.</div>
+      </td>
+      <td>—</td>
+    </tr>
+    <tr class="s-d">
+      <td><span class="rw-shot-num">12.2</span></td>
+      <td><span class="rw-badge rw-badge-d">دیالۆگ</span></td>
+      <td><span class="rw-setup-chip">B</span></td>
+      <td><span class="rw-lens">50mm</span></td>
+      <td>دوو-شات — ناڵی و گەشە لە مایدەدا</td>
+      <td><span class="rw-lens">45s</span></td>
+      <td>
+        ناڵی و گەشە — دیالۆگی سەرەکی
+        <div class="rw-desc">دیالۆگ دەست دەکات. مایدە نێوانیانەوە.</div>
+      </td>
+      <td><span class="rw-notes">پێویستی بە وردکاریی بیوکاری هەیە</span></td>
+    </tr>
+    <tr class="s-d">
+      <td><span class="rw-shot-num">12.3</span></td>
+      <td><span class="rw-badge rw-badge-d">دیالۆگ</span></td>
+      <td><span class="rw-setup-chip">C</span></td>
+      <td><span class="rw-lens">85mm</span></td>
+      <td>ئاڵاسای دواوەی سەر — ناڵی</td>
+      <td><span class="rw-lens">20s</span></td>
+      <td>کلۆز-ئەپی ناڵی — گوێ دەگرێت</td>
+      <td>—</td>
+    </tr>
+    <tr class="s-d">
+      <td><span class="rw-shot-num">12.4</span></td>
+      <td><span class="rw-badge rw-badge-d">دیالۆگ</span></td>
+      <td><span class="rw-setup-chip">C</span></td>
+      <td><span class="rw-lens">85mm</span></td>
+      <td>ئاڵاسای دواوەی سەر — گەشە</td>
+      <td><span class="rw-lens">18s</span></td>
+      <td>کلۆز-ئەپی گەشە — دەیوێت باس بکات</td>
+      <td>—</td>
+    </tr>
+    <tr class="s-d">
+      <td><span class="rw-shot-num">12.5</span></td>
+      <td><span class="rw-badge rw-badge-d">دیالۆگ</span></td>
+      <td><span class="rw-setup-chip">D</span></td>
+      <td><span class="rw-lens">40mm</span></td>
+      <td>پەنجارەی باوەش — دواوەی سەر</td>
+      <td><span class="rw-lens">30s</span></td>
+      <td>
+        دووی لەگەڵ یەکدی — دیالۆگی کۆتایی
+        <div class="rw-desc">هاتنەژوورەوەی بەهاو دەستی دووهەمیان.</div>
+      </td>
+      <td><span class="rw-notes">دیزۆڵڤی ئاهەستە — سەردەم دەگۆڕێت</span></td>
+    </tr>
+    <tr class="s-i">
+      <td><span class="rw-shot-num">12.6</span></td>
+      <td><span class="rw-badge rw-badge-i">داخڵکردن</span></td>
+      <td><span class="rw-setup-chip">E</span></td>
+      <td><span class="rw-lens">100mm</span></td>
+      <td>ئایستا — ماکرۆ</td>
+      <td><span class="rw-lens">5s</span></td>
+      <td>داخڵکردنی مەسەلەی گوڵ</td>
+      <td><span class="rw-notes">گوڵی سووری رووس پێویستە</span></td>
+    </tr>
+    <tr class="rw-summary-row">
+      <td colspan="8">6 لێدان — دیمەنی 12 — INT. خانووی باخچەی گوڵ — ئێوارە</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- TOTALS -->
+<div class="rw-totals">
+  <div class="rw-totals-cell">
+    <span class="rw-totals-val">32</span>
+    <div class="rw-totals-lbl">دیمەن</div>
+  </div>
+  <div class="rw-totals-cell">
+    <span class="rw-totals-val">187</span>
+    <div class="rw-totals-lbl">لێدان</div>
+  </div>
+  <div class="rw-totals-cell">
+    <span class="rw-totals-val">43</span>
+    <div class="rw-totals-lbl">ئامادەکردن</div>
+  </div>
+  <div class="rw-totals-cell">
+    <span class="rw-totals-val">98.5</span>
+    <div class="rw-totals-lbl">لاپەڕە</div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="rw-footer">
+  <div class="rw-footer-left">دروستکراوە لە <span class="rw-footer-brand">ڕوانگە</span> — پلاتفۆرمی پێشبەرهەمهێنانی سینەمای کوردی</div>
+  <div class="rw-footer-right"><bdi>2026-05-01 09:14</bdi></div>
+</div>
+
+</body>
+</html>

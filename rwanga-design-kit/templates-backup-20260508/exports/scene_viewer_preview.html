@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="ku" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>دیمەنی 12 — میوانێکی نادیار — ڕوانگە</title>
+<style>
+/* ════════════════════════════════════════════
+   RWANGA SCENE VIEWER — Fully self-contained
+   Zero external dependencies. Offline-safe.
+   ════════════════════════════════════════════ */
+:root {
+  --rw-bg:#0F0F12; --rw-surface:#17171C; --rw-surface-2:#1E1E26; --rw-surface-3:#26262E;
+  --rw-border:#2C2C38; --rw-border-2:#222230;
+  --rw-text:#EDEAD8; --rw-text-2:#78788C; --rw-text-3:#40404E;
+  --rw-amber:#D4A574; --rw-amber-dim:rgba(212,165,116,.10);
+  --rw-pink:#F72585; --rw-pink-dim:rgba(247,37,133,.10);
+  --rw-vis:#00A896; --rw-plan:#7C3AED; --rw-break:#2D5BE3; --rw-shoot:#F72585;
+  --rw-font:'Cairo','Noto Sans Arabic','Segoe UI',system-ui,sans-serif;
+  --rw-font-en:'Inter','Helvetica Neue',Arial,sans-serif;
+  --rw-r:2px; --rw-t:0.12s ease;
+}
+html.rw-light {
+  --rw-bg:#F7F7FA; --rw-surface:#FFFFFF; --rw-surface-2:#F0F0F6; --rw-surface-3:#E8E8F2;
+  --rw-border:#DCDCE8; --rw-border-2:#EBEBF4;
+  --rw-text:#0F0F12; --rw-text-2:#5C5C70; --rw-text-3:#A0A0B8;
+  --rw-amber:#9A5520; --rw-amber-dim:rgba(154,85,32,.08);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{font-size:15px;}
+body{font-family:var(--rw-font);background:var(--rw-bg);color:var(--rw-text);line-height:1.6;min-height:100vh;}
+.en,.mono{font-family:var(--rw-font-en);font-size:.93em;}
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--rw-border);border-radius:2px;}
+
+/* TOP BAR */
+#rw-topbar{position:sticky;top:0;z-index:100;background:var(--rw-surface);border-bottom:1px solid var(--rw-border);display:flex;align-items:center;gap:12px;padding:0 20px;height:52px;flex-shrink:0;}
+.rw-logo-mark{width:36px;height:36px;background:var(--rw-pink);color:#fff;font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:var(--rw-font);}
+.rw-topbar-title{font-size:14px;font-weight:700;color:var(--rw-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.rw-topbar-spacer{flex:1;}
+.rw-topbar-btn{width:36px;height:36px;background:var(--rw-surface-2);border:1px solid var(--rw-border);color:var(--rw-text-2);font-size:16px;display:flex;align-items:center;justify-content:center;border-radius:var(--rw-r);transition:color var(--rw-t),border-color var(--rw-t);flex-shrink:0;cursor:pointer;}
+.rw-topbar-btn:hover{color:var(--rw-text);border-color:var(--rw-text-3);}
+
+/* SCENE HERO */
+#rw-scene-hero{background:var(--rw-surface);border-bottom:1px solid var(--rw-border);padding:28px 24px 20px;}
+.rw-hero-scene-num{font-family:var(--rw-font-en);font-size:11px;font-weight:700;color:var(--rw-pink);text-transform:uppercase;letter-spacing:1.4px;margin-bottom:6px;}
+.rw-hero-title{font-size:24px;font-weight:700;color:var(--rw-text);line-height:1.2;margin-bottom:10px;}
+.rw-hero-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;}
+.rw-chip{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;background:var(--rw-surface-2);border:1px solid var(--rw-border);font-size:11px;font-weight:600;color:var(--rw-text-2);border-radius:var(--rw-r);}
+.rw-chip.int-ext{background:var(--rw-amber-dim);border-color:rgba(212,165,116,.3);color:var(--rw-amber);font-family:var(--rw-font-en);}
+.rw-hero-synopsis{font-size:14px;color:var(--rw-text-2);line-height:1.7;max-width:720px;border-inline-start:3px solid var(--rw-border);padding-inline-start:14px;}
+
+/* STATS */
+.rw-stats-strip{display:flex;border-bottom:1px solid var(--rw-border);background:var(--rw-surface);}
+.rw-stat-cell{flex:1;padding:16px 12px;text-align:center;border-inline-start:1px solid var(--rw-border);}
+.rw-stat-cell:first-child{border-inline-start:none;}
+.rw-stat-val{font-family:var(--rw-font-en);font-size:26px;font-weight:700;color:var(--rw-amber);line-height:1;margin-bottom:4px;direction:ltr;}
+.rw-stat-lbl{font-size:9px;font-weight:700;color:var(--rw-text-3);text-transform:uppercase;letter-spacing:1px;}
+
+/* NAV TABS */
+#rw-tabs{position:sticky;top:52px;z-index:90;display:flex;background:var(--rw-surface);border-bottom:1px solid var(--rw-border);overflow-x:auto;padding:0 8px;}
+#rw-tabs::-webkit-scrollbar{height:0;}
+.rw-tab{display:flex;align-items:center;padding:0 16px;height:48px;font-size:12px;font-weight:600;color:var(--rw-text-2);white-space:nowrap;border:none;background:none;border-bottom:3px solid transparent;transition:color var(--rw-t),border-color var(--rw-t);cursor:pointer;}
+.rw-tab:hover{color:var(--rw-text);}
+.rw-tab.active{color:var(--rw-amber);border-bottom-color:var(--rw-amber);}
+
+/* PANES */
+.rw-pane{display:none;padding:28px 24px;}
+.rw-pane.active{display:block;}
+.rw-sec-hdr{font-size:10px;font-weight:700;color:var(--rw-text-3);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--rw-border);}
+
+/* SHOT ACCORDION */
+.rw-shot-list{display:flex;flex-direction:column;}
+.rw-shot-item{background:var(--rw-surface);border:1px solid var(--rw-border);border-bottom:none;}
+.rw-shot-item:last-child{border-bottom:1px solid var(--rw-border);}
+.rw-shot-header{display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer;transition:background var(--rw-t);user-select:none;}
+.rw-shot-header:hover,.rw-shot-header.open{background:var(--rw-surface-2);}
+.rw-shot-num{font-family:var(--rw-font-en);font-size:14px;font-weight:700;color:var(--rw-amber);min-width:40px;direction:ltr;flex-shrink:0;}
+.rw-shot-style{font-size:13px;font-weight:600;color:var(--rw-text);flex:1;}
+.rw-shot-meta{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.rw-badge{display:inline-block;padding:2px 7px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;border-radius:var(--rw-r);}
+.rw-badge-d{background:rgba(245,215,110,.12);color:#F5D76E;border:1px solid rgba(245,215,110,.25);}
+.rw-badge-v{background:var(--rw-surface-3);color:var(--rw-text-2);border:1px solid var(--rw-border);}
+.rw-badge-i{background:rgba(45,91,227,.12);color:#7FA8FF;border:1px solid rgba(45,91,227,.25);}
+.rw-lens-tag{font-family:var(--rw-font-en);font-size:11px;font-weight:600;color:var(--rw-text-3);background:var(--rw-surface-3);padding:2px 7px;border:1px solid var(--rw-border);direction:ltr;display:inline-block;}
+.rw-dur-tag{font-family:var(--rw-font-en);font-size:11px;color:var(--rw-text-3);direction:ltr;}
+.rw-chevron{font-size:12px;color:var(--rw-text-3);flex-shrink:0;transition:transform var(--rw-t);}
+.rw-shot-header.open .rw-chevron{transform:rotate(90deg);}
+.rw-shot-body{display:none;padding:16px 20px 20px;border-top:1px solid var(--rw-border-2);background:var(--rw-surface-2);}
+.rw-shot-body.open{display:block;}
+.rw-shot-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:14px;}
+.rw-field-label{font-size:9px;font-weight:700;color:var(--rw-text-3);text-transform:uppercase;letter-spacing:.9px;margin-bottom:4px;}
+.rw-field-val{font-size:13px;color:var(--rw-text);line-height:1.6;}
+.rw-shot-desc{font-size:13px;color:var(--rw-text-2);line-height:1.7;margin-bottom:14px;}
+.rw-notes-block{background:var(--rw-amber-dim);border-inline-start:3px solid var(--rw-amber);padding:10px 14px;font-size:12px;color:var(--rw-text-2);line-height:1.6;margin-top:10px;}
+.rw-sb-thumb{aspect-ratio:16/9;background:var(--rw-surface-3);border:1px solid var(--rw-border);display:flex;align-items:center;justify-content:center;color:var(--rw-text-3);font-size:11px;font-family:var(--rw-font-en);margin-top:12px;overflow:hidden;}
+.rw-sb-thumb img{width:100%;height:100%;object-fit:cover;}
+
+/* FLOOR PLAN */
+#rw-fp-canvas{width:100%;background:var(--rw-surface);border:1px solid var(--rw-border);overflow:auto;}
+#rw-fp-canvas svg{max-width:100%;height:auto;display:block;margin:0 auto;}
+.rw-fp-legend{margin-top:12px;font-size:11px;color:var(--rw-text-3);line-height:1.7;display:flex;gap:20px;flex-wrap:wrap;}
+.rw-fp-legend span{display:flex;align-items:center;gap:6px;}
+.rw-fp-dot{display:inline-block;width:14px;height:14px;flex-shrink:0;}
+
+/* DEPT TABS */
+.rw-dept-tabs{display:flex;border-bottom:1px solid var(--rw-border);margin-bottom:16px;gap:0;flex-wrap:wrap;}
+.rw-dept-tab{padding:9px 16px;font-size:12px;font-weight:600;color:var(--rw-text-2);background:none;border:none;border-bottom:2px solid transparent;transition:color var(--rw-t),border-color var(--rw-t);cursor:pointer;white-space:nowrap;}
+.rw-dept-tab:hover{color:var(--rw-text);}
+.rw-dept-tab.active{color:var(--rw-amber);border-bottom-color:var(--rw-amber);}
+.rw-dept-pane{display:none;}
+.rw-dept-pane.active{display:block;}
+
+/* CHECKLISTS */
+.rw-checklist{display:flex;flex-direction:column;}
+.rw-check-item{display:flex;align-items:flex-start;gap:12px;padding:12px 14px;background:var(--rw-surface);border-bottom:1px solid var(--rw-border-2);}
+.rw-check-item:last-child{border-bottom:none;}
+.rw-check-item input[type=checkbox]{width:16px;height:16px;margin-top:2px;accent-color:var(--rw-amber);flex-shrink:0;cursor:pointer;}
+.rw-ci-name{font-size:13px;font-weight:600;color:var(--rw-text);margin-bottom:2px;}
+.rw-ci-note{font-size:11px;color:var(--rw-text-2);line-height:1.5;}
+
+/* LIGHTING */
+.rw-light-list{background:var(--rw-surface);border:1px solid var(--rw-border);}
+.rw-light-item{display:flex;gap:14px;align-items:flex-start;padding:12px 14px;border-bottom:1px solid var(--rw-border-2);}
+.rw-light-item:last-child{border-bottom:none;}
+.rw-light-shot{font-family:var(--rw-font-en);font-size:12px;font-weight:700;color:var(--rw-amber);min-width:36px;flex-shrink:0;direction:ltr;}
+.rw-light-body{flex:1;}
+.rw-light-note{font-size:13px;color:var(--rw-text-2);line-height:1.6;margin-bottom:4px;}
+.rw-light-meta{font-family:var(--rw-font-en);font-size:11px;color:var(--rw-text-3);direction:ltr;display:inline-block;}
+
+/* WARDROBE */
+.rw-wc-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--rw-border);}
+.rw-wc-card{background:var(--rw-surface);padding:16px;border-top:4px solid var(--rw-amber);}
+.rw-wc-char{font-size:15px;font-weight:700;color:var(--rw-text);margin-bottom:10px;}
+.rw-wc-outfit{font-size:13px;color:var(--rw-amber);font-weight:600;margin-bottom:6px;}
+.rw-wc-desc{font-size:12px;color:var(--rw-text-2);line-height:1.6;}
+
+/* SCHEDULE */
+.rw-sched-list{background:var(--rw-surface);border:1px solid var(--rw-border);}
+.rw-sched-row{display:grid;grid-template-columns:80px 1fr;gap:12px;padding:14px 16px;border-bottom:1px solid var(--rw-border-2);align-items:start;}
+.rw-sched-row:last-child{border-bottom:none;}
+.rw-s-time{font-family:var(--rw-font-en);font-size:11px;color:var(--rw-text-3);direction:ltr;line-height:1.6;}
+.rw-s-dur{font-weight:700;font-size:12px;color:var(--rw-text-2);margin-top:2px;}
+.rw-s-title{font-size:14px;font-weight:700;color:var(--rw-text);margin-bottom:3px;}
+.rw-s-note{font-size:11px;color:var(--rw-text-3);font-style:italic;}
+
+/* OFFLINE NOTICE */
+.rw-offline-notice{background:var(--rw-surface);border:1px solid var(--rw-border);border-inline-start:4px solid var(--rw-text-3);padding:10px 14px;font-size:11px;color:var(--rw-text-3);line-height:1.6;}
+
+/* FOOTER */
+#rw-footer{background:var(--rw-surface);border-top:1px solid var(--rw-border);padding:16px 24px;display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:11px;color:var(--rw-text-3);flex-wrap:wrap;}
+.rw-footer-brand{display:flex;align-items:center;gap:8px;font-weight:700;color:var(--rw-text-2);}
+.rw-footer-meta{font-family:var(--rw-font-en);direction:ltr;display:inline-block;}
+
+@media(max-width:600px){
+  .rw-hero-title{font-size:18px;}
+  .rw-shot-grid,.rw-wc-grid{grid-template-columns:1fr;}
+  .rw-stats-strip{flex-wrap:wrap;}
+  .rw-stat-cell{min-width:50%;border-bottom:1px solid var(--rw-border);}
+}
+@media print{
+  #rw-topbar,#rw-tabs{position:static;}
+  .rw-tab{display:none;}
+  .rw-pane{display:block!important;}
+  .rw-shot-body{display:block!important;}
+  .rw-offline-notice{display:none;}
+}
+</style>
+</head>
+<body>
+
+<!-- EMBEDDED DATA (mock — Django renders this) -->
+<script id="rw-data" type="application/json">
+{
+  "project": {"title": "میوانێکی نادیار", "director": "سەروەر مهەدین"},
+  "scene": {
+    "number": 12, "title": "خانووی باخچەی گوڵ — ژووری خواردن",
+    "int_ext": "INT", "location": "خانووی باخچەی گوڵ",
+    "time_of_day": "ئێوارە",
+    "synopsis": "ناڵی و گەشە دوای چەند ساڵ لەیەکدی دووردەکەوتبوون، ئەمشەو لە خوێندنی ماوبەسەر، ئاشنا دەبنەوە. دیالۆگ بە کووتایی دەگات بۆ ئەوەی ئایا دەتوانن بگەڕێنەوە."
+  },
+  "shots": [
+    {"number":"12.1","type":"visual","style":"دیمەنی داخستن — سەرتاسەری ژوور","lens":"35mm","movement":"ئاڵاسایی کۆتای","duration":"10s","description":"مایدەی بەیانیخواردن ئامادەیە. کەس نیە هێشتا. ڕووناکی ئێوارەی خۆش لە پەنجەرەوە دێت.","notes":"","setup":"A","storyboard_url":null},
+    {"number":"12.2","type":"dialogue","style":"دوو-شاتی ناڵی و گەشە","lens":"50mm","movement":"ئایستا","duration":"45s","description":"دیالۆگی سەرەکی — مایدە نێوانیانەوە. هەردووکیان ئاراستەی چاوی یەکدی ناکەن.","notes":"پێویستی بە وردکاریی بیوکاری هەیە — ناڵی ئەگەری کەلیت بگۆڕێت","setup":"B","storyboard_url":null},
+    {"number":"12.3","type":"dialogue","style":"کلۆز-ئەپی ناڵی","lens":"85mm","movement":"ئاڵاسای دواوەی سەر","duration":"20s","description":"کلۆز-ئەپی ناڵی — گوێ دەگرێت. هەستی ئاگاداری لە چاوەکانی دیاره.","notes":"","setup":"C","storyboard_url":null},
+    {"number":"12.4","type":"dialogue","style":"کلۆز-ئەپی گەشە","lens":"85mm","movement":"ئاڵاسای دواوەی سەر","duration":"18s","description":"کلۆز-ئەپی گەشە — باسی دەکات. ئارامە، بەڵام بە بیرەوەری.","notes":"","setup":"C","storyboard_url":null},
+    {"number":"12.5","type":"dialogue","style":"دیالۆگی کۆتایی — بە پەنجارەی باوەش","lens":"40mm","movement":"پەنجارەی باوەش — دواوەی سەر","duration":"30s","description":"هاتنەژوورەوەی بەهاو دەستی دووهەمیان. سایەی دواوە سووڕدەکاتەوە.","notes":"دیزۆڵڤی ئاهەستە لە دوای ئەم شاتە","setup":"D","storyboard_url":null},
+    {"number":"12.6","type":"insert","style":"داخڵکردنی مەسەلەی گوڵ","lens":"100mm","movement":"ئایستا — ماکرۆ","duration":"5s","description":"داخڵکردنی مەسەلەی گوڵی سووری رووس — ئاماژەی سمبۆلی.","notes":"گوڵی سووری رووس پێویستە","setup":"E","storyboard_url":null}
+  ],
+  "floor_plan": {
+    "room_width": 8.0, "room_height": 5.5,
+    "furniture": [
+      {"type":"table","x":2.5,"y":1.8,"w":3.0,"h":1.4,"label":"مایدە"},
+      {"type":"chair","x":2.2,"y":1.5,"w":0.8,"h":0.8,"label":""},
+      {"type":"chair","x":5.5,"y":1.5,"w":0.8,"h":0.8,"label":""},
+      {"type":"chair","x":2.2,"y":3.2,"w":0.8,"h":0.8,"label":""},
+      {"type":"chair","x":5.5,"y":3.2,"w":0.8,"h":0.8,"label":""},
+      {"type":"sofa","x":0.3,"y":3.8,"w":2.2,"h":0.9,"label":"سۆفا"},
+      {"type":"shelf","x":6.8,"y":0.5,"w":0.9,"h":2.5,"label":"ڕیزمان"},
+      {"type":"window","x":3.0,"y":0.0,"w":2.0,"h":0.3,"label":"پەنجەرە"}
+    ],
+    "cameras": [
+      {"letter":"A","x":4.0,"y":4.8,"target_x":4.0,"target_y":2.5},
+      {"letter":"B","x":7.2,"y":2.5,"target_x":4.0,"target_y":2.5},
+      {"letter":"C","x":0.4,"y":2.5,"target_x":3.5,"target_y":2.5},
+      {"letter":"D","x":1.2,"y":0.6,"target_x":4.5,"target_y":2.8},
+      {"letter":"E","x":4.0,"y":3.5,"target_x":4.0,"target_y":1.5}
+    ],
+    "paths": [
+      {"points":[{"x":5.2,"y":2.0},{"x":5.2,"y":3.8},{"x":1.8,"y":3.8}]},
+      {"points":[{"x":2.8,"y":2.0},{"x":2.8,"y":4.2}]}
+    ]
+  },
+  "departments": {
+    "lighting": [
+      {"shot_number":"12.1","note":"کتێبی ئاهەستەی ڕووناکی. ڕووناکی ئێوارەی خۆش لە پەنجەرە. کتێبی ئاهەستە — 2700K. کم-کەی، بایدن فرێم.","color_temp":"2700K","equipment":"بایدن فرێم، کتێبی ئاهەستە"},
+      {"shot_number":"12.2","note":"دوو-شات: ڕووناکی هاوپشت بۆ هەردووکیان. گریم-لایتی زۆر بچووک لەگەڵ کتێبی سەرووی ناسمووی. ئاسۆی باوەش بۆ سایەی خوارەوەی ناڵی.","color_temp":"3200K","equipment":"گریم-لایت، ئاسۆی باوەش"},
+      {"shot_number":"12.3","note":"کلۆز-ئەپی ناڵی — رووناکی تووندتر لە ئاراستەی بچووکی بڕۆ. سایەی چاوی بیر دەهێنێتەوە. ١٢deg کتێبی باوەش.","color_temp":"2700K","equipment":"فرێنێڵ بچووک"},
+      {"shot_number":"12.5","note":"دیالۆگی کۆتایی — سایەی دواوە سووڕدەکاتەوە. کتێبی ئاهەستە — ڕووناکی کەمدەبێتەوە لە ١۰۰٪ بۆ ٣۰٪ لە ٣۰چرکەیدا.","color_temp":"2200K","equipment":"دیمر"}
+    ],
+    "sound": [
+      {"shot_number":"12.1","note":"دەنگی ژووری بچووک. بارەی دەنگ ٤٢dB — پێویستی بە بارەی پایرەکی هەیە. باپیشکی کاری سەرەکیی دیمەن.","sound_type":"room_tone"},
+      {"shot_number":"12.2","note":"دیالۆگ — ئەودیۆی گیرسووکی باوەشی. دوو باوەشی لاپێل سادەبکرێن — ناڵی و گەشە. باپیشکی کاری زۆری تری دیمەن.","sound_type":"dialogue"},
+      {"shot_number":"12.6","note":"دەنگی سادەکردنەوەی مایدەی گوڵ. ئایستا، دەنگی گوڵی ناسمووی پێویستە.","sound_type":"sfx"}
+    ],
+    "props": [
+      {"name":"مایدەی باخچەی گوڵ","category":"وردەکاری","status":"on_set"},
+      {"name":"گوڵی سووری رووس","category":"گوڵ","status":"sourced"},
+      {"name":"گلاسی شەرابی","category":"وردەکاری","status":"on_set"},
+      {"name":"کانلدیەکانی مایدە","category":"ڕووناکی","status":"on_set"},
+      {"name":"کتێبی کۆنی","category":"پرۆپ","status":"needed"},
+      {"name":"تەلەفۆنی ناڵی","category":"پرۆپ","status":"on_set"}
+    ],
+    "wardrobe": [
+      {"character":"ناڵی","outfit":"سووتی تاری","description":"سووت و تایی تاری — سەردەمی پاشکشتنەوەی ناڵی نیشان دەدات. گوڵیکراو — قەبارەی ٤٢R."},
+      {"character":"گەشە","outfit":"کراسی سووری شەوان","description":"کراسی سوور — شوخ بەڵام ئارام. ئەمرووی دووبارەدیتن. مووی کراوەی باشترە."}
+    ],
+    "continuity": [
+      {"direction":"in","description":"ناڵی لە باشووری ژووری دەچێتەژوورەوە. ژاکێتی تێیەکە.","checked":true},
+      {"direction":"in","description":"گەشە لە باکووری ژووری دەچێتەژوورەوە. بە جلوبەرگی ئێوارەیی.","checked":true},
+      {"direction":"out","description":"ناڵی بے ژاکێتی ژووری دەهێڵێتەوە.","checked":false},
+      {"direction":"out","description":"گوڵەکان لەسەر مایدە دەمێننەوە.","checked":false},
+      {"direction":"out","description":"٢تا گلاسی شەراب نیوشارای لەسەر مایدە.","checked":false}
+    ]
+  },
+  "schedule": [
+    {"time":"07:00","duration":"45min","title":"ئامادەکردنی A — دیمەنی داخستن"},
+    {"time":"07:45","duration":"90min","title":"ئامادەکردنی B و C — دوو-شات و کلۆزئەپ"},
+    {"time":"09:15","duration":"60min","title":"ئامادەکردنی D — دیالۆگی کۆتایی"},
+    {"time":"10:15","duration":"20min","title":"ئامادەکردنی E — داخڵکردن"}
+  ],
+  "generated_at":"2026-05-01 09:14",
+  "version":3
+}
+</script>
+
+<!-- TOP BAR -->
+<header id="rw-topbar">
+  <div class="rw-logo-mark">ڕ</div>
+  <div class="rw-topbar-title" id="rw-topbar-title">ڕوانگە — میوانێکی نادیار — دیمەنی ١٢</div>
+  <div class="rw-topbar-spacer"></div>
+  <button class="rw-topbar-btn" id="rw-theme-toggle" title="گۆڕینی ڕووکار">☀</button>
+  <button class="rw-topbar-btn" title="چاپکردن" onclick="window.print()">⎙</button>
+</header>
+
+<!-- OFFLINE NOTICE -->
+<div style="padding:12px 24px 0">
+  <div class="rw-offline-notice">
+    ⚠ کۆپیی دەرخراو — لەوانەیە نوێ نەبێت. بۆ دەست بە وەشانی تازەوە بگرن بڕۆن بۆ سەکۆی ڕوانگە.
+    <span style="float:inline-end;font-family:'Inter',sans-serif;direction:ltr">v3 · 2026-05-01 09:14</span>
+  </div>
+</div>
+
+<!-- SCENE HERO -->
+<section id="rw-scene-hero">
+  <div class="rw-hero-scene-num">ڕوانگە · میوانێکی نادیار · دیمەنی <span style="font-family:'Inter',sans-serif;direction:ltr">12</span></div>
+  <h1 class="rw-hero-title">INT. خانووی باخچەی گوڵ — ژووری خواردن — ئێوارە</h1>
+  <div class="rw-hero-chips">
+    <span class="rw-chip int-ext">INT</span>
+    <span class="rw-chip">📍 خانووی باخچەی گوڵ</span>
+    <span class="rw-chip">🕐 ئێوارە</span>
+    <span class="rw-chip"><span style="font-family:'Inter',sans-serif">4.0</span> لاپەڕە</span>
+  </div>
+  <p class="rw-hero-synopsis">ناڵی و گەشە دوای چەند ساڵ لەیەکدی دووردەکەوتبوون، ئەمشەو لە خوێندنی ماوبەسەر، ئاشنا دەبنەوە. دیالۆگ بە کووتایی دەگات بۆ ئەوەی ئایا دەتوانن بگەڕێنەوە.</p>
+</section>
+
+<!-- STATS -->
+<div class="rw-stats-strip">
+  <div class="rw-stat-cell"><div class="rw-stat-val">6</div><div class="rw-stat-lbl">لێدان</div></div>
+  <div class="rw-stat-cell"><div class="rw-stat-val">5</div><div class="rw-stat-lbl">ئامادەکردن</div></div>
+  <div class="rw-stat-cell"><div class="rw-stat-val">6</div><div class="rw-stat-lbl">تایبەتمەندی</div></div>
+  <div class="rw-stat-cell"><div class="rw-stat-val">2</div><div class="rw-stat-lbl">کەسایەتی</div></div>
+</div>
+
+<!-- MAIN TABS -->
+<nav id="rw-tabs" role="tablist">
+  <button class="rw-tab active" data-pane="shots">لێدانەکان</button>
+  <button class="rw-tab" data-pane="floorplan">نەخشەی زەوی</button>
+  <button class="rw-tab" data-pane="departments">بەشەکان</button>
+  <button class="rw-tab" data-pane="schedule">خشتە</button>
+</nav>
+
+<main id="rw-main">
+
+<!-- SHOTS PANE -->
+<div class="rw-pane active" id="pane-shots">
+  <div class="rw-sec-hdr">لیستی لێدانەکان · دیمەنی ١٢</div>
+  <div class="rw-shot-list" id="rw-shot-list"></div>
+</div>
+
+<!-- FLOOR PLAN PANE -->
+<div class="rw-pane" id="pane-floorplan">
+  <div class="rw-sec-hdr">نەخشەی زەوی و بلۆکینگ</div>
+  <div id="rw-fp-canvas">
+    <svg id="rw-fp-svg" viewBox="0 0 640 460" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-height:480px"></svg>
+  </div>
+  <div class="rw-fp-legend">
+    <span><span class="rw-fp-dot" style="background:#D4A574;border-radius:50%"></span>پۆزیشنی کامێرا</span>
+    <span><span class="rw-fp-dot" style="background:#2D5BE3;opacity:.5"></span>وردەکاری</span>
+    <span><span class="rw-fp-dot" style="background:#00A896;height:3px;border-radius:1px"></span>ڕێگای جووڵانی</span>
+  </div>
+</div>
+
+<!-- DEPARTMENTS PANE -->
+<div class="rw-pane" id="pane-departments">
+  <div class="rw-sec-hdr">بەشەکان</div>
+  <div class="rw-dept-tabs">
+    <button class="rw-dept-tab active" data-dept="lighting">ڕووناکی</button>
+    <button class="rw-dept-tab" data-dept="sound">دەنگ</button>
+    <button class="rw-dept-tab" data-dept="props">تایبەتمەندی</button>
+    <button class="rw-dept-tab" data-dept="wardrobe">جل و بەرگ</button>
+    <button class="rw-dept-tab" data-dept="continuity">بەردەوامی</button>
+  </div>
+  <div id="dept-lighting" class="rw-dept-pane active"></div>
+  <div id="dept-sound" class="rw-dept-pane"></div>
+  <div id="dept-props" class="rw-dept-pane"></div>
+  <div id="dept-wardrobe" class="rw-dept-pane"></div>
+  <div id="dept-continuity" class="rw-dept-pane"></div>
+</div>
+
+<!-- SCHEDULE PANE -->
+<div class="rw-pane" id="pane-schedule">
+  <div class="rw-sec-hdr">خشتەی دیمەن</div>
+  <div class="rw-sched-list" id="rw-sched-list"></div>
+</div>
+
+</main>
+
+<!-- FOOTER -->
+<footer id="rw-footer">
+  <div class="rw-footer-brand">
+    <div class="rw-logo-mark" style="width:28px;height:28px;font-size:12px">ڕ</div>
+    <span><span style="color:#F72585">ڕوانگە</span> — پلاتفۆرمی پێشبەرهەمهێنانی سینەمای کوردی</span>
+  </div>
+  <div>
+    <span style="color:var(--rw-text-3)">وەشان 3 ·</span>
+    <span class="rw-footer-meta"> 2026-05-01 09:14</span>
+    <span style="color:var(--rw-pink);margin-inline-start:10px">● کۆپیی دەرخراو</span>
+  </div>
+</footer>
+
+<script>
+const RW = (function() {
+  let D = {};
+  try { D = JSON.parse(document.getElementById('rw-data').textContent); } catch(e){}
+
+  const html = document.documentElement;
+
+  /* ── THEME ── */
+  function initTheme() {
+    const saved = localStorage.getItem('rw-viewer-theme');
+    const dark = saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme:dark)').matches);
+    setTheme(dark ? 'dark' : 'light');
+  }
+  function setTheme(mode) {
+    html.classList.toggle('rw-dark', mode === 'dark');
+    html.classList.toggle('rw-light', mode === 'light');
+    const btn = document.getElementById('rw-theme-toggle');
+    if (btn) btn.textContent = mode === 'dark' ? '☀' : '☾';
+    localStorage.setItem('rw-viewer-theme', mode);
+  }
+
+  /* ── TABS ── */
+  function initTabs() {
+    document.querySelectorAll('#rw-tabs .rw-tab').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        const paneId = this.dataset.pane;
+        document.querySelectorAll('#rw-tabs .rw-tab').forEach(function(b){b.classList.remove('active');});
+        document.querySelectorAll('#rw-main .rw-pane').forEach(function(p){p.classList.remove('active');});
+        this.classList.add('active');
+        const pane = document.getElementById('pane-' + paneId);
+        if (pane) { pane.classList.add('active'); if(paneId==='floorplan') renderFP(); }
+        localStorage.setItem('rw-viewer-tab', paneId);
+      });
+    });
+    const saved = localStorage.getItem('rw-viewer-tab');
+    if (saved) { const b = document.querySelector('#rw-tabs .rw-tab[data-pane="'+saved+'"]'); if(b) b.click(); }
+  }
+
+  /* ── DEPT TABS ── */
+  function initDeptTabs() {
+    document.querySelectorAll('.rw-dept-tab').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        const deptId = this.dataset.dept;
+        document.querySelectorAll('.rw-dept-tab').forEach(function(b){b.classList.remove('active');});
+        document.querySelectorAll('.rw-dept-pane').forEach(function(p){p.classList.remove('active');});
+        this.classList.add('active');
+        const pane = document.getElementById('dept-' + deptId);
+        if (pane) pane.classList.add('active');
+      });
+    });
+  }
+
+  /* ── SHOT ACCORDION ── */
+  function buildShots() {
+    const list = document.getElementById('rw-shot-list');
+    if (!list || !D.shots) return;
+    D.shots.forEach(function(shot) {
+      const typeClass = shot.type === 'dialogue' ? 'rw-badge-d' : shot.type === 'insert' ? 'rw-badge-i' : 'rw-badge-v';
+      const typeLabel = shot.type === 'dialogue' ? 'دیالۆگ' : shot.type === 'insert' ? 'داخڵکردن' : 'بینراو';
+      const bodyId = 'sb-' + shot.number.replace(/\./g, '-');
+      const div = document.createElement('div');
+      div.className = 'rw-shot-item';
+      div.innerHTML =
+        '<div class="rw-shot-header" onclick="RW.toggleShot(this,\''+bodyId+'\')">' +
+          '<div class="rw-shot-num">'+esc(shot.number)+'</div>' +
+          '<div class="rw-shot-style">'+esc(shot.style)+'</div>' +
+          '<div class="rw-shot-meta">' +
+            '<span class="rw-badge '+typeClass+'">'+typeLabel+'</span>' +
+            (shot.lens ? '<span class="rw-lens-tag">'+esc(shot.lens)+'</span>' : '') +
+            (shot.duration ? '<span class="rw-dur-tag">'+esc(shot.duration)+'</span>' : '') +
+          '</div>' +
+          '<span class="rw-chevron">›</span>' +
+        '</div>' +
+        '<div class="rw-shot-body" id="'+bodyId+'">' +
+          '<div class="rw-shot-grid">' +
+            (shot.movement ? '<div><div class="rw-field-label">جووڵانی کامێرا</div><div class="rw-field-val">'+esc(shot.movement)+'</div></div>' : '') +
+            (shot.setup ? '<div><div class="rw-field-label">ئامادەکردن</div><div class="rw-field-val"><span style="font-family:\'Inter\',sans-serif">'+esc(shot.setup)+'</span></div></div>' : '') +
+            (shot.lens ? '<div><div class="rw-field-label">لێنس</div><div class="rw-field-val"><span style="font-family:\'Inter\',sans-serif;direction:ltr">'+esc(shot.lens)+'</span></div></div>' : '') +
+            (shot.duration ? '<div><div class="rw-field-label">ماوە</div><div class="rw-field-val"><span style="font-family:\'Inter\',sans-serif;direction:ltr">'+esc(shot.duration)+'</span></div></div>' : '') +
+          '</div>' +
+          (shot.description ? '<div class="rw-shot-desc">'+esc(shot.description)+'</div>' : '') +
+          (shot.notes ? '<div class="rw-notes-block">'+esc(shot.notes)+'</div>' : '') +
+          '<div class="rw-sb-thumb">STORYBOARD · '+esc(shot.number)+'</div>' +
+        '</div>';
+      list.appendChild(div);
+    });
+  }
+
+  function toggleShot(header, bodyId) {
+    const body = document.getElementById(bodyId);
+    if (!body) return;
+    const open = body.classList.contains('open');
+    body.classList.toggle('open', !open);
+    header.classList.toggle('open', !open);
+  }
+
+  /* ── FLOOR PLAN ── */
+  function renderFP() {
+    const fp = D.floor_plan;
+    const svg = document.getElementById('rw-fp-svg');
+    if (!fp || !svg) return;
+    const PM = 72, PAD = 32;
+    const W = fp.room_width * PM, H = fp.room_height * PM;
+    const VW = W + PAD*2, VH = H + PAD*2;
+    svg.setAttribute('viewBox','0 0 '+VW+' '+VH);
+
+    let s = '';
+    s += '<rect x="0" y="0" width="'+VW+'" height="'+VH+'" fill="#0F0F12"/>';
+    s += '<rect x="'+PAD+'" y="'+PAD+'" width="'+W+'" height="'+H+'" fill="#1E1E26" stroke="#2C2C38" stroke-width="2"/>';
+    s += '<g stroke="#2C2C38" stroke-width="0.5" opacity="0.4">';
+    for(let x=PAD;x<=PAD+W;x+=PM) s+='<line x1="'+x+'" y1="'+PAD+'" x2="'+x+'" y2="'+(PAD+H)+'"/>';
+    for(let y=PAD;y<=PAD+H;y+=PM) s+='<line x1="'+PAD+'" y1="'+y+'" x2="'+(PAD+W)+'" y2="'+y+'"/>';
+    s += '</g>';
+
+    (fp.furniture||[]).forEach(function(f) {
+      const fx=PAD+f.x*PM, fy=PAD+f.y*PM, fw=(f.w||1)*PM, fh=(f.h||0.6)*PM;
+      s += '<rect x="'+fx+'" y="'+fy+'" width="'+fw+'" height="'+fh+'" fill="#2D5BE3" opacity="0.22" stroke="#2D5BE3" stroke-width="1"/>';
+      if(f.label) s += '<text x="'+(fx+fw/2)+'" y="'+(fy+fh/2+4)+'" text-anchor="middle" font-family="monospace" font-size="10" fill="#EDEAD8" opacity="0.6">'+escX(f.label)+'</text>';
+    });
+
+    (fp.paths||[]).forEach(function(path) {
+      if(!path.points||path.points.length<2) return;
+      const pts = path.points.map(function(p){return (PAD+p.x*PM)+','+(PAD+p.y*PM);}).join(' ');
+      s += '<polyline points="'+pts+'" fill="none" stroke="#00A896" stroke-width="2" stroke-dasharray="6,4" opacity="0.7"/>';
+    });
+
+    (fp.cameras||[]).forEach(function(cam) {
+      const cx=PAD+cam.x*PM, cy=PAD+cam.y*PM;
+      if(cam.target_x!==undefined) {
+        const tx=PAD+cam.target_x*PM, ty=PAD+cam.target_y*PM;
+        s += '<line x1="'+cx+'" y1="'+cy+'" x2="'+tx+'" y2="'+ty+'" stroke="#D4A574" stroke-width="1.5" opacity="0.45" stroke-dasharray="4,3"/>';
+      }
+      s += '<circle cx="'+cx+'" cy="'+cy+'" r="11" fill="#D4A574" opacity="0.95"/>';
+      s += '<text x="'+cx+'" y="'+(cy+4)+'" text-anchor="middle" font-family="monospace" font-size="10" font-weight="700" fill="#0F0F12">'+escX(cam.letter||'')+'</text>';
+    });
+
+    s += '<text x="'+(PAD+W/2)+'" y="'+(PAD+H+22)+'" text-anchor="middle" font-family="monospace" font-size="10" fill="#40404E">'+fp.room_width+'m</text>';
+    s += '<text x="'+(PAD-16)+'" y="'+(PAD+H/2)+'" text-anchor="middle" font-family="monospace" font-size="10" fill="#40404E" transform="rotate(-90,'+(PAD-16)+','+(PAD+H/2)+')">'+fp.room_height+'m</text>';
+    svg.innerHTML = s;
+  }
+
+  /* ── DEPARTMENTS ── */
+  function buildDepts() {
+    const d = D.departments;
+    if (!d) return;
+
+    /* Lighting */
+    const lEl = document.getElementById('dept-lighting');
+    if (lEl && d.lighting && d.lighting.length) {
+      let h = '<div class="rw-light-list">';
+      d.lighting.forEach(function(ln) {
+        h += '<div class="rw-light-item"><div class="rw-light-shot">'+esc(ln.shot_number)+'</div><div class="rw-light-body"><div class="rw-light-note">'+esc(ln.note)+'</div>';
+        if(ln.color_temp||ln.equipment) h += '<span class="rw-light-meta">'+(ln.color_temp?esc(ln.color_temp):'')+(ln.color_temp&&ln.equipment?' · ':'')+(ln.equipment?esc(ln.equipment):'')+'</span>';
+        h += '</div></div>';
+      });
+      h += '</div>';
+      lEl.innerHTML = h;
+    }
+
+    /* Sound */
+    const sEl = document.getElementById('dept-sound');
+    if (sEl && d.sound && d.sound.length) {
+      let h = '<div class="rw-light-list">';
+      d.sound.forEach(function(sn) {
+        h += '<div class="rw-light-item"><div class="rw-light-shot">'+esc(sn.shot_number)+'</div><div class="rw-light-body"><div class="rw-light-note">'+esc(sn.note)+'</div>';
+        if(sn.sound_type) h += '<span style="font-size:10px;color:var(--rw-text-3);text-transform:uppercase;letter-spacing:.5px">'+esc(sn.sound_type)+'</span>';
+        h += '</div></div>';
+      });
+      h += '</div>';
+      sEl.innerHTML = h;
+    }
+
+    /* Props */
+    const pEl = document.getElementById('dept-props');
+    if (pEl && d.props && d.props.length) {
+      let h = '<div class="rw-checklist" style="border:1px solid var(--rw-border)">';
+      d.props.forEach(function(prop) {
+        const statusColor = prop.status==='on_set'?'var(--rw-vis)':prop.status==='sourced'?'var(--rw-amber)':'var(--rw-text-3)';
+        h += '<div class="rw-check-item"><input type="checkbox"'+(prop.status==='on_set'?' checked':'')+'>'+
+          '<div><div class="rw-ci-name">'+esc(prop.name)+'</div>'+
+          '<div class="rw-ci-note">'+esc(prop.category)+' · <span style="color:'+statusColor+'">'+esc(prop.status)+'</span></div></div></div>';
+      });
+      h += '</div>';
+      pEl.innerHTML = h;
+    }
+
+    /* Wardrobe */
+    const wEl = document.getElementById('dept-wardrobe');
+    if (wEl && d.wardrobe && d.wardrobe.length) {
+      let h = '<div class="rw-wc-grid">';
+      d.wardrobe.forEach(function(wi) {
+        h += '<div class="rw-wc-card"><div class="rw-wc-char">'+esc(wi.character)+'</div>'+
+          '<div class="rw-wc-outfit">'+esc(wi.outfit)+'</div>'+
+          '<div class="rw-wc-desc">'+esc(wi.description)+'</div></div>';
+      });
+      h += '</div>';
+      wEl.innerHTML = h;
+    }
+
+    /* Continuity */
+    const cEl = document.getElementById('dept-continuity');
+    if (cEl && d.continuity && d.continuity.length) {
+      let h = '<div class="rw-checklist" style="border:1px solid var(--rw-border)">';
+      d.continuity.forEach(function(ci) {
+        const dirColor = ci.direction==='in'?'var(--rw-vis)':'var(--rw-amber)';
+        const dirLabel = ci.direction==='in'?'↓ بەشدارکردن':'↑ دەرچوون';
+        h += '<div class="rw-check-item"><input type="checkbox"'+(ci.checked?' checked':'')+'>'+
+          '<div><div class="rw-ci-name">'+esc(ci.description)+'</div>'+
+          '<div class="rw-ci-note" style="color:'+dirColor+'">'+dirLabel+'</div></div></div>';
+      });
+      h += '</div>';
+      cEl.innerHTML = h;
+    }
+  }
+
+  /* ── SCHEDULE ── */
+  function buildSchedule() {
+    const el = document.getElementById('rw-sched-list');
+    if (!el || !D.schedule) return;
+    let h = '<div class="rw-sched-list">';
+    D.schedule.forEach(function(block) {
+      h += '<div class="rw-sched-row">'+
+        '<div><div class="rw-s-time">'+esc(block.time)+'</div><div class="rw-s-dur">'+esc(block.duration)+'</div></div>'+
+        '<div><div class="rw-s-title">'+esc(block.title)+'</div></div></div>';
+    });
+    h += '</div>';
+    el.innerHTML = h;
+  }
+
+  /* ── UTILS ── */
+  function esc(str) {
+    return String(str||'')
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+  function escX(str) { return esc(str); }
+
+  /* ── INIT ── */
+  function init() {
+    initTheme();
+    buildShots();
+    buildDepts();
+    buildSchedule();
+    initTabs();
+    initDeptTabs();
+
+    const themeBtn = document.getElementById('rw-theme-toggle');
+    if (themeBtn) themeBtn.addEventListener('click', function() {
+      const isDark = html.classList.contains('rw-dark');
+      setTheme(isDark ? 'light' : 'dark');
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', init);
+
+  return {
+    toggleShot: toggleShot
+  };
+}());
+</script>
+</body>
+</html>

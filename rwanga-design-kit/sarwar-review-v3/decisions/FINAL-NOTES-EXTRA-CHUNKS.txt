@@ -1,0 +1,96 @@
+=====================================
+CHUNK 1 — HEADER
+=====================================
+
+Extra Note — Last-Minute Additions Before Script Lock
+
+Date: 5 May 2026
+Context: After Sarwar approved the Final Script Recommendations and the three additional notes (old house removal, pre-garden thrills, sensual hints), he raised two final points in a phone call. These are our responses. After this, the script review is locked and rewriting begins.
+
+=====================================
+CHUNK 2 — THE HITCHHIKER SCENE
+=====================================
+
+The Hitchhiker — Sarwar's Scene, Our Analysis
+
+Sarwar's scene: On the road to the garden, someone tries to flag them down for a lift. They don't stop. Nali tells Gesha: "If you weren't with me, I would've picked him up!" Gesha replies: "That is a wrong move! What will you do if something happens to them while they are with you?!"
+
+Cultural context: In Kurdish society, picking up strangers on the road is considered good manners — an essential part of not leaving people behind. This exchange sounds completely natural to a Kurdish audience. It's just a familiar road conversation.
+
+Why this scene is structurally perfect:
+
+1. Foreshadowing disguised as culture. Gesha asks "what will you do if something happens to them?" — and then she becomes the answer to her own question. She IS the person who dies in Nali's care. The audience won't catch this on first viewing. On second viewing, it will be devastating.
+
+2. Nali's creative extraction exposed. He says he would have picked the stranger up — not out of pure kindness, but because he wants interactions with strangers for his creativity. He collects human experiences as raw material. This is D15 in its most casual, invisible form: Nali mediates even his generosity through creative self-interest. The same instinct that makes him pick up a stranger for a story later turns Gesha's death into a screenplay prompt for AI.
+
+3. The gap between them. Gesha thinks in terms of consequences — she sees a dead stranger and police questions. Nali thinks in terms of material — he sees a character and a story. This gap between practical empathy and creative extraction is the entire relationship compressed into one exchange.
+
+4. Invisible foreshadowing. Because it hides inside Kurdish cultural truth, no audience member will register this as a clue. That's the best kind of foreshadowing — it only becomes visible retroactively.
+
+Decision: This scene goes in exactly as Sarwar described. No changes needed.
+
+=====================================
+CHUNK 3 — PRE-GARDEN THRILLER: OPTION 1
+=====================================
+
+Pre-Garden Thriller Moments — Three Options for Sarwar
+
+Sarwar asked: "What do you suggest for the pre-garden thrills?" These are three specific options. They are not full scenes — they are textures, each under a minute, spread across the drive to the garden. Together they build the feeling that something is closing in.
+
+Option 1 — The Phone Almost Dies
+
+During the drive, Nali's phone battery drops to critical. He panics — not about being lost, but about losing his connection to AI. He scrambles to find a charger, becomes agitated and distracted. Gesha watches and says something like "it's just a phone."
+
+For Nali, it's not just a phone — it's his entire processing system.
+
+Why it works: This connects directly to the desert scene later where AI goes offline for real. The audience sees this early panic and retroactively understands — when he lost his phone connection in the desert, he lost everything. It also shows Gesha how dependent Nali is on his device, and she dismisses it. She doesn't understand what she's seeing.
+
+Cost: 30 seconds. No new location. Just dialogue and a phone screen.
+
+=====================================
+CHUNK 4 — PRE-GARDEN THRILLER: OPTION 2
+=====================================
+
+Option 2 — The Dead Animal Connects to the Taxidermy
+
+On the road, they pass something dead — a bird, a fox, roadkill. Gesha reacts with discomfort or sadness. Nali barely registers it, or says something detached like "it looks peaceful."
+
+When they arrive at the house and Gesha discovers the taxidermy collection, the audience unconsciously connects the two: Nali's indifference to real death and his comfort with preserved, controlled versions of dead things.
+
+Why it works: This is not a symbol — it is a behavioral data point. It shows the audience how Nali processes death before the film forces him to process a real one. His detachment on the road is the same detachment that lets him hide a body in a couch and direct a rehearsal on top of it.
+
+Important rule: The dead animal must not feel planted or dramatic. It should be passing — a two-second shot through the car window. The audience notices it, Gesha notices it, Nali doesn't. That asymmetry is the point.
+
+Cost: One passing shot. Zero additional time.
+
+=====================================
+CHUNK 5 — PRE-GARDEN THRILLER: OPTION 3
+=====================================
+
+Option 3 — The Road Narrows
+
+As they get closer to the garden, the road physically changes. Wider road becomes a narrow lane. Paved becomes unpaved. Phone signal weakens. No dramatic moment — just the environment slowly closing in.
+
+The audience feels the isolation building before they understand why it matters.
+
+Why it works: This connects to the tunnel (signal loss, transition from public to private world) and to the desert later (total isolation where the mediation system collapses). The garden is not just remote — the road to it is a funnel that strips away the outside world one layer at a time. By the time they arrive, the audience already feels trapped without knowing why.
+
+Cost: Cinematography only. No dialogue, no new scenes. Just how the existing drive is shot.
+
+=====================================
+CHUNK 6 — RECOMMENDATION
+=====================================
+
+Our Recommendation
+
+Use all three. They are not competing options — they are layers.
+
+Phone panic = 30 seconds of dialogue. Dead animal = a passing shot. Road narrowing = camera work.
+
+Together they build one feeling across the drive: something is closing in, and Nali is more worried about his phone than about the world disappearing around them.
+
+Spread them across the existing drive scenes. No new locations, no new cast, minimal additional screen time. The drive that currently repeats "Nali is nervous about being seen" gets replaced with a drive that makes the audience nervous about where they are going.
+
+Sarwar picks which ones to use. These are his options.
+
+After this, the script review is locked. We proceed to rewriting.

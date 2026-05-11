@@ -1,0 +1,1125 @@
+{% extends "base.html" %}
+{% comment %}
+RWANGA — reviews/workbench.html
+Review Workbench — 3-tab director interface
+Split panel: decisions (left in RTL) + bible/script (right in RTL)
+
+Context:
+  review          — BibleReview instance
+  project         — Project instance
+  active_decisions — QuerySet (status=proposed)
+  locked_decisions — QuerySet (status=locked)
+{% endcomment %}
+{% load static i18n %}
+
+{% block title %}پێداچوونەوە — {{ project.title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ══════════════════════════════════════════════════════
+   REVIEW WORKBENCH — component CSS
+   Uses var(--rw-*) tokens from rwanga.css
+   ══════════════════════════════════════════════════════ */
+
+/* ── WORKBENCH HEADER ── */
+.rwb-header {
+  background: var(--rw-surface);
+  border-bottom: 1px solid var(--rw-border);
+  padding: 12px var(--rw-pad-md);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+.rwb-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--rw-text);
+  flex: 1;
+}
+.rwb-meta {
+  font-family: var(--rw-font-en);
+  font-size: 11px;
+  color: var(--rw-text-3);
+  direction: ltr;
+}
+
+/* ── TABS ── */
+.rwb-tabs {
+  display: flex;
+  background: var(--rw-surface);
+  border-bottom: 1px solid var(--rw-border);
+  padding: 0 8px;
+  flex-shrink: 0;
+}
+.rwb-tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 18px;
+  height: 46px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--rw-text-2);
+  white-space: nowrap;
+  border: none;
+  background: none;
+  border-bottom: 3px solid transparent;
+  transition: color 0.12s, border-color 0.12s;
+  cursor: pointer;
+  font-family: var(--rw-font);
+}
+.rwb-tab:hover { color: var(--rw-text); }
+.rwb-tab.active { color: var(--rw-amber); border-bottom-color: var(--rw-amber); }
+.rwb-tab-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  font-family: var(--rw-font-en);
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 10px;
+  background: var(--rw-pink);
+  color: #fff;
+}
+.rwb-tab-count.dim { background: var(--rw-surface-3); color: var(--rw-text-2); }
+
+/* ── SPLIT PANEL ── */
+.rwb-split {
+  display: flex;
+  flex: 1;
+  min-height: 0; /* critical for flex overflow */
+  overflow: hidden;
+}
+.rwb-left {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+  padding: 16px var(--rw-pad-md);
+}
+.rwb-right {
+  width: 400px;
+  flex-shrink: 0;
+  overflow-y: auto;
+  background: var(--rw-surface);
+  border-inline-start: 1px solid var(--rw-border);
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── LEFT PANES (tab content) ── */
+.rwb-pane { display: none; }
+.rwb-pane.active { display: block; }
+
+/* ── DECISION CARD ── */
+.rwb-card {
+  background: var(--rw-surface);
+  border: 1px solid var(--rw-border);
+  margin-bottom: 10px;
+  transition: border-color 0.15s;
+  cursor: pointer;
+}
+.rwb-card:hover { border-color: var(--rw-text-3); }
+.rwb-card.selected {
+  border-color: var(--rw-amber);
+  border-inline-end: 3px solid var(--rw-amber);
+}
+.rwb-card-body { padding: 14px 16px 10px; }
+.rwb-card-topic {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--rw-text);
+  margin-bottom: 4px;
+}
+.rwb-card-text {
+  font-size: 13px;
+  color: var(--rw-text-2);
+  line-height: 1.7;
+  margin-bottom: 8px;
+}
+
+/* Chips & badges */
+.rwb-chips { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.rwb-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 2px;
+}
+.rwb-chip-scene {
+  background: var(--rw-pink-dim);
+  border: 1px solid rgba(247, 37, 133, 0.3);
+  color: var(--rw-pink);
+}
+.rwb-chip-chain {
+  background: var(--rw-amber-dim);
+  border: 1px solid rgba(212, 165, 116, 0.3);
+  color: var(--rw-amber);
+  font-family: var(--rw-font-en);
+}
+.rwb-chip-expr {
+  border: 1px solid var(--rw-border);
+  color: var(--rw-text-2);
+  background: var(--rw-surface-2);
+  font-family: var(--rw-font-en);
+}
+.rwb-chip-expr.emotional { border-color: rgba(45, 91, 227, 0.3); color: #7FA8FF; }
+.rwb-chip-expr.behavioral { border-color: rgba(212, 165, 116, 0.3); color: var(--rw-amber); }
+.rwb-chip-expr.artistic { border-color: rgba(247, 37, 133, 0.3); color: var(--rw-pink); }
+.rwb-chip-expr.broken { border-color: rgba(230, 57, 70, 0.3); color: #E63946; }
+.rwb-chip-expr.memory { border-color: rgba(46, 196, 182, 0.3); color: #2EC4B6; }
+
+/* Intensity bar */
+.rwb-intensity {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-family: var(--rw-font-en);
+  color: var(--rw-text-3);
+}
+.rwb-int-bar { display: flex; gap: 2px; }
+.rwb-int-dot {
+  width: 6px;
+  height: 14px;
+  background: var(--rw-surface-3);
+  border-radius: 1px;
+}
+.rwb-int-dot.on { background: var(--rw-amber); }
+.rwb-int-dot.on.peak { background: var(--rw-pink); }
+.rwb-int-dot.on.collapse { background: #E63946; }
+
+/* Action row */
+.rwb-actions {
+  display: flex;
+  gap: 8px;
+  padding: 0 16px 14px;
+  align-items: center;
+}
+.rwb-btn {
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid var(--rw-border);
+  background: var(--rw-surface-2);
+  color: var(--rw-text-2);
+  cursor: pointer;
+  font-family: var(--rw-font);
+  transition: all 0.12s;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.rwb-btn:hover { color: var(--rw-text); border-color: var(--rw-text-3); }
+.rwb-btn-accept {
+  border-color: rgba(212, 165, 116, 0.35);
+  color: var(--rw-amber);
+}
+.rwb-btn-accept:hover {
+  background: var(--rw-amber-dim);
+  border-color: var(--rw-amber);
+}
+.rwb-btn-reject {
+  border-color: rgba(230, 57, 70, 0.25);
+  color: var(--rw-text-3);
+}
+.rwb-btn-reject:hover {
+  background: rgba(230, 57, 70, 0.08);
+  color: #E63946;
+  border-color: rgba(230, 57, 70, 0.4);
+}
+.rwb-btn-comment { margin-inline-start: auto; }
+
+/* Comment */
+.rwb-comment { display: none; padding: 0 16px 14px; }
+.rwb-comment.open { display: block; }
+.rwb-comment textarea {
+  width: 100%;
+  background: var(--rw-surface-2);
+  border: 1px solid var(--rw-border);
+  color: var(--rw-text);
+  padding: 10px 12px;
+  font-size: 13px;
+  font-family: var(--rw-font);
+  resize: vertical;
+  min-height: 60px;
+  direction: rtl;
+}
+.rwb-comment textarea:focus { outline: none; border-color: var(--rw-amber); }
+
+/* ── LOCKED CARD ── */
+.rwb-locked {
+  background: var(--rw-surface);
+  border: 1px solid var(--rw-border);
+  margin-bottom: 6px;
+}
+.rwb-locked-hdr {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.rwb-locked-hdr:hover { background: var(--rw-surface-2); }
+.rwb-locked-topic {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--rw-text);
+  flex: 1;
+}
+.rwb-locked-badge {
+  padding: 2px 8px;
+  font-size: 10px;
+  font-weight: 700;
+  background: var(--rw-amber-dim);
+  border: 1px solid rgba(212, 165, 116, 0.3);
+  color: var(--rw-amber);
+}
+.rwb-locked-chevron {
+  font-size: 12px;
+  color: var(--rw-text-3);
+  transition: transform 0.12s;
+}
+.rwb-locked-hdr.open .rwb-locked-chevron { transform: rotate(90deg); }
+.rwb-locked-body {
+  display: none;
+  padding: 12px 16px 14px;
+  border-top: 1px solid var(--rw-border-2);
+}
+.rwb-locked-body.open { display: block; }
+.rwb-locked-text {
+  font-size: 13px;
+  color: var(--rw-text-2);
+  line-height: 1.7;
+  margin-bottom: 8px;
+}
+.rwb-locked-comment {
+  font-size: 12px;
+  color: var(--rw-text-3);
+  font-style: italic;
+  padding-inline-start: 12px;
+  border-inline-start: 2px solid var(--rw-border);
+}
+
+/* ── BIBLE (full read) ── */
+/* ── BIBLE VIEWER — Filmustage-style sectioned reader ── */
+.rwb-split.bb-mode .rwb-right { display: none; }
+.rwb-split.bb-mode .rwb-left {
+  padding: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.rwb-split.bb-mode #rwb-bible {
+  flex: 1;
+  min-height: 0;
+  display: flex !important;
+  flex-direction: column;
+}
+.bb-layout {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+.bb-sidebar {
+  width: 220px;
+  flex-shrink: 0;
+  border-inline-end: 1px solid var(--rw-border);
+  overflow-y: auto;
+  background: var(--rw-surface);
+  padding: 0;
+}
+.bb-toc-head {
+  padding: 16px 16px 10px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--rw-text-3);
+}
+.bb-toc-item {
+  display: block;
+  padding: 9px 16px;
+  font-size: 13px;
+  color: var(--rw-text-2);
+  cursor: pointer;
+  border-inline-start: 3px solid transparent;
+  transition: all 0.15s;
+  line-height: 1.5;
+}
+.bb-toc-item:hover {
+  background: var(--rw-surface-2);
+  color: var(--rw-text);
+}
+.bb-toc-item.active {
+  border-inline-start-color: var(--rw-amber);
+  color: var(--rw-amber);
+  background: var(--rw-amber-dim);
+  font-weight: 600;
+}
+.bb-main {
+  flex: 1;
+  overflow-y: auto;
+  padding: 32px 48px 80px;
+  min-width: 0;
+}
+.bb-doc-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--rw-text);
+  margin-bottom: 6px;
+}
+.bb-doc-meta {
+  font-size: 12px;
+  color: var(--rw-text-3);
+  font-family: var(--rw-font-en);
+  margin-bottom: 28px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--rw-border);
+}
+.bb-section {
+  margin-bottom: 48px;
+  scroll-margin-top: 24px;
+}
+.bb-section-hdr { margin-bottom: 20px; }
+.bb-section-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--rw-text);
+  margin-bottom: 2px;
+}
+.bb-section-sub {
+  font-size: 12px;
+  color: var(--rw-text-3);
+  font-family: var(--rw-font-en);
+  direction: ltr;
+  unicode-bidi: isolate;
+  display: inline-block;
+}
+.bb-section-rule {
+  width: 36px;
+  height: 2px;
+  background: var(--rw-amber);
+  margin-top: 12px;
+}
+.bb-para {
+  font-size: 14.5px;
+  color: var(--rw-text-2);
+  line-height: 2.1;
+  margin-bottom: 18px;
+}
+.bb-quote {
+  font-size: 15px;
+  color: var(--rw-text);
+  line-height: 2;
+  padding: 16px 20px;
+  border-inline-start: 3px solid var(--rw-amber);
+  background: var(--rw-amber-dim);
+  margin-bottom: 20px;
+}
+.bb-meta-row {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--rw-text-2);
+  margin-bottom: 6px;
+}
+.bb-meta-row span {
+  font-family: var(--rw-font-en);
+  color: var(--rw-amber);
+  font-weight: 700;
+}
+.bb-table-wrap { overflow-x: auto; margin-bottom: 24px; }
+.bb-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.bb-table th {
+  background: var(--rw-surface-2);
+  font-weight: 700;
+  color: var(--rw-text);
+  padding: 10px 14px;
+  text-align: start;
+  border-bottom: 2px solid var(--rw-border);
+}
+.bb-table td {
+  padding: 10px 14px;
+  color: var(--rw-text-2);
+  border-bottom: 1px solid var(--rw-border-2, var(--rw-border));
+  line-height: 1.7;
+  vertical-align: top;
+}
+.bb-table tr:hover td { background: var(--rw-surface-2); }
+.bb-table td:first-child {
+  font-weight: 700;
+  color: var(--rw-text);
+  white-space: nowrap;
+}
+.bb-prop {
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--rw-border-2, var(--rw-border));
+}
+.bb-prop:last-child { border-bottom: none; }
+.bb-prop-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--rw-pink);
+  margin-bottom: 6px;
+}
+.bb-prop-desc {
+  font-size: 13.5px;
+  color: var(--rw-text-2);
+  line-height: 1.9;
+}
+.bb-note {
+  font-size: 12px;
+  color: var(--rw-text-3);
+  font-style: italic;
+  padding: 14px 16px;
+  background: var(--rw-surface-2);
+  border: 1px solid var(--rw-border);
+  line-height: 1.7;
+  margin-top: 8px;
+}
+
+/* ── RIGHT PANEL ── */
+.rwb-right-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--rw-border);
+  flex-shrink: 0;
+}
+.rwb-right-tab {
+  flex: 1;
+  padding: 12px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--rw-text-3);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.12s;
+}
+.rwb-right-tab:hover { color: var(--rw-text-2); }
+.rwb-right-tab.active { color: var(--rw-amber); border-bottom-color: var(--rw-amber); }
+.rwb-rpane { display: none; padding: 16px; overflow-y: auto; flex: 1; }
+.rwb-rpane.active { display: block; }
+
+/* Bible section (right panel) */
+.rwb-bsection {
+  padding: 12px 14px;
+  margin-bottom: 8px;
+  border-inline-start: 3px solid transparent;
+  transition: all 0.2s;
+}
+.rwb-bsection.highlighted {
+  border-inline-start-color: var(--rw-amber);
+  background: var(--rw-amber-dim);
+}
+.rwb-bsection h3 {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--rw-text);
+  margin-bottom: 6px;
+}
+.rwb-bsection p {
+  font-size: 13px;
+  color: var(--rw-text-2);
+  line-height: 1.8;
+}
+
+/* Script lines (right panel) */
+.rwb-script-line {
+  font-size: 13px;
+  color: var(--rw-text-2);
+  line-height: 1.8;
+  margin-bottom: 6px;
+  padding: 4px 8px;
+}
+.rwb-script-line.scene-hdr {
+  font-weight: 700;
+  color: var(--rw-text);
+  font-size: 14px;
+  margin-top: 16px;
+  padding: 8px;
+  background: var(--rw-surface-2);
+  border: 1px solid var(--rw-border);
+}
+.rwb-script-line.char {
+  font-weight: 700;
+  color: var(--rw-amber);
+  font-size: 12px;
+  text-transform: uppercase;
+  padding-inline-start: 40px;
+  margin-top: 10px;
+  margin-bottom: 2px;
+}
+.rwb-script-line.dlg {
+  padding-inline-start: 40px;
+  color: var(--rw-text);
+}
+.rwb-script-line.act {
+  color: var(--rw-text-2);
+  font-style: italic;
+}
+
+/* ── FOOTER ── */
+.rwb-footer {
+  background: var(--rw-surface);
+  border-top: 1px solid var(--rw-border);
+  padding: 10px var(--rw-pad-md);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--rw-text-3);
+  flex-shrink: 0;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+
+{# ── Workbench header ── #}
+<div class="rwb-header">
+  <div class="rwb-title">ڕوانگە — {{ project.title }} — پێداچوونەوە</div>
+  <div class="rwb-meta">review {{ review.version|default:"v03" }} · bible {{ review.bible_version|default:"v3.0" }}</div>
+</div>
+
+{# ── Tabs ── #}
+<div class="rwb-tabs" id="rwb-tabs">
+  <button class="rwb-tab active" onclick="rwbTab('active',this)">بڕیارە نوێیەکان <span class="rwb-tab-count">{{ active_decisions.count }}</span></button>
+  <button class="rwb-tab" onclick="rwbTab('locked',this)">بڕیارە جێگیرکراوەکان <span class="rwb-tab-count dim">{{ locked_decisions.count }}</span></button>
+  <button class="rwb-tab" onclick="rwbTab('bible',this)">بایبڵ</button>
+</div>
+
+{# ── Split panel ── #}
+<div class="rwb-split">
+
+  {# ═══ LEFT PANEL — decision panes ═══ #}
+  <div class="rwb-left">
+
+    {# Tab 1: Active decisions #}
+    <div class="rwb-pane active" id="rwb-active">
+      {% for d in active_decisions %}
+      <div class="rwb-card" data-section="{{ d.chain_id|default:'general' }}" onclick="rwbSelect(this, '{{ d.chain_id|default:'general' }}')">
+        <div class="rwb-card-body">
+          <div class="rwb-card-topic">{{ d.topic }}</div>
+          <div class="rwb-card-text">{{ d.decision_text }}</div>
+          <div class="rwb-chips">
+            {% if d.scene %}
+            <span class="rwb-chip rwb-chip-scene">دیمەن {{ d.scene.scene_number }}</span>
+            {% endif %}
+            {% if d.chain_id %}
+            <a href="{% url 'projects:review_chain' project.id review.id d.chain_id %}" class="rwb-chip rwb-chip-chain" onclick="event.stopPropagation()">زنجیرەی {{ d.chain_id }}</a>
+            {% endif %}
+            {% if d.expression_type %}
+            <span class="rwb-chip rwb-chip-expr {{ d.expression_type }}">{{ d.expression_type }}</span>
+            {% endif %}
+            {% if d.intensity %}
+            <div class="rwb-intensity">
+              <div class="rwb-int-bar">
+                <div class="rwb-int-dot{% if d.intensity == 'low' or d.intensity == 'medium' or d.intensity == 'peak' or d.intensity == 'collapse' %} on{% endif %}"></div>
+                <div class="rwb-int-dot{% if d.intensity == 'medium' or d.intensity == 'peak' or d.intensity == 'collapse' %} on{% endif %}"></div>
+                <div class="rwb-int-dot{% if d.intensity == 'peak' or d.intensity == 'collapse' %} on{% if d.intensity == 'peak' %} peak{% endif %}{% endif %}"></div>
+                <div class="rwb-int-dot{% if d.intensity == 'collapse' %} on collapse{% endif %}"></div>
+              </div>
+              <span>{{ d.intensity }}</span>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+        <div class="rwb-actions">
+          <button class="rwb-btn rwb-btn-accept"
+                  hx-patch="{% url 'reviews:lock-decision' review.id d.id %}"
+                  hx-target="closest .rwb-card"
+                  hx-swap="outerHTML"
+                  onclick="event.stopPropagation()">✓ پەسەندکردن</button>
+          <button class="rwb-btn rwb-btn-reject"
+                  hx-patch="{% url 'reviews:reject-decision' review.id d.id %}"
+                  hx-target="closest .rwb-card"
+                  hx-swap="outerHTML"
+                  onclick="event.stopPropagation()">✗ ڕەتکردنەوە</button>
+          <button class="rwb-btn rwb-btn-comment" onclick="event.stopPropagation();rwbComment(this)">💬 تێبینی</button>
+        </div>
+        <div class="rwb-comment">
+          <textarea placeholder="تێبینیت لێرە بنووسە..."></textarea>
+        </div>
+      </div>
+      {% empty %}
+      <div style="text-align:center;padding:60px 20px;color:var(--rw-text-3)">
+        <p style="font-size:18px;margin-bottom:8px">هیچ بڕیارێکی نوێ نییە</p>
+        <p style="font-size:13px">هەموو بڕیارەکان جێگیرکراون یان ڕەتکراونەتەوە.</p>
+      </div>
+      {% endfor %}
+    </div>
+
+    {# Tab 2: Locked decisions #}
+    <div class="rwb-pane" id="rwb-locked">
+      {% for d in locked_decisions %}
+      <div class="rwb-locked">
+        <div class="rwb-locked-hdr" onclick="rwbToggle(this)">
+          <span class="rwb-locked-topic">{{ d.topic }}</span>
+          <span class="rwb-locked-badge">جێگیر</span>
+          <span class="rwb-locked-chevron">›</span>
+        </div>
+        <div class="rwb-locked-body">
+          <div class="rwb-locked-text">{{ d.decision_text }}</div>
+          {% if d.lock_comment %}
+          <div class="rwb-locked-comment">{{ d.lock_comment }}</div>
+          {% endif %}
+        </div>
+      </div>
+      {% empty %}
+      <div style="text-align:center;padding:60px 20px;color:var(--rw-text-3)">
+        <p>هیچ بڕیارێکی جێگیرکراو نییە هێشتا.</p>
+      </div>
+      {% endfor %}
+    </div>
+
+    {# Tab 3: Full bible — Filmustage-style sectioned viewer #}
+    <div class="rwb-pane" id="rwb-bible">
+      <div class="bb-layout">
+        <nav class="bb-sidebar" id="bb-toc"></nav>
+        <div class="bb-main" id="bb-content"></div>
+      </div>
+    </div>
+    {{ review.content|json_script:"bb-data" }}
+
+  </div>{# /rwb-left #}
+
+  {# ═══ RIGHT PANEL — bible / script (always visible) ═══ #}
+  <div class="rwb-right">
+    <div class="rwb-right-tabs">
+      <div class="rwb-right-tab active" onclick="rwbRight('rbible',this)">بایبڵ</div>
+      <div class="rwb-right-tab" onclick="rwbRight('rscript',this)">سکریپت</div>
+    </div>
+
+    {# Bible sections #}
+    <div class="rwb-rpane active" id="rwb-rbible">
+      <div class="rwb-bsection" data-section="D">
+        <h3>سیستمی ناڵی — D15 ناڕاستەوخۆیی</h3>
+        <p>هەر پەیوەندییەکی ناڵی بە سیستمێکەوە ناڕاستەوخۆ ئەنجام دەدرێت. ئەو هەرگیز ڕاستەوخۆ کار ناکات لەسەر ڕاستی.</p>
+      </div>
+      <div class="rwb-bsection" data-section="A">
+        <h3>گەشە — چیرۆکی تایبەتی خۆی</h3>
+        <p>گەشە تەنها قوربانی نییە. شەکرەبایی و نەخۆشییەکەی، ماسکەکەی، شەربەتەکەی — هەموو ئەمانە بەشی ئەرکی ڕێبازین.</p>
+      </div>
+      <div class="rwb-bsection" data-section="B">
+        <h3>جیهانی فیزیکی — شتەکان چیرۆک دەگێڕن</h3>
+        <p>سۆفا، دەرگای قفڵکراو، خانووی باخچە — هەر شتێک لە فیلمەکەدا بارگی ستراکچەری هەڵدەگرێت.</p>
+      </div>
+      <div class="rwb-bsection" data-section="C">
+        <h3>ئاوازی فیلم — چوارچێوە</h3>
+        <p>تویستی کۆتایی هەموو شتێک دەگۆڕێتەوە. مۆنتاژی سەرەتا ئامادەکاری کۆتاییە. لە ٥ خولەکی کۆتاییدا بڕیار دەدرێت.</p>
+      </div>
+      <div class="rwb-bsection" data-section="general">
+        <h3>{{ project.title }}</h3>
+        <p>بڕیارێک هەڵبژێرە بۆ ئەوەی بەشی پەیوەندیدار لەم پانێلەدا نیشان بدرێت.</p>
+      </div>
+    </div>
+
+    {# Script panel #}
+    <div class="rwb-rpane" id="rwb-rscript">
+      <div class="rwb-script-line scene-hdr">دیمەنی ٣ — ژووری ناڵی — شەو</div>
+      <div class="rwb-script-line act">ناڵی لە تەختی مۆبایلەکەی سەیر دەکات. دوای ئەوەی بە گەشە قسەی کرد، تەلەفۆنەکە دادەنێت و ئەپی AI دەکاتەوە.</div>
+      <div class="rwb-script-line char">ناڵی</div>
+      <div class="rwb-script-line dlg">ئەوەی ئەمشەو قسەی کردین... ئایا ئەو ڕاستگۆ بوو؟</div>
+      <div class="rwb-script-line char">AI</div>
+      <div class="rwb-script-line dlg">بەپێی شیکردنەوەی دەنگ — ئاستی دڵنیایی ٧٨٪ بوو.</div>
+      <div class="rwb-script-line scene-hdr" style="margin-top:24px">دیمەنی ١٣ — ناوی خانوو — ڕۆژ</div>
+      <div class="rwb-script-line act">ناڵی لە ژوورێکی دیکەوە بە نهێنی تەلەفۆن بۆ AI دەکات.</div>
+      <div class="rwb-script-line char">ناڵی</div>
+      <div class="rwb-script-line dlg">ئەو قسەی کرد لەبارەی ئەوەی ئەویشنەوە بۆ ئەوەی کە بەسەر چووبوو... واتا چی؟</div>
+      <div class="rwb-script-line char">AI</div>
+      <div class="rwb-script-line dlg">واز لە خوێندنەوەی مێشکی مرۆڤەکان بهێنە.</div>
+      <div class="rwb-script-line scene-hdr" style="margin-top:24px">دیمەنی ٢١ — ژووری نیشتەجێبوون — ئێوارە</div>
+      <div class="rwb-script-line act">ناڵی ڕاهێنانی چیخۆڤ بەڕێوە دەبات. ئەکتەرەکان لەسەر سۆفا ئەکتەری دەکەن.</div>
+      <div class="rwb-script-line char">ناڵی</div>
+      <div class="rwb-script-line dlg">باشە، بیربکەنەوە ئەمە ساتی ڕاستییە. نینا ڕاستییەکە دەزانێت. ئێوە — ئەو ڕاستییە ناکارە.</div>
+    </div>
+  </div>{# /rwb-right #}
+
+</div>{# /rwb-split #}
+
+{# ── Footer ── #}
+<div class="rwb-footer">
+  <span>دروستکراوە لە <span style="color:var(--rw-pink);font-weight:700">ڕوانگە</span> — پلاتفۆرمی پێشبەرهەمهێنانی سینەمای کوردی</span>
+  <span class="en">{{ review.version|default:"v03" }} · {% now "Y-m-d" %}</span>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+/* Tab switching (left panel only) */
+function rwbTab(id, btn) {
+  document.querySelectorAll('#rwb-tabs .rwb-tab').forEach(function(b){ b.classList.remove('active'); });
+  document.querySelectorAll('.rwb-left .rwb-pane').forEach(function(p){ p.classList.remove('active'); });
+  btn.classList.add('active');
+  document.getElementById('rwb-' + id).classList.add('active');
+  /* Bible mode — full-width, hide right panel */
+  var split = document.querySelector('.rwb-split');
+  if (id === 'bible') {
+    split.classList.add('bb-mode');
+    if (!window._bbLoaded) { bbInit(); window._bbLoaded = true; }
+  } else {
+    split.classList.remove('bb-mode');
+  }
+}
+
+/* Right panel toggle */
+function rwbRight(id, btn) {
+  document.querySelectorAll('.rwb-right-tab').forEach(function(b){ b.classList.remove('active'); });
+  document.querySelectorAll('.rwb-rpane').forEach(function(p){ p.classList.remove('active'); });
+  btn.classList.add('active');
+  document.getElementById('rwb-' + id).classList.add('active');
+}
+
+/* Select decision → highlight bible section */
+function rwbSelect(el, section) {
+  document.querySelectorAll('.rwb-card').forEach(function(d){ d.classList.remove('selected'); });
+  el.classList.add('selected');
+  document.querySelectorAll('.rwb-bsection').forEach(function(s){ s.classList.remove('highlighted'); });
+  var target = document.querySelector('.rwb-bsection[data-section="' + section + '"]');
+  if (target) {
+    target.classList.add('highlighted');
+    target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+}
+
+/* Toggle locked decision */
+function rwbToggle(hdr) {
+  var body = hdr.nextElementSibling;
+  var open = body.classList.contains('open');
+  body.classList.toggle('open', !open);
+  hdr.classList.toggle('open', !open);
+}
+
+/* Toggle comment */
+function rwbComment(btn) {
+  var area = btn.closest('.rwb-card').querySelector('.rwb-comment');
+  area.classList.toggle('open');
+  if (area.classList.contains('open')) area.querySelector('textarea').focus();
+}
+
+/* ═══════════════════════════════════════════════════
+   BIBLE VIEWER — Filmustage-style sectioned reader
+   Parses markdown-style bible content into formatted
+   sections with TOC sidebar and proper typography.
+   ═══════════════════════════════════════════════════ */
+
+function _esc(t) {
+  var d = document.createElement('div');
+  d.textContent = t;
+  return d.innerHTML;
+}
+
+function bbInit() {
+  var el = document.getElementById('bb-data');
+  if (!el) return;
+  var data;
+  try { data = JSON.parse(el.textContent); } catch(e) { return; }
+
+  var content = '', title = '';
+  if (typeof data === 'string') {
+    content = data;
+  } else if (data && typeof data === 'object') {
+    content = data.content || '';
+    title = data.title || '';
+    /* if content is still a dict/object, try to extract text */
+    if (typeof content === 'object') {
+      content = JSON.stringify(content);
+    }
+  }
+  if (!content) return;
+
+  /* normalize: replace literal \n sequences with real newlines */
+  content = content.replace(/\\n/g, '\n');
+
+  var sections = bbParse(content);
+  var mainEl = document.getElementById('bb-content');
+  var tocEl = document.getElementById('bb-toc');
+
+  /* ── render main ── */
+  var html = '';
+  if (title) {
+    html += '<div class="bb-doc-title">' + _esc(title) + '</div>';
+    html += '<div class="bb-doc-meta">Story Bible</div>';
+  }
+  sections.forEach(function(s) { html += bbSection(s); });
+  mainEl.innerHTML = html;
+
+  /* ── render TOC ── */
+  var toc = '<div class="bb-toc-head">بەشەکان</div>';
+  sections.forEach(function(s) {
+    if (!s.title) return;
+    var label = s.title.replace(/\s*\([^)]+\)\s*$/, '');
+    toc += '<div class="bb-toc-item" data-t="' + s.id + '" onclick="bbNav(this)">' + _esc(label) + '</div>';
+  });
+  tocEl.innerHTML = toc;
+
+  /* activate first */
+  var first = tocEl.querySelector('.bb-toc-item');
+  if (first) first.classList.add('active');
+
+  /* scroll spy */
+  mainEl.addEventListener('scroll', function() { bbSpy(); });
+}
+
+/* ── Parse content into sections ── */
+function bbParse(text) {
+  /*
+   * The bible content may arrive in different newline states:
+   *   - real \n from JSON.parse
+   *   - literal two-char \n from double-escaping
+   *   - mixed
+   * Normalize everything to real newlines first.
+   */
+  text = text.replace(/\\n/g, '\n');
+  text = text.replace(/\r\n/g, '\n');
+
+  /*
+   * Insert * * * separators before section patterns the source omits.
+   * We look for Header\n--- patterns that are NOT already preceded by * * *.
+   * Also inject before known standalone headers (چیرۆکەکە).
+   */
+  /* Pattern A: any Header\n--- that isn't already after * * * */
+  text = text.replace(/\n(?!\s*\*\s*\*\s*\*)(\n*[^\n*|>_][^\n]*\n-{3,})/g, '\n\n* * *\n\n$1');
+  /* Pattern B: story header — no dashes, standalone title */
+  text = text.replace(/\n(?!\s*\*\s*\*\s*\*)\n*(چیرۆکەکە)\s*\n/g, '\n\n* * *\n\n$1\n');
+
+  var chunks = text.split(/\n\s*\*\s*\*\s*\*\s*\n/);
+  var out = [];
+
+  chunks.forEach(function(chunk, i) {
+    chunk = chunk.trim();
+    if (!chunk) return;
+
+    var title = '', body = chunk, enName = '';
+
+    /* header: line followed by --- dashes */
+    var m = chunk.match(/^([^\n]+)\n-{3,}\s*\n?([\s\S]*)/);
+    if (m) {
+      title = m[1].trim();
+      body = (m[2] || '').trim();
+    } else {
+      /* short first line as implicit header */
+      var lines = chunk.split('\n');
+      var fl = lines[0].trim();
+      if (fl.length < 70 && lines.length > 1 && !/^[|>*_]/.test(fl)) {
+        title = fl;
+        body = lines.slice(1).join('\n').trim();
+      }
+    }
+
+    /* detect **تێبینی:** as title */
+    if (!title) {
+      var nm = body.match(/^\*\*(.+?)[:：]\*\*\s*([\s\S]*)/);
+      if (nm) { title = nm[1].trim(); body = nm[2].trim(); }
+    }
+
+    /* English sub-name from parentheses */
+    var enM = title.match(/\(([^)]+)\)/);
+    if (enM) enName = enM[1];
+
+    /* detect section type */
+    var type = 'general';
+    if (/Core Statement|پوختەی سەرەکی/.test(title)) type = 'core';
+    else if (/Logline|کورتەی چیرۆک/.test(title)) type = 'logline';
+    else if (/کارەکتەرەکان|Characters/.test(title)) type = 'characters';
+    else if (/هێما|Key Props/.test(title)) type = 'props';
+    else if (/تێبینی/.test(title)) type = 'note';
+    else if (/خشتەی دیمەنەکان|Scene Table/.test(title)) type = 'scene-table';
+    else if (/چیرۆکەکە/.test(title)) type = 'story';
+
+    out.push({ id: 'bb-s' + i, title: title, enName: enName, body: body, type: type });
+  });
+
+  return out;
+}
+
+/* ── Render a section ── */
+function bbSection(s) {
+  var h = '<div class="bb-section" id="' + s.id + '">';
+
+  if (s.title) {
+    h += '<div class="bb-section-hdr">';
+    h += '<div class="bb-section-title">' + _esc(s.title) + '</div>';
+    if (s.enName) h += '<div class="bb-section-sub">' + _esc(s.enName) + '</div>';
+    h += '<div class="bb-section-rule"></div>';
+    h += '</div>';
+  }
+
+  switch (s.type) {
+    case 'core':      h += bbCore(s.body); break;
+    case 'logline':   h += bbLogline(s.body); break;
+    case 'characters':h += bbTable(s.body); break;
+    case 'props':     h += bbProps(s.body); break;
+    case 'note':      h += '<div class="bb-note">' + _esc(s.body) + '</div>'; break;
+    case 'scene-table':
+      h += bbParas(s.body); break;
+    default:          h += bbParas(s.body); break;
+  }
+
+  h += '</div>';
+  return h;
+}
+
+/* ── Core Statement (blockquote) ── */
+function bbCore(body) {
+  var lines = body.split('\n'), q = [], rest = [];
+  lines.forEach(function(l) {
+    if (l.trim().match(/^>/)) q.push(l.trim().replace(/^>\s*/, '').replace(/^"|"$/g, ''));
+    else rest.push(l);
+  });
+  var h = '';
+  if (q.length) h += '<div class="bb-quote">' + _esc(q.join(' ')) + '</div>';
+  var r = rest.join('\n').trim();
+  if (r) h += bbParas(r);
+  return h;
+}
+
+/* ── Logline (paragraphs + metadata) ── */
+function bbLogline(body) {
+  /* try double-newline split; fall back to single if only 1 chunk */
+  var paras = body.split(/\n\n+/);
+  if (paras.length <= 1) paras = body.split(/\n/);
+  var h = '';
+  paras.forEach(function(p) {
+    p = p.trim();
+    if (!p) return;
+    var mm = p.match(/^\*\*(.+?)[:：]\*\*\s*(.+)/);
+    if (mm) {
+      h += '<div class="bb-meta-row">' + _esc(mm[1]) + ': <span>' + _esc(mm[2]) + '</span></div>';
+    } else {
+      h += '<p class="bb-para">' + bbInline(p) + '</p>';
+    }
+  });
+  return h;
+}
+
+/* ── Table (characters) ── */
+function bbTable(body) {
+  var lines = body.split('\n').filter(function(l) { return l.trim(); });
+  var tLines = [], oLines = [];
+  lines.forEach(function(l) {
+    var t = l.trim();
+    /* detect pipe-delimited rows: must have at least 2 pipes */
+    (t.charAt(0) === '|' || (t.indexOf('|') > 0 && (t.match(/\|/g)||[]).length >= 2))
+      ? tLines.push(t) : oLines.push(l);
+  });
+  if (!tLines.length) return bbParas(body);
+
+  var h = '<div class="bb-table-wrap"><table class="bb-table">';
+  var isFirst = true;
+  tLines.forEach(function(row) {
+    /* skip separator: line with only pipes, dashes, colons, spaces */
+    if (/^\|[\s\-:|]+\|?\s*$/.test(row)) return;
+    if (/^[-:||\s]+$/.test(row)) return;
+    var cells = row.split('|').filter(function(c) { return c.trim() !== ''; });
+    if (!cells.length) return;
+    var tag = isFirst ? 'th' : 'td';
+    h += '<tr>';
+    cells.forEach(function(c) {
+      c = c.trim().replace(/^\*\*|\*\*$/g, '');
+      h += '<' + tag + '>' + _esc(c) + '</' + tag + '>';
+    });
+    h += '</tr>';
+    isFirst = false;
+  });
+  h += '</table></div>';
+  if (oLines.length) h += bbParas(oLines.join('\n'));
+  return h;
+}
+
+/* ── Props (bold name + description) ── */
+function bbProps(body) {
+  var parts = body.split(/\n(?=\*\*)/), h = '';
+  parts.forEach(function(part) {
+    part = part.trim();
+    if (!part) return;
+    var pm = part.match(/^\*\*(.+?)[:：]\*\*\s*([\s\S]*)/);
+    if (pm) {
+      h += '<div class="bb-prop">';
+      h += '<div class="bb-prop-name">' + _esc(pm[1]) + '</div>';
+      h += '<div class="bb-prop-desc">' + bbInline(pm[2].trim()) + '</div>';
+      h += '</div>';
+    } else {
+      h += '<p class="bb-para">' + bbInline(part) + '</p>';
+    }
+  });
+  return h;
+}
+
+/* ── Generic paragraphs ── */
+function bbParas(body) {
+  /* try double-newline split; fall back to single if only 1 chunk */
+  var paras = body.split(/\n\n+/);
+  if (paras.length <= 1) paras = body.split(/\n/);
+  var h = '';
+  paras.forEach(function(p) {
+    p = p.trim();
+    if (!p) return;
+    /* metadata line */
+    var mm = p.match(/^\*\*(.+?)[:：]\*\*\s*(.+)/);
+    if (mm) {
+      h += '<div class="bb-meta-row">' + _esc(mm[1]) + ': <span>' + _esc(mm[2]) + '</span></div>';
+      return;
+    }
+    /* italic note */
+    if (p.startsWith('_') && p.endsWith('_')) {
+      h += '<div class="bb-note">' + _esc(p.replace(/^_\(?|_\)?$/g, '').replace(/^\(|\)$/g, '')) + '</div>';
+      return;
+    }
+    /* blockquote */
+    if (p.match(/^>/m)) {
+      var qt = p.replace(/^>\s*/gm, '').replace(/^"|"$/g, '');
+      h += '<div class="bb-quote">' + _esc(qt) + '</div>';
+      return;
+    }
+    h += '<p class="bb-para">' + bbInline(p) + '</p>';
+  });
+  return h;
+}
+
+/* ── Inline formatting ── */
+function bbInline(text) {
+  text = _esc(text);
+  text = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  return text;
+}
+
+/* ── TOC navigation ── */
+function bbNav(el) {
+  document.querySelectorAll('.bb-toc-item').forEach(function(t) { t.classList.remove('active'); });
+  el.classList.add('active');
+  var target = document.getElementById(el.getAttribute('data-t'));
+  if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+/* ── Scroll spy ── */
+function bbSpy() {
+  var main = document.getElementById('bb-content');
+  var items = document.querySelectorAll('.bb-toc-item');
+  if (!main || !items.length) return;
+  var sects = main.querySelectorAll('.bb-section');
+  var current = '';
+  var top = main.getBoundingClientRect().top + 80;
+  sects.forEach(function(s) {
+    if (s.getBoundingClientRect().top < top) current = s.id;
+  });
+  items.forEach(function(item) {
+    item.classList.toggle('active', item.getAttribute('data-t') === current);
+  });
+}
+</script>
+{% endblock %}

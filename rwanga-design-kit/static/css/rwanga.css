@@ -1385,11 +1385,12 @@ html, body {
 }
 
 /* ── RESPONSIVE ─────────────────────────────────────────── */
+/* See tasks/active/MOBILE-RESPONSIVE-REDESIGN.md for the full plan */
+
 @media (max-width: 960px) {
   .rw-grid-2, .rw-wardrobe-grid, .rw-cont-grid, .rw-light-grid, .rw-mov-grid,
   .rw-exp-grid { grid-template-columns: 1fr; }
   .rw-scene-panel { width: 200px; }
-  .rw-pad-lg { padding: var(--rw-pad-md); }
 }
 
 @media (max-width: 640px) {

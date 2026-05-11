@@ -1,0 +1,67 @@
+{# ════════════════════════════════════════════════════════
+   RWANGA — progress/changelog.html
+   Change record timeline.
+
+   Context:
+     changes — QuerySet[ChangeRecord]
+   ════════════════════════════════════════════════════════ #}
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "تۆماری گۆڕانکاری" %} — Progress{% endblock %}
+
+{% block content %}
+<div id="rw-content" style="overflow-y:auto;flex:1;padding:var(--rw-pad-lg)">
+
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--rw-pad-lg)">
+    <h1 style="font-size:20px;font-weight:700">{% trans "تۆماری گۆڕانکاری" %}</h1>
+    <a href="{% url 'progress:dashboard' %}" class="rw-btn rw-btn-ghost">← {% trans "داشبۆرد" %}</a>
+  </div>
+
+  <div style="background:var(--rw-surface);border:1px solid var(--rw-border)">
+    {% for change in changes %}
+    <div style="display:flex;gap:16px;padding:16px var(--rw-pad-md);border-bottom:1px solid var(--rw-border-2)">
+
+      {# Change type color strip #}
+      <div style="width:4px;flex-shrink:0;background:{% if change.change_type == 'model_added' %}var(--rw-vis){% elif change.change_type == 'model_modified' %}var(--rw-amber){% elif change.change_type == 'migration_run' %}var(--rw-plan){% elif change.change_type == 'dependency_added' %}var(--rw-break){% else %}var(--rw-border){% endif %};border-radius:2px"></div>
+
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:5px">
+          <span class="rw-badge rw-badge-v" style="font-family:var(--rw-font-en);font-size:9px">{{ change.change_type }}</span>
+          <span style="font-size:12px;font-weight:600;color:var(--rw-amber);font-family:var(--rw-font-en)">{{ change.app_name }}</span>
+          {% if change.commit_hash %}
+          <code style="font-size:10px;background:var(--rw-surface-2);border:1px solid var(--rw-border);padding:2px 6px;color:var(--rw-text-3);font-family:var(--rw-font-en)" dir="ltr">
+            {{ change.commit_hash|slice:":8" }}
+          </code>
+          {% endif %}
+          <span style="font-size:11px;color:var(--rw-text-3);font-family:var(--rw-font-en);margin-inline-start:auto" dir="ltr">
+            {{ change.created_at|date:"Y-m-d H:i" }}
+          </span>
+        </div>
+        <p style="font-size:13px;color:var(--rw-text-2);line-height:1.6;margin-bottom:0">{{ change.description }}</p>
+        {% if change.files_changed %}
+        <div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap">
+          {% for f in change.files_changed %}
+          <code style="font-size:10px;background:var(--rw-surface-2);border:1px solid var(--rw-border);padding:2px 6px;color:var(--rw-text-3);font-family:var(--rw-font-en)" dir="ltr">{{ f }}</code>
+          {% endfor %}
+        </div>
+        {% endif %}
+        {% if change.diff_summary %}
+        <div style="margin-top:6px;font-size:11px;color:var(--rw-text-3);font-style:italic">{{ change.diff_summary }}</div>
+        {% endif %}
+        {% if change.task %}
+        <div style="margin-top:6px">
+          <a href="{% url 'progress:task_detail' change.task.pk %}" style="font-size:11px;color:var(--rw-text-3)">
+            {% trans "تاسک:" %} {{ change.task.title|truncatechars:50 }}
+          </a>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+    {% empty %}
+    {% include "components/_empty_state.html" with icon="📋" title=_("هێشتا گۆڕانکارییەک نییە") sub=_("تۆماری گۆڕانکارییەکان لێرە دەردەکەون") %}
+    {% endfor %}
+  </div>
+
+</div>
+{% endblock %}

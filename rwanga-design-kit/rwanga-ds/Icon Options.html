@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rwanga — Icon Direction Options</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+:root {
+  --rw-bg:        #0A0A0D;
+  --rw-surface:   #111116;
+  --rw-surface-2: #18181F;
+  --rw-border:    #222230;
+  --rw-text:      #EDEAD8;
+  --rw-text-2:    #78788C;
+  --rw-text-3:    #35353F;
+  --rw-pink:      #F72585;
+  --rw-amber:     #D4A574;
+  --rw-script:    #FF6B35;
+  --rw-break:     #2D5BE3;
+  --rw-vis:       #00A896;
+  --rw-plan:      #7C3AED;
+  --rw-shoot:     #F72585;
+}
+
+*, *::before, *::after { box-shadow: none !important; }
+
+body {
+  background: var(--rw-bg);
+  color: var(--rw-text);
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  min-height: 100vh;
+}
+
+/* ── Page chrome ── */
+.page-header {
+  padding: 48px 64px 32px;
+  border-bottom: 1px solid var(--rw-border);
+}
+.page-title { font-size: 32px; font-weight: 700; letter-spacing: -0.5px; }
+.page-sub   { font-size: 15px; color: var(--rw-text-2); margin-top: 6px; max-width: 560px; line-height: 1.7; }
+
+.option-block { padding: 56px 64px; border-bottom: 1px solid var(--rw-border); }
+.option-num   { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.4px; color: var(--rw-text-3); margin-bottom: 6px; }
+.option-name  { font-size: 24px; font-weight: 700; margin-bottom: 6px; }
+.option-desc  { font-size: 14px; color: var(--rw-text-2); line-height: 1.7; margin-bottom: 40px; max-width: 560px; }
+
+/* ── Rail mockup shared ── */
+.rail-mock {
+  width: 72px;
+  background: #050507;
+  border: 1px solid var(--rw-border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 0;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.rail-logo-box {
+  width: 40px; height: 40px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 20px;
+  font-family: 'Cairo', sans-serif;
+  font-size: 17px; font-weight: 700; color: #fff;
+}
+.rail-icon-slot {
+  width: 48px; height: 48px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; position: relative;
+  border-radius: 2px;
+  transition: background 0.1s;
+}
+.rail-sep { width: 28px; height: 1px; background: rgba(255,255,255,.05); margin: 6px 0; }
+.rail-spacer { flex: 1; }
+
+/* icon grid for comparing sets */
+.icon-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 2px;
+  background: var(--rw-border);
+  border: 1px solid var(--rw-border);
+  margin-bottom: 32px;
+}
+.icon-cell {
+  background: var(--rw-surface);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 10px; padding: 20px 12px;
+}
+.icon-label { font-size: 10px; color: var(--rw-text-3); text-align: center; letter-spacing: 0.5px; }
+
+
+/* ═══════════════════════════════════════════
+   OPTION A — Phosphor-style thin stroke
+   Clean, editorial, like Linear / Vercel / Figma
+   ═══════════════════════════════════════════ */
+
+/* SVG inline icons — all stroke-based, same weight */
+.ico-thin { stroke: currentColor; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+
+/* glow filter on hover */
+.opt-a .rail-icon-slot { color: #4A4A5A; }
+.opt-a .rail-icon-slot:hover { color: #EDEAD8; }
+.opt-a .rail-icon-slot.active {
+  color: #fff;
+}
+.opt-a .rail-icon-slot.active::before {
+  content: '';
+  position: absolute;
+  inset-inline-start: 0;
+  top: 10px; bottom: 10px;
+  width: 2px;
+  background: var(--rw-amber);
+  box-shadow: 0 0 6px var(--rw-amber) !important;
+}
+
+/* ═══════════════════════════════════════════
+   OPTION B — Neon glow: stroke icons + CSS glow
+   Like Framer / dark SaaS dashboards
+   ═══════════════════════════════════════════ */
+
+.opt-b .rail-icon-slot { color: #3A3A4A; }
+.opt-b .rail-icon-slot:hover { color: #D4A574; filter: drop-shadow(0 0 5px rgba(212,165,116,0.5)); }
+.opt-b .rail-icon-slot.active {
+  color: #D4A574;
+  filter: drop-shadow(0 0 8px rgba(212,165,116,0.6)) drop-shadow(0 0 16px rgba(212,165,116,0.25));
+}
+.opt-b .rail-icon-slot.active::before {
+  content: '';
+  position: absolute;
+  inset-inline-start: 0; top: 8px; bottom: 8px;
+  width: 2px;
+  background: var(--rw-amber);
+  filter: blur(2px) !important;
+  box-shadow: 0 0 8px var(--rw-amber), 0 0 16px rgba(212,165,116,0.4) !important;
+}
+
+/* section-coloured glow variants */
+.opt-b .glow-script { color: var(--rw-script); filter: drop-shadow(0 0 6px rgba(255,107,53,0.5)); }
+.opt-b .glow-break  { color: #7FA8FF; filter: drop-shadow(0 0 6px rgba(127,168,255,0.5)); }
+.opt-b .glow-vis    { color: var(--rw-vis);   filter: drop-shadow(0 0 6px rgba(0,168,150,0.5)); }
+.opt-b .glow-plan   { color: #B39DFF; filter: drop-shadow(0 0 6px rgba(179,157,255,0.5)); }
+.opt-b .glow-shoot  { color: var(--rw-shoot); filter: drop-shadow(0 0 6px rgba(247,37,133,0.5)); }
+
+/* ═══════════════════════════════════════════
+   OPTION C — Filled + subtle glow halo
+   More cinematic, less techy
+   ═══════════════════════════════════════════ */
+
+.opt-c .rail-icon-slot { color: #2A2A36; }
+.opt-c .rail-icon-slot:hover { color: #6A6A7E; background: rgba(255,255,255,.03); }
+.opt-c .rail-icon-slot.active {
+  color: #fff;
+  background: rgba(212,165,116,0.08);
+}
+.opt-c .rail-icon-slot.active svg {
+  filter: drop-shadow(0 0 4px rgba(255,255,255,0.3)) drop-shadow(0 0 10px rgba(212,165,116,0.2));
+}
+.opt-c .rail-icon-slot.active::before {
+  content: '';
+  position: absolute;
+  inset-inline-start: 0; top: 8px; bottom: 8px;
+  width: 2px;
+  background: linear-gradient(to bottom, rgba(212,165,116,0.2), var(--rw-amber), rgba(212,165,116,0.2));
+  box-shadow: 0 0 6px var(--rw-amber) !important;
+}
+
+/* ═══════════════════════════════════════════
+   OPTION D — Minimal dot + label
+   Like Notion, Linear — ultra clean
+   ═══════════════════════════════════════════ */
+
+.opt-d .rail-icon-slot {
+  width: 100%;
+  height: auto;
+  flex-direction: column;
+  gap: 5px;
+  padding: 10px 0;
+  border-radius: 0;
+  color: #3A3A4A;
+}
+.opt-d .rail-icon-slot span.ilabel {
+  font-size: 9px; font-weight: 600; letter-spacing: 0.3px; text-align: center;
+  line-height: 1;
+  font-family: 'Inter', sans-serif;
+}
+.opt-d .rail-icon-slot:hover { color: #EDEAD8; }
+.opt-d .rail-icon-slot.active { color: #D4A574; }
+.opt-d .rail-icon-slot.active::before {
+  content: '';
+  position: absolute;
+  inset-inline-start: 0; top: 0; bottom: 0;
+  width: 2px;
+  background: var(--rw-amber);
+  box-shadow: 0 0 5px var(--rw-amber) !important;
+}
+
+/* ═══════════════════════════════════════════
+   OPTION E — Cinema film reel aesthetic
+   Custom SVG icons, amber accents, cinematic
+   ═══════════════════════════════════════════ */
+.opt-e .rail-icon-slot { color: #2E2E3A; }
+.opt-e .rail-icon-slot:hover { color: #EDEAD8; background: rgba(212,165,116,0.04); }
+.opt-e .rail-icon-slot.active {
+  color: #D4A574;
+  background: rgba(212,165,116,0.06);
+}
+.opt-e .rail-icon-slot.active svg {
+  filter: drop-shadow(0 0 3px rgba(212,165,116,0.4));
+}
+.opt-e .rail-icon-slot.active::before {
+  content: '';
+  position: absolute;
+  inset-inline-start: 0; top: 6px; bottom: 6px;
+  width: 2px;
+  background: var(--rw-amber);
+  box-shadow: 0 0 8px rgba(212,165,116,.6), 0 0 18px rgba(212,165,116,.2) !important;
+}
+
+/* choice chip */
+.choice-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 20px;
+  background: var(--rw-surface-2);
+  border: 1px solid var(--rw-border);
+  color: var(--rw-text-2);
+  font-size: 13px; font-weight: 600;
+  cursor: pointer;
+  transition: all 0.12s;
+  font-family: 'Inter', sans-serif;
+}
+.choice-btn:hover { border-color: var(--rw-amber); color: var(--rw-amber); }
+.choice-btn.selected { background: var(--rw-amber); color: #fff; border-color: var(--rw-amber); }
+
+/* comparison table */
+.compare-table { width: 100%; border-collapse: collapse; }
+.compare-table th { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.9px; color: var(--rw-text-3); padding: 12px 16px; text-align: start; background: var(--rw-surface); border-bottom: 1px solid var(--rw-border); }
+.compare-table td { font-size: 13px; color: var(--rw-text-2); padding: 14px 16px; border-bottom: 1px solid var(--rw-border); vertical-align: middle; }
+.compare-table td:first-child { font-weight: 700; color: var(--rw-text); }
+.check { color: var(--rw-vis); font-size: 16px; }
+.cross { color: var(--rw-shoot); font-size: 16px; }
+</style>
+</head>
+<body>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+    <div style="width:36px;height:36px;background:#F72585;display:flex;align-items:center;justify-content:center;font-family:'Cairo',sans-serif;font-size:15px;font-weight:700;color:#fff">ڕ</div>
+    <span style="color:var(--rw-text-2);font-size:13px">Rwanga Design System</span>
+  </div>
+  <div class="page-title">Icon Direction — 5 Options</div>
+  <div class="page-sub">Five distinct icon styles for the rail sidebar and throughout the platform. All shown at actual rail size (28px). Pick your direction — I'll apply it everywhere.</div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     OPTION A — Phosphor / Heroicons thin stroke
+══════════════════════════════════════════════════ -->
+<div class="option-block opt-a">
+  <div class="option-num">Option A</div>
+  <div class="option-name">Editorial Stroke — Phosphor / Heroicons style</div>
+  <div class="option-desc">Clean thin-stroke lines, no fill. Same visual weight as StudioBinder's nav. Professional, neutral, works in both dark and light mode without adjustment.</div>
+
+  <div style="display:flex;gap:48px;align-items:flex-start;flex-wrap:wrap">
+    <!-- Rail mockup -->
+    <div class="rail-mock opt-a">
+      <div class="rail-logo-box" style="background:#F72585;width:40px;height:40px;border-radius:2px">ڕ</div>
+
+      <div class="rail-icon-slot active" title="Projects">
+        <svg width="24" height="24" viewBox="0 0 24 24" class="ico-thin"><rect x="3" y="3" width="8" height="8" rx="1"/><rect x="13" y="3" width="8" height="8" rx="1"/><rect x="3" y="13" width="8" height="8" rx="1"/><rect x="13" y="13" width="8" height="8" rx="1"/></svg>
+      </div>
+      <div class="rail-icon-slot" title="Team">
+        <svg width="24" height="24" viewBox="0 0 24 24" class="ico-thin"><circle cx="9" cy="7" r="3"/><path d="M3 21v-1a6 6 0 0 1 6-6h0a6 6 0 0 1 6 6v1"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><path d="M21 21v-1a4 4 0 0 0-3-3.85"/></svg>
+      </div>
+      <div class="rail-icon-slot" title="Locations">
+        <svg width="24" height="24" viewBox="0 0 24 24" class="ico-thin"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+      </div>
+      <div class="rail-sep"></div>
+      <div class="rail-icon-slot" title="Reviews" style="color:#6A4AFF">
+        <svg width="24" height="24" viewBox="0 0 24 24" class="ico-thin" style="stroke:#6A4AFF"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      </div>
+      <div class="rail-icon-slot" title="Community" style="color:#00A896">
+        <svg width="24" height="24" viewBox="0 0 24 24" class="ico-thin" style="stroke:#00A896"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      </div>
+      <div class="rail-sep"></div>
+      <div class="rail-icon-slot" title="Settings">
+        <svg width="24" height="24" viewBox="0 0 24 24" class="ico-thin"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </div>
+      <div class="rail-spacer"></div>
+      <div class="rail-icon-slot" title="Theme" style="color:#3A3A4A">
+        <svg width="20" height="20" viewBox="0 0 24 24" class="ico-thin"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+      </div>
+    </div>
+
+    <!-- Full icon set -->
+    <div style="flex:1">
+      <div style="font-size:11px;color:var(--rw-text-3);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">All nav icons at 28px</div>
+      <div class="icon-grid" style="grid-template-columns:repeat(6,1fr)">
+        <div class="icon-cell">
+          <svg width="28" height="28" viewBox="0 0 24 24" class="ico-thin" style="color:#EDEAD8"><rect x="3" y="3" width="8" height="8" rx="1"/><rect x="13" y="3" width="8" height="8" rx="1"/><rect x="3" y="13" width="8" height="8" rx="1"/><rect x="13" y="13" width="8" height="8" rx="1"/></svg>
+          <span class="icon-label">Projects</span>
+        </div>
+        <div class="icon-cell">
+          <svg width="28" height="28" viewBox="0 0 24 24" class="ico-thin" style="color:#EDEAD8"><circle cx="9" cy="7" r="3"/><path d="M3 21v-1a6 6 0 0 1 6-6h0a6 6 0 0 1 6 6v1"/><path d="M16 3.13a4 4 0 0 1 0 7.75M21 21v-1a4 4 0 0 0-3-3.85"/></svg>
+          <span class="icon-label">Team</span>
+        </div>
+        <div class="icon-cell">
+          <svg width="28" height="28" viewBox="0 0 24 24" class="ico-thin" style="color:#EDEAD8"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+          <span class="icon-label">Locations</span>
+        </div>
+        <div class="icon-cell">
+          <svg width="28" height="28" viewBox="0 0 24 24" class="ico-thin" style="color:#6A4AFF"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          <span class="icon-label">Reviews</span>
+        </div>
+        <div class="icon-cell">
+          <svg width="28" height="28" viewBox="0 0 24 24" class="ico-thin" style="color:#00A896"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <span class="icon-label">Community</span>
+        </div>
+        <div class="icon-cell">
+          <svg width="28" height="28" viewBox="0 0 24 24" class="ico-thin" style="color:#EDEAD8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          <span class="icon-label">Settings</span>
+        </div>
+        <div class="icon-cell">
+          <svg width="28" height="28" viewBox="0 0 24 24" class="ico-thin" style="color:#EDEAD8"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
+          <span class="icon-label">Script</span>
+        </div>
+        <div class="icon-cell">
+          <svg width="28" height="28" viewBox="0 0 24 24" class="ico-thin" style="color:#EDEAD8"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          <span class="icon-label">Shot List</span>
+        </div>
+        <div class="icon-cell">
+          <svg width="28" height="28" viewBox="0 0 24 24" class="ico-thin" style="color:#EDEAD8"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          <span class="icon-label">Storyboard</span>
+        </div>
+        <div class="icon-cell">
+          <svg width="28" height="28" viewBox="0 0 24 24" class="ico-thin" style="color:#EDEAD8"><rect x="2" y="7" width="20" height="15" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><circle cx="12" cy="13" r="3"/></svg>
+          <span class="icon-label">Camera</span>
+        </div>
+        <div class="icon-cell">
+          <svg width="28" height="28" viewBox="0 0 24 24" class="ico-thin" style="color:#EDEAD8"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          <span class="icon-label">Schedule</span>
+        </div>
+        <div class="icon-cell">
+          <svg width="28" height="28" viewBox="0 0 24 24" class="ico-thin" style="color:#EDEAD8"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <span class="icon-label">Notify</span>
+        </div>
+      </div>
+      <div style="font-size:12px;color:var(--rw-text-3);font-style:italic">Active state: white + amber left accent bar</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════
+     OPTION B — Neon glow stroke
+══════════════════════════════════════════════════ -->
+<div class="option-block opt-b">
+  <div class="option-num">Option B</div>
+  <div class="option-name">Neon Glow — Stroke icons with CSS drop-shadow glow</div>
+  <div class="option-desc">Same thin stroke icons as A, but with a CSS <code>drop-shadow</code> glow on active and hover states. Amber glow for nav, section colours for section-specific icons. Cinematic, dark-first. The glow is tasteful — not comic-book.</div>
+
+  <div style="display:flex;gap:48px;align-items:flex-start;flex-wrap:wrap">
+    <div class="rail-mock opt-b">
+      <div class="rail-logo-box" style="background:#F72585;border-radius:2px;box-shadow:0 0 12px rgba(247,37,133,.4),0 0 24px rgba(247,37,133,.15)">ڕ</div>
+
+      <div class="rail-icon-slot active" title="Projects">
+        <svg width="26" height="26" viewBox="0 0 24 24" class="ico-thin"><rect x="3" y="3" width="8" height="8" rx="1"/><rect x="13" y="3" width="8" height="8" rx="1"/><rect x="3" y="13" width="8" height="8" rx="1"/><rect x="13" y="13" width="8" height="8" rx="1"/></svg>
+      </div>
+      <div class="rail-icon-slot" title="Team">
+        <svg width="26" height="26" viewBox="0 0 24 24" class="ico-thin"><circle cx="9" cy="7" r="3"/><path d="M3 21v-1a6 6 0 0 1 12 0v1"/><path d="M16 3.13a4 4 0 0 1 0 7.75M21 21v-1a4 4 0 0 0-3-3.85"/></svg>
+      </div>
+      <div class="rail-icon-slot" title="Locations">
+        <svg width="26" height="26" viewBox="0 0 24 24" class="ico-thin"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+      </div>
+      <div class="rail-sep"></div>
+      <div class="rail-icon-slot glow-plan" title="Reviews">
+        <svg width="26" height="26" viewBox="0 0 24 24" class="ico-thin" style="stroke:currentColor"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      </div>
+      <div class="rail-icon-slot glow-vis" title="Community">
+        <svg width="26" height="26" viewBox="0 0 24 24" class="ico-thin" style="stroke:currentColor"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      </div>
+      <div class="rail-sep"></div>
+      <div class="rail-icon-slot" title="Settings">
+        <svg width="26" height="26" viewBox="0 0 24 24" class="ico-thin"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </div>
+      <div class="rail-spacer"></div>
+      <div class="rail-icon-slot" title="Theme" style="color:#2E2E3A">
+        <svg width="20" height="20" viewBox="0 0 24 24" class="ico-thin"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+      </div>
+    </div>
+
+    <!-- Glow states showcase -->
+    <div style="flex:1">
+      <div style="font-size:11px;color:var(--rw-text-3);text-transform:uppercase;letter-spacing:1px;margin-bottom:16px">Glow states — 4 intensities</div>
+      <div style="display:flex;gap:32px;flex-wrap:wrap;margin-bottom:32px">
+        <!-- Inactive -->
+        <div style="text-align:center">
+          <div style="width:56px;height:56px;background:#050507;border:1px solid var(--rw-border);display:flex;align-items:center;justify-content:center;margin-bottom:8px">
+            <svg width="26" height="26" viewBox="0 0 24 24" class="ico-thin" style="color:#2A2A38"><rect x="3" y="3" width="8" height="8" rx="1"/><rect x="13" y="3" width="8" height="8" rx="1"/><rect x="3" y="13" width="8" height="8" rx="1"/><rect x="13" y="13" width="8" height="8" rx="1"/></svg>
+          </div>
+          <div style="font-size:10px;color:var(--rw-text-3)">Rest</div>
+        </div>
+        <!-- Hover -->
+        <div style="text-align:center">
+          <div style="width:56px;height:56px;background:#050507;border:1px solid var(--rw-border);display:flex;align-items:center;justify-content:center;margin-bottom:8px">
+            <svg width="26" height="26" viewBox="0 0 24 24" class="ico-thin" style="color:#D4A574;filter:drop-shadow(0 0 5px rgba(212,165,116,0.5))"><rect x="3" y="3" width="8" height="8" rx="1"/><rect x="13" y="3" width="8" height="8" rx="1"/><rect x="3" y="13" width="8" height="8" rx="1"/><rect x="13" y="13" width="8" height="8" rx="1"/></svg>
+          </div>
+          <div style="font-size:10px;color:var(--rw-text-3)">Hover</div>
+        </div>
+        <!-- Active amber -->
+        <div style="text-align:center">
+          <div style="width:56px;height:56px;background:#050507;border:1px solid var(--rw-border);display:flex;align-items:center;justify-content:center;margin-bottom:8px;position:relative">
+            <div style="position:absolute;left:0;top:10px;bottom:10px;width:2px;background:#D4A574;filter:blur(1px);box-shadow:0 0 6px #D4A574,0 0 14px rgba(212,165,116,.3)"></div>
+            <svg width="26" height="26" viewBox="0 0 24 24" class="ico-thin" style="color:#D4A574;filter:drop-shadow(0 0 8px rgba(212,165,116,0.6)) drop-shadow(0 0 16px rgba(212,165,116,0.25))"><rect x="3" y="3" width="8" height="8" rx="1"/><rect x="13" y="3" width="8" height="8" rx="1"/><rect x="3" y="13" width="8" height="8" rx="1"/><rect x="13" y="13" width="8" height="8" rx="1"/></svg>
+          </div>
+          <div style="font-size:10px;color:var(--rw-text-3)">Active / Amber</div>
+        </div>
+        <!-- Section glow - purple -->
+        <div style="text-align:center">
+          <div style="width:56px;height:56px;background:#050507;border:1px solid var(--rw-border);display:flex;align-items:center;justify-content:center;margin-bottom:8px">
+            <svg width="26" height="26" viewBox="0 0 24 24" class="ico-thin" style="color:#B39DFF;filter:drop-shadow(0 0 6px rgba(179,157,255,0.55))"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          </div>
+          <div style="font-size:10px;color:var(--rw-text-3)">Reviews / Purple</div>
+        </div>
+        <!-- Section glow - teal -->
+        <div style="text-align:center">
+          <div style="width:56px;height:56px;background:#050507;border:1px solid var(--rw-border);display:flex;align-items:center;justify-content:center;margin-bottom:8px">
+            <svg width="26" height="26" viewBox="0 0 24 24" class="ico-thin" style="color:#00A896;filter:drop-shadow(0 0 6px rgba(0,168,150,0.55))"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          </div>
+          <div style="font-size:10px;color:var(--rw-text-3)">Community / Teal</div>
+        </div>
+        <!-- Pink glow -->
+        <div style="text-align:center">
+          <div style="width:56px;height:56px;background:#050507;border:1px solid var(--rw-border);display:flex;align-items:center;justify-content:center;margin-bottom:8px">
+            <svg width="26" height="26" viewBox="0 0 24 24" class="ico-thin" style="color:#F72585;filter:drop-shadow(0 0 6px rgba(247,37,133,0.55))"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+          </div>
+          <div style="font-size:10px;color:var(--rw-text-3)">Alert / Pink</div>
+        </div>
+      </div>
+      <div style="font-size:12px;color:var(--rw-text-3);font-style:italic">⭐ Recommended — tasteful glow, professional, dark-native</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════
+     OPTION C — Filled with glow halo
+══════════════════════════════════════════════════ -->
+<div class="option-block opt-c">
+  <div class="option-num">Option C</div>
+  <div class="option-name">Filled + Subtle White Glow</div>
+  <div class="option-desc">Solid filled icons (more visible at small sizes on TVs and iPads). Active state adds a very soft white glow — less neon, more cinematic. Background tint on active slot.</div>
+
+  <div style="display:flex;gap:48px;align-items:flex-start;flex-wrap:wrap">
+    <div class="rail-mock opt-c">
+      <div class="rail-logo-box" style="background:#F72585;border-radius:2px">ڕ</div>
+
+      <div class="rail-icon-slot active" title="Projects">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M3 3h8v8H3zm10 0h8v8h-8zM3 13h8v8H3zm10 0h8v8h-8z"/></svg>
+      </div>
+      <div class="rail-icon-slot" title="Team">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+      </div>
+      <div class="rail-icon-slot" title="Locations">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+      </div>
+      <div class="rail-sep"></div>
+      <div class="rail-icon-slot" title="Reviews" style="color:#7C3AED">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+      </div>
+      <div class="rail-icon-slot" title="Community" style="color:#00A896">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+      </div>
+      <div class="rail-sep"></div>
+      <div class="rail-icon-slot" title="Settings">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87a.48.48 0 0 0 .12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32a.48.48 0 0 0-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+      </div>
+      <div class="rail-spacer"></div>
+    </div>
+
+    <div style="flex:1">
+      <div style="font-size:11px;color:var(--rw-text-3);text-transform:uppercase;letter-spacing:1px;margin-bottom:16px">Active state detail — filled + halo</div>
+      <div style="display:flex;gap:24px;align-items:center;flex-wrap:wrap;margin-bottom:20px">
+        <div style="text-align:center">
+          <div style="width:72px;height:72px;background:#050507;border:1px solid var(--rw-border);display:flex;align-items:center;justify-content:center;margin-bottom:8px;position:relative">
+            <div style="position:absolute;left:0;top:8px;bottom:8px;width:2px;background:linear-gradient(to bottom,rgba(212,165,116,.15),#D4A574,rgba(212,165,116,.15));box-shadow:0 0 8px rgba(212,165,116,.5)"></div>
+            <div style="background:rgba(212,165,116,.08);width:48px;height:48px;display:flex;align-items:center;justify-content:center;border-radius:2px">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="#fff" style="filter:drop-shadow(0 0 4px rgba(255,255,255,0.3)) drop-shadow(0 0 10px rgba(212,165,116,0.2))"><path d="M3 3h8v8H3zm10 0h8v8h-8zM3 13h8v8H3zm10 0h8v8h-8z"/></svg>
+            </div>
+          </div>
+          <div style="font-size:10px;color:var(--rw-text-3)">Active — filled+halo</div>
+        </div>
+        <div style="font-size:13px;color:var(--rw-text-2);max-width:300px;line-height:1.8">
+          More legible on TVs and smartboards at distance. The background tint makes the active slot clearly defined even without glow. Best for accessibility.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════
+     OPTION D — Text + icon labels (StudioBinder-ish)
+══════════════════════════════════════════════════ -->
+<div class="option-block opt-d">
+  <div class="option-num">Option D</div>
+  <div class="option-name">Icon + Label — StudioBinder / Notion style</div>
+  <div class="option-desc">Icon above a micro-label. More descriptive, especially for new users. Works at 72–80px rail width. Active state amber label + glow bar. Less cinematic, more product-forward.</div>
+
+  <div style="display:flex;gap:48px;align-items:flex-start;flex-wrap:wrap">
+    <div class="rail-mock opt-d" style="width:80px;padding:16px 0;gap:0">
+      <div class="rail-logo-box" style="background:#F72585;border-radius:2px;width:40px;height:40px;margin-bottom:16px">ڕ</div>
+
+      <div class="rail-icon-slot active flex-column" style="width:80px;padding:10px 0;height:auto">
+        <svg width="22" height="22" viewBox="0 0 24 24" class="ico-thin"><rect x="3" y="3" width="8" height="8" rx="1"/><rect x="13" y="3" width="8" height="8" rx="1"/><rect x="3" y="13" width="8" height="8" rx="1"/><rect x="13" y="13" width="8" height="8" rx="1"/></svg>
+        <span class="ilabel">PROJECTS</span>
+      </div>
+      <div class="rail-icon-slot flex-column" style="width:80px;padding:10px 0;height:auto">
+        <svg width="22" height="22" viewBox="0 0 24 24" class="ico-thin"><circle cx="9" cy="7" r="3"/><path d="M3 21v-1a6 6 0 0 1 12 0v1M16 3.13a4 4 0 0 1 0 7.75M21 21v-1a4 4 0 0 0-3-3.85"/></svg>
+        <span class="ilabel">TEAM</span>
+      </div>
+      <div class="rail-icon-slot flex-column" style="width:80px;padding:10px 0;height:auto">
+        <svg width="22" height="22" viewBox="0 0 24 24" class="ico-thin"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+        <span class="ilabel">LOCATIONS</span>
+      </div>
+      <div class="rail-sep" style="width:40px"></div>
+      <div class="rail-icon-slot flex-column" style="width:80px;padding:10px 0;height:auto;color:#7C3AED">
+        <svg width="22" height="22" viewBox="0 0 24 24" class="ico-thin" style="stroke:currentColor"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        <span class="ilabel" style="color:#7C3AED">REVIEWS</span>
+      </div>
+      <div class="rail-icon-slot flex-column" style="width:80px;padding:10px 0;height:auto;color:#00A896">
+        <svg width="22" height="22" viewBox="0 0 24 24" class="ico-thin" style="stroke:currentColor"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <span class="ilabel" style="color:#00A896">COMMUNITY</span>
+      </div>
+    </div>
+    <div style="flex:1;color:var(--rw-text-2);font-size:13px;line-height:1.9">
+      ✓ Most discoverable for new users<br>
+      ✓ No tooltips needed<br>
+      ✗ Takes more vertical space<br>
+      ✗ Less cinematic — feels more like a business app<br>
+      ✗ Kurdish labels need RTL consideration
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════
+     OPTION E — Cinema custom: film-strip glyphs
+══════════════════════════════════════════════════ -->
+<div class="option-block opt-e">
+  <div class="option-num">Option E ⭐</div>
+  <div class="option-name">Cinema Glyphs — Custom SVG with Amber Glow</div>
+  <div class="option-desc">Custom-drawn cinema-domain SVG icons instead of generic UI icons. Film frames, clapperboards, viewfinders, film reels. Amber glow on active. Unique to Rwanga — no other platform looks like this. Highest visual identity.</div>
+
+  <div style="display:flex;gap:48px;align-items:flex-start;flex-wrap:wrap">
+    <div class="rail-mock opt-e">
+      <div class="rail-logo-box" style="background:#F72585;border-radius:2px;filter:drop-shadow(0 0 8px rgba(247,37,133,.35))">ڕ</div>
+
+      <!-- Film frame grid (projects) -->
+      <div class="rail-icon-slot active" title="Projects">
+        <svg width="26" height="26" viewBox="0 0 24 24" class="ico-thin">
+          <rect x="2" y="4" width="20" height="16" rx="1"/>
+          <line x1="2" y1="8" x2="22" y2="8"/><line x1="2" y1="16" x2="22" y2="16"/>
+          <line x1="6" y1="4" x2="6" y2="8"/><line x1="10" y1="4" x2="10" y2="8"/>
+          <line x1="14" y1="4" x2="14" y2="8"/><line x1="18" y1="4" x2="18" y2="8"/>
+          <line x1="6" y1="16" x2="6" y2="20"/><line x1="10" y1="16" x2="10" y2="20"/>
+          <line x1="14" y1="16" x2="14" y2="20"/><line x1="18" y1="16" x2="18" y2="20"/>
+        </svg>
+      </div>
+
+      <!-- Clapperboard (team) -->
+      <div class="rail-icon-slot" title="Team">
+        <svg width="26" height="26" viewBox="0 0 24 24" class="ico-thin">
+          <path d="M4 6l16-3v4H4z"/>
+          <rect x="2" y="7" width="20" height="14" rx="1"/>
+          <line x1="7" y1="3.5" x2="5" y2="7"/><line x1="11" y1="2.7" x2="9" y2="7"/>
+          <line x1="15" y1="1.9" x2="13" y2="7"/><line x1="19" y1="1.1" x2="17" y2="7"/>
+        </svg>
+      </div>
+
+      <!-- Viewfinder / location -->
+      <div class="rail-icon-slot" title="Locations">
+        <svg width="26" height="26" viewBox="0 0 24 24" class="ico-thin">
+          <circle cx="12" cy="12" r="9"/>
+          <circle cx="12" cy="12" r="3"/>
+          <line x1="12" y1="3" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="21"/>
+          <line x1="3" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="21" y2="12"/>
+        </svg>
+      </div>
+
+      <div class="rail-sep"></div>
+
+      <!-- Review / check frame -->
+      <div class="rail-icon-slot" title="Reviews" style="color:#9D7DFF">
+        <svg width="26" height="26" viewBox="0 0 24 24" class="ico-thin" style="stroke:currentColor;filter:drop-shadow(0 0 5px rgba(157,125,255,.5))">
+          <rect x="3" y="5" width="18" height="14" rx="1"/>
+          <polyline points="7,10 10,13 17,8"/>
+        </svg>
+      </div>
+
+      <!-- Speech bubble / community -->
+      <div class="rail-icon-slot" title="Community" style="color:#00C4B0">
+        <svg width="26" height="26" viewBox="0 0 24 24" class="ico-thin" style="stroke:currentColor;filter:drop-shadow(0 0 5px rgba(0,196,176,.5))">
+          <path d="M3 6a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H8l-4 3V6z"/>
+        </svg>
+      </div>
+
+      <div class="rail-sep"></div>
+
+      <!-- Aperture (settings) -->
+      <div class="rail-icon-slot" title="Settings">
+        <svg width="26" height="26" viewBox="0 0 24 24" class="ico-thin">
+          <circle cx="12" cy="12" r="9"/>
+          <circle cx="12" cy="12" r="3.5"/>
+          <line x1="12" y1="3" x2="12" y2="8.5"/><line x1="12" y1="15.5" x2="12" y2="21"/>
+          <line x1="3" y1="12" x2="8.5" y2="12"/><line x1="15.5" y1="12" x2="21" y2="12"/>
+          <line x1="5.6" y1="5.6" x2="9.5" y2="9.5"/><line x1="14.5" y1="14.5" x2="18.4" y2="18.4"/>
+          <line x1="18.4" y1="5.6" x2="14.5" y2="9.5"/><line x1="9.5" y1="14.5" x2="5.6" y2="18.4"/>
+        </svg>
+      </div>
+
+      <div class="rail-spacer"></div>
+    </div>
+
+    <!-- Full cinema icon set -->
+    <div style="flex:1">
+      <div style="font-size:11px;color:var(--rw-text-3);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">Cinema-domain icons at 32px — with amber glow (active)</div>
+      <div class="icon-grid" style="grid-template-columns:repeat(4,1fr)">
+        <!-- Film frame -->
+        <div class="icon-cell">
+          <svg width="32" height="32" viewBox="0 0 24 24" class="ico-thin" style="color:#D4A574;filter:drop-shadow(0 0 6px rgba(212,165,116,.5))">
+            <rect x="2" y="4" width="20" height="16" rx="1"/>
+            <line x1="2" y1="8" x2="22" y2="8"/><line x1="2" y1="16" x2="22" y2="16"/>
+            <line x1="6" y1="4" x2="6" y2="8"/><line x1="10" y1="4" x2="10" y2="8"/><line x1="14" y1="4" x2="14" y2="8"/><line x1="18" y1="4" x2="18" y2="8"/>
+            <line x1="6" y1="16" x2="6" y2="20"/><line x1="10" y1="16" x2="10" y2="20"/><line x1="14" y1="16" x2="14" y2="20"/><line x1="18" y1="16" x2="18" y2="20"/>
+          </svg>
+          <span class="icon-label" style="color:var(--rw-amber)">Film Frame</span>
+        </div>
+        <!-- Clapperboard -->
+        <div class="icon-cell">
+          <svg width="32" height="32" viewBox="0 0 24 24" class="ico-thin" style="color:#D4A574;filter:drop-shadow(0 0 6px rgba(212,165,116,.5))">
+            <path d="M4 6l16-3v4H4z"/>
+            <rect x="2" y="7" width="20" height="14" rx="1"/>
+            <line x1="7" y1="3.5" x2="5" y2="7"/><line x1="11" y1="2.7" x2="9" y2="7"/>
+            <line x1="15" y1="1.9" x2="13" y2="7"/><line x1="19" y1="1.1" x2="17" y2="7"/>
+          </svg>
+          <span class="icon-label" style="color:var(--rw-amber)">Clapperboard</span>
+        </div>
+        <!-- Viewfinder -->
+        <div class="icon-cell">
+          <svg width="32" height="32" viewBox="0 0 24 24" class="ico-thin" style="color:#D4A574;filter:drop-shadow(0 0 6px rgba(212,165,116,.5))">
+            <circle cx="12" cy="12" r="9"/>
+            <circle cx="12" cy="12" r="3"/>
+            <line x1="12" y1="3" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="21"/>
+            <line x1="3" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="21" y2="12"/>
+          </svg>
+          <span class="icon-label" style="color:var(--rw-amber)">Viewfinder</span>
+        </div>
+        <!-- Aperture -->
+        <div class="icon-cell">
+          <svg width="32" height="32" viewBox="0 0 24 24" class="ico-thin" style="color:#D4A574;filter:drop-shadow(0 0 6px rgba(212,165,116,.5))">
+            <circle cx="12" cy="12" r="9"/>
+            <circle cx="12" cy="12" r="3.5"/>
+            <line x1="12" y1="3" x2="12" y2="8.5"/><line x1="12" y1="15.5" x2="12" y2="21"/>
+            <line x1="3" y1="12" x2="8.5" y2="12"/><line x1="15.5" y1="12" x2="21" y2="12"/>
+            <line x1="5.6" y1="5.6" x2="9.5" y2="9.5"/><line x1="14.5" y1="14.5" x2="18.4" y2="18.4"/>
+            <line x1="18.4" y1="5.6" x2="14.5" y2="9.5"/><line x1="9.5" y1="14.5" x2="5.6" y2="18.4"/>
+          </svg>
+          <span class="icon-label" style="color:var(--rw-amber)">Aperture</span>
+        </div>
+        <!-- Film reel -->
+        <div class="icon-cell">
+          <svg width="32" height="32" viewBox="0 0 24 24" class="ico-thin" style="color:#D4A574;filter:drop-shadow(0 0 6px rgba(212,165,116,.5))">
+            <circle cx="12" cy="12" r="9"/>
+            <circle cx="12" cy="12" r="2.5"/>
+            <circle cx="12" cy="6" r="1.5"/><circle cx="12" cy="18" r="1.5"/>
+            <circle cx="6" cy="12" r="1.5"/><circle cx="18" cy="12" r="1.5"/>
+            <circle cx="7.76" cy="7.76" r="1.5"/><circle cx="16.24" cy="16.24" r="1.5"/>
+            <circle cx="16.24" cy="7.76" r="1.5"/><circle cx="7.76" cy="16.24" r="1.5"/>
+          </svg>
+          <span class="icon-label" style="color:var(--rw-amber)">Film Reel</span>
+        </div>
+        <!-- Camera lens -->
+        <div class="icon-cell">
+          <svg width="32" height="32" viewBox="0 0 24 24" class="ico-thin" style="color:#D4A574;filter:drop-shadow(0 0 6px rgba(212,165,116,.5))">
+            <rect x="2" y="7" width="20" height="14" rx="1"/>
+            <circle cx="12" cy="14" r="4"/>
+            <circle cx="12" cy="14" r="2"/>
+            <rect x="7" y="4" width="10" height="3" rx="1"/>
+            <line x1="8" y1="14" x2="8" y2="14"/><line x1="16" y1="14" x2="16" y2="14"/>
+          </svg>
+          <span class="icon-label" style="color:var(--rw-amber)">Camera</span>
+        </div>
+        <!-- Shot list / stacked frames -->
+        <div class="icon-cell">
+          <svg width="32" height="32" viewBox="0 0 24 24" class="ico-thin" style="color:#D4A574;filter:drop-shadow(0 0 6px rgba(212,165,116,.5))">
+            <rect x="3" y="6" width="18" height="13" rx="1"/>
+            <rect x="5" y="3" width="14" height="3" rx="1"/>
+            <line x1="3" y1="10" x2="21" y2="10"/>
+            <line x1="7" y1="14" x2="17" y2="14"/>
+            <line x1="7" y1="17" x2="14" y2="17"/>
+          </svg>
+          <span class="icon-label" style="color:var(--rw-amber)">Shot List</span>
+        </div>
+        <!-- Blocking / floor plan -->
+        <div class="icon-cell">
+          <svg width="32" height="32" viewBox="0 0 24 24" class="ico-thin" style="color:#D4A574;filter:drop-shadow(0 0 6px rgba(212,165,116,.5))">
+            <rect x="3" y="3" width="18" height="18" rx="1"/>
+            <line x1="3" y1="10" x2="21" y2="10"/>
+            <line x1="10" y1="10" x2="10" y2="21"/>
+            <circle cx="7" cy="6.5" r="1.5"/>
+            <circle cx="16" cy="16" r="1.5"/>
+          </svg>
+          <span class="icon-label" style="color:var(--rw-amber)">Floor Plan</span>
+        </div>
+      </div>
+      <div style="font-size:12px;color:var(--rw-text-3);font-style:italic;margin-top:8px">⭐ Most unique — no other platform uses cinema-native icons</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- COMPARISON TABLE -->
+<div class="option-block">
+  <div class="option-name" style="font-size:20px;margin-bottom:24px">Quick Comparison</div>
+  <div style="border:1px solid var(--rw-border);overflow:hidden">
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th>Option</th>
+          <th>Style</th>
+          <th>TV / Smartboard</th>
+          <th>iPad</th>
+          <th>Dark Mode</th>
+          <th>Light Mode</th>
+          <th>Uniqueness</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>A — Editorial Stroke</td><td>Thin line, no glow</td><td>✓ readable</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td>⭑⭑⭑</td></tr>
+        <tr><td>B — Neon Glow ⭐</td><td>Thin line + glow</td><td>✓ glows in dark</td><td class="check">✓</td><td class="check">✓✓</td><td class="cross">⚠ glow fades</td><td>⭑⭑⭑⭑</td></tr>
+        <tr><td>C — Filled + Halo</td><td>Solid + soft halo</td><td class="check">✓✓ best contrast</td><td class="check">✓✓</td><td class="check">✓</td><td class="check">✓</td><td>⭑⭑⭑</td></tr>
+        <tr><td>D — Labels</td><td>Icon + text label</td><td>✓ most clear</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td>⭑⭑</td></tr>
+        <tr><td>E — Cinema ⭐⭐</td><td>Film glyphs + glow</td><td>✓ cinematic</td><td class="check">✓</td><td class="check">✓✓</td><td class="cross">⚠ glow fades</td><td>⭑⭑⭑⭑⭑</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div style="margin-top:32px;padding:24px;background:var(--rw-surface);border:1px solid var(--rw-border);border-inline-start:4px solid var(--rw-amber)">
+    <div style="font-size:13px;font-weight:700;color:var(--rw-amber);margin-bottom:8px">My recommendation: B+E hybrid</div>
+    <div style="font-size:14px;color:var(--rw-text-2);line-height:1.8">
+      Use <strong style="color:var(--rw-text)">Option E cinema glyphs</strong> for domain-specific icons (projects, shots, clapperboard, floor plan, storyboard)
+      and <strong style="color:var(--rw-text)">Option B neon stroke</strong> for utility icons (settings, notifications, theme toggle).
+      Apply the amber glow on active, section-color glows for Reviews/Community.
+      This gives Rwanga a completely unique visual identity — no other platform looks like it.
+    </div>
+  </div>
+</div>
+
+<!-- PICK -->
+<div class="option-block" style="border-bottom:none;padding-bottom:80px">
+  <div class="option-name" style="font-size:20px;margin-bottom:8px">Which direction?</div>
+  <div style="font-size:14px;color:var(--rw-text-2);margin-bottom:28px">Pick one (or mix) — I'll apply it across all templates and the pattern library.</div>
+  <div style="display:flex;gap:12px;flex-wrap:wrap">
+    <button class="choice-btn" onclick="pick(this,'A')">A — Editorial</button>
+    <button class="choice-btn" onclick="pick(this,'B')">B — Neon Glow ⭐</button>
+    <button class="choice-btn" onclick="pick(this,'C')">C — Filled + Halo</button>
+    <button class="choice-btn" onclick="pick(this,'D')">D — Labels</button>
+    <button class="choice-btn" onclick="pick(this,'E')">E — Cinema ⭐⭐</button>
+    <button class="choice-btn" onclick="pick(this,'BE')">B+E Hybrid ← my pick</button>
+  </div>
+  <div id="pick-note" style="margin-top:20px;font-size:13px;color:var(--rw-text-3)"></div>
+</div>
+
+<script>
+function pick(btn, opt) {
+  document.querySelectorAll('.choice-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  const notes = {
+    'A': 'Clean editorial, works everywhere. I\'ll use Heroicons Outline 24px across the full platform.',
+    'B': 'Amber glow on active, section-colored glows for Reviews/Community. CSS drop-shadow — no extra images.',
+    'C': 'Filled icons + background tint on active. Best for TV readability at distance.',
+    'D': 'Labels added to each icon. Rail width expands to 80px. Good for discoverability.',
+    'E': 'Custom cinema SVGs — film frames, clapperboards, viewfinders, apertures. Completely unique to Rwanga.',
+    'BE': 'Cinema glyphs for production icons + neon stroke for utility icons. My recommendation. Tell me to proceed!'
+  };
+  document.getElementById('pick-note').textContent = '→ ' + notes[opt];
+}
+</script>
+</body>
+</html>

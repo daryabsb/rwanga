@@ -1,0 +1,91 @@
+{# ════════════════════════════════════════════════════════
+   RWANGA — projects/scenes/tabs/storyboard.html
+   Storyboard grid tab. HTMX fragment.
+   Upload images, associate with shots, Sortable.js reorder.
+
+   Context:
+     scene              — Scene instance
+     project            — Project instance
+     storyboard_frames  — QuerySet[StoryboardFrame] with linked shots
+   ════════════════════════════════════════════════════════ #}
+{% load i18n %}
+
+<div style="padding:var(--rw-pad-lg)">
+
+  {# ── Header actions ── #}
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--rw-pad-md)">
+    <div style="font-size:13px;color:var(--rw-text-2)">
+      {{ storyboard_frames.count }} {% trans "فریم" %}
+    </div>
+    <button class="rw-btn rw-btn-primary"
+            hx-get="{% url 'shots:upload_storyboard_modal' project.pk scene.pk %}"
+            hx-target="#rw-modal-container" hx-swap="innerHTML">
+      + {% trans "زیادکردنی فریم" %}
+    </button>
+  </div>
+
+  {% if storyboard_frames %}
+  <div class="rw-sb-grid" id="rw-sb-sortable">
+    {% for frame in storyboard_frames %}
+    <div class="rw-sb-card" data-frame-id="{{ frame.pk }}"
+         onclick="RW.openStoryboardModal('{{ frame.pk }}')">
+      <div class="rw-sb-thumb">
+        {% if frame.image %}
+        <img src="{{ frame.image.url }}" alt="{% trans 'فریمی' %} {{ frame.shot.number }}"
+             style="width:100%;height:100%;object-fit:cover">
+        {% else %}
+        <div class="rw-sb-thumb-num">{{ frame.shot.number }}</div>
+        <span style="font-size:10px">{{ frame.shot.setup.letter|default:"" }}</span>
+        {% endif %}
+      </div>
+      <div class="rw-sb-meta">
+        <div class="rw-sb-num">
+          {{ frame.shot.number }}
+          {% if frame.shot.shot_type == 'dialogue' %}
+          <span class="rw-badge rw-badge-d" style="font-size:9px">{% trans "دیالۆگ" %}</span>
+          {% elif frame.shot.shot_type == 'insert' %}
+          <span class="rw-badge rw-badge-i" style="font-size:9px">{% trans "داخڵکردن" %}</span>
+          {% else %}
+          <span class="rw-badge rw-badge-v" style="font-size:9px">{% trans "بینراو" %}</span>
+          {% endif %}
+        </div>
+        <div class="rw-sb-style">{{ frame.shot.style }}</div>
+        {% if frame.shot.lens %}
+        <span class="rw-sb-lens" dir="ltr">{{ frame.shot.lens }}</span>
+        {% endif %}
+        {% if frame.ai_generated %}
+        <div style="margin-top:6px"><span class="rw-ai-badge">AI</span></div>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <script>
+    if (typeof Sortable !== 'undefined') {
+      Sortable.create(document.getElementById('rw-sb-sortable'), {
+        animation: 150,
+        onEnd: function(evt) {
+          const ids = [...document.querySelectorAll('#rw-sb-sortable [data-frame-id]')].map(el=>el.dataset.frameId);
+          htmx.ajax('PATCH', '{% url "shots:reorder_storyboard" project.pk scene.pk %}', {
+            values: { order: ids }, swap: 'none'
+          });
+        }
+      });
+    }
+  </script>
+
+  {% else %}
+  <div class="rw-empty">
+    <div class="rw-empty-icon">🖼</div>
+    <div class="rw-empty-title">{% trans "هێشتا فریمێک نییە" %}</div>
+    <div class="rw-empty-sub">{% trans "وێنەکان بار بکە یان لە لێدانەکانەوە فریم دروست بکە" %}</div>
+    <button class="rw-btn rw-btn-primary"
+            hx-get="{% url 'shots:upload_storyboard_modal' project.pk scene.pk %}"
+            hx-target="#rw-modal-container" hx-swap="innerHTML">
+      + {% trans "زیادکردنی فریمی یەکەم" %}
+    </button>
+  </div>
+  {% endif %}
+
+</div>

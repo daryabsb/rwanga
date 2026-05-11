@@ -1,0 +1,24 @@
+{# ════════════════════════════════════════════════════
+   _toast.html  — OOB swapped via HTMX from Django views
+   In views.py: render to string, return in HX-Trigger header
+   OR: use hx-swap-oob="beforeend:#rw-toasts"
+
+   Usage in view:
+     from django.template.loader import render_to_string
+     toast_html = render_to_string('components/_toast.html', {
+         'message': 'ستۆری‌بۆرد پاشەکەوت کرا',
+         'type': 'success'
+     })
+   Then include in response via OOB swap.
+
+   Types: success | error | info | warning
+   ════════════════════════════════════════════════════ #}
+<div class="rw-toast {{ type|default:'info' }}"
+     hx-swap-oob="beforeend:#rw-toasts"
+     x-data
+     x-init="setTimeout(() => $el.remove(), 4000)">
+  <span style="font-size:16px;font-weight:700;flex-shrink:0">
+    {% if type == 'success' %}✓{% elif type == 'error' %}✕{% elif type == 'warning' %}⚠{% else %}·{% endif %}
+  </span>
+  {{ message }}
+</div>

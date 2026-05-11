@@ -1,0 +1,436 @@
+TRANSLATION CHUNKS — The Unknown Guest
+101 chunks total. Director notes and new sections that need proper Kurdish.
+
+HOW TO USE:
+- Each chunk starts with [1], [2], etc.
+- The >> line is an anchor — DO NOT translate it, skip it.
+- Translate the English text below into proper Kurdish.
+- Stop when you hit a blank line. Then start the next chunk.
+
+
+--- CLUSTER 1 (Scenes 1-10: Opening + Drive) ---
+
+[1]
+>> ئەم کلەستەرە بنەمای هەموو شتەکانی تر دادەنێت
+This cluster lays the foundation for everything. Nali is a good man — sociable, caring, active. But this goodness is borrowed — AI supports him, he can't separate from his phone. The audience must like Nali before everything falls apart in Clusters 3 and 4.
+
+[2]
+>> لە فرەیمی یەکەمەوە دەنگی باخەوانەکە دەبیسترێت
+C5 Gardener Voice: The gardener's voice is heard from the very first frame — as if he's narrating the story to the audience. This voice appears normal in Scene 2 — but in Scenes 8 and 43 it returns as overlap. The audience eventually realizes — what they'd been watching was "the gardener's retelling."
+
+[3]
+>> ئەم کردارانە هەموو لەژێر ٣ چرکەن
+C2: Please note — these actions are all under 3 seconds each. Fragment. Sudden. The audience can't process one thing before the next comes. This is "fragmentary montage" — we see without understanding.
+
+[4]
+>> ئەم دیمەنە لەنگەرگای فیلمەکەیە
+C1: This scene is the film's anchor. The gardener tells the story of a murder — like daily news — but what he tells Nali is actually a reflection of Nali himself. In Scene 43 this scene returns — the audience realizes what they saw wasn't "a story" — it was "reality."
+
+[5]
+>> ئەم تێکەڵبوونی دەنگە ئاگاداری یەکەمە
+C5: This sound bleed is the first warning. The audience feels something is different but doesn't know what yet. This is setup for Scene 43.
+
+[6]
+>> ئەمە یەکەمین کاتە AI ئەبینین
+D1: This is the first time we see AI. It should look natural — Nali casually interacts with AI like talking to a friend. But look closely — Nali uses AI to make his decisions for him. This dependency starts here.
+
+[7]
+>> لەم دیمەنەدا نالی تەنهایە — بۆیە Voice Mode
+D3: In this scene Nali is alone — so he uses Voice Mode. When he's alone and emotional — he talks. When others are around — he types. This difference must be completely clear.
+
+[8]
+>> سەرنج بدەن — نالی لە AI ئەپرسێت
+Note — Nali asks AI "should I postpone?" — this is a man who can't make his own decisions. AI responds like a therapist not a tool. This dynamic becomes criminal in Clusters 3 and 4.
+
+[9]
+>> ئەم دیمەنە لە ئەسڵەکەدا ساتیکی ئاسایی لێخوڕینە
+NEW: This scene in the original is a normal driving moment. In the rewrite we add three new things: (1) Hitchhiker — Nali wants to stop, Gesha says no (2) This foreshadows Scene 36 — where Nali finds a body near a tree and nobody discovers it (3) Gesha watches the child during the incident — this woman has maternal instincts.
+
+[10]
+>> ئەم ژنە لاشەکەی خۆی لەسەر جادەدا ئەگواست
+This woman carries her own body on the road — for her child. Nali in Scene 36 carries Gesha's body on the road — for himself. This parallel should be felt, not stated directly.
+
+[11]
+>> ئەم دیمەنە دەکرێت لەگەڵ Scene 9 تێکەڵبکرێت
+This scene could be merged with Scene 9 — but if kept separate it should be short: 30 seconds.
+
+[12]
+>> ئەمە یەکەم جارە نالی شیرینی بۆ گەشە دەکڕێت
+A1: This is the first time Nali buys sweets for Gesha. Gesha doesn't drink the sherbet — "I haven't had sweets in a long time" — this passes as normal. But the audience will understand in Scenes 16 and 34 — sugar was killing her.
+
+[13]
+>> نالی لە بازاڕی پڕ خەڵکدا تەلەفۆنی بۆ AI ئەکات
+Nali calls AI in a crowded bazaar — this dependency looks normal here — in Cluster 4 it becomes criminal.
+
+[14]
+>> گەشە لە شروبییەکە ناخوات. ئەیخاتە کۆشییەوە
+A3: Note — Gesha doesn't drink from the sherbet. She puts it aside. She looks at it — doesn't drink — puts it back. This behavior must be established — without any dialogue about it.
+
+[15]
+>> دوو شتی تازە: (١) A5 — تەلەفۆنی ئێڤین و (٢) باتریی مۆبایل
+Two new things: (1) A5 — Evin's phone call and (2) mobile battery panic.
+
+[16]
+>> ئەم ساتە ئاسایی دەردەکەوێت. لە Scene 39b
+This moment appears normal. In Scene 39b at the police station it gains meaning — it was Evin. Gesha hid it.
+
+[17]
+>> ئەم ساتە بچوکە — ٣٠ چرکە — بەس callback
+This small moment — 30 seconds — has a terrifying callback. In Cluster 6 Scene 37 Nali is in the desert with no charge and no signal — the panic here was just about a charger — there nothing can bring it back.
+
+[18]
+>> ئەم دیمەنە سێ لایەری هەیە
+This scene has three layers: (1) A5 — Evin's second phone call (2) NEW — dead animal on the road (3) NEW — road gets narrow (4) C5 — gardener's voice. All together — the world tightens around Nali and Gesha.
+
+[19]
+>> ئەم ساتە گرنگە — گەشە بۆ دووەم جار لە شروبییەکە ناخوات
+A3: This moment is important — Gesha refuses the sherbet for the second time. She only looks at it. This is behavior not dialogue. In Cluster 3 Scene 16 — when Nali breaks her emotionally — Gesha drinks the sherbet. That moment protection stops = death.
+
+[20]
+>> گەشە ئەبینێت — نالی نابینێت. ئەم فەرقە سادەیە
+Gesha sees it — Nali doesn't. This simple difference is deep — Gesha is someone who's aware of death and suffering. Nali is not aware — or deliberately doesn't look.
+
+[21]
+>> ئەمە ئەبێت بێ سەرنجی تاماشاواندا تێبپەڕێت
+This should pass without the audience noticing — like an unclear melody. Only on second viewing will the audience feel it.
+
+[22]
+>> ئەم سەیتەرە لەسەر جادەی لاوەکیەکە
+This checkpoint is on the side road — different from Scene 5. This one is near the garden — so the police are more careful. It has its own tension — the audience knows Nali and Gesha came secretly without their families knowing.
+
+[23]
+>> یەکەمین دیمەنی ماڵەکە لە دوورەوە — ئەبێت "زۆر تەواو"
+B3: First view of the house from a distance — it should look "too perfect." Not normal — not alive — but like something arranged — like a film set. This feeling should come gently — the audience should feel "something isn't right" without knowing what.
+
+[24]
+>> ئەم WIDE SHOT-ە ئەبێت ١-٢ چرکە زیاتر
+This WIDE SHOT should linger 1-2 seconds longer than normal. The audience should feel "this place isn't right" — but can't say why. In Scenes 11 and 12 this feeling deepens.
+
+[25]
+>> ئەم لاینە ئاسایییە — هیچ کەسێک سەرنجی ناگرێت
+This line is normal — nobody notices it. But in Scene 14 it gets postponed again. In Scenes 16 and 34 — it gains meaning: Gesha can't eat sugar. It was killing her.
+
+
+--- CLUSTER 2 (Scenes 11-14: Arrival + House Discovery) ---
+
+[26]
+>> ئەم کلەستەرە واتە "خەفەتان"
+This cluster means "suffocation" — Gesha enters Nali's world. Everything that appears normal — the dried animals, the locked room, the masks — these are all hints. The audience should feel this house "isn't right" without anyone telling them.
+
+[27]
+>> لە Scene 10 دا یەکەمین WIDE SHOT-ی ماڵەکەمان بینی
+B3: In Scene 10 we saw the first WIDE SHOT of the house — "too perfect." Here we go inside and give the same feeling — everything is arranged but not alive. Like a museum not a home.
+
+[28]
+>> گەشە ئەڵێت "دڵگیر" — واتە lonely
+B3: Note — Gesha says "dilgir" — meaning lonely. The beauty of this house is mixed with loneliness. This word comes out suddenly but it's true.
+
+[29]
+>> ئەمە دیمەنی "مۆزەخانە" یە
+This is the "museum" scene. Gesha sees inside the house for the first time — and sees that Nali is not like the person she knew on the phone. Animal heads and masks and knives — these function as warning signs but Gesha treats them as jokes.
+
+[30]
+>> گەشە تازە ئەزانێت ئەم ماڵە لە ئەو نالییەی
+Gesha is just realizing this house is very far from the Nali she knew on the phone. This feeling should come gently — not fear, but confusion.
+
+[31]
+>> ئەمە Setup-ی locked room-ەکەیە
+This is the locked room setup. Gesha looks at Nali here — confusion shows on her face — she wants to ask — she changes her mind. In Scene 16 this room becomes a dare — "open it." In Scene 32 Nali opens it himself — puts Gesha's body inside.
+
+[32]
+>> کامێرا لەسەر نالی ئەوەستێت کە سەیری سێبەرەکە ئەکات
+Camera stays on Nali watching the shadow — not on the shadow itself. What we see is how Nali watches — not what he watches.
+
+[33]
+>> ئەم دیمەنە سێ شتی سەرەکیی تێدایە
+This scene has three main elements: (1) Sensual hint — Nali wants to reach for Gesha's hair — Gesha stops him (2) A1/A3 — the tea and the sugar (3) D4 — setting up Truth or Dare. All together they lay the foundation for Cluster 3.
+
+[34]
+>> ئەمە یەکەمین "نا" ی فیزیکییە
+This is the first physical "no." Gesha can't get close in that way — not yet. In Scene 16 continuations Nali tries again — "let me touch your hand" — and Gesha says no again. This pattern matters — Nali wants to hold, Gesha won't let him.
+
+[35]
+>> ئەم ساتە ئاسایییە — چای دروستکردن. بەس ئەگەر سەرنج بدەین
+A3: This moment is ordinary — making tea. But notice — Gesha didn't add sugar. In Scene 10 she said "don't put sugar in my tea." Here we do something better — Gesha simply doesn't add sugar without saying a word about it. This behavior should be natural and silent — not dialogue.
+
+[36]
+>> ئەمە Setup-ی Cluster 3 یە. ئەو یارییەی
+D4: This is the setup for Cluster 3. The game that starts as a joke here — in Scene 16 becomes an emotional weapon. Truth or Dare here is normal — there Nali turns it into a tool for extracting Gesha's secrets. Meaning — Nali uses the game like AI: extract information, push boundaries, control the situation.
+
+
+--- CLUSTER 3 (Scenes 16-18: House Night) ---
+
+[37]
+>> ئەم دیمەنە درێژترین و ئاڵۆزترین دیمەنی فیلمەکەیە
+This scene is the longest and most complex in the film. It consists of several parts separated by Scenes 17 and 18. Main objective: Truth or Dare as a D15 tool — Nali does the same thing with humans that he does with AI: extract information through an organized system.
+
+[38]
+>> گەشە لەم ساتەدا بەسەرخۆشییەوە قسە دەکات
+A3 BAROMETER: Gesha is speaking happily at this point. She still has hope. She still hasn't eaten the sweets — that's the will to live. They're left on the table without anyone touching them.
+
+[39]
+>> ئەم شۆتە — گەشە لە تاریکیدا بە ئارامی دوور دەبێتەوە
+SENSUAL HINT: This shot — Gesha quietly moves away in the darkness, her hair moves in the breeze — it should be beautiful and captivating. Camera pays attention the way Nali pays attention: from a hiding spot, lingering one second longer. This is not sexualizing — this is showing Gesha's physical presence that later, when she dies, becomes physical damage.
+
+[40]
+>> ئەمە ساتی شکانە. تاکو ئێستا گەشە دوور بووەتەوە لە شیرینی
+A3 BAROMETER: This is the breaking point. Until now Gesha stayed away from sweets — that was the will to live. Now Nali has broken her emotionally and Gesha eats the sherbet — finished. She's surrendered. The viewer feels this as "giving up" before knowing why it equals death.
+
+[41]
+>> سەمای گەشە — ئارد لە دەموچاویدا
+SENSUAL HINT: Gesha's dance — flour on her face, tears and laughter mixed. Camera on Nali: sitting on the chair, watching Gesha. Takes a sip of wine. This watching should linger — Nali watches both artistically and physically. This is the raw material of D15 — the instinct that later makes Gesha's death a "prompt."
+
+[42]
+>> ئەمە ساتی سنساڵە. نالی دەیەوێت دەستی بکات بۆ قژی گەشە
+This is the critical moment. Nali wants to reach for Gesha's hair/hand — Gesha refuses. This rejection is physical and cold. No bodily intimacy allowed. This shows: the body that Nali isn't allowed to touch, later gets hidden inside a couch.
+
+[43]
+>> کامێرا لەسەر دەموچاوی گەشە ئەمێنێتەوە — دوو بیت زیاتر
+B2: Camera stays on Gesha's face — two beats longer than normal. Don't add sound. Let the silence stay. The viewer should feel Gesha "almost" understood something — but let it go.
+
+
+--- CLUSTER 4 (Scenes 19-21: Death + Cover-Up) ---
+
+[44]
+>> ئەم دیمەنە سەیرترین و ترسناکترین دیمەنی فیلمەکەیە
+This scene is the strangest and most terrifying in the film — actors perform on a couch that has a corpse underneath. The viewer knows this, the characters don't.
+
+[45]
+>> ئەم دیالۆگی چیخۆف لەسەر قەنەفەیەکدا دەوترێت
+This Chekhov dialogue is spoken on a couch with a girl's corpse underneath. The viewer knows this. Those who don't know are "living" their lives. This is astonishing — and this irony should not be discussed, just left alone.
+
+[46]
+>> نالی هیچ کەسی لەسەر قەنەفەکەی جەنازەکە نادات
+Nali doesn't let anyone near the corpse couch. Every time someone heads toward it — he redirects them.
+
+[47]
+>> ئەدیب تەنها لە عەمەلیاتی تارا نیە ناڕازی
+SENSUAL HINT: Edib isn't just uncomfortable with Tara's behavior — her clothes bother him too. This is shown through Edib's behavior not through explicit words.
+
+
+--- CLUSTER 4B (Scenes 22-26: Evening with Friends) ---
+
+[48]
+>> ئەم بلۆکە "ژیان لەسەر مردن" ە
+This block is "life on top of death." Under the house — inside the couch — is Gesha's body. Above — friends eat, rehearse, fight. Nali must hold both worlds together — and the audience must remember every moment what's inside that couch. Every time someone sits on the couch — CAMERA lingers a moment longer than normal on Nali's face.
+
+[49]
+>> ئەم ساردییە لە نێوان ئەدیب و تارا
+This coldness between Edib and Tara — this is the first hint of the fight that explodes in Scene 25 cont.
+
+[50]
+>> بەردەوام خەیاڵی لای قەنەفەکەیە کە جەنازەکەی تێدایە
+B1: He's constantly thinking about the couch with the corpse inside. Nali gets a little dizzy — but says nothing.
+
+[51]
+>> نازی لەسەری دادەنیشێت — نالی ئەترسێت. CAMERA لەسەر دەستەکانی
+B1 payoff: This is the third function of the couch. First: Gesha slept on it. Second: body was hidden inside. Third: Nazi sits on it — and Nali panics. CAMERA on Nali's hands — how he grips the table.
+
+[52]
+>> ئەو "هەزە" ی تەلەفۆن بوو نەک هەزەی قەنەفە
+Nali's color has changed — breathing fast — fear has settled. He moves to another couch. CAMERA stay on Nali's face — that "vibration" was the phone not the couch — but Nali can't tell the difference anymore.
+
+[53]
+>> لەمکاتەدا نالی لەناو خەیاڵەکەیدایە
+D3: Nali is lost in thought — Ako calls him over during conversation. Nali takes out his phone — puts in earphones — speaks to AI in a low voice.
+
+[54]
+>> نالی لەناو بیرکردنەوەیەکی قوڵدایە — ئەزانێت
+Nali is in deep thought — he knows if the roles aren't switched — a fight will happen. And that's what AI had suggested. CAMERA pauses on Nali's face — the moment he decides — that's the moment he executes AI's plan.
+
+[55]
+>> ئەمە دیمەنی "مارمەڵانگ" ی چیخۆفە
+C3: This is the Chekhov "Seagull" scene — rehearsal happens on the corpse couch. This irony is physical not literary — the audience sees actors performing theater on top of a body without knowing it.
+
+[56]
+>> "بیر لە مردن ناکەمەوە" — ئەم دیالۆگە لە چیخۆفە
+"I don't think about death" — this dialogue is from Chekhov — but at this moment it's spoken on a corpse couch. This is C3 — the irony is physical.
+
+[57]
+>> ئەدیب هەڵدەستێت — بەرەو لای قەنەفەی جەنازەکە دەڕوات
+B1 + D5: Edib gets up — heads toward the corpse couch — to grab the dried animal piece near the wall for his performance. This is the fourth function of the couch. And this is a D5 callback — the sculpture stone near the wall — the one Edib hits his head on in Scene 28.
+
+[58]
+>> "بەمزوانە بەم شێوەیە کۆتایی بە ژیانم دێنم"
+"Soon I'll end my life this way" — this is Chekhov's dialogue (Treplyov) — but coming from Edib it sounds personal. The audience doesn't know yet — but in Scene 28 Edib actually dies. These words become foreshadowing.
+
+[59]
+>> ئەمە "تەقینەوە" یە. ئەدیب سەرخۆشترە
+This is the "explosion." Edib is drunker — Tara crossed her limits — and now a fight breaks out. This is the "disruption" that AI had suggested. Nali decided not to change it — and now he sees the consequences.
+
+[60]
+>> ئەدیب لێرە ئەمێنێتەوە. سەرخۆشە. لەسەر قەنەفەکە
+D5: Edib stays here. He's drunk. He lies on the couch. This is setup for Scenes 27-28 — they leave, Edib stays, and at night he opens the couch.
+
+
+--- CLUSTER 5 (Scenes 27-29: Discovery + Second Death) ---
+
+[61]
+>> ئەم دیمەنە سەنتەری فیلمەکەیە — واقع بوونی مردنی دووەم
+This scene is the center of the film — the second death occurs. It should be quick and cold. Edib's death should not be dramatic — it's reflexive. Fall, hit, silence.
+
+
+--- CLUSTER 6 (Scenes 30-37, 39: Desert + Silence) ---
+
+[62]
+>> ئەم کلەستەرە کەمترین دیالۆگی تێدایە و زۆرترین بێدەنگی
+This cluster has the least dialogue and the most silence. Until now Nali feared other people — here he fears himself. Wind, insects, and fire are the only sounds. No music. This section must have 90 seconds of complete silence during production — only wind.
+
+[63]
+>> ئەم کلەستەرە بەستراوەتەوە بە panic-ی باتری مۆبایل
+This cluster connects to the mobile battery panic from Cluster 1 — back then Nali panicked at 1% battery. Here both battery and signal run out completely. AI stopping now means losing what he's depended on.
+
+[64]
+>> ئەم دیمەنە کورتە — ٤٥ چرکە. مردوویەک وەکو لاپەرە
+This scene is short — 45 seconds. A corpse like a page. Edib is like something no longer remembered — just a body that adds urgency.
+
+[65]
+>> نالی ئەدیبی بەجێهێشت وەکو ناسراو
+Note — Nali left Edib as someone recognizable. Edib will be found in time — but Gesha won't. That's the difference.
+
+[66]
+>> ئەم تۆمارانە لە چاوی نالییەوە دەبینین
+We see these recordings through Nali's eyes — he doesn't do more than this but it's enough to know Gesha was a normal woman who wanted her phone — nothing secret. These clips are Nali's condemnation — Nali deletes them not because they seem suspicious but because they're normal.
+
+[67]
+>> ئەمە یەکەم جارە تاماشاوان ئەم ژوورەیە دەبینن
+This is the first time the audience sees this room. But here we don't reveal what's inside — we only see old things and faded photos. The room's name is saved for Scene 39b — the police station.
+
+[68]
+>> ئەمە بابەتەکەیە. ٩٠ چرکەی بێدەنگی تەواو
+D6: This is the point. 90 seconds of complete silence. Only wind. No music. Nali is at his most human in this scene — not because he speaks, but because he places Gesha's ID next to her body. This is a human decision amidst all the concealment.
+
+[69]
+>> ئەمە بڕیاری سەرەکییە. هەموو شتەکانی تر ئەسوتێنێت
+This is the key decision. He burns everything else — but places the ID next to the body. This means the body will be found. This is the only human thing Nali does that night.
+
+[70]
+>> ئەم نامانە لە ئێڤینن — A5
+These messages are from Evin — A5. The audience doesn't know yet who this person is but in Scene 39b at the police station it's revealed.
+
+[71]
+>> ئەمە کۆتایی D15-ی AI dependency arc-ەکەیە
+D1: This is the end of the D15 AI dependency arc. From Cluster 1 Nali hid his phone — in Cluster 3 he talked to AI at night — in Cluster 4 after 911 he turned to AI — here AI is gone. No signal. Nali is alone for the first time without anything.
+
+[72]
+>> ئەم مەحاڵە بیربخەنەوە — نالی لە Cluster 1 وەک ئەوەی باتری ١٪
+Remember — Nali in Cluster 1 panicked as if 1% battery would kill him. In Cluster 3 he called AI in the darkness of night. In Cluster 4 after 911 he turned to AI. Now — nothing is there. A dark car and a corpse and a desert.
+
+[73]
+>> ئەمە کۆتایی arc-ی AI-ەکەیە. نالی هێشتا لەگەڵ AI قسەدەکات
+This is the end of the AI arc. Nali still talks to AI — but AI isn't there. The message didn't send. He says "my hero" — is he saying it to his character or to himself? The audience doesn't know. Nali doesn't know either.
+
+[74]
+>> ئەم دیمەنە ٢٠ چرکەیە. لە دوورەوە
+This scene is 20 seconds. From a distance. We know why he's here — he wants to get his phone back. He wants his AI. And that itself is terrifying.
+
+[75]
+>> بێدەنگییەکە لەمەوبەر تەنها تەکنیکی بوو
+D6 complete: The silence before was just technical — absence of sound. Here the silence is thematic — Nali for the first time is alone with his own actions without any music or AI to narrate them as story.
+
+[76]
+>> نالی ئێستا تەواو تەنهایە. AI نیە. گەشە نیە. ئەدیب نیە
+Nali is now completely alone. No AI. No Gesha. No Edib. He sees city lights from a distance — but can't reach them. This is Nali without mask — without AI — without story — without anything. Cluster 7 starts from here.
+
+
+--- CLUSTER 7 (Scenes 43a, 39b, 40-43: Return + Ending) ---
+
+[77]
+>> ئەم کلەستەرە "گەڕانەوە" یە — بەس گەڕانەوە بۆ کوێ
+This cluster is "the return" — but return to where? Nali returns to his world — theater, police, city — but he's no longer the Nali who left in Cluster 1. This cluster is a mirror — everything that was setup in Cluster 1 appears here — but this time we know the truth.
+
+[78]
+>> ئەم کلەستەرە لە Cluster 6 (بێدەنگی و چۆڵەوانی) دێتەوە
+Tone: This cluster comes from Cluster 6 (silence and desert) — so the tone must gradually warm up. Scene 43a starts from silence — Scene 43 ends in ambiguity.
+
+[79]
+>> ئەمە یەکەمین جار نالی دەبینینەوە لە دوای چۆڵەوانی
+This is the first time we see Nali again after the desert. In Cluster 6 he came from the darkness of the desert — now he's in a theater hall. But this hall is emptier than the desert.
+
+[80]
+>> ئەم کچە — گەشە نیە. بەس نالی وایبینی
+This girl — is not Gesha. But Nali sees her as Gesha. CAMERA stay on Nali's eyes — the tears come down this time.
+
+[81]
+>> ئەم دیمەنە ٣-٤ خولەک. بێدەنگی نالی لە ئاخری
+This scene is 3-4 minutes. Nali's silence at the end — he leaves without a word — this is not normal for Nali. Nazi knows something is wrong — but doesn't ask.
+
+[82]
+>> ئەم دیمەنە لابراوە بەپێی ڕێنماییەکانی سەروەر
+This scene has been removed per Sarwar's direction. Nali's old house is no longer needed — all the documents and things from that life are now in the locked room of the garden (Scene 12 setup) and appear at the police station (Scene 39b). This makes the film tighter — the old house was redundant.
+
+[83]
+>> ئەمە گرنگترین دیمەنی ئەم کلەستەرەیە. سێ شت لەیەکجارەوە
+This is the most important scene in this cluster. Three things hit the audience at once: (1) A4 — how Gesha died (diabetes + sugar + no medication) (2) A5 — Evin appears and the audience recognizes her from the phone calls in Cluster 1 (3) Evidence from the locked room. This scene should feel like a mirror of Scene 3 — there Nali spoke from behind a screen, here he faces an officer and can't hide.
+
+[84]
+>> ئەمە ئەوینە. تاماشاوان بۆ یەکەم جار ئەیبینن
+A5: This is Evin. The audience sees her for the first time — but they know her voice. In Scene 7 she called for the first time and Gesha hid it. In Scene 8 again — Gesha blocked her. Now Evin is here — physically. Don't hint she's the same person — let the audience figure it out.
+
+[85]
+>> ئێستا بۆ یەکەم جار CAMERA لەسەر ڕووی ئەوین ئەوەستێت
+A5 payoff: Now for the first time CAMERA stays on Evin's face. The audience should feel "I know this voice" — in Scenes 7 and 8 Evin's voice came from the phone and Gesha hid it. Now Evin is visible — and what she did on the phone now makes sense.
+
+[86]
+>> تاماشاوان ئێستا لەبیریان دەبێت — هەموو ئەو ساتانەی
+A4/A3 payoff: The audience now remembers — all those moments Gesha refused sugar (Scene 6: "these will kill me", Scene 10: "don't put sugar in my tea", Scene 14: no sugar in tea) — those were all hints. And during Truth or Dare in Cluster 3 — when Gesha drank the sherbet — that was surrender. The scene quiets this — no need to write dialogue for it.
+
+[87]
+>> ئەمە "شکان" ی نالییە
+This is Nali's "breaking." The Gesha that Nali knew — through video calls — that was all surface. Evin is Gesha's real world — and that world was full of: evicted from their house, ignoring her illness, living alone.
+
+[88]
+>> لێرە ئەوین چیرۆکی ڕاستی گەشە ئەگێڕێتەوە
+Here Evin tells Gesha's real story. These words should feel heavy — every word Evin says opens a new layer for the audience.
+
+[89]
+>> ئاوبۆکی لە نالی: ئەمە CALLBACK-ە
+Mirror from Nali: This is a CALLBACK — the audience now knows what "diabetes" means. Evin doesn't know Gesha was killed — but she knows Gesha is dead. And these words — "afford the insulin shots" — mean Gesha couldn't afford her own medicine. These words should burn.
+
+[90]
+>> ئەم ساتە — ٣٠ چرکە بێدەنگی. باران و قاوەی سارد
+This moment — 30 seconds of silence. Rain and cold coffee. Nali says nothing — but the audience now knows: the Gesha that Nali knew — that was surface. Video calls, jokes — all a screen layer. Evin knew her — Evin was real. And that reality — motherless, pressure, illness — those are the things Nali didn't see.
+
+[91]
+>> ئەمە ئاخرین پەیوەندی نالی لەگەڵ تەکنەلۆجیا
+D15/AI dependency callback: This is Nali's last interaction with technology — but this time he wants a "new version" — meaning he wants his AI improved. This is Nali's last attempt at control — but Omid asks him "does it stay forever for humans?"
+
+[92]
+>> ئەم دیمەنە ٢ خولەک. وشەکانی ئومێد
+This scene is 2 minutes. Omid's words — "does it stay forever for humans?" — this is the last hint. Nali wants his AI to "stay forever" — but Omid tells him: humans themselves don't last forever. These words should stay in the audience's ears.
+
+[93]
+>> ئەمە بەرامبەربوونەوەی نالی و ئەوینە
+C4: This is the confrontation between Nali and Evin. This is the "mirror" of Scene 3 — there Nali met Gesha from behind a screen — here Evin puts the real Gesha in front of him. The audience should ask: can Nali change?
+
+[94]
+>> ئەمە خەو نیە — سوریالە
+This is not a dream — it's surreal. Nali's reality separates from the audience's reality. This scene is 2 minutes — short and dry and terrifying.
+
+[95]
+>> بوکەڵەکە = گەشە. سەمایەکە = ئەو سەمایەیە
+The puppet = Gesha. The dance = the same dance from Scene 43a. Everything spirals back. But this time — there's fire.
+
+[96]
+>> دەنگ پێشتر دەگەڕێتەوە
+C5: Sound returns first. Before we see the garden — the gardener's voice is heard. This is the C5 that was setup in Cluster 1 Scene 8 — where the gardener's voice suddenly blended into a transition. Now it fully returns.
+
+[97]
+>> ئێستا لەناکاو هەموو شتێک مانا ئەدات
+C1: Now suddenly everything makes sense. That gardener in Scene 2 — he was talking all along — describing the same events. The audience now knows: what "watched you" from Scene 2 onward — was Nali, was Nali's fear, was Nali's world — but in imagination. The entire film was Nali's imagination to see what would happen if that event happened to him.
+
+[98]
+>> ئەمە C1 ی تەواو — "you were watching his fear unfold"
+This is C1 complete — "you were watching his fear unfold in real time." The audience didn't know they were watching imagination — they thought it was reality. Now they go back — and everything takes on new meaning.
+
+[99]
+>> ئەمە ئەو ساتەیە. لە Scene 2 دا نالی خەریکی بڕینی لقێک بوو
+TWIST: This is that moment. In Scene 2 Nali was cutting a branch and the audience sensed he might cut his finger. But it wasn't cut. Meaning — Nali was in imagination. The entire film — from Scene 3 to Scene 42 — was Nali's imagination. He was sitting in the garden — listening to the gardener — and thinking: if I did that — what would happen?
+
+[100]
+>> ئایا ئەمجارە — لەدوای ئەوەی هەموو ئەو خەیاڵەی بینی
+This is that moment. This time — after seeing all that imagination — will he respond? Will his response be different from what he did in imagination? Can he change? These questions stay with the audience.
+
+[101]
+>> کامێرا pull back ئەکات — نالی ئەبێتە فیگورێکی بچووک
+Camera pulls back — Nali becomes a small figure in the garden. Gesha's voice — the voice the audience knows — comes from afar. Unclear. We don't know what she says. We can't hear it. This is the last frame — and nothing has been resolved.

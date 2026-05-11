@@ -1,0 +1,83 @@
+{# ════════════════════════════════════════════════════════
+   RWANGA — scheduling/index.html
+   Shooting schedule overview — shoot day list with strips.
+
+   Context:
+     project        — Project instance
+     shoot_days     — QuerySet[ShootDay]
+     active_section — 'p'
+   ════════════════════════════════════════════════════════ #}
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "خشتەی وێنەگرتن" %} — {{ project.title }}{% endblock %}
+
+{% block content %}
+<div id="rw-content" style="display:flex;flex:1;overflow:hidden">
+
+  {# ── Day selector panel ── #}
+  <aside style="width:220px;background:var(--rw-surface);border-inline-start:1px solid var(--rw-border);display:flex;flex-direction:column;flex-shrink:0">
+    <div style="padding:var(--rw-pad-md) var(--rw-pad-sm) var(--rw-pad-xs);font-size:10px;font-weight:700;color:var(--rw-text-3);text-transform:uppercase;letter-spacing:1.2px;border-bottom:1px solid var(--rw-border)">
+      {% trans "ڕۆژەکانی وێنەگرتن" %}
+    </div>
+    <div style="flex:1;overflow-y:auto;padding:8px 0">
+      {% for day in shoot_days %}
+      <div class="rw-scene-item {% if forloop.first %}active{% endif %}"
+           hx-get="{% url 'scheduling:day_detail' project.pk day.pk %}"
+           hx-target="#rw-sched-main" hx-swap="innerHTML">
+        <span class="rw-sc-num" dir="ltr">{{ day.day_number }}</span>
+        <div style="flex:1;min-width:0">
+          <div class="rw-sc-loc" style="font-family:var(--rw-font-en)">{{ day.date|date:"M j" }}</div>
+          <div class="rw-sc-time">{{ day.blocks.count }} {% trans "بلۆک" %}</div>
+        </div>
+      </div>
+      {% empty %}
+      <div style="padding:var(--rw-pad-md);text-align:center;color:var(--rw-text-3);font-size:12px">
+        {% trans "ڕۆژی وێنەگرتن نییە" %}
+      </div>
+      {% endfor %}
+    </div>
+    <div style="padding:12px;border-top:1px solid var(--rw-border)">
+      <button class="rw-btn rw-btn-primary" style="width:100%;justify-content:center"
+              hx-get="{% url 'scheduling:add_day_modal' project.pk %}"
+              hx-target="#rw-modal-container" hx-swap="innerHTML">
+        + {% trans "ڕۆژی نوێ" %}
+      </button>
+    </div>
+  </aside>
+
+  {# ── Main schedule content ── #}
+  <div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+
+    {# Header bar #}
+    <div style="height:56px;background:var(--rw-surface);border-bottom:1px solid var(--rw-border);display:flex;align-items:center;padding:0 var(--rw-pad-md);gap:16px;flex-shrink:0">
+      <h1 style="font-size:18px;font-weight:700;flex:1">{% trans "خشتەی وێنەگرتن" %}</h1>
+      <div style="font-size:13px;color:var(--rw-text-2)">
+        {{ shoot_days.count }} {% trans "ڕۆژ" %}
+      </div>
+      <a href="{% url 'scheduling:stripboard' project.pk %}" class="rw-btn rw-btn-ghost">
+        ≡ {% trans "ستریپبۆرد" %}
+      </a>
+      <a href="{% url 'scheduling:call_sheets' project.pk %}" class="rw-btn rw-btn-amber">
+        📋 {% trans "ئایننامەکان" %}
+      </a>
+    </div>
+
+    {# Schedule content swapped by day selection #}
+    <div id="rw-sched-main" style="flex:1;overflow-y:auto;padding:var(--rw-pad-lg)">
+      {% if shoot_days %}
+      {# Load first day by default #}
+      <div style="text-align:center;color:var(--rw-text-3);padding:var(--rw-pad-xl);font-size:13px">
+        {% trans "ڕۆژێک هەڵبژێرە" %}
+      </div>
+      {% else %}
+      {% include "components/_empty_state.html" with icon="📅" title=_("هێشتا خشتەیەک نییە") sub=_("ڕۆژی وێنەگرتنی یەکەم زیاد بکە") cta_text=_("دروستکردنی خشتە") %}
+      {% endif %}
+    </div>
+
+  </div>
+
+</div>
+
+<div id="rw-modal-container"></div>
+{% endblock %}

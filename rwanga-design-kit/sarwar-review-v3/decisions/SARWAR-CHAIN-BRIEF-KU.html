@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="ku" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ڕوانگە — زنجیرەی بڕیارەکان — کورتەیەک بۆ سەروەر</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+@media screen {
+  body{background:#E8E8EC;padding:32px;font-family:'Cairo','Noto Sans Arabic',Arial,sans-serif;font-size:11pt;color:#0F0F12;line-height:1.7;direction:rtl;}
+}
+@media print {
+  body{background:#fff;padding:0;font-family:'Cairo','Noto Sans Arabic',Arial,sans-serif;font-size:11pt;color:#0F0F12;line-height:1.7;direction:rtl;}
+  .page{box-shadow:none !important;margin:0 !important;page-break-after:always;}
+  .page:last-child{page-break-after:auto;}
+}
+.page{
+  background:#fff;max-width:210mm;margin:0 auto 24px;padding:14mm 16mm 18mm;
+  min-height:297mm;box-shadow:0 2px 12px rgba(0,0,0,.12);
+}
+.en{font-family:'Inter',sans-serif;direction:ltr;unicode-bidi:isolate;}
+
+/* Header */
+.header{display:flex;align-items:center;gap:14pt;border-bottom:3pt solid #F72585;padding-bottom:12pt;margin-bottom:20pt;}
+.logo-mark{width:44pt;height:44pt;background:#F72585;color:#fff;font-family:'Cairo',sans-serif;font-size:20pt;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.logo-sub{font-size:7.5pt;font-weight:700;color:#5C5C70;text-transform:uppercase;letter-spacing:1.2pt;margin-top:2pt;font-family:'Cairo',sans-serif;}
+.header-info{flex:1;}
+.header-title{font-size:18pt;font-weight:700;color:#0F0F12;line-height:1.3;}
+.header-sub{font-size:9.5pt;color:#5C5C70;margin-top:3pt;}
+.header-right{text-align:start;}
+.header-date{font-size:9pt;color:#A0A0B8;}
+.header-badge{display:inline-block;background:#F72585;color:#fff;font-size:8pt;font-weight:700;padding:3pt 10pt;text-transform:uppercase;letter-spacing:1pt;margin-top:4pt;}
+
+/* Sections */
+h2{font-size:14pt;font-weight:700;color:#0F0F12;margin:22pt 0 10pt;padding-bottom:6pt;border-bottom:1.5pt solid #DCDCE8;}
+h3{font-size:12pt;font-weight:700;color:#9A5520;margin:16pt 0 8pt;}
+p{margin-bottom:10pt;font-size:10.5pt;line-height:1.8;}
+.lead{font-size:11.5pt;color:#0F0F12;font-weight:500;line-height:1.8;margin-bottom:14pt;}
+.muted{color:#5C5C70;}
+.emphasis{background:#FFF8F0;border-inline-start:3pt solid #D4A574;padding:10pt 14pt;margin:12pt 0;font-size:10.5pt;line-height:1.8;}
+.emphasis strong{color:#9A5520;}
+.pink-box{background:#FFF0F5;border-inline-start:3pt solid #F72585;padding:10pt 14pt;margin:12pt 0;font-size:10.5pt;line-height:1.8;}
+
+/* Chain cards */
+.chain-card{border:1.5pt solid #DCDCE8;margin:14pt 0;page-break-inside:avoid;}
+.chain-header{background:#F7F7FA;padding:10pt 14pt;border-bottom:1.5pt solid #DCDCE8;display:flex;align-items:center;gap:10pt;}
+.chain-letter{width:36pt;height:36pt;background:#F72585;color:#fff;font-size:16pt;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:'Inter',sans-serif;}
+.chain-title{font-size:13pt;font-weight:700;color:#0F0F12;}
+.chain-count{font-size:9pt;color:#A0A0B8;margin-top:2pt;}
+.chain-body{padding:12pt 14pt;}
+.chain-body p{margin-bottom:8pt;font-size:10pt;}
+.chain-decisions{list-style:none;padding:0;margin:0 0 10pt;counter-reset:chain-counter;}
+.chain-decisions li{padding:6pt 0;border-bottom:1pt solid #F0F0F6;font-size:10pt;line-height:1.7;counter-increment:chain-counter;display:flex;gap:6pt;}
+.chain-decisions li::before{content:counter(chain-counter) ".";font-family:'Inter',sans-serif;font-weight:700;color:#9A5520;min-width:18pt;flex-shrink:0;}
+.chain-decisions li:last-child{border-bottom:none;}
+.chain-decisions li strong{color:#9A5520;}
+.chain-test{background:#F7F7FA;padding:8pt 12pt;font-size:9.5pt;color:#5C5C70;line-height:1.7;margin-top:8pt;}
+.chain-test strong{color:#0F0F12;}
+.chain-pick{font-size:9pt;font-weight:600;color:#F72585;margin-top:8pt;}
+
+/* CTA */
+.cta-box{background:#0F0F12;color:#EDEAD8;padding:20pt 24pt;margin:20pt 0;text-align:center;}
+.cta-box h2{color:#F72585;border:none;margin:0 0 10pt;font-size:16pt;}
+.cta-box p{color:#78788C;font-size:10.5pt;margin-bottom:6pt;}
+.cta-options{display:flex;justify-content:center;gap:12pt;margin-top:14pt;}
+.cta-option{width:56pt;height:56pt;border:2pt solid #2C2C38;display:flex;align-items:center;justify-content:center;font-size:20pt;font-weight:700;color:#D4A574;font-family:'Inter',sans-serif;}
+
+/* Footer */
+.footer{margin-top:24pt;padding-top:8pt;border-top:1pt solid #DCDCE8;display:flex;justify-content:space-between;font-size:8pt;color:#A0A0B8;}
+.footer-brand{font-weight:700;color:#F72585;}
+</style>
+</head>
+<body>
+
+<!-- لاپەڕەی ١ -->
+<div class="page">
+
+<div class="header">
+  <div>
+    <div class="logo-mark">ڕ</div>
+    <div class="logo-sub">ڕوانگە</div>
+  </div>
+  <div class="header-info">
+    <div class="header-title">زنجیرەی بڕیارەکان</div>
+    <div class="header-sub">کورتەیەک بۆ سەروەر — یەکێک لە زنجیرەکان هەڵبژێرە، تا پێکەوە بونیادی بنێین.</div>
+  </div>
+  <div class="header-right">
+    <div class="header-date"><span class="en">2 May 2026</span></div>
+    <div class="header-badge"><span class="en">v03</span> پێداچوونەوە</div>
+  </div>
+</div>
+
+<h2>Chain چییە؟</h2>
+
+<p class="lead">زنجیرە یان <strong>"Chain"</strong> جۆرێکە لە تاقیکردنەوە. کۆمەڵێک بڕیاری ناو پێداچوونەوەکەت وەردەگرێت و ئەم پرسیارە دەکات: <strong>ئایا ئەم بڕیارانە لە ناو دیمەنەکاندا بە ڕاستی پێکەوە کار دەکەن، یان تەنها چەند خاڵێکن و لە لیستی بڕیارەکاندا تەنیشت یەک کەوتوون؟</strong></p>
+
+<p>لە ئێستادا، پێداچوونەوەی وەشانی سێیەم (<span class="en">v03</span>) ١٩ بڕیاری "یەکلاینەکراوەی" تێدایە — هەر یەکێکیان پرسیارێکە دەربارەی ئەوەی ئایا شتێکی ناو چیرۆکەکە کار دەکات یان نا. بۆ نموونە: "ئایا مێکانزمی مردنی گەشان جێگەی بڕوایە؟" یان "ئایا قەنەفەکە وەک هێما زیادەڕەویی تێدا نەکراوە؟" یان "ئایا کۆتایییەکە کار دەکات؟"</p>
+
+<p>ئەم بڕیارانە وا دیارە کە سەربەخۆ بن، بەڵام لە ڕاستیدا وا نین. ئەمانە زنجیرە (<span class="en">Chains</span>) پێکدەهێنن — واتە کۆمەڵە بڕیارێکن کە یەکلاکردنەوەی دانەیەکیان، ناچارت دەکات ئەوانی تریش یەکلا بکەیتەوە، چونکە هەموویان لە چەندین دیمەنی جیاوازدا هەمان لۆژیکی داڕشتنیان هەیە.</p>
+
+<div class="emphasis">
+<strong>نموونە — بە زمانێکی سادە:</strong><br><br>
+باسی "شەربەتەکە" (شڕوبی) بکەین. بڕیارێکی یەکلاینەکراوەت هەیە کە دەڵێت: "ئایا ئەو ئاماژە کورتە ('ئەمانە دەمکوژن') بۆ بینەر بەسە، یان پێویستمان بە ئاماژەی پێشوەختەی زیاترە؟"<br><br>
+بەڵام تۆ ناتوانیت تەنها وەڵامی ئەمە بدەیتەوە. چونکە شەربەتەکە پەیوەندیی بە شەکرەی گەشانەوە هەیە (بڕیارێکی تری یەکلاینەکراوە)، ئەویش پەیوەندیی بەوەوە هەیە کە چۆن دەمرێت (دانەیەکی تر)، ئەویش بەستراوەتەوە بەوەی "ئەوین" لە بنکەی پۆلیس چی ئاشکرا دەکات (دانەیەکی تریش).<br><br>
+ئەگەر بڕیار بدەیت کە ئەو ئاماژە کورتە بەسە، واتە بڕیاریشت داوە کە ئاشکراکردنی نەخۆشیی شەکرەکە دەکرێت درەنگ بێت. ئەگەر بڕیار بدەیت کە ئاماژەکە دەبێت بەهێزتر بکرێت، ڕەنگە پێویست بکات "ئەوین" زووتر دەربکەوێت. بڕیارێکیان ئەوانی تر ڕادەکێشێت.<br><br>
+<strong>ئەمەیە زنجیرە (Chain). بڕیارەکان وەک کۆڵەکەن و قورساییی یەکتر هەڵدەگرن.</strong>
+</div>
+
+<h2>بونیادنانی زنجیرەیەک چی بەدەست دەهێنێت؟</h2>
+
+<h3>١. ناچارت دەکات وەڵامی ڕاستگۆیانە بدەیتەوە</h3>
+<p>کاتێک بە تەنیا سەیری بڕیارێک دەکەیت — "ئایا قەنەفەکە زیادەڕەویی تێدا کراوە؟" — دەتوانیت بڵێیت "ئاسایییە" و تێپەڕیت. بەڵام کاتێک دەبینیت قەنەفەکە بەستراوەتەوە بە ژوورە داخراوەکە و ئەویش بەستراوەتەوە بە ماڵەکە وەک سیستم، و هەرسێکیان هەمان ئەرکی پێکهاتەیییان هەیە (کە جیهانی فیزیکی، کۆنتڕۆڵەکەی نالی دەردەخات)، لێرەدا "ئاسایییە" ئیتر بەس نییە. دەبێت بڵێیت بە ڕاستی خەریکی چییە و ئایا ئەو سێ دانەیە پێکەوە زۆرن، کەمن یان ڕێک بە ئەندازەن.</p>
+
+<h3>٢. پەیوەندییە ڕاستەقینەکانت نیشان دەدات</h3>
+<p>هەندێک بڕیار وا دیارە لێک جیا بن بەڵام وا نین. مۆنتاژی سەرەتا و تویستەکەی کۆتایی وا دەردەکەون لە دوو سەری فیلمەکە بن، بەڵام لە ڕاستیدا هەمان مێکانزمی داڕشتنیان هەیە (پارچە ڤیدیۆی خێرا کە تەنها لە کۆتایییەکەدا مانیان دەبێت). ئەگەر تویستەکە یەکلا بکەیتەوە بێ ئەوەی بیر لە مۆنتاژەکە بکەیتەوە، ڕەنگە دژبەری دروست بکەیت.</p>
+
+<h3>٣. متمانە بە شێوازی شیکارییەکە دەبەخشێت</h3>
+<p>ئێمە خەریکی دروستکردنی "هاوێنەی شیکاری" بووین — واتە کورتەیەک کە ئەو یاسایە دیاری دەکات کە هەر دیمەنێک پەیڕەوی دەکات. زنجیرەی "ناڕاستەوخۆیی" (<span class="en">D15</span>) سەلەماندی کە ئەم شێوازە بۆ بڕیارە جێگیرەکان سەرکەوتووە. ئێستا لەسەر بڕیارە یەکلاینەکراوەکان تاقی دەکەینەوە. ئەگەر لێرەشدا کاری کرد، واتە شێوازێکی جێگیرمان دەستکەوتووە بۆ تەواوی <span class="en">Interactive Bible</span>ەکە.</p>
+
+<h2>بۆچی سەرەتا تەنها یەک زنجیرە هەڵدەبژێرین؟</h2>
+
+<p>چونکە ئەگەر هەر چوار زنجیرەکە پێکەوە بکەین، چەندین ڕۆژی پێ دەچێت و کارێکی سەرپێیی دەردەچێت. یەک زنجیرە، ئەگەر بە ڕێکوپێکی ئەنجام بدرێت، شێوازی کارکردنەکەمان فێر دەکات. زنجیرەی دووەم خێراتر دەڕوات. تا دەگەینە چوارەم زنجیرە، هەموو بڕیارە یەکلاینەکراوەکانی وەشانی سێیەم (<span class="en">v03</span>) لەژێر فشاری پێکهاتەییدا تاقیکراونەتەوە.</p>
+
+<p>هەروەها: تێبینییەکانی تۆ لەسەر یەکەم زنجیرە، شێوازی بونیادنانی زنجیرەکانی تریش دیاری دەکات. ئەگەر بڵێیت "پەیوەندییەکان زۆر بە زۆر دروست کراون" یان "دیمەنێکتان لەبیر چووە"، پێش دووبارەکردنەوەی پڕۆسەکە، شێوازەکەمان ڕاست دەکەینەوە.</p>
+
+<div class="footer">
+  <span>دروستکراوە لەلایەن <span class="footer-brand">ڕوانگە</span> — پلاتفۆرمی پێش‌بەرهەمهێنانی سینەمای کوردی</span>
+  <span>لاپەڕەی ١ لە ٣</span>
+</div>
+
+</div><!-- /لاپەڕەی ١ -->
+
+
+<!-- لاپەڕەی ٢ -->
+<div class="page">
+
+<div class="header">
+  <div>
+    <div class="logo-mark">ڕ</div>
+  </div>
+  <div class="header-info">
+    <div class="header-title">چوار زنجیرەکە</div>
+    <div class="header-sub">ئەوەیان هەڵبژێرە کە دڵت دەڵێت "لەمەیان کەمتر دڵنیام".</div>
+  </div>
+  <div class="header-right">
+    <div class="header-date">١٩ بڕیاری یەکلاینەکراوە</div>
+    <div class="header-badge">دانەیەک هەڵبژێرە</div>
+  </div>
+</div>
+
+<!-- زنجیرەی A -->
+<div class="chain-card">
+  <div class="chain-header">
+    <div class="chain-letter">A</div>
+    <div>
+      <div class="chain-title">گەشان: تراژیدیای تایبەتیی میوانەکە</div>
+      <div class="chain-count">٥ بڕیار</div>
+    </div>
+  </div>
+  <div class="chain-body">
+    <ul class="chain-decisions">
+      <li><strong>کارەکتەری گەشان</strong> — ئایا گەشان هێندە پەرەی پێ دراوە کە بینەر هەستی بۆ بجوڵێت؟ ئایا دەبێت نەخۆشیی شەکرەکەی زووتر ئاشکرا بکرێت؟</li>
+      <li><strong>ماسکی جوانکاریی پێست</strong> — ئایا ئەم نیشانەیە بۆ یەکەم بینین بەسە، یان دەبێت لە ناو فیلمەکەدا دووبارە ببێتەوە؟</li>
+      <li><strong>شەربەتەکە (شڕوبی)</strong> — ئایا ئەو ئاماژە کورتە ("ئەمانە دەمکوژن") بەسە، یان بینەر پێویستی بە ئاماژەی پێشوەختەی زیاترە؟ ئایا خواردنی یەکێکیان لەلایەن "نالی"یەوە لە کاتی مەشقەکەدا، دەبێت دراماتیکیتر بێت؟</li>
+      <li><strong>مردنی گەشان</strong> — ئایا مێکانزمی مردنەکە (جەڵتەی دڵ بەهۆی شەکرەوە) بێ زانیاریی پزیشکیی پێشوەختە جێگەی بڕوایە؟</li>
+      <li><strong>ئەوین لە بنکەی پۆلیس</strong> — ئایا ئەم بەشە زۆر درێژ نییە؟ ئایا دەبێت "ئەوین" لە شوێنێکی تر پێش بنکەی پۆلیس دەربکەوێت؟</li>
+    </ul>
+    <div class="chain-test"><strong>ئەم زنجیرەیە چی تاقی دەکاتەوە:</strong> ئایا هێڵی چیرۆکی گەشان وەک تراژیدیایەکی سەربەخۆ کار دەکات کە بەیەکدا دەکەون لەگەڵ سیستمەکەی نالیدا؟ ئەم ٥ بڕیارە لە ڕاستیدا یەک پرسیارن بە ٥ شێوازی جیاواز: ئایا بینەر تێدەگات کە گەشان بەهۆی چیرۆکی تایبەتیی خۆیەوە چارەنووسی بەرەو وێرانبوون چوو، نەک تەنها بەهۆی نالییەوە؟</div>
+    <div class="chain-pick">ئەگەر ئەمە هەڵبژێریت ← دەریا وردەکاریی تەواوی زنجیرەی "گەشان"ت پێ دەدات.</div>
+  </div>
+</div>
+
+<!-- زنجیرەی B -->
+<div class="chain-card">
+  <div class="chain-header">
+    <div class="chain-letter">B</div>
+    <div>
+      <div class="chain-title">جیهانی فیزیکی: ئەو شتانەی چیرۆکەکە هەڵدەگرن</div>
+      <div class="chain-count">٣ بڕیار</div>
+    </div>
+  </div>
+  <div class="chain-body">
+    <ul class="chain-decisions">
+      <li><strong>قەنەفەکە</strong> — ئایا وەک هێمایەک (خەو، مردن، حەشارگە، دۆزینەوە، نزیکبوونەوە) زیادەڕەویی تێدا کراوە، یان کۆبوونەوەی هەموو ئەمانە مەبەستی سەرەکییە؟</li>
+      <li><strong>ژوورە داخراوەکە</strong> — ئایا ئاشکراکردنی ڕاستییەکان (ڕابردووی نالی لە ئەوروپا، کچە فەرەنسییەکە کە لە گەشان دەچێت) لە کاتی گونجاودایە؟ ئایا دەبێت ئاماژەی پێشوەختە هەبن؟</li>
+      <li><strong>ماڵەکە وەک سیستم</strong> — ئایا ژیانە دووفاقییەکە (باخە دیزاینکراوەکە بەرامبەر شوقە تۆزاوییەکە) بۆ بینەر هێندە ڕوونە؟</li>
+    </ul>
+    <div class="chain-test"><strong>ئەم زنجیرەیە چی تاقی دەکاتەوە:</strong> ئایا جیهانی فیزیکی کارێکی پێکهاتەیی ڕاستەقینە دەکات یان تەنها دیکۆرە؟ ئەگەر هەموو قسەکان لابدەیت و تەنها سەیری جوڵەی کەسێک بکەیت لە ناو ماڵەکەدا (قەنەفەکە، ژوورە داخراوەکە)، ئایا لە فیلمەکە تێدەگەیت؟</div>
+    <div class="chain-pick">ئەگەر ئەمە هەڵبژێریت ← دەریا وردەکاریی تەواوی زنجیرەی "جیهانی فیزیکی"ت پێ دەدات.</div>
+  </div>
+</div>
+
+<!-- زنجیرەی C -->
+<div class="chain-card">
+  <div class="chain-header">
+    <div class="chain-letter">C</div>
+    <div>
+      <div class="chain-title">داڕشتنی گشتیی فیلمەکە: چوارچێوەکە چۆن کار دەکات</div>
+      <div class="chain-count">٥ بڕیار</div>
+    </div>
+  </div>
+  <div class="chain-body">
+    <ul class="chain-decisions">
+      <li><strong>تویستی کۆتایی</strong> — ئایا بینەر کاتێک تێدەگات هەموو شتەکە تەنها خەیاڵی "نالی" بووە، هەست بە ئاشکرابوونی ڕاستییەکان دەکات یان هەست دەکات فێڵی لێ کراوە؟</li>
+      <li><strong>مۆنتاژی سەرەتا</strong> — ئایا ئەو پارچە ڤیدیۆیانەی داهاتوو نیشان دەدەن (<span class="en">Flash-forward</span>) زۆر ئاشکران؟ ئایا دەبێت لە کاتی تویستەکەدا دووبارە پیشان بدرێنەوە؟</li>
+      <li><strong>نەورەسەکەی چیخۆف</strong> — ئایا بەکارهێنانی شانۆگەریی "نەورەس" وەک ئاوێنەیەک بۆ چیرۆکەکە زۆر ڕاستەوخۆ نییە؟ ئەی ئەگەر بینەر چیخۆف نەناسێت؟</li>
+      <li><strong>کۆتایییەکە</strong> — نالی وەڵامی تەلەفۆنەکە دەداتەوە بەبێ هیچ سیستم و نێوەندگیرێک. ئایا ئەمە بەسە؟ ئایا بینەر بڕوا دەکات کە ئەو گۆڕاوە؟</li>
+      <li><strong>باخەوانەکە</strong> — ئایا چوارچێوەی چیرۆکەکە (باخەوانەکە لە کۆتایییەکەدا هێشتا قسە دەکات و هەمان گفتوگۆیە) کار دەکات؟ ئایا ڕوونە کە هیچ کاتێک تێپەڕ نەبووە؟</li>
+    </ul>
+    <div class="chain-test"><strong>ئەم زنجیرەیە چی تاقی دەکاتەوە:</strong> ئایا پێکهاتە گەورەکەی فیلمەکە (سەرەتا ← تویست ← کۆتایی) وەک بازنەیەکی داخراو کار دەکات؟ ئەم بڕیارانە دیاری دەکەن کە ئایا ٥ خولەکی کۆتایی، ٩٠ خولەکەکەی پێشوو دەوڵەمەندتر دەکەن یان نرخەکەی دادەبەزێنن.</div>
+    <div class="chain-pick">ئەگەر ئەمە هەڵبژێریت ← دەریا وردەکاریی تەواوی زنجیرەی "داڕشتنی گشتی"ت پێ دەدات.</div>
+  </div>
+</div>
+
+<div class="footer">
+  <span>دروستکراوە لەلایەن <span class="footer-brand">ڕوانگە</span> — پلاتفۆرمی پێش‌بەرهەمهێنانی سینەمای کوردی</span>
+  <span>لاپەڕەی ٢ لە ٣</span>
+</div>
+
+</div><!-- /لاپەڕەی ٢ -->
+
+
+<!-- لاپەڕەی ٣ -->
+<div class="page">
+
+<div class="header">
+  <div>
+    <div class="logo-mark">ڕ</div>
+  </div>
+  <div class="header-info">
+    <div class="header-title">چوار زنجیرەکە (بەردەوام)</div>
+    <div class="header-sub">دوایین هەڵبژاردە + هەنگاوی تۆ</div>
+  </div>
+  <div class="header-right">
+    <div class="header-date"><span class="en">2 May 2026</span></div>
+  </div>
+</div>
+
+<!-- زنجیرەی D -->
+<div class="chain-card">
+  <div class="chain-header">
+    <div class="chain-letter">D</div>
+    <div>
+      <div class="chain-title">سیستمی کۆنتڕۆڵەکەی نالی: چۆن دەشکێت</div>
+      <div class="chain-count">٦ بڕیار</div>
+    </div>
+  </div>
+  <div class="chain-body">
+    <ul class="chain-decisions">
+      <li><strong>ئالوودەبوونی نالی بۆ دڵنیایی</strong> — ئایا وابەستەیییەکەی بە <span class="en">AI</span> ئەوەندە زیادەڕەویی تێدایە کە وای لێ بکات لای بینەر ببێتە کەسێکی بێزارکەر؟</li>
+      <li><strong>ڕۆڵی <span class="en">AI</span></strong> — چاودێرێکی بێ هەست: ئایا ئەمە قووڵییەکی تەواوە، یان دەبێت زیاتر ببینین کە <span class="en">AI</span> چی پێ دەکرێت و چی پێ ناکرێت؟</li>
+      <li><strong>زمانی <span class="en">AI</span> (دەنگ بەرامبەر تێکست)</strong> — ئایا ئەم سیستمە (دەنگ = بێئومێدی، تێکست = خۆشاردنەوە) دەبێت بۆ بینەر ڕوون بکرێتەوە، بۆ نموونە لە ڕێگەی ژێرنووسەوە؟</li>
+      <li><strong>ڕاستی یان بوێری (<span class="en">Truth or Dare</span>)</strong> — یارییەکە لە ڕاستیدا لێکۆڵینەوەیەکی پۆلیسییە لە بەرگێکی تردا. ئایا دەبێت لێکچوونی نێوان یارییەکە و <span class="en">AI</span> ئاشکراتر بێت؟</li>
+      <li><strong>مردنی ئەدیب</strong> — ئایا مێکانزمی مردنە ڕێکەوتەکە (پاڵنانی لە کاتی ترسدا ← کەوتن ← بەرکەوتن بە پەیکەرەکە ← مردن) جێگەی بڕوایە؟</li>
+      <li><strong>ئینسانیترین ساتی نالی</strong> — ناسنامەکە لە تەنیشت تەرمەکە جێ دەهێڵێت. ئایا کاتی پێویستی لەسەر شاشە پێ دراوە؟ ئایا هێندە دراماتیکی هەیە؟</li>
+    </ul>
+    <div class="chain-test"><strong>ئەم زنجیرەیە چی تاقی دەکاتەوە:</strong> ئایا سیستمی کۆنتڕۆڵەکەی نالی (<span class="en">AI</span> ← یاری ← هونەر ← بیابان) بە شێوەیەکی مەنتیقی سەرکەوتووە و دواتر بە شێوەیەکی قایلکەر دەشکێت؟ ئەم بڕیارانە دیاری دەکەن کە ئایا بینەر تێدەگات "بۆچی" نالی ئەم کارانە دەکات، نەک تەنها "چی" دەکات.</div>
+    <div class="chain-pick">ئەگەر ئەمە هەڵبژێریت ← دەریا وردەکاریی تەواوی زنجیرەی "سیستمی نالی"ت پێ دەدات.</div>
+  </div>
+</div>
+
+<!-- سندووقی بڕیار -->
+<div class="cta-box">
+  <h2 style="border:none;">هەنگاوی تۆ</h2>
+  <p style="color:#EDEAD8;font-size:12pt;font-weight:600;margin-bottom:10pt;">یەک زنجیرە هەڵبژێرە: <span class="en">A</span>، <span class="en">B</span>، <span class="en">C</span>، یان <span class="en">D</span>.</p>
+  <p>زۆر بیری لێ مەکەرەوە. ئەوەیان هەڵبژێرە کە دڵت دەڵێت "لەمەیان کەمتر دڵنیام".<br>چونکە لەوێدا زنجیرەکە زۆرترین کاری بۆ دەکرێت.</p>
+  <div class="cta-options">
+    <div class="cta-option">A</div>
+    <div class="cta-option">B</div>
+    <div class="cta-option">C</div>
+    <div class="cta-option">D</div>
+  </div>
+  <p style="margin-top:14pt;font-size:9.5pt;">کاتێک هەڵت بژارد، دەریا دۆکیومێنتی وردەکاریی زنجیرەکەت دەداتێ.<br>تۆ دەیخوێنیتەوە و ڕای خۆت دەڵێیت، ئەویش تێبینییەکانت تۆمار دەکات و لەوێوە دەست پێ دەکەین.<br>سێ زنجیرەکەی تریش دواتر دێن بە هەمان پڕۆسە.</p>
+</div>
+
+<div class="pink-box">
+<strong>پڕۆسەکە:</strong><br>
+١. تۆ پیتێکی زنجیرە هەڵدەبژێریت (<span class="en">A</span>، <span class="en">B</span>، <span class="en">C</span>، یان <span class="en">D</span>).<br>
+٢. دەریا وردەکاریی تەواوی ئەو زنجیرەیەت دەداتێ.<br>
+٣. دەیخوێنیتەوە — دیاری دەکەت چی ڕاستە، چی هەڵەیە، و چی کەمە.<br>
+٤. دەریا تێبینییەکانت تۆمار دەکات.<br>
+٥. زنجیرەی دواتر بونیاد دەنێین، بەو گۆڕانکارییانەی لە زنجیرەی پێشوو فێر بووین.<br>
+٦. لە کۆتاییدا: هەموو ١٩ بڕیارە یەکلاینەکراوەکە لە ڕووی پێکهاتەیییەوە چارەسەر دەبن.
+</div>
+
+<p class="muted" style="text-align:center;margin-top:20pt;font-size:10pt;">هەر جارەی یەک زنجیرە. تۆ هەڵبژێرە، ئێمە دروستی دەکەین.</p>
+
+<div class="footer">
+  <span>دروستکراوە لەلایەن <span class="footer-brand">ڕوانگە</span> — پلاتفۆرمی پێش‌بەرهەمهێنانی سینەمای کوردی</span>
+  <span>لاپەڕەی ٣ لە ٣</span>
+</div>
+
+</div><!-- /لاپەڕەی ٣ -->
+
+</body>
+</html>

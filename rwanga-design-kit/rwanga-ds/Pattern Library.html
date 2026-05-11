@@ -1,0 +1,2791 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" data-theme="dark" data-bs-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rwanga Design System — Pattern Library</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;500;600;700&family=Noto+Sans+Arabic:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+/* ══════════════════════════════════════════════════════
+   RWANGA DESIGN TOKENS — full system
+   ══════════════════════════════════════════════════════ */
+:root {
+  --rw-bg:        #0A0A0D;
+  --rw-surface:   #111116;
+  --rw-surface-2: #18181F;
+  --rw-surface-3: #1E1E28;
+  --rw-border:    #222230;
+  --rw-border-2:  #1A1A25;
+
+  --rw-text:      #EDEAD8;
+  --rw-text-2:    #78788C;
+  --rw-text-3:    #35353F;
+
+  --rw-amber:     #D4A574;
+  --rw-amber-dim: rgba(212,165,116,0.10);
+  --rw-pink:      #F72585;
+  --rw-pink-dim:  rgba(247,37,133,0.10);
+
+  --rw-script:    #FF6B35;
+  --rw-break:     #2D5BE3;
+  --rw-vis:       #00A896;
+  --rw-plan:      #7C3AED;
+  --rw-shoot:     #F72585;
+
+  --rw-rail-bg:   #060608;
+  --rw-rail-w:    60px;
+  --rw-topnav-h:  52px;
+  --rw-font:      'Noto Sans Arabic', 'Cairo', system-ui, sans-serif;
+  --rw-font-en:   'Inter', system-ui, sans-serif;
+  --rw-r:         2px;
+  --rw-t:         0.12s ease;
+
+  /* Icon glow values */
+  --glow-amber:   drop-shadow(0 0 6px rgba(212,165,116,.7)) drop-shadow(0 0 14px rgba(212,165,116,.3));
+  --glow-plan:    drop-shadow(0 0 6px rgba(124,58,237,.65)) drop-shadow(0 0 14px rgba(124,58,237,.25));
+  --glow-vis:     drop-shadow(0 0 6px rgba(0,168,150,.65))  drop-shadow(0 0 14px rgba(0,168,150,.25));
+  --glow-script:  drop-shadow(0 0 6px rgba(255,107,53,.65)) drop-shadow(0 0 14px rgba(255,107,53,.25));
+  --glow-shoot:   drop-shadow(0 0 6px rgba(247,37,133,.65)) drop-shadow(0 0 14px rgba(247,37,133,.25));
+}
+[data-theme="light"] {
+  --rw-bg: #F4F4F7; --rw-surface: #fff; --rw-surface-2: #EDEDF4;
+  --rw-surface-3: #E5E5EF; --rw-border: #D8D8E8; --rw-border-2: #E8E8F2;
+  --rw-text: #0F0F12; --rw-text-2: #5C5C70; --rw-text-3: #A0A0B8;
+  --rw-amber: #9A5520; --rw-amber-dim: rgba(154,85,32,.08);
+  --rw-pink-dim: rgba(247,37,133,.06);
+}
+
+/* BS5 overrides */
+:root {
+  --bs-body-font-family: var(--rw-font);
+  --bs-body-font-size: 14px;
+  --bs-body-color: var(--rw-text);
+  --bs-body-bg: var(--rw-bg);
+  --bs-border-color: var(--rw-border);
+  --bs-border-radius: var(--rw-r);
+  --bs-border-radius-sm: var(--rw-r);
+  --bs-border-radius-lg: var(--rw-r);
+  --bs-link-color: var(--rw-amber);
+  --bs-link-hover-color: var(--rw-amber);
+  --bs-link-decoration: none;
+  --bs-card-bg: var(--rw-surface);
+  --bs-card-border-color: var(--rw-border);
+}
+*, *::before, *::after { box-shadow: none !important; }
+html, body { height: 100%; overflow: hidden; font-family: var(--rw-font); background: var(--rw-bg); color: var(--rw-text); }
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--rw-border); border-radius: 2px; }
+
+/* ══════════════════════════════════════════════════════
+   ICON SYSTEM — B+E Hybrid
+   Cinema SVG glyphs for domain, neon stroke for utility
+   ══════════════════════════════════════════════════════ */
+.ico { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.ico-fill { fill: currentColor; stroke: none; }
+
+/* Rail icon slot — 60px wide rail, icon fills it */
+.rw-rail-icon {
+  width: 60px; height: 52px;
+  display: flex; align-items: center; justify-content: center;
+  position: relative; cursor: pointer;
+  color: var(--rw-text-3);
+  border: none; background: none;
+  transition: color var(--rw-t), filter var(--rw-t);
+  text-decoration: none;
+}
+.rw-rail-icon:hover { color: var(--rw-text-2); }
+
+/* Active: amber glow + left bar */
+.rw-rail-icon.active { color: var(--rw-amber); filter: var(--glow-amber); }
+.rw-rail-icon.active::before {
+  content: '';
+  position: absolute;
+  inset-inline-start: 0; top: 12px; bottom: 12px;
+  width: 2px;
+  background: var(--rw-amber);
+  /* real glow on the bar */
+  box-shadow: 0 0 8px var(--rw-amber), 0 0 20px rgba(212,165,116,.35) !important;
+  border-radius: 0 1px 1px 0;
+}
+
+/* Section-colored active states for nav modes */
+.rw-rail-icon.active-plan   { color: #A78BFF; filter: var(--glow-plan); }
+.rw-rail-icon.active-plan::before   { background: #A78BFF; box-shadow: 0 0 8px #A78BFF, 0 0 20px rgba(167,139,255,.35) !important; }
+.rw-rail-icon.active-vis    { color: #00C4B0; filter: var(--glow-vis); }
+.rw-rail-icon.active-vis::before    { background: #00C4B0; box-shadow: 0 0 8px #00C4B0, 0 0 20px rgba(0,196,176,.35) !important; }
+
+.rw-rail-sep { width: 32px; height: 1px; background: rgba(255,255,255,.05); margin: 4px 0; }
+.rw-rail-logo {
+  width: 60px; height: 52px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--rw-font); font-size: 20px; font-weight: 700; color: #fff;
+  background: var(--rw-pink);
+  cursor: pointer; text-decoration: none; flex-shrink: 0;
+  /* Pink logo glow */
+  filter: drop-shadow(0 0 8px rgba(247,37,133,.4)) drop-shadow(0 0 20px rgba(247,37,133,.15));
+  transition: filter var(--rw-t);
+}
+.rw-rail-logo:hover { filter: drop-shadow(0 0 12px rgba(247,37,133,.6)) drop-shadow(0 0 28px rgba(247,37,133,.25)); }
+
+/* App shell */
+.rw-app  { display: flex; height: 100vh; overflow: hidden; }
+.rw-rail { width: var(--rw-rail-w); background: var(--rw-rail-bg); display: flex; flex-direction: column; align-items: center; padding: 0; flex-shrink: 0; z-index: 100; }
+.rw-main { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+
+/* Top nav */
+.rw-topnav { height: var(--rw-topnav-h); background: var(--rw-surface); border-bottom: 1px solid var(--rw-border); display: flex; align-items: center; padding: 0 20px; gap: 0; flex-shrink: 0; }
+.rw-topnav-project { display: flex; align-items: center; gap: 10px; padding-inline-end: 20px; border-inline-end: 1px solid var(--rw-border); text-decoration: none; }
+.rw-project-thumb { width: 26px; height: 26px; background: var(--rw-script); flex-shrink: 0; }
+.rw-project-name { font-size: 13px; font-weight: 700; white-space: nowrap; color: var(--rw-text); }
+.rw-sec-tab { height: var(--rw-topnav-h); font-size: 13px; font-weight: 600; cursor: pointer; color: var(--rw-text-2); border: none; background: none; border-bottom: 2px solid transparent; white-space: nowrap; transition: color var(--rw-t), border-color var(--rw-t); padding: 0 14px; text-decoration: none; display: flex; align-items: center; gap: 6px; }
+.rw-sec-tab:hover { color: var(--rw-text); }
+.rw-sec-tab[data-s="s"].active  { color: var(--rw-script); border-bottom-color: var(--rw-script); }
+.rw-sec-tab[data-s="b"].active  { color: #7FA8FF;           border-bottom-color: #7FA8FF; }
+.rw-sec-tab[data-s="v"].active  { color: var(--rw-vis);     border-bottom-color: var(--rw-vis); }
+.rw-sec-tab[data-s="p"].active  { color: #A78BFF;           border-bottom-color: #A78BFF; }
+.rw-sec-tab[data-s="sh"].active { color: var(--rw-shoot);   border-bottom-color: var(--rw-shoot); }
+.rw-sec-tab[data-s="rv"].active { color: #A78BFF;           border-bottom-color: #A78BFF; }
+.rw-sec-tab[data-s="cm"].active { color: #00C4B0;           border-bottom-color: #00C4B0; }
+/* Tab dot indicator */
+.rw-tab-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+
+/* Avatar */
+.rw-avatar { width: 30px; height: 30px; background: var(--rw-break); color: #fff; font-size: 11px; font-weight: 700; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
+
+/* Breadcrumb */
+.rw-breadcrumb { height: 44px; background: var(--rw-surface-2); border-bottom: 1px solid var(--rw-border); display: flex; align-items: center; padding: 0 20px; gap: 10px; flex-shrink: 0; }
+.rw-crumb-back { background: var(--rw-pink); color: #fff; font-size: 12px; font-weight: 600; border: none; cursor: pointer; padding: 6px 14px; transition: opacity var(--rw-t); text-decoration: none; }
+.rw-crumb-sep { color: var(--rw-text-3); }
+.rw-crumb-node { font-size: 13px; font-weight: 600; color: var(--rw-text); }
+.rw-crumb-leaf { font-size: 13px; color: var(--rw-text-2); }
+
+/* Scene panel */
+.rw-scene-panel { width: 240px; background: var(--rw-surface); border-inline-start: 1px solid var(--rw-border); display: flex; flex-direction: column; flex-shrink: 0; }
+.rw-scene-item { display: flex; align-items: center; gap: 10px; padding: 9px 14px; cursor: pointer; transition: background var(--rw-t); border-inline-start: 3px solid transparent; }
+.rw-scene-item:hover { background: var(--rw-surface-2); }
+.rw-scene-item.active { background: var(--rw-amber-dim); border-inline-start-color: var(--rw-amber); }
+.rw-sc-num { font-family: var(--rw-font-en); font-size: 11px; font-weight: 600; color: var(--rw-text-3); min-width: 20px; }
+.rw-scene-item.active .rw-sc-num { color: var(--rw-amber); }
+.rw-sc-loc { font-size: 13px; color: var(--rw-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rw-sc-time { font-size: 11px; color: var(--rw-text-3); }
+.rw-scene-item.active .rw-sc-loc { color: var(--rw-amber); font-weight: 600; }
+
+/* Module tabs */
+.rw-mod-tab { height: 48px; font-size: 13px; font-weight: 600; color: var(--rw-text-2); cursor: pointer; white-space: nowrap; border: none; background: none; border-bottom: 2px solid transparent; transition: color var(--rw-t), border-color var(--rw-t); padding: 0 16px; }
+.rw-mod-tab:hover { color: var(--rw-text); }
+.rw-mod-tab.active { color: var(--rw-amber); border-bottom-color: var(--rw-amber); }
+
+/* Buttons */
+.rw-btn { font-family: var(--rw-font); font-size: 13px; font-weight: 600; border: none; cursor: pointer; white-space: nowrap; text-decoration: none; transition: opacity var(--rw-t); display: inline-flex; align-items: center; gap: 6px; border-radius: var(--rw-r); }
+.rw-btn:hover { opacity: 0.85; } .rw-btn:active { opacity: 0.7; }
+.rw-btn-primary { background: var(--rw-pink); color: #fff; padding: 9px 18px; }
+.rw-btn-amber   { background: var(--rw-amber); color: #fff; padding: 9px 18px; }
+.rw-btn-ghost   { background: var(--rw-surface-2); color: var(--rw-text-2); border: 1px solid var(--rw-border); padding: 8px 16px; }
+.rw-btn-ghost:hover { color: var(--rw-text); opacity: 1; border-color: var(--rw-text-3); }
+.rw-btn-ai      { background: transparent; border: 1px solid var(--rw-border); color: var(--rw-text-2); padding: 8px 16px; }
+.rw-btn-ai:hover { border-color: var(--rw-amber); color: var(--rw-amber); opacity: 1; }
+.rw-btn-sm  { padding: 5px 12px; font-size: 12px; }
+.rw-btn-lg  { padding: 12px 24px; font-size: 14px; }
+.rw-btn-icon { width: 34px; height: 34px; padding: 0; justify-content: center; background: var(--rw-surface-2); border: 1px solid var(--rw-border); color: var(--rw-text-2); }
+.rw-btn-icon:hover { color: var(--rw-text); opacity: 1; }
+
+/* Badges */
+.rw-badge { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; padding: 3px 8px; border-radius: var(--rw-r); }
+.rw-badge-ok   { background: rgba(0,168,150,.12);  color: var(--rw-vis);   border: 1px solid rgba(0,168,150,.25); }
+.rw-badge-warn { background: var(--rw-amber-dim);  color: var(--rw-amber); border: 1px solid rgba(212,165,116,.25); }
+.rw-badge-err  { background: var(--rw-pink-dim);   color: var(--rw-shoot); border: 1px solid rgba(247,37,133,.25); }
+.rw-badge-mute { background: var(--rw-surface-2);  color: var(--rw-text-2); border: 1px solid var(--rw-border); }
+.rw-badge-plan { background: rgba(124,58,237,.12); color: #A78BFF;         border: 1px solid rgba(124,58,237,.25); }
+.rw-badge-d    { background: rgba(245,215,110,.10); color: #F5D76E;        border: 1px solid rgba(245,215,110,.25); }
+.rw-badge-v    { background: var(--rw-surface-2); color: var(--rw-text-2); border: 1px solid var(--rw-border); }
+.rw-badge-i    { background: rgba(45,91,227,.12); color: #7FA8FF;          border: 1px solid rgba(45,91,227,.25); }
+
+/* Cards */
+.rw-card { background: var(--rw-surface); border: 1px solid var(--rw-border); }
+.rw-card-script { border-inline-start: 3px solid var(--rw-script); }
+.rw-card-break  { border-inline-start: 3px solid var(--rw-break); }
+.rw-card-vis    { border-inline-start: 3px solid var(--rw-vis); }
+.rw-card-plan   { border-inline-start: 3px solid var(--rw-plan); }
+.rw-card-shoot  { border-inline-start: 3px solid var(--rw-shoot); }
+.rw-card-amber  { border-inline-start: 3px solid var(--rw-amber); }
+
+/* Tables */
+.rw-tbl { width: 100%; border-collapse: collapse; background: var(--rw-surface); border: 1px solid var(--rw-border); }
+.rw-tbl thead th { font-size: 10px; font-weight: 700; color: var(--rw-text-3); text-transform: uppercase; letter-spacing: .9px; background: var(--rw-surface-2); border-bottom: 1px solid var(--rw-border); padding: 11px 16px; text-align: start; }
+.rw-tbl td { font-size: 13px; border-bottom: 1px solid var(--rw-border-2); vertical-align: middle; padding: 13px 16px; }
+.rw-tbl-row { cursor: pointer; transition: background var(--rw-t); }
+.rw-tbl-row:hover td { background: var(--rw-surface-2); }
+.rw-shot-num { font-family: var(--rw-font-en); font-size: 13px; font-weight: 700; color: var(--rw-amber); }
+
+/* Stats */
+.rw-stats { border: 1px solid var(--rw-border); display: flex; }
+.rw-stat { flex: 1; background: var(--rw-surface); border-inline-start: 1px solid var(--rw-border); text-align: center; padding: 20px 12px; }
+.rw-stat:first-child { border-inline-start: none; }
+.rw-stat-val { font-family: var(--rw-font-en); font-size: 28px; font-weight: 600; color: var(--rw-amber); line-height: 1; }
+.rw-stat-lbl { font-size: 10px; font-weight: 700; color: var(--rw-text-3); text-transform: uppercase; letter-spacing: 1px; margin-top: 6px; }
+
+/* Filters */
+.rw-filter-row { display: flex; border: 1px solid var(--rw-border); width: fit-content; }
+.rw-f-btn { font-family: var(--rw-font); font-size: 12px; font-weight: 600; background: var(--rw-surface); border: none; border-inline-start: 1px solid var(--rw-border); color: var(--rw-text-2); cursor: pointer; padding: 0 16px; min-height: 38px; white-space: nowrap; transition: background var(--rw-t), color var(--rw-t); }
+.rw-f-btn:first-child { border-inline-start: none; }
+.rw-f-btn:hover { background: var(--rw-surface-2); color: var(--rw-text); }
+.rw-f-btn.active { background: var(--rw-amber); color: #fff; }
+
+/* Forms */
+.rw-form-input { width: 100%; background: var(--rw-surface); border: 1px solid var(--rw-border); color: var(--rw-text); font-family: var(--rw-font); font-size: 14px; padding: 11px 14px; border-radius: var(--rw-r); outline: none; transition: border-color var(--rw-t); }
+.rw-form-input:focus { border-color: var(--rw-amber); }
+.rw-form-input::placeholder { color: var(--rw-text-3); }
+.rw-form-label { font-size: 10px; font-weight: 700; color: var(--rw-text-2); text-transform: uppercase; letter-spacing: .8px; display: block; margin-bottom: 6px; }
+
+/* Dashboard section rows */
+.rw-sec-row { display: flex; align-items: stretch; background: var(--rw-surface); border: 1px solid var(--rw-border); border-bottom: none; }
+.rw-sec-row:last-of-type { border-bottom: 1px solid var(--rw-border); }
+.rw-sec-label { width: 90px; flex-shrink: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; cursor: pointer; transition: opacity var(--rw-t); padding: 16px 8px; }
+.rw-sec-label:hover { opacity: 0.85; }
+.rw-sec-label-text { font-size: 10px; font-weight: 700; color: #fff; letter-spacing: .3px; text-align: center; }
+.rw-sec-modules { flex: 1; display: flex; flex-wrap: wrap; border-inline-start: 1px solid var(--rw-border); }
+.rw-mod-card { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 20px 12px; min-width: 110px; cursor: pointer; border-inline-start: 1px solid var(--rw-border); transition: background var(--rw-t); }
+.rw-mod-card:first-child { border-inline-start: none; }
+.rw-mod-card:hover { background: var(--rw-surface-2); }
+.rw-mod-name { font-size: 11px; font-weight: 600; color: var(--rw-text-2); text-align: center; line-height: 1.4; }
+
+/* Empty states */
+.rw-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 64px 32px; gap: 12px; }
+.rw-empty-icon { font-size: 40px; opacity: 0.2; }
+.rw-empty-title { font-size: 18px; font-weight: 700; }
+.rw-empty-sub { font-size: 14px; color: var(--rw-text-2); max-width: 340px; line-height: 1.7; }
+
+/* Toasts */
+.rw-toast-container { position: fixed; bottom: 20px; inset-inline-start: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+.rw-toast { background: var(--rw-surface-3); border: 1px solid var(--rw-border); border-inline-start: 3px solid var(--rw-amber); font-size: 13px; color: var(--rw-text); min-width: 260px; padding: 14px 16px; pointer-events: auto; animation: toast-in .18s ease; }
+.rw-toast.success { border-inline-start-color: var(--rw-vis); }
+.rw-toast.error   { border-inline-start-color: var(--rw-shoot); }
+@keyframes toast-in { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:none; } }
+
+/* Section header */
+.rw-section-hdr { font-size: 10px; font-weight: 700; color: var(--rw-text-3); text-transform: uppercase; letter-spacing: 1.2px; border-bottom: 1px solid var(--rw-border); padding-bottom: 8px; margin-bottom: 16px; }
+
+/* Misc */
+.rw-font-en { font-family: var(--rw-font-en); }
+.rw-overline { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--rw-text-3); }
+.text-rw-amber { color: var(--rw-amber) !important; }
+.text-rw-muted { color: var(--rw-text-2) !important; }
+.text-rw-dim   { color: var(--rw-text-3) !important; }
+.bg-rw-surface  { background: var(--rw-surface) !important; }
+.bg-rw-surface2 { background: var(--rw-surface-2) !important; }
+.border-rw      { border-color: var(--rw-border) !important; }
+
+/* ══════════════════════════════════════════════════════
+   PATTERN LIBRARY CHROME
+   ══════════════════════════════════════════════════════ */
+.pl-root    { display: flex; height: 100vh; overflow: hidden; }
+.pl-sidebar { width: 200px; background: #040406; border-inline-end: 1px solid #18181F; overflow-y: auto; flex-shrink: 0; padding: 20px 0; }
+.pl-main    { flex: 1; overflow-y: auto; background: var(--rw-bg); }
+
+.pl-nav-group { font-size: 9px; font-weight: 700; color: #2E2E3A; text-transform: uppercase; letter-spacing: 1.4px; padding: 14px 18px 5px; }
+.pl-nav-item  { display: block; width: 100%; text-align: start; padding: 7px 18px; font-size: 12px; font-weight: 500; color: #55556A; background: none; border: none; border-inline-start: 2px solid transparent; cursor: pointer; transition: color .1s, background .1s; font-family: 'Inter', sans-serif; }
+.pl-nav-item:hover  { color: #EDEAD8; background: rgba(255,255,255,.03); }
+.pl-nav-item.active { color: var(--rw-amber); border-inline-start-color: var(--rw-amber); background: rgba(212,165,116,.05); }
+
+.pl-section { padding: 44px 40px; border-bottom: 1px solid var(--rw-border); }
+.pl-section:last-child { border-bottom: none; }
+.pl-tag  { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.4px; color: var(--rw-text-3); margin-bottom: 4px; }
+.pl-name { font-size: 26px; font-weight: 700; color: var(--rw-text); margin-bottom: 6px; line-height: 1.2; }
+.pl-desc { font-size: 14px; color: var(--rw-text-2); line-height: 1.75; max-width: 600px; margin-bottom: 28px; }
+
+.pl-demo  { background: var(--rw-surface); border: 1px solid var(--rw-border); padding: 24px; margin-bottom: 8px; }
+.pl-lbl   { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--rw-text-3); margin-bottom: 10px; }
+.pl-code  { background: #040406; border: 1px solid var(--rw-border); padding: 16px 20px; font-family: 'Courier New', monospace; font-size: 11.5px; line-height: 1.9; color: #8899AA; overflow-x: auto; white-space: pre; margin-bottom: 24px; }
+.pl-code .kw  { color: var(--rw-pink); }
+.pl-code .cls { color: var(--rw-amber); }
+.pl-code .str { color: var(--rw-vis); }
+.pl-code .cmt { color: #35353F; font-style: italic; }
+
+.pl-header { background: #040406; border-bottom: 1px solid #18181F; padding: 18px 36px; display: flex; align-items: center; gap: 14px; }
+
+/* Icon showcase grids */
+.ico-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px,1fr)); gap: 1px; background: var(--rw-border); border: 1px solid var(--rw-border); margin-bottom: 24px; }
+.ico-cell { background: var(--rw-surface); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 18px 8px; cursor: default; }
+.ico-cell-label { font-size: 9px; color: var(--rw-text-3); text-align: center; letter-spacing: .3px; }
+
+/* Glow state demos */
+.glow-demo { display: flex; gap: 20px; flex-wrap: wrap; align-items: flex-end; }
+.glow-state { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.glow-slot { width: 60px; height: 52px; background: #060608; border: 1px solid var(--rw-border); display: flex; align-items: center; justify-content: center; position: relative; }
+.glow-slot-label { font-size: 10px; color: var(--rw-text-3); }
+
+/* ══ MODAL ══════════════════════════════════════════════ */
+.rw-modal-backdrop {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.7);
+  z-index: 500;
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px;
+  backdrop-filter: blur(2px);
+}
+.rw-modal {
+  background: var(--rw-surface);
+  border: 1px solid var(--rw-border);
+  border-top: 2px solid var(--rw-amber);
+  width: 100%; max-width: 540px;
+  max-height: 80vh;
+  overflow-y: auto;
+  border-radius: var(--rw-r);
+  animation: modal-in .15s ease;
+}
+.rw-modal-sm { max-width: 380px; }
+.rw-modal-lg { max-width: 720px; }
+.rw-modal-header {
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid var(--rw-border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.rw-modal-title { font-size: 16px; font-weight: 700; color: var(--rw-text); }
+.rw-modal-close {
+  width: 28px; height: 28px;
+  display: flex; align-items: center; justify-content: center;
+  background: none; border: none; cursor: pointer;
+  color: var(--rw-text-3); font-size: 18px;
+  border-radius: var(--rw-r);
+  transition: color var(--rw-t), background var(--rw-t);
+}
+.rw-modal-close:hover { color: var(--rw-text); background: var(--rw-surface-2); }
+.rw-modal-body   { padding: 24px; }
+.rw-modal-footer {
+  padding: 16px 24px;
+  border-top: 1px solid var(--rw-border);
+  display: flex; justify-content: flex-end; gap: 8px;
+}
+
+/* Danger modal variant */
+.rw-modal-danger { border-top-color: var(--rw-shoot); }
+
+@keyframes modal-in {
+  from { opacity:0; transform: translateY(-8px) scale(.98); }
+  to   { opacity:1; transform: none; }
+}
+
+/* ══ TOASTS & ALERTS ══════════════════════════════════ */
+/* Toast container — fixed bottom-start */
+.rw-toast-stack {
+  position: fixed;
+  bottom: 24px;
+  inset-inline-start: 24px;
+  z-index: 9999;
+  display: flex; flex-direction: column; gap: 8px;
+  pointer-events: none;
+  max-width: 360px;
+}
+
+.rw-toast {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 14px 16px;
+  background: var(--rw-surface-3);
+  border: 1px solid var(--rw-border);
+  border-inline-start: 3px solid var(--rw-amber);
+  font-size: 13px; color: var(--rw-text);
+  pointer-events: auto;
+  animation: toast-in .18s ease;
+  position: relative;
+}
+.rw-toast.t-ok      { border-inline-start-color: var(--rw-vis); }
+.rw-toast.t-err     { border-inline-start-color: var(--rw-shoot); }
+.rw-toast.t-info    { border-inline-start-color: var(--rw-break); }
+.rw-toast.t-warn    { border-inline-start-color: var(--rw-amber); }
+
+.rw-toast-icon  { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+.rw-toast-body  { flex: 1; min-width: 0; }
+.rw-toast-title { font-size: 13px; font-weight: 700; margin-bottom: 2px; }
+.rw-toast-msg   { font-size: 12px; color: var(--rw-text-2); line-height: 1.5; }
+.rw-toast-close {
+  width: 20px; height: 20px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: none; border: none; cursor: pointer;
+  color: var(--rw-text-3); font-size: 14px;
+}
+.rw-toast-close:hover { color: var(--rw-text); }
+
+/* Toast progress bar */
+.rw-toast-bar {
+  position: absolute;
+  bottom: 0; inset-inline-start: 0; height: 2px;
+  background: var(--rw-amber);
+  animation: toast-bar 4s linear forwards;
+}
+.rw-toast.t-ok   .rw-toast-bar { background: var(--rw-vis); }
+.rw-toast.t-err  .rw-toast-bar { background: var(--rw-shoot); }
+.rw-toast.t-info .rw-toast-bar { background: #7FA8FF; }
+
+@keyframes toast-in  { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:none; } }
+@keyframes toast-bar { from { width:100%; } to { width:0%; } }
+
+/* Inline alerts (not toasts — used inside content) */
+.rw-alert {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 14px 16px;
+  border: 1px solid var(--rw-border);
+  border-inline-start: 3px solid var(--rw-amber);
+  background: var(--rw-surface);
+  font-size: 13px;
+}
+.rw-alert-ok   { border-inline-start-color: var(--rw-vis);   background: rgba(0,168,150,.06); }
+.rw-alert-err  { border-inline-start-color: var(--rw-shoot); background: var(--rw-pink-dim); }
+.rw-alert-warn { border-inline-start-color: var(--rw-amber); background: var(--rw-amber-dim); }
+.rw-alert-info { border-inline-start-color: #7FA8FF;         background: rgba(45,91,227,.06); }
+.rw-alert-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+.rw-alert-text { flex: 1; line-height: 1.6; }
+.rw-alert-title { font-weight: 700; margin-bottom: 3px; }
+
+/* ══ WIZARD ══════════════════════════════════════════ */
+.rw-wizard-bar {
+  display: flex;
+  background: var(--rw-surface);
+  border-bottom: 1px solid var(--rw-border);
+  padding: 0 32px;
+  overflow-x: auto;
+}
+.rw-wiz-step {
+  display: flex; align-items: center; gap: 10px;
+  padding: 18px 20px 18px 0;
+  font-size: 13px; font-weight: 600;
+  color: var(--rw-text-3);
+  border-bottom: 2px solid transparent;
+  white-space: nowrap; cursor: default;
+  transition: color var(--rw-t);
+}
+.rw-wiz-step.active { color: var(--rw-text); border-bottom-color: var(--rw-pink); }
+.rw-wiz-step.done   { color: var(--rw-vis); }
+
+.rw-wiz-num {
+  width: 26px; height: 26px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; flex-shrink: 0;
+  background: var(--rw-surface-3); color: var(--rw-text-3);
+  transition: background var(--rw-t), color var(--rw-t);
+}
+.rw-wiz-step.active .rw-wiz-num { background: var(--rw-pink);  color: #fff; }
+.rw-wiz-step.done   .rw-wiz-num { background: var(--rw-vis);   color: #fff; }
+
+.rw-wiz-connector {
+  width: 24px; height: 1px;
+  background: var(--rw-border);
+  margin: 0 4px; flex-shrink: 0;
+  align-self: center;
+}
+.rw-wiz-step.done ~ .rw-wiz-connector { background: var(--rw-vis); }
+
+.rw-wizard-body {
+  padding: 36px 32px;
+  max-width: 680px;
+}
+.rw-wizard-footer {
+  padding: 20px 32px;
+  border-top: 1px solid var(--rw-border);
+  display: flex; align-items: center; gap: 8px;
+  background: var(--rw-surface);
+}
+
+/* ══ LOADERS ═════════════════════════════════════════ */
+
+/* 1. Inline spinner */
+.rw-spin {
+  width: 20px; height: 20px;
+  border: 2px solid var(--rw-border);
+  border-top-color: var(--rw-amber);
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+  flex-shrink: 0;
+}
+.rw-spin-sm { width: 14px; height: 14px; border-width: 1.5px; }
+.rw-spin-lg { width: 32px; height: 32px; border-width: 3px; }
+.rw-spin-pink  { border-top-color: var(--rw-pink); }
+.rw-spin-vis   { border-top-color: var(--rw-vis); }
+.rw-spin-plan  { border-top-color: #A78BFF; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* 2. Progress bar */
+.rw-progress-bar {
+  height: 3px;
+  background: var(--rw-surface-3);
+  overflow: hidden;
+  position: relative;
+}
+.rw-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--rw-amber), var(--rw-pink));
+  transition: width .3s ease;
+}
+.rw-progress-indeterminate .rw-progress-fill {
+  width: 35% !important;
+  animation: progress-slide 1.4s ease-in-out infinite;
+}
+@keyframes progress-slide {
+  0%   { transform: translateX(-150%); }
+  100% { transform: translateX(400%); }
+}
+
+/* 3. Skeleton shimmer */
+.rw-skel {
+  background: linear-gradient(90deg,
+    var(--rw-surface-2) 25%,
+    var(--rw-surface-3) 50%,
+    var(--rw-surface-2) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.6s infinite;
+  border-radius: var(--rw-r);
+}
+@keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+
+/* 4. AI thinking block */
+.rw-ai-thinking {
+  display: flex; flex-direction: column; gap: 12px;
+  padding: 20px 24px;
+  background: var(--rw-surface);
+  border: 1px solid var(--rw-border);
+  border-inline-start: 3px solid var(--rw-amber);
+}
+.rw-ai-thinking-header {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 13px; font-weight: 700; color: var(--rw-amber);
+}
+.rw-ai-pulse {
+  display: flex; gap: 4px; align-items: center;
+}
+.rw-ai-pulse span {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--rw-amber);
+  animation: ai-pulse 1.2s ease-in-out infinite;
+  opacity: .3;
+}
+.rw-ai-pulse span:nth-child(2) { animation-delay: .2s; }
+.rw-ai-pulse span:nth-child(3) { animation-delay: .4s; }
+@keyframes ai-pulse {
+  0%, 100% { opacity:.2; transform:scale(.8); }
+  50%       { opacity:1;  transform:scale(1.1); }
+}
+.rw-ai-step-list { display: flex; flex-direction: column; gap: 6px; }
+.rw-ai-step {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12px; color: var(--rw-text-2);
+}
+.rw-ai-step-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--rw-surface-3); flex-shrink: 0;
+}
+.rw-ai-step.done   .rw-ai-step-dot { background: var(--rw-vis); }
+.rw-ai-step.active .rw-ai-step-dot { background: var(--rw-amber); box-shadow: 0 0 6px rgba(212,165,116,.6); }
+.rw-ai-step.done   { color: var(--rw-text-3); }
+.rw-ai-step.active { color: var(--rw-amber); font-weight: 600; }
+
+/* 5. Full backdrop loader */
+.rw-loader-backdrop {
+  position: fixed; inset: 0;
+  background: rgba(6,6,8,.85);
+  backdrop-filter: blur(3px);
+  z-index: 800;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 20px;
+}
+.rw-loader-ring {
+  width: 56px; height: 56px;
+  border: 3px solid var(--rw-border);
+  border-top-color: var(--rw-amber);
+  border-radius: 50%;
+  animation: spin .8s linear infinite;
+  filter: drop-shadow(0 0 8px rgba(212,165,116,.5));
+}
+.rw-loader-label {
+  font-size: 14px; font-weight: 600; color: var(--rw-amber);
+  letter-spacing: .3px;
+}
+.rw-loader-sub { font-size: 12px; color: var(--rw-text-3); }
+</style>
+</head>
+<body>
+<div class="pl-root">
+
+<!-- ── SIDEBAR NAV ── -->
+<nav class="pl-sidebar">
+  <div style="padding: 0 18px 20px; display:flex; align-items:center; gap:10px;">
+    <div style="width:34px;height:34px;background:var(--rw-pink);display:flex;align-items:center;justify-content:center;font-family:'Noto Sans Arabic',sans-serif;font-size:15px;font-weight:700;color:#fff;filter:drop-shadow(0 0 6px rgba(247,37,133,.5))">ڕ</div>
+    <div><div style="font-size:12px;font-weight:700;color:#EDEAD8;font-family:'Inter',sans-serif">Rwanga DS</div><div style="font-size:10px;color:#2E2E3A;font-family:'Inter',sans-serif">v1.0 · B+E Icons</div></div>
+  </div>
+
+  <div class="pl-nav-group">Foundations</div>
+  <button class="pl-nav-item active" onclick="go('tokens')">Tokens</button>
+  <button class="pl-nav-item" onclick="go('typography')">Typography</button>
+  <button class="pl-nav-item" onclick="go('icons')">Icon System ★</button>
+  <button class="pl-nav-item" onclick="go('spacing')">Spacing</button>
+
+  <div class="pl-nav-group">Shell</div>
+  <button class="pl-nav-item" onclick="go('shell')">App Shell</button>
+  <button class="pl-nav-item" onclick="go('rail')">Rail</button>
+  <button class="pl-nav-item" onclick="go('topnav')">Top Nav</button>
+  <button class="pl-nav-item" onclick="go('breadcrumb')">Breadcrumb</button>
+
+  <div class="pl-nav-group">Components</div>
+  <button class="pl-nav-item" onclick="go('buttons')">Buttons</button>
+  <button class="pl-nav-item" onclick="go('badges')">Badges</button>
+  <button class="pl-nav-item" onclick="go('cards')">Cards</button>
+  <button class="pl-nav-item" onclick="go('filters')">Filters</button>
+  <button class="pl-nav-item" onclick="go('forms')">Forms</button>
+  <button class="pl-nav-item" onclick="go('tables')">Tables</button>
+  <button class="pl-nav-item" onclick="go('stats')">Stats Strip</button>
+  <button class="pl-nav-item" onclick="go('empty')">Empty States</button>
+  <button class="pl-nav-item" onclick="go('toasts')">Toasts</button>
+
+  <div class="pl-nav-group">Page Patterns</div>
+  <button class="pl-nav-item" onclick="go('L-list')">LIST</button>
+  <button class="pl-nav-item" onclick="go('L-card')">CARD GRID</button>
+  <button class="pl-nav-item" onclick="go('L-split')">SPLIT VIEW</button>
+  <button class="pl-nav-item" onclick="go('DT-scene')">SCENE VIEW</button>
+  <button class="pl-nav-item" onclick="go('DT-dash')">DASHBOARD</button>
+  <button class="pl-nav-item" onclick="go('DT-form')">FORM / EDIT</button>
+
+  <div class="pl-nav-group">Spacing & Typography</div>
+  <button class="pl-nav-item" onclick="go('spacing')">Spacing Scale</button>
+  <button class="pl-nav-item" onclick="go('lineheight')">Line Height</button>
+
+  <div class="pl-nav-group">Components</div>
+  <button class="pl-nav-item" onclick="go('breadcrumb')">Breadcrumb</button>
+  <button class="pl-nav-item" onclick="go('tabs')">Tabs</button>
+  <button class="pl-nav-item" onclick="go('forms-full')">Forms (full)</button>
+
+  <div class="pl-nav-group">Page Patterns</div>
+  <button class="pl-nav-item" onclick="go('PG-dashboard')">DASHBOARD</button>
+  <button class="pl-nav-item" onclick="go('PG-list')">LIST</button>
+  <button class="pl-nav-item" onclick="go('PG-card')">CARD GRID</button>
+  <button class="pl-nav-item" onclick="go('PG-split')">SPLIT VIEW ★</button>
+  <button class="pl-nav-item" onclick="go('PG-scene')">SCENE VIEW</button>
+  <button class="pl-nav-item" onclick="go('PG-form')">FORM / EDIT</button>
+
+  <div class="pl-nav-group">Forms & Feedback</div>
+  <button class="pl-nav-item" onclick="go('modals')">Modals</button>
+  <button class="pl-nav-item" onclick="go('toasts')">Toasts & Alerts</button>
+  <button class="pl-nav-item" onclick="go('wizards')">Wizards</button>
+  <button class="pl-nav-item" onclick="go('loaders')">Loaders ★ AI</button>
+
+  <div class="pl-nav-group">RTL</div>
+  <button class="pl-nav-item" onclick="go('rtl')">RTL / Kurdish</button>
+
+  <div style="padding: 20px 18px 0;">
+    <button onclick="toggleTheme()" style="width:100%;padding:8px;background:var(--rw-surface-2);border:1px solid var(--rw-border);color:var(--rw-text-2);font-size:11px;font-family:'Inter',sans-serif;cursor:pointer;">Toggle Theme</button>
+  </div>
+</nav>
+
+<!-- ── MAIN ── -->
+<main class="pl-main" id="pl-main">
+
+<div class="pl-header">
+  <div style="width:34px;height:34px;background:var(--rw-pink);display:flex;align-items:center;justify-content:center;font-family:'Noto Sans Arabic',sans-serif;font-size:15px;font-weight:700;color:#fff;filter:drop-shadow(0 0 6px rgba(247,37,133,.4))">ڕ</div>
+  <div>
+    <div style="font-size:17px;font-weight:700;color:#EDEAD8;font-family:'Inter',sans-serif">Rwanga Pattern Library</div>
+    <div style="font-size:11px;color:#35353F;font-family:'Inter',sans-serif">BS5-first · HTMX-compatible · RTL-ready · B+E Icon System</div>
+  </div>
+</div>
+
+<!-- ════════════════════ TOKENS ════════════════════ -->
+<section class="pl-section" id="tokens">
+  <div class="pl-tag">Foundations</div>
+  <div class="pl-name">Design Tokens</div>
+  <div class="pl-desc">Every colour, spacing value and radius lives as a CSS custom property on <code>:root</code>. Templates consume only <code>var(--rw-*)</code> — never raw hex values.</div>
+
+  <div class="pl-lbl">SURFACES</div>
+  <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:1px;background:var(--rw-border);border:1px solid var(--rw-border);margin-bottom:20px">
+    <div style="background:var(--rw-surface);padding:14px 12px"><div style="width:100%;height:28px;background:#0A0A0D;margin-bottom:6px;border:1px solid var(--rw-border)"></div><div style="font-size:10px;color:var(--rw-text-2)">--rw-bg</div><div style="font-size:9px;color:var(--rw-text-3);font-family:monospace">#0A0A0D</div></div>
+    <div style="background:var(--rw-surface);padding:14px 12px"><div style="width:100%;height:28px;background:#111116;margin-bottom:6px;border:1px solid var(--rw-border)"></div><div style="font-size:10px;color:var(--rw-text-2)">--rw-surface</div><div style="font-size:9px;color:var(--rw-text-3);font-family:monospace">#111116</div></div>
+    <div style="background:var(--rw-surface);padding:14px 12px"><div style="width:100%;height:28px;background:#18181F;margin-bottom:6px;border:1px solid var(--rw-border)"></div><div style="font-size:10px;color:var(--rw-text-2)">--rw-surface-2</div><div style="font-size:9px;color:var(--rw-text-3);font-family:monospace">#18181F</div></div>
+    <div style="background:var(--rw-surface);padding:14px 12px"><div style="width:100%;height:28px;background:#1E1E28;margin-bottom:6px;border:1px solid var(--rw-border)"></div><div style="font-size:10px;color:var(--rw-text-2)">--rw-surface-3</div><div style="font-size:9px;color:var(--rw-text-3);font-family:monospace">#1E1E28</div></div>
+    <div style="background:var(--rw-surface);padding:14px 12px"><div style="width:100%;height:28px;background:#222230;margin-bottom:6px;border:1px solid var(--rw-border)"></div><div style="font-size:10px;color:var(--rw-text-2)">--rw-border</div><div style="font-size:9px;color:var(--rw-text-3);font-family:monospace">#222230</div></div>
+    <div style="background:var(--rw-surface);padding:14px 12px"><div style="width:100%;height:28px;background:#060608;margin-bottom:6px;border:1px solid var(--rw-border)"></div><div style="font-size:10px;color:var(--rw-text-2)">--rw-rail-bg</div><div style="font-size:9px;color:var(--rw-text-3);font-family:monospace">#060608</div></div>
+  </div>
+
+  <div class="pl-lbl">SECTION PALETTE</div>
+  <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--rw-border);border:1px solid var(--rw-border);margin-bottom:20px">
+    <div style="background:var(--rw-surface);padding:14px 12px"><div style="width:100%;height:36px;background:#FF6B35;margin-bottom:6px"></div><div style="font-size:10px;color:var(--rw-text-2)">--rw-script</div><div style="font-size:9px;color:var(--rw-text-3);font-family:monospace">Write</div></div>
+    <div style="background:var(--rw-surface);padding:14px 12px"><div style="width:100%;height:36px;background:#2D5BE3;margin-bottom:6px"></div><div style="font-size:10px;color:var(--rw-text-2)">--rw-break</div><div style="font-size:9px;color:var(--rw-text-3);font-family:monospace">Breakdown</div></div>
+    <div style="background:var(--rw-surface);padding:14px 12px"><div style="width:100%;height:36px;background:#00A896;margin-bottom:6px"></div><div style="font-size:10px;color:var(--rw-text-2)">--rw-vis</div><div style="font-size:9px;color:var(--rw-text-3);font-family:monospace">Visualize</div></div>
+    <div style="background:var(--rw-surface);padding:14px 12px"><div style="width:100%;height:36px;background:#7C3AED;margin-bottom:6px"></div><div style="font-size:10px;color:var(--rw-text-2)">--rw-plan</div><div style="font-size:9px;color:var(--rw-text-3);font-family:monospace">Plan</div></div>
+    <div style="background:var(--rw-surface);padding:14px 12px"><div style="width:100%;height:36px;background:#F72585;margin-bottom:6px"></div><div style="font-size:10px;color:var(--rw-text-2)">--rw-shoot</div><div style="font-size:9px;color:var(--rw-text-3);font-family:monospace">Shoot</div></div>
+  </div>
+
+  <div class="pl-lbl">ACCENTS</div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--rw-border);border:1px solid var(--rw-border)">
+    <div style="background:var(--rw-surface);padding:14px 12px"><div style="width:100%;height:36px;background:#D4A574;margin-bottom:6px"></div><div style="font-size:10px;color:var(--rw-text-2)">--rw-amber</div><div style="font-size:9px;color:var(--rw-text-3);font-family:monospace">Active / highlight</div></div>
+    <div style="background:var(--rw-surface);padding:14px 12px"><div style="width:100%;height:36px;background:#F72585;margin-bottom:6px"></div><div style="font-size:10px;color:var(--rw-text-2)">--rw-pink</div><div style="font-size:9px;color:var(--rw-text-3);font-family:monospace">Primary CTA / logo</div></div>
+    <div style="background:var(--rw-surface);padding:14px 12px"><div style="width:100%;height:36px;background:#EDEAD8;margin-bottom:6px"></div><div style="font-size:10px;color:var(--rw-text-2)">--rw-text</div><div style="font-size:9px;color:var(--rw-text-3);font-family:monospace">Body text</div></div>
+  </div>
+</section>
+
+<!-- ════════════════════ TYPOGRAPHY ════════════════════ -->
+<section class="pl-section" id="typography">
+  <div class="pl-tag">Foundations</div>
+  <div class="pl-name">Typography</div>
+  <div class="pl-desc"><strong>Noto Sans Arabic</strong> — Kurdish UI, all labels, headings. <strong>Inter</strong> — English technical content: lens specs, shot numbers, timestamps. Use <code>.rw-font-en</code> or <code>dir="ltr"</code> on inline spans for technical terms.</div>
+  <div class="pl-demo">
+    <div style="font-family:'Noto Sans Arabic';font-size:28px;font-weight:700;margin-bottom:8px">ڕوانگە — Project Title / Noto Sans Arabic 700 / 28px</div>
+    <div style="font-family:'Noto Sans Arabic';font-size:20px;font-weight:600;color:var(--rw-text);margin-bottom:8px">دەستنووس — Section Title / Noto Sans Arabic 600 / 20px</div>
+    <div style="font-family:'Noto Sans Arabic';font-size:14px;color:var(--rw-text-2);margin-bottom:8px">لە دەستنووسەوە بۆ شاشە — Body / Noto Sans Arabic 400 / 14px</div>
+    <div style="font-family:'Noto Sans Arabic';font-size:12px;color:var(--rw-text-3);margin-bottom:16px">زانیاری دووجار — Meta / 12px / text-3</div>
+    <hr style="border-color:var(--rw-border);margin:16px 0">
+    <div style="font-family:'Inter';font-size:18px;font-weight:600;color:var(--rw-text);margin-bottom:8px">Shot 12.3A — 85mm — f/2.8 — Inter 600</div>
+    <div style="font-family:'Inter';font-size:13px;color:var(--rw-text-2);margin-bottom:8px">2700K · Steadicam · POV · LS · MCU — Inter 400</div>
+    <div class="rw-overline">OVERLINE — 9PX NOTO 700 UPPERCASE 1.2PX TRACKING</div>
+  </div>
+</section>
+
+<!-- ════════════════════ ICON SYSTEM ════════════════════ -->
+<section class="pl-section" id="icons">
+  <div class="pl-tag">Foundations ★ Core Decision</div>
+  <div class="pl-name">B+E Icon System — Cinema Glyphs + Neon Glow</div>
+  <div class="pl-desc">Two icon families merged into one system. <strong>Cinema glyphs</strong> (Option E) for domain-specific production icons — film frames, clapperboards, viewfinders. <strong>Neon stroke</strong> (Option B) for utility — team, settings, notifications. Active state: amber CSS <code>drop-shadow</code> glow + 2px glowing left bar. Sized at <strong>28px</strong> in the rail — large enough to see from across a room.</div>
+
+  <!-- GLOW STATES -->
+  <div class="pl-lbl">ICON STATES — 60px rail at actual size</div>
+  <div class="glow-demo mb-4">
+    <div class="glow-state">
+      <div class="glow-slot">
+        <svg width="28" height="28" viewBox="0 0 24 24" class="ico" style="color:#2A2A38"><rect x="2" y="4" width="20" height="16" rx="1"/><line x1="2" y1="8" x2="22" y2="8"/><line x1="2" y1="16" x2="22" y2="16"/><line x1="6" y1="4" x2="6" y2="8"/><line x1="10" y1="4" x2="10" y2="8"/><line x1="14" y1="4" x2="14" y2="8"/><line x1="18" y1="4" x2="18" y2="8"/><line x1="6" y1="16" x2="6" y2="20"/><line x1="10" y1="16" x2="10" y2="20"/><line x1="14" y1="16" x2="14" y2="20"/><line x1="18" y1="16" x2="18" y2="20"/></svg>
+      </div>
+      <div class="glow-slot-label">Rest</div>
+    </div>
+    <div class="glow-state">
+      <div class="glow-slot">
+        <svg width="28" height="28" viewBox="0 0 24 24" class="ico" style="color:#6A6A7E;filter:drop-shadow(0 0 4px rgba(212,165,116,.3))"><rect x="2" y="4" width="20" height="16" rx="1"/><line x1="2" y1="8" x2="22" y2="8"/><line x1="2" y1="16" x2="22" y2="16"/><line x1="6" y1="4" x2="6" y2="8"/><line x1="10" y1="4" x2="10" y2="8"/><line x1="14" y1="4" x2="14" y2="8"/><line x1="18" y1="4" x2="18" y2="8"/><line x1="6" y1="16" x2="6" y2="20"/><line x1="10" y1="16" x2="10" y2="20"/><line x1="14" y1="16" x2="14" y2="20"/><line x1="18" y1="16" x2="18" y2="20"/></svg>
+      </div>
+      <div class="glow-slot-label">Hover</div>
+    </div>
+    <div class="glow-state">
+      <div class="glow-slot" style="position:relative">
+        <div style="position:absolute;left:0;top:10px;bottom:10px;width:2px;background:var(--rw-amber);box-shadow:0 0 8px var(--rw-amber),0 0 20px rgba(212,165,116,.35)"></div>
+        <svg width="28" height="28" viewBox="0 0 24 24" class="ico" style="color:#D4A574;filter:drop-shadow(0 0 6px rgba(212,165,116,.7)) drop-shadow(0 0 14px rgba(212,165,116,.3))"><rect x="2" y="4" width="20" height="16" rx="1"/><line x1="2" y1="8" x2="22" y2="8"/><line x1="2" y1="16" x2="22" y2="16"/><line x1="6" y1="4" x2="6" y2="8"/><line x1="10" y1="4" x2="10" y2="8"/><line x1="14" y1="4" x2="14" y2="8"/><line x1="18" y1="4" x2="18" y2="8"/><line x1="6" y1="16" x2="6" y2="20"/><line x1="10" y1="16" x2="10" y2="20"/><line x1="14" y1="16" x2="14" y2="20"/><line x1="18" y1="16" x2="18" y2="20"/></svg>
+      </div>
+      <div class="glow-slot-label">Active / Amber</div>
+    </div>
+    <div class="glow-state">
+      <div class="glow-slot" style="position:relative">
+        <div style="position:absolute;left:0;top:10px;bottom:10px;width:2px;background:#A78BFF;box-shadow:0 0 8px #A78BFF,0 0 20px rgba(167,139,255,.35)"></div>
+        <svg width="28" height="28" viewBox="0 0 24 24" class="ico" style="color:#A78BFF;filter:drop-shadow(0 0 6px rgba(167,139,255,.65)) drop-shadow(0 0 14px rgba(167,139,255,.25))"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      </div>
+      <div class="glow-slot-label">Reviews / Purple</div>
+    </div>
+    <div class="glow-state">
+      <div class="glow-slot" style="position:relative">
+        <div style="position:absolute;left:0;top:10px;bottom:10px;width:2px;background:#00C4B0;box-shadow:0 0 8px #00C4B0,0 0 20px rgba(0,196,176,.35)"></div>
+        <svg width="28" height="28" viewBox="0 0 24 24" class="ico" style="color:#00C4B0;filter:drop-shadow(0 0 6px rgba(0,196,176,.65)) drop-shadow(0 0 14px rgba(0,196,176,.25))"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      </div>
+      <div class="glow-slot-label">Community / Teal</div>
+    </div>
+    <div class="glow-state">
+      <div class="glow-slot">
+        <svg width="28" height="28" viewBox="0 0 24 24" class="ico" style="color:#F72585;filter:drop-shadow(0 0 6px rgba(247,37,133,.65)) drop-shadow(0 0 14px rgba(247,37,133,.25))"><circle cx="12" cy="12" r="2"/><line x1="12" y1="3" x2="12" y2="7"/><line x1="12" y1="17" x2="12" y2="21"/><line x1="4.22" y1="4.22" x2="7.05" y2="7.05"/><line x1="16.95" y1="16.95" x2="19.78" y2="19.78"/><line x1="3" y1="12" x2="7" y2="12"/><line x1="17" y1="12" x2="21" y2="12"/><line x1="4.22" y1="19.78" x2="7.05" y2="16.95"/><line x1="16.95" y1="7.05" x2="19.78" y2="4.22"/></svg>
+      </div>
+      <div class="glow-slot-label">Alert / Pink</div>
+    </div>
+  </div>
+
+  <!-- CINEMA GLYPH ICONS (Option E) -->
+  <div class="pl-lbl">CINEMA GLYPHS (Option E) — Domain icons at 28px with amber glow</div>
+  <div class="ico-grid" style="grid-template-columns:repeat(8,1fr)">
+    <!-- Film Frame / Projects -->
+    <div class="ico-cell">
+      <svg width="28" height="28" viewBox="0 0 24 24" class="ico" style="color:#D4A574;filter:drop-shadow(0 0 6px rgba(212,165,116,.6)) drop-shadow(0 0 14px rgba(212,165,116,.25))">
+        <rect x="2" y="4" width="20" height="16" rx="1"/>
+        <line x1="2" y1="8" x2="22" y2="8"/><line x1="2" y1="16" x2="22" y2="16"/>
+        <line x1="6" y1="4" x2="6" y2="8"/><line x1="10" y1="4" x2="10" y2="8"/>
+        <line x1="14" y1="4" x2="14" y2="8"/><line x1="18" y1="4" x2="18" y2="8"/>
+        <line x1="6" y1="16" x2="6" y2="20"/><line x1="10" y1="16" x2="10" y2="20"/>
+        <line x1="14" y1="16" x2="14" y2="20"/><line x1="18" y1="16" x2="18" y2="20"/>
+      </svg>
+      <span class="ico-cell-label">Projects</span>
+    </div>
+    <!-- Clapperboard -->
+    <div class="ico-cell">
+      <svg width="28" height="28" viewBox="0 0 24 24" class="ico" style="color:#D4A574;filter:drop-shadow(0 0 6px rgba(212,165,116,.6)) drop-shadow(0 0 14px rgba(212,165,116,.25))">
+        <path d="M4 6l16-3v4H4z"/>
+        <rect x="2" y="7" width="20" height="14" rx="1"/>
+        <line x1="7" y1="3.5" x2="5" y2="7"/><line x1="11" y1="2.7" x2="9" y2="7"/>
+        <line x1="15" y1="1.9" x2="13" y2="7"/><line x1="19" y1="1.1" x2="17" y2="7"/>
+      </svg>
+      <span class="ico-cell-label">Script</span>
+    </div>
+    <!-- Viewfinder -->
+    <div class="ico-cell">
+      <svg width="28" height="28" viewBox="0 0 24 24" class="ico" style="color:#D4A574;filter:drop-shadow(0 0 6px rgba(212,165,116,.6)) drop-shadow(0 0 14px rgba(212,165,116,.25))">
+        <circle cx="12" cy="12" r="9"/>
+        <circle cx="12" cy="12" r="3"/>
+        <line x1="12" y1="3" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="21"/>
+        <line x1="3" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="21" y2="12"/>
+      </svg>
+      <span class="ico-cell-label">Shot List</span>
+    </div>
+    <!-- Storyboard frames -->
+    <div class="ico-cell">
+      <svg width="28" height="28" viewBox="0 0 24 24" class="ico" style="color:#D4A574;filter:drop-shadow(0 0 6px rgba(212,165,116,.6)) drop-shadow(0 0 14px rgba(212,165,116,.25))">
+        <rect x="2" y="2" width="9" height="7" rx="1"/><rect x="13" y="2" width="9" height="7" rx="1"/>
+        <rect x="2" y="11" width="9" height="7" rx="1"/><rect x="13" y="11" width="9" height="7" rx="1"/>
+        <line x1="5" y1="20" x2="19" y2="20"/>
+      </svg>
+      <span class="ico-cell-label">Storyboard</span>
+    </div>
+    <!-- Floor plan -->
+    <div class="ico-cell">
+      <svg width="28" height="28" viewBox="0 0 24 24" class="ico" style="color:#D4A574;filter:drop-shadow(0 0 6px rgba(212,165,116,.6)) drop-shadow(0 0 14px rgba(212,165,116,.25))">
+        <rect x="3" y="3" width="18" height="18" rx="1"/>
+        <line x1="3" y1="10" x2="21" y2="10"/>
+        <line x1="10" y1="10" x2="10" y2="21"/>
+        <circle cx="6.5" cy="6.5" r="1.5"/><circle cx="16" cy="16" r="1.5"/>
+      </svg>
+      <span class="ico-cell-label">Floor Plan</span>
+    </div>
+    <!-- Film reel / schedule -->
+    <div class="ico-cell">
+      <svg width="28" height="28" viewBox="0 0 24 24" class="ico" style="color:#D4A574;filter:drop-shadow(0 0 6px rgba(212,165,116,.6)) drop-shadow(0 0 14px rgba(212,165,116,.25))">
+        <circle cx="12" cy="12" r="9"/>
+        <circle cx="12" cy="12" r="2.5"/>
+        <circle cx="12" cy="5.5" r="1.5"/><circle cx="12" cy="18.5" r="1.5"/>
+        <circle cx="5.5" cy="12" r="1.5"/><circle cx="18.5" cy="12" r="1.5"/>
+        <circle cx="7.7" cy="7.7" r="1.5"/><circle cx="16.3" cy="16.3" r="1.5"/>
+        <circle cx="16.3" cy="7.7" r="1.5"/><circle cx="7.7" cy="16.3" r="1.5"/>
+      </svg>
+      <span class="ico-cell-label">Schedule</span>
+    </div>
+    <!-- Camera -->
+    <div class="ico-cell">
+      <svg width="28" height="28" viewBox="0 0 24 24" class="ico" style="color:#D4A574;filter:drop-shadow(0 0 6px rgba(212,165,116,.6)) drop-shadow(0 0 14px rgba(212,165,116,.25))">
+        <rect x="2" y="7" width="20" height="14" rx="2"/>
+        <circle cx="12" cy="14" r="4"/><circle cx="12" cy="14" r="2"/>
+        <path d="M7 7V5a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v2"/>
+      </svg>
+      <span class="ico-cell-label">Camera</span>
+    </div>
+    <!-- Aperture / settings-cinema -->
+    <div class="ico-cell">
+      <svg width="28" height="28" viewBox="0 0 24 24" class="ico" style="color:#D4A574;filter:drop-shadow(0 0 6px rgba(212,165,116,.6)) drop-shadow(0 0 14px rgba(212,165,116,.25))">
+        <circle cx="12" cy="12" r="9"/>
+        <circle cx="12" cy="12" r="3.5"/>
+        <line x1="12" y1="3" x2="12" y2="8.5"/><line x1="12" y1="15.5" x2="12" y2="21"/>
+        <line x1="3" y1="12" x2="8.5" y2="12"/><line x1="15.5" y1="12" x2="21" y2="12"/>
+        <line x1="5.6" y1="5.6" x2="9.4" y2="9.4"/><line x1="14.6" y1="14.6" x2="18.4" y2="18.4"/>
+        <line x1="18.4" y1="5.6" x2="14.6" y2="9.4"/><line x1="9.4" y1="14.6" x2="5.6" y2="18.4"/>
+      </svg>
+      <span class="ico-cell-label">Aperture</span>
+    </div>
+  </div>
+
+  <!-- UTILITY ICONS (Option B neon stroke) -->
+  <div class="pl-lbl">UTILITY ICONS (Option B) — Standard stroke, 28px</div>
+  <div class="ico-grid" style="grid-template-columns:repeat(8,1fr)">
+    <div class="ico-cell">
+      <svg width="28" height="28" viewBox="0 0 24 24" class="ico" style="color:#EDEAD8"><circle cx="9" cy="7" r="3"/><path d="M3 21v-1a6 6 0 0 1 12 0v1"/><path d="M16 3.13a4 4 0 0 1 0 7.75M21 21v-1a4 4 0 0 0-3-3.85"/></svg>
+      <span class="ico-cell-label">Team</span>
+    </div>
+    <div class="ico-cell">
+      <svg width="28" height="28" viewBox="0 0 24 24" class="ico" style="color:#EDEAD8"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+      <span class="ico-cell-label">Locations</span>
+    </div>
+    <div class="ico-cell">
+      <svg width="28" height="28" viewBox="0 0 24 24" class="ico" style="color:#A78BFF;filter:drop-shadow(0 0 5px rgba(167,139,255,.5))"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      <span class="ico-cell-label">Reviews</span>
+    </div>
+    <div class="ico-cell">
+      <svg width="28" height="28" viewBox="0 0 24 24" class="ico" style="color:#00C4B0;filter:drop-shadow(0 0 5px rgba(0,196,176,.5))"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <span class="ico-cell-label">Community</span>
+    </div>
+    <div class="ico-cell">
+      <svg width="28" height="28" viewBox="0 0 24 24" class="ico" style="color:#EDEAD8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <span class="ico-cell-label">Settings</span>
+    </div>
+    <div class="ico-cell">
+      <svg width="28" height="28" viewBox="0 0 24 24" class="ico" style="color:#EDEAD8"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      <span class="ico-cell-label">Notify</span>
+    </div>
+    <div class="ico-cell">
+      <svg width="28" height="28" viewBox="0 0 24 24" class="ico" style="color:#EDEAD8"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+      <span class="ico-cell-label">Theme</span>
+    </div>
+    <div class="ico-cell">
+      <svg width="28" height="28" viewBox="0 0 24 24" class="ico" style="color:#EDEAD8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span class="ico-cell-label">Profile</span>
+    </div>
+  </div>
+
+  <div class="pl-code"><span class="cmt">{# Icon usage — cinema glyph (Option E) #}</span>
+<span class="cmt">{# Replace emoji icons in _sidebar.html like this: #}</span>
+
+&lt;<span class="kw">a</span> <span class="cls">href</span>=<span class="str">"{% url 'projects:list' %}"</span>
+   <span class="cls">class</span>=<span class="str">"rw-rail-icon {% if active_section == 'projects' %}active{% endif %}"</span>
+   <span class="cls">title</span>=<span class="str">"{% trans 'پڕۆژەکان' %}"</span>&gt;
+  <span class="cmt">{# Film frame — cinema glyph — 28px in 60px slot #}</span>
+  &lt;<span class="kw">svg</span> <span class="cls">width</span>=<span class="str">"28"</span> <span class="cls">height</span>=<span class="str">"28"</span> <span class="cls">viewBox</span>=<span class="str">"0 0 24 24"</span> <span class="cls">class</span>=<span class="str">"ico"</span>&gt;
+    &lt;<span class="kw">rect</span> <span class="cls">x</span>=<span class="str">"2"</span> <span class="cls">y</span>=<span class="str">"4"</span> <span class="cls">width</span>=<span class="str">"20"</span> <span class="cls">height</span>=<span class="str">"16"</span> <span class="cls">rx</span>=<span class="str">"1"</span>/&gt;
+    &lt;<span class="kw">line</span> <span class="cls">x1</span>=<span class="str">"2"</span> <span class="cls">y1</span>=<span class="str">"8"</span> <span class="cls">x2</span>=<span class="str">"22"</span> <span class="cls">y2</span>=<span class="str">"8"</span>/&gt;...
+  &lt;/<span class="kw">svg</span>&gt;
+&lt;/<span class="kw">a</span>&gt;
+
+<span class="cmt">{# Reviews — utility (B) with purple glow #}</span>
+&lt;<span class="kw">a</span> <span class="cls">href</span>=<span class="str">"{% url 'reviews:list' %}"</span>
+   <span class="cls">class</span>=<span class="str">"rw-rail-icon {% if nav_mode == 'reviews' %}active-plan{% endif %}"</span>&gt;
+  &lt;<span class="kw">svg</span> <span class="cls">width</span>=<span class="str">"28"</span> <span class="cls">height</span>=<span class="str">"28"</span> <span class="cls">viewBox</span>=<span class="str">"0 0 24 24"</span> <span class="cls">class</span>=<span class="str">"ico"</span>&gt;...&lt;/<span class="kw">svg</span>&gt;
+&lt;/<span class="kw">a</span>&gt;</div>
+</section>
+
+<!-- ════════════════════ SHELL ════════════════════ -->
+<section class="pl-section" id="shell">
+  <div class="pl-tag">Shell</div>
+  <div class="pl-name">App Shell</div>
+  <div class="pl-desc">Root layout. Rail is <strong>first child</strong> in DOM — renders right in RTL, left in LTR. <code>.rw-app</code> = full-height flex container. <code>.rw-main</code> takes remaining space.</div>
+  <div class="pl-demo p-0" style="overflow:hidden;height:200px">
+    <div class="rw-app">
+      <aside class="rw-rail">
+        <a class="rw-rail-logo">ڕ</a>
+        <a class="rw-rail-icon active">
+          <svg width="28" height="28" viewBox="0 0 24 24" class="ico"><rect x="2" y="4" width="20" height="16" rx="1"/><line x1="2" y1="8" x2="22" y2="8"/><line x1="2" y1="16" x2="22" y2="16"/><line x1="6" y1="4" x2="6" y2="8"/><line x1="10" y1="4" x2="10" y2="8"/><line x1="14" y1="4" x2="14" y2="8"/><line x1="18" y1="4" x2="18" y2="8"/><line x1="6" y1="16" x2="6" y2="20"/><line x1="10" y1="16" x2="10" y2="20"/><line x1="14" y1="16" x2="14" y2="20"/><line x1="18" y1="16" x2="18" y2="20"/></svg>
+        </a>
+        <a class="rw-rail-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" class="ico"><circle cx="9" cy="7" r="3"/><path d="M3 21v-1a6 6 0 0 1 12 0v1"/><path d="M16 3.13a4 4 0 0 1 0 7.75M21 21v-1a4 4 0 0 0-3-3.85"/></svg>
+        </a>
+        <div class="rw-rail-sep"></div>
+        <a class="rw-rail-icon active-plan">
+          <svg width="28" height="28" viewBox="0 0 24 24" class="ico"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        </a>
+      </aside>
+      <div class="rw-main">
+        <nav class="rw-topnav" style="padding:0 20px;gap:12px">
+          <span style="font-size:13px;font-weight:700">Home</span>
+          <div style="flex:1"></div>
+          <div class="rw-avatar">DI</div>
+        </nav>
+        <div style="flex:1;overflow:auto;padding:20px;background:var(--rw-bg)">
+          <div style="color:var(--rw-text-3);font-size:12px">← Page content (overflow-y: auto)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="pl-code"><span class="cmt">{# base.html shell — EXACT STRUCTURE #}</span>
+&lt;<span class="kw">div</span> <span class="cls">class</span>=<span class="str">"rw-app"</span>&gt;
+
+  <span class="cmt">{# Rail FIRST in DOM = right in RTL, left in LTR #}</span>
+  &lt;<span class="kw">aside</span> <span class="cls">class</span>=<span class="str">"rw-rail"</span>&gt;{% include <span class="str">"components/_sidebar.html"</span> %}&lt;/<span class="kw">aside</span>&gt;
+
+  &lt;<span class="kw">div</span> <span class="cls">class</span>=<span class="str">"rw-main"</span>&gt;
+    {% include <span class="str">"components/_topnav.html"</span> %}
+    &lt;<span class="kw">div</span> <span class="cls">id</span>=<span class="str">"rw-content"</span> <span class="cls">class</span>=<span class="str">"flex-grow-1 overflow-auto"</span>&gt;
+      {% block content %}{% endblock %}
+    &lt;/<span class="kw">div</span>&gt;
+  &lt;/<span class="kw">div</span>&gt;
+
+&lt;/<span class="kw">div</span>&gt;</div>
+</section>
+
+<!-- ════════════════════ RAIL ════════════════════ -->
+<section class="pl-section" id="rail">
+  <div class="pl-tag">Shell</div>
+  <div class="pl-name">Rail / Sidebar</div>
+  <div class="pl-desc"><strong>60px wide</strong>. Icons at 28px — large enough to see from 2–3m on a smartboard. No labels. No wasted padding. Zero decoration. Mobile: becomes a fixed bottom tab bar. Always dark background — never inherits theme.</div>
+  <div class="pl-demo p-0 d-flex gap-5" style="align-items:flex-start">
+    <!-- Full rail mockup -->
+    <aside class="rw-rail" style="position:relative;height:420px">
+      <a class="rw-rail-logo">ڕ</a>
+      <!-- Projects (cinema glyph, active) -->
+      <a class="rw-rail-icon active" title="Projects">
+        <svg width="28" height="28" viewBox="0 0 24 24" class="ico"><rect x="2" y="4" width="20" height="16" rx="1"/><line x1="2" y1="8" x2="22" y2="8"/><line x1="2" y1="16" x2="22" y2="16"/><line x1="6" y1="4" x2="6" y2="8"/><line x1="10" y1="4" x2="10" y2="8"/><line x1="14" y1="4" x2="14" y2="8"/><line x1="18" y1="4" x2="18" y2="8"/><line x1="6" y1="16" x2="6" y2="20"/><line x1="10" y1="16" x2="10" y2="20"/><line x1="14" y1="16" x2="14" y2="20"/><line x1="18" y1="16" x2="18" y2="20"/></svg>
+      </a>
+      <!-- Team (utility) -->
+      <a class="rw-rail-icon" title="Team">
+        <svg width="28" height="28" viewBox="0 0 24 24" class="ico"><circle cx="9" cy="7" r="3"/><path d="M3 21v-1a6 6 0 0 1 12 0v1"/><path d="M16 3.13a4 4 0 0 1 0 7.75M21 21v-1a4 4 0 0 0-3-3.85"/></svg>
+      </a>
+      <!-- Locations (utility) -->
+      <a class="rw-rail-icon" title="Locations">
+        <svg width="28" height="28" viewBox="0 0 24 24" class="ico"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+      </a>
+      <div class="rw-rail-sep"></div>
+      <!-- Reviews (utility, purple glow) -->
+      <a class="rw-rail-icon active-plan" title="Reviews">
+        <svg width="28" height="28" viewBox="0 0 24 24" class="ico"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      </a>
+      <!-- Community (utility, teal glow) -->
+      <a class="rw-rail-icon" style="color:#00C4B0;filter:drop-shadow(0 0 5px rgba(0,196,176,.4))" title="Community">
+        <svg width="28" height="28" viewBox="0 0 24 24" class="ico"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      </a>
+      <div class="rw-rail-sep"></div>
+      <!-- Settings (utility) -->
+      <a class="rw-rail-icon" title="Settings">
+        <svg width="28" height="28" viewBox="0 0 24 24" class="ico"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </a>
+      <div style="flex:1"></div>
+      <!-- Bell -->
+      <a class="rw-rail-icon" title="Notifications" style="position:relative">
+        <svg width="26" height="26" viewBox="0 0 24 24" class="ico"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span style="position:absolute;top:10px;right:10px;width:7px;height:7px;background:var(--rw-shoot);border-radius:50%;box-shadow:0 0 5px rgba(247,37,133,.6)"></span>
+      </a>
+      <!-- Sun -->
+      <a class="rw-rail-icon" title="Theme" style="margin-bottom:8px">
+        <svg width="22" height="22" viewBox="0 0 24 24" class="ico"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+      </a>
+    </aside>
+
+    <div style="padding:24px 0;flex:1">
+      <div class="pl-lbl">SPECS</div>
+      <table class="rw-tbl" style="max-width:400px">
+        <tbody>
+          <tr><td class="px-3 py-2" style="color:var(--rw-text-2)">Rail width</td><td class="px-3 py-2" style="font-family:monospace;color:var(--rw-amber)">60px</td></tr>
+          <tr><td class="px-3 py-2" style="color:var(--rw-text-2)">Icon slot height</td><td class="px-3 py-2" style="font-family:monospace;color:var(--rw-amber)">52px</td></tr>
+          <tr><td class="px-3 py-2" style="color:var(--rw-text-2)">Icon size</td><td class="px-3 py-2" style="font-family:monospace;color:var(--rw-amber)">28px × 28px</td></tr>
+          <tr><td class="px-3 py-2" style="color:var(--rw-text-2)">Glow (active)</td><td class="px-3 py-2" style="font-family:monospace;color:var(--rw-amber)">drop-shadow × 2</td></tr>
+          <tr><td class="px-3 py-2" style="color:var(--rw-text-2)">Left bar</td><td class="px-3 py-2" style="font-family:monospace;color:var(--rw-amber)">2px + box-shadow glow</td></tr>
+          <tr><td class="px-3 py-2" style="color:var(--rw-text-2)">Stroke width</td><td class="px-3 py-2" style="font-family:monospace;color:var(--rw-amber)">1.5px (all icons)</td></tr>
+          <tr><td class="px-3 py-2" style="color:var(--rw-text-2)">Mobile behavior</td><td class="px-3 py-2" style="color:var(--rw-text-2)">Fixed bottom tab bar, 60px height</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════ TOP NAV ════════════════════ -->
+<section class="pl-section" id="topnav">
+  <div class="pl-tag">Shell</div>
+  <div class="pl-name">Top Nav</div>
+  <div class="pl-desc">52px. Home mode shows just the title. Project mode adds project identity + section tabs with colour-coded active underline. Tab dots match section colours.</div>
+
+  <div class="pl-lbl">HOME MODE</div>
+  <div class="pl-demo p-0 mb-4">
+    <nav class="rw-topnav" style="padding:0 20px;gap:12px">
+      <span style="font-size:14px;font-weight:700">Home</span>
+      <div style="flex:1"></div>
+      <span style="font-size:12px;color:var(--rw-text-2)">Zeneon LLC</span>
+      <div class="rw-avatar">DI</div>
+    </nav>
+  </div>
+
+  <div class="pl-lbl">PROJECT MODE</div>
+  <div class="pl-demo p-0">
+    <nav class="rw-topnav" style="padding:0;gap:0">
+      <a class="rw-topnav-project" style="padding:0 16px 0 16px">
+        <div class="rw-project-thumb"></div>
+        <span class="rw-project-name">A Mysterious Guest</span>
+      </a>
+      <div style="display:flex;height:100%">
+        <button class="rw-sec-tab active" data-s="s" style="display:flex;align-items:center;gap:6px">
+          <span class="rw-tab-dot" style="background:var(--rw-script)"></span>دەستنووس
+        </button>
+        <button class="rw-sec-tab" data-s="b" style="display:flex;align-items:center;gap:6px">
+          <span class="rw-tab-dot" style="background:var(--rw-break)"></span>داڕشتن
+        </button>
+        <button class="rw-sec-tab" data-s="v" style="display:flex;align-items:center;gap:6px">
+          <span class="rw-tab-dot" style="background:var(--rw-vis)"></span>بینراوکردن
+        </button>
+        <button class="rw-sec-tab" data-s="p" style="display:flex;align-items:center;gap:6px">
+          <span class="rw-tab-dot" style="background:var(--rw-plan)"></span>ڕێنوێس
+        </button>
+        <button class="rw-sec-tab" data-s="sh" style="display:flex;align-items:center;gap:6px">
+          <span class="rw-tab-dot" style="background:var(--rw-shoot)"></span>وێنەگرتن
+        </button>
+      </div>
+      <div style="flex:1"></div>
+      <div style="display:flex;align-items:center;gap:10px;padding:0 16px">
+        <button class="rw-btn rw-btn-amber rw-btn-sm">↗ دەرهێنان</button>
+        <div class="rw-avatar">DI</div>
+      </div>
+    </nav>
+  </div>
+</section>
+
+<!-- ════════════════════ BUTTONS ════════════════════ -->
+<section class="pl-section" id="buttons">
+  <div class="pl-tag">Components</div>
+  <div class="pl-name">Buttons</div>
+  <div class="pl-desc">Always <code>.rw-btn</code> + variant. Size via <code>.rw-btn-sm</code> / <code>.rw-btn-lg</code>. Min 44px height on mobile enforced by CSS. Never use BS5 <code>.btn-*</code> classes — use only <code>rw-btn-*</code>.</div>
+  <div class="pl-demo d-flex flex-wrap gap-3 align-items-center">
+    <button class="rw-btn rw-btn-primary">+ پڕۆژەی نوێ</button>
+    <button class="rw-btn rw-btn-amber">↗ دەرهێنانی HTML</button>
+    <button class="rw-btn rw-btn-ghost">← گەڕانەوە</button>
+    <button class="rw-btn rw-btn-ai">🤖 AI داڕشتن</button>
+    <button class="rw-btn rw-btn-icon">
+      <svg width="16" height="16" viewBox="0 0 24 24" class="ico"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+    </button>
+    <button class="rw-btn rw-btn-primary rw-btn-sm">Small</button>
+    <button class="rw-btn rw-btn-primary rw-btn-lg">Large</button>
+  </div>
+</section>
+
+<!-- ════════════════════ BADGES ════════════════════ -->
+<section class="pl-section" id="badges">
+  <div class="pl-tag">Components</div>
+  <div class="pl-name">Badges</div>
+  <div class="pl-desc">Status indicators. Always uppercase 10px. Use semantic variants — never invent new colours.</div>
+  <div class="pl-demo d-flex flex-wrap gap-3 align-items-center">
+    <span class="rw-badge rw-badge-ok">چالاک</span>
+    <span class="rw-badge rw-badge-warn">چاوەڕوانی</span>
+    <span class="rw-badge rw-badge-err">بلۆک</span>
+    <span class="rw-badge rw-badge-mute">ناچالاک</span>
+    <span class="rw-badge rw-badge-plan">پێداچوونەوە</span>
+    <span class="rw-badge rw-badge-d">Dialogue</span>
+    <span class="rw-badge rw-badge-v">Visual</span>
+    <span class="rw-badge rw-badge-i">Insert</span>
+  </div>
+</section>
+
+<!-- ════════════════════ CARDS ════════════════════ -->
+<section class="pl-section" id="cards">
+  <div class="pl-tag">Components</div>
+  <div class="pl-name">Cards</div>
+  <div class="pl-desc">Use BS5 <code>.card</code> + <code>.rw-card</code> skin. Add section accent via <code>.rw-card-{section}</code>. Avoid rounded corners — all radius = 2px.</div>
+  <div class="pl-demo">
+    <div class="row g-3">
+      <div class="col-12 col-md-4"><div class="card rw-card rw-card-script p-3"><div class="rw-overline mb-2">Write</div><div style="font-size:14px;font-weight:700">Scene 12 — Screenplay</div><div style="font-size:12px;color:var(--rw-text-2);margin-top:4px">INT. Garden House — Evening</div></div></div>
+      <div class="col-12 col-md-4"><div class="card rw-card rw-card-amber p-3"><div class="rw-overline mb-2 text-rw-amber">AI Suggestion</div><div style="font-size:13px;font-weight:600">Consider a wide establishing shot before the two-shot</div></div></div>
+      <div class="col-12 col-md-4"><div class="card rw-card rw-card-plan p-3"><div class="rw-overline mb-2" style="color:#A78BFF">Review</div><div style="font-size:14px;font-weight:700">Session #4 — Open</div><div style="font-size:12px;color:var(--rw-text-2);margin-top:4px">12 comments · 3 pending</div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════ FILTERS ════════════════════ -->
+<section class="pl-section" id="filters">
+  <div class="pl-tag">Components</div>
+  <div class="pl-name">Filters</div>
+  <div class="pl-desc">Segmented filter row. Wire each button with <code>hx-get</code> targeting the list container. Active = amber background.</div>
+  <div class="pl-demo d-flex flex-column gap-3">
+    <div class="rw-filter-row"><button class="rw-f-btn active">هەموو</button><button class="rw-f-btn">تیمی کار</button><button class="rw-f-btn">پێداچوونەوەکار</button></div>
+    <div class="rw-filter-row"><button class="rw-f-btn active">All</button><button class="rw-f-btn">Dialogue</button><button class="rw-f-btn">Visual</button><button class="rw-f-btn">Insert</button></div>
+  </div>
+</section>
+
+<!-- ════════════════════ TABLES ════════════════════ -->
+<section class="pl-section" id="tables">
+  <div class="pl-tag">Components</div>
+  <div class="pl-name">Tables</div>
+  <div class="pl-desc">Wrap in a container with <code>overflow-x:auto</code> for mobile. Header always <code>var(--rw-surface-2)</code>. Row height 48px minimum for touch targets.</div>
+  <div class="pl-demo p-0">
+    <table class="rw-tbl">
+      <thead><tr>
+        <th class="px-3 py-2">شات</th><th class="px-3 py-2">ستایل</th><th class="px-3 py-2">لێنز</th><th class="px-3 py-2">جۆر</th><th class="px-3 py-2">بارودۆخ</th>
+      </tr></thead>
+      <tbody>
+        <tr class="rw-tbl-row"><td class="px-3 py-2"><span class="rw-shot-num">12.1</span></td><td class="px-3 py-2">لێدانی ناوەندی</td><td class="px-3 py-2"><span class="rw-font-en" style="font-size:12px;color:var(--rw-text-2)">85mm</span></td><td class="px-3 py-2"><span class="rw-badge rw-badge-d">دیالۆگ</span></td><td class="px-3 py-2"><span class="rw-badge rw-badge-ok">تەواوبوو</span></td></tr>
+        <tr class="rw-tbl-row"><td class="px-3 py-2"><span class="rw-shot-num">12.2</span></td><td class="px-3 py-2">وایدی باڵا</td><td class="px-3 py-2"><span class="rw-font-en" style="font-size:12px;color:var(--rw-text-2)">35mm</span></td><td class="px-3 py-2"><span class="rw-badge rw-badge-v">بینراو</span></td><td class="px-3 py-2"><span class="rw-badge rw-badge-warn">چاوەڕوانی</span></td></tr>
+        <tr class="rw-tbl-row"><td class="px-3 py-2"><span class="rw-shot-num">12.3</span></td><td class="px-3 py-2">ئینسێرت دەست</td><td class="px-3 py-2"><span class="rw-font-en" style="font-size:12px;color:var(--rw-text-2)">100mm macro</span></td><td class="px-3 py-2"><span class="rw-badge rw-badge-i">ئینسێرت</span></td><td class="px-3 py-2"><span class="rw-badge rw-badge-mute">ناچالاک</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ════════════════════ STATS ════════════════════ -->
+<section class="pl-section" id="stats">
+  <div class="pl-tag">Components</div>
+  <div class="pl-name">Stats Strip</div>
+  <div class="pl-desc">Horizontal stat summary. Collapses to 2-col grid on mobile (&lt;768px).</div>
+  <div class="pl-demo p-0">
+    <div class="rw-stats">
+      <div class="rw-stat"><div class="rw-stat-val">32</div><div class="rw-stat-lbl mt-1">سەحنە</div></div>
+      <div class="rw-stat"><div class="rw-stat-val">187</div><div class="rw-stat-lbl mt-1">شات</div></div>
+      <div class="rw-stat"><div class="rw-stat-val" style="color:var(--rw-vis)">78%</div><div class="rw-stat-lbl mt-1">تەواوبووە</div></div>
+      <div class="rw-stat"><div class="rw-stat-val" style="color:var(--rw-shoot)">3</div><div class="rw-stat-lbl mt-1">بلۆک</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════ EMPTY ════════════════════ -->
+<section class="pl-section" id="empty">
+  <div class="pl-tag">Components</div>
+  <div class="pl-name">Empty States</div>
+  <div class="pl-desc">Use <code>_empty_state.html</code> partial wherever a list can be empty. Icon opacity 0.2. Never show raw Django "No items" text.</div>
+  <div class="pl-demo">
+    <div class="rw-empty">
+      <div class="rw-empty-icon">
+        <svg width="48" height="48" viewBox="0 0 24 24" class="ico" style="color:var(--rw-text-3)"><rect x="2" y="4" width="20" height="16" rx="1"/><line x1="2" y1="8" x2="22" y2="8"/><line x1="2" y1="16" x2="22" y2="16"/><line x1="6" y1="4" x2="6" y2="8"/><line x1="18" y1="4" x2="18" y2="8"/><line x1="6" y1="16" x2="6" y2="20"/><line x1="18" y1="16" x2="18" y2="20"/></svg>
+      </div>
+      <div class="rw-empty-title">هێشتا پڕۆژەیەک نییە</div>
+      <div class="rw-empty-sub">یەکەمین پڕۆژەی کوردیت دروست بکە</div>
+      <button class="rw-btn rw-btn-primary mt-2">+ پڕۆژەی نوێ</button>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════ PAGE PATTERN: LIST ════════════════════ -->
+<section class="pl-section" id="L-list">
+  <div class="pl-tag">Page Patterns</div>
+  <div class="pl-name">LIST — Table with Filter Strip</div>
+  <div class="pl-desc">For: team, tasks, contacts, decisions, locations-list. Structure: sticky page header → filter strip → scrollable table body. No sidebar inside the content area.</div>
+  <div class="pl-demo p-0" style="font-size:13px">
+    <div style="background:var(--rw-surface);border-bottom:1px solid var(--rw-border);padding:16px 20px;display:flex;align-items:center;justify-content:space-between">
+      <div><h1 style="font-size:18px;font-weight:700;margin:0 0 2px">تیمی ستودیۆ</h1><p style="font-size:12px;color:var(--rw-text-2);margin:0">Zeneon LLC</p></div>
+      <button class="rw-btn rw-btn-primary">+ بانگهێشتکردن</button>
+    </div>
+    <div style="padding:10px 20px;background:var(--rw-surface-2);border-bottom:1px solid var(--rw-border);display:flex;align-items:center;gap:0">
+      <div class="rw-filter-row"><button class="rw-f-btn active">هەموو</button><button class="rw-f-btn">تیمی کار</button><button class="rw-f-btn">پێداچوونەوەکار</button></div>
+      <span style="font-size:11px;color:var(--rw-text-3);margin-inline-start:auto">3 ئەندام</span>
+    </div>
+    <table class="rw-tbl">
+      <thead><tr><th class="px-3 py-2">ئەندام</th><th class="px-3 py-2">ڕۆڵ</th><th class="px-3 py-2">پڕۆژە</th><th class="px-3 py-2">بارودۆخ</th><th class="px-3 py-2"></th></tr></thead>
+      <tbody>
+        <tr class="rw-tbl-row"><td class="px-3 py-2"><div class="d-flex align-items-center gap-2"><div class="rw-avatar" style="width:26px;height:26px;font-size:10px">DI</div>Darya Ibrahim</div></td><td class="px-3 py-2" style="color:var(--rw-text-2)">Director</td><td class="px-3 py-2" style="color:var(--rw-amber)">A Mysterious Guest</td><td class="px-3 py-2"><span class="rw-badge rw-badge-ok">چالاک</span></td><td class="px-3 py-2"><button class="rw-btn rw-btn-ghost rw-btn-sm">دەستکاری</button></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="pl-code"><span class="cmt">{# LIST page skeleton #}</span>
+{% block content %}
+&lt;<span class="kw">div</span> <span class="cls">id</span>=<span class="str">"rw-content"</span> <span class="cls">class</span>=<span class="str">"flex-grow-1 overflow-auto"</span>&gt;
+
+  <span class="cmt">{# Sticky header #}</span>
+  &lt;<span class="kw">div</span> <span class="cls">class</span>=<span class="str">"d-flex align-items-center justify-content-between
+              px-4 py-3 bg-rw-surface border-bottom border-rw"</span>&gt;
+    &lt;<span class="kw">h1</span> <span class="cls">class</span>=<span class="str">"fs-4 fw-bold mb-0"</span>&gt;{% trans <span class="str">"PAGE TITLE"</span> %}&lt;/<span class="kw">h1</span>&gt;
+    &lt;<span class="kw">button</span> <span class="cls">class</span>=<span class="str">"rw-btn rw-btn-primary"</span> hx-get=...&gt;+ {% trans <span class="str">"زیادکردن"</span> %}&lt;/<span class="kw">button</span>&gt;
+  &lt;/<span class="kw">div</span>&gt;
+
+  <span class="cmt">{# Filter strip #}</span>
+  &lt;<span class="kw">div</span> <span class="cls">class</span>=<span class="str">"d-flex align-items-center px-4 py-2
+              bg-rw-surface2 border-bottom border-rw"</span>&gt;
+    &lt;<span class="kw">div</span> <span class="cls">class</span>=<span class="str">"rw-filter-row"</span>&gt;
+      &lt;<span class="kw">button</span> <span class="cls">class</span>=<span class="str">"rw-f-btn active"</span> hx-get=<span class="str">"?f=all"</span> hx-target=<span class="str">"#list-body"</span>&gt;{% trans <span class="str">"هەموو"</span> %}&lt;/<span class="kw">button</span>&gt;
+    &lt;/<span class="kw">div</span>&gt;
+  &lt;/<span class="kw">div</span>&gt;
+
+  <span class="cmt">{# Table — overflow-x:auto on mobile #}</span>
+  &lt;<span class="kw">div</span> <span class="cls">id</span>=<span class="str">"list-body"</span> <span class="cls">style</span>=<span class="str">"overflow-x:auto"</span>&gt;
+    &lt;<span class="kw">table</span> <span class="cls">class</span>=<span class="str">"rw-tbl"</span>&gt;...&lt;/<span class="kw">table</span>&gt;
+  &lt;/<span class="kw">div</span>&gt;
+
+&lt;/<span class="kw">div</span>&gt;
+{% endblock %}</div>
+</section>
+
+<!-- ════════════════════ SCENE VIEW ════════════════════ -->
+<section class="pl-section" id="DT-scene">
+  <div class="pl-tag">Page Patterns</div>
+  <div class="pl-name">SCENE VIEW — Panel + Tabs</div>
+  <div class="pl-desc">The core production view. Scene list panel (240px) + scene main area with module tabs. Panel collapses on mobile to an offcanvas. Each tab pane loads via HTMX.</div>
+  <div class="pl-demo p-0" style="height:260px;overflow:hidden">
+    <div class="d-flex" style="height:260px;overflow:hidden">
+      <aside style="width:200px;background:var(--rw-surface);border-inline-start:1px solid var(--rw-border);flex-shrink:0;overflow:hidden;display:flex;flex-direction:column">
+        <div style="padding:8px 12px;font-size:9px;font-weight:700;color:var(--rw-text-3);text-transform:uppercase;letter-spacing:1.2px;border-bottom:1px solid var(--rw-border)">سەحنەکان</div>
+        <div style="flex:1;overflow-y:auto;padding:4px 0">
+          <div class="rw-scene-item"><span class="rw-sc-num">11</span><div><div class="rw-sc-loc">EXT. ڕێگا</div><div class="rw-sc-time">ڕۆژ</div></div></div>
+          <div class="rw-scene-item active"><span class="rw-sc-num">12</span><div><div class="rw-sc-loc">INT. بەستانخانە</div><div class="rw-sc-time">ئێوار</div></div></div>
+          <div class="rw-scene-item"><span class="rw-sc-num">13</span><div><div class="rw-sc-loc">EXT. باغچە</div><div class="rw-sc-time">شەو</div></div></div>
+        </div>
+      </aside>
+      <div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+        <div style="height:56px;background:var(--rw-surface);border-bottom:1px solid var(--rw-border);display:flex;align-items:center;padding:0 20px;gap:12px;flex-shrink:0">
+          <div><div style="font-size:14px;font-weight:700">INT. بەستانخانەی باخچە — ئێوار</div><div style="font-size:11px;color:var(--rw-text-2)">سەحنە 12 · 2.5 پەڕە · 4 کەس</div></div>
+          <button class="rw-btn rw-btn-amber rw-btn-sm ms-auto">↗ دەرهێنان</button>
+        </div>
+        <div style="display:flex;height:48px;background:var(--rw-surface);border-bottom:1px solid var(--rw-border);padding:0 16px;overflow-x:auto">
+          <button class="rw-mod-tab active">Overview</button>
+          <button class="rw-mod-tab">Shot List</button>
+          <button class="rw-mod-tab">Storyboard</button>
+          <button class="rw-mod-tab">Floor Plan</button>
+          <button class="rw-mod-tab">Lighting</button>
+        </div>
+        <div style="flex:1;overflow:auto;padding:20px;background:var(--rw-bg)">
+          <div style="color:var(--rw-text-3);font-size:12px">← Module content (HTMX partial loaded here)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="pl-code"><span class="cmt">{# Scene view skeleton #}</span>
+{% block content %}
+&lt;<span class="kw">div</span> <span class="cls">class</span>=<span class="str">"d-flex flex-grow-1 overflow-hidden"</span>&gt;
+
+  <span class="cmt">{# Scene panel — first in DOM = right in RTL #}</span>
+  &lt;<span class="kw">aside</span> <span class="cls">class</span>=<span class="str">"rw-scene-panel d-none d-lg-flex flex-column overflow-hidden"</span>&gt;
+    &lt;<span class="kw">div</span> <span class="cls">class</span>=<span class="str">"px-3 py-2 border-bottom border-rw rw-overline"</span>&gt;{% trans <span class="str">"سەحنەکان"</span> %}&lt;/<span class="kw">div</span>&gt;
+    &lt;<span class="kw">div</span> <span class="cls">class</span>=<span class="str">"flex-grow-1 overflow-auto"</span>&gt;
+      {% for scene in project.scenes.all %}
+      &lt;<span class="kw">a</span> <span class="cls">class</span>=<span class="str">"rw-scene-item {% if scene == active_scene %}active{% endif %}"</span>
+         hx-get=<span class="str">"{% url 'scripts:scene' project.pk scene.pk %}"</span>
+         hx-target=<span class="str">"#rw-scene-main"</span>&gt;
+        &lt;<span class="kw">span</span> <span class="cls">class</span>=<span class="str">"rw-sc-num"</span>&gt;{{ scene.number }}&lt;/<span class="kw">span</span>&gt;
+        &lt;<span class="kw">div</span>&gt;&lt;<span class="kw">div</span> <span class="cls">class</span>=<span class="str">"rw-sc-loc"</span>&gt;{{ scene.location_name }}&lt;/<span class="kw">div</span>&gt;&lt;<span class="kw">div</span> <span class="cls">class</span>=<span class="str">"rw-sc-time"</span>&gt;{{ scene.time_of_day }}&lt;/<span class="kw">div</span>&gt;&lt;/<span class="kw">div</span>&gt;
+      &lt;/<span class="kw">a</span>&gt;
+      {% endfor %}
+    &lt;/<span class="kw">div</span>&gt;
+  &lt;/<span class="kw">aside</span>&gt;
+
+  <span class="cmt">{# Scene main area #}</span>
+  &lt;<span class="kw">div</span> <span class="cls">id</span>=<span class="str">"rw-scene-main"</span> <span class="cls">class</span>=<span class="str">"flex-grow-1 d-flex flex-column overflow-hidden"</span>&gt;
+    &lt;<span class="kw">div</span> <span class="cls">class</span>=<span class="str">"d-flex align-items-center px-4 gap-3 bg-rw-surface border-bottom border-rw"</span>
+         <span class="cls">style</span>=<span class="str">"height:56px;flex-shrink:0"</span>&gt;
+      &lt;<span class="kw">div</span>&gt;&lt;<span class="kw">div</span> <span class="cls">class</span>=<span class="str">"fw-bold"</span>&gt;{{ scene.int_ext }}. {{ scene.location_name }}&lt;/<span class="kw">div</span>&gt;&lt;/<span class="kw">div</span>&gt;
+      &lt;<span class="kw">a</span> <span class="cls">class</span>=<span class="str">"rw-btn rw-btn-amber rw-btn-sm ms-auto"</span>
+         href=<span class="str">"{% url 'exports:scene_viewer' scene.pk %}"</span>&gt;↗ {% trans <span class="str">"دەرهێنان"</span> %}&lt;/<span class="kw">a</span>&gt;
+    &lt;/<span class="kw">div</span>&gt;
+    &lt;<span class="kw">div</span> <span class="cls">class</span>=<span class="str">"d-flex overflow-x-auto border-bottom border-rw px-3"</span>
+         <span class="cls">style</span>=<span class="str">"height:48px;flex-shrink:0;background:var(--rw-surface)"</span>&gt;
+      {% for tab in tabs %}
+      &lt;<span class="kw">button</span> <span class="cls">class</span>=<span class="str">"rw-mod-tab {% if tab.active %}active{% endif %}"</span>
+              hx-get=<span class="str">"{{ tab.url }}"</span> hx-target=<span class="str">"#rw-tab-content"</span>&gt;{{ tab.label }}&lt;/<span class="kw">button</span>&gt;
+      {% endfor %}
+    &lt;/<span class="kw">div</span>&gt;
+    &lt;<span class="kw">div</span> <span class="cls">id</span>=<span class="str">"rw-tab-content"</span> <span class="cls">class</span>=<span class="str">"flex-grow-1 overflow-auto p-4"</span>&gt;
+      {% block tab_content %}{% endblock %}
+    &lt;/<span class="kw">div</span>&gt;
+  &lt;/<span class="kw">div</span>&gt;
+
+&lt;/<span class="kw">div</span>&gt;
+{% endblock %}</div>
+</section>
+
+<!-- ════════════════════ RTL ════════════════════ -->
+<section class="pl-section" id="rtl">
+  <div class="pl-tag">RTL / Kurdish</div>
+  <div class="pl-name">RTL Rules</div>
+  <div class="pl-desc">BS5 RTL build handles most layout automatically when <code>dir="rtl"</code> is on <code>&lt;html&gt;</code>. Follow these rules for everything else.</div>
+  <table class="rw-tbl mb-4">
+    <thead><tr><th class="px-3 py-2">❌ Don't</th><th class="px-3 py-2">✅ Do</th></tr></thead>
+    <tbody>
+      <tr class="rw-tbl-row"><td class="px-3 py-2"><code>margin-left/right</code></td><td class="px-3 py-2"><code>margin-inline-start/end</code></td></tr>
+      <tr class="rw-tbl-row"><td class="px-3 py-2"><code>border-left: 3px solid</code></td><td class="px-3 py-2"><code>border-inline-start: 3px solid</code></td></tr>
+      <tr class="rw-tbl-row"><td class="px-3 py-2"><code>left:0 / right:0</code></td><td class="px-3 py-2"><code>inset-inline-start/end: 0</code></td></tr>
+      <tr class="rw-tbl-row"><td class="px-3 py-2"><code>text-align: left</code></td><td class="px-3 py-2"><code>text-align: start</code></td></tr>
+      <tr class="rw-tbl-row"><td class="px-3 py-2">Hardcode English in Kurdish context</td><td class="px-3 py-2"><code>&lt;bdi dir="ltr" class="rw-font-en"&gt;85mm&lt;/bdi&gt;</code></td></tr>
+      <tr class="rw-tbl-row"><td class="px-3 py-2">Rail on the right manually</td><td class="px-3 py-2">Rail is first child — BS5 RTL places it correctly</td></tr>
+    </tbody>
+  </table>
+  <div class="pl-demo">
+    <div style="font-size:15px;line-height:2.2" dir="rtl">
+      سەحنە ١٢ — دوو لێدانی ناوەندی لە
+      <bdi dir="ltr" class="rw-font-en" style="color:var(--rw-amber)">85mm f/2.8</bdi>
+      — نووروک
+      <bdi dir="ltr" class="rw-font-en" style="color:var(--rw-amber)">Steadicam</bdi>
+    </div>
+  </div>
+</section>
+
+
+<!-- ════════════════════ SPACING ════════════════════ -->
+<section class="pl-section" id="spacing">
+  <div class="pl-tag">Spacing & Typography</div>
+  <div class="pl-name">Spacing Scale</div>
+  <div class="pl-desc">All spacing via BS5 utilities — <code>p-*</code>, <code>m-*</code>, <code>gap-*</code>. Never write custom margin/padding CSS. The platform uses generous spacing: content breathes on TV/smartboard, stays compact on mobile. Use the tighter end of the scale for dense data tables; the looser end for reading/review views.</div>
+
+  <div class="pl-demo p-0">
+    <table class="rw-tbl">
+      <thead><tr>
+        <th class="px-3 py-2">BS5 Class</th>
+        <th class="px-3 py-2">px</th>
+        <th class="px-3 py-2">Swatch</th>
+        <th class="px-3 py-2">Use for</th>
+      </tr></thead>
+      <tbody>
+        <tr class="rw-tbl-row"><td class="px-3 py-2"><code>gap-1 / p-1 / m-1</code></td><td class="px-3 py-2 rw-font-en">4px</td><td class="px-3 py-2"><div style="width:4px;height:16px;background:var(--rw-amber);display:inline-block"></div></td><td class="px-3 py-2" style="color:var(--rw-text-2)">Icon gaps, badge padding nudges</td></tr>
+        <tr class="rw-tbl-row"><td class="px-3 py-2"><code>gap-2 / p-2 / m-2</code></td><td class="px-3 py-2 rw-font-en">8px</td><td class="px-3 py-2"><div style="width:8px;height:16px;background:var(--rw-amber);display:inline-block"></div></td><td class="px-3 py-2" style="color:var(--rw-text-2)">Tight button padding, list-item gaps</td></tr>
+        <tr class="rw-tbl-row"><td class="px-3 py-2"><code>gap-3 / p-3 / m-3</code></td><td class="px-3 py-2 rw-font-en">16px</td><td class="px-3 py-2"><div style="width:16px;height:16px;background:var(--rw-amber);display:inline-block"></div></td><td class="px-3 py-2" style="color:var(--rw-text-2)">Card padding, table cell padding, filter rows</td></tr>
+        <tr class="rw-tbl-row"><td class="px-3 py-2"><code>gap-4 / p-4 / m-4</code></td><td class="px-3 py-2 rw-font-en">24px</td><td class="px-3 py-2"><div style="width:24px;height:16px;background:var(--rw-amber);display:inline-block"></div></td><td class="px-3 py-2" style="color:var(--rw-text-2)">Section internal padding, modal body</td></tr>
+        <tr class="rw-tbl-row"><td class="px-3 py-2"><code>gap-5 / p-5 / m-5</code></td><td class="px-3 py-2 rw-font-en">48px</td><td class="px-3 py-2"><div style="width:48px;height:16px;background:var(--rw-amber);display:inline-block"></div></td><td class="px-3 py-2" style="color:var(--rw-text-2)">Page outer padding (desktop), hero sections</td></tr>
+        <tr class="rw-tbl-row"><td class="px-3 py-2"><code>px-4 py-3</code></td><td class="px-3 py-2 rw-font-en">24px / 16px</td><td class="px-3 py-2"><div style="width:24px;height:16px;background:var(--rw-pink);display:inline-block"></div></td><td class="px-3 py-2" style="color:var(--rw-text-2)">Standard topnav / page header padding</td></tr>
+        <tr class="rw-tbl-row"><td class="px-3 py-2"><code>px-3 py-2</code></td><td class="px-3 py-2 rw-font-en">16px / 8px</td><td class="px-3 py-2"><div style="width:16px;height:8px;background:var(--rw-vis);display:inline-block"></div></td><td class="px-3 py-2" style="color:var(--rw-text-2)">Table cells, button default</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="pl-lbl mt-4">MINIMUM TOUCH TARGETS — ENFORCED</div>
+  <div class="pl-demo d-flex flex-wrap gap-4 align-items-center">
+    <div class="text-center">
+      <button class="rw-btn rw-btn-primary" style="min-height:44px">44px — mobile button min</button>
+    </div>
+    <div class="text-center">
+      <div style="height:48px;background:var(--rw-surface-2);border:1px solid var(--rw-border);display:flex;align-items:center;padding:0 16px;font-size:13px;color:var(--rw-text-2)">48px table row height</div>
+    </div>
+    <div class="text-center">
+      <div style="height:52px;background:var(--rw-surface);border:1px solid var(--rw-border);display:flex;align-items:center;padding:0 16px;font-size:13px;color:var(--rw-text-2)">52px topnav / mod-tab height</div>
+    </div>
+    <div class="text-center">
+      <div style="height:60px;background:var(--rw-rail-bg);border:1px solid var(--rw-border);display:flex;align-items:center;justify-content:center;width:60px;font-size:11px;color:var(--rw-text-3);text-align:center;line-height:1.3">60px<br>rail slot</div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════ LINE HEIGHT ════════════════════ -->
+<section class="pl-section" id="lineheight">
+  <div class="pl-tag">Spacing & Typography</div>
+  <div class="pl-name">Line Height & Text Rhythm</div>
+  <div class="pl-desc">Kurdish script (Noto Sans Arabic) needs more generous line-height than Latin. Tight line-height breaks readability in RTL. Use these values via inline style or BS5 <code>lh-*</code> utilities. Never compress line-height below 1.5 for body text.</div>
+  <div class="pl-demo">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
+      <div>
+        <div class="rw-overline mb-2">Kurdish BODY — lh 1.8</div>
+        <p style="font-family:'Noto Sans Arabic',sans-serif;font-size:14px;line-height:1.8;color:var(--rw-text-2);margin:0">لە دەستنووسەوە بۆ شاشە. ڕوانگە پلاتفۆرمێکی پێش بەرهەمهێنانی فیلمی کوردییە کە بۆ دیرەکتەرەکان دیزاین کراوە. هەموو تووشبوونەکان لێرە هاوکێشەن.</p>
+      </div>
+      <div>
+        <div class="rw-overline mb-2">ENGLISH TECHNICAL — lh 1.5</div>
+        <p style="font-family:'Inter',sans-serif;font-size:13px;line-height:1.5;color:var(--rw-text-2);margin:0">Shot 12.3A · 85mm · f/2.8 · Steadicam dolly in. Scene 12 establishes the garden interior with warm practical lighting from the fireplace.</p>
+      </div>
+      <div>
+        <div class="rw-overline mb-2">HEADING — lh 1.2</div>
+        <h2 style="font-family:'Noto Sans Arabic',sans-serif;font-size:24px;font-weight:700;line-height:1.2;margin:0">سەحنەی دوازدە — ناوخۆی بەستانخانەی باخچە</h2>
+      </div>
+      <div>
+        <div class="rw-overline mb-2">META / LABEL — lh 1.4</div>
+        <div style="font-size:11px;line-height:1.4;color:var(--rw-text-3)">INT. Garden House — Evening<br>Scene 12 · 2.5 pages · 4 characters</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="pl-lbl mt-3">QUICK REFERENCE</div>
+  <table class="rw-tbl" style="max-width:500px">
+    <thead><tr><th class="px-3 py-2">Context</th><th class="px-3 py-2">line-height</th><th class="px-3 py-2">BS5 / CSS</th></tr></thead>
+    <tbody>
+      <tr class="rw-tbl-row"><td class="px-3 py-2">Headings</td><td class="px-3 py-2 rw-font-en">1.2</td><td class="px-3 py-2"><code>lh-sm</code></td></tr>
+      <tr class="rw-tbl-row"><td class="px-3 py-2">Kurdish body text</td><td class="px-3 py-2 rw-font-en">1.8</td><td class="px-3 py-2"><code>style="line-height:1.8"</code></td></tr>
+      <tr class="rw-tbl-row"><td class="px-3 py-2">English body / notes</td><td class="px-3 py-2 rw-font-en">1.5</td><td class="px-3 py-2"><code>lh-base</code></td></tr>
+      <tr class="rw-tbl-row"><td class="px-3 py-2">Table cells / labels</td><td class="px-3 py-2 rw-font-en">1.4</td><td class="px-3 py-2"><code>lh-sm</code></td></tr>
+      <tr class="rw-tbl-row"><td class="px-3 py-2">Compact UI (badges, chips)</td><td class="px-3 py-2 rw-font-en">1.0</td><td class="px-3 py-2"><code>lh-1</code></td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ════════════════════ BREADCRUMB ════════════════════ -->
+<section class="pl-section" id="breadcrumb">
+  <div class="pl-tag">Components</div>
+  <div class="pl-name">Breadcrumb</div>
+  <div class="pl-desc">Fast navigation bar — always 44px tall, sits between topnav and page content. Shows current location + one-click back. Left (RTL: right) pink "Back" button is the primary action. Nodes are text, current leaf is muted. Essential for deep drill-down: Studio → Project → Scene → Module.</div>
+
+  <div class="pl-lbl">VARIANTS</div>
+  <div class="d-flex flex-column gap-3 mb-4">
+    <!-- Studio level -->
+    <div>
+      <div style="font-size:10px;color:var(--rw-text-3);margin-bottom:4px">Studio level</div>
+      <div class="rw-breadcrumb d-flex align-items-center gap-2 px-4">
+        <a class="rw-crumb-back px-3 py-1">← ستودیۆ</a>
+        <span class="rw-crumb-sep">/</span>
+        <span class="rw-crumb-leaf">پڕۆژەکان</span>
+      </div>
+    </div>
+    <!-- Project level -->
+    <div>
+      <div style="font-size:10px;color:var(--rw-text-3);margin-bottom:4px">Project level</div>
+      <div class="rw-breadcrumb d-flex align-items-center gap-2 px-4">
+        <a class="rw-crumb-back px-3 py-1">← پڕۆژەکان</a>
+        <span class="rw-crumb-sep">/</span>
+        <span class="rw-crumb-node">مێوانێکی نادیار</span>
+        <span class="rw-crumb-sep">/</span>
+        <span class="rw-crumb-leaf">داشبۆرد</span>
+      </div>
+    </div>
+    <!-- Scene level -->
+    <div>
+      <div style="font-size:10px;color:var(--rw-text-3);margin-bottom:4px">Scene → Module level</div>
+      <div class="rw-breadcrumb d-flex align-items-center gap-2 px-4">
+        <a class="rw-crumb-back px-3 py-1">← مێوانێکی نادیار</a>
+        <span class="rw-crumb-sep">/</span>
+        <span class="rw-crumb-node">سەحنە ١٢</span>
+        <span class="rw-crumb-sep">/</span>
+        <span class="rw-crumb-leaf">شات لیست</span>
+        <div style="flex:1"></div>
+        <span style="font-size:11px;color:var(--rw-text-3)" class="rw-font-en">INT. Garden House — Evening</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="pl-code"><span class="cmt">{# _breadcrumb.html — include after topnav, before content #}</span>
+&lt;<span class="kw">div</span> <span class="cls">class</span>=<span class="str">"rw-breadcrumb d-flex align-items-center gap-2 px-4"</span>&gt;
+
+  &lt;<span class="kw">a</span> <span class="cls">class</span>=<span class="str">"rw-crumb-back px-3 py-1"</span>
+     href=<span class="str">"{% url 'projects:list' %}"</span>&gt;← {% trans <span class="str">"پڕۆژەکان"</span> %}&lt;/<span class="kw">a</span>&gt;
+
+  &lt;<span class="kw">span</span> <span class="cls">class</span>=<span class="str">"rw-crumb-sep"</span>&gt;/&lt;/<span class="kw">span</span>&gt;
+  &lt;<span class="kw">a</span> <span class="cls">class</span>=<span class="str">"rw-crumb-node"</span>
+     href=<span class="str">"{% url 'projects:dashboard' project.pk %}"</span>&gt;{{ project.title }}&lt;/<span class="kw">a</span>&gt;
+
+  &lt;<span class="kw">span</span> <span class="cls">class</span>=<span class="str">"rw-crumb-sep"</span>&gt;/&lt;/<span class="kw">span</span>&gt;
+  &lt;<span class="kw">span</span> <span class="cls">class</span>=<span class="str">"rw-crumb-leaf"</span>&gt;{% trans <span class="str">"شات لیست"</span> %}&lt;/<span class="kw">span</span>&gt;
+
+  &lt;<span class="kw">div</span> <span class="cls">class</span>=<span class="str">"flex-grow-1"</span>&gt;&lt;/<span class="kw">div</span>&gt;
+  <span class="cmt">{# Optional right-side meta #}</span>
+  &lt;<span class="kw">span</span> <span class="cls">class</span>=<span class="str">"rw-font-en text-rw-dim"</span> <span class="cls">style</span>=<span class="str">"font-size:11px"</span>&gt;
+    {{ scene.int_ext }}. {{ scene.location_name }} — {{ scene.time_of_day }}
+  &lt;/<span class="kw">span</span>&gt;
+
+&lt;/<span class="kw">div</span>&gt;</div>
+</section>
+
+<!-- ════════════════════ TABS ════════════════════ -->
+<section class="pl-section" id="tabs">
+  <div class="pl-tag">Components</div>
+  <div class="pl-name">Tabs</div>
+  <div class="pl-desc">Three tab styles for three contexts. <strong>Section tabs</strong> live in the topnav (colour-coded per workflow section). <strong>Module tabs</strong> are the scene-level tab bar (amber active). <strong>Content tabs</strong> are inside a card or panel (smaller, for sub-views like List/Grid toggle or Bible/Script toggle).</div>
+
+  <div class="pl-lbl">1. SECTION TABS — topnav level, colour-coded</div>
+  <div class="pl-demo p-0 mb-4">
+    <div style="height:52px;background:var(--rw-surface);border-bottom:1px solid var(--rw-border);display:flex;align-items:center;padding:0 0 0 12px;gap:0">
+      <button class="rw-sec-tab active px-3 d-flex align-items-center gap-2" data-s="s">
+        <span style="width:6px;height:6px;border-radius:50%;background:var(--rw-script);flex-shrink:0"></span>دەستنووس
+      </button>
+      <button class="rw-sec-tab px-3 d-flex align-items-center gap-2" data-s="b">
+        <span style="width:6px;height:6px;border-radius:50%;background:var(--rw-break);flex-shrink:0"></span>داڕشتن
+      </button>
+      <button class="rw-sec-tab px-3 d-flex align-items-center gap-2" data-s="v">
+        <span style="width:6px;height:6px;border-radius:50%;background:var(--rw-vis);flex-shrink:0"></span>بینراوکردن
+      </button>
+      <button class="rw-sec-tab px-3 d-flex align-items-center gap-2" data-s="p">
+        <span style="width:6px;height:6px;border-radius:50%;background:var(--rw-plan);flex-shrink:0"></span>ڕێنوێس
+      </button>
+      <button class="rw-sec-tab px-3 d-flex align-items-center gap-2" data-s="sh">
+        <span style="width:6px;height:6px;border-radius:50%;background:var(--rw-shoot);flex-shrink:0"></span>وێنەگرتن
+      </button>
+    </div>
+  </div>
+
+  <div class="pl-lbl">2. MODULE TABS — scene level, amber active</div>
+  <div class="pl-demo p-0 mb-4">
+    <div style="height:48px;background:var(--rw-surface);border-bottom:1px solid var(--rw-border);display:flex;align-items:center;padding:0 16px;gap:0;overflow-x:auto">
+      <button class="rw-mod-tab active">Overview</button>
+      <button class="rw-mod-tab">Shot List</button>
+      <button class="rw-mod-tab">Storyboard</button>
+      <button class="rw-mod-tab">Floor Plan</button>
+      <button class="rw-mod-tab">Lighting</button>
+      <button class="rw-mod-tab">Sound</button>
+      <button class="rw-mod-tab">Props</button>
+      <button class="rw-mod-tab">Wardrobe</button>
+    </div>
+  </div>
+
+  <div class="pl-lbl">3. CONTENT TABS — inside cards/panels</div>
+  <div class="pl-demo mb-4">
+    <div style="border-bottom:1px solid var(--rw-border);display:flex;gap:0;margin:-24px -24px 20px;padding:0 24px">
+      <button class="rw-content-tab active" onclick="ctab(this,'ct-list')">لیست</button>
+      <button class="rw-content-tab" onclick="ctab(this,'ct-grid')">گرید</button>
+      <button class="rw-content-tab" onclick="ctab(this,'ct-bible')">Bible</button>
+    </div>
+    <div id="ct-list" style="font-size:13px;color:var(--rw-text-2)">← لیست ڤیوو نیشان دەدرێت</div>
+    <div id="ct-grid" style="display:none;font-size:13px;color:var(--rw-text-2)">← گرید ڤیوو نیشان دەدرێت</div>
+    <div id="ct-bible" style="display:none;font-size:13px;color:var(--rw-text-2)">← Bible view نیشان دەدرێت</div>
+  </div>
+
+  <div class="pl-code"><span class="cmt">{# Content tabs — HTMX-wired #}</span>
+&lt;<span class="kw">div</span> <span class="cls">class</span>=<span class="str">"d-flex border-bottom border-rw mb-4"</span> <span class="cls">style</span>=<span class="str">"gap:0"</span>&gt;
+  &lt;<span class="kw">button</span> <span class="cls">class</span>=<span class="str">"rw-content-tab {% if view == 'list' %}active{% endif %}"</span>
+          hx-get=<span class="str">"?view=list"</span> hx-target=<span class="str">"#tab-body"</span> hx-push-url=<span class="str">"true"</span>&gt;{% trans <span class="str">"لیست"</span> %}&lt;/<span class="kw">button</span>&gt;
+  &lt;<span class="kw">button</span> <span class="cls">class</span>=<span class="str">"rw-content-tab {% if view == 'grid' %}active{% endif %}"</span>
+          hx-get=<span class="str">"?view=grid"</span> hx-target=<span class="str">"#tab-body"</span> hx-push-url=<span class="str">"true"</span>&gt;{% trans <span class="str">"گرید"</span> %}&lt;/<span class="kw">button</span>&gt;
+&lt;/<span class="kw">div</span>&gt;
+&lt;<span class="kw">div</span> <span class="cls">id</span>=<span class="str">"tab-body"</span>&gt;...&lt;/<span class="kw">div</span>&gt;</div>
+</section>
+
+<!-- ════════════════════ FORMS FULL ════════════════════ -->
+<section class="pl-section" id="forms-full">
+  <div class="pl-tag">Components</div>
+  <div class="pl-name">Forms — Full Page</div>
+  <div class="pl-desc">Full-page forms: settings, create project, edit scene. Max-width 640px on desktop (never full-width). Group fields in sections with <code>.rw-section-hdr</code>. Use BS5 <code>row g-3</code> for multi-column field rows. Always Django CSRF + HTMX post.</div>
+
+  <div class="pl-demo" style="max-width:640px">
+    <div class="rw-section-hdr mb-4">زانیاری بنەڕەتی</div>
+    <div class="row g-3 mb-4">
+      <div class="col-12">
+        <label class="rw-form-label">ناوی پڕۆژە *</label>
+        <input class="rw-form-input" type="text" value="مێوانێکی نادیار" placeholder="ناوی پڕۆژەکەت بنووسە">
+        <div style="font-size:11px;color:var(--rw-text-3);margin-top:5px">ناوی کوردی پڕۆژەکەت — دەتوانیت نوسینی لاتین زیاد بکەیت لە خوارەوە</div>
+      </div>
+      <div class="col-12 col-md-6">
+        <label class="rw-form-label">ناوی لاتین (ئارەزووی)</label>
+        <input class="rw-form-input rw-font-en" type="text" placeholder="e.g. A Mysterious Guest">
+      </div>
+      <div class="col-12 col-md-6">
+        <label class="rw-form-label">جۆری پڕۆژە *</label>
+        <select class="rw-form-input" style="appearance:none">
+          <option>فیلمی کورت</option>
+          <option>فیلمی درێژ</option>
+          <option>سیریالی تەلەویزیۆنی</option>
+          <option>ڤیدیۆی مۆزیک</option>
+          <option>ڕەکلام</option>
+        </select>
+      </div>
+      <div class="col-12">
+        <label class="rw-form-label">لۆگلاین (ئارەزووی)</label>
+        <textarea class="rw-form-input" rows="3" placeholder="پوختەیەکی کورت لەسەر چیرۆکەکەت بنووسە..."></textarea>
+        <div style="font-size:11px;color:var(--rw-text-3);margin-top:5px">هەتا ٢٥٠ پیت</div>
+      </div>
+    </div>
+
+    <div class="rw-section-hdr mb-4">ڕووپۆش</div>
+    <div class="row g-3 mb-4">
+      <div class="col-12">
+        <div style="border:2px dashed var(--rw-border);padding:32px;text-align:center;background:var(--rw-surface);cursor:pointer;transition:border-color var(--rw-t)"
+             onmouseenter="this.style.borderColor='var(--rw-amber)'"
+             onmouseleave="this.style.borderColor='var(--rw-border)'">
+          <div style="font-size:11px;color:var(--rw-text-3)">PNG / JPG / WEBP · هەتا 5MB</div>
+          <button class="rw-btn rw-btn-ghost mt-2">فایل هەڵبژێرە</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Error state example -->
+    <div class="rw-section-hdr mb-4">نموونەی هەڵە</div>
+    <div class="mb-3">
+      <label class="rw-form-label" style="color:var(--rw-shoot)">ئیمەیل *</label>
+      <input class="rw-form-input" type="email" value="not-an-email" style="border-color:var(--rw-shoot)">
+      <div style="font-size:11px;color:var(--rw-shoot);margin-top:5px">⚠ ئیمەیلەکە دروست نییە</div>
+    </div>
+
+    <div class="d-flex gap-2 pt-2">
+      <button class="rw-btn rw-btn-primary">پاشەکەوتکردن</button>
+      <button class="rw-btn rw-btn-ghost">هەڵوەشاندنەوە</button>
+    </div>
+  </div>
+
+  <div class="pl-code"><span class="cmt">{# Full page form skeleton — app/edit.html #}</span>
+{% block content %}
+&lt;<span class="kw">div</span> <span class="cls">id</span>=<span class="str">"rw-content"</span> <span class="cls">class</span>=<span class="str">"flex-grow-1 overflow-auto"</span>&gt;
+
+  {% include <span class="str">"components/_breadcrumb.html"</span> %}
+
+  &lt;<span class="kw">div</span> <span class="cls">class</span>=<span class="str">"p-4 p-lg-5"</span>&gt;
+    &lt;<span class="kw">div</span> <span class="cls">style</span>=<span class="str">"max-width:640px"</span>&gt;
+
+      &lt;<span class="kw">form</span> hx-post=<span class="str">"{% url 'app:save' pk %}"</span>
+            hx-target=<span class="str">"#rw-content"</span>
+            hx-swap=<span class="str">"outerHTML"</span>
+            enctype=<span class="str">"multipart/form-data"</span>&gt;
+        {% csrf_token %}
+
+        &lt;<span class="kw">div</span> <span class="cls">class</span>=<span class="str">"rw-section-hdr mb-4"</span>&gt;{% trans <span class="str">"زانیاری بنەڕەتی"</span> %}&lt;/<span class="kw">div</span>&gt;
+
+        &lt;<span class="kw">div</span> <span class="cls">class</span>=<span class="str">"row g-3 mb-4"</span>&gt;
+          &lt;<span class="kw">div</span> <span class="cls">class</span>=<span class="str">"col-12"</span>&gt;
+            &lt;<span class="kw">label</span> <span class="cls">class</span>=<span class="str">"rw-form-label"</span>&gt;{% trans <span class="str">"ناوی پڕۆژە"</span> %} *&lt;/<span class="kw">label</span>&gt;
+            &lt;<span class="kw">input</span> <span class="cls">class</span>=<span class="str">"rw-form-input {% if form.title.errors %}is-invalid{% endif %}"</span>
+                   <span class="cls">type</span>=<span class="str">"text"</span> <span class="cls">name</span>=<span class="str">"title"</span> <span class="cls">value</span>=<span class="str">"{{ form.title.value|default:'' }}"</span>&gt;
+            {% if form.title.errors %}
+            &lt;<span class="kw">div</span> <span class="cls">style</span>=<span class="str">"font-size:11px;color:var(--rw-shoot);margin-top:5px"</span>&gt;
+              ⚠ {{ form.title.errors.0 }}
+            &lt;/<span class="kw">div</span>&gt;
+            {% endif %}
+          &lt;/<span class="kw">div</span>&gt;
+          &lt;<span class="kw">div</span> <span class="cls">class</span>=<span class="str">"col-12 col-md-6"</span>&gt;...&lt;/<span class="kw">div</span>&gt;
+        &lt;/<span class="kw">div</span>&gt;
+
+        &lt;<span class="kw">div</span> <span class="cls">class</span>=<span class="str">"d-flex gap-2"</span>&gt;
+          &lt;<span class="kw">button</span> <span class="cls">type</span>=<span class="str">"submit"</span> <span class="cls">class</span>=<span class="str">"rw-btn rw-btn-primary"</span>
+                  hx-indicator=<span class="str">"#save-spin"</span>&gt;
+            &lt;<span class="kw">span</span> <span class="cls">id</span>=<span class="str">"save-spin"</span> <span class="cls">class</span>=<span class="str">"rw-spin rw-spin-sm htmx-indicator"</span>
+                  <span class="cls">style</span>=<span class="str">"border-color:rgba(255,255,255,.3);border-top-color:#fff"</span>&gt;&lt;/<span class="kw">span</span>&gt;
+            {% trans <span class="str">"پاشەکەوتکردن"</span> %}
+          &lt;/<span class="kw">button</span>&gt;
+          &lt;<span class="kw">a</span> <span class="cls">class</span>=<span class="str">"rw-btn rw-btn-ghost"</span> href=<span class="str">"{{ cancel_url }}"</span>&gt;{% trans <span class="str">"هەڵوەشاندنەوە"</span> %}&lt;/<span class="kw">a</span>&gt;
+        &lt;/<span class="kw">div</span>&gt;
+
+      &lt;/<span class="kw">form</span>&gt;
+    &lt;/<span class="kw">div</span>&gt;
+  &lt;/<span class="kw">div</span>&gt;
+&lt;/<span class="kw">div</span>&gt;
+{% endblock %}</div>
+</section>
+
+<!-- ════════════════════ PAGE: DASHBOARD ════════════════════ -->
+<section class="pl-section" id="PG-dashboard">
+  <div class="pl-tag">Page Patterns</div>
+  <div class="pl-name">DASHBOARD — Studio / Project Overview</div>
+  <div class="pl-desc">The home base after login. Stats strip + section rows (Write/Breakdown/Visualize/Plan/Shoot) + recent activity. Also used as the project overview page. No sidebar within content — rail provides global nav.</div>
+  <div class="pl-demo p-0" style="font-size:13px;overflow:hidden">
+    <!-- Project header -->
+    <div style="background:var(--rw-surface);border-bottom:1px solid var(--rw-border);padding:20px 24px;display:flex;align-items:center;gap:16px">
+      <div style="width:72px;height:72px;background:var(--rw-script);display:flex;align-items:center;justify-content:center;font-size:30px;flex-shrink:0">🎬</div>
+      <div>
+        <div style="font-size:22px;font-weight:700;margin-bottom:4px">مێوانێکی نادیار</div>
+        <div style="font-size:12px;color:var(--rw-text-2)">Zeneon LLC · فیلمی کورت · ٢٠٢٦</div>
+      </div>
+      <div style="margin-inline-start:auto;display:flex;gap:8px">
+        <button class="rw-btn rw-btn-ghost rw-btn-sm">+ بانگهێشت</button>
+        <button class="rw-btn rw-btn-amber rw-btn-sm">↗ دەرهێنان</button>
+      </div>
+    </div>
+    <!-- Stats -->
+    <div style="display:flex;border-bottom:1px solid var(--rw-border)">
+      <div class="rw-stat flex-fill text-center py-3"><div class="rw-stat-val" style="font-size:22px">32</div><div class="rw-stat-lbl mt-1">سەحنە</div></div>
+      <div class="rw-stat flex-fill text-center py-3 border-start border-rw"><div class="rw-stat-val" style="font-size:22px">187</div><div class="rw-stat-lbl mt-1">شات</div></div>
+      <div class="rw-stat flex-fill text-center py-3 border-start border-rw"><div class="rw-stat-val" style="font-size:22px;color:var(--rw-vis)">78%</div><div class="rw-stat-lbl mt-1">تەواوبووە</div></div>
+      <div class="rw-stat flex-fill text-center py-3 border-start border-rw"><div class="rw-stat-val" style="font-size:22px">12</div><div class="rw-stat-lbl mt-1">شوێن</div></div>
+    </div>
+    <!-- Section rows -->
+    <div style="padding:16px 24px">
+      <div class="d-flex rw-sec-row">
+        <a class="rw-sec-label bg-rw-script d-flex flex-column align-items-center justify-content-center gap-2 py-3">
+          <svg width="22" height="22" viewBox="0 0 24 24" class="ico" style="color:#fff"><path d="M4 6l16-3v4H4z"/><rect x="2" y="7" width="20" height="14" rx="1"/></svg>
+          <span class="rw-sec-label-text">دەستنووس</span>
+        </a>
+        <div class="rw-sec-modules flex-grow-1 d-flex flex-wrap">
+          <a class="rw-mod-card d-flex flex-column align-items-center justify-content-center gap-2 py-3 px-3 text-decoration-none"><svg width="24" height="24" viewBox="0 0 24 24" class="ico" style="color:var(--rw-script)"><path d="M4 6l16-3v4H4z"/><rect x="2" y="7" width="20" height="14" rx="1"/><line x1="7" y1="3.5" x2="5" y2="7"/><line x1="11" y1="2.7" x2="9" y2="7"/><line x1="15" y1="1.9" x2="13" y2="7"/></svg><span class="rw-mod-name">دەستنووس</span></a>
+          <a class="rw-mod-card d-flex flex-column align-items-center justify-content-center gap-2 py-3 px-3 text-decoration-none"><svg width="24" height="24" viewBox="0 0 24 24" class="ico" style="color:var(--rw-script)"><rect x="3" y="3" width="18" height="18" rx="1"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/></svg><span class="rw-mod-name">AV Script</span></a>
+          <a class="rw-mod-card d-flex flex-column align-items-center justify-content-center gap-2 py-3 px-3 text-decoration-none"><svg width="24" height="24" viewBox="0 0 24 24" class="ico" style="color:var(--rw-script)"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><span class="rw-mod-name">بەڵگەکان</span></a>
+        </div>
+      </div>
+      <div class="d-flex rw-sec-row">
+        <a class="rw-sec-label d-flex flex-column align-items-center justify-content-center gap-2 py-3" style="background:var(--rw-break)">
+          <svg width="22" height="22" viewBox="0 0 24 24" class="ico" style="color:#fff"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="3" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="21"/><line x1="3" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="21" y2="12"/></svg>
+          <span class="rw-sec-label-text">داڕشتن</span>
+        </a>
+        <div class="rw-sec-modules flex-grow-1 d-flex flex-wrap">
+          <a class="rw-mod-card d-flex flex-column align-items-center justify-content-center gap-2 py-3 px-3 text-decoration-none"><svg width="24" height="24" viewBox="0 0 24 24" class="ico" style="color:var(--rw-break)"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="3" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="21"/><line x1="3" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="21" y2="12"/></svg><span class="rw-mod-name">شات لیست</span></a>
+          <a class="rw-mod-card d-flex flex-column align-items-center justify-content-center gap-2 py-3 px-3 text-decoration-none"><svg width="24" height="24" viewBox="0 0 24 24" class="ico" style="color:var(--rw-break)"><rect x="2" y="2" width="9" height="7" rx="1"/><rect x="13" y="2" width="9" height="7" rx="1"/><rect x="2" y="11" width="9" height="7" rx="1"/><rect x="13" y="11" width="9" height="7" rx="1"/></svg><span class="rw-mod-name">ستریپبۆرد</span></a>
+          <a class="rw-mod-card d-flex flex-column align-items-center justify-content-center gap-2 py-3 px-3 text-decoration-none"><svg width="24" height="24" viewBox="0 0 24 24" class="ico" style="color:var(--rw-break)"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg><span class="rw-mod-name">ڕاپۆرت</span></a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="pl-code"><span class="cmt">{# Dashboard shell — projects/dashboard.html #}</span>
+{% block content %}
+&lt;<span class="kw">div</span> <span class="cls">id</span>=<span class="str">"rw-content"</span> <span class="cls">class</span>=<span class="str">"flex-grow-1 overflow-auto"</span>&gt;
+
+  <span class="cmt">{# Project cover header #}</span>
+  &lt;<span class="kw">div</span> <span class="cls">class</span>=<span class="str">"d-flex align-items-center gap-4 px-4 py-4
+              bg-rw-surface border-bottom border-rw"</span>&gt;
+    &lt;<span class="kw">div</span> <span class="cls">class</span>=<span class="str">"rw-proj-cover d-flex align-items-center justify-content-center"</span>&gt;🎬&lt;/<span class="kw">div</span>&gt;
+    &lt;<span class="kw">div</span>&gt;
+      &lt;<span class="kw">h1</span> <span class="cls">class</span>=<span class="str">"rw-proj-title mb-1"</span>&gt;{{ project.title }}&lt;/<span class="kw">h1</span>&gt;
+      &lt;<span class="kw">div</span> <span class="cls">style</span>=<span class="str">"font-size:13px;color:var(--rw-text-2)"</span>&gt;{{ project.studio.name }}&lt;/<span class="kw">div</span>&gt;
+    &lt;/<span class="kw">div</span>&gt;
+  &lt;/<span class="kw">div</span>&gt;
+
+  <span class="cmt">{# Stats strip #}</span>
+  &lt;<span class="kw">div</span> <span class="cls">class</span>=<span class="str">"d-flex rw-stats"</span>&gt;
+    &lt;<span class="kw">div</span> <span class="cls">class</span>=<span class="str">"rw-stat flex-fill text-center py-4 px-3"</span>&gt;
+      &lt;<span class="kw">div</span> <span class="cls">class</span>=<span class="str">"rw-stat-val"</span>&gt;{{ project.scenes.count }}&lt;/<span class="kw">div</span>&gt;
+      &lt;<span class="kw">div</span> <span class="cls">class</span>=<span class="str">"rw-stat-lbl mt-1"</span>&gt;{% trans <span class="str">"سەحنە"</span> %}&lt;/<span class="kw">div</span>&gt;
+    &lt;/<span class="kw">div</span>&gt;
+    ... <span class="cmt">{# repeat for shots, completion, locations #}</span>
+  &lt;/<span class="kw">div</span>&gt;
+
+  <span class="cmt">{# Section rows #}</span>
+  &lt;<span class="kw">div</span> <span class="cls">class</span>=<span class="str">"px-4 py-4"</span>&gt;
+    {% for section in sections %}
+    &lt;<span class="kw">div</span> <span class="cls">class</span>=<span class="str">"d-flex rw-sec-row"</span>&gt;
+      &lt;<span class="kw">a</span> <span class="cls">href</span>=<span class="str">"{{ section.url }}"</span>
+         <span class="cls">class</span>=<span class="str">"rw-sec-label bg-rw-{{ section.color }}
+                d-flex flex-column align-items-center justify-content-center gap-2 py-3"</span>&gt;
+        &lt;<span class="kw">svg</span> ...&gt;...&lt;/<span class="kw">svg</span>&gt;
+        &lt;<span class="kw">span</span> <span class="cls">class</span>=<span class="str">"rw-sec-label-text"</span>&gt;{{ section.name }}&lt;/<span class="kw">span</span>&gt;
+      &lt;/<span class="kw">a</span>&gt;
+      &lt;<span class="kw">div</span> <span class="cls">class</span>=<span class="str">"rw-sec-modules flex-grow-1 d-flex flex-wrap"</span>&gt;
+        {% for mod in section.modules %}
+        &lt;<span class="kw">a</span> <span class="cls">href</span>=<span class="str">"{{ mod.url }}"</span>
+           <span class="cls">class</span>=<span class="str">"rw-mod-card d-flex flex-column align-items-center
+                  justify-content-center gap-2 py-4 px-3 text-decoration-none"</span>&gt;
+          &lt;<span class="kw">svg</span> <span class="cls">class</span>=<span class="str">"ico"</span> <span class="cls">style</span>=<span class="str">"color:var(--rw-{{ section.color }})"</span>&gt;...&lt;/<span class="kw">svg</span>&gt;
+          &lt;<span class="kw">span</span> <span class="cls">class</span>=<span class="str">"rw-mod-name"</span>&gt;{{ mod.name }}&lt;/<span class="kw">span</span>&gt;
+        &lt;/<span class="kw">a</span>&gt;
+        {% endfor %}
+      &lt;/<span class="kw">div</span>&gt;
+    &lt;/<span class="kw">div</span>&gt;
+    {% endfor %}
+  &lt;/<span class="kw">div</span>&gt;
+
+&lt;/<span class="kw">div</span>&gt;
+{% endblock %}</div>
+</section>
+
+<!-- ════════════════════ PAGE: CARD GRID ════════════════════ -->
+<section class="pl-section" id="PG-card">
+  <div class="pl-tag">Page Patterns</div>
+  <div class="pl-name">CARD GRID — Auto-fill Visual Grid</div>
+  <div class="pl-desc">For: community sessions, project list, storyboard frames. Uses CSS <code>auto-fill</code> grid — NOT BS5 <code>col-*</code>. Cards auto-reflow to fill available width. Mobile: 1-col. Each card is a block-level anchor with a coloured top-border accent.</div>
+  <div class="pl-demo p-0">
+    <div style="padding:12px 20px;background:var(--rw-surface-2);border-bottom:1px solid var(--rw-border);display:flex;align-items:center;gap:0">
+      <div class="rw-filter-row"><button class="rw-f-btn active">هەموو</button><button class="rw-f-btn">کراوەیە</button><button class="rw-f-btn">داخراوە</button></div>
+      <span style="font-size:11px;color:var(--rw-text-3);margin-inline-start:auto">3 دانیشتن</span>
+    </div>
+    <div style="padding:16px 20px;display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1px;background:var(--rw-border)">
+      <a style="text-decoration:none;display:block">
+        <div class="rw-session-card d-flex flex-column gap-3 p-3" style="height:100%">
+          <div class="d-flex align-items-center gap-2"><span class="rw-badge rw-badge-ok">کراوەیە</span><span style="font-size:11px;color:var(--rw-text-3)">مێوانێکی نادیار</span></div>
+          <div style="font-size:14px;font-weight:700;color:var(--rw-text);line-height:1.4">گفتوگۆی سەحنەی دوازدە — کەمەرەی دیالۆگ</div>
+          <div style="font-size:12px;color:var(--rw-text-2)">چاوەڕوانی بۆ بڕیاری کۆتایی...</div>
+          <div class="d-flex gap-3 mt-auto pt-2" style="border-top:1px solid var(--rw-border-2);font-size:11px;color:var(--rw-text-3)"><span><strong style="color:var(--rw-text-2)">12</strong> لێدوان</span><span><strong style="color:var(--rw-text-2)">3</strong> بەشدار</span></div>
+        </div>
+      </a>
+      <a style="text-decoration:none;display:block">
+        <div class="rw-session-card d-flex flex-column gap-3 p-3" style="height:100%;border-top-color:var(--rw-plan)">
+          <div class="d-flex align-items-center gap-2"><span class="rw-badge rw-badge-mute">داخراوە</span><span style="font-size:11px;color:var(--rw-text-3)">مێوانێکی نادیار</span></div>
+          <div style="font-size:14px;font-weight:700;color:var(--rw-text);line-height:1.4">پلانی وێنەگرتنی ڕۆژی یەکەم</div>
+          <div class="d-flex gap-3 mt-auto pt-2" style="border-top:1px solid var(--rw-border-2);font-size:11px;color:var(--rw-text-3)"><span><strong style="color:var(--rw-text-2)">7</strong> لێدوان</span></div>
+        </div>
+      </a>
+      <a style="text-decoration:none;display:block">
+        <div class="rw-session-card d-flex flex-column gap-3 p-3" style="height:100%;border-top-color:var(--rw-script)">
+          <div class="d-flex align-items-center gap-2"><span class="rw-badge rw-badge-ok">کراوەیە</span><span style="font-size:11px;color:var(--rw-text-3)">مێوانێکی نادیار</span></div>
+          <div style="font-size:14px;font-weight:700;color:var(--rw-text);line-height:1.4">نووسینی دووبارەی سەحنەی هەژدە</div>
+          <div class="d-flex gap-3 mt-auto pt-2" style="border-top:1px solid var(--rw-border-2);font-size:11px;color:var(--rw-text-3)"><span><strong style="color:var(--rw-text-2)">5</strong> لێدوان</span></div>
+        </div>
+      </a>
+    </div>
+  </div>
+  <div class="pl-code"><span class="cmt">{# Card grid — auto-fill, NOT col-* #}</span>
+&lt;<span class="kw">div</span> <span class="cls">id</span>=<span class="str">"card-grid"</span>
+     <span class="cls">style</span>=<span class="str">"display:grid;
+            grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
+            gap:1px;background:var(--rw-border);border:1px solid var(--rw-border)"</span>&gt;
+  {% for item in items %}
+  &lt;<span class="kw">a</span> <span class="cls">href</span>=<span class="str">"{% url 'community:detail' item.pk %}"</span>
+     <span class="cls">class</span>=<span class="str">"rw-session-card d-flex flex-column gap-3 p-3"</span>
+     <span class="cls">data-status</span>=<span class="str">"{{ item.status }}"</span>&gt;
+    <span class="cmt">{# Status + project row #}</span>
+    &lt;<span class="kw">div</span> <span class="cls">class</span>=<span class="str">"d-flex align-items-center gap-2"</span>&gt;
+      &lt;<span class="kw">span</span> <span class="cls">class</span>=<span class="str">"rw-badge rw-badge-{% if item.status == 'open' %}ok{% else %}mute{% endif %}"</span>&gt;
+        {{ item.get_status_display }}
+      &lt;/<span class="kw">span</span>&gt;
+      &lt;<span class="kw">span</span> <span class="cls">style</span>=<span class="str">"font-size:11px;color:var(--rw-text-3)"</span>&gt;{{ item.project.title }}&lt;/<span class="kw">span</span>&gt;
+    &lt;/<span class="kw">div</span>&gt;
+    &lt;<span class="kw">div</span> <span class="cls">style</span>=<span class="str">"font-size:15px;font-weight:700;color:var(--rw-text);line-height:1.4"</span>&gt;{{ item.title }}&lt;/<span class="kw">div</span>&gt;
+    &lt;<span class="kw">div</span> <span class="cls">class</span>=<span class="str">"d-flex gap-3 mt-auto pt-2"</span>
+         <span class="cls">style</span>=<span class="str">"border-top:1px solid var(--rw-border-2);font-size:11px;color:var(--rw-text-3)"</span>&gt;
+      &lt;<span class="kw">span</span>&gt;&lt;<span class="kw">strong</span>&gt;{{ item.comments.count }}&lt;/<span class="kw">strong</span>&gt; {% trans <span class="str">"لێدوان"</span> %}&lt;/<span class="kw">span</span>&gt;
+    &lt;/<span class="kw">div</span>&gt;
+  &lt;/<span class="kw">a</span>&gt;
+  {% empty %}
+    {% include <span class="str">"components/_empty_state.html"</span> ... %}
+  {% endfor %}
+&lt;/<span class="kw">div</span>&gt;</div>
+</section>
+
+<!-- ════════════════════ PAGE: SPLIT VIEW ════════════════════ -->
+<section class="pl-section" id="PG-split">
+  <div class="pl-tag">Page Patterns ★ Essential</div>
+  <div class="pl-name">SPLIT VIEW — Panel + Main Content</div>
+  <div class="pl-desc">The most important layout in Rwanga. Used for: script review with comment panel, locations (map + list), notifications (list + detail), community (thread + detail). Panel is always <strong>first in DOM</strong> (= right in RTL). Panel width: 280–320px fixed. Main area: flex-grow-1. Both scroll independently. Panel collapses to offcanvas on mobile.</div>
+
+  <div class="pl-lbl">LIVE DEMO — Script Review Split View</div>
+  <div class="pl-demo p-0" style="height:340px;overflow:hidden">
+    <div class="d-flex" style="height:340px;overflow:hidden">
+
+      <!-- Comment panel (first = right in RTL) -->
+      <aside style="width:280px;background:var(--rw-surface);border-inline-start:1px solid var(--rw-border);flex-shrink:0;display:flex;flex-direction:column;overflow:hidden">
+        <!-- Panel header -->
+        <div style="padding:12px 16px;border-bottom:1px solid var(--rw-border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+          <span style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.9px;color:var(--rw-text-3)">لێدوانەکان</span>
+          <div class="d-flex gap-1">
+            <div class="rw-filter-row" style="border-width:1px"><button class="rw-f-btn active" style="min-height:28px;padding:0 10px;font-size:11px">هەموو</button><button class="rw-f-btn" style="min-height:28px;padding:0 10px;font-size:11px">کراوە</button></div>
+          </div>
+        </div>
+        <!-- Comment list -->
+        <div style="flex:1;overflow-y:auto">
+          <!-- Active comment -->
+          <div style="padding:12px 14px;border-bottom:1px solid var(--rw-border-2);border-inline-start:3px solid var(--rw-amber);background:var(--rw-amber-dim)">
+            <div class="d-flex align-items-center gap-2 mb-1">
+              <div class="rw-avatar" style="width:24px;height:24px;font-size:9px">DI</div>
+              <span style="font-size:11px;font-weight:700">Darya</span>
+              <span style="font-size:10px;color:var(--rw-text-3);margin-inline-start:auto" class="rw-font-en">2h ago</span>
+            </div>
+            <p style="font-size:12px;color:var(--rw-text-2);margin:0;line-height:1.6">دیالۆگی سەحنەی ١٢ زۆر درێژە — ١٥ چرکە کەم بکرێت.</p>
+            <div class="d-flex gap-2 mt-2"><span class="rw-badge rw-badge-warn" style="font-size:9px">کراوەیە</span><span class="rw-badge rw-badge-plan" style="font-size:9px">دیالۆگ</span></div>
+          </div>
+          <!-- Regular comment -->
+          <div style="padding:12px 14px;border-bottom:1px solid var(--rw-border-2);border-inline-start:3px solid transparent">
+            <div class="d-flex align-items-center gap-2 mb-1">
+              <div class="rw-avatar" style="width:24px;height:24px;font-size:9px;background:var(--rw-vis)">SA</div>
+              <span style="font-size:11px;font-weight:700">Sarwar</span>
+              <span style="font-size:10px;color:var(--rw-text-3);margin-inline-start:auto" class="rw-font-en">1d ago</span>
+            </div>
+            <p style="font-size:12px;color:var(--rw-text-2);margin:0;line-height:1.6">کەمەرەی سەحنەی هەشت باشترە بۆ ئەم شوێنە.</p>
+            <div class="d-flex gap-2 mt-2"><span class="rw-badge rw-badge-ok" style="font-size:9px">چارەسەرکرا</span></div>
+          </div>
+          <div style="padding:12px 14px;border-bottom:1px solid var(--rw-border-2);border-inline-start:3px solid transparent">
+            <div class="d-flex align-items-center gap-2 mb-1">
+              <div class="rw-avatar" style="width:24px;height:24px;font-size:9px;background:var(--rw-plan)">HA</div>
+              <span style="font-size:11px;font-weight:700">Hana</span>
+              <span style="font-size:10px;color:var(--rw-text-3);margin-inline-start:auto" class="rw-font-en">3d ago</span>
+            </div>
+            <p style="font-size:12px;color:var(--rw-text-2);margin:0;line-height:1.6">جلوبەرگی گەشەی سەحنەی دوازدە؟</p>
+          </div>
+        </div>
+        <!-- Reply input -->
+        <div style="padding:12px;border-top:1px solid var(--rw-border);flex-shrink:0">
+          <textarea class="rw-form-input" rows="2" placeholder="لێدوانێک بنووسە..." style="font-size:12px;resize:none"></textarea>
+          <div class="d-flex justify-content-end mt-1">
+            <button class="rw-btn rw-btn-primary rw-btn-sm">نێردن</button>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Main content (script viewer) -->
+      <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--rw-bg)">
+        <!-- Content toolbar -->
+        <div style="height:44px;background:var(--rw-surface);border-bottom:1px solid var(--rw-border);display:flex;align-items:center;padding:0 20px;gap:12px;flex-shrink:0">
+          <span style="font-size:12px;font-weight:700">سەحنە ١٢ — دەستنووس</span>
+          <div style="flex:1"></div>
+          <div class="d-flex border-bottom-0 rw-filter-row" style="border-width:1px"><button class="rw-f-btn active" style="min-height:28px;padding:0 10px;font-size:11px">Bible</button><button class="rw-f-btn" style="min-height:28px;padding:0 10px;font-size:11px">Script</button></div>
+        </div>
+        <!-- Script content -->
+        <div style="flex:1;overflow-y:auto;padding:24px 32px">
+          <div style="max-width:560px;margin:0 auto">
+            <div style="font-size:12px;font-weight:700;text-align:center;margin-bottom:16px;color:var(--rw-text-3);font-family:'Inter',sans-serif">INT. GARDEN HOUSE — EVENING</div>
+            <p style="font-size:13px;line-height:2;color:var(--rw-text-2);margin-bottom:20px">ناوخۆی بەستانخانەیەک کە رووناکیی گەرمی ئاگرەکە دەتابێت بە سەر دیوارەکانی بەرزدا.</p>
+            <div style="margin-bottom:20px">
+              <div style="font-size:12px;font-weight:700;text-align:center;color:var(--rw-text);font-family:'Inter',sans-serif;margin-bottom:8px">نالی</div>
+              <div style="font-size:13px;line-height:2;color:var(--rw-text-2);padding:0 48px;text-align:center;border-inline-start:3px solid var(--rw-amber);background:var(--rw-amber-dim);padding:12px 20px">کاتێک ئاگاداری کەسێک دەبیت... ئیتر هیچ شتێک وەک پێش نابێت.</div>
+            </div>
+            <p style="font-size:13px;line-height:2;color:var(--rw-text-2)">گەشە بەدوای دیوارەوە دەچێت، دستی لە سەر ئەو دیوارە دەگرێت کە کاتێک زۆر جار دەستی تێ گرتووە.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="pl-code"><span class="cmt">{# SPLIT VIEW skeleton — reviews/detail.html #}</span>
+{% block content %}
+&lt;<span class="kw">div</span> <span class="cls">id</span>=<span class="str">"rw-content"</span> <span class="cls">class</span>=<span class="str">"d-flex flex-grow-1 overflow-hidden"</span>&gt;
+
+  <span class="cmt">{# PANEL — FIRST in DOM = right in RTL, left in LTR #}</span>
+  &lt;<span class="kw">aside</span> <span class="cls">class</span>=<span class="str">"d-none d-lg-flex flex-column overflow-hidden"</span>
+         <span class="cls">style</span>=<span class="str">"width:300px;background:var(--rw-surface);
+                border-inline-start:1px solid var(--rw-border);flex-shrink:0"</span>&gt;
+
+    <span class="cmt">{# Panel header #}</span>
+    &lt;<span class="kw">div</span> <span class="cls">class</span>=<span class="str">"d-flex align-items-center justify-content-between px-3 py-2"</span>
+         <span class="cls">style</span>=<span class="str">"border-bottom:1px solid var(--rw-border);flex-shrink:0"</span>&gt;
+      &lt;<span class="kw">span</span> <span class="cls">class</span>=<span class="str">"rw-overline"</span>&gt;{% trans <span class="str">"لێدوانەکان"</span> %}&lt;/<span class="kw">span</span>&gt;
+      &lt;<span class="kw">span</span> <span class="cls">class</span>=<span class="str">"rw-badge rw-badge-warn"</span>&gt;{{ open_count }}&lt;/<span class="kw">span</span>&gt;
+    &lt;/<span class="kw">div</span>&gt;
+
+    <span class="cmt">{# Panel list — scrollable #}</span>
+    &lt;<span class="kw">div</span> <span class="cls">class</span>=<span class="str">"flex-grow-1 overflow-auto"</span>&gt;
+      {% for comment in comments %}
+      &lt;<span class="kw">div</span> <span class="cls">class</span>=<span class="str">"p-3 {% if comment == active %}bg-rw-surface2{% endif %}"</span>
+           <span class="cls">style</span>=<span class="str">"border-bottom:1px solid var(--rw-border-2);
+                  border-inline-start:3px solid {% if comment == active %}var(--rw-amber){% else %}transparent{% endif %};
+                  cursor:pointer"</span>
+           hx-get=<span class="str">"{% url 'reviews:comment' comment.pk %}"</span>
+           hx-target=<span class="str">"#rw-main-content"</span>&gt;
+        <span class="cmt">{# comment preview #}</span>
+      &lt;/<span class="kw">div</span>&gt;
+      {% endfor %}
+    &lt;/<span class="kw">div</span>&gt;
+
+    <span class="cmt">{# Reply input — sticky at bottom #}</span>
+    &lt;<span class="kw">div</span> <span class="cls">class</span>=<span class="str">"p-3"</span>
+         <span class="cls">style</span>=<span class="str">"border-top:1px solid var(--rw-border);flex-shrink:0"</span>&gt;
+      &lt;<span class="kw">form</span> hx-post=<span class="str">"{% url 'reviews:reply' session.pk %}"</span>
+            hx-target=<span class="str">"#comment-list"</span>&gt;
+        {% csrf_token %}
+        &lt;<span class="kw">textarea</span> <span class="cls">class</span>=<span class="str">"rw-form-input mb-2"</span> <span class="cls">name</span>=<span class="str">"body"</span> <span class="cls">rows</span>=<span class="str">"2"</span>
+                  <span class="cls">placeholder</span>=<span class="str">"{% trans 'لێدوانێک بنووسە...' %}"</span>
+                  <span class="cls">style</span>=<span class="str">"font-size:12px;resize:none"</span>&gt;&lt;/<span class="kw">textarea</span>&gt;
+        &lt;<span class="kw">div</span> <span class="cls">class</span>=<span class="str">"d-flex justify-content-end"</span>&gt;
+          &lt;<span class="kw">button</span> <span class="cls">type</span>=<span class="str">"submit"</span> <span class="cls">class</span>=<span class="str">"rw-btn rw-btn-primary rw-btn-sm"</span>&gt;{% trans <span class="str">"نێردن"</span> %}&lt;/<span class="kw">button</span>&gt;
+        &lt;/<span class="kw">div</span>&gt;
+      &lt;/<span class="kw">form</span>&gt;
+    &lt;/<span class="kw">div</span>&gt;
+
+  &lt;/<span class="kw">aside</span>&gt;
+
+  <span class="cmt">{# MAIN CONTENT — script, map, detail view #}</span>
+  &lt;<span class="kw">div</span> <span class="cls">id</span>=<span class="str">"rw-main-content"</span>
+       <span class="cls">class</span>=<span class="str">"flex-grow-1 d-flex flex-column overflow-hidden"</span>&gt;
+    <span class="cmt">{# toolbar #}</span>
+    &lt;<span class="kw">div</span> <span class="cls">class</span>=<span class="str">"d-flex align-items-center px-4 gap-3 bg-rw-surface"</span>
+         <span class="cls">style</span>=<span class="str">"height:44px;flex-shrink:0;border-bottom:1px solid var(--rw-border)"</span>&gt;
+      ...
+    &lt;/<span class="kw">div</span>&gt;
+    <span class="cmt">{# scrollable content #}</span>
+    &lt;<span class="kw">div</span> <span class="cls">class</span>=<span class="str">"flex-grow-1 overflow-auto p-4"</span>&gt;
+      {% block main_content %}{% endblock %}
+    &lt;/<span class="kw">div</span>&gt;
+  &lt;/<span class="kw">div</span>&gt;
+
+&lt;/<span class="kw">div</span>&gt;
+{% endblock %}</div>
+</section>
+
+<!-- ════════════════════ PAGE: FORM/EDIT ════════════════════ -->
+<section class="pl-section" id="PG-form">
+  <div class="pl-tag">Page Patterns</div>
+  <div class="pl-name">FORM / EDIT — Settings & Edit Pages</div>
+  <div class="pl-desc">Full-page form layout. Max-width 640px, centred horizontally on desktop. Breadcrumb above. Grouped sections with <code>.rw-section-hdr</code>. Django form validation errors shown inline below each field. Submit + cancel at the bottom.</div>
+  <div class="pl-demo p-0" style="font-size:13px">
+    <div style="padding:0;background:var(--rw-surface);border-bottom:1px solid var(--rw-border)">
+      <div class="rw-breadcrumb d-flex align-items-center gap-2 px-4">
+        <a class="rw-crumb-back px-3 py-1">← ڕێکخستنەکان</a>
+        <span class="rw-crumb-sep">/</span>
+        <span class="rw-crumb-leaf">ستودیۆ</span>
+      </div>
+    </div>
+    <div style="padding:32px 40px;max-width:680px">
+      <div class="rw-section-hdr mb-4">ستودیۆ</div>
+      <div class="row g-3 mb-4">
+        <div class="col-12 col-md-8">
+          <label class="rw-form-label">ناوی ستودیۆ *</label>
+          <input class="rw-form-input" type="text" value="Zeneon LLC">
+        </div>
+        <div class="col-12 col-md-4">
+          <label class="rw-form-label">زمان</label>
+          <select class="rw-form-input" style="appearance:none"><option>کوردی سۆرانی</option></select>
+        </div>
+        <div class="col-12">
+          <label class="rw-form-label">کاتژمێری ناوچە</label>
+          <select class="rw-form-input rw-font-en" style="appearance:none"><option>Asia/Baghdad (UTC+3)</option></select>
+        </div>
+      </div>
+      <div class="rw-section-hdr mb-4">مەودای خەتەرناک</div>
+      <div style="background:var(--rw-pink-dim);border:1px solid rgba(247,37,133,.2);border-inline-start:3px solid var(--rw-shoot);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px">
+        <div><div style="font-size:13px;font-weight:700;color:var(--rw-shoot);margin-bottom:3px">سڕینەوەی ستودیۆ</div><div style="font-size:12px;color:var(--rw-text-2)">هەموو پڕۆژە و داتاکان دەسڕێتەوە. گەڕانەوەی نییە.</div></div>
+        <button class="rw-btn rw-btn-sm" style="background:var(--rw-shoot);color:#fff;flex-shrink:0">سڕینەوە</button>
+      </div>
+      <div class="d-flex gap-2 mt-4"><button class="rw-btn rw-btn-primary">پاشەکەوتکردن</button><button class="rw-btn rw-btn-ghost">هەڵوەشاندنەوە</button></div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════ PAGE: LIST (moved/renamed) ════════════════════ -->
+<section class="pl-section" id="PG-list">
+  <div class="pl-tag">Page Patterns</div>
+  <div class="pl-name">LIST — Table with Filter Strip</div>
+  <div class="pl-desc">For: team, tasks, contacts, decisions, locations. Structure: sticky page header → filter strip → scrollable table body.</div>
+  <div class="pl-demo p-0">
+    <div style="background:var(--rw-surface);border-bottom:1px solid var(--rw-border);padding:14px 20px;display:flex;align-items:center;justify-content:space-between">
+      <div><h1 style="font-size:18px;font-weight:700;margin:0 0 2px">تیمی ستودیۆ</h1><p style="font-size:11px;color:var(--rw-text-2);margin:0">Zeneon LLC</p></div>
+      <button class="rw-btn rw-btn-primary rw-btn-sm">+ بانگهێشتکردن</button>
+    </div>
+    <div style="padding:10px 20px;background:var(--rw-surface-2);border-bottom:1px solid var(--rw-border);display:flex;align-items:center">
+      <div class="rw-filter-row"><button class="rw-f-btn active">هەموو</button><button class="rw-f-btn">تیمی کار</button><button class="rw-f-btn">پێداچوونەوەکار</button></div>
+      <span style="font-size:11px;color:var(--rw-text-3);margin-inline-start:auto">2 ئەندام</span>
+    </div>
+    <table class="rw-tbl">
+      <thead><tr><th class="px-3 py-2">ئەندام</th><th class="px-3 py-2">ڕۆڵ</th><th class="px-3 py-2">پڕۆژە</th><th class="px-3 py-2">بارودۆخ</th><th class="px-3 py-2"></th></tr></thead>
+      <tbody>
+        <tr class="rw-tbl-row"><td class="px-3 py-2"><div class="d-flex align-items-center gap-2"><div class="rw-avatar" style="width:26px;height:26px;font-size:10px">DI</div>Darya Ibrahim</div></td><td class="px-3 py-2" style="color:var(--rw-text-2)">Director</td><td class="px-3 py-2" style="color:var(--rw-amber)">مێوانێکی نادیار</td><td class="px-3 py-2"><span class="rw-badge rw-badge-ok">چالاک</span></td><td class="px-3 py-2"><button class="rw-btn rw-btn-ghost rw-btn-sm">دەستکاری</button></td></tr>
+        <tr class="rw-tbl-row"><td class="px-3 py-2"><div class="d-flex align-items-center gap-2"><div class="rw-avatar" style="width:26px;height:26px;font-size:10px;background:var(--rw-vis)">SA</div>Sarwar Ahmed</div></td><td class="px-3 py-2" style="color:var(--rw-text-2)">Reviewer</td><td class="px-3 py-2" style="color:var(--rw-amber)">مێوانێکی نادیار</td><td class="px-3 py-2"><span class="rw-badge rw-badge-warn">چاوەڕوانی</span></td><td class="px-3 py-2"><button class="rw-btn rw-btn-ghost rw-btn-sm">دەستکاری</button></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ════════════════════ PAGE: SCENE VIEW (kept) ════════════════════ -->
+<section class="pl-section" id="PG-scene">
+  <div class="pl-tag">Page Patterns</div>
+  <div class="pl-name">SCENE VIEW — Panel + Module Tabs</div>
+  <div class="pl-desc">Core production layout. Scene list panel (240px, first in DOM) + scene main with module tabs. Each tab loads via HTMX. Panel collapses on mobile.</div>
+  <div class="pl-demo p-0" style="height:240px;overflow:hidden">
+    <div class="d-flex" style="height:240px">
+      <aside style="width:190px;background:var(--rw-surface);border-inline-start:1px solid var(--rw-border);flex-shrink:0;display:flex;flex-direction:column;overflow:hidden">
+        <div style="padding:7px 12px;font-size:9px;font-weight:700;color:var(--rw-text-3);text-transform:uppercase;letter-spacing:1.2px;border-bottom:1px solid var(--rw-border)">سەحنەکان</div>
+        <div style="flex:1;overflow-y:auto;padding:4px 0">
+          <div class="rw-scene-item"><span class="rw-sc-num">11</span><div><div class="rw-sc-loc">EXT. ڕێگا</div><div class="rw-sc-time">ڕۆژ</div></div></div>
+          <div class="rw-scene-item active"><span class="rw-sc-num">12</span><div><div class="rw-sc-loc">INT. بەستانخانە</div><div class="rw-sc-time">ئێوار</div></div></div>
+          <div class="rw-scene-item"><span class="rw-sc-num">13</span><div><div class="rw-sc-loc">EXT. باغچە</div><div class="rw-sc-time">شەو</div></div></div>
+        </div>
+      </aside>
+      <div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+        <div style="height:52px;background:var(--rw-surface);border-bottom:1px solid var(--rw-border);display:flex;align-items:center;padding:0 16px;gap:10px;flex-shrink:0">
+          <div><div style="font-size:13px;font-weight:700">INT. بەستانخانەی باخچە — ئێوار</div><div style="font-size:10px;color:var(--rw-text-2)">سەحنە ١٢ · 2.5 پەڕە</div></div>
+          <button class="rw-btn rw-btn-amber rw-btn-sm ms-auto">↗ دەرهێنان</button>
+        </div>
+        <div style="height:44px;background:var(--rw-surface);border-bottom:1px solid var(--rw-border);display:flex;align-items:center;padding:0 12px;overflow-x:auto;gap:0;flex-shrink:0">
+          <button class="rw-mod-tab active px-3">Overview</button><button class="rw-mod-tab px-3">Shot List</button><button class="rw-mod-tab px-3">Storyboard</button><button class="rw-mod-tab px-3">Floor Plan</button>
+        </div>
+        <div style="flex:1;overflow:auto;padding:16px;background:var(--rw-bg)"><div style="color:var(--rw-text-3);font-size:11px">← HTMX partial loaded here</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+</div>
+<section class="pl-section" id="modals">
+  <div class="pl-tag">Forms & Feedback</div>
+  <div class="pl-name">Modals</div>
+  <div class="pl-desc">Three variants: <strong>Default</strong> (confirm, forms), <strong>Danger</strong> (destructive actions), <strong>Small</strong> (quick prompts). Always loaded via HTMX into <code>#rw-modal-container</code> — never pre-rendered in the template. Amber top border on default, pink on danger.</div>
+
+  <div class="pl-lbl">VARIANTS — click to open live</div>
+  <div class="d-flex flex-wrap gap-3 mb-4">
+    <button class="rw-btn rw-btn-primary" onclick="openModal('modal-default')">Default Modal</button>
+    <button class="rw-btn rw-btn-ghost"   onclick="openModal('modal-danger')">Danger Modal</button>
+    <button class="rw-btn rw-btn-ghost"   onclick="openModal('modal-small')">Small / Confirm</button>
+    <button class="rw-btn rw-btn-ghost"   onclick="openModal('modal-form')">Form Modal</button>
+  </div>
+
+  <!-- MODAL DEMOS (hidden, shown via JS) -->
+  <div id="modal-default" style="display:none">
+    <div class="rw-modal-backdrop" onclick="if(event.target===this)closeModal('modal-default')">
+      <div class="rw-modal" onclick="event.stopPropagation()">
+        <div class="rw-modal-header">
+          <span class="rw-modal-title">پڕۆژەی نوێ دروست بکە</span>
+          <button class="rw-modal-close" onclick="closeModal('modal-default')">✕</button>
+        </div>
+        <div class="rw-modal-body">
+          <label class="rw-form-label">ناوی پڕۆژە</label>
+          <input class="rw-form-input mb-3" type="text" placeholder="ناوی پڕۆژەکەت بنووسە...">
+          <label class="rw-form-label">جۆری پڕۆژە</label>
+          <select class="rw-form-input" style="appearance:none">
+            <option>فیلمی کورت</option>
+            <option>فیلمی درێژ</option>
+            <option>سیریالی تەلەویزیۆنی</option>
+          </select>
+        </div>
+        <div class="rw-modal-footer">
+          <button class="rw-btn rw-btn-ghost" onclick="closeModal('modal-default')">هەڵوەشاندنەوە</button>
+          <button class="rw-btn rw-btn-primary">دروستکردن</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="modal-danger" style="display:none">
+    <div class="rw-modal-backdrop" onclick="if(event.target===this)closeModal('modal-danger')">
+      <div class="rw-modal rw-modal-sm rw-modal-danger" onclick="event.stopPropagation()">
+        <div class="rw-modal-header">
+          <span class="rw-modal-title" style="color:var(--rw-shoot)">سڕینەوەی پڕۆژە</span>
+          <button class="rw-modal-close" onclick="closeModal('modal-danger')">✕</button>
+        </div>
+        <div class="rw-modal-body">
+          <div class="rw-alert rw-alert-err mb-3">
+            <span class="rw-alert-icon">⚠</span>
+            <div class="rw-alert-text">ئەم کردارە گەڕانەوەی نییە. هەموو داتای پڕۆژە دەسڕێتەوە.</div>
+          </div>
+          <p style="font-size:13px;color:var(--rw-text-2)">دڵنیایت لە سڕینەوەی <strong style="color:var(--rw-text)">A Mysterious Guest</strong>؟</p>
+        </div>
+        <div class="rw-modal-footer">
+          <button class="rw-btn rw-btn-ghost" onclick="closeModal('modal-danger')">هەڵوەشاندنەوە</button>
+          <button class="rw-btn rw-btn-primary" style="background:var(--rw-shoot)">بەڵێ، بیسڕەوە</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="modal-small" style="display:none">
+    <div class="rw-modal-backdrop" onclick="if(event.target===this)closeModal('modal-small')">
+      <div class="rw-modal rw-modal-sm" onclick="event.stopPropagation()">
+        <div class="rw-modal-header">
+          <span class="rw-modal-title">دڵنیابوون</span>
+          <button class="rw-modal-close" onclick="closeModal('modal-small')">✕</button>
+        </div>
+        <div class="rw-modal-body">
+          <p style="font-size:13px;color:var(--rw-text-2);line-height:1.7">گۆڕانکارییەکانت پاشەکەوت بکە پێش ئەوەی بچیتە دەرەوە؟</p>
+        </div>
+        <div class="rw-modal-footer">
+          <button class="rw-btn rw-btn-ghost" onclick="closeModal('modal-small')">بەبێ پاشەکەوتکردن</button>
+          <button class="rw-btn rw-btn-amber">پاشەکەوتکردن</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="modal-form" style="display:none">
+    <div class="rw-modal-backdrop" onclick="if(event.target===this)closeModal('modal-form')">
+      <div class="rw-modal rw-modal-lg" onclick="event.stopPropagation()">
+        <div class="rw-modal-header">
+          <span class="rw-modal-title">بانگهێشتکردنی ئەندام</span>
+          <button class="rw-modal-close" onclick="closeModal('modal-form')">✕</button>
+        </div>
+        <div class="rw-modal-body">
+          <div class="row g-3">
+            <div class="col-12 col-md-6">
+              <label class="rw-form-label">ئیمەیل</label>
+              <input class="rw-form-input" type="email" placeholder="name@studio.com">
+            </div>
+            <div class="col-12 col-md-6">
+              <label class="rw-form-label">جۆری ڕۆڵ</label>
+              <select class="rw-form-input" style="appearance:none">
+                <option>Director</option><option>DP</option><option>AD</option><option>Viewer</option>
+              </select>
+            </div>
+            <div class="col-12">
+              <label class="rw-form-label">پڕۆژە</label>
+              <select class="rw-form-input" style="appearance:none">
+                <option>A Mysterious Guest</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="rw-modal-footer">
+          <button class="rw-btn rw-btn-ghost" onclick="closeModal('modal-form')">هەڵوەشاندنەوە</button>
+          <button class="rw-btn rw-btn-primary">نێردنی بانگهێشتنامە</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="pl-code"><span class="cmt">{# 1. Trigger — hx-get loads modal partial into #rw-modal-container #}</span>
+&lt;<span class="kw">button</span> <span class="cls">class</span>=<span class="str">"rw-btn rw-btn-primary"</span>
+        hx-get=<span class="str">"{% url 'projects:create_modal' %}"</span>
+        hx-target=<span class="str">"#rw-modal-container"</span>
+        hx-swap=<span class="str">"innerHTML"</span>&gt;
+  + {% trans <span class="str">"پڕۆژەی نوێ"</span> %}
+&lt;/<span class="kw">button</span>&gt;
+
+<span class="cmt">{# 2. Django view — returns the modal partial #}</span>
+<span class="cmt"># views.py</span>
+<span class="kw">def</span> create_modal(request):
+    form = ProjectForm()
+    <span class="kw">return</span> render(request, <span class="str">'projects/_modal_create.html'</span>, {<span class="str">'form'</span>: form})
+
+<span class="cmt">{# 3. Modal partial — projects/_modal_create.html #}</span>
+&lt;<span class="kw">div</span> <span class="cls">class</span>=<span class="str">"rw-modal-backdrop"</span>
+     hx-on:click=<span class="str">"if(event.target===this) document.getElementById('rw-modal-container').innerHTML=''"</span>&gt;
+  &lt;<span class="kw">div</span> <span class="cls">class</span>=<span class="str">"rw-modal"</span> onclick=<span class="str">"event.stopPropagation()"</span>&gt;
+    &lt;<span class="kw">div</span> <span class="cls">class</span>=<span class="str">"rw-modal-header"</span>&gt;
+      &lt;<span class="kw">span</span> <span class="cls">class</span>=<span class="str">"rw-modal-title"</span>&gt;{% trans <span class="str">"پڕۆژەی نوێ دروست بکە"</span> %}&lt;/<span class="kw">span</span>&gt;
+      &lt;<span class="kw">button</span> <span class="cls">class</span>=<span class="str">"rw-modal-close"</span>
+              onclick=<span class="str">"document.getElementById('rw-modal-container').innerHTML=''"</span>&gt;✕&lt;/<span class="kw">button</span>&gt;
+    &lt;/<span class="kw">div</span>&gt;
+    &lt;<span class="kw">div</span> <span class="cls">class</span>=<span class="str">"rw-modal-body"</span>&gt;
+      &lt;<span class="kw">form</span> hx-post=<span class="str">"{% url 'projects:create' %}"</span>
+            hx-target=<span class="str">"#rw-content"</span>
+            hx-swap=<span class="str">"outerHTML"</span>&gt;
+        {% csrf_token %}
+        &lt;<span class="kw">label</span> <span class="cls">class</span>=<span class="str">"rw-form-label"</span>&gt;{% trans <span class="str">"ناوی پڕۆژە"</span> %}&lt;/<span class="kw">label</span>&gt;
+        &lt;<span class="kw">input</span> <span class="cls">class</span>=<span class="str">"rw-form-input mb-3"</span> <span class="cls">name</span>=<span class="str">"title"</span> <span class="cls">type</span>=<span class="str">"text"</span>&gt;
+        &lt;<span class="kw">div</span> <span class="cls">class</span>=<span class="str">"rw-modal-footer"</span>&gt;
+          &lt;<span class="kw">button</span> <span class="cls">type</span>=<span class="str">"button"</span> <span class="cls">class</span>=<span class="str">"rw-btn rw-btn-ghost"</span>
+                  onclick=<span class="str">"document.getElementById('rw-modal-container').innerHTML=''"</span>&gt;
+            {% trans <span class="str">"هەڵوەشاندنەوە"</span> %}
+          &lt;/<span class="kw">button</span>&gt;
+          &lt;<span class="kw">button</span> <span class="cls">type</span>=<span class="str">"submit"</span> <span class="cls">class</span>=<span class="str">"rw-btn rw-btn-primary"</span>&gt;{% trans <span class="str">"دروستکردن"</span> %}&lt;/<span class="kw">button</span>&gt;
+        &lt;/<span class="kw">div</span>&gt;
+      &lt;/<span class="kw">form</span>&gt;
+    &lt;/<span class="kw">div</span>&gt;
+  &lt;/<span class="kw">div</span>&gt;
+&lt;/<span class="kw">div</span>&gt;
+<span class="cmt">&lt;!-- Backdrop --&gt;</span>
+&lt;<span class="kw">div</span> <span class="cls">class</span>=<span class="str">"rw-modal-backdrop"</span>
+     style=<span class="str">"position:fixed;inset:0;z-index:499;background:transparent"</span>
+     onclick=<span class="str">"document.getElementById('rw-modal-container').innerHTML=''"</span>&gt;&lt;/<span class="kw">div</span>&gt;
+
+<span class="cmt">{# After success: Django view returns HX-Trigger header to close modal #}</span>
+<span class="cmt"># views.py — on POST success:</span>
+response = redirect(<span class="str">'projects:dashboard'</span>, pk=project.pk)
+response[<span class="str">'HX-Redirect'</span>] = str(redirect_url)
+<span class="cmt"># OR use OOB swap to clear modal:</span>
+<span class="cmt"># &lt;div id="rw-modal-container" hx-swap-oob="innerHTML"&gt;&lt;/div&gt;</span></div>
+</section>
+
+<!-- ════════════════════ TOASTS & ALERTS ════════════════════ -->
+<section class="pl-section" id="toasts">
+  <div class="pl-tag">Forms & Feedback</div>
+  <div class="pl-name">Toasts & Alerts</div>
+  <div class="pl-desc"><strong>Toasts</strong> = transient floating notifications (fixed bottom-start). Auto-dismiss after 4s, HTMX OOB swap. <strong>Alerts</strong> = inline persistent messages inside content areas. Both come in 4 semantic variants: ok, warn, err, info.</div>
+
+  <div class="pl-lbl">LIVE TOASTS — click to fire</div>
+  <div class="d-flex flex-wrap gap-3 mb-4">
+    <button class="rw-btn rw-btn-ghost" onclick="fireToast('ok','تەواوبوو','پڕۆژەکەت پاشەکەوت کرا.')">✓ Success</button>
+    <button class="rw-btn rw-btn-ghost" onclick="fireToast('warn','ئاگادارکردن','کاتی دەرهێنانەکەت نزیکە.')">⚠ Warning</button>
+    <button class="rw-btn rw-btn-ghost" onclick="fireToast('err','هەڵە','نەتوانرا پاشەکەوت بکرێت.')">✕ Error</button>
+    <button class="rw-btn rw-btn-ghost" onclick="fireToast('info','زانیاری','دەستنووس نوێکرایەوە.')">ℹ Info</button>
+  </div>
+
+  <!-- toast container for demos -->
+  <div id="demo-toast-stack" class="rw-toast-stack" style="position:relative;bottom:auto;inset-inline-start:auto;pointer-events:auto;max-width:100%"></div>
+
+  <div class="pl-lbl mt-3">STATIC VARIANTS</div>
+  <div class="d-flex flex-column gap-2 mb-4" style="max-width:400px">
+    <div class="rw-toast t-ok">
+      <span class="rw-toast-icon">✓</span>
+      <div class="rw-toast-body"><div class="rw-toast-title">تەواوبوو</div><div class="rw-toast-msg">پڕۆژەکەت پاشەکەوت کرا</div></div>
+      <button class="rw-toast-close">✕</button>
+      <div class="rw-toast-bar" style="background:var(--rw-vis)"></div>
+    </div>
+    <div class="rw-toast t-warn">
+      <span class="rw-toast-icon">⚠</span>
+      <div class="rw-toast-body"><div class="rw-toast-title">ئاگادارکردن</div><div class="rw-toast-msg">کاتی دەرهێنانەکەت نزیکە</div></div>
+      <button class="rw-toast-close">✕</button>
+      <div class="rw-toast-bar"></div>
+    </div>
+    <div class="rw-toast t-err">
+      <span class="rw-toast-icon">✕</span>
+      <div class="rw-toast-body"><div class="rw-toast-title">هەڵە</div><div class="rw-toast-msg">نەتوانرا پاشەکەوت بکرێت. دووبارە هەوڵ بدە.</div></div>
+      <button class="rw-toast-close">✕</button>
+      <div class="rw-toast-bar" style="background:var(--rw-shoot)"></div>
+    </div>
+  </div>
+
+  <div class="pl-lbl">INLINE ALERTS</div>
+  <div class="d-flex flex-column gap-2 mb-4">
+    <div class="rw-alert rw-alert-ok"><span class="rw-alert-icon">✓</span><div class="rw-alert-text"><div class="rw-alert-title">AI داڕشتن تەواو بوو</div>هەموو ئەلێمێنتەکان بەسەرکەوتوویی دەستنووسەکراون.</div></div>
+    <div class="rw-alert rw-alert-warn"><span class="rw-alert-icon">⚠</span><div class="rw-alert-text"><div class="rw-alert-title">ئاگادارکردن</div>سەحنە ١٢ هێشتا شاتێکی نیشانەکراوی نییە.</div></div>
+    <div class="rw-alert rw-alert-err"><span class="rw-alert-icon">⚠</span><div class="rw-alert-text"><div class="rw-alert-title">هەڵەی فۆرم</div>ناوی پڕۆژە پێویستە.</div></div>
+    <div class="rw-alert rw-alert-info"><span class="rw-alert-icon">ℹ</span><div class="rw-alert-text"><div class="rw-alert-title">زانیاری</div>ئەم شوێنە بۆ پڕۆژە ٣ بەکارهاتووە.</div></div>
+  </div>
+
+  <div class="pl-code"><span class="cmt">{# Django view — fire a toast via HTMX OOB swap #}</span>
+<span class="cmt"># Any view can inject a toast by including this in the response:</span>
+<span class="kw">def</span> save_shot(request, pk):
+    shot = get_object_or_404(Shot, pk=pk)
+    form = ShotForm(request.POST, instance=shot)
+    <span class="kw">if</span> form.is_valid():
+        form.save()
+        <span class="cmt"># Return the saved row + a toast OOB</span>
+        <span class="kw">return</span> render(request, <span class="str">'shots/_row.html'</span>, {
+            <span class="str">'shot'</span>: shot,
+            <span class="str">'toast'</span>: {<span class="str">'type'</span>: <span class="str">'ok'</span>, <span class="str">'title'</span>: <span class="str">'تەواوبوو'</span>, <span class="str">'msg'</span>: <span class="str">'شاتەکە پاشەکەوت کرا'</span>}
+        })
+
+<span class="cmt">{# In shots/_row.html — append the OOB toast swap: #}</span>
+{% if toast %}
+&lt;<span class="kw">div</span> <span class="cls">id</span>=<span class="str">"rw-toast-container"</span> hx-swap-oob=<span class="str">"afterbegin"</span>&gt;
+  &lt;<span class="kw">div</span> <span class="cls">class</span>=<span class="str">"rw-toast t-{{ toast.type }}"</span>
+       x-data=<span class="str">"{ show: true }"</span> x-init=<span class="str">"setTimeout(() => $el.remove(), 4000)"</span>&gt;
+    &lt;<span class="kw">span</span> <span class="cls">class</span>=<span class="str">"rw-toast-icon"</span>&gt;{% if toast.type == 'ok' %}✓{% elif toast.type == 'err' %}✕{% else %}⚠{% endif %}&lt;/<span class="kw">span</span>&gt;
+    &lt;<span class="kw">div</span> <span class="cls">class</span>=<span class="str">"rw-toast-body"</span>&gt;
+      &lt;<span class="kw">div</span> <span class="cls">class</span>=<span class="str">"rw-toast-title"</span>&gt;{{ toast.title }}&lt;/<span class="kw">div</span>&gt;
+      &lt;<span class="kw">div</span> <span class="cls">class</span>=<span class="str">"rw-toast-msg"</span>&gt;{{ toast.msg }}&lt;/<span class="kw">div</span>&gt;
+    &lt;/<span class="kw">div</span>&gt;
+    &lt;<span class="kw">button</span> <span class="cls">class</span>=<span class="str">"rw-toast-close"</span> onclick=<span class="str">"this.closest('.rw-toast').remove()"</span>&gt;✕&lt;/<span class="kw">button</span>&gt;
+    &lt;<span class="kw">div</span> <span class="cls">class</span>=<span class="str">"rw-toast-bar"</span>&gt;&lt;/<span class="kw">div</span>&gt;
+  &lt;/<span class="kw">div</span>&gt;
+&lt;/<span class="kw">div</span>&gt;
+{% endif %}
+
+<span class="cmt">{# rwanga.js — global HTMX toast helper #}</span>
+document.body.addEventListener(<span class="str">'htmx:afterRequest'</span>, <span class="kw">function</span>(evt) {
+  <span class="kw">const</span> msg = evt.detail.xhr.getResponseHeader(<span class="str">'HX-Toast'</span>);
+  <span class="kw">if</span> (msg) RW.toast(JSON.parse(msg));
+});
+RW.toast = <span class="kw">function</span>({type=<span class="str">'ok'</span>, title, msg}) {
+  <span class="kw">const</span> el = document.createElement(<span class="str">'div'</span>);
+  el.className = <span class="str">`rw-toast t-${type}`</span>;
+  el.innerHTML = <span class="str">`&lt;span class="rw-toast-icon"&gt;...&lt;/span&gt;
+    &lt;div class="rw-toast-body"&gt;
+      &lt;div class="rw-toast-title"&gt;${title}&lt;/div&gt;
+      &lt;div class="rw-toast-msg"&gt;${msg}&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class="rw-toast-bar"&gt;&lt;/div&gt;`</span>;
+  document.getElementById(<span class="str">'rw-toast-container'</span>).prepend(el);
+  setTimeout(() => el.remove(), <span class="str">4200</span>);
+};</div>
+</section>
+
+<!-- ════════════════════ WIZARDS ════════════════════ -->
+<section class="pl-section" id="wizards">
+  <div class="pl-tag">Forms & Feedback</div>
+  <div class="pl-name">Wizards — Multi-Step Forms</div>
+  <div class="pl-desc">For: new project creation, script upload, team invite flow. Each step is a separate Django view + HTMX partial swap. Step bar stays fixed; only the body swaps. Steps: numbered circles, pink active, teal done.</div>
+
+  <div class="pl-lbl">LIVE WIZARD — 4 steps</div>
+  <div class="pl-demo p-0" style="overflow:hidden">
+    <!-- Step bar -->
+    <div class="rw-wizard-bar" id="wiz-bar">
+      <div class="rw-wiz-step done"   id="ws-1"><div class="rw-wiz-num">✓</div>بنەڕەت</div>
+      <div class="rw-wiz-connector"></div>
+      <div class="rw-wiz-step active" id="ws-2"><div class="rw-wiz-num">2</div>دەستنووس</div>
+      <div class="rw-wiz-connector"></div>
+      <div class="rw-wiz-step"        id="ws-3"><div class="rw-wiz-num">3</div>مۆدیول</div>
+      <div class="rw-wiz-connector"></div>
+      <div class="rw-wiz-step"        id="ws-4"><div class="rw-wiz-num">4</div>تیم</div>
+    </div>
+
+    <!-- Step body — swaps via HTMX in real app -->
+    <div class="rw-wizard-body" id="wiz-body">
+      <div class="rw-section-hdr mb-3">هەڵوەشاندنەوەی دەستنووس</div>
+      <div style="border:2px dashed var(--rw-border);padding:48px;text-align:center;cursor:pointer;transition:border-color var(--rw-t);background:var(--rw-surface)"
+           onmouseenter="this.style.borderColor='var(--rw-amber)'"
+           onmouseleave="this.style.borderColor='var(--rw-border)'">
+        <div style="font-size:36px;opacity:.3;margin-bottom:12px">
+          <svg width="40" height="40" viewBox="0 0 24 24" class="ico" style="color:var(--rw-text-3)"><path d="M4 6l16-3v4H4z"/><rect x="2" y="7" width="20" height="14" rx="1"/><line x1="7" y1="3.5" x2="5" y2="7"/><line x1="11" y1="2.7" x2="9" y2="7"/><line x1="15" y1="1.9" x2="13" y2="7"/></svg>
+        </div>
+        <div style="font-size:16px;font-weight:700;margin-bottom:6px">دەستنووسەکەت ئێرە بکێشە</div>
+        <div style="font-size:13px;color:var(--rw-text-2);margin-bottom:16px">FDX · Fountain · PDF · DOCX</div>
+        <button class="rw-btn rw-btn-ghost">یان فایل هەڵبژێرە</button>
+      </div>
+      <p style="font-size:12px;color:var(--rw-text-3);margin-top:12px">یان دەستنووسەکەت ئێرە بنووسە — دواتر دەتوانیت فایل زیاد بکەیت.</p>
+    </div>
+
+    <!-- Footer -->
+    <div class="rw-wizard-footer">
+      <button class="rw-btn rw-btn-ghost" onclick="wizStep(-1)">← پێشوو</button>
+      <div style="flex:1;font-size:12px;color:var(--rw-text-3);text-align:center">هەنگاو ٢ لە ٤</div>
+      <button class="rw-btn rw-btn-primary" onclick="wizStep(1)">دواتر ←</button>
+    </div>
+  </div>
+
+  <div class="pl-code"><span class="cmt">{# Wizard: each step is a Django URL, HTMX swaps #rw-wiz-body #}</span>
+
+<span class="cmt"># urls.py</span>
+path(<span class="str">'projects/new/step/&lt;int:step&gt;/'</span>, views.project_wizard, name=<span class="str">'project_wizard'</span>),
+
+<span class="cmt"># views.py</span>
+STEPS = [<span class="str">'basics'</span>, <span class="str">'script'</span>, <span class="str">'modules'</span>, <span class="str">'team'</span>]
+<span class="kw">def</span> project_wizard(request, step=1):
+    <span class="kw">if</span> request.method == <span class="str">'POST'</span>:
+        <span class="cmt"># save step data to session</span>
+        request.session[<span class="str">f'wizard_step_{step}'</span>] = request.POST.dict()
+        <span class="kw">if</span> step == len(STEPS):
+            <span class="cmt"># Final step — create project</span>
+            project = create_project_from_session(request.session)
+            <span class="kw">return</span> HttpResponse(headers={<span class="str">'HX-Redirect'</span>: project.get_absolute_url()})
+        <span class="cmt"># Advance to next step — swap body + update step bar</span>
+        response = render(request, <span class="str">f'projects/wizard/_step_{step+1}.html'</span>, {<span class="str">'step'</span>: step+1})
+        response[<span class="str">'HX-Trigger'</span>] = json.dumps({<span class="str">'wizardStep'</span>: step+1})
+        <span class="kw">return</span> response
+    <span class="kw">return</span> render(request, <span class="str">f'projects/wizard/_step_{step}.html'</span>, {<span class="str">'step'</span>: step})
+
+<span class="cmt">{# Wizard shell — projects/wizard/shell.html #}</span>
+&lt;<span class="kw">div</span> <span class="cls">class</span>=<span class="str">"rw-wizard-bar"</span>&gt;
+  {% for i, label in steps %}
+  &lt;<span class="kw">div</span> <span class="cls">class</span>=<span class="str">"rw-wiz-step {% if i &lt; current %}done{% elif i == current %}active{% endif %}"</span>&gt;
+    &lt;<span class="kw">div</span> <span class="cls">class</span>=<span class="str">"rw-wiz-num"</span>&gt;{% if i &lt; current %}✓{% else %}{{ i }}{% endif %}&lt;/<span class="kw">div</span>&gt;
+    {{ label }}
+  &lt;/<span class="kw">div</span>&gt;
+  {% if not forloop.last %}&lt;<span class="kw">div</span> <span class="cls">class</span>=<span class="str">"rw-wiz-connector"</span>&gt;&lt;/<span class="kw">div</span>&gt;{% endif %}
+  {% endfor %}
+&lt;/<span class="kw">div</span>&gt;
+
+&lt;<span class="kw">div</span> <span class="cls">id</span>=<span class="str">"rw-wiz-body"</span>&gt;{% include step_template %}&lt;/<span class="kw">div</span>&gt;
+
+&lt;<span class="kw">div</span> <span class="cls">class</span>=<span class="str">"rw-wizard-footer"</span>&gt;
+  {% if current &gt; 1 %}
+  &lt;<span class="kw">button</span> <span class="cls">class</span>=<span class="str">"rw-btn rw-btn-ghost"</span>
+          hx-get=<span class="str">"{% url 'projects:wizard' current|add:'-1' %}"</span>
+          hx-target=<span class="str">"#rw-wiz-body"</span>&gt;← {% trans <span class="str">"پێشوو"</span> %}&lt;/<span class="kw">button</span>&gt;
+  {% endif %}
+  &lt;<span class="kw">div</span> <span class="cls">class</span>=<span class="str">"flex-grow-1 text-center"</span> <span class="cls">style</span>=<span class="str">"font-size:12px;color:var(--rw-text-3)"</span>&gt;
+    {% trans "هەنگاو" %} {{ current }} {% trans "لە" %} {{ total }}
+  &lt;/<span class="kw">div</span>&gt;
+  &lt;<span class="kw">button</span> <span class="cls">class</span>=<span class="str">"rw-btn rw-btn-primary"</span>
+          hx-post=<span class="str">"{% url 'projects:wizard' current %}"</span>
+          hx-target=<span class="str">"#rw-wiz-body"</span>
+          hx-include=<span class="str">"closest form"</span>&gt;
+    {% if current == total %}{% trans "دروستکردن" %}{% else %}{% trans "دواتر" %} →{% endif %}
+  &lt;/<span class="kw">button</span>&gt;
+&lt;/<span class="kw">div</span>&gt;</div>
+</section>
+
+<!-- ════════════════════ LOADERS ════════════════════ -->
+<section class="pl-section" id="loaders">
+  <div class="pl-tag">Forms & Feedback ★ AI-first</div>
+  <div class="pl-name">Loaders — AI is a First-Class Citizen</div>
+  <div class="pl-desc">AI thinking/loading is the most important UX state in this platform. Five loader variants for different contexts. Rule: <strong>never show a blank area while waiting</strong> — always show the appropriate loader. Use HTMX <code>hx-indicator</code> to wire loaders automatically.</div>
+
+  <!-- VARIANT 1: Inline spinner -->
+  <div class="pl-lbl">1. INLINE SPINNER — inside buttons, next to labels</div>
+  <div class="pl-demo d-flex flex-wrap gap-4 align-items-center mb-0">
+    <div class="d-flex align-items-center gap-2"><div class="rw-spin"></div><span style="font-size:13px;color:var(--rw-text-2)">پاشەکەوتکردن...</span></div>
+    <div class="d-flex align-items-center gap-2"><div class="rw-spin rw-spin-sm rw-spin-pink"></div><span style="font-size:12px;color:var(--rw-text-2)">Small / Pink</span></div>
+    <div class="d-flex align-items-center gap-2"><div class="rw-spin rw-spin-lg rw-spin-vis"></div><span style="font-size:13px;color:var(--rw-text-2)">Large / Teal</span></div>
+    <button class="rw-btn rw-btn-primary d-flex align-items-center gap-2">
+      <div class="rw-spin rw-spin-sm" style="border-color:rgba(255,255,255,.3);border-top-color:#fff"></div>
+      کاردەکات...
+    </button>
+    <button class="rw-btn rw-btn-ai d-flex align-items-center gap-2">
+      <div class="rw-spin rw-spin-sm" style="border-color:rgba(212,165,116,.2);border-top-color:var(--rw-amber)"></div>
+      AI دەهوڕێت...
+    </button>
+  </div>
+
+  <!-- VARIANT 2: Progress bar -->
+  <div class="pl-lbl mt-4">2. PROGRESS BAR — top of content area, or inside AI block</div>
+  <div class="pl-demo d-flex flex-column gap-3 mb-0">
+    <div>
+      <div style="font-size:11px;color:var(--rw-text-3);margin-bottom:6px">Determinate — 65%</div>
+      <div class="rw-progress-bar"><div class="rw-progress-fill" style="width:65%"></div></div>
+    </div>
+    <div>
+      <div style="font-size:11px;color:var(--rw-text-3);margin-bottom:6px">Indeterminate — endless slide</div>
+      <div class="rw-progress-bar rw-progress-indeterminate"><div class="rw-progress-fill"></div></div>
+    </div>
+    <div>
+      <div style="font-size:11px;color:var(--rw-text-3);margin-bottom:6px">Pink variant — primary actions</div>
+      <div class="rw-progress-bar rw-progress-indeterminate">
+        <div class="rw-progress-fill" style="background:linear-gradient(90deg,var(--rw-pink),var(--rw-plan))"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VARIANT 3: Skeleton shimmer -->
+  <div class="pl-lbl mt-4">3. SKELETON — replace content while loading, same shape as final content</div>
+  <div class="pl-demo mb-0">
+    <div class="d-flex flex-column gap-3">
+      <!-- Simulated shot table skeleton -->
+      <div style="border:1px solid var(--rw-border)">
+        <div style="background:var(--rw-surface-2);padding:11px 16px;border-bottom:1px solid var(--rw-border);display:flex;gap:24px">
+          <div class="rw-skel" style="width:40px;height:10px"></div>
+          <div class="rw-skel" style="width:120px;height:10px"></div>
+          <div class="rw-skel" style="width:60px;height:10px"></div>
+          <div class="rw-skel" style="width:80px;height:10px"></div>
+        </div>
+        {% for i in "123" %}
+        <div style="padding:13px 16px;border-bottom:1px solid var(--rw-border-2);display:flex;gap:24px;align-items:center">
+          <div class="rw-skel" style="width:32px;height:12px"></div>
+          <div class="rw-skel" style="width:{% if forloop.counter == 1 %}140{% elif forloop.counter == 2 %}110{% else %}160{% endif %}px;height:12px"></div>
+          <div class="rw-skel" style="width:40px;height:12px"></div>
+          <div class="rw-skel" style="width:60px;height:20px;border-radius:2px"></div>
+        </div>
+        {% endfor %}
+      </div>
+      <!-- Card skeleton -->
+      <div class="d-flex gap-3">
+        <div style="background:var(--rw-surface);border:1px solid var(--rw-border);padding:20px;flex:1">
+          <div class="rw-skel mb-3" style="width:60%;height:14px"></div>
+          <div class="rw-skel mb-2" style="width:100%;height:10px"></div>
+          <div class="rw-skel" style="width:80%;height:10px"></div>
+        </div>
+        <div style="background:var(--rw-surface);border:1px solid var(--rw-border);padding:20px;flex:1">
+          <div class="rw-skel mb-3" style="width:50%;height:14px"></div>
+          <div class="rw-skel mb-2" style="width:100%;height:10px"></div>
+          <div class="rw-skel" style="width:70%;height:10px"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VARIANT 4: AI Thinking block -->
+  <div class="pl-lbl mt-4">4. AI THINKING BLOCK — full AI job status with step tracking</div>
+  <div class="pl-demo mb-0">
+    <div class="rw-ai-thinking" id="demo-ai-block">
+      <div class="rw-ai-thinking-header">
+        <div class="rw-ai-pulse">
+          <span></span><span></span><span></span>
+        </div>
+        AI دەهوڕێت — داڕشتنی دەستنووس
+      </div>
+      <div class="rw-progress-bar rw-progress-indeterminate mb-2">
+        <div class="rw-progress-fill"></div>
+      </div>
+      <div class="rw-ai-step-list" id="ai-steps">
+        <div class="rw-ai-step done">
+          <div class="rw-ai-step-dot"></div>
+          <span>دەستنووس خوێندرایەوە — ٣٢ سەحنە دۆزرایەوە</span>
+        </div>
+        <div class="rw-ai-step done">
+          <div class="rw-ai-step-dot"></div>
+          <span>کەسایەتییەکان دەستنووسەکران — ٨ کەسایەتی</span>
+        </div>
+        <div class="rw-ai-step active">
+          <div class="rw-ai-step-dot"></div>
+          <span>شوێنەکان دەستنووسەکرێن — ١٢ لە ١٨...</span>
+        </div>
+        <div class="rw-ai-step">
+          <div class="rw-ai-step-dot"></div>
+          <span>پارچەپارچەکانی بارەگا دیاردەکرێن...</span>
+        </div>
+        <div class="rw-ai-step">
+          <div class="rw-ai-step-dot"></div>
+          <span>راپۆرتی کۆتایی دروست دەکرێت</span>
+        </div>
+      </div>
+      <div style="margin-top:8px;font-size:11px;color:var(--rw-text-3)">AI Claude Sonnet · داتای تەنها لەناو پڕۆژەکەتدا دەمێنێتەوە</div>
+    </div>
+    <button class="rw-btn rw-btn-ghost rw-btn-sm mt-3" onclick="animateAISteps()">▶ دوبارە پخش بکەوە</button>
+  </div>
+
+  <!-- VARIANT 5: Full backdrop -->
+  <div class="pl-lbl mt-4">5. FULL BACKDROP — page-level blocking operations (export, bulk AI)</div>
+  <div class="pl-demo mb-0">
+    <div style="position:relative;height:180px;overflow:hidden;border-radius:2px">
+      <div style="position:absolute;inset:0;background:var(--rw-bg);opacity:.4;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;font-size:13px;color:var(--rw-text-2)">
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:160px">
+          <div class="rw-skel" style="height:40px"></div><div class="rw-skel" style="height:40px"></div><div class="rw-skel" style="height:40px"></div>
+          <div class="rw-skel" style="height:40px"></div><div class="rw-skel" style="height:40px"></div><div class="rw-skel" style="height:40px"></div>
+        </div>
+      </div>
+      <div style="position:absolute;inset:0;background:rgba(6,6,8,.82);backdrop-filter:blur(3px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px">
+        <div class="rw-loader-ring"></div>
+        <div class="rw-loader-label">HTML دەرهێندرێت...</div>
+        <div class="rw-loader-sub">ئەمە چەند چرکەیەک دەخاتە سەر</div>
+      </div>
+    </div>
+    <button class="rw-btn rw-btn-ghost rw-btn-sm mt-3" onclick="showBackdropDemo()">▶ نیشانبدە</button>
+    <div id="backdrop-demo" style="display:none;position:fixed;inset:0;background:rgba(6,6,8,.85);backdrop-filter:blur(3px);z-index:9000;flex-direction:column;align-items:center;justify-content:center;gap:20px" onclick="this.style.display='none'">
+      <div class="rw-loader-ring"></div>
+      <div class="rw-loader-label">HTML دەرهێندرێت...</div>
+      <div class="rw-loader-sub">کلیک بکە بۆ داخستن (دیمۆ)</div>
+    </div>
+  </div>
+
+  <div class="pl-code"><span class="cmt">{# HTMX hx-indicator wiring — automatic show/hide #}</span>
+
+<span class="cmt">{# 1. Inline spinner on button #}</span>
+&lt;<span class="kw">button</span> <span class="cls">class</span>=<span class="str">"rw-btn rw-btn-ai d-flex align-items-center gap-2"</span>
+        hx-post=<span class="str">"{% url 'ai_engine:breakdown' scene.pk %}"</span>
+        hx-target=<span class="str">"#breakdown-result"</span>
+        hx-indicator=<span class="str">"#ai-spin-{{ scene.pk }}"</span>&gt;
+  &lt;<span class="kw">span</span> <span class="cls">id</span>=<span class="str">"ai-spin-{{ scene.pk }}"</span>
+        <span class="cls">class</span>=<span class="str">"rw-spin rw-spin-sm htmx-indicator"</span>
+        <span class="cls">style</span>=<span class="str">"border-color:rgba(212,165,116,.2);border-top-color:var(--rw-amber)"</span>&gt;
+  &lt;/<span class="kw">span</span>&gt;
+  🤖 {% trans <span class="str">"AI داڕشتن"</span> %}
+&lt;/<span class="kw">button</span>&gt;
+
+<span class="cmt">{# 2. Indeterminate bar at top of content #}</span>
+&lt;<span class="kw">div</span> <span class="cls">id</span>=<span class="str">"page-loader"</span>
+     <span class="cls">class</span>=<span class="str">"rw-progress-bar rw-progress-indeterminate htmx-indicator"</span>
+     <span class="cls">style</span>=<span class="str">"position:sticky;top:0;z-index:50"</span>&gt;
+  &lt;<span class="kw">div</span> <span class="cls">class</span>=<span class="str">"rw-progress-fill"</span>&gt;&lt;/<span class="kw">div</span>&gt;
+&lt;/<span class="kw">div</span>&gt;
+
+<span class="cmt">{# 3. Skeleton — show while HTMX loads; replaced by real content #}</span>
+<span class="cmt">{# Put skeleton in the target div; HTMX replaces it on response #}</span>
+&lt;<span class="kw">div</span> <span class="cls">id</span>=<span class="str">"shot-list"</span>&gt;
+  {% include <span class="str">"components/_skeleton_table.html"</span> %}
+&lt;/<span class="kw">div</span>&gt;
+
+<span class="cmt">{# 4. AI thinking block — Celery + WebSocket update #}</span>
+<span class="cmt"># views.py — kick off Celery task</span>
+<span class="kw">def</span> ai_breakdown(request, scene_pk):
+    task = breakdown_scene.delay(scene_pk)
+    request.session[<span class="str">'ai_task_id'</span>] = task.id
+    <span class="kw">return</span> render(request, <span class="str">'ai/_thinking.html'</span>, {<span class="str">'task_id'</span>: task.id})
+
+<span class="cmt">{# ai/_thinking.html — polls via HTMX SSE or polling #}</span>
+&lt;<span class="kw">div</span> <span class="cls">class</span>=<span class="str">"rw-ai-thinking"</span>
+     hx-get=<span class="str">"{% url 'ai_engine:status' task_id %}"</span>
+     hx-trigger=<span class="str">"every 2s"</span>
+     hx-target=<span class="str">"this"</span> hx-swap=<span class="str">"outerHTML"</span>&gt;
+  &lt;<span class="kw">div</span> <span class="cls">class</span>=<span class="str">"rw-ai-thinking-header"</span>&gt;
+    &lt;<span class="kw">div</span> <span class="cls">class</span>=<span class="str">"rw-ai-pulse"</span>&gt;&lt;<span class="kw">span</span>&gt;&lt;/<span class="kw">span</span>&gt;&lt;<span class="kw">span</span>&gt;&lt;/<span class="kw">span</span>&gt;&lt;<span class="kw">span</span>&gt;&lt;/<span class="kw">span</span>&gt;&lt;/<span class="kw">div</span>&gt;
+    AI دەهوڕێت
+  &lt;/<span class="kw">div</span>&gt;
+  &lt;<span class="kw">div</span> <span class="cls">class</span>=<span class="str">"rw-progress-bar rw-progress-indeterminate"</span>&gt;
+    &lt;<span class="kw">div</span> <span class="cls">class</span>=<span class="str">"rw-progress-fill"</span>&gt;&lt;/<span class="kw">div</span>&gt;
+  &lt;/<span class="kw">div</span>&gt;
+  {% for step in steps %}
+  &lt;<span class="kw">div</span> <span class="cls">class</span>=<span class="str">"rw-ai-step {{ step.status }}"</span>&gt;
+    &lt;<span class="kw">div</span> <span class="cls">class</span>=<span class="str">"rw-ai-step-dot"</span>&gt;&lt;/<span class="kw">div</span>&gt;{{ step.label }}
+  &lt;/<span class="kw">div</span>&gt;
+  {% endfor %}
+&lt;/<span class="kw">div</span>&gt;
+
+<span class="cmt">{# 5. Full backdrop — show on export #}</span>
+&lt;<span class="kw">button</span> <span class="cls">class</span>=<span class="str">"rw-btn rw-btn-amber"</span>
+        hx-post=<span class="str">"{% url 'exports:scene_html' scene.pk %}"</span>
+        hx-indicator=<span class="str">"#export-backdrop"</span>&gt;
+  ↗ {% trans <span class="str">"دەرهێنانی HTML"</span> %}
+&lt;/<span class="kw">button</span>&gt;
+&lt;<span class="kw">div</span> <span class="cls">id</span>=<span class="str">"export-backdrop"</span>
+     <span class="cls">class</span>=<span class="str">"rw-loader-backdrop htmx-indicator"</span>&gt;
+  &lt;<span class="kw">div</span> <span class="cls">class</span>=<span class="str">"rw-loader-ring"</span>&gt;&lt;/<span class="kw">div</span>&gt;
+  &lt;<span class="kw">div</span> <span class="cls">class</span>=<span class="str">"rw-loader-label"</span>&gt;{% trans <span class="str">"HTML دەرهێندرێت..."</span> %}&lt;/<span class="kw">div</span>&gt;
+  &lt;<span class="kw">div</span> <span class="cls">class</span>=<span class="str">"rw-loader-sub"</span>&gt;{% trans <span class="str">"ئەمە چەند چرکەیەک دەخاتە سەر"</span> %}&lt;/<span class="kw">div</span>&gt;
+&lt;/<span class="kw">div</span>&gt;
+
+<span class="cmt">{# rwanga-ds.css: HTMX indicator visibility #}</span>
+.htmx-indicator { display: none !important; }
+.htmx-request .htmx-indicator { display: flex !important; }
+.htmx-request.htmx-indicator  { display: flex !important; }</div>
+</section>
+
+</main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+/* ── Content tabs ── */
+function ctab(btn, id) {
+  btn.closest('.pl-demo').querySelectorAll('.rw-content-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  btn.closest('.pl-demo').querySelectorAll('[id^="ct-"]').forEach(el => el.style.display = 'none');
+  document.getElementById(id).style.display = 'block';
+}
+
+/* ── Nav ── */
+function go(id) {  document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+  document.querySelectorAll('.pl-nav-item').forEach(b => b.classList.remove('active'));
+  if (event?.target) event.target.classList.add('active');
+}
+function toggleTheme() {
+  const h = document.documentElement;
+  const t = h.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  h.setAttribute('data-theme', t);
+  h.setAttribute('data-bs-theme', t);
+}
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      const id = e.target.id;
+      document.querySelectorAll('.pl-nav-item').forEach(b => {
+        b.classList.toggle('active', b.getAttribute('onclick')?.includes(`'${id}'`));
+      });
+    }
+  });
+}, { root: document.getElementById('pl-main'), rootMargin: '-30% 0px -60% 0px' });
+document.querySelectorAll('.pl-section[id]').forEach(s => obs.observe(s));
+
+/* ── Modal demos ── */
+function openModal(id) {
+  document.getElementById(id).style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+function closeModal(id) {
+  document.getElementById(id).style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+/* ── Toast demos ── */
+const toastIcons = { ok:'✓', warn:'⚠', err:'✕', info:'ℹ' };
+function fireToast(type, title, msg) {
+  const stack = document.getElementById('demo-toast-stack');
+  const el = document.createElement('div');
+  el.className = `rw-toast t-${type}`;
+  el.innerHTML = `
+    <span class="rw-toast-icon">${toastIcons[type]}</span>
+    <div class="rw-toast-body">
+      <div class="rw-toast-title">${title}</div>
+      <div class="rw-toast-msg">${msg}</div>
+    </div>
+    <button class="rw-toast-close" onclick="this.closest('.rw-toast').remove()">✕</button>
+    <div class="rw-toast-bar"></div>`;
+  stack.prepend(el);
+  setTimeout(() => el.style.opacity = '0', 3800);
+  setTimeout(() => el.remove(), 4200);
+}
+
+/* ── Wizard demo ── */
+let wizCurrent = 2;
+const wizLabels = ['بنەڕەت','دەستنووس','مۆدیول','تیم'];
+const wizBodies = [
+  `<div class="rw-wizard-body"><div class="rw-section-hdr mb-3">زانیاری بنەڕەتی</div>
+    <label class="rw-form-label">ناوی پڕۆژە</label>
+    <input class="rw-form-input mb-3" type="text" value="مێوانێکی نادیار">
+    <label class="rw-form-label">جۆری پڕۆژە</label>
+    <select class="rw-form-input" style="appearance:none"><option>فیلمی کورت</option></select>
+  </div>`,
+  `<div class="rw-wizard-body"><div class="rw-section-hdr mb-3">هەڵوەشاندنەوەی دەستنووس</div>
+    <div style="border:2px dashed var(--rw-border);padding:40px;text-align:center;background:var(--rw-surface)">
+      <div style="font-size:13px;color:var(--rw-text-2)">دەستنووسەکەت ئێرە بکێشە<br><small style="color:var(--rw-text-3)">FDX · Fountain · PDF · DOCX</small></div>
+    </div>
+  </div>`,
+  `<div class="rw-wizard-body"><div class="rw-section-hdr mb-3">مۆدیولەکان هەڵبژێرە</div>
+    <div class="d-flex flex-column gap-2">
+      ${['شات لیست','ستۆریبۆرد','فلور پلان','شیدیول'].map((l,i)=>`
+      <label style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--rw-surface);border:1px solid var(--rw-border);cursor:pointer">
+        <input type="checkbox" ${i<2?'checked':''} style="accent-color:var(--rw-amber);width:16px;height:16px">
+        <span style="font-size:13px">${l}</span>
+      </label>`).join('')}
+    </div>
+  </div>`,
+  `<div class="rw-wizard-body"><div class="rw-section-hdr mb-3">بانگهێشتکردنی تیم</div>
+    <label class="rw-form-label">ئیمەیلی ئەندام</label>
+    <div class="d-flex gap-2 mb-3"><input class="rw-form-input" type="email" placeholder="name@studio.com"><button class="rw-btn rw-btn-ghost" style="flex-shrink:0">+ زیادکردن</button></div>
+    <p style="font-size:12px;color:var(--rw-text-3)">یان ئەمە بیرە بۆ دواتر — دەتوانیت لە تیم رووپەلەکەوە زیاد بکەیت.</p>
+  </div>`
+];
+function renderWiz() {
+  for(let i=1;i<=4;i++){
+    const s = document.getElementById('ws-'+i);
+    s.className = 'rw-wiz-step' + (i < wizCurrent ? ' done' : i === wizCurrent ? ' active' : '');
+    s.querySelector('.rw-wiz-num').textContent = i < wizCurrent ? '✓' : i;
+  }
+  document.getElementById('wiz-body').innerHTML = wizBodies[wizCurrent-1];
+  document.querySelector('.rw-wizard-footer div').textContent = `هەنگاو ${wizCurrent} لە ٤`;
+}
+function wizStep(dir) {
+  wizCurrent = Math.max(1, Math.min(4, wizCurrent + dir));
+  renderWiz();
+}
+
+/* ── AI Steps demo ── */
+function animateAISteps() {
+  const steps = document.querySelectorAll('#ai-steps .rw-ai-step');
+  steps.forEach(s => { s.classList.remove('done','active'); });
+  let i = 0;
+  function tick() {
+    if (i > 0) steps[i-1].classList.replace('active','done');
+    if (i < steps.length) {
+      steps[i].classList.add('active');
+      i++;
+      setTimeout(tick, 900);
+    }
+  }
+  tick();
+}
+
+/* ── Backdrop demo ── */
+function showBackdropDemo() {
+  const el = document.getElementById('backdrop-demo');
+  el.style.display = 'flex';
+}
+</script>
+</body>
+</html>

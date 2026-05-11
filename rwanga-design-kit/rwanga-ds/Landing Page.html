@@ -1,0 +1,1187 @@
+<!DOCTYPE html>
+<html lang="ku" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ڕوانگە — لە دەستنووسەوە بۆ شاشە</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700;800;900&family=Cairo:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ══ TOKENS ══ */
+:root {
+  --bg:       #070709;
+  --surface:  #0F0F14;
+  --surface2: #15151C;
+  --border:   #1E1E2C;
+  --border2:  #252535;
+  --text:     #EDEAD8;
+  --text2:    #6A6A82;
+  --text3:    #2E2E40;
+  --amber:    #D4A574;
+  --amber2:   #E8C49A;
+  --pink:     #F72585;
+  --script:   #FF6B35;
+  --break:    #2D5BE3;
+  --vis:      #00A896;
+  --plan:     #7C3AED;
+  --shoot:    #F72585;
+  --font:     'Noto Sans Arabic', 'Cairo', system-ui, sans-serif;
+  --font-en:  'Inter', system-ui, sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 16px;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+a { color: inherit; text-decoration: none; }
+img { display: block; max-width: 100%; }
+.en { font-family: var(--font-en); }
+
+/* ══ LAYOUT ══ */
+.container { max-width: 1140px; margin: 0 auto; padding: 0 24px; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: center; }
+.grid-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 24px; }
+.grid-4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 20px; }
+
+/* ══ NAVBAR ══ */
+.navbar {
+  position: fixed; top: 0; inset-inline-start: 0; inset-inline-end: 0;
+  height: 60px; z-index: 100;
+  background: rgba(7,7,9,.85);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center;
+}
+.nav-inner {
+  display: flex; align-items: center; gap: 0;
+  width: 100%; max-width: 1140px; margin: 0 auto; padding: 0 24px;
+}
+.nav-logo {
+  display: flex; align-items: center; gap: 12px;
+  font-size: 20px; font-weight: 800; color: var(--text);
+}
+.nav-logo-mark {
+  width: 36px; height: 36px;
+  background: var(--pink);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; font-weight: 800; color: #fff;
+  filter: drop-shadow(0 0 8px rgba(247,37,133,.4));
+}
+.nav-links {
+  display: flex; align-items: center; gap: 0;
+  margin-inline-start: 40px;
+  list-style: none;
+}
+.nav-links a {
+  display: block; padding: 0 16px; height: 60px;
+  display: flex; align-items: center;
+  font-size: 14px; font-weight: 500;
+  color: var(--text2);
+  transition: color .12s;
+  border-bottom: 2px solid transparent;
+}
+.nav-links a:hover { color: var(--text); }
+.nav-links a.active { color: var(--amber); border-bottom-color: var(--amber); }
+.nav-end { margin-inline-start: auto; display: flex; align-items: center; gap: 12px; }
+.btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 22px; font-family: var(--font); font-size: 14px; font-weight: 600; border: none; cursor: pointer; transition: opacity .12s, filter .12s; text-decoration: none; }
+.btn:hover { opacity: .88; }
+.btn-ghost { background: transparent; border: 1px solid var(--border2); color: var(--text2); }
+.btn-ghost:hover { border-color: var(--amber); color: var(--amber); opacity: 1; }
+.btn-primary { background: var(--pink); color: #fff; filter: drop-shadow(0 0 8px rgba(247,37,133,.3)); }
+.btn-primary:hover { filter: drop-shadow(0 0 14px rgba(247,37,133,.5)); opacity: 1; }
+.btn-amber { background: var(--amber); color: #fff; }
+.btn-lg { padding: 14px 32px; font-size: 16px; }
+
+/* ══ HERO ══ */
+.hero {
+  padding: 120px 0 48px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute; top: 0; inset-inline-start: 50%; transform: translateX(50%);
+  width: 800px; height: 800px;
+  background: radial-gradient(ellipse at center,
+    rgba(247,37,133,.08) 0%,
+    rgba(124,58,237,.05) 35%,
+    transparent 70%);
+  pointer-events: none;
+}
+
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 6px 16px;
+  background: rgba(212,165,116,.08);
+  border: 1px solid rgba(212,165,116,.2);
+  font-size: 12px; font-weight: 700; color: var(--amber);
+  text-transform: uppercase; letter-spacing: 1.2px;
+  margin-bottom: 28px;
+}
+.hero-title {
+  font-size: clamp(36px, 6vw, 72px);
+  font-weight: 900;
+  line-height: 1.05;
+  letter-spacing: -.5px;
+  margin-bottom: 20px;
+  color: var(--text);
+}
+.hero-title .accent {
+  background: linear-gradient(135deg, var(--amber) 0%, var(--pink) 60%, var(--plan) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.hero-sub {
+  font-size: 16px;
+  color: var(--text2);
+  max-width: 520px;
+  margin: 0 auto 32px;
+  line-height: 1.9;
+}
+.hero-cta { display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; margin-bottom: 40px; }
+.hero-social-proof {
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+  font-size: 13px; color: var(--text2); flex-wrap: nowrap; white-space: nowrap;
+}
+.avatar-stack { display: flex; }
+.avatar-stack .av {
+  width: 32px; height: 32px; border-radius: 50%;
+  border: 2px solid var(--bg);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; color: #fff;
+  margin-inline-start: -8px;
+}
+.avatar-stack .av:first-child { margin-inline-start: 0; }
+
+/* ══ MOCKUP / APP PREVIEW ══ */
+.mockup-wrap {
+  position: relative;
+  max-width: 960px;
+  margin: 40px auto 80px;
+  padding: 0 24px;
+}
+.mockup-glow {
+  position: absolute;
+  inset: -40px;
+  background: radial-gradient(ellipse at 50% 40%,
+    rgba(212,165,116,.12) 0%,
+    rgba(247,37,133,.06) 50%,
+    transparent 70%);
+  pointer-events: none;
+}
+.mockup-frame {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-top: 2px solid var(--border2);
+  overflow: hidden;
+  position: relative;
+  z-index: 1;
+  direction: ltr;
+}
+.mockup-topbar {
+  height: 36px;
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; padding: 0 16px; gap: 6px;
+}
+.mockup-dot { width: 10px; height: 10px; border-radius: 50%; }
+.mockup-body { display: flex; height: 380px; direction: ltr; }
+.mockup-rail {
+  width: 48px;
+  background: #050507;
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; align-items: center; padding: 10px 0; gap: 2px;
+  order: 0;
+}
+.m-rail-logo {
+  width: 32px; height: 32px;
+  background: var(--pink);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 800; color: #fff; margin-bottom: 12px;
+  filter: drop-shadow(0 0 8px rgba(247,37,133,.7));
+}
+.m-icon {
+  width: 40px; height: 40px;
+  display: flex; align-items: center; justify-content: center;
+  position: relative;
+}
+.m-icon svg { stroke: #4A4A65; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.m-icon.active svg { stroke: var(--amber); filter: drop-shadow(0 0 5px rgba(212,165,116,.6)); }
+.m-icon.active::before {
+  content: '';
+  position: absolute; left: 0; top: 8px; bottom: 8px;
+  width: 2px; background: var(--amber);
+  box-shadow: 0 0 6px var(--amber), 0 0 14px rgba(212,165,116,.3);
+}
+.mockup-main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.mockup-nav {
+  height: 40px; background: var(--surface); border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; padding: 0 16px; gap: 12px; flex-shrink: 0;
+}
+.m-proj-thumb { width: 22px; height: 22px; background: var(--script); flex-shrink: 0; }
+.m-proj-name { font-size: 12px; font-weight: 700; }
+.m-tabs { display: flex; height: 40px; border-inline-end: 1px solid var(--border); }
+.m-tab {
+  padding: 0 12px; height: 40px; font-size: 11px; font-weight: 600;
+  display: flex; align-items: center; gap: 5px;
+  color: var(--text2); border-bottom: 2px solid transparent; cursor: pointer;
+}
+.m-tab .dot { width: 5px; height: 5px; border-radius: 50%; }
+.m-tab.active { border-bottom-color: currentColor; }
+.m-tab.s  { color: var(--script); }
+.m-tab.b  { color: #7FA8FF; }
+.m-tab.v  { color: var(--vis); }
+.m-tab.p  { color: #A78BFF; }
+.m-tab.sh { color: var(--shoot); }
+.mockup-content { flex: 1; display: flex; overflow: hidden; }
+.m-scene-panel {
+  width: 150px; background: var(--surface); border-left: 1px solid var(--border);
+  overflow: hidden; flex-shrink: 0;
+}
+.m-scene-hdr { padding: 6px 10px; font-size: 7px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid var(--border); }
+.m-scene-item { display: flex; align-items: center; gap: 6px; padding: 7px 10px; border-inline-start: 2px solid transparent; }
+.m-scene-item.active { border-inline-start-color: var(--amber); background: rgba(212,165,116,.06); }
+.m-snum { font-family: var(--font-en); font-size: 9px; font-weight: 600; color: var(--text3); min-width: 14px; }
+.m-scene-item.active .m-snum { color: var(--amber); }
+.m-sloc { font-size: 10px; color: var(--text); }
+.m-stime { font-size: 9px; color: var(--text3); }
+.m-scene-item.active .m-sloc { color: var(--amber); font-weight: 700; }
+.m-workspace { flex: 1; background: var(--bg); overflow: hidden; padding: 14px; }
+
+/* Shot table in mockup */
+.m-table { width: 100%; border-collapse: collapse; background: var(--surface); border: 1px solid var(--border); }
+.m-table th { font-size: 8px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: .8px; padding: 7px 10px; background: var(--surface2); border-bottom: 1px solid var(--border); text-align: start; }
+.m-table td { font-size: 10px; padding: 8px 10px; border-bottom: 1px solid var(--border); color: var(--text2); }
+.m-shot-num { font-family: var(--font-en); font-weight: 700; color: var(--amber); font-size: 10px; }
+.m-badge { font-size: 8px; font-weight: 700; text-transform: uppercase; padding: 2px 6px; }
+.m-badge-ok  { background: rgba(0,168,150,.12); color: var(--vis); border: 1px solid rgba(0,168,150,.25); }
+.m-badge-w   { background: rgba(212,165,116,.1); color: var(--amber); border: 1px solid rgba(212,165,116,.2); }
+
+/* ══ SECTION CHROME ══ */
+section { padding: 96px 0; }
+.section-eyebrow {
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 1.4px; color: var(--amber); margin-bottom: 12px;
+}
+.section-title {
+  font-size: clamp(28px, 4vw, 44px);
+  font-weight: 800; line-height: 1.15;
+  margin-bottom: 16px;
+}
+.section-sub {
+  font-size: 16px; color: var(--text2);
+  max-width: 480px; line-height: 1.8;
+}
+
+/* Horizontal divider */
+.rule { height: 1px; background: var(--border); }
+
+/* ══ HOW IT WORKS ══ */
+.steps-list { display: flex; flex-direction: column; gap: 0; position: relative; }
+.steps-list::before {
+  content: '';
+  position: absolute;
+  inset-inline-start: 24px; top: 32px; bottom: 32px;
+  width: 1px;
+  background: linear-gradient(to bottom, var(--pink), var(--plan), var(--vis));
+}
+.step-item {
+  display: flex; gap: 24px; padding: 28px 0;
+  border-bottom: 1px solid var(--border);
+}
+.step-item:last-child { border-bottom: none; }
+.step-num {
+  width: 48px; height: 48px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-en); font-size: 16px; font-weight: 700;
+  flex-shrink: 0; position: relative; z-index: 1;
+}
+.step-num.s1 { background: var(--pink);  color: #fff; box-shadow: 0 0 16px rgba(247,37,133,.4); }
+.step-num.s2 { background: var(--plan);  color: #fff; box-shadow: 0 0 16px rgba(124,58,237,.4); }
+.step-num.s3 { background: var(--vis);   color: #fff; box-shadow: 0 0 16px rgba(0,168,150,.4); }
+.step-num.s4 { background: var(--amber); color: #fff; box-shadow: 0 0 16px rgba(212,165,116,.4); }
+.step-body { padding-top: 8px; }
+.step-title { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
+.step-desc  { font-size: 14px; color: var(--text2); line-height: 1.8; }
+
+/* ══ FEATURES ══ */
+.feat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 28px;
+  transition: border-color .15s;
+  position: relative;
+  overflow: hidden;
+}
+.feat-card::before {
+  content: '';
+  position: absolute; top: 0; inset-inline-start: 0; inset-inline-end: 0;
+  height: 2px;
+}
+.feat-card.c-script::before { background: var(--script); }
+.feat-card.c-break::before  { background: var(--break); }
+.feat-card.c-vis::before    { background: var(--vis); }
+.feat-card.c-plan::before   { background: var(--plan); }
+.feat-card.c-shoot::before  { background: var(--shoot); }
+.feat-card.c-amber::before  { background: var(--amber); }
+.feat-card:hover { border-color: var(--border2); }
+.feat-icon {
+  width: 48px; height: 48px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 18px;
+  font-size: 22px;
+}
+.feat-icon svg { width: 28px; height: 28px; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.feat-title { font-size: 17px; font-weight: 700; margin-bottom: 8px; }
+.feat-desc  { font-size: 13px; color: var(--text2); line-height: 1.8; }
+.feat-tag {
+  display: inline-block; margin-top: 14px;
+  padding: 3px 10px; font-size: 10px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .6px;
+}
+
+/* ══ WORKFLOW TABS ══ */
+.workflow-tabs { display: flex; gap: 0; border: 1px solid var(--border); margin-bottom: 1px; }
+.w-tab {
+  flex: 1; padding: 16px 12px; font-size: 13px; font-weight: 600;
+  color: var(--text2); background: var(--surface); border: none; cursor: pointer;
+  border-inline-start: 1px solid var(--border);
+  border-bottom: 3px solid transparent;
+  transition: color .12s, border-color .12s;
+}
+.w-tab:first-child { border-inline-start: none; }
+.w-tab:hover { color: var(--text); }
+.w-tab.active { color: currentColor; }
+.w-tab.ws { color: var(--script); } .w-tab.ws.active { border-bottom-color: var(--script); background: rgba(255,107,53,.04); }
+.w-tab.wb { color: #7FA8FF; }       .w-tab.wb.active { border-bottom-color: #7FA8FF; background: rgba(127,168,255,.04); }
+.w-tab.wv { color: var(--vis); }    .w-tab.wv.active { border-bottom-color: var(--vis); background: rgba(0,168,150,.04); }
+.w-tab.wp { color: #A78BFF; }       .w-tab.wp.active { border-bottom-color: #A78BFF; background: rgba(167,139,255,.04); }
+.w-tab.wsh { color: var(--shoot); } .w-tab.wsh.active { border-bottom-color: var(--shoot); background: rgba(247,37,133,.04); }
+
+.workflow-pane { display: none; background: var(--surface); border: 1px solid var(--border); padding: 32px; }
+.workflow-pane.active { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: start; }
+.wf-list { display: flex; flex-direction: column; gap: 0; }
+.wf-item {
+  display: flex; align-items: flex-start; gap: 14px;
+  padding: 14px 0; border-bottom: 1px solid var(--border);
+}
+.wf-item:last-child { border-bottom: none; }
+.wf-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 7px; flex-shrink: 0; }
+.wf-item-title { font-size: 14px; font-weight: 700; margin-bottom: 3px; }
+.wf-item-desc  { font-size: 12px; color: var(--text2); line-height: 1.7; }
+.wf-preview { background: var(--bg); border: 1px solid var(--border); padding: 20px; }
+.wf-preview-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text3); margin-bottom: 14px; }
+
+/* ══ AI SECTION ══ */
+.ai-section { background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+.ai-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 12px; font-size: 11px; font-weight: 700;
+  background: rgba(212,165,116,.08); border: 1px solid rgba(212,165,116,.2);
+  color: var(--amber); letter-spacing: .5px; margin-bottom: 8px;
+}
+.ai-pulse { display: inline-flex; gap: 3px; align-items: center; }
+.ai-pulse span {
+  width: 5px; height: 5px; border-radius: 50%; background: var(--amber);
+  animation: aip 1.2s ease-in-out infinite; opacity: .3;
+}
+.ai-pulse span:nth-child(2) { animation-delay: .2s; }
+.ai-pulse span:nth-child(3) { animation-delay: .4s; }
+@keyframes aip { 0%,100%{opacity:.2;transform:scale(.8)} 50%{opacity:1;transform:scale(1.15)} }
+
+.ai-feat-list { display: flex; flex-direction: column; gap: 16px; margin-top: 32px; }
+.ai-feat {
+  display: flex; align-items: flex-start; gap: 16px;
+  padding: 16px 20px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-inline-start: 2px solid var(--amber);
+}
+.ai-feat-icon { font-size: 22px; flex-shrink: 0; margin-top: 2px; }
+.ai-feat-name  { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+.ai-feat-desc  { font-size: 13px; color: var(--text2); line-height: 1.7; }
+
+/* ══ PRICING ══ */
+.plan-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 32px;
+}
+.plan-card.featured {
+  border-color: var(--amber);
+  position: relative;
+  background: linear-gradient(180deg, rgba(212,165,116,.05) 0%, var(--surface) 60%);
+}
+.plan-badge {
+  position: absolute; top: -12px; inset-inline-start: 50%; transform: translateX(-50%);
+  padding: 4px 16px; background: var(--amber); color: #fff;
+  font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .6px;
+  white-space: nowrap;
+}
+.plan-name  { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text2); margin-bottom: 8px; }
+.plan-price { font-size: 40px; font-weight: 800; line-height: 1; font-family: var(--font-en); margin-bottom: 4px; }
+.plan-period { font-size: 12px; color: var(--text2); margin-bottom: 24px; }
+.plan-features { list-style: none; display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px; }
+.plan-features li { font-size: 13px; color: var(--text2); display: flex; align-items: center; gap: 8px; }
+.plan-features li::before { content: '✓'; color: var(--vis); font-weight: 700; flex-shrink: 0; }
+.plan-features li.no { color: var(--text3); }
+.plan-features li.no::before { content: '—'; color: var(--text3); }
+
+/* ══ TESTIMONIALS ══ */
+.quote-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-top: 2px solid var(--amber);
+  padding: 28px;
+}
+.quote-text { font-size: 15px; line-height: 1.9; color: var(--text2); margin-bottom: 20px; }
+.quote-text::before { content: '"'; color: var(--amber); font-size: 24px; line-height: 0; vertical-align: -8px; margin-inline-end: 4px; }
+.quote-author { display: flex; align-items: center; gap: 12px; }
+.q-av { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #fff; flex-shrink: 0; }
+.q-name  { font-size: 14px; font-weight: 700; }
+.q-role  { font-size: 12px; color: var(--text2); }
+
+/* ══ CTA BANNER ══ */
+.cta-banner {
+  padding: 96px 0;
+  text-align: center;
+  position: relative; overflow: hidden;
+}
+.cta-banner::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 50% 0%,
+    rgba(247,37,133,.1) 0%,
+    rgba(124,58,237,.06) 40%,
+    transparent 70%);
+  pointer-events: none;
+}
+.cta-title { font-size: clamp(32px, 5vw, 56px); font-weight: 900; line-height: 1.1; margin-bottom: 20px; }
+.cta-sub   { font-size: 17px; color: var(--text2); max-width: 480px; margin: 0 auto 36px; line-height: 1.8; }
+
+/* ══ FOOTER ══ */
+footer {
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  padding: 48px 0 32px;
+}
+.footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 48px; margin-bottom: 48px; }
+.footer-brand-name { font-size: 20px; font-weight: 800; margin-bottom: 12px; display: flex; align-items: center; gap: 10px; }
+.footer-brand-mark { width: 32px; height: 32px; background: var(--pink); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 800; color: #fff; }
+.footer-tagline { font-size: 13px; color: var(--text2); line-height: 1.8; max-width: 280px; }
+.footer-col-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text3); margin-bottom: 16px; }
+.footer-links { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.footer-links a { font-size: 14px; color: var(--text2); transition: color .12s; }
+.footer-links a:hover { color: var(--amber); }
+.footer-bottom { border-top: 1px solid var(--border); padding-top: 24px; display: flex; align-items: center; justify-content: space-between; }
+.footer-copy { font-size: 12px; color: var(--text3); }
+.footer-lang { display: flex; gap: 0; border: 1px solid var(--border); }
+.footer-lang button { padding: 6px 14px; font-size: 12px; background: none; border: none; color: var(--text2); cursor: pointer; border-inline-start: 1px solid var(--border); }
+.footer-lang button:first-child { border-inline-start: none; }
+.footer-lang button.active { background: var(--surface2); color: var(--amber); }
+
+/* ══ MOBILE ══ */
+@media (max-width: 900px) {
+  .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+  .footer-grid { grid-template-columns: 1fr 1fr; }
+  .workflow-pane.active { grid-template-columns: 1fr; }
+  .nav-links { display: none; }
+  .mockup-body { height: 220px; }
+  .m-scene-panel { display: none; }
+}
+@media (max-width: 600px) {
+  .hero { padding: 100px 0 60px; }
+  .footer-grid { grid-template-columns: 1fr; }
+  .plan-badge { transform: translateX(50%); }
+}
+
+/* Utility */
+.text-center { text-align: center; }
+.mt-2 { margin-top: 8px; }
+.mt-3 { margin-top: 16px; }
+.mt-4 { margin-top: 24px; }
+.mb-2 { margin-bottom: 8px; }
+.mb-3 { margin-bottom: 16px; }
+.mb-4 { margin-bottom: 24px; }
+.gap-2 { gap: 8px; }
+.gap-3 { gap: 16px; }
+.d-flex { display: flex; }
+.align-center { align-items: center; }
+.justify-center { justify-content: center; }
+</style>
+</head>
+<body>
+
+<!-- ════════ NAVBAR ════════ -->
+<nav class="navbar">
+  <div class="nav-inner">
+    <a href="#" class="nav-logo">
+      <div class="nav-logo-mark">ڕ</div>
+      ڕوانگە
+    </a>
+    <ul class="nav-links">
+      <li><a href="#features">تایبەتمەندییەکان</a></li>
+      <li><a href="#workflow">چۆن کاردەکات</a></li>
+      <li><a href="#ai">AI</a></li>
+      <li><a href="#pricing">نرخەکان</a></li>
+    </ul>
+    <div class="nav-end">
+      <a href="/accounts/login/" class="btn btn-ghost">چوونەژوورەوە</a>
+      <a href="/accounts/register/" class="btn btn-primary">دەستپێکردن — بەخۆراییە</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ════════ HERO ════════ -->
+<section class="hero" id="hero">
+  <div class="container">
+    <div class="hero-eyebrow">
+      <span class="ai-pulse"><span></span><span></span><span></span></span>
+      پلاتفۆرمی پێش‌بەرهەمهێنانی فیلمی کوردی
+    </div>
+
+    <h1 class="hero-title">
+      لە دەستنووسەوە<br>
+      بۆ <span class="accent">شاشە</span>
+    </h1>
+
+    <p class="hero-sub">
+      ڕوانگە دیرەکتەرەکانی کوردی یاری دەدات کە پڕۆژەی فیلمیان بە شێوازێکی پیشەیی ئامادە بکەن — شات لیست، ستۆریبۆرد، فلور پلان، بەرواری وێنەگرتن — هەموو لەیەک شوێن.
+    </p>
+
+    <div class="hero-cta">
+      <a href="/accounts/register/" class="btn btn-primary btn-lg">دەستپێکردنی بەخۆراییی — بەبێ کارتی کردیت</a>
+      <a href="#workflow" class="btn btn-ghost btn-lg">بینینی چۆن کاردەکات</a>
+    </div>
+
+    <div class="hero-social-proof">
+      <div class="avatar-stack">
+        <div class="av" style="background:#F72585">DI</div>
+        <div class="av" style="background:#7C3AED">SA</div>
+        <div class="av" style="background:#00A896">HA</div>
+        <div class="av" style="background:#FF6B35">KM</div>
+        <div class="av" style="background:#2D5BE3">RB</div>
+      </div>
+      <span>+٢٠٠ دیرەکتەر و تیمی پێش‌بەرهەمهێنان بەکاریان دێنێت</span>
+    </div>
+  </div>
+</section>
+
+<!-- ════════ APP MOCKUP ════════ -->
+<div class="mockup-wrap">
+  <div class="mockup-glow"></div>
+  <div class="mockup-frame">
+    <!-- Window chrome -->
+    <div class="mockup-topbar">
+      <div class="mockup-dot" style="background:#F72585"></div>
+      <div class="mockup-dot" style="background:#D4A574"></div>
+      <div class="mockup-dot" style="background:#00A896"></div>
+      <div style="flex:1;text-align:center;font-family:'Inter',sans-serif;font-size:11px;color:#2A2A3A">rwanga.app</div>
+    </div>
+    <!-- App shell -->
+    <div class="mockup-body">
+      <!-- Rail -->
+      <div class="mockup-rail">
+        <div class="m-rail-logo">ڕ</div>
+        <!-- Film frame (active) -->
+        <div class="m-icon active" title="پڕۆژەکان">
+          <svg width="22" height="22" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="1"/><line x1="2" y1="8" x2="22" y2="8"/><line x1="2" y1="16" x2="22" y2="16"/><line x1="6" y1="4" x2="6" y2="8"/><line x1="10" y1="4" x2="10" y2="8"/><line x1="14" y1="4" x2="14" y2="8"/><line x1="18" y1="4" x2="18" y2="8"/><line x1="6" y1="16" x2="6" y2="20"/><line x1="10" y1="16" x2="10" y2="20"/><line x1="14" y1="16" x2="14" y2="20"/><line x1="18" y1="16" x2="18" y2="20"/></svg>
+        </div>
+        <!-- Team -->
+        <div class="m-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24"><circle cx="9" cy="7" r="3"/><path d="M3 21v-1a6 6 0 0 1 12 0v1"/><path d="M16 3.13a4 4 0 0 1 0 7.75M21 21v-1a4 4 0 0 0-3-3.85"/></svg>
+        </div>
+        <!-- Viewfinder -->
+        <div class="m-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="3" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="21"/><line x1="3" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="21" y2="12"/></svg>
+        </div>
+        <div style="width:28px;height:1px;background:rgba(255,255,255,.04);margin:4px 0"></div>
+        <!-- Reviews (purple glow) -->
+        <div class="m-icon" style="color:#A78BFF">
+          <svg width="22" height="22" viewBox="0 0 24 24" style="stroke:#A78BFF;filter:drop-shadow(0 0 4px rgba(167,139,255,.5))"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        </div>
+        <!-- Community (teal glow) -->
+        <div class="m-icon" style="color:#00C4B0">
+          <svg width="22" height="22" viewBox="0 0 24 24" style="stroke:#00C4B0;filter:drop-shadow(0 0 4px rgba(0,196,176,.5))"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <div style="flex:1"></div>
+        <!-- Settings aperture -->
+        <div class="m-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.5"/><line x1="12" y1="3" x2="12" y2="8.5"/><line x1="12" y1="15.5" x2="12" y2="21"/><line x1="3" y1="12" x2="8.5" y2="12"/><line x1="15.5" y1="12" x2="21" y2="12"/><line x1="5.6" y1="5.6" x2="9.4" y2="9.4"/><line x1="14.6" y1="14.6" x2="18.4" y2="18.4"/><line x1="18.4" y1="5.6" x2="14.6" y2="9.4"/><line x1="9.4" y1="14.6" x2="5.6" y2="18.4"/></svg>
+        </div>
+      </div>
+
+      <!-- Main area -->
+      <div class="mockup-main">
+        <!-- Top nav -->
+        <div class="mockup-nav">
+          <div class="m-proj-thumb"></div>
+          <span class="m-proj-name">مێوانێکی نادیار</span>
+          <div style="width:1px;height:20px;background:var(--border);margin:0 8px"></div>
+          <div class="m-tabs">
+            <div class="m-tab s active"><span class="dot" style="background:var(--script)"></span>دەستنووس</div>
+            <div class="m-tab b"><span class="dot" style="background:#7FA8FF"></span>داڕشتن</div>
+            <div class="m-tab v"><span class="dot" style="background:var(--vis)"></span>بینراو</div>
+            <div class="m-tab p"><span class="dot" style="background:#A78BFF"></span>ڕێنوێس</div>
+            <div class="m-tab sh"><span class="dot" style="background:var(--shoot)"></span>وێنەگرتن</div>
+          </div>
+          <div style="margin-inline-start:auto;display:flex;align-items:center;gap:8px">
+            <div style="width:22px;height:22px;border-radius:50%;background:var(--break);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff">DI</div>
+          </div>
+        </div>
+
+        <!-- Content area -->
+        <div class="mockup-content">
+          <!-- Scene panel -->
+          <div class="m-scene-panel">
+            <div class="m-scene-hdr">سەحنەکان</div>
+            <div class="m-scene-item"><span class="m-snum">11</span><div><div class="m-sloc">EXT. ڕێگا</div><div class="m-stime">ڕۆژ</div></div></div>
+            <div class="m-scene-item active"><span class="m-snum">12</span><div><div class="m-sloc">INT. بەستانخانە</div><div class="m-stime">ئێوار</div></div></div>
+            <div class="m-scene-item"><span class="m-snum">13</span><div><div class="m-sloc">EXT. باغچە</div><div class="m-stime">شەو</div></div></div>
+            <div class="m-scene-item"><span class="m-snum">14</span><div><div class="m-sloc">INT. ژووری نووستن</div><div class="m-stime">شەو</div></div></div>
+          </div>
+
+          <!-- Workspace: shot list -->
+          <div class="m-workspace">
+            <table class="m-table">
+              <thead><tr><th>شات</th><th>ستایل</th><th>لێنز</th><th>بارودۆخ</th></tr></thead>
+              <tbody>
+                <tr><td><span class="m-shot-num en">12.1</span></td><td>لێدانی ناوەندی</td><td><span class="en" style="font-size:9px">85mm</span></td><td><span class="m-badge m-badge-ok">تەواو</span></td></tr>
+                <tr><td><span class="m-shot-num en">12.2</span></td><td>وایدی باڵا</td><td><span class="en" style="font-size:9px">35mm</span></td><td><span class="m-badge m-badge-ok">تەواو</span></td></tr>
+                <tr><td><span class="m-shot-num en">12.3</span></td><td>ئینسێرت دەست</td><td><span class="en" style="font-size:9px">100mm</span></td><td><span class="m-badge m-badge-w">چاوەڕوانی</span></td></tr>
+                <tr><td><span class="m-shot-num en">12.4</span></td><td>دوو-شات</td><td><span class="en" style="font-size:9px">50mm</span></td><td><span class="m-badge m-badge-w">چاوەڕوانی</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════ SECTION PALETTE ════════ -->
+<div style="background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:24px 0">
+  <div class="container">
+    <div style="display:flex;gap:0;overflow-x:auto">
+      <div style="flex:1;min-width:120px;padding:20px 24px;border-inline-start:3px solid var(--script);background:rgba(255,107,53,.04)">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--script);margin-bottom:4px">دەستنووس</div>
+        <div style="font-size:12px;color:var(--text2)">نووسینی دەستنووس، AV Script</div>
+      </div>
+      <div style="flex:1;min-width:120px;padding:20px 24px;border-inline-start:3px solid #7FA8FF;background:rgba(127,168,255,.04)">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#7FA8FF;margin-bottom:4px">داڕشتن</div>
+        <div style="font-size:12px;color:var(--text2)">شات لیست، ستریپبۆرد</div>
+      </div>
+      <div style="flex:1;min-width:120px;padding:20px 24px;border-inline-start:3px solid var(--vis);background:rgba(0,168,150,.04)">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--vis);margin-bottom:4px">بینراوکردن</div>
+        <div style="font-size:12px;color:var(--text2)">ستۆریبۆرد، فلور پلان</div>
+      </div>
+      <div style="flex:1;min-width:120px;padding:20px 24px;border-inline-start:3px solid #A78BFF;background:rgba(167,139,255,.04)">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#A78BFF;margin-bottom:4px">ڕێنوێس</div>
+        <div style="font-size:12px;color:var(--text2)">بەروار، کاڵ شیت</div>
+      </div>
+      <div style="flex:1;min-width:120px;padding:20px 24px;border-inline-start:3px solid var(--shoot);background:rgba(247,37,133,.04)">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--shoot);margin-bottom:4px">وێنەگرتن</div>
+        <div style="font-size:12px;color:var(--text2)">کاڵ شیت، شوێنەکان</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════ HOW IT WORKS ════════ -->
+<section id="workflow">
+  <div class="container">
+    <div class="grid-2">
+      <div>
+        <div class="section-eyebrow">چۆن کاردەکات</div>
+        <h2 class="section-title">لە بارکردنی دەستنووسەوە بۆ ئامادەکاری تەواو</h2>
+        <p class="section-sub mb-4">٤ هەنگاو — دیرەکتەر دەستنووسەکەی دەبارکات، AI کارەکانی دەکات، تیم هاوکاری دەکات، ئامادەکاری تەواو دەبێت.</p>
+      </div>
+      <div class="steps-list">
+        <div class="step-item">
+          <div class="step-num s1">١</div>
+          <div class="step-body">
+            <div class="step-title">دەستنووسەکەت بارکە</div>
+            <div class="step-desc">FDX، Fountain، PDF یان DOCX — ڕوانگە دەستنووسەکەت دەخوێنێتەوە، سەحنەکان دەناسێنێت، کەسایەتییەکان و شوێنەکان دەدۆزێتەوە.</div>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num s2">٢</div>
+          <div class="step-body">
+            <div class="step-title">AI داڕشتنی ئۆتۆماتیکی</div>
+            <div class="step-desc">Claude دەستنووسەکەت دەشکێنێت — شاتەکان پێشنیار دەکات، بەرواری وێنەگرتن ئامادە دەکات، کاڵ شیت دروست دەکات.</div>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num s3">٣</div>
+          <div class="step-body">
+            <div class="step-title">تیمەکەت هاوکاری دەکات</div>
+            <div class="step-desc">دیرەکتەر، DP، AD و ئەعزای تیم هەموو لە یەک جێگا کاردەکەن — لێدوان، بڕیار، گۆڕانکاری — هەموو ئەمانە ئەمڕۆ.</div>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num s4">٤</div>
+          <div class="step-body">
+            <div class="step-title">دەرهێنانی پاکێجی سەحنە</div>
+            <div class="step-desc">هەر سەحنەیەک دەتوانی بیناردیت بە یەک HTML فایلی سەربەخۆ — ئۆفلاین کاردەکات، لە SmartBoard و ئایپاد و مۆبایل ئاماژەیەک نییە.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════ WORKFLOW TABS ════════ -->
+<section style="padding:0 0 96px;background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border)" id="features">
+  <div class="container" style="padding-top:64px">
+    <div class="text-center mb-4">
+      <div class="section-eyebrow">مۆدیولەکان</div>
+      <h2 class="section-title">هەموو شتێک لە یەک شوێن</h2>
+    </div>
+
+    <div class="workflow-tabs">
+      <button class="w-tab ws active" onclick="wtab(this,'wf-s')">✍ دەستنووس</button>
+      <button class="w-tab wb" onclick="wtab(this,'wf-b')">♦ داڕشتن</button>
+      <button class="w-tab wv" onclick="wtab(this,'wf-v')">◎ بینراوکردن</button>
+      <button class="w-tab wp" onclick="wtab(this,'wf-p')">⊞ ڕێنوێس</button>
+      <button class="w-tab wsh" onclick="wtab(this,'wf-sh')">⬡ وێنەگرتن</button>
+    </div>
+
+    <div id="wf-s" class="workflow-pane active">
+      <div class="wf-list">
+        <div class="wf-item"><div class="wf-dot" style="background:var(--script)"></div><div><div class="wf-item-title">دەستنووسی فیلم</div><div class="wf-item-desc">دەستنووسی کوردی بنووسە یان بارکە — ئێدیتەری ناوخۆ یان FDX، Fountain.</div></div></div>
+        <div class="wf-item"><div class="wf-dot" style="background:var(--script)"></div><div><div class="wf-item-title">AV Script</div><div class="wf-item-desc">بۆ ڤیدیۆی بازرگانی و مۆزیک — دووستونی Audio/Video.</div></div></div>
+        <div class="wf-item"><div class="wf-dot" style="background:var(--script)"></div><div><div class="wf-item-title">بەڵگەکان</div><div class="wf-item-desc">یادداشت، ڕاپۆرت، فایلەکانی پڕۆژە — هەموو لەیەک شوێن.</div></div></div>
+      </div>
+      <div class="wf-preview">
+        <div class="wf-preview-title">نموونەی دەستنووس</div>
+        <div style="font-size:11px;text-align:center;color:var(--text3);margin-bottom:12px;font-family:'Inter',sans-serif">INT. GARDEN HOUSE — EVENING</div>
+        <p style="font-size:12px;line-height:2;color:var(--text2);margin-bottom:12px">ناوخۆی بەستانخانەیەک. رووناکیی گەرمی ئاگرەکە دەتابێت بە سەر دیوارەکانی بەرزدا. گەشە تەنیا لە خوارەوە دانیشتووە.</p>
+        <div style="padding:10px 16px;background:rgba(212,165,116,.06);border-inline-start:2px solid var(--amber);margin-bottom:12px">
+          <div style="font-size:11px;font-weight:700;text-align:center;color:var(--text);font-family:'Inter',sans-serif;margin-bottom:6px">GESHA</div>
+          <div style="font-size:11px;line-height:1.9;color:var(--text2);text-align:center">کاتێک ئاگاداری کەسێک دەبیت...<br>ئیتر هیچ شتێک وەک پێش نابێت.</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="wf-b" class="workflow-pane">
+      <div class="wf-list">
+        <div class="wf-item"><div class="wf-dot" style="background:#7FA8FF"></div><div><div class="wf-item-title">شات لیست</div><div class="wf-item-desc">هەر شاتێک بە تەفسیل — ستایل، لێنز، جووڵە، ماوە، جۆر.</div></div></div>
+        <div class="wf-item"><div class="wf-dot" style="background:#7FA8FF"></div><div><div class="wf-item-title">ستریپبۆرد</div><div class="wf-item-desc">بەرواری وێنەگرتن بە ئۆتۆماتیکی ئامادە دەبێت، ڕیزکردن بە شوێن و کات.</div></div></div>
+        <div class="wf-item"><div class="wf-dot" style="background:#7FA8FF"></div><div><div class="wf-item-title">ڕاپۆرتەکان</div><div class="wf-item-desc">ڕاپۆرتی کەسایەتی، شوێن، پڕۆپس — PDF بە کوردی.</div></div></div>
+      </div>
+      <div class="wf-preview">
+        <div class="wf-preview-title">شات لیستی سەحنە ١٢</div>
+        <table style="width:100%;border-collapse:collapse;font-size:11px">
+          <tr style="background:var(--surface2)"><th style="padding:7px 10px;text-align:start;color:var(--text3);font-size:9px;text-transform:uppercase">شات</th><th style="padding:7px 10px;text-align:start;color:var(--text3);font-size:9px;text-transform:uppercase">ستایل</th><th style="padding:7px 10px;text-align:start;color:var(--text3);font-size:9px;text-transform:uppercase">لێنز</th></tr>
+          <tr style="border-bottom:1px solid var(--border)"><td style="padding:8px 10px;color:var(--amber);font-family:'Inter',sans-serif;font-weight:700">12.1</td><td style="padding:8px 10px;color:var(--text2)">لێدانی ناوەندی</td><td style="padding:8px 10px;color:var(--text2);font-family:'Inter',sans-serif">85mm</td></tr>
+          <tr style="border-bottom:1px solid var(--border)"><td style="padding:8px 10px;color:var(--amber);font-family:'Inter',sans-serif;font-weight:700">12.2</td><td style="padding:8px 10px;color:var(--text2)">وایدی باڵا</td><td style="padding:8px 10px;color:var(--text2);font-family:'Inter',sans-serif">35mm</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div id="wf-v" class="workflow-pane">
+      <div class="wf-list">
+        <div class="wf-item"><div class="wf-dot" style="background:var(--vis)"></div><div><div class="wf-item-title">ستۆریبۆرد</div><div class="wf-item-desc">وێنە بارکە یان بکێشە — گرید ٤×٣ یان ٦×٤ بۆ پرینت.</div></div></div>
+        <div class="wf-item"><div class="wf-dot" style="background:var(--vis)"></div><div><div class="wf-item-title">فلور پلان</div><div class="wf-item-desc">SVG ئینتەراکتیڤ — کامەرا، رووناکی، کەسایەتی، جووڵە.</div></div></div>
+        <div class="wf-item"><div class="wf-dot" style="background:var(--vis)"></div><div><div class="wf-item-title">ڤیوەر HTML</div><div class="wf-item-desc">پاکێجی سەحنە بناردە بۆ تیم — ئۆفلاین، SmartBoard ئامادە.</div></div></div>
+      </div>
+      <div class="wf-preview">
+        <div class="wf-preview-title">فلور پلانی سەحنە ١٢</div>
+        <svg viewBox="0 0 300 180" style="width:100%;background:#0A0A0D;border:1px solid var(--border)">
+          <!-- Room -->
+          <rect x="20" y="20" width="260" height="140" fill="none" stroke="#2E2E3A" stroke-width="2"/>
+          <!-- Furniture -->
+          <rect x="100" y="60" width="100" height="60" fill="#1E1E2C" stroke="#2D5BE3" stroke-width="1.5"/>
+          <text x="150" y="94" fill="#7FA8FF" font-size="8" text-anchor="middle" font-family="Inter">میز</text>
+          <rect x="30" y="90" width="40" height="20" fill="#1E1E2C" stroke="#35353F" stroke-width="1"/>
+          <text x="50" y="103" fill="#35353F" font-size="7" text-anchor="middle" font-family="Inter">سۆفا</text>
+          <!-- Camera A -->
+          <circle cx="60" cy="45" r="8" fill="#F72585" opacity=".9"/>
+          <text x="60" y="49" fill="#fff" font-size="8" text-anchor="middle" font-weight="bold" font-family="Inter">A</text>
+          <line x1="60" y1="53" x2="100" y2="80" stroke="#F72585" stroke-width="1" stroke-dasharray="3,2" opacity=".5"/>
+          <!-- Camera B -->
+          <circle cx="240" cy="45" r="8" fill="#00A896" opacity=".9"/>
+          <text x="240" y="49" fill="#fff" font-size="8" text-anchor="middle" font-weight="bold" font-family="Inter">B</text>
+          <line x1="240" y1="53" x2="200" y2="80" stroke="#00A896" stroke-width="1" stroke-dasharray="3,2" opacity=".5"/>
+          <!-- Character marks -->
+          <circle cx="150" cy="50" r="6" fill="#D4A574" opacity=".8"/>
+          <text x="150" y="54" fill="#fff" font-size="7" text-anchor="middle" font-weight="bold" font-family="Cairo">گ</text>
+          <circle cx="150" cy="150" r="6" fill="#7C3AED" opacity=".8"/>
+          <text x="150" y="154" fill="#fff" font-size="7" text-anchor="middle" font-weight="bold" font-family="Cairo">ن</text>
+        </svg>
+      </div>
+    </div>
+
+    <div id="wf-p" class="workflow-pane">
+      <div class="wf-list">
+        <div class="wf-item"><div class="wf-dot" style="background:#A78BFF"></div><div><div class="wf-item-title">بەرواری وێنەگرتن</div><div class="wf-item-desc">ئۆتۆماتیکی ئامادە دەبێت — ڕیزکردن بە شوێن، کەسایەتی، ئامێر.</div></div></div>
+        <div class="wf-item"><div class="wf-dot" style="background:#A78BFF"></div><div><div class="wf-item-title">کاڵ شیت</div><div class="wf-item-desc">بناردە بە ئیمەیل یان واتسئاپ — پڕ بووە بە ئۆتۆماتیکی.</div></div></div>
+        <div class="wf-item"><div class="wf-dot" style="background:#A78BFF"></div><div><div class="wf-item-title">کانتاکتەکان</div><div class="wf-item-desc">تیمی بەرهەمهێنان — ڕۆڵ، تەلەفۆن، کاتی گەیشتن.</div></div></div>
+      </div>
+      <div class="wf-preview">
+        <div class="wf-preview-title">کاڵ شیتی ڕۆژی یەکەم</div>
+        <div style="display:flex;flex-direction:column;gap:8px;font-size:11px">
+          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)"><span style="color:var(--text2)">ڕۆژی وێنەگرتن</span><span style="color:var(--text);font-family:'Inter',sans-serif">١٥ی ئازار ٢٠٢٦</span></div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)"><span style="color:var(--text2)">شوێن</span><span style="color:var(--amber)">INT. بەستانخانە</span></div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)"><span style="color:var(--text2)">کاتی گشتی</span><span style="color:var(--text);font-family:'Inter',sans-serif">07:30</span></div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0"><span style="color:var(--text2)">ئاب و هەوا</span><span style="color:var(--vis)">☀ 24°C</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="wf-sh" class="workflow-pane">
+      <div class="wf-list">
+        <div class="wf-item"><div class="wf-dot" style="background:var(--shoot)"></div><div><div class="wf-item-title">کاڵ شیتی SmartBoard</div><div class="wf-item-desc">لەسەر ئەکرانی ستودیۆ نیشان بدە — تاچ ئامادە، دووری ٣ مەتر خوێندراوەتەوە.</div></div></div>
+        <div class="wf-item"><div class="wf-dot" style="background:var(--shoot)"></div><div><div class="wf-item-title">ئۆفلاین PWA</div><div class="wf-item-desc">دیرەکتەر لە شوێنی وێنەگرتن — بێ ئینتەرنێت — پڕۆژەی تەواو دەبینێت.</div></div></div>
+        <div class="wf-item"><div class="wf-dot" style="background:var(--shoot)"></div><div><div class="wf-item-title">دەرهێنانی HTML</div><div class="wf-item-desc">پاکێجی سەحنە — ستۆریبۆرد، شات لیست، فلور پلان — هەموو لە یەک فایلدا.</div></div></div>
+      </div>
+      <div class="wf-preview">
+        <div class="wf-preview-title">بینینی سەحنە لەسەر SmartBoard</div>
+        <div style="background:#050507;border:1px solid var(--border);padding:16px;display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:11px">
+          <div style="background:var(--surface2);padding:10px;border-top:2px solid var(--script)"><div style="color:var(--script);font-size:9px;text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px">شات لیست</div><div style="color:var(--text2)">١٢.١ — لێدانی ناوەندی</div></div>
+          <div style="background:var(--surface2);padding:10px;border-top:2px solid var(--vis)"><div style="color:var(--vis);font-size:9px;text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px">فلور پلان</div><div style="color:var(--text2)">کامەرا A — ٨٥mm</div></div>
+          <div style="background:var(--surface2);padding:10px;border-top:2px solid var(--plan);grid-column:span 2"><div style="color:#A78BFF;font-size:9px;text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px">ستۆریبۆرد</div><div style="display:flex;gap:8px"><div style="width:60px;height:36px;background:var(--surface3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--text3);font-family:'Inter',sans-serif">1/4</div><div style="width:60px;height:36px;background:var(--surface3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--text3);font-family:'Inter',sans-serif">2/4</div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════ AI SECTION ════════ -->
+<section class="ai-section" id="ai">
+  <div class="container">
+    <div class="grid-2">
+      <div>
+        <div class="ai-chip">
+          <span class="ai-pulse"><span></span><span></span><span></span></span>
+          AI — Claude Sonnet
+        </div>
+        <h2 class="section-title">AI یارمەتیکارت — نەک جێگرەوەت</h2>
+        <p class="section-sub">هەر تایبەتمەندییەکی AI لە ڕوانگە شێوەی یەکسانی هەیە: دروستکردن → پێداچوونەوە → چارەسەرکردن. دیرەکتەر هەمیشە بڕیاری کۆتایی دەدات.</p>
+        <div class="ai-feat-list">
+          <div class="ai-feat">
+            <span class="ai-feat-icon">🤖</span>
+            <div>
+              <div class="ai-feat-name">داڕشتنی ئۆتۆماتیکی دەستنووس</div>
+              <div class="ai-feat-desc">دەستنووسی کوردیت دەبارکی — Claude سەحنە، کەسایەتی، شوێن، پڕۆپس دەناسێنێت. دیرەکتەر پێداچوونەوەی دەکات و دروست دەکات.</div>
+            </div>
+          </div>
+          <div class="ai-feat">
+            <span class="ai-feat-icon">🗺</span>
+            <div>
+              <div class="ai-feat-name">فلور پلانی AI</div>
+              <div class="ai-feat-desc">بە کوردی بووژی — "ژووری چێشتخانەی گەورە لەگەڵ میزی خواردن لە ناوەندا" — فلور پلانی SVG دروست دەبێت.</div>
+            </div>
+          </div>
+          <div class="ai-feat">
+            <span class="ai-feat-icon">📅</span>
+            <div>
+              <div class="ai-feat-name">ئامادەکاری زیرەکانەی بەرواری وێنەگرتن</div>
+              <div class="ai-feat-desc">AI بەرواری باشتری وێنەگرتن پێشنیار دەکات — وەک گۆڕینی شوێن کەمتر، گۆڕینی رووناکی کەمتر، ئامانجی ماوەی وێنەگرتن.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- AI thinking demo -->
+      <div style="background:var(--bg);border:1px solid var(--border);border-inline-start:3px solid var(--amber);padding:28px">
+        <div style="display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700;color:var(--amber);margin-bottom:16px">
+          <span class="ai-pulse"><span></span><span></span><span></span></span>
+          AI داڕشتنی دەستنووس — مێوانێکی نادیار
+        </div>
+        <div style="height:3px;background:var(--surface2);overflow:hidden;margin-bottom:20px">
+          <div style="height:100%;background:linear-gradient(90deg,var(--amber),var(--pink));animation:prog 1.4s ease-in-out infinite;width:35%"></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text3)">
+            <div style="width:8px;height:8px;border-radius:50%;background:var(--vis);flex-shrink:0"></div>
+            دەستنووس خوێندرایەوە — ٣٢ سەحنە دۆزرایەوە
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text3)">
+            <div style="width:8px;height:8px;border-radius:50%;background:var(--vis);flex-shrink:0"></div>
+            کەسایەتییەکان دەستنووسەکران — ٨ کەسایەتی
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;font-size:13px;font-weight:600;color:var(--amber)">
+            <div style="width:8px;height:8px;border-radius:50%;background:var(--amber);box-shadow:0 0 6px rgba(212,165,116,.6);flex-shrink:0"></div>
+            شوێنەکان دەستنووسەکرێن — ١٢ لە ١٨...
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text3)">
+            <div style="width:8px;height:8px;border-radius:50%;background:var(--surface2);border:1px solid var(--border2);flex-shrink:0"></div>
+            پارچەپارچەکانی بارەگا دیاردەکرێن
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text3)">
+            <div style="width:8px;height:8px;border-radius:50%;background:var(--surface2);border:1px solid var(--border2);flex-shrink:0"></div>
+            ڕاپۆرتی کۆتایی دروست دەکرێت
+          </div>
+        </div>
+        <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border);font-size:11px;color:var(--text3)">داتاکانت ناکرێت لەگەڵ هیچ مۆدێلی AI ئامۆژگاری پێ بکرێت · Claude Sonnet</div>
+      </div>
+    </div>
+  </div>
+</section>
+<style>
+@keyframes prog { 0%{transform:translateX(-200%)} 100%{transform:translateX(400%)} }
+</style>
+
+<!-- ════════ FEATURES GRID ════════ -->
+<section>
+  <div class="container">
+    <div class="text-center mb-4" style="margin-bottom:48px">
+      <div class="section-eyebrow">تایبەتمەندییەکان</div>
+      <h2 class="section-title">دروستکرا بۆ دیرەکتەرانی کوردی</h2>
+    </div>
+    <div class="grid-3">
+      <div class="feat-card c-script">
+        <div class="feat-icon"><svg viewBox="0 0 24 24" style="stroke:var(--script)"><path d="M4 6l16-3v4H4z"/><rect x="2" y="7" width="20" height="14" rx="1"/><line x1="7" y1="3.5" x2="5" y2="7"/><line x1="11" y1="2.7" x2="9" y2="7"/><line x1="15" y1="1.9" x2="13" y2="7"/><line x1="19" y1="1.1" x2="17" y2="7"/></svg></div>
+        <div class="feat-title">کوردی-ئۆریجنال</div>
+        <div class="feat-desc">ئینتەرفەیسی RTL بە کوردی سۆرانی — نە وەرگێڕانی دواتری، لە یەکەم ڕۆژەوە کوردی.</div>
+        <div class="feat-tag" style="background:rgba(255,107,53,.1);color:var(--script)">Kurdish First</div>
+      </div>
+      <div class="feat-card c-vis">
+        <div class="feat-icon"><svg viewBox="0 0 24 24" style="stroke:var(--vis)"><rect x="2" y="7" width="20" height="14" rx="2"/><circle cx="12" cy="14" r="4"/><circle cx="12" cy="14" r="2"/><path d="M7 7V5a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v2"/></svg></div>
+        <div class="feat-title">SmartBoard ئامادە</div>
+        <div class="feat-desc">دیرەکتەر لەسەر ئەکرانی ٥٥ ئینجی دەوستێت — تاچ تارگیت ٤٤px، تەکست ١٦px کەمترین.</div>
+        <div class="feat-tag" style="background:rgba(0,168,150,.1);color:var(--vis)">TV Optimized</div>
+      </div>
+      <div class="feat-card c-plan">
+        <div class="feat-icon"><svg viewBox="0 0 24 24" style="stroke:#A78BFF"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+        <div class="feat-title">هاوکاری تیم</div>
+        <div class="feat-desc">دیرەکتەر، DP، AD، هەموو لە یەک جێگا — لێدوان، بڕیار، گۆڕانکاری — ئەمڕۆ.</div>
+        <div class="feat-tag" style="background:rgba(124,58,237,.1);color:#A78BFF">Real-time</div>
+      </div>
+      <div class="feat-card c-amber">
+        <div class="feat-icon"><svg viewBox="0 0 24 24" style="stroke:var(--amber)"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
+        <div class="feat-title">ئۆفلاین PWA</div>
+        <div class="feat-desc">کوردستان — ئینتەرنێت هەمیشە باش نییە. ڕوانگە ئۆفلاین کاردەکات — پڕۆژەت پاراستراوە.</div>
+        <div class="feat-tag" style="background:rgba(212,165,116,.1);color:var(--amber)">Works Offline</div>
+      </div>
+      <div class="feat-card c-break">
+        <div class="feat-icon"><svg viewBox="0 0 24 24" style="stroke:#7FA8FF"><rect x="3" y="3" width="18" height="18" rx="1"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="10" y1="10" x2="10" y2="21"/><circle cx="6.5" cy="6.5" r="1.5"/><circle cx="16" cy="16" r="1.5"/></svg></div>
+        <div class="feat-title">دەرهێنانی HTML</div>
+        <div class="feat-desc">پاکێجی سەحنەت بناردە بۆ تیم — ستۆریبۆرد، شات لیست، فلور پلان — هەموو لە یەک فایل.</div>
+        <div class="feat-tag" style="background:rgba(45,91,227,.1);color:#7FA8FF">Shareable</div>
+      </div>
+      <div class="feat-card c-shoot">
+        <div class="feat-icon"><svg viewBox="0 0 24 24" style="stroke:var(--shoot)"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="3" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="21"/><line x1="3" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="21" y2="12"/></svg></div>
+        <div class="feat-title">پاکەت بەخۆراییی</div>
+        <div class="feat-desc">١ پڕۆژە، ١٠ سەحنە، هەموو مۆدیولەکان — بەخۆراییە. کارت کردیت پێویست نییە.</div>
+        <div class="feat-tag" style="background:rgba(247,37,133,.1);color:var(--shoot)">Free Forever</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════ TESTIMONIALS ════════ -->
+<section style="background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
+  <div class="container">
+    <div class="text-center mb-4" style="margin-bottom:48px">
+      <div class="section-eyebrow">دەنگی بەکارهێنەران</div>
+      <h2 class="section-title">دیرەکتەران چی دەڵێن</h2>
+    </div>
+    <div class="grid-3">
+      <div class="quote-card">
+        <p class="quote-text">پێش ڕوانگە هەموو شتێکم لە Excel دەکرد. ئێستا شات لیستی سەحنەی ١٢م لە ٥ خولەکدا ئامادەیە. هەر ئەوەندەش.</p>
+        <div class="quote-author">
+          <div class="q-av" style="background:var(--pink)">DI</div>
+          <div><div class="q-name">داریا ئیبراهیم</div><div class="q-role">دیرەکتەر — Zeneon LLC</div></div>
+        </div>
+      </div>
+      <div class="quote-card">
+        <p class="quote-text">فلور پلانی SVG تایبەتمەندییەکی کیلەرە. لە کۆبوونی پیشەیی کامەرای بەسەر ئەکرانی SmartBoard نیشان دەدەم.</p>
+        <div class="quote-author">
+          <div class="q-av" style="background:var(--plan)">SA</div>
+          <div><div class="q-name">سەرور ئەحمەد</div><div class="q-role">DP — Kurdistan Film Collective</div></div>
+        </div>
+      </div>
+      <div class="quote-card">
+        <p class="quote-text">کاڵ شیت بە واتسئاپ ناردن — ئەمە بۆ کرووی کوردی مەعنایەکی زۆری هەیە. تیمم خۆی ئاگادار دەبێت بەبێ ئیمەیل.</p>
+        <div class="quote-author">
+          <div class="q-av" style="background:var(--vis)">HA</div>
+          <div><div class="q-name">هانا ئازیز</div><div class="q-role">AD — Slemani Productions</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════ PRICING ════════ -->
+<section id="pricing">
+  <div class="container">
+    <div class="text-center mb-4" style="margin-bottom:56px">
+      <div class="section-eyebrow">نرخەکان</div>
+      <h2 class="section-title">سادە و ئاشکرا</h2>
+      <p style="font-size:15px;color:var(--text2);margin-top:8px">هیچ کردیتێک پێویست نییە بۆ دەستپێکردن</p>
+    </div>
+    <div class="grid-3" style="max-width:860px;margin:0 auto">
+      <div class="plan-card">
+        <div class="plan-name">Indie — بەخۆرایی</div>
+        <div class="plan-price">$0</div>
+        <div class="plan-period">بۆ هەمیشە</div>
+        <ul class="plan-features">
+          <li>١ پڕۆژە</li>
+          <li>١٠ سەحنە</li>
+          <li>شات لیست و ستۆریبۆرد</li>
+          <li>فلور پلان</li>
+          <li>دەرهێنانی HTML</li>
+          <li class="no">AI داڕشتن</li>
+          <li class="no">تیمی زیاتر لە ١ کەس</li>
+        </ul>
+        <a href="/accounts/register/" class="btn btn-ghost" style="width:100%;justify-content:center">دەستپێکردن</a>
+      </div>
+
+      <div class="plan-card featured">
+        <div class="plan-badge">باشترین هەڵبژاردن</div>
+        <div class="plan-name">Studio</div>
+        <div class="plan-price" style="color:var(--amber)">$29</div>
+        <div class="plan-period">لە مانگێکدا / ستودیۆ</div>
+        <ul class="plan-features">
+          <li>پڕۆژەی نامحدود</li>
+          <li>سەحنەی نامحدود</li>
+          <li>هەموو مۆدیولەکان</li>
+          <li>AI داڕشتنی دەستنووس</li>
+          <li>AI فلور پلان</li>
+          <li>تیمی هەتا ١٠ کەس</li>
+          <li>کاڵ شیت بە واتسئاپ</li>
+          <li>PWA ئۆفلاین</li>
+        </ul>
+        <a href="/accounts/register/?plan=studio" class="btn btn-primary" style="width:100%;justify-content:center">١٤ ڕۆژ بەخۆرایی</a>
+      </div>
+
+      <div class="plan-card">
+        <div class="plan-name">Enterprise</div>
+        <div class="plan-price">Custom</div>
+        <div class="plan-period">بۆ ستودیۆی گەورە</div>
+        <ul class="plan-features">
+          <li>هەموو ئەوەی Studio تێدایە</li>
+          <li>تیمی نامحدود</li>
+          <li>SSO / SAML</li>
+          <li>API Access</li>
+          <li>پشتگیری تایبەت</li>
+          <li>ئامۆژگاری و ڕێنمایی</li>
+        </ul>
+        <a href="mailto:hello@rwanga.app" class="btn btn-ghost" style="width:100%;justify-content:center">پەیوەندی بکە</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════ CTA ════════ -->
+<div class="cta-banner">
+  <div class="container">
+    <div class="hero-eyebrow" style="margin-bottom:24px">
+      <span class="ai-pulse"><span></span><span></span><span></span></span>
+      ئێستا دەستپێبکە
+    </div>
+    <h2 class="cta-title">پڕۆژەی فیلمیت<br>ئامادەبە</h2>
+    <p class="cta-sub">بە کەمتر لە ٥ خولەک ستودیۆکەت دروست بکە — دەستنووسەکەت بارکە — هەر ئامادەیی.</p>
+    <div style="display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap">
+      <a href="/accounts/register/" class="btn btn-primary btn-lg">دەستپێکردنی بەخۆراییی</a>
+      <a href="#workflow" class="btn btn-ghost btn-lg">بینینی دیمۆ</a>
+    </div>
+    <p style="margin-top:20px;font-size:13px;color:var(--text3)">کردیت کارت پێویست نییە · هەمیشە بەخۆرایی بۆ ١ پڕۆژە</p>
+  </div>
+</div>
+
+<!-- ════════ FOOTER ════════ -->
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-brand-name">
+          <div class="footer-brand-mark">ڕ</div>
+          ڕوانگە
+        </div>
+        <p class="footer-tagline">پلاتفۆرمی پێش‌بەرهەمهێنانی فیلمی کوردی — لە دەستنووسەوە بۆ شاشە.</p>
+        <div style="margin-top:20px;display:flex;gap:12px">
+          <a href="#" style="width:32px;height:32px;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--text2);transition:color .12s" onmouseenter="this.style.color='var(--amber)'" onmouseleave="this.style.color='var(--text2)'">𝕏</a>
+          <a href="#" style="width:32px;height:32px;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--text2);transition:color .12s" onmouseenter="this.style.color='var(--amber)'" onmouseleave="this.style.color='var(--text2)'">in</a>
+          <a href="#" style="width:32px;height:32px;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--text2);transition:color .12s" onmouseenter="this.style.color='var(--amber)'" onmouseleave="this.style.color='var(--text2)'">▶</a>
+        </div>
+      </div>
+      <div>
+        <div class="footer-col-title">پڕۆدەکت</div>
+        <ul class="footer-links">
+          <li><a href="#features">تایبەتمەندییەکان</a></li>
+          <li><a href="#workflow">چۆن کاردەکات</a></li>
+          <li><a href="#ai">AI</a></li>
+          <li><a href="#pricing">نرخەکان</a></li>
+          <li><a href="/changelog">گۆڕانکاریەکان</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-col-title">ستودیۆ</div>
+        <ul class="footer-links">
+          <li><a href="/accounts/login/">چوونەژوورەوە</a></li>
+          <li><a href="/accounts/register/">تۆمارکردن</a></li>
+          <li><a href="/docs">بەڵگەنامە</a></li>
+          <li><a href="/blog">بلۆگ</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-col-title">یارمەتی</div>
+        <ul class="footer-links">
+          <li><a href="mailto:hello@rwanga.app">hello@rwanga.app</a></li>
+          <li><a href="/privacy">پارێزگاری داتا</a></li>
+          <li><a href="/terms">مەرجەکان</a></li>
+          <li><a href="/status">بارودۆخی سیستەم</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-copy">© ٢٠٢٦ ڕوانگە. هەموو مافەکان پارێزراوە.</div>
+      <div class="footer-lang">
+        <button class="active">کوردی</button>
+        <button>English</button>
+        <button>عربي</button>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* Workflow tabs */
+function wtab(btn, id) {
+  document.querySelectorAll('.w-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.workflow-pane').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+/* Navbar scroll effect */
+const navbar = document.querySelector('.navbar');
+window.addEventListener('scroll', () => {
+  navbar.style.background = window.scrollY > 60
+    ? 'rgba(7,7,9,.95)'
+    : 'rgba(7,7,9,.85)';
+});
+
+/* Smooth active nav */
+const sections = document.querySelectorAll('section[id], div[id="hero"]');
+const navLinks = document.querySelectorAll('.nav-links a');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      navLinks.forEach(a => a.classList.remove('active'));
+      const match = document.querySelector(`.nav-links a[href="#${e.target.id}"]`);
+      if (match) match.classList.add('active');
+    }
+  });
+}, { rootMargin: '-40% 0px -55% 0px' });
+sections.forEach(s => observer.observe(s));
+
+/* Language toggle (visual demo only) */
+document.querySelectorAll('.footer-lang button').forEach(btn => {
+  btn.addEventListener('click', function() {
+    this.closest('.footer-lang').querySelectorAll('button').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+</script>
+</body>
+</html>

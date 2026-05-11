@@ -1,0 +1,46 @@
+TASK: Translate 101 English director notes into proper Kurdish (Sorani)
+
+INPUT FILE: TRANSLATION-CHUNKS.txt (same folder as this file)
+
+WHAT TO DO:
+1. Open TRANSLATION-CHUNKS.txt
+2. For each chunk [1] through [101]:
+   - Read the number line like [1]
+   - SKIP the >> line — do not translate it, do not touch it, copy it exactly as-is
+   - Translate the English text below it into natural Sorani Kurdish
+   - These are director notes for a film screenplay — write them as clear instructions a Kurdish film director would understand
+3. Save your output as TRANSLATION-OUTPUT.txt in the same folder
+
+OUTPUT FORMAT — follow this exactly:
+
+[1]
+>> (copy the exact same >> line from the input)
+(your Kurdish translation here)
+
+[2]
+>> (copy the exact same >> line from the input)
+(your Kurdish translation here)
+
+...continue until [101]
+
+RULES:
+- There are exactly 101 chunks. Count them. Do not skip any. Do not stop early.
+- The >> line is sacred — copy it exactly, character for character, do not translate it
+- Translate ONLY the English text into Kurdish
+- Use natural Sorani Kurdish — not literal word-for-word translation
+- Keep film terms in English where Kurdish directors would use them: CAMERA, WIDE SHOT, CLOSE-UP, callback, setup, payoff, foreshadowing, montage
+- Keep character names as-is: Nali, Gesha, Edib, Tara, Nazi, Evin, Omid, Ako, AI
+- Keep scene/cluster references as-is: Scene 2, Cluster 1, etc.
+- Keep decision codes as-is: A1, A3, A5, B1, B2, B3, C1, C3, C5, D1, D3, D4, D5, D6, D15
+- Blank line between each chunk
+- No formatting, no headers, no markdown — plain text only
+- Do not add explanations or commentary — just the translations
+
+HOW TO VERIFY YOU ARE DONE:
+- Your output must have exactly 101 chunks: [1] through [101]
+- Every chunk must have the >> line copied exactly
+- Every chunk must have Kurdish text below the >> line
+- Search your output for any remaining English sentences — there should be none except the film terms listed above
+- Count your chunks at the end: if you have fewer than 101, go back and find what you missed
+
+START FROM [1] AND DO NOT STOP UNTIL [101] IS COMPLETE.

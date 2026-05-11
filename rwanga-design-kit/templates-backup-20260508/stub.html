@@ -1,0 +1,13 @@
+{# ════════════════════════════════════════════════════════
+   RWANGA — stub.html
+   Shared stub for URL names that exist but have no real page yet.
+
+   Context:
+     stub_name   — string  module name shown in placeholder
+   ════════════════════════════════════════════════════════ #}
+{% extends "base.html" %}
+{% block content %}
+<div id="rw-content" style="padding:var(--rw-pad-lg)">
+  <p style="color:var(--rw-text-2)">{{ stub_name }} — coming soon</p>
+</div>
+{% endblock %}

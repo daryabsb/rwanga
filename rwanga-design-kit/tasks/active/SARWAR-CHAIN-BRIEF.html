@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rwanga — Decision Chains Brief for Sarwar</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+@media screen {
+  body{background:#E8E8EC;padding:32px;font-family:'Inter','Cairo',sans-serif;font-size:11pt;color:#0F0F12;line-height:1.6;}
+}
+@media print {
+  body{background:#fff;padding:0;font-family:'Inter','Cairo',sans-serif;font-size:11pt;color:#0F0F12;line-height:1.6;}
+  .page{box-shadow:none !important;margin:0 !important;page-break-after:always;}
+  .page:last-child{page-break-after:auto;}
+  .no-print{display:none !important;}
+}
+.page{
+  background:#fff;max-width:210mm;margin:0 auto 24px;padding:14mm 16mm 18mm;
+  min-height:297mm;box-shadow:0 2px 12px rgba(0,0,0,.12);
+}
+/* Header */
+.header{display:flex;align-items:center;gap:14pt;border-bottom:3pt solid #F72585;padding-bottom:12pt;margin-bottom:20pt;}
+.logo-mark{width:44pt;height:44pt;background:#F72585;color:#fff;font-family:'Cairo',sans-serif;font-size:20pt;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.logo-sub{font-size:7.5pt;font-weight:700;color:#5C5C70;text-transform:uppercase;letter-spacing:1.2pt;margin-top:2pt;font-family:'Cairo',sans-serif;}
+.header-info{flex:1;}
+.header-title{font-size:18pt;font-weight:700;color:#0F0F12;line-height:1.2;}
+.header-sub{font-size:9.5pt;color:#5C5C70;margin-top:3pt;}
+.header-right{text-align:right;}
+.header-date{font-size:9pt;color:#A0A0B8;}
+.header-badge{display:inline-block;background:#F72585;color:#fff;font-size:8pt;font-weight:700;padding:3pt 10pt;text-transform:uppercase;letter-spacing:1pt;margin-top:4pt;}
+
+/* Sections */
+h2{font-size:14pt;font-weight:700;color:#0F0F12;margin:22pt 0 10pt;padding-bottom:6pt;border-bottom:1.5pt solid #DCDCE8;}
+h3{font-size:12pt;font-weight:700;color:#9A5520;margin:16pt 0 8pt;}
+p{margin-bottom:10pt;font-size:10.5pt;line-height:1.7;}
+.lead{font-size:11.5pt;color:#0F0F12;font-weight:500;line-height:1.7;margin-bottom:14pt;}
+.muted{color:#5C5C70;}
+.emphasis{background:#FFF8F0;border-left:3pt solid #D4A574;padding:10pt 14pt;margin:12pt 0;font-size:10.5pt;line-height:1.7;}
+.emphasis strong{color:#9A5520;}
+.pink-box{background:#FFF0F5;border-left:3pt solid #F72585;padding:10pt 14pt;margin:12pt 0;font-size:10.5pt;line-height:1.7;}
+
+/* Chain cards */
+.chain-card{border:1.5pt solid #DCDCE8;margin:14pt 0;page-break-inside:avoid;}
+.chain-header{background:#F7F7FA;padding:10pt 14pt;border-bottom:1.5pt solid #DCDCE8;display:flex;align-items:center;gap:10pt;}
+.chain-letter{width:36pt;height:36pt;background:#F72585;color:#fff;font-size:16pt;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:'Inter',sans-serif;}
+.chain-title{font-size:13pt;font-weight:700;color:#0F0F12;}
+.chain-count{font-size:9pt;color:#A0A0B8;margin-top:2pt;}
+.chain-body{padding:12pt 14pt;}
+.chain-body p{margin-bottom:8pt;font-size:10pt;}
+.chain-decisions{list-style:none;padding:0;margin:0 0 10pt;}
+.chain-decisions li{padding:6pt 0;border-bottom:1pt solid #F0F0F6;font-size:10pt;line-height:1.5;}
+.chain-decisions li:last-child{border-bottom:none;}
+.chain-decisions li strong{color:#9A5520;}
+.chain-test{background:#F7F7FA;padding:8pt 12pt;font-size:9.5pt;color:#5C5C70;line-height:1.6;margin-top:8pt;}
+.chain-test strong{color:#0F0F12;}
+.chain-pick{font-size:9pt;font-weight:600;color:#F72585;margin-top:8pt;}
+
+/* CTA */
+.cta-box{background:#0F0F12;color:#EDEAD8;padding:20pt 24pt;margin:20pt 0;text-align:center;}
+.cta-box h2{color:#F72585;border:none;margin:0 0 10pt;font-size:16pt;}
+.cta-box p{color:#78788C;font-size:10.5pt;margin-bottom:6pt;}
+.cta-options{display:flex;justify-content:center;gap:12pt;margin-top:14pt;}
+.cta-option{width:56pt;height:56pt;border:2pt solid #2C2C38;display:flex;align-items:center;justify-content:center;font-size:20pt;font-weight:700;color:#D4A574;font-family:'Inter',sans-serif;}
+
+/* Footer */
+.footer{margin-top:24pt;padding-top:8pt;border-top:1pt solid #DCDCE8;display:flex;justify-content:space-between;font-size:8pt;color:#A0A0B8;}
+.footer-brand{font-weight:700;color:#F72585;}
+</style>
+</head>
+<body>
+
+<!-- PAGE 1 -->
+<div class="page">
+
+<div class="header">
+  <div>
+    <div class="logo-mark">&#1685;</div>
+    <div class="logo-sub">&#1685;&#1608;&#1575;&#1606;&#1711;&#1749;</div>
+  </div>
+  <div class="header-info">
+    <div class="header-title">Decision Chains</div>
+    <div class="header-sub">Brief for Sarwar &mdash; Pick one chain. We build it together.</div>
+  </div>
+  <div class="header-right">
+    <div class="header-date">2 May 2026</div>
+    <div class="header-badge">Review v03</div>
+  </div>
+</div>
+
+<h2>What is a chain?</h2>
+
+<p class="lead">A chain is a test. It takes a group of decisions from your review and asks: <strong>do these decisions actually work together across scenes, or are they just sitting next to each other on a list?</strong></p>
+
+<p>Right now, your v03 review has 19 unsettled decisions &mdash; each one asking a question about whether something in the story works. Things like: &ldquo;Is Gesha&rsquo;s death mechanism believable?&rdquo; or &ldquo;Is the couch overdone as a symbol?&rdquo; or &ldquo;Does the ending land?&rdquo;</p>
+
+<p>These decisions look independent. But they&rsquo;re not. They form chains &mdash; groups where settling one decision forces you to settle the others, because they share the same structural logic across multiple scenes.</p>
+
+<div class="emphasis">
+<strong>Example &mdash; plain language:</strong><br><br>
+Take the sherbet. You have an unsettled decision asking: &ldquo;Is the hint (&lsquo;these will kill me&rsquo;) enough for the audience, or do we need more foreshadowing?&rdquo;<br><br>
+But you can&rsquo;t answer that alone. Because the sherbet connects to Gesha&rsquo;s diabetes (another unsettled decision), which connects to how her death works (another), which connects to what Evin reveals at the police station (another).<br><br>
+If you decide the hint is enough, you&rsquo;re also deciding the diabetes reveal can stay late. If you decide the hint needs strengthening, you might need Evin to appear earlier. One decision pulls the others.<br><br>
+<strong>That&rsquo;s a chain. The decisions are load-bearing for each other.</strong>
+</div>
+
+<h2>What does building a chain achieve?</h2>
+
+<h3>1. It forces honest answers</h3>
+<p>When you look at a decision in isolation &mdash; &ldquo;Is the couch overdone?&rdquo; &mdash; you can say &ldquo;it&rsquo;s fine&rdquo; and move on. But when you see the couch connected to the locked room connected to the house-as-system, all three sharing the same structural job (the physical world encodes Nali&rsquo;s control), now &ldquo;it&rsquo;s fine&rdquo; isn&rsquo;t enough. You have to say what it&rsquo;s actually doing and whether the three together are doing too much, too little, or the right amount.</p>
+
+<h3>2. It shows you the real dependencies</h3>
+<p>Some decisions feel separate but aren&rsquo;t. The opening montage and the final twist look like they live at opposite ends of the film, but they&rsquo;re the same structural mechanism (flash-forward fragments that only make sense at the end). If you settle the twist without thinking about the montage, you might create a contradiction.</p>
+
+<h3>3. It validates the analysis format</h3>
+<p>We&rsquo;ve been building analytical lenses &mdash; short English summaries that define the rule each scene obeys. The D15 mediation chain proved the format works for locked decisions. Now we test it on unsettled ones. If it works here too, we have the format for the entire interactive bible viewer.</p>
+
+<h2>Why pick one chain first?</h2>
+
+<p>Because doing all four at once would take days and produce shallow work. One chain, done properly, teaches us the method. The second chain goes faster. By the fourth, every unsettled decision in v03 will have been tested under structural pressure.</p>
+
+<p>Also: your feedback on the first chain will shape how we build the rest. If you say &ldquo;the connections are too forced&rdquo; or &ldquo;you&rsquo;re missing a scene,&rdquo; we adjust before repeating the process.</p>
+
+<div class="footer">
+  <span>Created with <span class="footer-brand">Rwanga</span> &mdash; Kurdish Cinema Preproduction Platform</span>
+  <span>Page 1 of 3</span>
+</div>
+
+</div><!-- /page 1 -->
+
+
+<!-- PAGE 2 -->
+<div class="page">
+
+<div class="header">
+  <div>
+    <div class="logo-mark">&#1685;</div>
+  </div>
+  <div class="header-info">
+    <div class="header-title">The Four Chains</div>
+    <div class="header-sub">Pick the one where your gut says &ldquo;I&rsquo;m least sure about this.&rdquo;</div>
+  </div>
+  <div class="header-right">
+    <div class="header-date">19 unsettled decisions</div>
+    <div class="header-badge">Pick One</div>
+  </div>
+</div>
+
+<!-- Chain A -->
+<div class="chain-card">
+  <div class="chain-header">
+    <div class="chain-letter">A</div>
+    <div>
+      <div class="chain-title">Gesha: The Guest&rsquo;s Own Tragedy</div>
+      <div class="chain-count">5 decisions</div>
+    </div>
+  </div>
+  <div class="chain-body">
+    <ol class="chain-decisions">
+      <li><strong>Gesha&rsquo;s character</strong> &mdash; Is she developed enough for the audience to feel for her? Should her diabetes be revealed earlier?</li>
+      <li><strong>The skincare mask</strong> &mdash; Is this motif enough for a first impression, or should it recur through the film?</li>
+      <li><strong>The sherbet</strong> &mdash; Is the hint (&ldquo;these will kill me&rdquo;) enough, or does the audience need more foreshadowing? Should Nazi eating one during rehearsal be more dramatic?</li>
+      <li><strong>Gesha&rsquo;s death</strong> &mdash; Is the mechanism (cardiac arrest from sugar) believable without earlier medical clues?</li>
+      <li><strong>Evin at the police station</strong> &mdash; Is this section too long? Should Evin appear somewhere before the station?</li>
+    </ol>
+    <div class="chain-test"><strong>What this chain tests:</strong> Whether Gesha&rsquo;s arc holds together as a self-contained tragedy that collides with Nali&rsquo;s system. These five decisions are really one question asked five different ways: does the audience understand that Gesha was doomed by her own story, not just by Nali&rsquo;s?</div>
+    <div class="chain-pick">If you pick this &rarr; Darya gives you the full Gesha chain breakdown</div>
+  </div>
+</div>
+
+<!-- Chain B -->
+<div class="chain-card">
+  <div class="chain-header">
+    <div class="chain-letter">B</div>
+    <div>
+      <div class="chain-title">The Physical World: Objects That Carry the Story</div>
+      <div class="chain-count">3 decisions</div>
+    </div>
+  </div>
+  <div class="chain-body">
+    <ol class="chain-decisions">
+      <li><strong>The couch</strong> &mdash; Is it overdone as a symbol (sleep, death, hiding, discovery, near-opening), or is the accumulation the point?</li>
+      <li><strong>The locked room</strong> &mdash; Does the reveal (Nali&rsquo;s European past, the French girl who looks like Gesha) come at the right time? Should there be earlier hints?</li>
+      <li><strong>The house as system</strong> &mdash; Is the dual life (designed garden vs. dusty apartment) clear enough for the audience?</li>
+    </ol>
+    <div class="chain-test"><strong>What this chain tests:</strong> Whether the physical world is doing real structural work or just set decoration. If you took away all the words and just watched someone move through the house, the couch, the locked room &mdash; would you understand the film?</div>
+    <div class="chain-pick">If you pick this &rarr; Darya gives you the full Physical World chain breakdown</div>
+  </div>
+</div>
+
+<!-- Chain C -->
+<div class="chain-card">
+  <div class="chain-header">
+    <div class="chain-letter">C</div>
+    <div>
+      <div class="chain-title">The Film&rsquo;s Architecture: How the Frame Works</div>
+      <div class="chain-count">5 decisions</div>
+    </div>
+  </div>
+  <div class="chain-body">
+    <ol class="chain-decisions">
+      <li><strong>The final twist</strong> &mdash; Does the audience feel enlightened or cheated when they learn it was all Nali&rsquo;s imagination?</li>
+      <li><strong>The opening montage</strong> &mdash; Are the flash-forward fragments too obvious? Should they be replayed during the twist?</li>
+      <li><strong>Chekhov&rsquo;s Seagull</strong> &mdash; Is using The Seagull as a mirror too on-the-nose? What if the audience doesn&rsquo;t know Chekhov?</li>
+      <li><strong>The ending</strong> &mdash; Nali answers the phone without any system. Is this enough? Does the audience believe he&rsquo;s changed?</li>
+      <li><strong>The gardener</strong> &mdash; Does the framing device (gardener still talking at the end, same conversation) work? Is it clear no time has passed?</li>
+    </ol>
+    <div class="chain-test"><strong>What this chain tests:</strong> Whether the film&rsquo;s macro-structure (opening &rarr; twist &rarr; ending) works as a closed loop. These decisions determine whether the last 5 minutes make the previous 90 minutes richer or cheaper.</div>
+    <div class="chain-pick">If you pick this &rarr; Darya gives you the full Architecture chain breakdown</div>
+  </div>
+</div>
+
+<div class="footer">
+  <span>Created with <span class="footer-brand">Rwanga</span> &mdash; Kurdish Cinema Preproduction Platform</span>
+  <span>Page 2 of 3</span>
+</div>
+
+</div><!-- /page 2 -->
+
+
+<!-- PAGE 3 -->
+<div class="page">
+
+<div class="header">
+  <div>
+    <div class="logo-mark">&#1685;</div>
+  </div>
+  <div class="header-info">
+    <div class="header-title">The Four Chains (continued)</div>
+    <div class="header-sub">Last option + your move</div>
+  </div>
+  <div class="header-right">
+    <div class="header-date">2 May 2026</div>
+  </div>
+</div>
+
+<!-- Chain D -->
+<div class="chain-card">
+  <div class="chain-header">
+    <div class="chain-letter">D</div>
+    <div>
+      <div class="chain-title">Nali&rsquo;s Control System: How He Breaks</div>
+      <div class="chain-count">6 decisions</div>
+    </div>
+  </div>
+  <div class="chain-body">
+    <ol class="chain-decisions">
+      <li><strong>Nali&rsquo;s certainty addiction</strong> &mdash; Is his dependence on AI so extreme it makes him repulsive to the audience?</li>
+      <li><strong>The AI role</strong> &mdash; Observer without feeling: is this enough depth, or should we see more of what AI can/can&rsquo;t do?</li>
+      <li><strong>AI grammar (voice vs. text)</strong> &mdash; Should this system (voice = desperation, text = hiding) be made explicit for the audience, e.g., through subtitles?</li>
+      <li><strong>Truth or Dare</strong> &mdash; The game is really a police interrogation in disguise. Should the parallel with AI be more obvious?</li>
+      <li><strong>Edib&rsquo;s death</strong> &mdash; Is the accidental mechanism (panic push &rarr; falls &rarr; hits statue &rarr; dies) believable?</li>
+      <li><strong>Nali&rsquo;s most human moment</strong> &mdash; He leaves the ID by the body. Is this given enough screen time? Is it dramatic enough?</li>
+    </ol>
+    <div class="chain-test"><strong>What this chain tests:</strong> Whether Nali&rsquo;s control system (AI &rarr; game &rarr; art &rarr; desert) escalates believably and then breaks convincingly. These decisions determine whether the audience understands WHY Nali does what he does, not just WHAT he does.</div>
+    <div class="chain-pick">If you pick this &rarr; Darya gives you the full Nali&rsquo;s System chain breakdown</div>
+  </div>
+</div>
+
+<!-- CTA -->
+<div class="cta-box">
+  <h2 style="border:none;">Your Move</h2>
+  <p style="color:#EDEAD8;font-size:12pt;font-weight:600;margin-bottom:10pt;">Pick one chain: A, B, C, or D.</p>
+  <p>Don&rsquo;t overthink it. Pick the one where your gut says &ldquo;I&rsquo;m least sure about this.&rdquo;<br>That&rsquo;s where the chain will do the most work.</p>
+  <div class="cta-options">
+    <div class="cta-option">A</div>
+    <div class="cta-option">B</div>
+    <div class="cta-option">C</div>
+    <div class="cta-option">D</div>
+  </div>
+  <p style="margin-top:14pt;font-size:9.5pt;">Once you pick, Darya gives you the detailed chain document.<br>You read it, react, she captures your notes, we build from there.<br>The other three chains come after. Same process.</p>
+</div>
+
+<div class="pink-box">
+<strong>The process:</strong><br>
+1. You pick a chain letter (A, B, C, or D)<br>
+2. Darya gives you the full breakdown for that chain<br>
+3. You read it &mdash; mark what&rsquo;s right, what&rsquo;s wrong, what&rsquo;s missing<br>
+4. Darya captures your feedback<br>
+5. We build the next chain, adjusted by what we learned<br>
+6. By the end: all 19 unsettled decisions resolved structurally
+</div>
+
+<p class="muted" style="text-align:center;margin-top:20pt;font-size:10pt;">One chain at a time. You pick. We build.</p>
+
+<div class="footer">
+  <span>Created with <span class="footer-brand">Rwanga</span> &mdash; Kurdish Cinema Preproduction Platform</span>
+  <span>Page 3 of 3</span>
+</div>
+
+</div><!-- /page 3 -->
+
+</body>
+</html>
