@@ -16,9 +16,9 @@
 {% endcomment %}
 {% load i18n %}
 
-{% comment %} Brand mark — only show in desktop rail (offcanvas header has its own) {% endcomment %}
+{% comment %} Brand mark — always returns to Home dashboard {% endcomment %}
 {% if not offcanvas %}
-<a href="{% url 'projects:list' %}"
+<a href="{% url 'dashboard:home' %}"
    class="rw-rail-logo d-flex align-items-center justify-content-center rounded-1 mb-2"
    title="ڕوانگە">ڕ</a>
 {% endif %}
