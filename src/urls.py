@@ -22,7 +22,7 @@ class HealthAPIView(APIView):
 @login_not_required
 def landing_view(request):
     if request.user.is_authenticated:
-        return redirect("projects:list")
+        return redirect("dashboard:home")
     return render(request, "landing.html")
 
 
@@ -43,6 +43,7 @@ urlpatterns = [
     path("api/v1/accounts/", include("src.accounts.api.urls")),
     path("api/v1/projects/", include("src.projects.api.urls")),
     path("api/v1/progress/", include("src.progress.api.urls")),
+    path("dashboard/", include("src.dashboard.urls")),
     path("accounts/", include("src.accounts.urls")),
     path("accounts/", include("allauth.urls")),
     path("projects/", include("src.projects.urls")),

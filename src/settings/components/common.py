@@ -31,6 +31,7 @@ THIRD_PARTY_APPS = [
 LOCAL_APPS = [
     "src.core",
     "src.accounts",
+    "src.dashboard",
     "src.projects",
     "src.reviews",
     "src.scripts",
