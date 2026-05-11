@@ -23,12 +23,11 @@
 
   {% comment %} ── SCENE LIST PANEL ── first in DOM = right in RTL {% endcomment %}
   <aside class="rw-scene-panel d-none d-lg-flex flex-column overflow-hidden">
-    <div class="px-3 py-2 rw-overline"
-         style="border-bottom:1px solid var(--rw-border)">
+    <div class="px-3 py-2 rw-overline border-bottom border-rw">
       {% trans "دیمەنەکان" %}
     </div>
 
-    <div class="px-2 py-2" style="border-bottom:1px solid var(--rw-border)">
+    <div class="px-2 py-2 border-bottom border-rw">
       <input type="search" class="rw-form-input"
              placeholder="{% trans 'گەڕان...' %}"
              oninput="RW.sceneFilter(this.value)"
@@ -36,8 +35,8 @@
              style="padding:6px 10px;font-size:12px">
     </div>
 
-    <label class="d-flex align-items-center gap-2 px-3 py-2"
-           style="font-size:11px;color:var(--rw-text-3);cursor:pointer;border-bottom:1px solid var(--rw-border);flex-shrink:0">
+    <label class="d-flex align-items-center gap-2 px-3 py-2 border-bottom border-rw flex-shrink-0"
+           style="font-size:11px;color:var(--rw-text-3);cursor:pointer">
       <input type="checkbox" id="rw-group-toggle" checked>
       {% trans "گروپبەندی بەپێی شوێن" %}
     </label>
@@ -57,8 +56,8 @@
     {% include "components/_breadcrumb.html" with crumbs=crumbs current=scene.number|stringformat:"s" location=scene.heading %}
 
     {# Scene topbar #}
-    <div class="d-flex align-items-center px-4 gap-3 bg-rw-surface"
-         style="height:56px;flex-shrink:0;border-bottom:1px solid var(--rw-border)">
+    <div class="d-flex align-items-center px-4 gap-3 bg-rw-surface border-bottom border-rw flex-shrink-0"
+         style="height:56px">
       <div class="flex-grow-1">
         <div class="fw-bold">
           {% trans "دیمەنی" %} {{ scene.number }}
@@ -108,8 +107,8 @@
     </div>
 
     {% comment %} ── MODULE TABS ── {% endcomment %}
-    <div class="d-flex overflow-x-auto px-3 bg-rw-surface"
-         style="height:48px;flex-shrink:0;border-bottom:1px solid var(--rw-border)"
+    <div class="d-flex overflow-x-auto px-3 bg-rw-surface border-bottom border-rw flex-shrink-0"
+         style="height:48px"
          role="tablist">
       {% for tab in tabs %}
       <button class="rw-mod-tab {% if active_tab == tab.id %}active{% endif %}"
