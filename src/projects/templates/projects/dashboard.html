@@ -17,45 +17,36 @@
 {% block content %}
 
   {% comment %} ── Project header ── {% endcomment %}
-  <div class="d-flex align-items-center gap-4 px-4 py-4 bg-rw-surface"
-       style="border-bottom:1px solid var(--rw-border)">
-    <div class="rw-proj-cover d-flex align-items-center justify-content-center">
-      {% if project.cover %}
-        <img src="{{ project.cover.url }}" alt="{{ project.title }}" style="width:100%;height:100%;object-fit:cover">
-      {% else %}
-        <svg width="28" height="28" viewBox="0 0 24 24" class="ico">
-          <rect x="2" y="4" width="20" height="16" rx="1"/>
-          <line x1="2" y1="8" x2="22" y2="8"/><line x1="2" y1="16" x2="22" y2="16"/>
-          <line x1="6" y1="4" x2="6" y2="8"/><line x1="10" y1="4" x2="10" y2="8"/>
-          <line x1="14" y1="4" x2="14" y2="8"/><line x1="18" y1="4" x2="18" y2="8"/>
-          <line x1="6" y1="16" x2="6" y2="20"/><line x1="10" y1="16" x2="10" y2="20"/>
-          <line x1="14" y1="16" x2="14" y2="20"/><line x1="18" y1="16" x2="18" y2="20"/>
-        </svg>
-      {% endif %}
-    </div>
-    <div>
-      <div class="rw-proj-title">{{ project.title }}</div>
-      <div class="d-flex gap-3 mt-1" style="font-size:13px;color:var(--rw-text-2)">
-        <span>{{ project.studio.name }}</span>
-        <span>{{ project.get_project_type_display }}</span>
-        <span>{{ project.scenes.count }} {% trans "دیمەن" %}</span>
-        <span>{{ project.shots_count }} {% trans "لێدان" %}</span>
+  <div class="px-4 py-4" style="background:var(--rw-surface);border-bottom:1px solid var(--rw-border)">
+    <div class="d-flex align-items-center gap-4 flex-wrap">
+      <div class="rounded-2 d-flex align-items-center justify-content-center flex-shrink-0" style="width:200px;height:150px;background:var(--rw-script);color:#fff">
+        {% if project.cover %}<img src="{{ project.cover.url }}" alt="{{ project.title }}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit">{% else %}<svg width="44" height="44" viewBox="0 0 24 24" fill="currentColor" style="opacity:.65"><path d="M4 4h16v3H4zm0 5h16v3H4zm0 5h16v3H4z"/></svg>{% endif %}
       </div>
-    </div>
-    <div class="ms-auto d-flex gap-3 align-items-center">
-      <a href="{% url 'scripts:upload' project.pk %}" class="rw-btn rw-btn-ghost">
-        + {% trans "بارکردنی دەستنووس" %}
-      </a>
-      <a href="{% url 'projects:settings' project.pk %}" class="rw-btn rw-btn-ghost rw-btn-sm" title="{% trans 'ڕێکخستنەکان' %}">
-        <svg width="20" height="20" viewBox="0 0 24 24" class="ico">
-          <circle cx="12" cy="12" r="9"/>
-          <circle cx="12" cy="12" r="3.5"/>
-          <line x1="12" y1="3" x2="12" y2="8.5"/><line x1="12" y1="15.5" x2="12" y2="21"/>
-          <line x1="3" y1="12" x2="8.5" y2="12"/><line x1="15.5" y1="12" x2="21" y2="12"/>
-          <line x1="5.6" y1="5.6" x2="9.4" y2="9.4"/><line x1="14.6" y1="14.6" x2="18.4" y2="18.4"/>
-          <line x1="18.4" y1="5.6" x2="14.6" y2="9.4"/><line x1="9.4" y1="14.6" x2="5.6" y2="18.4"/>
-        </svg>
-      </a>
+      <div class="flex-grow-1" style="min-width:240px">
+        <h1 class="fw-light mb-1" style="font-size:26px;color:var(--rw-text)">{{ project.title }}</h1>
+        <div class="d-flex align-items-center gap-2 mb-2" style="font-size:13px;color:var(--rw-text-2)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M3 21V7l9-4 9 4v14H3zm2-2h4v-6h6v6h4V8.3l-7-3.1-7 3.1V19zm6-2h2v-2h-2v2z"/></svg>
+          <span>{{ project.studio.name }}</span>
+        </div>
+        <div class="d-flex flex-wrap gap-3" style="font-size:12px;color:var(--rw-text-2)">
+          <span>{{ project.get_project_type_display }}</span>
+          <span>{{ project.scenes.count }} {% trans "دیمەن" %}</span>
+          <span>{{ project.shots_count }} {% trans "لێدان" %}</span>
+        </div>
+      </div>
+      <div class="d-flex gap-3 align-items-center flex-shrink-0">
+        <a href="{% url 'scripts:upload' project.pk %}" class="rw-btn rw-btn-ghost">+ {% trans "بارکردنی دەستنووس" %}</a>
+        <a href="{% url 'projects:settings' project.pk %}" class="rw-btn rw-btn-ghost rw-btn-sm" title="{% trans 'ڕێکخستنەکان' %}">
+          <svg width="20" height="20" viewBox="0 0 24 24" class="ico">
+            <circle cx="12" cy="12" r="9"/>
+            <circle cx="12" cy="12" r="3.5"/>
+            <line x1="12" y1="3" x2="12" y2="8.5"/><line x1="12" y1="15.5" x2="12" y2="21"/>
+            <line x1="3" y1="12" x2="8.5" y2="12"/><line x1="15.5" y1="12" x2="21" y2="12"/>
+            <line x1="5.6" y1="5.6" x2="9.4" y2="9.4"/><line x1="14.6" y1="14.6" x2="18.4" y2="18.4"/>
+            <line x1="18.4" y1="5.6" x2="14.6" y2="9.4"/><line x1="9.4" y1="14.6" x2="5.6" y2="18.4"/>
+          </svg>
+        </a>
+      </div>
     </div>
   </div>
 
@@ -67,193 +58,189 @@
   </div>
 
   {% comment %} ── Module grid ── {% endcomment %}
-  <div class="px-4 pb-4">
+  <div class="px-4 py-4">
 
     {% comment %} ── هاوکاری (Collaboration: Reviews + Community) ── {% endcomment %}
-    <div class="d-flex rw-sec-row">
-      <a href="{% url 'reviews:project_list' project.pk %}"
-         class="rw-sec-label d-flex flex-column align-items-center justify-content-center gap-2 py-3"
-         style="background:var(--rw-amber)">
-        <svg width="28" height="28" viewBox="0 0 24 24" class="ico">
-          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-        </svg>
-        <span class="rw-sec-label-text">{% trans "هاوکاری" %}</span>
-      </a>
-      <div class="rw-sec-modules flex-grow-1 d-flex flex-wrap">
+    <div class="card mb-3" style="background:var(--rw-surface);border:1px solid var(--rw-border);overflow:hidden">
+      <div class="d-flex rw-sec-row">
         <a href="{% url 'reviews:project_list' project.pk %}"
-           class="rw-mod-card d-flex flex-column align-items-center justify-content-center gap-2 py-4 px-3 text-decoration-none">
-          <svg width="28" height="28" viewBox="0 0 24 24" class="ico" style="color:var(--rw-plan)">
-            <path d="M9 11l3 3L22 4"/>
-            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
-          </svg>
-          <span class="rw-mod-name">{% trans "پێداچوونەوەکان" %}</span>
-        </a>
-        <a href="{% url 'community:project_list' project.pk %}"
-           class="rw-mod-card d-flex flex-column align-items-center justify-content-center gap-2 py-4 px-3 text-decoration-none">
-          <svg width="28" height="28" viewBox="0 0 24 24" class="ico" style="color:var(--rw-vis)">
+           class="rw-sec-label d-flex flex-column align-items-center justify-content-center gap-2 py-3"
+           style="background:var(--rw-amber)">
+          <svg width="28" height="28" viewBox="0 0 24 24" class="ico">
             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
           </svg>
-          <span class="rw-mod-name">{% trans "کۆمەڵگا" %}</span>
+          <span class="rw-sec-label-text">{% trans "هاوکاری" %}</span>
         </a>
-        <a href="{% url 'accounts:team' %}"
-           class="rw-mod-card d-flex flex-column align-items-center justify-content-center gap-2 py-4 px-3 text-decoration-none">
-          <svg width="28" height="28" viewBox="0 0 24 24" class="ico" style="color:var(--rw-amber)">
-            <circle cx="9" cy="7" r="3"/>
-            <path d="M3 21v-1a6 6 0 0 1 12 0v1"/>
-            <path d="M16 3.13a4 4 0 0 1 0 7.75M21 21v-1a4 4 0 0 0-3-3.85"/>
-          </svg>
-          <span class="rw-mod-name">{% trans "تیم" %}</span>
-        </a>
+        <div class="rw-sec-modules flex-grow-1 d-flex flex-wrap">
+          <a href="{% url 'reviews:project_list' project.pk %}"
+             class="rw-mod-card d-flex flex-column align-items-center justify-content-center gap-2 py-4 px-3 text-decoration-none">
+            <svg width="28" height="28" viewBox="0 0 24 24" class="ico" style="color:var(--rw-plan)">
+              <path d="M9 11l3 3L22 4"/>
+              <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+            </svg>
+            <span class="rw-mod-name">{% trans "پێداچوونەوەکان" %}</span>
+          </a>
+          <a href="{% url 'community:project_list' project.pk %}"
+             class="rw-mod-card d-flex flex-column align-items-center justify-content-center gap-2 py-4 px-3 text-decoration-none">
+            <svg width="28" height="28" viewBox="0 0 24 24" class="ico" style="color:var(--rw-vis)">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+            <span class="rw-mod-name">{% trans "کۆمەڵگا" %}</span>
+          </a>
+          <a href="{% url 'accounts:team' %}"
+             class="rw-mod-card d-flex flex-column align-items-center justify-content-center gap-2 py-4 px-3 text-decoration-none">
+            <svg width="28" height="28" viewBox="0 0 24 24" class="ico" style="color:var(--rw-amber)">
+              <circle cx="9" cy="7" r="3"/>
+              <path d="M3 21v-1a6 6 0 0 1 12 0v1"/>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75M21 21v-1a4 4 0 0 0-3-3.85"/>
+            </svg>
+            <span class="rw-mod-name">{% trans "تیم" %}</span>
+          </a>
+        </div>
       </div>
     </div>
 
     {% comment %} ── دەستنووس (Script) ── {% endcomment %}
-    <div class="d-flex rw-sec-row">
-      <a href="{% url 'scripts:index' project.pk %}"
-         class="rw-sec-label d-flex flex-column align-items-center justify-content-center gap-2 py-3"
-         style="background:var(--rw-script)">
-        <svg width="28" height="28" viewBox="0 0 24 24" class="ico">
-          <path d="M4 6l16-3v4H4z"/>
-          <rect x="2" y="7" width="20" height="14" rx="1"/>
-          <line x1="7" y1="3.5" x2="5" y2="7"/><line x1="11" y1="2.7" x2="9" y2="7"/>
-          <line x1="15" y1="1.9" x2="13" y2="7"/><line x1="19" y1="1.1" x2="17" y2="7"/>
-        </svg>
-        <span class="rw-sec-label-text">{% trans "دەستنووس" %}</span>
-      </a>
-      <div class="rw-sec-modules flex-grow-1 d-flex flex-wrap">
+    <div class="card mb-3" style="background:var(--rw-surface);border:1px solid var(--rw-border);overflow:hidden">
+      <div class="d-flex rw-sec-row">
         <a href="{% url 'scripts:index' project.pk %}"
-           class="rw-mod-card d-flex flex-column align-items-center justify-content-center gap-2 py-4 px-3 text-decoration-none">
-          <svg width="28" height="28" viewBox="0 0 24 24" class="ico" style="color:var(--rw-script)">
+           class="rw-sec-label d-flex flex-column align-items-center justify-content-center gap-2 py-3"
+           style="background:var(--rw-script)">
+          <svg width="28" height="28" viewBox="0 0 24 24" class="ico">
             <path d="M4 6l16-3v4H4z"/>
             <rect x="2" y="7" width="20" height="14" rx="1"/>
             <line x1="7" y1="3.5" x2="5" y2="7"/><line x1="11" y1="2.7" x2="9" y2="7"/>
             <line x1="15" y1="1.9" x2="13" y2="7"/><line x1="19" y1="1.1" x2="17" y2="7"/>
           </svg>
-          <span class="rw-mod-name">{% trans "دەستنووسەکان" %}</span>
+          <span class="rw-sec-label-text">{% trans "دەستنووس" %}</span>
         </a>
-        <a href="{% url 'scripts:upload' project.pk %}"
-           class="rw-mod-card d-flex flex-column align-items-center justify-content-center gap-2 py-4 px-3 text-decoration-none">
-          <svg width="28" height="28" viewBox="0 0 24 24" class="ico" style="color:var(--rw-amber)">
-            <circle cx="12" cy="12" r="9"/>
-            <line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>
-          </svg>
-          <span class="rw-mod-name">{% trans "AI داڕشتن" %}<br><span class="rw-ai-badge">AI</span></span>
-        </a>
-        <a href="{% url 'scripts:docs' project.pk %}"
-           class="rw-mod-card d-flex flex-column align-items-center justify-content-center gap-2 py-4 px-3 text-decoration-none">
-          <svg width="28" height="28" viewBox="0 0 24 24" class="ico" style="color:var(--rw-script)">
-            <rect x="4" y="2" width="16" height="20" rx="1"/>
-            <line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="13" y2="16"/>
-          </svg>
-          <span class="rw-mod-name">{% trans "بەڵگەکان" %}</span>
-        </a>
+        <div class="rw-sec-modules flex-grow-1 d-flex flex-wrap">
+          <a href="{% url 'scripts:index' project.pk %}"
+             class="rw-mod-card d-flex flex-column align-items-center justify-content-center gap-2 py-4 px-3 text-decoration-none">
+            <svg width="28" height="28" viewBox="0 0 24 24" class="ico" style="color:var(--rw-script)">
+              <path d="M4 6l16-3v4H4z"/>
+              <rect x="2" y="7" width="20" height="14" rx="1"/>
+              <line x1="7" y1="3.5" x2="5" y2="7"/><line x1="11" y1="2.7" x2="9" y2="7"/>
+              <line x1="15" y1="1.9" x2="13" y2="7"/><line x1="19" y1="1.1" x2="17" y2="7"/>
+            </svg>
+            <span class="rw-mod-name">{% trans "دەستنووسەکان" %}</span>
+          </a>
+          <a href="{% url 'scripts:upload' project.pk %}"
+             class="rw-mod-card d-flex flex-column align-items-center justify-content-center gap-2 py-4 px-3 text-decoration-none">
+            <svg width="28" height="28" viewBox="0 0 24 24" class="ico" style="color:var(--rw-amber)">
+              <circle cx="12" cy="12" r="9"/>
+              <line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>
+            </svg>
+            <span class="rw-mod-name">{% trans "AI داڕشتن" %}<br><span class="rw-ai-badge">AI</span></span>
+          </a>
+          <a href="{% url 'scripts:docs' project.pk %}"
+             class="rw-mod-card d-flex flex-column align-items-center justify-content-center gap-2 py-4 px-3 text-decoration-none">
+            <svg width="28" height="28" viewBox="0 0 24 24" class="ico" style="color:var(--rw-script)">
+              <rect x="4" y="2" width="16" height="20" rx="1"/>
+              <line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="13" y2="16"/>
+            </svg>
+            <span class="rw-mod-name">{% trans "بەڵگەکان" %}</span>
+          </a>
+        </div>
       </div>
     </div>
 
     {% comment %} ── داڕشتن (Breakdown) ── {% endcomment %}
-    <div class="d-flex rw-sec-row">
-      <a href="{% url 'scripts:breakdown' project.pk %}"
-         class="rw-sec-label d-flex flex-column align-items-center justify-content-center gap-2 py-3"
-         style="background:var(--rw-break)">
-        <svg width="28" height="28" viewBox="0 0 24 24" class="ico">
-          <rect x="3" y="3" width="7" height="7" rx="1"/>
-          <rect x="14" y="3" width="7" height="7" rx="1"/>
-          <rect x="3" y="14" width="7" height="7" rx="1"/>
-          <rect x="14" y="14" width="7" height="7" rx="1"/>
-        </svg>
-        <span class="rw-sec-label-text">{% trans "داڕشتن" %}</span>
-      </a>
-      <div class="rw-sec-modules flex-grow-1 d-flex flex-wrap">
+    <div class="card mb-3" style="background:var(--rw-surface);border:1px solid var(--rw-border);overflow:hidden">
+      <div class="d-flex rw-sec-row">
         <a href="{% url 'scripts:breakdown' project.pk %}"
-           class="rw-mod-card d-flex flex-column align-items-center justify-content-center gap-2 py-4 px-3 text-decoration-none">
-          <svg width="28" height="28" viewBox="0 0 24 24" class="ico" style="color:var(--rw-break)">
-            <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
-            <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+           class="rw-sec-label d-flex flex-column align-items-center justify-content-center gap-2 py-3"
+           style="background:var(--rw-break)">
+          <svg width="28" height="28" viewBox="0 0 24 24" class="ico">
+            <rect x="3" y="3" width="7" height="7" rx="1"/>
+            <rect x="14" y="3" width="7" height="7" rx="1"/>
+            <rect x="3" y="14" width="7" height="7" rx="1"/>
+            <rect x="14" y="14" width="7" height="7" rx="1"/>
           </svg>
-          <span class="rw-mod-name">{% trans "داڕشتنی دەستنووس" %}</span>
+          <span class="rw-sec-label-text">{% trans "داڕشتن" %}</span>
         </a>
-        <a href="{% url 'scheduling:stripboard' project.pk %}"
-           class="rw-mod-card d-flex flex-column align-items-center justify-content-center gap-2 py-4 px-3 text-decoration-none">
-          <svg width="28" height="28" viewBox="0 0 24 24" class="ico" style="color:var(--rw-break)">
-            <line x1="3" y1="7" x2="21" y2="7"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="17" x2="21" y2="17"/>
-          </svg>
-          <span class="rw-mod-name">{% trans "ستریپبۆرد" %}</span>
-        </a>
-        <a href="{% url 'scripts:elements' project.pk %}"
-           class="rw-mod-card d-flex flex-column align-items-center justify-content-center gap-2 py-4 px-3 text-decoration-none">
-          <svg width="28" height="28" viewBox="0 0 24 24" class="ico" style="color:var(--rw-break)">
-            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-          </svg>
-          <span class="rw-mod-name">{% trans "ئێلیمێنتەکان" %}</span>
-        </a>
+        <div class="rw-sec-modules flex-grow-1 d-flex flex-wrap">
+          <a href="{% url 'scripts:breakdown' project.pk %}"
+             class="rw-mod-card d-flex flex-column align-items-center justify-content-center gap-2 py-4 px-3 text-decoration-none">
+            <svg width="28" height="28" viewBox="0 0 24 24" class="ico" style="color:var(--rw-break)">
+              <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+              <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+            </svg>
+            <span class="rw-mod-name">{% trans "داڕشتنی دەستنووس" %}</span>
+          </a>
+          <a href="{% url 'scheduling:stripboard' project.pk %}"
+             class="rw-mod-card d-flex flex-column align-items-center justify-content-center gap-2 py-4 px-3 text-decoration-none">
+            <svg width="28" height="28" viewBox="0 0 24 24" class="ico" style="color:var(--rw-break)">
+              <line x1="3" y1="7" x2="21" y2="7"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="17" x2="21" y2="17"/>
+            </svg>
+            <span class="rw-mod-name">{% trans "ستریپبۆرد" %}</span>
+          </a>
+          <a href="{% url 'scripts:elements' project.pk %}"
+             class="rw-mod-card d-flex flex-column align-items-center justify-content-center gap-2 py-4 px-3 text-decoration-none">
+            <svg width="28" height="28" viewBox="0 0 24 24" class="ico" style="color:var(--rw-break)">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+            </svg>
+            <span class="rw-mod-name">{% trans "ئێلیمێنتەکان" %}</span>
+          </a>
+        </div>
       </div>
     </div>
 
     {% comment %} ── بینراوکردن (Visualize) ── {% endcomment %}
-    <div class="d-flex rw-sec-row">
-      <a href="{% url 'shots:list' project.pk %}"
-         class="rw-sec-label d-flex flex-column align-items-center justify-content-center gap-2 py-3"
-         style="background:var(--rw-vis)">
-        <svg width="28" height="28" viewBox="0 0 24 24" class="ico">
-          <circle cx="12" cy="12" r="9"/>
-          <circle cx="12" cy="12" r="3"/>
-          <line x1="12" y1="3" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="21"/>
-          <line x1="3" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="21" y2="12"/>
-        </svg>
-        <span class="rw-sec-label-text">{% trans "بینراوکردن" %}</span>
-      </a>
-      <div class="rw-sec-modules flex-grow-1 d-flex flex-wrap">
+    <div class="card mb-3" style="background:var(--rw-surface);border:1px solid var(--rw-border);overflow:hidden">
+      <div class="d-flex rw-sec-row">
         <a href="{% url 'shots:list' project.pk %}"
-           class="rw-mod-card d-flex flex-column align-items-center justify-content-center gap-2 py-4 px-3 text-decoration-none">
-          <svg width="28" height="28" viewBox="0 0 24 24" class="ico" style="color:var(--rw-vis)">
+           class="rw-sec-label d-flex flex-column align-items-center justify-content-center gap-2 py-3"
+           style="background:var(--rw-vis)">
+          <svg width="28" height="28" viewBox="0 0 24 24" class="ico">
             <circle cx="12" cy="12" r="9"/>
             <circle cx="12" cy="12" r="3"/>
             <line x1="12" y1="3" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="21"/>
             <line x1="3" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="21" y2="12"/>
           </svg>
-          <span class="rw-mod-name">{% trans "لیستی لێدانەکان" %}</span>
+          <span class="rw-sec-label-text">{% trans "بینراوکردن" %}</span>
         </a>
-        <a href="{% url 'shots:storyboards' project.pk %}"
-           class="rw-mod-card d-flex flex-column align-items-center justify-content-center gap-2 py-4 px-3 text-decoration-none">
-          <svg width="28" height="28" viewBox="0 0 24 24" class="ico" style="color:var(--rw-vis)">
-            <rect x="2" y="2" width="9" height="7" rx="1"/><rect x="13" y="2" width="9" height="7" rx="1"/>
-            <rect x="2" y="11" width="9" height="7" rx="1"/><rect x="13" y="11" width="9" height="7" rx="1"/>
-            <line x1="5" y1="20" x2="19" y2="20"/>
-          </svg>
-          <span class="rw-mod-name">{% trans "ستۆری‌بۆردەکان" %}</span>
-        </a>
-        <a href="{% url 'floorplans:list' project.pk %}"
-           class="rw-mod-card d-flex flex-column align-items-center justify-content-center gap-2 py-4 px-3 text-decoration-none">
-          <svg width="28" height="28" viewBox="0 0 24 24" class="ico" style="color:var(--rw-vis)">
-            <rect x="3" y="3" width="18" height="18" rx="1"/>
-            <line x1="3" y1="10" x2="21" y2="10"/>
-            <line x1="10" y1="10" x2="10" y2="21"/>
-            <circle cx="6.5" cy="6.5" r="1.5"/><circle cx="16" cy="16" r="1.5"/>
-          </svg>
-          <span class="rw-mod-name">{% trans "نەخشەی ژوور" %}<br><span class="rw-rw-exclusive">ڕوانگە ✦</span></span>
-        </a>
+        <div class="rw-sec-modules flex-grow-1 d-flex flex-wrap">
+          <a href="{% url 'shots:list' project.pk %}"
+             class="rw-mod-card d-flex flex-column align-items-center justify-content-center gap-2 py-4 px-3 text-decoration-none">
+            <svg width="28" height="28" viewBox="0 0 24 24" class="ico" style="color:var(--rw-vis)">
+              <circle cx="12" cy="12" r="9"/>
+              <circle cx="12" cy="12" r="3"/>
+              <line x1="12" y1="3" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="21"/>
+              <line x1="3" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="21" y2="12"/>
+            </svg>
+            <span class="rw-mod-name">{% trans "لیستی لێدانەکان" %}</span>
+          </a>
+          <a href="{% url 'shots:storyboards' project.pk %}"
+             class="rw-mod-card d-flex flex-column align-items-center justify-content-center gap-2 py-4 px-3 text-decoration-none">
+            <svg width="28" height="28" viewBox="0 0 24 24" class="ico" style="color:var(--rw-vis)">
+              <rect x="2" y="2" width="9" height="7" rx="1"/><rect x="13" y="2" width="9" height="7" rx="1"/>
+              <rect x="2" y="11" width="9" height="7" rx="1"/><rect x="13" y="11" width="9" height="7" rx="1"/>
+              <line x1="5" y1="20" x2="19" y2="20"/>
+            </svg>
+            <span class="rw-mod-name">{% trans "ستۆری‌بۆردەکان" %}</span>
+          </a>
+          <a href="{% url 'floorplans:list' project.pk %}"
+             class="rw-mod-card d-flex flex-column align-items-center justify-content-center gap-2 py-4 px-3 text-decoration-none">
+            <svg width="28" height="28" viewBox="0 0 24 24" class="ico" style="color:var(--rw-vis)">
+              <rect x="3" y="3" width="18" height="18" rx="1"/>
+              <line x1="3" y1="10" x2="21" y2="10"/>
+              <line x1="10" y1="10" x2="10" y2="21"/>
+              <circle cx="6.5" cy="6.5" r="1.5"/><circle cx="16" cy="16" r="1.5"/>
+            </svg>
+            <span class="rw-mod-name">{% trans "نەخشەی ژوور" %}<br><span class="rw-rw-exclusive">ڕوانگە ✦</span></span>
+          </a>
+        </div>
       </div>
     </div>
 
     {% comment %} ── ڕێنوێس (Plan) ── {% endcomment %}
-    <div class="d-flex rw-sec-row">
-      <a href="{% url 'scheduling:index' project.pk %}"
-         class="rw-sec-label d-flex flex-column align-items-center justify-content-center gap-2 py-3"
-         style="background:var(--rw-plan)">
-        <svg width="28" height="28" viewBox="0 0 24 24" class="ico">
-          <circle cx="12" cy="12" r="9"/>
-          <circle cx="12" cy="12" r="2.5"/>
-          <circle cx="12" cy="5.5" r="1.5"/><circle cx="12" cy="18.5" r="1.5"/>
-          <circle cx="5.5" cy="12" r="1.5"/><circle cx="18.5" cy="12" r="1.5"/>
-          <circle cx="7.7" cy="7.7" r="1.5"/><circle cx="16.3" cy="16.3" r="1.5"/>
-          <circle cx="16.3" cy="7.7" r="1.5"/><circle cx="7.7" cy="16.3" r="1.5"/>
-        </svg>
-        <span class="rw-sec-label-text">{% trans "ڕێنوێس" %}</span>
-      </a>
-      <div class="rw-sec-modules flex-grow-1 d-flex flex-wrap">
+    <div class="card mb-3" style="background:var(--rw-surface);border:1px solid var(--rw-border);overflow:hidden">
+      <div class="d-flex rw-sec-row">
         <a href="{% url 'scheduling:index' project.pk %}"
-           class="rw-mod-card d-flex flex-column align-items-center justify-content-center gap-2 py-4 px-3 text-decoration-none">
-          <svg width="28" height="28" viewBox="0 0 24 24" class="ico" style="color:var(--rw-plan)">
+           class="rw-sec-label d-flex flex-column align-items-center justify-content-center gap-2 py-3"
+           style="background:var(--rw-plan)">
+          <svg width="28" height="28" viewBox="0 0 24 24" class="ico">
             <circle cx="12" cy="12" r="9"/>
             <circle cx="12" cy="12" r="2.5"/>
             <circle cx="12" cy="5.5" r="1.5"/><circle cx="12" cy="18.5" r="1.5"/>
@@ -261,83 +248,99 @@
             <circle cx="7.7" cy="7.7" r="1.5"/><circle cx="16.3" cy="16.3" r="1.5"/>
             <circle cx="16.3" cy="7.7" r="1.5"/><circle cx="7.7" cy="16.3" r="1.5"/>
           </svg>
-          <span class="rw-mod-name">{% trans "خشتەی وێنەگرتن" %}</span>
+          <span class="rw-sec-label-text">{% trans "ڕێنوێس" %}</span>
         </a>
-        <a href="{% url 'scheduling:call_sheets' project.pk %}"
-           class="rw-mod-card d-flex flex-column align-items-center justify-content-center gap-2 py-4 px-3 text-decoration-none">
-          <svg width="28" height="28" viewBox="0 0 24 24" class="ico" style="color:var(--rw-plan)">
-            <rect x="4" y="2" width="16" height="20" rx="1"/>
-            <line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="13" y2="16"/>
-          </svg>
-          <span class="rw-mod-name">{% trans "ئایننامەکان" %}</span>
-        </a>
-        <a href="{% url 'accounts:contacts' project.pk %}"
-           class="rw-mod-card d-flex flex-column align-items-center justify-content-center gap-2 py-4 px-3 text-decoration-none">
-          <svg width="28" height="28" viewBox="0 0 24 24" class="ico" style="color:var(--rw-plan)">
-            <circle cx="9" cy="7" r="3"/>
-            <path d="M3 21v-1a6 6 0 0 1 12 0v1"/>
-            <path d="M16 3.13a4 4 0 0 1 0 7.75M21 21v-1a4 4 0 0 0-3-3.85"/>
-          </svg>
-          <span class="rw-mod-name">{% trans "پەیوەندییەکان" %}</span>
-        </a>
-        <a href="{% url 'departments:lighting' project.pk %}"
-           class="rw-mod-card d-flex flex-column align-items-center justify-content-center gap-2 py-4 px-3 text-decoration-none">
-          <svg width="28" height="28" viewBox="0 0 24 24" class="ico" style="color:var(--rw-plan)">
-            <circle cx="12" cy="12" r="5"/>
-            <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
-            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-            <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
-            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-          </svg>
-          <span class="rw-mod-name">{% trans "ڕووناکی" %}<br><span class="rw-rw-exclusive">ڕوانگە ✦</span></span>
-        </a>
+        <div class="rw-sec-modules flex-grow-1 d-flex flex-wrap">
+          <a href="{% url 'scheduling:index' project.pk %}"
+             class="rw-mod-card d-flex flex-column align-items-center justify-content-center gap-2 py-4 px-3 text-decoration-none">
+            <svg width="28" height="28" viewBox="0 0 24 24" class="ico" style="color:var(--rw-plan)">
+              <circle cx="12" cy="12" r="9"/>
+              <circle cx="12" cy="12" r="2.5"/>
+              <circle cx="12" cy="5.5" r="1.5"/><circle cx="12" cy="18.5" r="1.5"/>
+              <circle cx="5.5" cy="12" r="1.5"/><circle cx="18.5" cy="12" r="1.5"/>
+              <circle cx="7.7" cy="7.7" r="1.5"/><circle cx="16.3" cy="16.3" r="1.5"/>
+              <circle cx="16.3" cy="7.7" r="1.5"/><circle cx="7.7" cy="16.3" r="1.5"/>
+            </svg>
+            <span class="rw-mod-name">{% trans "خشتەی وێنەگرتن" %}</span>
+          </a>
+          <a href="{% url 'scheduling:call_sheets' project.pk %}"
+             class="rw-mod-card d-flex flex-column align-items-center justify-content-center gap-2 py-4 px-3 text-decoration-none">
+            <svg width="28" height="28" viewBox="0 0 24 24" class="ico" style="color:var(--rw-plan)">
+              <rect x="4" y="2" width="16" height="20" rx="1"/>
+              <line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="13" y2="16"/>
+            </svg>
+            <span class="rw-mod-name">{% trans "ئایننامەکان" %}</span>
+          </a>
+          <a href="{% url 'accounts:contacts' project.pk %}"
+             class="rw-mod-card d-flex flex-column align-items-center justify-content-center gap-2 py-4 px-3 text-decoration-none">
+            <svg width="28" height="28" viewBox="0 0 24 24" class="ico" style="color:var(--rw-plan)">
+              <circle cx="9" cy="7" r="3"/>
+              <path d="M3 21v-1a6 6 0 0 1 12 0v1"/>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75M21 21v-1a4 4 0 0 0-3-3.85"/>
+            </svg>
+            <span class="rw-mod-name">{% trans "پەیوەندییەکان" %}</span>
+          </a>
+          <a href="{% url 'departments:lighting' project.pk %}"
+             class="rw-mod-card d-flex flex-column align-items-center justify-content-center gap-2 py-4 px-3 text-decoration-none">
+            <svg width="28" height="28" viewBox="0 0 24 24" class="ico" style="color:var(--rw-plan)">
+              <circle cx="12" cy="12" r="5"/>
+              <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+              <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+            </svg>
+            <span class="rw-mod-name">{% trans "ڕووناکی" %}<br><span class="rw-rw-exclusive">ڕوانگە ✦</span></span>
+          </a>
+        </div>
       </div>
     </div>
 
     {% comment %} ── وێنەگرتن (Shoot) ── {% endcomment %}
-    <div class="d-flex rw-sec-row">
-      <a href="{% url 'scheduling:call_sheets' project.pk %}"
-         class="rw-sec-label d-flex flex-column align-items-center justify-content-center gap-2 py-3"
-         style="background:var(--rw-shoot)">
-        <svg width="28" height="28" viewBox="0 0 24 24" class="ico">
-          <rect x="2" y="4" width="20" height="16" rx="1"/>
-          <circle cx="12" cy="12" r="4"/>
-          <path d="M16 4l3-2v4l-3-1"/>
-        </svg>
-        <span class="rw-sec-label-text">{% trans "وێنەگرتن" %}</span>
-      </a>
-      <div class="rw-sec-modules flex-grow-1 d-flex flex-wrap">
-        <a href="{% url 'locations:list' %}"
-           class="rw-mod-card d-flex flex-column align-items-center justify-content-center gap-2 py-4 px-3 text-decoration-none">
-          <svg width="28" height="28" viewBox="0 0 24 24" class="ico" style="color:var(--rw-shoot)">
-            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
-            <circle cx="12" cy="9" r="2.5"/>
+    <div class="card mb-3" style="background:var(--rw-surface);border:1px solid var(--rw-border);overflow:hidden">
+      <div class="d-flex rw-sec-row">
+        <a href="{% url 'scheduling:call_sheets' project.pk %}"
+           class="rw-sec-label d-flex flex-column align-items-center justify-content-center gap-2 py-3"
+           style="background:var(--rw-shoot)">
+          <svg width="28" height="28" viewBox="0 0 24 24" class="ico">
+            <rect x="2" y="4" width="20" height="16" rx="1"/>
+            <circle cx="12" cy="12" r="4"/>
+            <path d="M16 4l3-2v4l-3-1"/>
           </svg>
-          <span class="rw-mod-name">{% trans "شوێنەکان" %}</span>
+          <span class="rw-sec-label-text">{% trans "وێنەگرتن" %}</span>
         </a>
-        <a href="{% url 'departments:sound' project.pk %}"
-           class="rw-mod-card d-flex flex-column align-items-center justify-content-center gap-2 py-4 px-3 text-decoration-none">
-          <svg width="28" height="28" viewBox="0 0 24 24" class="ico" style="color:var(--rw-shoot)">
-            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
-            <path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/>
-          </svg>
-          <span class="rw-mod-name">{% trans "دەنگ" %}<br><span class="rw-rw-exclusive">ڕوانگە ✦</span></span>
-        </a>
-        <a href="{% url 'departments:wardrobe' project.pk %}"
-           class="rw-mod-card d-flex flex-column align-items-center justify-content-center gap-2 py-4 px-3 text-decoration-none">
-          <svg width="28" height="28" viewBox="0 0 24 24" class="ico" style="color:var(--rw-shoot)">
-            <path d="M20.38 3.46L16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.57a1 1 0 0 0 .99.84H6v10a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.57a2 2 0 0 0-1.34-2.23z"/>
-          </svg>
-          <span class="rw-mod-name">{% trans "جلوبەرگ" %}</span>
-        </a>
-        <a href="{% url 'departments:continuity' project.pk %}"
-           class="rw-mod-card d-flex flex-column align-items-center justify-content-center gap-2 py-4 px-3 text-decoration-none">
-          <svg width="28" height="28" viewBox="0 0 24 24" class="ico" style="color:var(--rw-shoot)">
-            <path d="M9 11l3 3L22 4"/>
-            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
-          </svg>
-          <span class="rw-mod-name">{% trans "بەردەوامی" %}<br><span class="rw-rw-exclusive">ڕوانگە ✦</span></span>
-        </a>
+        <div class="rw-sec-modules flex-grow-1 d-flex flex-wrap">
+          <a href="{% url 'locations:list' %}"
+             class="rw-mod-card d-flex flex-column align-items-center justify-content-center gap-2 py-4 px-3 text-decoration-none">
+            <svg width="28" height="28" viewBox="0 0 24 24" class="ico" style="color:var(--rw-shoot)">
+              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+              <circle cx="12" cy="9" r="2.5"/>
+            </svg>
+            <span class="rw-mod-name">{% trans "شوێنەکان" %}</span>
+          </a>
+          <a href="{% url 'departments:sound' project.pk %}"
+             class="rw-mod-card d-flex flex-column align-items-center justify-content-center gap-2 py-4 px-3 text-decoration-none">
+            <svg width="28" height="28" viewBox="0 0 24 24" class="ico" style="color:var(--rw-shoot)">
+              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/>
+            </svg>
+            <span class="rw-mod-name">{% trans "دەنگ" %}<br><span class="rw-rw-exclusive">ڕوانگە ✦</span></span>
+          </a>
+          <a href="{% url 'departments:wardrobe' project.pk %}"
+             class="rw-mod-card d-flex flex-column align-items-center justify-content-center gap-2 py-4 px-3 text-decoration-none">
+            <svg width="28" height="28" viewBox="0 0 24 24" class="ico" style="color:var(--rw-shoot)">
+              <path d="M20.38 3.46L16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.57a1 1 0 0 0 .99.84H6v10a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.57a2 2 0 0 0-1.34-2.23z"/>
+            </svg>
+            <span class="rw-mod-name">{% trans "جلوبەرگ" %}</span>
+          </a>
+          <a href="{% url 'departments:continuity' project.pk %}"
+             class="rw-mod-card d-flex flex-column align-items-center justify-content-center gap-2 py-4 px-3 text-decoration-none">
+            <svg width="28" height="28" viewBox="0 0 24 24" class="ico" style="color:var(--rw-shoot)">
+              <path d="M9 11l3 3L22 4"/>
+              <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+            </svg>
+            <span class="rw-mod-name">{% trans "بەردەوامی" %}<br><span class="rw-rw-exclusive">ڕوانگە ✦</span></span>
+          </a>
+        </div>
       </div>
     </div>
 
