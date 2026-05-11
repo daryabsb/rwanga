@@ -216,3 +216,13 @@ local_backup/
 src/media/
 
 rwanga-mcp/
+
+# Local Claude Code state (per-machine, not source)
+.claude/
+
+# Local debug/test databases — keep only db.sqlite3 if it's tracked
+*.sqlite3
+!db.sqlite3
+
+# Backup files left by editors / migrations
+*.bak
