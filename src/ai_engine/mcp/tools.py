@@ -51,6 +51,44 @@ def register_tools(app):
                     },
                 },
             ),
+            Tool(
+                name="list_projects",
+                description="List projects accessible to the given user (owner, created_by, or active membership). Optionally scoped to one studio. Returns id, name, slug, project_type, status, studio_id, studio_name.",
+                inputSchema={
+                    "type": "object",
+                    "required": ["user_id"],
+                    "properties": {
+                        "user_id": {"type": "string"},
+                        "studio_id": {"type": "string", "description": "Optional studio scope."},
+                    },
+                },
+            ),
+            Tool(
+                name="get_project",
+                description="Get full project details: name, name_latin, slug, type, status, logline, language, director_credit, scene/member counts. Verifies user has access.",
+                inputSchema={
+                    "type": "object",
+                    "required": ["user_id", "project_id"],
+                    "properties": {
+                        "user_id": {"type": "string"},
+                        "project_id": {"type": "string"},
+                    },
+                },
+            ),
+            Tool(
+                name="create_project",
+                description="Create a new project in the given studio. User must have active membership in the studio. Returns id, name, slug, status (draft).",
+                inputSchema={
+                    "type": "object",
+                    "required": ["user_id", "studio_id", "name"],
+                    "properties": {
+                        "user_id": {"type": "string"},
+                        "studio_id": {"type": "string"},
+                        "name": {"type": "string"},
+                        "project_type": {"type": "string", "default": "feature"},
+                    },
+                },
+            ),
         ]
 
     @app.call_tool()
@@ -178,5 +216,89 @@ def register_tools(app):
                 "specialty": studio.specialty,
                 "members": members,
                 "project_count": studio.projects.count(),
+            })
+        if name == "list_projects":
+            from src.accounts.models import User, Studio
+            from src.projects.models import Project
+            from django.db.models import Q
+            try:
+                user = User.objects.get(pk=args["user_id"])
+            except (User.DoesNotExist, ValueError):
+                return _ok({"error": "user not found"})
+            qs = Project.objects.filter(
+                Q(owner=user) | Q(created_by=user) | Q(memberships__user=user)
+            ).distinct().select_related("studio")
+            if args.get("studio_id"):
+                qs = qs.filter(studio_id=args["studio_id"])
+            out = [
+                {
+                    "id": str(p.id),
+                    "name": p.name or p.title,
+                    "slug": p.slug,
+                    "project_type": p.project_type,
+                    "status": p.status,
+                    "studio_id": str(p.studio_id),
+                    "studio_name": p.studio.name,
+                }
+                for p in qs
+            ]
+            return _ok({"projects": out})
+        if name == "get_project":
+            from src.accounts.models import User
+            from src.projects.models import Project
+            from django.db.models import Q
+            try:
+                user = User.objects.get(pk=args["user_id"])
+                project = Project.objects.filter(
+                    Q(owner=user) | Q(created_by=user) | Q(memberships__user=user)
+                ).filter(pk=args["project_id"]).select_related("studio").first()
+                if project is None:
+                    return _ok({"error": "project not accessible to user"})
+            except (User.DoesNotExist, ValueError):
+                return _ok({"error": "user not found"})
+            members = [
+                {"email": m.user.email, "role": m.role_type, "tier": getattr(m, "tier", "production")}
+                for m in project.memberships.filter(status="active").select_related("user")
+            ]
+            return _ok({
+                "id": str(project.id),
+                "name": project.name or project.title,
+                "name_latin": project.name_latin,
+                "slug": project.slug,
+                "project_type": project.project_type,
+                "status": project.status,
+                "logline": project.logline,
+                "language": project.language,
+                "director_credit": project.director_credit,
+                "estimated_shoot_start": str(project.estimated_shoot_start) if project.estimated_shoot_start else None,
+                "estimated_length_minutes": project.estimated_length_minutes,
+                "studio_id": str(project.studio_id),
+                "studio_name": project.studio.name,
+                "scenes_count": project.scenes.count(),
+                "members": members,
+            })
+        if name == "create_project":
+            from src.accounts.models import User, Studio
+            from src.projects.services.lifecycle_services import create_project
+            try:
+                user = User.objects.get(pk=args["user_id"])
+                studio = Studio.objects.get(
+                    pk=args["studio_id"],
+                    memberships__user=user,
+                    memberships__status="active",
+                )
+            except (User.DoesNotExist, Studio.DoesNotExist, ValueError):
+                return _ok({"error": "user or studio not accessible"})
+            project = create_project(
+                studio=studio,
+                user=user,
+                name=args["name"],
+                project_type=args.get("project_type", "feature"),
+            )
+            return _ok({
+                "id": str(project.id),
+                "name": project.name,
+                "slug": project.slug,
+                "status": project.status,
             })
         raise ValueError(f"Unknown tool: {name}")
