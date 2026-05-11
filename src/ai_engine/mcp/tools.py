@@ -28,6 +28,29 @@ def register_tools(app):
             Tool(name="record_change", description="Record a code change.", inputSchema={"type": "object", "properties": {"task_id": {"type": "string"}, "change_type": {"type": "string"}, "app_name": {"type": "string"}, "description": {"type": "string"}, "files_changed": {"type": "array", "items": {"type": "string"}}, "diff_summary": {"type": "string"}, "commit_hash": {"type": "string"}}}),
             Tool(name="record_decision", description="Record a design decision.", inputSchema={"type": "object", "required": ["title", "context", "decision"], "properties": {"title": {"type": "string"}, "context": {"type": "string"}, "decision": {"type": "string"}, "alternatives_considered": {"type": "string"}, "decided_by": {"type": "string"}, "phase": {"type": "string"}, "app_name": {"type": "string"}}}),
             Tool(name="update_diagram", description="Update a system diagram and mark current.", inputSchema={"type": "object", "required": ["title", "diagram_type", "phase", "content"], "properties": {"title": {"type": "string"}, "diagram_type": {"type": "string"}, "phase": {"type": "string"}, "content": {"type": "string"}, "render_format": {"type": "string"}, "notes": {"type": "string"}}}),
+            Tool(
+                name="list_studios",
+                description="List all studios the given user has active membership in. Returns id, name, slug, specialty, is_primary (whether this is the user's primary 'My Studio'), and member_count (active members) for each studio.",
+                inputSchema={
+                    "type": "object",
+                    "required": ["user_id"],
+                    "properties": {
+                        "user_id": {"type": "string", "description": "PK of the user whose studios to list."},
+                    },
+                },
+            ),
+            Tool(
+                name="get_studio",
+                description="Get full details of one studio: id, name, slug, specialty, members (email/role/tier for each active member), and project_count. Verifies the user has active membership before returning details.",
+                inputSchema={
+                    "type": "object",
+                    "required": ["user_id", "studio_id"],
+                    "properties": {
+                        "user_id": {"type": "string"},
+                        "studio_id": {"type": "string"},
+                    },
+                },
+            ),
         ]
 
     @app.call_tool()
@@ -112,4 +135,48 @@ def register_tools(app):
                 notes=args.get("notes"),
             )
             return _ok({"id": str(diagram.pk), "status": "current"})
+        if name == "list_studios":
+            from src.accounts.models import User, Studio
+            try:
+                user = User.objects.get(pk=args["user_id"])
+            except (User.DoesNotExist, ValueError):
+                return _ok({"error": "user not found", "user_id": args.get("user_id")})
+            studios_qs = Studio.objects.filter(
+                memberships__user=user, memberships__status="active",
+            ).distinct()
+            out = []
+            for s in studios_qs:
+                m = s.memberships.filter(user=user).first()
+                out.append({
+                    "id": str(s.id),
+                    "name": s.name,
+                    "slug": s.slug,
+                    "specialty": s.specialty,
+                    "is_primary": bool(m and m.is_primary),
+                    "member_count": s.memberships.filter(status="active").count(),
+                })
+            return _ok({"studios": out})
+        if name == "get_studio":
+            from src.accounts.models import User, Studio
+            try:
+                user = User.objects.get(pk=args["user_id"])
+                studio = Studio.objects.get(
+                    pk=args["studio_id"],
+                    memberships__user=user,
+                    memberships__status="active",
+                )
+            except (User.DoesNotExist, Studio.DoesNotExist, ValueError):
+                return _ok({"error": "studio not accessible to user"})
+            members = [
+                {"email": m.user.email, "role": m.role, "tier": m.tier}
+                for m in studio.memberships.filter(status="active").select_related("user")
+            ]
+            return _ok({
+                "id": str(studio.id),
+                "name": studio.name,
+                "slug": studio.slug,
+                "specialty": studio.specialty,
+                "members": members,
+                "project_count": studio.projects.count(),
+            })
         raise ValueError(f"Unknown tool: {name}")
