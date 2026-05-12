@@ -1,0 +1,59 @@
+appId: io.rwanga.editor
+productName: Rwanga Editor
+copyright: Copyright © 2026 Rwanga
+
+directories:
+  output: build/output
+  buildResources: build/resources
+
+files:
+  - electron/**/*
+  - renderer/**/*
+  - LICENSE
+  - package.json
+
+asar: true
+
+# Windows
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+  artifactName: ${productName}-Setup-${version}.${ext}
+  # Signing slots — populated by env vars in CI when certs available
+  # See .env.example for SignPath / Azure / traditional CA options
+
+nsis:
+  oneClick: true
+  perMachine: false
+  allowToChangeInstallationDirectory: false
+  deleteAppDataOnUninstall: false
+
+# macOS
+mac:
+  target:
+    - target: dmg
+      arch:
+        - x64
+        - arm64
+    - target: zip
+      arch:
+        - x64
+        - arm64
+  category: public.app-category.productivity
+  hardenedRuntime: true
+  gatekeeperAssess: false
+  artifactName: ${productName}-${version}-${arch}.${ext}
+  # identity is set by APPLE_TEAM_ID env var when signing is available
+
+dmg:
+  sign: false  # Re-enable when Apple Developer cert is provisioned
+
+# Auto-update publish
+publish:
+  - provider: github
+    owner: daryabsb
+    repo: rwanga
+    releaseType: draft
+    # electron-updater filters by tag prefix `editor-v` (configured in main.js)

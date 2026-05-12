@@ -1,0 +1,27 @@
+{
+  "name": "rwanga-editor",
+  "version": "0.1.0-alpha.0",
+  "description": "Structured screenplay editor for Kurdish and Arabic cinema",
+  "main": "electron/main.js",
+  "license": "Apache-2.0",
+  "author": "Rwanga",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "test:unit": "node --test tests/unit/",
+    "test:e2e": "playwright test --config=tests/integration/playwright.config.js",
+    "pack:win": "electron-builder --win --x64",
+    "pack:mac": "electron-builder --mac",
+    "pack": "electron-builder --win --mac"
+  },
+  "devDependencies": {
+    "electron": "^31.0.0",
+    "electron-builder": "^25.0.0",
+    "@playwright/test": "^1.45.0",
+    "pdf-parse": "^1.1.1",
+    "jsdom": "^24.0.0"
+  },
+  "dependencies": {
+    "electron-updater": "^6.2.0"
+  }
+}

@@ -1,0 +1,39 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+out/
+build/output/
+
+# Tests
+coverage/
+tests/integration/output/
+test-results/
+
+# Electron-builder
+*.dmg
+*.exe
+*.zip
+*.AppImage
+*.deb
+*.rpm
+
+# IDE
+.vscode/
+.idea/
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Env
+.env
+.env.local
+
+# Runtime junk under userData (if any leaks into repo)
+*.bak
+*.bad-*
+
+# Logs
+*.log
