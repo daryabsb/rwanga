@@ -1,0 +1,18 @@
+{
+  "rga_version": "1.0",
+  "metadata": {
+    "title": "v1.0 Sample",
+    "author": "Fixture",
+    "created": "2026-01-01T00:00:00Z",
+    "modified": "2026-01-01T00:00:00Z",
+    "version": 1,
+    "revision_notes": "",
+    "language": "en",
+    "genre": "",
+    "logline": ""
+  },
+  "settings": { "theme": "dark", "font_size": 12, "show_scene_numbers": true, "custom_tag_colors": {} },
+  "scenes": [],
+  "tag_registry": { "characters": [], "props": [], "wardrobe": [], "locations": [], "sfx": [], "vfx": [], "vehicles": [], "animals": [], "custom": [] },
+  "export_settings": { "branding": "rwanga", "letterhead_url": null, "include_scene_numbers": true, "include_revision_marks": false }
+}
