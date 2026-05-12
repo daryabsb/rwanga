@@ -587,5 +587,37 @@ Rga.Editor = {
     if (Rga.SceneManager && Rga.SceneManager.updateNavigator) Rga.SceneManager.updateNavigator();
     if (Rga.TagSystem && Rga.TagSystem.updateManagerPanel) Rga.TagSystem.updateManagerPanel();
     if (Rga.Problems && Rga.Problems.run) Rga.Problems.run();
+  },
+
+  /**
+   * Doc-scoped load (Phase 6: multi-tab).
+   * Renders the document body into a specific container's editor surface,
+   * not the global #editor element.
+   */
+  loadDocumentInto: function(doc, container) {
+    if (!container) return;
+    var ed = container.querySelector('[data-role="editor"]');
+    if (!ed) return;
+    ed.innerHTML = '';
+    if (doc.body && Array.isArray(doc.body.scenes) && doc.body.scenes.length) {
+      doc.body.scenes.forEach(function(scene) {
+        var sh = document.createElement('div');
+        sh.className = 'block scene-header';
+        sh.dataset.sceneId = scene.id || '';
+        sh.textContent = '#' + (scene.number || '') + ' — ' + (scene.setting || '') + '. ' + (scene.location || '') + ' — ' + (scene.time || '');
+        ed.appendChild(sh);
+        (scene.elements || []).forEach(function(el) {
+          var div = document.createElement('div');
+          div.className = 'block ' + (el.type || 'action');
+          div.dataset.elementId = el.id || '';
+          div.textContent = el.text || '';
+          ed.appendChild(div);
+        });
+      });
+    } else {
+      var first = document.createElement('div');
+      first.className = 'block action';
+      ed.appendChild(first);
+    }
   }
 };

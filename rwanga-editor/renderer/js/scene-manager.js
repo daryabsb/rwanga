@@ -298,6 +298,31 @@ Rga.SceneManager = {
      ============================================================ */
 
   /**
+   * Doc-scoped scene navigator update (Phase 6: multi-tab).
+   * Renders the scene list from a Doc body, not from the DOM.
+   */
+  updateNavigatorFor: function(doc, container) {
+    var sceneList = document.querySelector('[data-panel="scenes"] .scene-list');
+    if (!sceneList) return;
+    sceneList.innerHTML = '';
+    var scenes = (doc && doc.body && doc.body.scenes) || [];
+    var badge = document.querySelector('.scenes-badge');
+    if (badge) badge.textContent = scenes.length;
+    scenes.forEach(function(scene) {
+      var item = document.createElement('div');
+      item.className = 'scene-item';
+      item.dataset.sceneId = scene.id || '';
+      item.textContent = '#' + (scene.number || '') + ' ' + (scene.setting || '') + '. ' + (scene.location || '') + ' — ' + (scene.time || '');
+      item.addEventListener('click', function() {
+        if (!container) return;
+        var target = container.querySelector('[data-scene-id="' + scene.id + '"]');
+        if (target && target.scrollIntoView) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+      sceneList.appendChild(item);
+    });
+  },
+
+  /**
    * Re-render the scene list in the sidebar.
    */
   updateNavigator: function() {

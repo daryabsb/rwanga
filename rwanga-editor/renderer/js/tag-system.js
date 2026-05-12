@@ -337,6 +337,33 @@ Rga.TagSystem = {
      ============================================================ */
 
   /**
+   * Doc-scoped tag manager update (Phase 6: multi-tab).
+   * Renders the tag manager panel from a Doc body's tag_registry,
+   * not from the in-memory registry Map.
+   */
+  updateManagerPanelFor: function(doc) {
+    var container = document.querySelector('.tag-groups-container');
+    if (!container) return;
+    container.innerHTML = '';
+    var registry = (doc && doc.body && doc.body.tag_registry) || {};
+    Object.keys(registry).forEach(function(group) {
+      var entries = registry[group] || [];
+      if (!entries.length) return;
+      var groupEl = document.createElement('div');
+      groupEl.className = 'tag-group';
+      groupEl.innerHTML = '<div class="tag-group-header">' + group + ' <span class="badge muted">' + entries.length + '</span></div>';
+      entries.forEach(function(e) {
+        var item = document.createElement('div');
+        item.className = 'tag-entry';
+        item.style.background = e.color || 'transparent';
+        item.textContent = e.name || '';
+        groupEl.appendChild(item);
+      });
+      container.appendChild(groupEl);
+    });
+  },
+
+  /**
    * Re-render the tag manager sidebar panel.
    */
   updateManagerPanel: function() {

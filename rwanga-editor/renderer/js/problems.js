@@ -18,6 +18,36 @@ Rga.Problems = {
   },
 
   /**
+   * Doc-scoped validation (Phase 6: multi-tab).
+   * Validates the given container's editor blocks, scoped to a specific Doc.
+   */
+  runFor: function(doc, container) {
+    var problems = [];
+    if (container) {
+      var blocks = container.querySelectorAll('[data-role="editor"] .block');
+      blocks.forEach(function(b) {
+        if (b.textContent && /دیمەنی\s+\d+/.test(b.textContent) && !b.classList.contains('scene-header')) {
+          problems.push({ severity: 'error', text: 'Scene-header text found in a non-scene block', element: b });
+        }
+      });
+    }
+    var listEl = document.querySelector('.problems-list');
+    if (!listEl) return;
+    listEl.innerHTML = '';
+    problems.forEach(function(p) {
+      var row = document.createElement('div');
+      row.className = 'problem ' + p.severity;
+      row.textContent = p.text;
+      listEl.appendChild(row);
+    });
+    var badge = document.querySelector('.problems-badge');
+    if (badge) {
+      badge.textContent = problems.length;
+      badge.hidden = problems.length === 0;
+    }
+  },
+
+  /**
    * Run the full validation pass. Debounced call from editor input events.
    */
   run: function() {
