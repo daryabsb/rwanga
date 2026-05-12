@@ -226,3 +226,7 @@ rwanga-mcp/
 
 # Backup files left by editors / migrations
 *.bak
+
+# rwanga-editor JS source lib dirs — override the Python `lib/` rule above
+!rwanga-editor/electron/lib/
+!rwanga-editor/electron/lib/**
