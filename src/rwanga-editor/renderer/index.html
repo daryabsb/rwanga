@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rwanga Script Editor</title>
+
+  <!-- Fonts are loaded via @font-face declarations in css/tokens.css (vendored locally — no CDN) -->
+
+  <!-- ============================================================
+       CSS — load in this order
+       ============================================================ -->
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/shell.css">
+  <link rel="stylesheet" href="css/editor.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/overlays.css">
+</head>
+<body>
+
+<!-- ================================================================
+     #app — THE APPLICATION SHELL
+     All zones described in 01-Implementation-Plan.md §2.2
+     ================================================================ -->
+<div id="app">
+
+  <!-- ============================================================
+       MENU BAR
+       ============================================================ -->
+  <header id="menu-bar">
+    <span class="menu-title" id="app-logo"></span>
+    <span class="menu-item" data-menu="file">File</span>
+    <span class="menu-item" data-menu="edit">Edit</span>
+    <span class="menu-item" data-menu="view">View</span>
+    <span class="menu-item" data-menu="script">Script</span>
+    <span class="menu-item" data-menu="tags">Tags</span>
+    <span class="menu-item" data-menu="export">Export</span>
+    <span class="menu-item" data-menu="help">Help</span>
+    <span class="menu-spacer"></span>
+    <div class="menu-window-controls">
+      <button class="menu-window-btn" id="win-minimize" title="Minimize"></button>
+      <button class="menu-window-btn" id="win-maximize" title="Maximize"></button>
+      <button class="menu-window-btn close" id="win-close" title="Close"></button>
+    </div>
+  </header>
+
+  <!-- ============================================================
+       WORKSPACE (activity bar + sidebar + editor + inspector)
+       ============================================================ -->
+  <div id="workspace">
+
+    <!-- ---- ACTIVITY BAR (leftmost icon strip) ---- -->
+    <nav id="activity-bar">
+      <div class="activity-bar-top">
+        <button class="activity-icon active" data-panel="explorer" title="Explorer"></button>
+        <button class="activity-icon" data-panel="scenes" title="Scenes"></button>
+        <button class="activity-icon" data-panel="tags" title="Tags"></button>
+        <button class="activity-icon" data-panel="sync" title="Rwanga Sync"></button>
+      </div>
+      <div class="activity-bar-bottom">
+        <button class="activity-icon" data-panel="extensions" title="Extensions"></button>
+        <button class="activity-icon" id="btn-settings" title="Settings"></button>
+      </div>
+    </nav>
+
+    <!-- ---- SIDEBAR ---- -->
+    <aside id="sidebar">
+      <div id="sidebar-header">
+        <span id="sidebar-header-text">Explorer</span>
+        <div id="sidebar-header-actions"></div>
+      </div>
+      <div id="sidebar-content">
+
+        <!-- PANEL: Explorer (File Tree) -->
+        <div class="sidebar-panel active" data-panel="explorer">
+          <div class="sidebar-section-header">
+            <span>Open Editors</span>
+          </div>
+          <div class="file-tree" id="file-tree">
+            <!-- Populated by JS or static for prototype -->
+            <div class="tree-item folder open">
+              <span class="tree-chevron"></span>
+              <span class="tree-icon" data-icon="folderOpen"></span>
+              <span class="tree-label">My Project</span>
+            </div>
+            <div class="tree-item file active" style="padding-left:28px">
+              <span class="tree-icon" data-icon="fileRga"></span>
+              <span class="tree-label">The Last Light.rga</span>
+            </div>
+            <div class="tree-item file" style="padding-left:28px">
+              <span class="tree-icon" data-icon="fileTxt"></span>
+              <span class="tree-label">Notes.txt</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- PANEL: Scenes (Scene Navigator) -->
+        <div class="sidebar-panel" data-panel="scenes">
+          <div class="sidebar-section-header">
+            <span>Scenes</span>
+            <span class="badge muted scenes-badge">0</span>
+          </div>
+          <div class="scene-list">
+            <!-- Dynamically populated by SceneManager.updateNavigator() -->
+          </div>
+        </div>
+
+        <!-- PANEL: Tags (Tag Manager) -->
+        <div class="sidebar-panel" data-panel="tags">
+          <div class="sidebar-search">
+            <input type="text" placeholder="Filter tags..." id="tag-filter-input">
+          </div>
+          <div class="tag-groups-container">
+            <!-- Dynamically populated by TagSystem.updateManagerPanel() -->
+          </div>
+          <button class="sidebar-btn-full" id="btn-create-tag-type">+ Create Custom Tag Type</button>
+        </div>
+
+        <!-- PANEL: Rwanga Sync -->
+        <div class="sidebar-panel" data-panel="sync">
+          <div class="sync-login">
+            <div class="sync-logo" id="sync-logo-icon"></div>
+            <p>Sign in to Rwanga to sync your scripts across devices and access version history.</p>
+            <button class="btn-primary">Sign In</button>
+            <button class="btn-secondary">Create Account</button>
+          </div>
+        </div>
+
+        <!-- PANEL: Extensions -->
+        <div class="sidebar-panel" data-panel="extensions">
+          <div class="sidebar-search">
+            <input type="text" placeholder="Search extensions...">
+          </div>
+          <div class="extension-card locked">
+            <div class="extension-icon">🤖</div>
+            <div class="extension-info">
+              <div class="extension-name">Claude AI Assistant</div>
+              <div class="extension-desc">AI-powered script analysis, dialogue suggestions, and story structure feedback</div>
+            </div>
+            <span class="pro-badge">PRO</span>
+          </div>
+          <div class="extension-card locked">
+            <div class="extension-icon">💬</div>
+            <div class="extension-info">
+              <div class="extension-name">ChatGPT</div>
+              <div class="extension-desc">OpenAI writing assistant for dialogue, character development, and brainstorming</div>
+            </div>
+            <span class="pro-badge">PRO</span>
+          </div>
+          <div class="extension-card locked">
+            <div class="extension-icon">🔌</div>
+            <div class="extension-info">
+              <div class="extension-name">MCP Server</div>
+              <div class="extension-desc">Connect any AI platform via the Model Context Protocol</div>
+            </div>
+            <span class="pro-badge">PRO</span>
+          </div>
+          <div class="extensions-cta">
+            <p>AI extensions require a Pro plan.</p>
+            <button class="btn-primary">Upgrade to Pro</button>
+          </div>
+        </div>
+
+      </div>
+    </aside>
+
+    <!-- ---- RESIZE: sidebar ↔ editor ---- -->
+    <div class="resize-handle" data-resize="sidebar"></div>
+
+    <!-- ---- CENTER COLUMN ---- -->
+    <div id="center-column">
+
+      <!-- EDITOR AREA -->
+      <div id="editor-area">
+
+        <!-- Tab Bar -->
+        <div id="tab-bar">
+          <!-- Tabs populated by Rga.Tabs — first tab created on init -->
+          <button id="tab-new" title="New Tab"></button>
+        </div>
+
+        <!-- Editor Container (gutter + writing surface) -->
+        <div id="editor-container">
+          <div id="gutter"></div>
+          <div id="editor" contenteditable="true" spellcheck="true">
+            <!-- Content blocks populated by sample-data.js or user input -->
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ---- RESIZE: editor ↔ bottom panel ---- -->
+      <div class="resize-handle" data-resize="bottom-panel"></div>
+
+      <!-- BOTTOM PANEL -->
+      <div id="bottom-panel">
+        <div id="bottom-panel-tabs">
+          <button class="bp-tab active" data-bp-tab="notes">Notes</button>
+          <button class="bp-tab" data-bp-tab="problems">
+            Problems <span class="badge warning problems-badge" hidden>0</span>
+          </button>
+          <button class="bp-tab" data-bp-tab="breakdown">Breakdown</button>
+          <span class="bp-tab-spacer"></span>
+          <button class="bp-tab-action" id="btn-close-bottom-panel" title="Close Panel"></button>
+        </div>
+        <div id="bottom-panel-content">
+          <div class="bp-content active" data-bp-tab="notes">
+            <div class="notes-header" id="notes-scene-label">Notes — No scene selected</div>
+            <textarea class="notes-textarea" id="notes-textarea" placeholder="Add notes for this scene..."></textarea>
+          </div>
+          <div class="bp-content" data-bp-tab="problems">
+            <div class="problems-list">
+              <!-- Populated by Rga.Problems.run() -->
+            </div>
+          </div>
+          <div class="bp-content" data-bp-tab="breakdown">
+            <table class="breakdown-table">
+              <thead>
+                <tr>
+                  <th>Element</th>
+                  <th>Type</th>
+                  <th>Scenes</th>
+                </tr>
+              </thead>
+              <tbody id="breakdown-body">
+                <!-- Populated from tag registry -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ---- RESIZE: editor ↔ inspector ---- -->
+    <div class="resize-handle" data-resize="inspector"></div>
+
+    <!-- INSPECTOR PANEL -->
+    <aside id="inspector-panel">
+      <div class="inspector-header">Inspector</div>
+      <div class="inspector-body">
+        <div style="padding:16px;color:var(--text-tertiary);font-size:12px;">
+          Select a tag or scene header to view details.
+        </div>
+      </div>
+    </aside>
+
+  </div>
+
+  <!-- ============================================================
+       STATUS BAR
+       ============================================================ -->
+  <footer id="status-bar">
+    <div class="status-left">
+      <span class="status-item" id="status-sync">
+        <span class="status-sync-dot synced"></span> Synced
+      </span>
+      <span class="status-item" id="status-scene">Scene 0/0</span>
+      <span class="status-item" id="status-problems" title="Problems">⚠ 0</span>
+    </div>
+    <div class="status-right">
+      <span class="status-item" id="status-words">0 words</span>
+      <span class="status-item" id="status-pages">0 pages</span>
+      <span class="status-item" id="status-block-type">Action</span>
+      <button class="status-item status-btn" id="status-theme" title="Toggle Theme"></button>
+      <button class="status-item status-btn" id="status-language">EN</button>
+    </div>
+  </footer>
+
+</div>
+
+<!-- ============================================================
+     OVERLAYS (rendered on top of everything)
+     ============================================================ -->
+
+<!-- Context Menu — positioned dynamically by JS -->
+<div id="context-menu" class="overlay-menu" hidden></div>
+
+<!-- Command Palette — Ctrl+Shift+P -->
+<div id="command-palette" class="overlay-palette" hidden>
+  <div class="palette-backdrop"></div>
+  <div class="palette-dialog">
+    <input type="text" class="palette-input" placeholder="Type a command..." autofocus>
+    <div class="palette-results"></div>
+  </div>
+</div>
+
+<!-- Location Autocomplete Datalist -->
+<datalist id="location-suggestions"></datalist>
+
+<!-- ============================================================
+     JS — load in this order (dependencies flow downward)
+     ============================================================ -->
+<script src="js/icons.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/app-shell.js"></script>
+<script src="js/editor-engine.js"></script>
+<script src="js/scene-manager.js"></script>
+<script src="js/tag-system.js"></script>
+<script src="js/problems.js"></script>
+<script src="js/sample-data.js"></script>
+
+<!-- ============================================================
+     INIT — wire everything together
+     ============================================================ -->
+<script>
+(function() {
+  'use strict';
+
+  /* ---- Inject Icons into elements with data-icon attributes ---- */
+  function injectIcons() {
+    // Activity bar icons
+    var iconMap = {
+      explorer: 'explorer',
+      scenes: 'scenes',
+      tags: 'tags',
+      sync: 'sync',
+      extensions: 'extensions'
+    };
+    Rga.$$('.activity-icon[data-panel]').forEach(function(btn) {
+      var iconName = iconMap[btn.dataset.panel];
+      if (iconName && Rga.Icons[iconName]) {
+        btn.innerHTML = Rga.Icons[iconName];
+      }
+    });
+
+    // Settings icon
+    var settingsBtn = Rga.$('#btn-settings');
+    if (settingsBtn) settingsBtn.innerHTML = Rga.Icons.settings;
+
+    // App logo
+    var logo = Rga.$('#app-logo');
+    if (logo) logo.innerHTML = Rga.Icons.rwangaLogo + ' Rwanga';
+
+    // Window controls
+    var minBtn = Rga.$('#win-minimize');
+    if (minBtn) minBtn.innerHTML = Rga.Icons.minimize;
+    var maxBtn = Rga.$('#win-maximize');
+    if (maxBtn) maxBtn.innerHTML = Rga.Icons.maximize;
+    var closeBtn = Rga.$('#win-close');
+    if (closeBtn) closeBtn.innerHTML = Rga.Icons.windowClose;
+
+    // Tab new button
+    var tabNew = Rga.$('#tab-new');
+    if (tabNew) tabNew.innerHTML = Rga.Icons.plus;
+
+    // Bottom panel close
+    var bpClose = Rga.$('#btn-close-bottom-panel');
+    if (bpClose) bpClose.innerHTML = Rga.Icons.close;
+
+    // File tree icons
+    Rga.$$('.tree-icon[data-icon]').forEach(function(el) {
+      var name = el.dataset.icon;
+      if (Rga.Icons[name]) el.innerHTML = Rga.Icons[name];
+    });
+
+    // Tree chevrons
+    Rga.$$('.tree-chevron').forEach(function(el) {
+      el.innerHTML = Rga.Icons.chevronDown;
+    });
+
+    // Sync logo
+    var syncLogo = Rga.$('#sync-logo-icon');
+    if (syncLogo) syncLogo.innerHTML = Rga.Icons.rwangaLogo;
+  }
+
+  /* ---- Register Commands for the Command Palette ---- */
+  function registerCommands() {
+    var P = Rga.CommandPalette;
+
+    P.register({ label: 'Toggle Theme', shortcut: 'Ctrl+Shift+T', category: 'View',
+      action: function() { Rga.Theme.toggle(); }
+    });
+    P.register({ label: 'Toggle Sidebar', shortcut: 'Ctrl+B', category: 'View',
+      action: function() { Rga.Sidebar.toggleCollapse(); }
+    });
+    P.register({ label: 'Toggle Inspector', shortcut: 'Ctrl+Shift+I', category: 'View',
+      action: function() { Rga.Inspector.toggle(); }
+    });
+    P.register({ label: 'Toggle Bottom Panel', shortcut: 'Ctrl+J', category: 'View',
+      action: function() { Rga.BottomPanel.toggleCollapse(); }
+    });
+    P.register({ label: 'New Scene', category: 'Script',
+      action: function() {
+        var current = Rga.Cursor.getCurrentBlock();
+        Rga.SceneManager.createHeader({}, current);
+      }
+    });
+    P.register({ label: 'Renumber Scenes', category: 'Script',
+      action: function() { Rga.SceneManager.renumberScenes(); }
+    });
+    P.register({ label: 'Show Scenes Panel', category: 'View',
+      action: function() { Rga.Sidebar.switchTo('scenes'); }
+    });
+    P.register({ label: 'Show Tags Panel', category: 'View',
+      action: function() { Rga.Sidebar.switchTo('tags'); }
+    });
+    P.register({ label: 'Show Explorer', category: 'View',
+      action: function() { Rga.Sidebar.switchTo('explorer'); }
+    });
+    P.register({ label: 'Run Validation', category: 'Script',
+      action: function() { Rga.Problems.run(); }
+    });
+    P.register({ label: 'Load Sample Script', category: 'Debug',
+      action: function() { Rga.SampleData.load(); }
+    });
+    P.register({ label: 'Collapse All Scenes', category: 'Script',
+      action: function() { Rga.SceneManager.collapseAll(); }
+    });
+    P.register({ label: 'Expand All Scenes', category: 'Script',
+      action: function() { Rga.SceneManager.expandAll(); }
+    });
+    P.register({ label: 'Change Script Language', category: 'Script',
+      action: function() { Rga.ScriptLanguage.showPicker(); }
+    });
+    P.register({ label: 'Script Language: English (LTR)', category: 'Script',
+      action: function() { Rga.ScriptLanguage.apply('en'); }
+    });
+    P.register({ label: 'Script Language: Kurdish (RTL)', category: 'Script',
+      action: function() { Rga.ScriptLanguage.apply('ku'); }
+    });
+    P.register({ label: 'Script Language: Arabic (RTL)', category: 'Script',
+      action: function() { Rga.ScriptLanguage.apply('ar'); }
+    });
+
+    // Block type commands
+    Rga.BLOCK_TYPES.forEach(function(type) {
+      if (type === 'scene-header') return;
+      P.register({
+        label: 'Set Block: ' + Rga.formatBlockTypeName(type),
+        category: 'Block',
+        action: function() {
+          var block = Rga.Cursor.getCurrentBlock();
+          if (block) Rga.Editor.setBlockType(block, type);
+        }
+      });
+    });
+  }
+
+  /* ---- Register Keyboard Shortcuts ---- */
+  function registerShortcuts() {
+    var K = Rga.Keyboard;
+
+    K.register('p', { ctrl: true, shift: true, alt: false }, function() {
+      Rga.CommandPalette.open();
+    });
+    K.register('b', { ctrl: true, shift: false, alt: false }, function() {
+      Rga.Sidebar.toggleCollapse();
+    });
+    K.register('j', { ctrl: true, shift: false, alt: false }, function() {
+      Rga.BottomPanel.toggleCollapse();
+    });
+    K.register('t', { ctrl: true, shift: true, alt: false }, function() {
+      Rga.Theme.toggle();
+    });
+    K.register('i', { ctrl: true, shift: true, alt: false }, function() {
+      Rga.Inspector.toggle();
+    });
+  }
+
+  /* ---- BOOT SEQUENCE ---- */
+  function boot() {
+    // 1. Inject icons into the DOM
+    injectIcons();
+
+    // 2. Initialize all modules (order matters)
+    Rga.Theme.init();
+    Rga.Resize.init();
+    Rga.Sidebar.init();
+    Rga.Tabs.init();
+    Rga.Keyboard.init();
+    Rga.BottomPanel.init();
+    Rga.CommandPalette.init();
+    Rga.FileTree.init();
+
+    // 3. Create the first tab (which initializes the editor area)
+    Rga.Tabs.create('Untitled.rga', 'rga');
+
+    // 4. Initialize editor systems (must happen after editor DOM exists)
+    Rga.Editor.init();
+    Rga.SceneManager.init();
+    Rga.TagSystem.init();
+    Rga.Problems.init();
+    Rga.ScriptLanguage.init();
+    Rga.SceneNotesConnector.init();
+
+    // 5. Register commands and shortcuts
+    registerCommands();
+    registerShortcuts();
+
+    // 6. Status bar initial update
+    Rga.StatusBar.init();
+
+    // 7. Theme toggle in status bar
+    var themeBtn = Rga.$('#status-theme');
+    if (themeBtn) {
+      themeBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        Rga.Theme.toggle();
+      });
+    }
+
+    // 8. Load sample data (remove this line for empty editor)
+    Rga.SampleData.load();
+
+    // 9. Load scene notes from sample data
+    Rga.SceneNotesConnector.loadFromScenes();
+
+    console.log('[Rwanga] Script Editor initialized.');
+  }
+
+  // Boot when DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot);
+  } else {
+    boot();
+  }
+})();
+</script>
+
+</body>
+</html>
