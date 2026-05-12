@@ -442,6 +442,13 @@ Rga.Editor = {
     if (Rga.Tabs && Rga.Tabs.activeTabId) {
       Rga.Tabs.setDirty(Rga.Tabs.activeTabId, true);
     }
+    if (Rga.FileManager && Rga.FileManager.getActive()) {
+      var d = Rga.FileManager.getActive();
+      if (!d.dirty) {
+        Rga.Doc.markDirty(d);
+        Rga.FileManager.notifyTitle();
+      }
+    }
   },
 
   /* ============================================================
@@ -544,5 +551,41 @@ Rga.Editor = {
   clear: function() {
     this.el.innerHTML = '';
     this.updateGutter();
+  },
+
+  /**
+   * Load a Doc object into the editor surface.
+   * @param {object} doc - a Rga.Doc document object
+   */
+  loadDocument: function(doc) {
+    var editor = document.getElementById('editor');
+    if (!editor) return;
+    editor.innerHTML = '';
+    if (doc.body && Array.isArray(doc.body.scenes)) {
+      doc.body.scenes.forEach(function(scene) {
+        var sh = document.createElement('div');
+        sh.className = 'block scene-header';
+        sh.dataset.sceneId = scene.id || '';
+        sh.dataset.sceneNumber = scene.number || '';
+        sh.textContent = '#' + (scene.number || '') + ' — ' + (scene.setting || '') + '. ' + (scene.location || '') + ' — ' + (scene.time || '');
+        editor.appendChild(sh);
+        (scene.elements || []).forEach(function(el) {
+          var div = document.createElement('div');
+          div.className = 'block ' + (el.type || 'action');
+          div.dataset.elementId = el.id || '';
+          div.textContent = el.text || '';
+          editor.appendChild(div);
+        });
+      });
+    }
+    if (!editor.children.length) {
+      var first = document.createElement('div');
+      first.className = 'block action';
+      first.textContent = '';
+      editor.appendChild(first);
+    }
+    if (Rga.SceneManager && Rga.SceneManager.updateNavigator) Rga.SceneManager.updateNavigator();
+    if (Rga.TagSystem && Rga.TagSystem.updateManagerPanel) Rga.TagSystem.updateManagerPanel();
+    if (Rga.Problems && Rga.Problems.run) Rga.Problems.run();
   }
 };
