@@ -1,0 +1,76 @@
+// Copyright (c) 2026 Rwanga. Licensed under Apache 2.0.
+'use strict';
+
+const { contextBridge, ipcRenderer } = require('electron');
+
+contextBridge.exposeInMainWorld('rwanga', {
+  files: {
+    pickOpen:    (filters) => ipcRenderer.invoke('files.pickOpen', filters),
+    pickFolder:  () => ipcRenderer.invoke('files.pickFolder'),
+    read:        (handle) => ipcRenderer.invoke('files.read', handle),
+    save:        (handle, content) => ipcRenderer.invoke('files.save', handle, content),
+    pickSaveAs:  (suggestedName, content) => ipcRenderer.invoke('files.pickSaveAs', suggestedName, content),
+    listFolder:  (handle) => ipcRenderer.invoke('files.listFolder', handle),
+    stat:        (handle) => ipcRenderer.invoke('files.stat', handle),
+  },
+  recent: {
+    list:  () => ipcRenderer.invoke('recent.list'),
+    touch: (handle, displayName) => ipcRenderer.invoke('recent.touch', handle, displayName),
+    clear: () => ipcRenderer.invoke('recent.clear'),
+  },
+  autosave: {
+    write:        (docId, content) => ipcRenderer.invoke('autosave.write', docId, content),
+    discard:      (docId) => ipcRenderer.invoke('autosave.discard', docId),
+    scanOrphans:  () => ipcRenderer.invoke('autosave.scanOrphans'),
+  },
+  workspace: {
+    read:  () => ipcRenderer.invoke('workspace.read'),
+    write: (state) => ipcRenderer.invoke('workspace.write', state),
+  },
+  prefs: {
+    read:  () => ipcRenderer.invoke('prefs.read'),
+    write: (partial) => ipcRenderer.invoke('prefs.write', partial),
+  },
+  export: {
+    toPDF: (content, options) => ipcRenderer.invoke('export.toPDF', content, options),
+  },
+  storage: {
+    getReport:            () => ipcRenderer.invoke('storage.getReport'),
+    openDataFolder:       () => ipcRenderer.invoke('storage.openDataFolder'),
+    clearAutosaves:       (opts) => ipcRenderer.invoke('storage.clearAutosaves', opts),
+    clearAutosaveEntry:   (docId) => ipcRenderer.invoke('storage.clearAutosaveEntry', docId),
+    clearRecentFiles:     () => ipcRenderer.invoke('storage.clearRecentFiles'),
+    resetWorkspace:       () => ipcRenderer.invoke('storage.resetWorkspace'),
+    resetPreferences:     () => ipcRenderer.invoke('storage.resetPreferences'),
+    clearCorruptBackups:  (kind) => ipcRenderer.invoke('storage.clearCorruptBackups', kind),
+    clearPendingUpdate:   () => ipcRenderer.invoke('storage.clearPendingUpdate'),
+  },
+  updates: {
+    getStatus:          () => ipcRenderer.invoke('updates.getStatus'),
+    checkNow:           () => ipcRenderer.invoke('updates.checkNow'),
+    restartAndInstall:  () => ipcRenderer.invoke('updates.restartAndInstall'),
+  },
+  window: {
+    minimize: () => ipcRenderer.invoke('window.minimize'),
+    maximize: () => ipcRenderer.invoke('window.maximize'),
+    close:    () => ipcRenderer.invoke('window.close'),
+    setTitle: (title) => ipcRenderer.invoke('window.setTitle', title),
+  },
+  on: {
+    updateDownloaded: (callback) => {
+      const handler = (_event, payload) => callback(payload);
+      ipcRenderer.on('updates.downloaded', handler);
+      return () => ipcRenderer.removeListener('updates.downloaded', handler);
+    },
+    menuAction: (callback) => {
+      const handler = (_event, action) => callback(action);
+      ipcRenderer.on('menu.action', handler);
+      return () => ipcRenderer.removeListener('menu.action', handler);
+    },
+    fileOpenRequest: (callback) => {
+      const handler = (_event, payload) => callback(payload);
+      ipcRenderer.on('files.openRequest', handler);
+      return () => ipcRenderer.removeListener('files.openRequest', handler);
+    },
+  },
+});
