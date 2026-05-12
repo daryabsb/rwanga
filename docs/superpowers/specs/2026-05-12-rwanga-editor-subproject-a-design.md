@@ -38,9 +38,13 @@ These come from the brainstorming dialogue and are durable architectural primiti
 
 6. **Auto-update from day one.** The app ships with `electron-updater` wired up. Phase 1 (pre-stable) installs silently on quit, no user prompt. Phase 2 (post-stable) is a config flag flip to prompted updates. (Memory: `project_ide_auto_update_strategy.md`.)
 
-7. **No CDN.** All fonts, icons, and assets are vendored locally. The prototype currently violates this (Google Fonts in `index.html:9`); sub-project A fixes it. (Memory: `feedback_local_assets_only.md`.)
+7. **IDE is open source (Apache 2.0).** The full source ships in a public repository under a permissive license. The moat is server-side (Rwanga platform API, auth, AI services, dataset, brand), not in the IDE code. The OSS code may freely include sign-in flows, platform communications, dataset-capture logic, MCP scaffolding, and special features — none of which is useful to a forker without access to Rwanga's servers. Pro-tier features (sub-project B+) are server-gated, not delivered as a closed-source binary fork. (Memory: `project_ide_oss_strategy.md`.)
 
-8. **Single source of truth for shared state.** Theme, language, defaults — one canonical store per concern. No silent dual-state.
+8. **No CDN.** All fonts, icons, and assets are vendored locally. The prototype currently violates this (Google Fonts in `index.html:9`); sub-project A fixes it. (Memory: `feedback_local_assets_only.md`.)
+
+9. **Single source of truth for shared state.** Theme, language, defaults — one canonical store per concern. No silent dual-state.
+
+10. **No secrets in source.** API keys, signing certs, training-data credentials — loaded from environment variables or fetched per-user at runtime. The OSS repo never contains usable credentials.
 
 ---
 
@@ -849,7 +853,10 @@ Clearing cancels the pending update; next launch re-downloads.
 
 **Reference (for when user decides):**
 - **macOS** ($99/yr Apple Developer Program) — required at first install, not just auto-update. Gatekeeper rejects unsigned apps; notarization on top.
-- **Windows** — **Azure Trusted Signing** is the recommended path (~$100/yr Standard for orgs; the user has an Azure admin account that likely qualifies). Provides EV-equivalent SmartScreen reputation instantly. Alternative: traditional CA OV ($200/yr, slow SmartScreen warm-up) or EV ($500/yr, instant trust).
+- **Windows** — multiple options:
+  - **SignPath Foundation** ($0, **recommended given OSS status**): FREE EV-level code signing for qualifying open-source projects. Apply after the public repo is established and the project shows activity. Approval can take days to weeks.
+  - **Azure Trusted Signing** (~$100/yr Standard for orgs): paid fallback if SignPath approval delays or denies. The user has an Azure admin account that likely qualifies.
+  - Traditional CA OV (~$200/yr, slow SmartScreen warm-up) or EV (~$500/yr, instant trust).
 - **Linux**: no OS-level signing requirement.
 - Auto-update consistency: don't switch between signed and unsigned mid-release-stream.
 - See memory: `project_ide_auto_update_strategy.md`.
@@ -954,7 +961,7 @@ These are not brainstorm questions; they're decisions to make at convenience bet
 | # | Decision | Status | Blocks |
 |---|---|---|---|
 | D1 | Linux support in v0.1 | ✅ **OUT** (decided 2026-05-12) | — |
-| D2 | Code signing certificates | ⏳ Deferred; placeholder config in sub-project A | Public release only |
+| D2 | Code signing certificates | ⏳ Deferred; placeholder config in sub-project A. SignPath Foundation now the recommended Windows path given OSS status. | Public release only |
 | D3 | Confirm `production_type` enum matches platform forms.py | ✅ Aligned (5 values + `untyped`) | — |
 | D4 | Source code location | ✅ `src/rwanga-editor/` in current repo (decided 2026-05-12) | — |
 | D5 | GitHub Releases org/repo for auto-update artifacts | ✅ Current repo, `editor-vX.Y.Z` tag prefix during A | — |
