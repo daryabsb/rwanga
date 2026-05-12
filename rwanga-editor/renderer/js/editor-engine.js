@@ -439,13 +439,11 @@ Rga.Editor = {
   },
 
   _markDirty: function() {
-    if (Rga.Tabs && Rga.Tabs.activeTabId) {
-      Rga.Tabs.setDirty(Rga.Tabs.activeTabId, true);
-    }
     if (Rga.FileManager && Rga.FileManager.getActive()) {
       var d = Rga.FileManager.getActive();
       if (!d.dirty) {
         Rga.Doc.markDirty(d);
+        if (Rga.TabManager && Rga.TabManager.renderTabBar) Rga.TabManager.renderTabBar();
         Rga.FileManager.notifyTitle();
       }
     }
@@ -561,6 +559,7 @@ Rga.Editor = {
     var editor = document.getElementById('editor');
     if (!editor) return;
     editor.innerHTML = '';
+    if (!doc) return;
     if (doc.body && Array.isArray(doc.body.scenes)) {
       doc.body.scenes.forEach(function(scene) {
         var sh = document.createElement('div');
