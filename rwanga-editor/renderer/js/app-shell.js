@@ -1,3 +1,4 @@
+﻿// Copyright (c) 2026 Rwanga. Licensed under Apache 2.0.
 /* ============================================================
    RWANGA SCRIPT EDITOR — app-shell.js
    Theme manager, resize handles, sidebar panel switching,

@@ -1,3 +1,4 @@
+﻿// Copyright (c) 2026 Rwanga. Licensed under Apache 2.0.
 /* ============================================================
    RWANGA SCRIPT EDITOR — tag-system.js
    Tag type definitions, tag registry, right-click "Tag As"

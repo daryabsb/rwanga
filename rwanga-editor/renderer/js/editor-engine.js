@@ -1,3 +1,4 @@
+﻿// Copyright (c) 2026 Rwanga. Licensed under Apache 2.0.
 /* ============================================================
    RWANGA SCRIPT EDITOR — editor-engine.js
    ContentEditable management: block creation, Tab cycling,

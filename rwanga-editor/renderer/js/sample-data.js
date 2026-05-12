@@ -1,3 +1,4 @@
+﻿// Copyright (c) 2026 Rwanga. Licensed under Apache 2.0.
 /* ============================================================
    RWANGA SCRIPT EDITOR — sample-data.js
    Sample screenplay data for testing and prototyping.
