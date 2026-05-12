@@ -143,6 +143,9 @@
     tabs.length = 0;
     activeTabId = null;
     tabIdCounter = 0;
+    // Hide the prototype's original #editor-container — TabManager owns the editor area now
+    var orig = document.getElementById('editor-container');
+    if (orig) orig.style.display = 'none';
     document.querySelectorAll('[data-role="editor-container"]').forEach(function(c) {
       if (c.parentNode) c.parentNode.removeChild(c);
     });
