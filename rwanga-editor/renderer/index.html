@@ -295,6 +295,7 @@
     <script src="js/constants.js"></script>
     <script src="js/doc.js"></script>
     <script src="js/file-manager.js"></script>
+    <script src="js/tab-manager.js"></script>
 <script src="js/icons.js"></script>
 <script src="js/utils.js"></script>
 <script src="js/app-shell.js"></script>
@@ -477,8 +478,9 @@
     Rga.CommandPalette.init();
     Rga.FileTree.init();
 
-    // 3. Create the first tab (which initializes the editor area)
-    Rga.Tabs.create('Untitled.rga', 'rga');
+    // 3. Initialize TabManager and create the first document (Phase 6: multi-tab)
+    Rga.TabManager.init();
+    Rga.FileManager.newScript();
 
     // 4. Initialize editor systems (must happen after editor DOM exists)
     Rga.Editor.init();
@@ -504,8 +506,10 @@
       });
     }
 
-    // 8. Load sample data (remove this line for empty editor)
-    Rga.SampleData.load();
+    // 8. Load sample data (disabled in Phase 6 — TabManager creates an empty doc instead)
+    if (false) {
+      Rga.SampleData.load();
+    }
 
     // 9. Load scene notes from sample data
     Rga.SceneNotesConnector.loadFromScenes();

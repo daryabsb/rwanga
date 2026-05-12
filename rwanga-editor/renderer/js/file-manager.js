@@ -12,12 +12,13 @@
     notifyTitle();
   }
 
-  function getActive() { return activeDoc; }
+  function getActive() { return Rga.TabManager ? Rga.TabManager.activeDoc() : activeDoc; }
 
   function notifyTitle() {
-    if (!activeDoc) return;
-    const dirty = activeDoc.dirty ? '● ' : '';
-    const title = `${dirty}${activeDoc.displayName} — Rwanga`;
+    const doc = getActive();
+    if (!doc) return;
+    const dirty = doc.dirty ? '● ' : '';
+    const title = `${dirty}${doc.displayName} — Rwanga`;
     if (window.rwanga && window.rwanga.window) {
       window.rwanga.window.setTitle(title);
     }
@@ -25,8 +26,7 @@
 
   async function newScript(seedDefaults) {
     const doc = Doc.create({ seedDefaults });
-    setActive(doc);
-    if (Rga.Editor && Rga.Editor.loadDocument) Rga.Editor.loadDocument(doc);
+    Rga.TabManager.openDocument(doc);
     return doc;
   }
 
@@ -44,8 +44,7 @@
       alert(`Cannot open file:\n${err.message}`);
       return null;
     }
-    setActive(doc);
-    if (Rga.Editor && Rga.Editor.loadDocument) Rga.Editor.loadDocument(doc);
+    Rga.TabManager.openDocument(doc);
     return doc;
   }
 
