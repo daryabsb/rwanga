@@ -5,6 +5,7 @@ const { app, BrowserWindow } = require('electron');
 const path = require('path');
 const filesBridge = require('./bridge/files');
 const windowControls = require('./bridge/window-controls');
+const { buildMenu } = require('./menu');
 
 let mainWindow = null;
 
@@ -26,6 +27,7 @@ function createMainWindow() {
   });
 
   mainWindow.loadFile(path.join(__dirname, '..', 'renderer', 'index.html'));
+  buildMenu(mainWindow);
 
   mainWindow.once('ready-to-show', () => {
     mainWindow.show();
