@@ -4,6 +4,7 @@
 const { app, BrowserWindow } = require('electron');
 const path = require('path');
 const filesBridge = require('./bridge/files');
+const windowControls = require('./bridge/window-controls');
 
 let mainWindow = null;
 
@@ -48,6 +49,7 @@ if (!gotLock) {
 
   app.whenReady().then(() => {
     filesBridge.register();
+    windowControls.register();
     createMainWindow();
   });
 
