@@ -510,6 +510,29 @@
     // 9. Load scene notes from sample data
     Rga.SceneNotesConnector.loadFromScenes();
 
+    // 10. Menu actions from main process
+    if (window.rwanga && window.rwanga.on && window.rwanga.on.menuAction) {
+      window.rwanga.on.menuAction(function(action) {
+        switch (action) {
+          case 'file.new':
+            Rga.FileManager.newScript();
+            break;
+          case 'file.open':
+            Rga.FileManager.openFromDialog();
+            break;
+          case 'file.save':
+            Rga.FileManager.save();
+            break;
+          case 'file.saveAs':
+            Rga.FileManager.saveAs();
+            break;
+          case 'help.loadSample':
+            if (Rga.SampleData && Rga.SampleData.load) Rga.SampleData.load();
+            break;
+        }
+      });
+    }
+
     console.log('[Rwanga] Script Editor initialized.');
   }
 
