@@ -3,6 +3,7 @@
 
 const { app, BrowserWindow } = require('electron');
 const path = require('path');
+const filesBridge = require('./bridge/files');
 
 let mainWindow = null;
 
@@ -45,7 +46,10 @@ if (!gotLock) {
     }
   });
 
-  app.whenReady().then(createMainWindow);
+  app.whenReady().then(() => {
+    filesBridge.register();
+    createMainWindow();
+  });
 
   app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {
