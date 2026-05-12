@@ -1,4 +1,4 @@
-# Rwanga Script Editor — Sub-Project A Implementation Plan
+﻿# Rwanga Script Editor — Sub-Project A Implementation Plan
 ## File Operations & Editor Finish (v0.1)
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
@@ -15,7 +15,7 @@
 
 ## File Structure
 
-### New files (all under `src/rwanga-editor/`)
+### New files (all under `rwanga-editor/`)
 
 **Project root:**
 - `package.json` — npm manifest; deps; build/test scripts; electron-builder config
@@ -25,7 +25,7 @@
 - `.env.example` — placeholder env vars (signing slots)
 - `electron-builder.yml` — packaging config (Windows NSIS + macOS dmg/zip)
 
-**Electron main process** (`src/rwanga-editor/electron/`):
+**Electron main process** (`rwanga-editor/electron/`):
 - `main.js` — app lifecycle, window creation, IPC handler registration, menu, single-instance lock, file-association handler
 - `preload.js` — `contextBridge.exposeInMainWorld('rwanga', ...)`; the cross-platform contract
 - `bridge/files.js` — `files.*` handlers (pickOpen, pickFolder, read, save, pickSaveAs, listFolder, stat)
@@ -42,7 +42,7 @@
 - `lib/debug-log.js` — main-process logger (`<userData>/logs/main.log`)
 - `menu.js` — application menu construction; menu-event → IPC bridge
 
-**Renderer** (`src/rwanga-editor/renderer/`):
+**Renderer** (`rwanga-editor/renderer/`):
 - `index.html` — copied from prototype, Google Fonts removed, fonts referenced locally
 - `css/` — copied verbatim from prototype: `tokens.css`, `reset.css`, `shell.css`, `editor.css`, `components.css`, `overlays.css`
 - `css/cache-management.css` — NEW: Storage dialog styles
@@ -63,7 +63,7 @@
 - `fonts/NotoSansArabic-Bold.woff2` — vendored
 - `js/` — existing prototype JS files (copied) + new files below
 
-**New renderer JS modules** (`src/rwanga-editor/renderer/js/`):
+**New renderer JS modules** (`rwanga-editor/renderer/js/`):
 - `doc.js` — `Document` factory; serialize/deserialize; schema validation + v1.0 backfill; dirty tracking
 - `file-manager.js` — wires `window.rwanga.files.*` to Document and tab-manager
 - `tab-manager.js` — multi-tab with Document-per-tab; extracted from existing inline `Rga.Tabs`
@@ -132,7 +132,7 @@
 
 | # | Phase | Focus | Risk |
 |---|---|---|---|
-| 0 | Scaffolding | `src/rwanga-editor/` layout, package.json, electron-builder.yml, LICENSE, vendored fonts, copied prototype assets, .gitignore | Low — pure setup |
+| 0 | Scaffolding | `rwanga-editor/` layout, package.json, electron-builder.yml, LICENSE, vendored fonts, copied prototype assets, .gitignore | Low — pure setup |
 | 1 | Electron shell | main.js + preload.js loads index.html; empty `window.rwanga` stub; window controls work; existing prototype renders inside Electron | Low |
 | 2 | Document + schema | `doc.js`, `constants.js`, schema validate + v1.0 backfill, dirty tracking. Pure-JS unit tests | Low — isolated module |
 | 3 | json-file helper | `lib/json-file.js` atomic write + corruption backup. Pure-JS unit tests | Low |
@@ -167,19 +167,19 @@ Goal: empty Electron project structure that builds. No app logic yet.
 
 ### Task 0.1 — Create directory layout
 
-**Files:** Create `src/rwanga-editor/{electron,renderer,tests,build}/`
+**Files:** Create `rwanga-editor/{electron,renderer,tests,build}/`
 
 - [ ] **Step 1: Create the directory tree**
 
 Run:
 ```
-mkdir -p src/rwanga-editor/electron/bridge src/rwanga-editor/electron/lib src/rwanga-editor/renderer/css src/rwanga-editor/renderer/js src/rwanga-editor/renderer/fonts src/rwanga-editor/tests/unit src/rwanga-editor/tests/integration src/rwanga-editor/tests/fixtures src/rwanga-editor/build
+mkdir -p rwanga-editor/electron/bridge rwanga-editor/electron/lib rwanga-editor/renderer/css rwanga-editor/renderer/js rwanga-editor/renderer/fonts rwanga-editor/tests/unit rwanga-editor/tests/integration rwanga-editor/tests/fixtures rwanga-editor/build
 ```
 
 - [ ] **Step 2: Commit**
 
 ```
-git add src/rwanga-editor/
+git add rwanga-editor/
 git commit -m "chore(editor): create sub-project A directory layout" --allow-empty
 ```
 
@@ -187,24 +187,24 @@ Note: directories without files won't commit; the `--allow-empty` is for traceab
 
 ### Task 0.2 — Apache 2.0 LICENSE
 
-**Files:** Create `src/rwanga-editor/LICENSE`
+**Files:** Create `rwanga-editor/LICENSE`
 
 - [ ] **Step 1: Write LICENSE file**
 
-Write `src/rwanga-editor/LICENSE` with the standard Apache 2.0 text. Use the canonical text from https://www.apache.org/licenses/LICENSE-2.0.txt (no modifications). Replace the placeholder `[yyyy] [name of copyright owner]` in the APPENDIX with `2026 Rwanga`.
+Write `rwanga-editor/LICENSE` with the standard Apache 2.0 text. Use the canonical text from https://www.apache.org/licenses/LICENSE-2.0.txt (no modifications). Replace the placeholder `[yyyy] [name of copyright owner]` in the APPENDIX with `2026 Rwanga`.
 
 The full Apache 2.0 license text is ~11.5 KB / ~200 lines. Standard boilerplate.
 
 - [ ] **Step 2: Commit**
 
 ```
-git add src/rwanga-editor/LICENSE
+git add rwanga-editor/LICENSE
 git commit -m "chore(editor): add Apache 2.0 LICENSE"
 ```
 
 ### Task 0.3 — `.gitignore`
 
-**Files:** Create `src/rwanga-editor/.gitignore`
+**Files:** Create `rwanga-editor/.gitignore`
 
 - [ ] **Step 1: Write .gitignore**
 
@@ -253,13 +253,13 @@ Thumbs.db
 - [ ] **Step 2: Commit**
 
 ```
-git add src/rwanga-editor/.gitignore
+git add rwanga-editor/.gitignore
 git commit -m "chore(editor): add .gitignore"
 ```
 
 ### Task 0.4 — `package.json`
 
-**Files:** Create `src/rwanga-editor/package.json`
+**Files:** Create `rwanga-editor/package.json`
 
 - [ ] **Step 1: Write package.json**
 
@@ -297,7 +297,7 @@ Note: `electron-updater` is a runtime dependency (loaded by main.js), `electron`
 
 - [ ] **Step 2: Install dependencies**
 
-Run from `src/rwanga-editor/`:
+Run from `rwanga-editor/`:
 ```
 npm install
 ```
@@ -316,13 +316,13 @@ Expected output: `v31.x.x` (or whatever was installed).
 - [ ] **Step 4: Commit**
 
 ```
-git add src/rwanga-editor/package.json src/rwanga-editor/package-lock.json
+git add rwanga-editor/package.json rwanga-editor/package-lock.json
 git commit -m "chore(editor): add package.json with Electron + electron-builder + Playwright deps"
 ```
 
 ### Task 0.5 — `.env.example`
 
-**Files:** Create `src/rwanga-editor/.env.example`
+**Files:** Create `rwanga-editor/.env.example`
 
 - [ ] **Step 1: Write .env.example**
 
@@ -356,13 +356,13 @@ GH_TOKEN=
 - [ ] **Step 2: Commit**
 
 ```
-git add src/rwanga-editor/.env.example
+git add rwanga-editor/.env.example
 git commit -m "chore(editor): add .env.example with signing slot placeholders"
 ```
 
 ### Task 0.6 — `electron-builder.yml` (skeleton)
 
-**Files:** Create `src/rwanga-editor/electron-builder.yml`
+**Files:** Create `rwanga-editor/electron-builder.yml`
 
 - [ ] **Step 1: Write electron-builder.yml**
 
@@ -433,70 +433,70 @@ Note: `publish.owner` and `repo` reference the current monorepo per spec D4 + D5
 - [ ] **Step 2: Commit**
 
 ```
-git add src/rwanga-editor/electron-builder.yml
+git add rwanga-editor/electron-builder.yml
 git commit -m "chore(editor): add electron-builder.yml skeleton (Win NSIS + macOS dmg/zip)"
 ```
 
 ### Task 0.7 — Copy prototype CSS verbatim
 
-**Files:** Copy `rwanga_script_editor_design_kit/library/css/*.css` to `src/rwanga-editor/renderer/css/`
+**Files:** Copy `rwanga_script_editor_design_kit/library/css/*.css` to `rwanga-editor/renderer/css/`
 
 - [ ] **Step 1: Copy each CSS file**
 
 Run (PowerShell-safe loop):
 ```
-cp rwanga_script_editor_design_kit/library/css/tokens.css src/rwanga-editor/renderer/css/tokens.css
-cp rwanga_script_editor_design_kit/library/css/reset.css src/rwanga-editor/renderer/css/reset.css
-cp rwanga_script_editor_design_kit/library/css/shell.css src/rwanga-editor/renderer/css/shell.css
-cp rwanga_script_editor_design_kit/library/css/editor.css src/rwanga-editor/renderer/css/editor.css
-cp rwanga_script_editor_design_kit/library/css/components.css src/rwanga-editor/renderer/css/components.css
-cp rwanga_script_editor_design_kit/library/css/overlays.css src/rwanga-editor/renderer/css/overlays.css
+cp rwanga_script_editor_design_kit/library/css/tokens.css rwanga-editor/renderer/css/tokens.css
+cp rwanga_script_editor_design_kit/library/css/reset.css rwanga-editor/renderer/css/reset.css
+cp rwanga_script_editor_design_kit/library/css/shell.css rwanga-editor/renderer/css/shell.css
+cp rwanga_script_editor_design_kit/library/css/editor.css rwanga-editor/renderer/css/editor.css
+cp rwanga_script_editor_design_kit/library/css/components.css rwanga-editor/renderer/css/components.css
+cp rwanga_script_editor_design_kit/library/css/overlays.css rwanga-editor/renderer/css/overlays.css
 ```
 
 - [ ] **Step 2: Commit**
 
 ```
-git add src/rwanga-editor/renderer/css/
+git add rwanga-editor/renderer/css/
 git commit -m "chore(editor): copy prototype CSS verbatim into renderer/"
 ```
 
 ### Task 0.8 — Copy prototype JS verbatim
 
-**Files:** Copy `rwanga_script_editor_design_kit/library/js/*.js` to `src/rwanga-editor/renderer/js/`
+**Files:** Copy `rwanga_script_editor_design_kit/library/js/*.js` to `rwanga-editor/renderer/js/`
 
 - [ ] **Step 1: Copy each JS file**
 
 ```
-cp rwanga_script_editor_design_kit/library/js/icons.js src/rwanga-editor/renderer/js/icons.js
-cp rwanga_script_editor_design_kit/library/js/utils.js src/rwanga-editor/renderer/js/utils.js
-cp rwanga_script_editor_design_kit/library/js/app-shell.js src/rwanga-editor/renderer/js/app-shell.js
-cp rwanga_script_editor_design_kit/library/js/editor-engine.js src/rwanga-editor/renderer/js/editor-engine.js
-cp rwanga_script_editor_design_kit/library/js/scene-manager.js src/rwanga-editor/renderer/js/scene-manager.js
-cp rwanga_script_editor_design_kit/library/js/tag-system.js src/rwanga-editor/renderer/js/tag-system.js
-cp rwanga_script_editor_design_kit/library/js/problems.js src/rwanga-editor/renderer/js/problems.js
-cp rwanga_script_editor_design_kit/library/js/sample-data.js src/rwanga-editor/renderer/js/sample-data.js
+cp rwanga_script_editor_design_kit/library/js/icons.js rwanga-editor/renderer/js/icons.js
+cp rwanga_script_editor_design_kit/library/js/utils.js rwanga-editor/renderer/js/utils.js
+cp rwanga_script_editor_design_kit/library/js/app-shell.js rwanga-editor/renderer/js/app-shell.js
+cp rwanga_script_editor_design_kit/library/js/editor-engine.js rwanga-editor/renderer/js/editor-engine.js
+cp rwanga_script_editor_design_kit/library/js/scene-manager.js rwanga-editor/renderer/js/scene-manager.js
+cp rwanga_script_editor_design_kit/library/js/tag-system.js rwanga-editor/renderer/js/tag-system.js
+cp rwanga_script_editor_design_kit/library/js/problems.js rwanga-editor/renderer/js/problems.js
+cp rwanga_script_editor_design_kit/library/js/sample-data.js rwanga-editor/renderer/js/sample-data.js
 ```
 
 - [ ] **Step 2: Commit**
 
 ```
-git add src/rwanga-editor/renderer/js/
+git add rwanga-editor/renderer/js/
 git commit -m "chore(editor): copy prototype JS verbatim into renderer/"
 ```
 
 ### Task 0.9 — Copy + modify `index.html` (kill Google Fonts CDN)
 
-**Files:** Create `src/rwanga-editor/renderer/index.html` from prototype, with CDN line removed
+**Files:** Create `rwanga-editor/renderer/index.html` from prototype, with CDN line removed
 
 - [ ] **Step 1: Copy and patch**
 
 ```
-cp rwanga_script_editor_design_kit/library/index.html src/rwanga-editor/renderer/index.html
+cp rwanga_script_editor_design_kit/library/index.html rwanga-editor/renderer/index.html
 ```
 
 - [ ] **Step 2: Remove the Google Fonts CDN line**
 
-Open `src/rwanga-editor/renderer/index.html`. Find line containing `fonts.googleapis.com` (line 9 in the prototype). Replace it with a comment placeholder pointing to the local `@font-face` declarations that will be added in Task 0.10:
+Open `rwanga-editor/renderer/index.html`. Find line containing `fonts.googleapis.com` (line 9 in the prototype). Replace it with a comment placeholder pointing to the local `@font-face` declarations that will be added in Task 0.10:
 
 ```html
   <!-- Fonts are loaded via @font-face declarations in css/tokens.css (vendored locally — no CDN) -->
@@ -506,7 +506,7 @@ Open `src/rwanga-editor/renderer/index.html`. Find line containing `fonts.google
 
 Run:
 ```
-grep -i "googleapis\|cdn\.\|unpkg\|cdnjs" src/rwanga-editor/renderer/index.html
+grep -i "googleapis\|cdn\.\|unpkg\|cdnjs" rwanga-editor/renderer/index.html
 ```
 
 Expected: no output (or no matches).
@@ -514,13 +514,13 @@ Expected: no output (or no matches).
 - [ ] **Step 4: Commit**
 
 ```
-git add src/rwanga-editor/renderer/index.html
+git add rwanga-editor/renderer/index.html
 git commit -m "chore(editor): copy index.html, remove Google Fonts CDN link"
 ```
 
 ### Task 0.10 — Vendor fonts locally
 
-**Files:** Add files to `src/rwanga-editor/renderer/fonts/` and `@font-face` block to `tokens.css`
+**Files:** Add files to `rwanga-editor/renderer/fonts/` and `@font-face` block to `tokens.css`
 
 - [ ] **Step 1: Download Courier Prime fonts**
 
@@ -532,7 +532,7 @@ Required files (woff2 preferred for size; ttf acceptable if woff2 unavailable):
 - `CourierPrime-Italic.woff2`
 - `CourierPrime-BoldItalic.woff2`
 
-Place at `src/rwanga-editor/renderer/fonts/`.
+Place at `rwanga-editor/renderer/fonts/`.
 
 - [ ] **Step 2: Download Noto Naskh Arabic and Noto Sans Arabic**
 
@@ -542,11 +542,11 @@ Required weights: 400, 500, 600, 700 (Regular, Medium, SemiBold, Bold) for each 
 - `NotoNaskhArabic-Regular.woff2`, `NotoNaskhArabic-Medium.woff2`, `NotoNaskhArabic-SemiBold.woff2`, `NotoNaskhArabic-Bold.woff2`
 - `NotoSansArabic-Regular.woff2`, `NotoSansArabic-Medium.woff2`, `NotoSansArabic-SemiBold.woff2`, `NotoSansArabic-Bold.woff2`
 
-Place at `src/rwanga-editor/renderer/fonts/`.
+Place at `rwanga-editor/renderer/fonts/`.
 
 - [ ] **Step 3: Add `@font-face` declarations to top of `tokens.css`**
 
-Open `src/rwanga-editor/renderer/css/tokens.css`. Prepend (before the existing `:root` block):
+Open `rwanga-editor/renderer/css/tokens.css`. Prepend (before the existing `:root` block):
 
 ```css
 /* === Vendored fonts (no CDN) === */
@@ -627,7 +627,7 @@ Open `src/rwanga-editor/renderer/css/tokens.css`. Prepend (before the existing `
 - [ ] **Step 4: Commit**
 
 ```
-git add src/rwanga-editor/renderer/fonts/ src/rwanga-editor/renderer/css/tokens.css
+git add rwanga-editor/renderer/fonts/ rwanga-editor/renderer/css/tokens.css
 git commit -m "chore(editor): vendor Courier Prime + Noto Arabic fonts locally"
 ```
 
@@ -637,7 +637,7 @@ git commit -m "chore(editor): vendor Courier Prime + Noto Arabic fonts locally"
 
 - [ ] **Step 1: Prepend the one-line license header**
 
-For each of `icons.js`, `utils.js`, `app-shell.js`, `editor-engine.js`, `scene-manager.js`, `tag-system.js`, `problems.js`, `sample-data.js` in `src/rwanga-editor/renderer/js/`, prepend the first line:
+For each of `icons.js`, `utils.js`, `app-shell.js`, `editor-engine.js`, `scene-manager.js`, `tag-system.js`, `problems.js`, `sample-data.js` in `rwanga-editor/renderer/js/`, prepend the first line:
 
 ```js
 // Copyright (c) 2026 Rwanga. Licensed under Apache 2.0.
@@ -648,13 +648,13 @@ The existing `(function() { 'use strict'; ... })();` block remains unchanged.
 - [ ] **Step 2: Commit**
 
 ```
-git add src/rwanga-editor/renderer/js/
+git add rwanga-editor/renderer/js/
 git commit -m "chore(editor): add Apache 2.0 attribution to renderer JS files"
 ```
 
 ### Task 0.11 — README
 
-**Files:** Create `src/rwanga-editor/README.md`
+**Files:** Create `rwanga-editor/README.md`
 
 - [ ] **Step 1: Write README**
 
@@ -710,7 +710,7 @@ Apache License 2.0 — see [LICENSE](./LICENSE).
 - [ ] **Step 2: Commit**
 
 ```
-git add src/rwanga-editor/README.md
+git add rwanga-editor/README.md
 git commit -m "docs(editor): add README"
 ```
 
@@ -720,10 +720,10 @@ git commit -m "docs(editor): add README"
 
 Run:
 ```
-ls -la src/rwanga-editor/
-ls -la src/rwanga-editor/renderer/
-ls -la src/rwanga-editor/renderer/js/
-ls -la src/rwanga-editor/renderer/fonts/
+ls -la rwanga-editor/
+ls -la rwanga-editor/renderer/
+ls -la rwanga-editor/renderer/js/
+ls -la rwanga-editor/renderer/fonts/
 ```
 
 Expected: all directories present; renderer/js has 8 copied files; renderer/fonts has 12 woff2 files; LICENSE, README, package.json, electron-builder.yml, .gitignore, .env.example exist at top level.
@@ -742,7 +742,7 @@ Goal: launch Electron, see the existing prototype render inside `BrowserWindow`.
 
 ### Task 1.1 — Minimal `main.js`
 
-**Files:** Create `src/rwanga-editor/electron/main.js`
+**Files:** Create `rwanga-editor/electron/main.js`
 
 - [ ] **Step 1: Write main.js**
 
@@ -812,13 +812,13 @@ if (!gotLock) {
 - [ ] **Step 2: Commit**
 
 ```
-git add src/rwanga-editor/electron/main.js
+git add rwanga-editor/electron/main.js
 git commit -m "feat(editor): minimal Electron main process with single-instance lock"
 ```
 
 ### Task 1.2 — Empty `preload.js` with `window.rwanga` stub
 
-**Files:** Create `src/rwanga-editor/electron/preload.js`
+**Files:** Create `rwanga-editor/electron/preload.js`
 
 - [ ] **Step 1: Write preload.js**
 
@@ -908,7 +908,7 @@ contextBridge.exposeInMainWorld('rwanga', {
 - [ ] **Step 2: Commit**
 
 ```
-git add src/rwanga-editor/electron/preload.js
+git add rwanga-editor/electron/preload.js
 git commit -m "feat(editor): preload bridge exposing window.rwanga.* contract stubs"
 ```
 
@@ -916,7 +916,7 @@ git commit -m "feat(editor): preload bridge exposing window.rwanga.* contract st
 
 - [ ] **Step 1: Launch the app**
 
-From `src/rwanga-editor/`:
+From `rwanga-editor/`:
 ```
 npm start
 ```
@@ -971,7 +971,7 @@ Goal: pure-JS module `doc.js` with serialize / deserialize / dirty-tracking / v1
 
 ### Task 2.1 — `constants.js`
 
-**Files:** Create `src/rwanga-editor/renderer/js/constants.js`
+**Files:** Create `rwanga-editor/renderer/js/constants.js`
 
 - [ ] **Step 1: Write constants.js**
 
@@ -1035,13 +1035,13 @@ Goal: pure-JS module `doc.js` with serialize / deserialize / dirty-tracking / v1
 - [ ] **Step 2: Commit**
 
 ```
-git add src/rwanga-editor/renderer/js/constants.js
+git add rwanga-editor/renderer/js/constants.js
 git commit -m "feat(editor): constants module — schema versions, production types, autosave/workspace timing"
 ```
 
 ### Task 2.2 — `doc.test.js` failing tests
 
-**Files:** Create `src/rwanga-editor/tests/unit/doc.test.js`
+**Files:** Create `rwanga-editor/tests/unit/doc.test.js`
 
 - [ ] **Step 1: Write the failing test suite**
 
@@ -1133,7 +1133,7 @@ test('Two Docs are independent — mutating one does not affect the other', () =
 
 - [ ] **Step 2: Run test, expect failure**
 
-From `src/rwanga-editor/`:
+From `rwanga-editor/`:
 ```
 npm run test:unit
 ```
@@ -1143,13 +1143,13 @@ Expected: FAIL. Cannot find module `../../renderer/js/doc.js` (we haven't writte
 - [ ] **Step 3: Commit (failing test)**
 
 ```
-git add src/rwanga-editor/tests/unit/doc.test.js
+git add rwanga-editor/tests/unit/doc.test.js
 git commit -m "test(editor): failing tests for Doc module (round-trip, backfill, dirty flag, isolation)"
 ```
 
 ### Task 2.3 — Implement `doc.js`
 
-**Files:** Create `src/rwanga-editor/renderer/js/doc.js`
+**Files:** Create `rwanga-editor/renderer/js/doc.js`
 
 - [ ] **Step 1: Write doc.js**
 
@@ -1355,13 +1355,13 @@ Expected: all tests in `doc.test.js` pass.
 - [ ] **Step 3: Commit**
 
 ```
-git add src/rwanga-editor/renderer/js/doc.js
+git add rwanga-editor/renderer/js/doc.js
 git commit -m "feat(editor): Doc module — create, serialize/deserialize, dirty tracking, v1.0 backfill"
 ```
 
 ### Task 2.4 — Add `<script src="js/constants.js">` and `<script src="js/doc.js">` to index.html
 
-**Files:** Modify `src/rwanga-editor/renderer/index.html`
+**Files:** Modify `rwanga-editor/renderer/index.html`
 
 - [ ] **Step 1: Insert script tags before the existing JS includes**
 
@@ -1393,13 +1393,13 @@ Expected: returns a Document object with `docId`, `handle: null`, `displayName: 
 - [ ] **Step 3: Commit**
 
 ```
-git add src/rwanga-editor/renderer/index.html
+git add rwanga-editor/renderer/index.html
 git commit -m "feat(editor): wire constants.js + doc.js into renderer index.html"
 ```
 
 ### Task 2.5 — Schema fixtures
 
-**Files:** Create `src/rwanga-editor/tests/fixtures/{sample-v10.rga, sample-v11.rga, corrupt.rga}`
+**Files:** Create `rwanga-editor/tests/fixtures/{sample-v10.rga, sample-v11.rga, corrupt.rga}`
 
 - [ ] **Step 1: Write `sample-v10.rga`**
 
@@ -1439,7 +1439,7 @@ Same as above but with `"rga_version": "1.1"` and adding `"production_type": "sh
 - [ ] **Step 4: Commit**
 
 ```
-git add src/rwanga-editor/tests/fixtures/
+git add rwanga-editor/tests/fixtures/
 git commit -m "test(editor): add v1.0, v1.1, and corrupt .rga fixtures"
 ```
 
@@ -1459,7 +1459,7 @@ Goal: a single helper used by recent.js, workspace.js, prefs.js, and the autosav
 
 ### Task 3.1 — Test for `json-file` atomic write + corruption backup
 
-**Files:** Create `src/rwanga-editor/tests/unit/json-file.test.js`
+**Files:** Create `rwanga-editor/tests/unit/json-file.test.js`
 
 - [ ] **Step 1: Write tests**
 
@@ -1540,13 +1540,13 @@ Expected: FAIL — `electron/lib/json-file.js` doesn't exist.
 - [ ] **Step 3: Commit failing test**
 
 ```
-git add src/rwanga-editor/tests/unit/json-file.test.js
+git add rwanga-editor/tests/unit/json-file.test.js
 git commit -m "test(editor): failing tests for json-file atomic write + corruption backup"
 ```
 
 ### Task 3.2 — Implement `json-file.js`
 
-**Files:** Create `src/rwanga-editor/electron/lib/json-file.js`
+**Files:** Create `rwanga-editor/electron/lib/json-file.js`
 
 - [ ] **Step 1: Write json-file.js**
 
@@ -1630,13 +1630,13 @@ Expected: all tests including `json-file.test.js` pass.
 - [ ] **Step 3: Commit**
 
 ```
-git add src/rwanga-editor/electron/lib/json-file.js
+git add rwanga-editor/electron/lib/json-file.js
 git commit -m "feat(editor): json-file lib — atomic write + corruption-backup read"
 ```
 
 ### Task 3.3 — `paths.js` helper
 
-**Files:** Create `src/rwanga-editor/electron/lib/paths.js`
+**Files:** Create `rwanga-editor/electron/lib/paths.js`
 
 - [ ] **Step 1: Write paths.js**
 
@@ -1701,7 +1701,7 @@ module.exports = {
 - [ ] **Step 2: Commit**
 
 ```
-git add src/rwanga-editor/electron/lib/paths.js
+git add rwanga-editor/electron/lib/paths.js
 git commit -m "feat(editor): paths lib — userData path helpers"
 ```
 
@@ -1721,7 +1721,7 @@ Goal: implement `window.rwanga.files.{pickOpen, read, save, pickSaveAs, stat}` i
 
 ### Task 4.1 — `bridge/files.js`
 
-**Files:** Create `src/rwanga-editor/electron/bridge/files.js`
+**Files:** Create `rwanga-editor/electron/bridge/files.js`
 
 - [ ] **Step 1: Write bridge/files.js**
 
@@ -1808,13 +1808,13 @@ module.exports = { register };
 - [ ] **Step 2: Commit**
 
 ```
-git add src/rwanga-editor/electron/bridge/files.js
+git add rwanga-editor/electron/bridge/files.js
 git commit -m "feat(editor): bridge/files — pickOpen, read, save, pickSaveAs, stat"
 ```
 
 ### Task 4.2 — Register bridge in `main.js`
 
-**Files:** Modify `src/rwanga-editor/electron/main.js`
+**Files:** Modify `rwanga-editor/electron/main.js`
 
 - [ ] **Step 1: Import and register bridge module**
 
@@ -1855,7 +1855,7 @@ Expected: `null` (file doesn't exist, no throw).
 - [ ] **Step 3: Commit**
 
 ```
-git add src/rwanga-editor/electron/main.js
+git add rwanga-editor/electron/main.js
 git commit -m "feat(editor): wire files bridge into main process"
 ```
 
@@ -1875,7 +1875,7 @@ Goal: from the running app, user can `File → New`, `File → Open`, edit, `Fil
 
 ### Task 5.1 — `file-manager.js` (renderer)
 
-**Files:** Create `src/rwanga-editor/renderer/js/file-manager.js`
+**Files:** Create `rwanga-editor/renderer/js/file-manager.js`
 
 - [ ] **Step 1: Write file-manager.js**
 
@@ -1973,7 +1973,7 @@ Goal: from the running app, user can `File → New`, `File → Open`, edit, `Fil
 
 - [ ] **Step 2: Add `<script src="js/file-manager.js">` to index.html**
 
-In `src/rwanga-editor/renderer/index.html`, after the `doc.js` include, add:
+In `rwanga-editor/renderer/index.html`, after the `doc.js` include, add:
 
 ```html
 <script src="js/file-manager.js"></script>
@@ -1982,13 +1982,13 @@ In `src/rwanga-editor/renderer/index.html`, after the `doc.js` include, add:
 - [ ] **Step 3: Commit**
 
 ```
-git add src/rwanga-editor/renderer/js/file-manager.js src/rwanga-editor/renderer/index.html
+git add rwanga-editor/renderer/js/file-manager.js rwanga-editor/renderer/index.html
 git commit -m "feat(editor): file-manager — new/open/save/saveAs against window.rwanga.files"
 ```
 
 ### Task 5.2 — `Editor.loadDocument` method on editor-engine
 
-**Files:** Modify `src/rwanga-editor/renderer/js/editor-engine.js`
+**Files:** Modify `rwanga-editor/renderer/js/editor-engine.js`
 
 - [ ] **Step 1: Add loadDocument method**
 
@@ -2074,13 +2074,13 @@ If no `input` listener exists, add this to the editor element:
 - [ ] **Step 3: Commit**
 
 ```
-git add src/rwanga-editor/renderer/js/editor-engine.js
+git add rwanga-editor/renderer/js/editor-engine.js
 git commit -m "feat(editor): editor.loadDocument + dirty-signal wiring"
 ```
 
 ### Task 5.3 — `window.minimize/maximize/close/setTitle` bridge
 
-**Files:** Create `src/rwanga-editor/electron/bridge/window-controls.js`; modify `main.js`
+**Files:** Create `rwanga-editor/electron/bridge/window-controls.js`; modify `main.js`
 
 - [ ] **Step 1: Write bridge/window-controls.js**
 
@@ -2135,13 +2135,13 @@ Inside whenReady block:
 - [ ] **Step 3: Commit**
 
 ```
-git add src/rwanga-editor/electron/bridge/window-controls.js src/rwanga-editor/electron/main.js
+git add rwanga-editor/electron/bridge/window-controls.js rwanga-editor/electron/main.js
 git commit -m "feat(editor): bridge/window-controls — minimize, maximize, close, setTitle"
 ```
 
 ### Task 5.4 — Application menu with File items
 
-**Files:** Create `src/rwanga-editor/electron/menu.js`; modify `main.js`
+**Files:** Create `rwanga-editor/electron/menu.js`; modify `main.js`
 
 - [ ] **Step 1: Write menu.js**
 
@@ -2285,13 +2285,13 @@ buildMenu(mainWindow);
 - [ ] **Step 3: Commit**
 
 ```
-git add src/rwanga-editor/electron/menu.js src/rwanga-editor/electron/main.js
+git add rwanga-editor/electron/menu.js rwanga-editor/electron/main.js
 git commit -m "feat(editor): application menu with File/Edit/View/Help groups"
 ```
 
 ### Task 5.5 — Wire menu actions in renderer to FileManager
 
-**Files:** Modify `src/rwanga-editor/renderer/js/app-shell.js`
+**Files:** Modify `rwanga-editor/renderer/js/app-shell.js`
 
 - [ ] **Step 1: Add menu-action listener inside the boot block**
 
@@ -2340,7 +2340,7 @@ Manual test:
 - [ ] **Step 3: Commit**
 
 ```
-git add src/rwanga-editor/renderer/js/app-shell.js
+git add rwanga-editor/renderer/js/app-shell.js
 git commit -m "feat(editor): wire File menu actions (new/open/save/saveAs) to FileManager"
 ```
 
@@ -2362,7 +2362,7 @@ This phase is **5 tasks** because it's substantial. Read each fully before start
 
 ### Task 6.1 — Failing tab-manager test
 
-**Files:** Create `src/rwanga-editor/tests/unit/tab-manager.test.js`
+**Files:** Create `rwanga-editor/tests/unit/tab-manager.test.js`
 
 - [ ] **Step 1: Write tests**
 
@@ -2447,13 +2447,13 @@ Expected: `tab-manager.test.js` fails (module not found).
 - [ ] **Step 3: Commit failing test**
 
 ```
-git add src/rwanga-editor/tests/unit/tab-manager.test.js
+git add rwanga-editor/tests/unit/tab-manager.test.js
 git commit -m "test(editor): failing tests for TabManager (isolation, switching, close)"
 ```
 
 ### Task 6.2 — Implement `tab-manager.js`
 
-**Files:** Create `src/rwanga-editor/renderer/js/tab-manager.js`
+**Files:** Create `rwanga-editor/renderer/js/tab-manager.js`
 
 - [ ] **Step 1: Write tab-manager.js**
 
@@ -2651,13 +2651,13 @@ Expected: tab-manager.test.js passes.
 - [ ] **Step 3: Commit**
 
 ```
-git add src/rwanga-editor/renderer/js/tab-manager.js
+git add rwanga-editor/renderer/js/tab-manager.js
 git commit -m "feat(editor): TabManager — multi-tab with Document-per-tab, display:none preservation"
 ```
 
 ### Task 6.3 — Refactor SceneManager / TagSystem / Problems to accept doc + container
 
-**Files:** Modify `src/rwanga-editor/renderer/js/scene-manager.js`, `tag-system.js`, `problems.js`
+**Files:** Modify `rwanga-editor/renderer/js/scene-manager.js`, `tag-system.js`, `problems.js`
 
 - [ ] **Step 1: Add `updateNavigatorFor(doc, container)` to SceneManager**
 
@@ -2787,13 +2787,13 @@ In `editor-engine.js`, replace or supplement the existing `loadDocument` with:
 - [ ] **Step 5: Commit**
 
 ```
-git add src/rwanga-editor/renderer/js/scene-manager.js src/rwanga-editor/renderer/js/tag-system.js src/rwanga-editor/renderer/js/problems.js src/rwanga-editor/renderer/js/editor-engine.js
+git add rwanga-editor/renderer/js/scene-manager.js rwanga-editor/renderer/js/tag-system.js rwanga-editor/renderer/js/problems.js rwanga-editor/renderer/js/editor-engine.js
 git commit -m "refactor(editor): scene-manager/tag-system/problems/editor — doc-scoped variants"
 ```
 
 ### Task 6.4 — Replace prototype's `Rga.Tabs` boot with `TabManager`
 
-**Files:** Modify `src/rwanga-editor/renderer/js/app-shell.js`
+**Files:** Modify `rwanga-editor/renderer/js/app-shell.js`
 
 - [ ] **Step 1: Comment out the prototype's `Rga.Tabs.create(...)` call in boot()**
 
@@ -2862,7 +2862,7 @@ Manual:
 - [ ] **Step 6: Commit**
 
 ```
-git add src/rwanga-editor/renderer/js/app-shell.js src/rwanga-editor/renderer/index.html src/rwanga-editor/renderer/js/file-manager.js
+git add rwanga-editor/renderer/js/app-shell.js rwanga-editor/renderer/index.html rwanga-editor/renderer/js/file-manager.js
 git commit -m "feat(editor): replace prototype's Rga.Tabs with TabManager in boot sequence"
 ```
 
@@ -2882,7 +2882,7 @@ Goal: `bridge/prefs.js` + renderer `prefs.js`. Theme migrates from localStorage 
 
 ### Task 7.1 — `bridge/prefs.js`
 
-**Files:** Create `src/rwanga-editor/electron/bridge/prefs.js`; modify `main.js`
+**Files:** Create `rwanga-editor/electron/bridge/prefs.js`; modify `main.js`
 
 - [ ] **Step 1: Write bridge/prefs.js**
 
@@ -2966,13 +2966,13 @@ const prefsBridge = require('./bridge/prefs');
 - [ ] **Step 3: Commit**
 
 ```
-git add src/rwanga-editor/electron/bridge/prefs.js src/rwanga-editor/electron/main.js
+git add rwanga-editor/electron/bridge/prefs.js rwanga-editor/electron/main.js
 git commit -m "feat(editor): bridge/prefs — preferences.json read/write with deep-merge"
 ```
 
 ### Task 7.2 — Renderer `prefs.js`
 
-**Files:** Create `src/rwanga-editor/renderer/js/prefs.js`; add `<script>` to index.html
+**Files:** Create `rwanga-editor/renderer/js/prefs.js`; add `<script>` to index.html
 
 - [ ] **Step 1: Write prefs.js**
 
@@ -3083,7 +3083,7 @@ Toggle theme via status bar. Close app. Re-open. Theme should persist (via prefs
 - [ ] **Step 5: Commit**
 
 ```
-git add src/rwanga-editor/renderer/js/prefs.js src/rwanga-editor/renderer/index.html src/rwanga-editor/renderer/js/app-shell.js
+git add rwanga-editor/renderer/js/prefs.js rwanga-editor/renderer/index.html rwanga-editor/renderer/js/app-shell.js
 git commit -m "feat(editor): renderer prefs module + theme migration from localStorage to preferences.json"
 ```
 
@@ -3103,7 +3103,7 @@ Goal: persist last folder + open tabs + window bounds + recent files in `workspa
 
 ### Task 8.1 — `bridge/workspace.js` + `bridge/recent.js`
 
-**Files:** Create `src/rwanga-editor/electron/bridge/workspace.js` and `src/rwanga-editor/electron/bridge/recent.js`; modify `main.js`
+**Files:** Create `rwanga-editor/electron/bridge/workspace.js` and `rwanga-editor/electron/bridge/recent.js`; modify `main.js`
 
 - [ ] **Step 1: Write bridge/workspace.js**
 
@@ -3211,13 +3211,13 @@ const recentBridge = require('./bridge/recent');
 - [ ] **Step 4: Commit**
 
 ```
-git add src/rwanga-editor/electron/bridge/workspace.js src/rwanga-editor/electron/bridge/recent.js src/rwanga-editor/electron/main.js
+git add rwanga-editor/electron/bridge/workspace.js rwanga-editor/electron/bridge/recent.js rwanga-editor/electron/main.js
 git commit -m "feat(editor): bridge/workspace + bridge/recent — workspace.json read/write, recent files cap 10"
 ```
 
 ### Task 8.2 — Renderer `workspace.js`
 
-**Files:** Create `src/rwanga-editor/renderer/js/workspace.js`; add `<script>` tag
+**Files:** Create `rwanga-editor/renderer/js/workspace.js`; add `<script>` tag
 
 - [ ] **Step 1: Write workspace.js**
 
@@ -3287,13 +3287,13 @@ git commit -m "feat(editor): bridge/workspace + bridge/recent — workspace.json
 - [ ] **Step 3: Commit**
 
 ```
-git add src/rwanga-editor/renderer/js/workspace.js src/rwanga-editor/renderer/index.html
+git add rwanga-editor/renderer/js/workspace.js rwanga-editor/renderer/index.html
 git commit -m "feat(editor): renderer workspace module — debounced persistence + tabs/folder/flags"
 ```
 
 ### Task 8.3 — Boot sequence integration
 
-**Files:** Modify `src/rwanga-editor/renderer/js/app-shell.js`
+**Files:** Modify `rwanga-editor/renderer/js/app-shell.js`
 
 - [ ] **Step 1: Replace the post-Phase-6 boot block**
 
@@ -3443,7 +3443,7 @@ function createMainWindow() {
 - [ ] **Step 5: Commit**
 
 ```
-git add src/rwanga-editor/renderer/js/app-shell.js src/rwanga-editor/renderer/js/file-manager.js src/rwanga-editor/electron/main.js
+git add rwanga-editor/renderer/js/app-shell.js rwanga-editor/renderer/js/file-manager.js rwanga-editor/electron/main.js
 git commit -m "feat(editor): boot restore — open tabs, last folder, window bounds, recent files"
 ```
 
@@ -3463,7 +3463,7 @@ Goal: `files.pickFolder` + `listFolder`; Explorer panel browses the current fold
 
 ### Task 9.1 — Extend `bridge/files.js` with folder methods
 
-**Files:** Modify `src/rwanga-editor/electron/bridge/files.js`
+**Files:** Modify `rwanga-editor/electron/bridge/files.js`
 
 - [ ] **Step 1: Add pickFolder + listFolder handlers**
 
@@ -3531,13 +3531,13 @@ async function readTree(rootHandle, maxDepth = 5) {
 - [ ] **Step 2: Commit**
 
 ```
-git add src/rwanga-editor/electron/bridge/files.js
+git add rwanga-editor/electron/bridge/files.js
 git commit -m "feat(editor): bridge/files — pickFolder + listFolder with .rga/.txt/.md filter"
 ```
 
 ### Task 9.2 — Explorer renderer wiring
 
-**Files:** Modify `src/rwanga-editor/renderer/js/app-shell.js` and `index.html`
+**Files:** Modify `rwanga-editor/renderer/js/app-shell.js` and `index.html`
 
 - [ ] **Step 1: Add Open Folder menu action handler**
 
@@ -3651,7 +3651,7 @@ Wire it in app-shell.js boot:
 - [ ] **Step 4: Commit**
 
 ```
-git add src/rwanga-editor/renderer/js/app-shell.js src/rwanga-editor/renderer/index.html
+git add rwanga-editor/renderer/js/app-shell.js rwanga-editor/renderer/index.html
 git commit -m "feat(editor): Open Folder + Explorer tree + Refresh (F5)"
 ```
 
@@ -3671,7 +3671,7 @@ Goal: each tab shows a metadata strip at the top of its editor surface with Lang
 
 ### Task 10.1 — `metadata-strip.css`
 
-**Files:** Create `src/rwanga-editor/renderer/css/metadata-strip.css`; reference in index.html
+**Files:** Create `rwanga-editor/renderer/css/metadata-strip.css`; reference in index.html
 
 - [ ] **Step 1: Write the stylesheet**
 
@@ -3744,13 +3744,13 @@ In `index.html`, add after the existing CSS includes:
 - [ ] **Step 2: Commit**
 
 ```
-git add src/rwanga-editor/renderer/css/metadata-strip.css src/rwanga-editor/renderer/index.html
+git add rwanga-editor/renderer/css/metadata-strip.css rwanga-editor/renderer/index.html
 git commit -m "feat(editor): metadata-strip CSS"
 ```
 
 ### Task 10.2 — `metadata-strip.js`
 
-**Files:** Create `src/rwanga-editor/renderer/js/metadata-strip.js`; reference in index.html
+**Files:** Create `rwanga-editor/renderer/js/metadata-strip.js`; reference in index.html
 
 - [ ] **Step 1: Write metadata-strip.js**
 
@@ -3906,7 +3906,7 @@ In `file-manager.js`, modify `newScript`:
 - [ ] **Step 6: Commit**
 
 ```
-git add src/rwanga-editor/renderer/js/metadata-strip.js src/rwanga-editor/renderer/js/tab-manager.js src/rwanga-editor/renderer/js/file-manager.js src/rwanga-editor/renderer/index.html
+git add rwanga-editor/renderer/js/metadata-strip.js rwanga-editor/renderer/js/tab-manager.js rwanga-editor/renderer/js/file-manager.js rwanga-editor/renderer/index.html
 git commit -m "feat(editor): inline metadata-strip per tab + Set-as-default → preferences.json"
 ```
 
@@ -3926,7 +3926,7 @@ Goal: clicking a tagged span or scene header populates the Inspector with editab
 
 ### Task 11.1 — `inspector.js`
 
-**Files:** Create `src/rwanga-editor/renderer/js/inspector.js`; add `<script>` to index.html
+**Files:** Create `rwanga-editor/renderer/js/inspector.js`; add `<script>` to index.html
 
 - [ ] **Step 1: Write inspector.js**
 
@@ -4096,7 +4096,7 @@ In `app-shell.js` boot, after `Rga.TabManager.init();`:
 - [ ] **Step 3: Commit**
 
 ```
-git add src/rwanga-editor/renderer/js/inspector.js src/rwanga-editor/renderer/index.html src/rwanga-editor/renderer/js/app-shell.js
+git add rwanga-editor/renderer/js/inspector.js rwanga-editor/renderer/index.html rwanga-editor/renderer/js/app-shell.js
 git commit -m "feat(editor): Inspector content — tag + scene selection with editable forms"
 ```
 
@@ -4116,7 +4116,7 @@ Goal: `bridge/autosave.js` writes per-doc `.bak` files with a manifest; `autosav
 
 ### Task 12.1 — `bridge/autosave.js`
 
-**Files:** Create `src/rwanga-editor/electron/bridge/autosave.js`; modify `main.js`
+**Files:** Create `rwanga-editor/electron/bridge/autosave.js`; modify `main.js`
 
 - [ ] **Step 1: Write bridge/autosave.js**
 
@@ -4233,13 +4233,13 @@ const autosaveBridge = require('./bridge/autosave');
 - [ ] **Step 3: Commit**
 
 ```
-git add src/rwanga-editor/electron/bridge/autosave.js src/rwanga-editor/electron/main.js
+git add rwanga-editor/electron/bridge/autosave.js rwanga-editor/electron/main.js
 git commit -m "feat(editor): bridge/autosave — write/discard/scanOrphans with manifest"
 ```
 
 ### Task 12.2 — Renderer `autosave-client.js`
 
-**Files:** Create `src/rwanga-editor/renderer/js/autosave-client.js`; add `<script>`
+**Files:** Create `rwanga-editor/renderer/js/autosave-client.js`; add `<script>`
 
 - [ ] **Step 1: Write autosave-client.js**
 
@@ -4427,7 +4427,7 @@ In `file-manager.js`, after a successful `save` or `saveAs`:
 - [ ] **Step 5: Commit**
 
 ```
-git add src/rwanga-editor/renderer/js/autosave-client.js src/rwanga-editor/renderer/index.html src/rwanga-editor/renderer/js/app-shell.js src/rwanga-editor/renderer/js/file-manager.js
+git add rwanga-editor/renderer/js/autosave-client.js rwanga-editor/renderer/index.html rwanga-editor/renderer/js/app-shell.js rwanga-editor/renderer/js/file-manager.js
 git commit -m "feat(editor): autosave client — debounced writes + crash recovery dialog on boot"
 ```
 
@@ -4447,7 +4447,7 @@ Goal: replace auto-load of sample script with Welcome view (first launch / empty
 
 ### Task 13.1 — `welcome.css` and `welcome-view.js`
 
-**Files:** Create `src/rwanga-editor/renderer/css/welcome.css`, `src/rwanga-editor/renderer/js/welcome-view.js`; reference in index.html
+**Files:** Create `rwanga-editor/renderer/css/welcome.css`, `rwanga-editor/renderer/js/welcome-view.js`; reference in index.html
 
 - [ ] **Step 1: Write welcome.css**
 
@@ -4658,7 +4658,7 @@ In `sample-data.js`, modify the `load` function. Wrap the existing logic so it c
 - [ ] **Step 5: Commit**
 
 ```
-git add src/rwanga-editor/renderer/css/welcome.css src/rwanga-editor/renderer/js/welcome-view.js src/rwanga-editor/renderer/index.html src/rwanga-editor/renderer/js/app-shell.js src/rwanga-editor/renderer/js/sample-data.js
+git add rwanga-editor/renderer/css/welcome.css rwanga-editor/renderer/js/welcome-view.js rwanga-editor/renderer/index.html rwanga-editor/renderer/js/app-shell.js rwanga-editor/renderer/js/sample-data.js
 git commit -m "feat(editor): Welcome view + sample script demoted to opt-in"
 ```
 
@@ -4678,7 +4678,7 @@ Goal: `window.rwanga.export.toPDF` renders the active doc to a print-formatted H
 
 ### Task 14.1 — `bridge/export.js`
 
-**Files:** Create `src/rwanga-editor/electron/bridge/export.js`; modify `main.js`
+**Files:** Create `rwanga-editor/electron/bridge/export.js`; modify `main.js`
 
 - [ ] **Step 1: Write bridge/export.js**
 
@@ -4792,13 +4792,13 @@ const exportBridge = require('./bridge/export');
 - [ ] **Step 3: Commit**
 
 ```
-git add src/rwanga-editor/electron/bridge/export.js src/rwanga-editor/electron/main.js
+git add rwanga-editor/electron/bridge/export.js rwanga-editor/electron/main.js
 git commit -m "feat(editor): bridge/export — printToPDF + Rwanga watermark composition"
 ```
 
 ### Task 14.2 — Renderer `export-client.js` + menu wire
 
-**Files:** Create `src/rwanga-editor/renderer/js/export-client.js`; modify `app-shell.js`; add script
+**Files:** Create `rwanga-editor/renderer/js/export-client.js`; modify `app-shell.js`; add script
 
 - [ ] **Step 1: Write export-client.js**
 
@@ -4864,7 +4864,7 @@ In `app-shell.js` menu-action switch:
 - [ ] **Step 5: Commit**
 
 ```
-git add src/rwanga-editor/renderer/js/export-client.js src/rwanga-editor/renderer/js/app-shell.js src/rwanga-editor/renderer/index.html
+git add rwanga-editor/renderer/js/export-client.js rwanga-editor/renderer/js/app-shell.js rwanga-editor/renderer/index.html
 git commit -m "feat(editor): export-client (pluggable) + PDF export wired to File menu"
 ```
 
@@ -4884,7 +4884,7 @@ Goal: Storage dialog reachable from File menu + Command Palette + status bar pil
 
 ### Task 15.1 — `bridge/storage.js`
 
-**Files:** Create `src/rwanga-editor/electron/bridge/storage.js`; modify `main.js`
+**Files:** Create `rwanga-editor/electron/bridge/storage.js`; modify `main.js`
 
 - [ ] **Step 1: Write bridge/storage.js**
 
@@ -5068,13 +5068,13 @@ const storageBridge = require('./bridge/storage');
 - [ ] **Step 3: Commit**
 
 ```
-git add src/rwanga-editor/electron/bridge/storage.js src/rwanga-editor/electron/main.js
+git add rwanga-editor/electron/bridge/storage.js rwanga-editor/electron/main.js
 git commit -m "feat(editor): bridge/storage — cache report + clear methods + openDataFolder"
 ```
 
 ### Task 15.2 — `cache-management.css` and `cache-management.js`
 
-**Files:** Create `src/rwanga-editor/renderer/css/cache-management.css`, `src/rwanga-editor/renderer/js/cache-management.js`; reference in index.html
+**Files:** Create `rwanga-editor/renderer/css/cache-management.css`, `rwanga-editor/renderer/js/cache-management.js`; reference in index.html
 
 - [ ] **Step 1: Write cache-management.css**
 
@@ -5309,7 +5309,7 @@ In `app-shell.js`:
 - [ ] **Step 6: Commit**
 
 ```
-git add src/rwanga-editor/renderer/css/cache-management.css src/rwanga-editor/renderer/js/cache-management.js src/rwanga-editor/renderer/index.html src/rwanga-editor/renderer/js/app-shell.js
+git add rwanga-editor/renderer/css/cache-management.css rwanga-editor/renderer/js/cache-management.js rwanga-editor/renderer/index.html rwanga-editor/renderer/js/app-shell.js
 git commit -m "feat(editor): Cache Management UI — Storage dialog + status pill + actions"
 ```
 
@@ -5329,7 +5329,7 @@ Goal: `electron-updater` wired in main; checks on launch + every 4 hours; downlo
 
 ### Task 16.1 — `bridge/updates.js`
 
-**Files:** Create `src/rwanga-editor/electron/bridge/updates.js`; modify `main.js`
+**Files:** Create `rwanga-editor/electron/bridge/updates.js`; modify `main.js`
 
 - [ ] **Step 1: Write bridge/updates.js**
 
@@ -5421,13 +5421,13 @@ app.on('before-quit', (event) => {
 - [ ] **Step 3: Commit**
 
 ```
-git add src/rwanga-editor/electron/bridge/updates.js src/rwanga-editor/electron/main.js
+git add rwanga-editor/electron/bridge/updates.js rwanga-editor/electron/main.js
 git commit -m "feat(editor): bridge/updates — silent check/download via electron-updater"
 ```
 
 ### Task 16.2 — `update-pill.js`
 
-**Files:** Create `src/rwanga-editor/renderer/js/update-pill.js`; CSS; tag in index.html
+**Files:** Create `rwanga-editor/renderer/js/update-pill.js`; CSS; tag in index.html
 
 - [ ] **Step 1: Write update-pill.css**
 
@@ -5533,7 +5533,7 @@ And in boot, after `Rga.CacheManagement.init();`:
 - [ ] **Step 4: Commit**
 
 ```
-git add src/rwanga-editor/renderer/css/update-pill.css src/rwanga-editor/renderer/js/update-pill.js src/rwanga-editor/renderer/index.html src/rwanga-editor/renderer/js/app-shell.js
+git add rwanga-editor/renderer/css/update-pill.css rwanga-editor/renderer/js/update-pill.js rwanga-editor/renderer/index.html rwanga-editor/renderer/js/app-shell.js
 git commit -m "feat(editor): update pill in status bar; Check for Updates menu wire"
 ```
 
@@ -5555,7 +5555,7 @@ Goal: dropping a `.rga` onto the running window opens as a new tab; dropping a f
 
 ### Task 17.1 — Drag-drop into running window
 
-**Files:** Modify `src/rwanga-editor/renderer/js/app-shell.js`
+**Files:** Modify `rwanga-editor/renderer/js/app-shell.js`
 
 - [ ] **Step 1: Add drag-drop handler**
 
@@ -5600,13 +5600,13 @@ In `app-shell.js` boot:
 - [ ] **Step 2: Commit**
 
 ```
-git add src/rwanga-editor/renderer/js/app-shell.js
+git add rwanga-editor/renderer/js/app-shell.js
 git commit -m "feat(editor): drag-drop .rga/.txt/.md + folder into running window"
 ```
 
 ### Task 17.2 — OS file association via electron-builder
 
-**Files:** Modify `src/rwanga-editor/electron-builder.yml`
+**Files:** Modify `rwanga-editor/electron-builder.yml`
 
 - [ ] **Step 1: Add fileAssociations block**
 
@@ -5696,7 +5696,7 @@ In `app-shell.js` boot:
 - [ ] **Step 4: Commit**
 
 ```
-git add src/rwanga-editor/electron-builder.yml src/rwanga-editor/electron/main.js src/rwanga-editor/renderer/js/app-shell.js
+git add rwanga-editor/electron-builder.yml rwanga-editor/electron/main.js rwanga-editor/renderer/js/app-shell.js
 git commit -m "feat(editor): OS file association for .rga + dispatch to renderer"
 ```
 
@@ -5716,11 +5716,11 @@ Goal: replace the placeholder `alert(...)` and `confirm(...)` calls from earlier
 
 ### Task 18.1 — `modal.js` reusable dialog helper
 
-**Files:** Create `src/rwanga-editor/renderer/js/modal.js`; CSS
+**Files:** Create `rwanga-editor/renderer/js/modal.js`; CSS
 
 - [ ] **Step 1: Write modal.css (append to overlays.css)**
 
-In `src/rwanga-editor/renderer/css/overlays.css`, append:
+In `rwanga-editor/renderer/css/overlays.css`, append:
 
 ```css
 /* Rwanga modal helper */
@@ -5834,13 +5834,13 @@ Note `closeTab` must become `async`. Update call sites accordingly (most just `a
 - [ ] **Step 4: Commit**
 
 ```
-git add src/rwanga-editor/renderer/js/modal.js src/rwanga-editor/renderer/css/overlays.css src/rwanga-editor/renderer/index.html src/rwanga-editor/renderer/js/file-manager.js src/rwanga-editor/renderer/js/autosave-client.js src/rwanga-editor/renderer/js/tab-manager.js src/rwanga-editor/renderer/js/cache-management.js src/rwanga-editor/renderer/js/app-shell.js
+git add rwanga-editor/renderer/js/modal.js rwanga-editor/renderer/css/overlays.css rwanga-editor/renderer/index.html rwanga-editor/renderer/js/file-manager.js rwanga-editor/renderer/js/autosave-client.js rwanga-editor/renderer/js/tab-manager.js rwanga-editor/renderer/js/cache-management.js rwanga-editor/renderer/js/app-shell.js
 git commit -m "feat(editor): modal helper + replace alert/confirm; dirty-tab close modal"
 ```
 
 ### Task 18.2 — External mtime detection on Save
 
-**Files:** Modify `src/rwanga-editor/renderer/js/file-manager.js`
+**Files:** Modify `rwanga-editor/renderer/js/file-manager.js`
 
 - [ ] **Step 1: Add stat-check before save**
 
@@ -5904,13 +5904,13 @@ Also handle `stat === null` (file deleted while open):
 - [ ] **Step 2: Commit**
 
 ```
-git add src/rwanga-editor/renderer/js/file-manager.js
+git add rwanga-editor/renderer/js/file-manager.js
 git commit -m "feat(editor): external mtime + missing-file detection at Save time"
 ```
 
 ### Task 18.3 — Quit-with-dirty prompt
 
-**Files:** Modify `src/rwanga-editor/electron/main.js` and `src/rwanga-editor/renderer/js/app-shell.js`
+**Files:** Modify `rwanga-editor/electron/main.js` and `rwanga-editor/renderer/js/app-shell.js`
 
 - [ ] **Step 1: Renderer-side: collect dirty count and prompt**
 
@@ -5962,13 +5962,13 @@ In `main.js`, replace the basic close handler with:
 - [ ] **Step 3: Commit**
 
 ```
-git add src/rwanga-editor/electron/main.js src/rwanga-editor/renderer/js/app-shell.js
+git add rwanga-editor/electron/main.js rwanga-editor/renderer/js/app-shell.js
 git commit -m "feat(editor): quit-with-dirty modal (Save All / Discard All / Cancel)"
 ```
 
 ### Task 18.4 — Stale recents removal on failed read
 
-**Files:** Modify `src/rwanga-editor/renderer/js/file-manager.js`
+**Files:** Modify `rwanga-editor/renderer/js/file-manager.js`
 
 - [ ] **Step 1: Detect ENOENT on `openFromContent` and prune**
 
@@ -5998,13 +5998,13 @@ Wrap the `files.read` calls in click handlers (welcome-view, explorer) so on err
 - [ ] **Step 2: Commit**
 
 ```
-git add src/rwanga-editor/renderer/js/welcome-view.js
+git add rwanga-editor/renderer/js/welcome-view.js
 git commit -m "feat(editor): prune stale Recent entry when target file is missing"
 ```
 
 ### Task 18.5 — Corrupt-rga recovery-mode
 
-**Files:** Modify `src/rwanga-editor/renderer/js/file-manager.js`
+**Files:** Modify `rwanga-editor/renderer/js/file-manager.js`
 
 - [ ] **Step 1: Catch deserialize errors and offer recovery mode**
 
@@ -6051,7 +6051,7 @@ In `file-manager.js` `openFromContent`:
 - [ ] **Step 2: Commit**
 
 ```
-git add src/rwanga-editor/renderer/js/file-manager.js
+git add rwanga-editor/renderer/js/file-manager.js
 git commit -m "feat(editor): corrupt-rga recovery-mode (View as plain text)"
 ```
 
@@ -6071,7 +6071,7 @@ Goal: `npm run pack:win` and `npm run pack:mac` produce unsigned artifacts that 
 
 ### Task 19.1 — Build resources (icon placeholder)
 
-**Files:** Create `src/rwanga-editor/build/resources/icon.png` and `icon.icns` and `icon.ico` (placeholder)
+**Files:** Create `rwanga-editor/build/resources/icon.png` and `icon.icns` and `icon.ico` (placeholder)
 
 - [ ] **Step 1: Generate placeholder icons**
 
@@ -6102,7 +6102,7 @@ mac:
 - [ ] **Step 3: Commit**
 
 ```
-git add src/rwanga-editor/build/resources/ src/rwanga-editor/electron-builder.yml
+git add rwanga-editor/build/resources/ rwanga-editor/electron-builder.yml
 git commit -m "chore(editor): add placeholder app icons + reference in build config"
 ```
 
@@ -6110,7 +6110,7 @@ git commit -m "chore(editor): add placeholder app icons + reference in build con
 
 - [ ] **Step 1: Pack**
 
-From `src/rwanga-editor/`:
+From `rwanga-editor/`:
 ```
 npm run pack:win
 ```
@@ -6165,7 +6165,7 @@ Goal: 4 Electron integration tests via Playwright's electron driver.
 
 ### Task 20.1 — Playwright config
 
-**Files:** Create `src/rwanga-editor/tests/integration/playwright.config.js`
+**Files:** Create `rwanga-editor/tests/integration/playwright.config.js`
 
 - [ ] **Step 1: Write config**
 
@@ -6197,13 +6197,13 @@ npx playwright install
 - [ ] **Step 3: Commit**
 
 ```
-git add src/rwanga-editor/tests/integration/playwright.config.js
+git add rwanga-editor/tests/integration/playwright.config.js
 git commit -m "test(editor): Playwright config for Electron integration suite"
 ```
 
 ### Task 20.2 — `boot.spec.js`
 
-**Files:** Create `src/rwanga-editor/tests/integration/boot.spec.js`
+**Files:** Create `rwanga-editor/tests/integration/boot.spec.js`
 
 - [ ] **Step 1: Write the test**
 
@@ -6243,13 +6243,13 @@ Expected: PASS.
 - [ ] **Step 3: Commit**
 
 ```
-git add src/rwanga-editor/tests/integration/boot.spec.js
+git add rwanga-editor/tests/integration/boot.spec.js
 git commit -m "test(editor): integration — boot happy path"
 ```
 
 ### Task 20.3 — `roundtrip.spec.js`
 
-**Files:** Create `src/rwanga-editor/tests/integration/roundtrip.spec.js`
+**Files:** Create `rwanga-editor/tests/integration/roundtrip.spec.js`
 
 - [ ] **Step 1: Write the test**
 
@@ -6302,13 +6302,13 @@ test('new → write → save → reopen round-trips body content', async () => {
 
 ```
 npm run test:e2e
-git add src/rwanga-editor/tests/integration/roundtrip.spec.js
+git add rwanga-editor/tests/integration/roundtrip.spec.js
 git commit -m "test(editor): integration — save/read round-trip via bridge"
 ```
 
 ### Task 20.4 — `autosave-recovery.spec.js`
 
-**Files:** Create `src/rwanga-editor/tests/integration/autosave-recovery.spec.js`
+**Files:** Create `rwanga-editor/tests/integration/autosave-recovery.spec.js`
 
 - [ ] **Step 1: Write the test**
 
@@ -6366,13 +6366,13 @@ test('autosave writes a .bak then scanOrphans finds it after restart', async () 
 
 ```
 npm run test:e2e
-git add src/rwanga-editor/tests/integration/autosave-recovery.spec.js
+git add rwanga-editor/tests/integration/autosave-recovery.spec.js
 git commit -m "test(editor): integration — autosave + scanOrphans across restart"
 ```
 
 ### Task 20.5 — `pdf-export.spec.js`
 
-**Files:** Create `src/rwanga-editor/tests/integration/pdf-export.spec.js`
+**Files:** Create `rwanga-editor/tests/integration/pdf-export.spec.js`
 
 - [ ] **Step 1: Write the test**
 
@@ -6429,7 +6429,7 @@ test('export.toPDF produces a PDF containing script text + Rwanga watermark', as
 
 ```
 npm run test:e2e
-git add src/rwanga-editor/tests/integration/pdf-export.spec.js
+git add rwanga-editor/tests/integration/pdf-export.spec.js
 git commit -m "test(editor): integration — PDF export pipeline smoke proxy"
 ```
 

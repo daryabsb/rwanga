@@ -1,4 +1,4 @@
-# Rwanga Script Editor — Sub-Project A Design Spec
+﻿# Rwanga Script Editor — Sub-Project A Design Spec
 ## File Operations & Editor Finish (v0.1)
 
 **Date:** 2026-05-12
@@ -61,7 +61,7 @@ These come from the brainstorming dialogue and are durable architectural primiti
 Standard Electron architecture (`nodeIntegration: false`, `contextIsolation: true`):
 
 ```
-src/rwanga-editor/
+rwanga-editor/
 ├── electron/
 │   ├── main.js              ← Main process: window, menu, dialogs, FS, IPC handlers, autosave timer, workspace state
 │   ├── preload.js           ← Context-isolated bridge: exposes window.rwanga.* to renderer
@@ -83,7 +83,7 @@ The renderer does **all UI**. The main process does **all I/O**. They communicat
 
 ### 1.3 Repository placement
 
-For sub-project A, the editor source lives in `src/rwanga-editor/` as a subdirectory of the existing `api-rwanga` repository. This avoids the cost of a mid-development repo migration. After sub-project A's implementation is complete, the editor will move to its own repository (`rwanga-editor`); auto-update endpoints will be reconfigured at that point.
+For sub-project A, the editor source lives in `rwanga-editor/` as a subdirectory of the existing `api-rwanga` repository. This avoids the cost of a mid-development repo migration. After sub-project A's implementation is complete, the editor will move to its own repository (`rwanga-editor`); auto-update endpoints will be reconfigured at that point.
 
 GitHub Releases for auto-update artifacts publish to the current repo during sub-project A. Tags use the `editor-vX.Y.Z` prefix to distinguish from platform releases. electron-updater is configured to filter releases by this tag prefix.
 
@@ -863,7 +863,7 @@ Clearing cancels the pending update; next launch re-downloads.
 
 ### 6.4 Source location
 
-Sub-project A's source lives at `src/rwanga-editor/` inside the current `api-rwanga` repository. After implementation completes, the editor moves to its own repository; auto-update endpoints reconfigure at that point.
+Sub-project A's source lives at `rwanga-editor/` inside the current `api-rwanga` repository. After implementation completes, the editor moves to its own repository; auto-update endpoints reconfigure at that point.
 
 This avoids the cost of mid-development repo migration while keeping the option open to extract later.
 
@@ -963,7 +963,7 @@ These are not brainstorm questions; they're decisions to make at convenience bet
 | D1 | Linux support in v0.1 | ✅ **OUT** (decided 2026-05-12) | — |
 | D2 | Code signing certificates | ⏳ Deferred; placeholder config in sub-project A. SignPath Foundation now the recommended Windows path given OSS status. | Public release only |
 | D3 | Confirm `production_type` enum matches platform forms.py | ✅ Aligned (5 values + `untyped`) | — |
-| D4 | Source code location | ✅ `src/rwanga-editor/` in current repo (decided 2026-05-12) | — |
+| D4 | Source code location | ✅ `rwanga-editor/` in current repo (decided 2026-05-12) | — |
 | D5 | GitHub Releases org/repo for auto-update artifacts | ✅ Current repo, `editor-vX.Y.Z` tag prefix during A | — |
 | D6 | App icon + branding assets | Pending — confirm reuse from platform's existing brand kit | Packaging step |
 
@@ -999,7 +999,7 @@ These are not brainstorm questions; they're decisions to make at convenience bet
 1. **User reviews this spec.** Feedback / corrections welcome before locking.
 2. Once approved, the writing-plans skill produces a step-by-step implementation plan derived from this spec.
 3. The implementation plan goes into a separate session for execution (using the executing-plans or subagent-driven-development skill).
-4. Implementation work happens in `src/rwanga-editor/` against this spec.
+4. Implementation work happens in `rwanga-editor/` against this spec.
 5. Sub-project A v0.1 ships internally (unsigned) for testing.
 6. External decisions D2 (signing) and D6 (branding) resolve before first public release.
 7. Sub-project B brainstorming begins after A's implementation lands.
