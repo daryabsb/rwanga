@@ -48,10 +48,15 @@
     return doc;
   }
 
+  function captureEditorState(doc) {
+    const view = Rga.TabManager && Rga.TabManager._editorView && Rga.TabManager._editorView();
+    if (view) doc.body = view.state.doc;
+  }
+
   async function save() {
     if (!activeDoc) return null;
     if (!activeDoc.handle) return await saveAs();
-    if (Rga.Editor && Rga.Editor.saveStateToDoc) Rga.Editor.saveStateToDoc(activeDoc);
+    captureEditorState(activeDoc);
     const content = Doc.serialize(activeDoc);
     try {
       const res = await window.rwanga.files.save(activeDoc.handle, content);
@@ -67,7 +72,7 @@
 
   async function saveAs() {
     if (!activeDoc) return null;
-    if (Rga.Editor && Rga.Editor.saveStateToDoc) Rga.Editor.saveStateToDoc(activeDoc);
+    captureEditorState(activeDoc);
     const content = Doc.serialize(activeDoc);
     const suggestedName = activeDoc.displayName.endsWith('.rga') ? activeDoc.displayName : 'Untitled.rga';
     try {
