@@ -7,7 +7,9 @@
   "author": "Rwanga",
   "private": true,
   "scripts": {
-    "start": "electron .",
+    "start": "node scripts/build-renderer.js && electron .",
+    "build:renderer": "node scripts/build-renderer.js",
+    "build:renderer:watch": "node scripts/build-renderer.js --watch",
     "test:unit": "node --test \"tests/unit/**/*.test.js\"",
     "test:e2e": "playwright test --config=tests/integration/playwright.config.js",
     "pack:win": "electron-builder --win --x64",
@@ -15,11 +17,12 @@
     "pack": "electron-builder --win --mac"
   },
   "devDependencies": {
+    "@playwright/test": "^1.45.0",
     "electron": "^31.0.0",
     "electron-builder": "^25.0.0",
-    "@playwright/test": "^1.45.0",
-    "pdf-parse": "^1.1.1",
-    "jsdom": "^24.0.0"
+    "esbuild": "^0.28.0",
+    "jsdom": "^24.0.0",
+    "pdf-parse": "^1.1.1"
   },
   "dependencies": {
     "electron-updater": "^6.2.0",

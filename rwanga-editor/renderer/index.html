@@ -295,8 +295,9 @@
 <script src="js/icons.js"></script>
 <script src="js/utils.js"></script>
 <script src="js/app-shell.js"></script>
-<!-- editor-engine.js, scene-manager.js, tag-system.js, problems.js, sample-data.js
-     deleted in Phase 0. New engine wired in Phase 1 (ProseMirror). -->
+<!-- ProseMirror bundle — built by scripts/build-renderer.js; exposes window.RgaProseMirror -->
+<script src="js/editor/bundle.js"></script>
+<script src="js/editor/mount.js"></script>
 
 <!-- ============================================================
      INIT — wire everything together
@@ -434,9 +435,12 @@
     Rga.CommandPalette.init();
     Rga.FileTree.init();
     Rga.TabManager.init();
-    // Editor engine is being rebuilt — Phase 1 wires Rga.Editor.mount() here.
-    // For now, no tab is opened automatically; the welcome view (Phase 8)
-    // will be the empty state.
+
+    const editorEl = document.getElementById('editor');
+    if (editorEl && Rga.Editor && Rga.Editor.mount) {
+      Rga.Editor._activeMount = Rga.Editor.mount(editorEl);
+    }
+
     registerCommands();
     registerShortcuts();
     Rga.StatusBar.init();
