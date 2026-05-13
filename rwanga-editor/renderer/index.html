@@ -183,9 +183,8 @@
         <!-- Editor Container (gutter + writing surface) -->
         <div id="editor-container">
           <div id="gutter"></div>
-          <div id="editor" contenteditable="true" spellcheck="true">
-            <!-- Content blocks populated by sample-data.js or user input -->
-          </div>
+          <!-- ProseMirror mounts here in Phase 1; contenteditable managed by PM -->
+          <div id="editor"></div>
         </div>
 
       </div>
@@ -286,9 +285,6 @@
   </div>
 </div>
 
-<!-- Location Autocomplete Datalist -->
-<datalist id="location-suggestions"></datalist>
-
 <!-- ============================================================
      JS — load in this order (dependencies flow downward)
      ============================================================ -->
@@ -299,11 +295,8 @@
 <script src="js/icons.js"></script>
 <script src="js/utils.js"></script>
 <script src="js/app-shell.js"></script>
-<script src="js/editor-engine.js"></script>
-<script src="js/scene-manager.js"></script>
-<script src="js/tag-system.js"></script>
-<script src="js/problems.js"></script>
-<script src="js/sample-data.js"></script>
+<!-- editor-engine.js, scene-manager.js, tag-system.js, problems.js, sample-data.js
+     deleted in Phase 0. New engine wired in Phase 1 (ProseMirror). -->
 
 <!-- ============================================================
      INIT — wire everything together
@@ -385,16 +378,6 @@
     P.register({ label: 'Toggle Bottom Panel', shortcut: 'Ctrl+J', category: 'View',
       action: function() { Rga.BottomPanel.toggleCollapse(); }
     });
-    P.register({ label: 'New Scene', shortcut: 'Ctrl+Enter', category: 'Script',
-      action: function() {
-        var current = Rga.Cursor.getCurrentBlock();
-        var header = Rga.SceneManager.createHeader({}, current);
-        if (header) { var loc = header.querySelector('.sh-location'); if (loc) loc.focus(); }
-      }
-    });
-    P.register({ label: 'Renumber Scenes', category: 'Script',
-      action: function() { Rga.SceneManager.renumberScenes(); }
-    });
     P.register({ label: 'Show Scenes Panel', category: 'View',
       action: function() { Rga.Sidebar.switchTo('scenes'); }
     });
@@ -404,43 +387,17 @@
     P.register({ label: 'Show Explorer', category: 'View',
       action: function() { Rga.Sidebar.switchTo('explorer'); }
     });
-    P.register({ label: 'Run Validation', category: 'Script',
-      action: function() { Rga.Problems.run(); }
-    });
-    P.register({ label: 'Load Sample Script', category: 'Debug',
-      action: function() { Rga.SampleData.load(); }
-    });
-    P.register({ label: 'Collapse All Scenes', category: 'Script',
-      action: function() { Rga.SceneManager.collapseAll(); }
-    });
-    P.register({ label: 'Expand All Scenes', category: 'Script',
-      action: function() { Rga.SceneManager.expandAll(); }
-    });
-    P.register({ label: 'Change Script Language', category: 'Script',
-      action: function() { Rga.ScriptLanguage.showPicker(); }
-    });
-    P.register({ label: 'Script Language: English (LTR)', category: 'Script',
-      action: function() { Rga.ScriptLanguage.apply('en'); }
-    });
-    P.register({ label: 'Script Language: Kurdish (RTL)', category: 'Script',
-      action: function() { Rga.ScriptLanguage.apply('ku'); }
-    });
-    P.register({ label: 'Script Language: Arabic (RTL)', category: 'Script',
-      action: function() { Rga.ScriptLanguage.apply('ar'); }
-    });
-
-    // Block type commands
-    Rga.BLOCK_TYPES.forEach(function(type) {
-      if (type === 'scene-header') return;
-      P.register({
-        label: 'Set Block: ' + Rga.formatBlockTypeName(type),
-        category: 'Block',
-        action: function() {
-          var block = Rga.Cursor.getCurrentBlock();
-          if (block) Rga.Editor.setBlockType(block, type);
-        }
-      });
-    });
+    // TODO[phase-9]: re-register when Rga.Commands (ProseMirror command layer) ships
+    // P.register({ label: 'New Scene', shortcut: 'Ctrl+Enter', category: 'Script', ... });
+    // P.register({ label: 'Renumber Scenes', ... });
+    // P.register({ label: 'Run Validation', ... });
+    // P.register({ label: 'Collapse All Scenes', ... });
+    // P.register({ label: 'Expand All Scenes', ... });
+    // P.register({ label: 'Change Script Language', ... });
+    // P.register({ label: 'Script Language: English (LTR)', ... });
+    // P.register({ label: 'Script Language: Kurdish (RTL)', ... });
+    // P.register({ label: 'Script Language: Arabic (RTL)', ... });
+    // Block type commands — TODO[phase-9]
   }
 
   /* ---- Register Keyboard Shortcuts ---- */
@@ -463,92 +420,40 @@
       Rga.Inspector.toggle();
     });
 
-    // Ctrl+Enter — insert scene header after current block (Final Draft convention)
-    K.register('Enter', { ctrl: true, shift: false, alt: false }, function() {
-      var current = Rga.Cursor.getCurrentBlock();
-      var header = Rga.SceneManager.createHeader({}, current);
-      if (header) {
-        var loc = header.querySelector('.sh-location');
-        if (loc) loc.focus();
-      }
-    });
+    // TODO[phase-9]: Ctrl+Enter — insert scene re-registered when ProseMirror keymap ships
   }
 
   /* ---- BOOT SEQUENCE ---- */
   function boot() {
-    // 1. Inject icons into the DOM
     injectIcons();
-
-    // 2. Initialize all modules (order matters)
     Rga.Theme.init();
     Rga.Resize.init();
     Rga.Sidebar.init();
-    Rga.Tabs.init();
     Rga.Keyboard.init();
     Rga.BottomPanel.init();
     Rga.CommandPalette.init();
     Rga.FileTree.init();
-
-    // 3. Initialize TabManager and create the first document (Phase 6: multi-tab)
     Rga.TabManager.init();
-    Rga.FileManager.newScript();
-
-    // 4. Initialize editor systems (must happen after editor DOM exists)
-    Rga.Editor.init();
-    Rga.SceneManager.init();
-    Rga.TagSystem.init();
-    Rga.Problems.init();
-    Rga.ScriptLanguage.init();
-    Rga.SceneNotesConnector.init();
-
-    // 5. Register commands and shortcuts
+    // Editor engine is being rebuilt — Phase 1 wires Rga.Editor.mount() here.
+    // For now, no tab is opened automatically; the welcome view (Phase 8)
+    // will be the empty state.
     registerCommands();
     registerShortcuts();
-
-    // 6. Status bar initial update
     Rga.StatusBar.init();
 
-    // 7. Theme toggle in status bar
-    var themeBtn = Rga.$('#status-theme');
-    if (themeBtn) {
-      themeBtn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        Rga.Theme.toggle();
-      });
-    }
-
-    // 8. Load sample data (disabled in Phase 6 — TabManager creates an empty doc instead)
-    if (false) {
-      Rga.SampleData.load();
-    }
-
-    // 9. Load scene notes from sample data
-    Rga.SceneNotesConnector.loadFromScenes();
-
-    // 10. Menu actions from main process
+    // Menu actions from main process
     if (window.rwanga && window.rwanga.on && window.rwanga.on.menuAction) {
       window.rwanga.on.menuAction(function(action) {
         switch (action) {
-          case 'file.new':
-            Rga.FileManager.newScript();
-            break;
-          case 'file.open':
-            Rga.FileManager.openFromDialog();
-            break;
-          case 'file.save':
-            Rga.FileManager.save();
-            break;
-          case 'file.saveAs':
-            Rga.FileManager.saveAs();
-            break;
-          case 'help.loadSample':
-            if (Rga.SampleData && Rga.SampleData.load) Rga.SampleData.load();
-            break;
+          case 'file.new': Rga.FileManager.newScript(); break;
+          case 'file.open': Rga.FileManager.openFromDialog(); break;
+          case 'file.save': Rga.FileManager.save(); break;
+          case 'file.saveAs': Rga.FileManager.saveAs(); break;
         }
       });
     }
 
-    console.log('[Rwanga] Script Editor initialized.');
+    console.log('[Rwanga] Script Editor initialized — Phase 0 (no editor mounted).');
   }
 
   // Boot when DOM is ready
