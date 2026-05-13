@@ -14,6 +14,7 @@
   <link rel="stylesheet" href="css/reset.css">
   <link rel="stylesheet" href="css/shell.css">
   <link rel="stylesheet" href="css/editor.css">
+  <link rel="stylesheet" href="css/editor-prosemirror.css">
   <link rel="stylesheet" href="css/components.css">
   <link rel="stylesheet" href="css/overlays.css">
 </head>
@@ -435,6 +436,7 @@
     Rga.CommandPalette.init();
     Rga.FileTree.init();
     Rga.TabManager.init();  // mounts ProseMirror EditorView internally
+    Rga.FileManager.newScript();  // open initial Untitled document
     registerCommands();
     registerShortcuts();
     Rga.StatusBar.init();

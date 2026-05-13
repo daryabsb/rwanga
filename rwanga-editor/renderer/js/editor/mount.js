@@ -3,56 +3,63 @@
 
 (function() {
   const Rga = window.Rga = window.Rga || {};
-  const PM = window.RgaProseMirror;
-
-  if (!PM) {
-    console.error('[Rga.Editor] ProseMirror bundle not loaded');
-    return;
-  }
 
   // PHASE 1 MINIMAL SCHEMA — replaced in Phase 2 by doc-types/screenplay/schema.js
-  const minimalSchema = new PM.Schema({
-    nodes: {
-      doc: { content: 'block+' },
-      paragraph: {
-        content: 'inline*',
-        group: 'block',
-        parseDOM: [{ tag: 'p' }],
-        toDOM() { return ['p', 0]; }
+  function buildMinimalSchema(PM) {
+    return new PM.Schema({
+      nodes: {
+        doc: { content: 'block+' },
+        paragraph: {
+          content: 'inline*',
+          group: 'block',
+          parseDOM: [{ tag: 'p' }],
+          toDOM() { return ['p', 0]; }
+        },
+        text: { group: 'inline' }
       },
-      text: { group: 'inline' }
-    },
-    marks: {
-      bold: {
-        parseDOM: [{ tag: 'strong' }, { tag: 'b' }],
-        toDOM() { return ['strong', 0]; }
-      },
-      italic: {
-        parseDOM: [{ tag: 'em' }, { tag: 'i' }],
-        toDOM() { return ['em', 0]; }
+      marks: {
+        bold: {
+          parseDOM: [{ tag: 'strong' }, { tag: 'b' }],
+          toDOM() { return ['strong', 0]; }
+        },
+        italic: {
+          parseDOM: [{ tag: 'em' }, { tag: 'i' }],
+          toDOM() { return ['em', 0]; }
+        }
       }
-    }
-  });
+    });
+  }
 
   /**
    * Mount a ProseMirror editor into the given DOM container.
    * @param {HTMLElement} container - the target element (will be cleared)
    * @param {object} [opts] - { initialDoc, schema, plugins }
-   * @returns {{ view: EditorView, state: EditorState }}
+   * @returns {{ view: EditorView, state: EditorState } | null}
    */
   function mount(container, opts) {
+    const PM = window.RgaProseMirror;
+    if (!PM) {
+      console.error('[Rga.Editor] ProseMirror bundle not loaded — window.RgaProseMirror is undefined');
+      return null;
+    }
+
     opts = opts || {};
-    const schema = opts.schema || minimalSchema;
+    const schema = opts.schema || buildMinimalSchema(PM);
+
+    const boldMark = schema.marks.bold;
+    const italicMark = schema.marks.italic;
+
+    const keymapEntries = {
+      'Mod-z': PM.undo,
+      'Mod-y': PM.redo,
+      'Mod-Shift-z': PM.redo,
+    };
+    if (boldMark) keymapEntries['Mod-b'] = PM.toggleMark(boldMark);
+    if (italicMark) keymapEntries['Mod-i'] = PM.toggleMark(italicMark);
 
     const plugins = [
       PM.history(),
-      PM.keymap({
-        'Mod-z': PM.undo,
-        'Mod-y': PM.redo,
-        'Mod-Shift-z': PM.redo,
-        'Mod-b': PM.toggleMark(schema.marks.bold),
-        'Mod-i': PM.toggleMark(schema.marks.italic),
-      }),
+      PM.keymap(keymapEntries),
       PM.keymap(PM.baseKeymap),
     ].concat(opts.plugins || []);
 
@@ -73,7 +80,7 @@
    * @param {EditorState} newState
    */
   function swapState(view, newState) {
-    view.updateState(newState);
+    if (view) view.updateState(newState);
   }
 
   /**
@@ -83,7 +90,7 @@
    */
   function setDoc(view, doc) {
     if (!view) return;
-    const newState = PM.EditorState.create({
+    const newState = window.RgaProseMirror.EditorState.create({
       schema: view.state.schema,
       doc,
       plugins: view.state.plugins
@@ -97,7 +104,9 @@
    * @returns {Node}
    */
   function emptyDoc(schema) {
-    schema = schema || minimalSchema;
+    const PM = window.RgaProseMirror;
+    if (!PM) return null;
+    schema = schema || buildMinimalSchema(PM);
     return schema.node('doc', null, [schema.node('paragraph')]);
   }
 
@@ -106,5 +115,4 @@
   Rga.Editor.swapState = swapState;
   Rga.Editor.setDoc = setDoc;
   Rga.Editor.emptyDoc = emptyDoc;
-  Rga.Editor._minimalSchema = minimalSchema;  // exposed for tests
 })();

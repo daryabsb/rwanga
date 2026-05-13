@@ -115,7 +115,11 @@
     const editorEl = document.getElementById('editor');
     if (editorEl && Rga.Editor && Rga.Editor.mount) {
       const mounted = Rga.Editor.mount(editorEl);
-      editorView = mounted.view;
+      if (mounted) {
+        editorView = mounted.view;
+      } else {
+        console.error('[Rga.TabManager] ProseMirror mount failed — editor will not be interactive');
+      }
     }
 
     const newBtn = document.getElementById('tab-new');

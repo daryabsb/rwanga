@@ -1,0 +1,52 @@
+/* ============================================================
+   RWANGA SCRIPT EDITOR — editor-prosemirror.css
+   ProseMirror surface styles. Phase 1: generic rich-text.
+   Phase 2 adds screenplay node-specific rules.
+   ============================================================ */
+
+/* ProseMirror root element */
+.ProseMirror {
+  position: relative;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  white-space: break-spaces;
+  -webkit-font-variant-ligatures: none;
+  font-variant-ligatures: none;
+  outline: none;
+  min-height: 100%;
+
+  font-family: var(--font-editor);
+  font-size: 12pt;
+  line-height: 2;
+  color: var(--text-primary);
+}
+
+/* RTL support */
+[dir="rtl"] .ProseMirror {
+  font-family: var(--font-editor-rtl);
+}
+
+/* Paragraph base */
+.ProseMirror p {
+  margin: 0;
+  padding: 0;
+}
+
+/* Placeholder for empty doc — shown via ::before on the first child */
+.ProseMirror > p:first-child:only-child:empty::before {
+  content: 'Start writing…';
+  color: var(--text-tertiary);
+  font-style: italic;
+  pointer-events: none;
+}
+
+/* Selection highlight */
+.ProseMirror-selectednode {
+  outline: 2px solid var(--accent-primary);
+}
+.ProseMirror-hideselection *::selection {
+  background: transparent;
+}
+.ProseMirror-hideselection {
+  caret-color: transparent;
+}
