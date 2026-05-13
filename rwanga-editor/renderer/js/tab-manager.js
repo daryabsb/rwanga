@@ -7,6 +7,7 @@
   const tabs = [];
   let activeTabId = null;
   let tabIdCounter = 0;
+  let editorView = null;  // singleton EditorView
 
   function nextTabId() {
     tabIdCounter += 1;
@@ -39,33 +40,47 @@
     if (newBtn) bar.appendChild(newBtn);
   }
 
+  function snapshotActive() {
+    const active = tabs.find(function(t) { return t.id === activeTabId; });
+    if (!active || !editorView) return;
+    active.editorState = editorView.state;
+  }
+
   function activate(tabId) {
-    const prev = tabs.find(function(t) { return t.id === activeTabId; });
+    snapshotActive();
     const tab = tabs.find(function(t) { return t.id === tabId; });
     if (!tab) return;
-    // Save current editor DOM to the tab being left before switching
-    if (prev && prev.id !== tabId && Rga.Editor && Rga.Editor.saveStateToDoc) {
-      Rga.Editor.saveStateToDoc(prev.doc);
-    }
     activeTabId = tabId;
     renderTabBar();
-    if (Rga.Editor && Rga.Editor.loadDocument) Rga.Editor.loadDocument(tab.doc);
+    if (editorView && tab.editorState) {
+      editorView.updateState(tab.editorState);
+    }
     if (Rga.FileManager && Rga.FileManager.setActive) Rga.FileManager.setActive(tab.doc);
   }
 
   function openDocument(doc) {
-    const tab = { id: nextTabId(), doc: doc };
+    const tab = {
+      id: nextTabId(),
+      doc: doc,
+      editorState: null
+    };
+    if (editorView) {
+      tab.editorState = window.RgaProseMirror.EditorState.create({
+        schema: editorView.state.schema,
+        doc: Rga.Editor.emptyDoc(editorView.state.schema),
+        plugins: editorView.state.plugins
+      });
+    }
     tabs.push(tab);
     activate(tab.id);
     return tab;
   }
 
-  function closeTab(tabId, opts) {
-    opts = opts || {};
+  function closeTab(tabId) {
     const idx = tabs.findIndex(function(t) { return t.id === tabId; });
     if (idx < 0) return;
     const tab = tabs[idx];
-    if (tab.doc.dirty && !opts.skipDirtyCheck) {
+    if (tab.doc.dirty) {
       const choice = confirm('"' + tab.doc.displayName + '" has unsaved changes. Discard them?');
       if (!choice) return;
     }
@@ -76,12 +91,11 @@
       else {
         activeTabId = null;
         renderTabBar();
-        if (Rga.Editor && Rga.Editor.loadDocument) Rga.Editor.loadDocument(null);
+        // Phase 8 wires the welcome view here; for now editor stays open.
       }
     } else {
       renderTabBar();
     }
-    if (Rga.AutosaveClient && Rga.AutosaveClient.discard) Rga.AutosaveClient.discard(tab.doc.docId);
   }
 
   function activeTab() {
@@ -97,6 +111,13 @@
     tabs.length = 0;
     activeTabId = null;
     tabIdCounter = 0;
+
+    const editorEl = document.getElementById('editor');
+    if (editorEl && Rga.Editor && Rga.Editor.mount) {
+      const mounted = Rga.Editor.mount(editorEl);
+      editorView = mounted.view;
+    }
+
     const newBtn = document.getElementById('tab-new');
     if (newBtn) {
       newBtn.addEventListener('click', function() {
@@ -114,5 +135,6 @@
     activeDoc,
     tabs: getTabs,
     renderTabBar,
+    _editorView: function() { return editorView; }
   };
 })();

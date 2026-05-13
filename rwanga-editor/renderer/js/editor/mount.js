@@ -76,8 +76,35 @@
     view.updateState(newState);
   }
 
+  /**
+   * Re-attach the EditorView to a new document.
+   * @param {EditorView} view
+   * @param {Node} doc
+   */
+  function setDoc(view, doc) {
+    if (!view) return;
+    const newState = PM.EditorState.create({
+      schema: view.state.schema,
+      doc,
+      plugins: view.state.plugins
+    });
+    view.updateState(newState);
+  }
+
+  /**
+   * Create a fresh document (one empty paragraph) under the given schema.
+   * @param {Schema} [schema]
+   * @returns {Node}
+   */
+  function emptyDoc(schema) {
+    schema = schema || minimalSchema;
+    return schema.node('doc', null, [schema.node('paragraph')]);
+  }
+
   Rga.Editor = Rga.Editor || {};
   Rga.Editor.mount = mount;
   Rga.Editor.swapState = swapState;
+  Rga.Editor.setDoc = setDoc;
+  Rga.Editor.emptyDoc = emptyDoc;
   Rga.Editor._minimalSchema = minimalSchema;  // exposed for tests
 })();

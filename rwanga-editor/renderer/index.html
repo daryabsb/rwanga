@@ -434,13 +434,7 @@
     Rga.BottomPanel.init();
     Rga.CommandPalette.init();
     Rga.FileTree.init();
-    Rga.TabManager.init();
-
-    const editorEl = document.getElementById('editor');
-    if (editorEl && Rga.Editor && Rga.Editor.mount) {
-      Rga.Editor._activeMount = Rga.Editor.mount(editorEl);
-    }
-
+    Rga.TabManager.init();  // mounts ProseMirror EditorView internally
     registerCommands();
     registerShortcuts();
     Rga.StatusBar.init();
