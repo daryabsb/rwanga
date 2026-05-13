@@ -203,6 +203,7 @@ Rga.Editor = {
    * Shift+Enter: allow line break but flag as problem.
    */
   _onEnter: function(e) {
+    if (e.ctrlKey || e.metaKey) return; // Ctrl+Enter handled globally (new scene header)
     if (e.shiftKey) {
       // Allow default <br> but register a problem
       if (Rga.Problems) {

@@ -385,10 +385,11 @@
     P.register({ label: 'Toggle Bottom Panel', shortcut: 'Ctrl+J', category: 'View',
       action: function() { Rga.BottomPanel.toggleCollapse(); }
     });
-    P.register({ label: 'New Scene', category: 'Script',
+    P.register({ label: 'New Scene', shortcut: 'Ctrl+Enter', category: 'Script',
       action: function() {
         var current = Rga.Cursor.getCurrentBlock();
-        Rga.SceneManager.createHeader({}, current);
+        var header = Rga.SceneManager.createHeader({}, current);
+        if (header) { var loc = header.querySelector('.sh-location'); if (loc) loc.focus(); }
       }
     });
     P.register({ label: 'Renumber Scenes', category: 'Script',
@@ -460,6 +461,16 @@
     });
     K.register('i', { ctrl: true, shift: true, alt: false }, function() {
       Rga.Inspector.toggle();
+    });
+
+    // Ctrl+Enter — insert scene header after current block (Final Draft convention)
+    K.register('Enter', { ctrl: true, shift: false, alt: false }, function() {
+      var current = Rga.Cursor.getCurrentBlock();
+      var header = Rga.SceneManager.createHeader({}, current);
+      if (header) {
+        var loc = header.querySelector('.sh-location');
+        if (loc) loc.focus();
+      }
     });
   }
 
