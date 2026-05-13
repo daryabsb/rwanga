@@ -65,6 +65,7 @@
       editorState: null
     };
     if (editorView) {
+      editorView.setProps({ editable: function() { return true; } });
       const pmDoc = doc.body || Rga.Editor.emptyDoc(editorView.state.schema);
       tab.editorState = window.RgaProseMirror.EditorState.create({
         schema: editorView.state.schema,
@@ -92,7 +93,15 @@
       else {
         activeTabId = null;
         renderTabBar();
-        // Phase 8 wires the welcome view here; for now editor stays open.
+        if (editorView) {
+          const emptyState = window.RgaProseMirror.EditorState.create({
+            schema: editorView.state.schema,
+            doc: Rga.Editor.emptyDoc(editorView.state.schema),
+            plugins: editorView.state.plugins
+          });
+          editorView.updateState(emptyState);
+          editorView.setProps({ editable: function() { return false; } });
+        }
       }
     } else {
       renderTabBar();

@@ -21,7 +21,7 @@ function bootDom() {
   dom.window.RgaProseMirror = { EditorState: { create: () => ({ plugins: [] }) } };
   dom.window.Rga = {
     Editor: {
-      mount: () => ({ view: { state: { schema: {}, plugins: [] }, updateState: () => {} } }),
+      mount: () => ({ view: { state: { schema: {}, plugins: [] }, updateState: () => {}, setProps: () => {} } }),
       emptyDoc: () => null
     }
   };
