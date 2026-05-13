@@ -1,10 +1,9 @@
 /* ============================================================
    RWANGA SCRIPT EDITOR — editor-prosemirror.css
-   ProseMirror surface styles. Phase 1: generic rich-text.
-   Phase 2 adds screenplay node-specific rules.
+   ProseMirror surface + screenplay node styles per spec §5.
    ============================================================ */
 
-/* ProseMirror root element */
+/* ProseMirror root */
 .ProseMirror {
   position: relative;
   word-wrap: break-word;
@@ -15,10 +14,12 @@
   outline: none;
   min-height: 100%;
 
-  font-family: var(--font-editor);
-  font-size: 12pt;
-  line-height: 2;
+  font-family: 'Courier Prime', 'Courier New', monospace;
+  font-size: var(--editor-font-size, 12pt);
+  line-height: 1.5;
+  padding: var(--editor-padding, 1in);
   color: var(--text-primary);
+  background: var(--bg-editor, var(--bg-primary));
 }
 
 /* RTL support */
@@ -26,21 +27,166 @@
   font-family: var(--font-editor-rtl);
 }
 
-/* Paragraph base */
+/* Generic paragraph */
 .ProseMirror p {
-  margin: 0;
+  margin: 0 0 1em 0;
   padding: 0;
 }
 
-/* Placeholder for empty doc — shown via ::before on the first child */
-.ProseMirror > p:first-child:only-child:empty::before {
+.ProseMirror h1, .ProseMirror h2, .ProseMirror h3 {
+  margin: 1.5em 0 0.5em 0;
+  font-weight: bold;
+}
+
+.ProseMirror blockquote {
+  margin: 1em 0;
+  padding-inline-start: 1em;
+  border-inline-start: 3px solid var(--accent-secondary);
+  color: var(--text-secondary);
+}
+
+/* Empty doc placeholder */
+.ProseMirror > .rga-body > p:first-child:only-child:empty::before {
   content: 'Start writing…';
   color: var(--text-tertiary);
   font-style: italic;
   pointer-events: none;
 }
 
-/* Selection highlight */
+/* ----- TITLE STRIP ----- */
+
+.ProseMirror .rga-title-strip {
+  font-size: 1.6em;
+  font-weight: bold;
+  text-align: center;
+  margin: 0 0 2em 0;
+  padding: 0.5em;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+/* ----- BODY CONTAINER ----- */
+
+.ProseMirror .rga-body {
+  /* no extra style — block-level container */
+}
+
+/* ----- SCENE container ----- */
+
+.ProseMirror .rga-scene {
+  margin: 1.5em 0;
+  padding: 0.5em 0;
+}
+
+/* Scene heading line: INT. LOCATION — TIME */
+.ProseMirror .rga-scene-line {
+  font-weight: bold;
+  text-transform: uppercase;
+  margin: 0 0 0.5em 0;
+}
+
+/* Action (description) */
+.ProseMirror .rga-action {
+  margin: 0 0 1em 0;
+}
+
+/* Character cue — industry standard: 3.7" from left margin */
+.ProseMirror .rga-character {
+  text-transform: uppercase;
+  margin-inline-start: 3.7in;
+  margin-bottom: 0;
+}
+
+/* Dialogue — 2.5" from both margins */
+.ProseMirror .rga-dialogue {
+  margin-inline-start: 2.5in;
+  margin-inline-end: 2.5in;
+  margin-bottom: 0.5em;
+}
+
+/* Parenthetical — 3.1" from left */
+.ProseMirror .rga-parenthetical {
+  font-style: italic;
+  margin-inline-start: 3.1in;
+  margin-bottom: 0;
+}
+
+/* Transition — right-aligned, uppercase */
+.ProseMirror .rga-transition {
+  text-transform: uppercase;
+  text-align: end;
+  margin: 1em 0;
+}
+
+/* Shot description */
+.ProseMirror .rga-shot {
+  text-transform: uppercase;
+  margin: 1em 0;
+}
+
+/* Inline free text (director/editor notes) */
+.ProseMirror .rga-inline-free-text {
+  background: var(--bg-secondary);
+  padding: 0.5em 1em;
+  margin: 0.5em -0.5em;
+  border-inline-start: 3px solid var(--accent-primary);
+  font-style: italic;
+  color: var(--text-secondary);
+}
+
+/* ----- MARKS ----- */
+
+/* Annotation highlight — background set via inline style */
+.ProseMirror .rga-annotation {
+  border-radius: 2px;
+  padding: 0 1px;
+}
+.ProseMirror .rga-annotation::after {
+  content: '\1F4DD';
+  font-size: 0.7em;
+  margin-inline-start: 2px;
+  opacity: 0.6;
+}
+
+/* Production tag underline — colour per type */
+.ProseMirror .rga-tag {
+  border-bottom: 2px solid var(--accent-primary);
+  cursor: help;
+}
+.ProseMirror .rga-tag-character { border-bottom-color: var(--tag-character, #4FC1FF); }
+.ProseMirror .rga-tag-prop      { border-bottom-color: var(--tag-prop,       #FFB347); }
+.ProseMirror .rga-tag-wardrobe  { border-bottom-color: var(--tag-wardrobe,   #C586C0); }
+.ProseMirror .rga-tag-location  { border-bottom-color: var(--tag-location,   #4EC9B0); }
+.ProseMirror .rga-tag-sfx       { border-bottom-color: var(--tag-sfx,        #F44747); }
+.ProseMirror .rga-tag-vfx       { border-bottom-color: var(--tag-vfx,        #C586C0); }
+.ProseMirror .rga-tag-vehicle   { border-bottom-color: var(--tag-vehicle,    #DCDCAA); }
+.ProseMirror .rga-tag-animal    { border-bottom-color: var(--tag-animal,     #B5CEA8); }
+.ProseMirror .rga-tag-custom    { border-bottom-color: var(--tag-custom,     #888);    }
+
+/* Revision flag */
+.ProseMirror .rga-revision-flag {
+  border-bottom: 2px dashed #F44747;
+  cursor: pointer;
+}
+.ProseMirror .rga-revision-flag::after {
+  content: '\1F6A9';
+  font-size: 0.7em;
+  margin-inline-start: 2px;
+}
+.ProseMirror .rga-revision-resolved {
+  border-bottom-style: dotted;
+  opacity: 0.5;
+}
+
+/* ----- PAGE BREAK ----- */
+
+.ProseMirror .rga-page-break {
+  break-after: page;
+  border-bottom: 1px dashed var(--border-subtle);
+  margin: 2em 0;
+}
+
+/* ----- SELECTION ----- */
+
 .ProseMirror-selectednode {
   outline: 2px solid var(--accent-primary);
 }
@@ -49,4 +195,14 @@
 }
 .ProseMirror-hideselection {
   caret-color: transparent;
+}
+
+/* ----- RTL ADJUSTMENTS ----- */
+
+[dir="rtl"] .ProseMirror .rga-character {
+  margin-inline-start: 3.7in;
+  margin-inline-end: 0;
+}
+[dir="rtl"] .ProseMirror .rga-transition {
+  text-align: start;
 }
