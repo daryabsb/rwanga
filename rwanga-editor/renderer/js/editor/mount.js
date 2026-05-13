@@ -7,10 +7,9 @@
   // Active schema — provided by the active document's type package.
   // Phase 2: screenplay only. Future: lookup by doc.document_type.
   function activeSchema() {
-    if (Rga.DocTypes && Rga.DocTypes.screenplay && Rga.DocTypes.screenplay.schema) {
-      return Rga.DocTypes.screenplay.schema;
-    }
-    throw new Error('[Rga.Editor.mount] No screenplay schema available — check bundle load order');
+    const s = Rga.DocTypes && Rga.DocTypes.screenplay && Rga.DocTypes.screenplay.schema;
+    if (!s) console.error('[Rga.Editor] No screenplay schema — is doc-types/screenplay/schema.js loaded after bundle.js?');
+    return s || null;
   }
 
   /**
@@ -28,6 +27,7 @@
 
     opts = opts || {};
     const schema = opts.schema || activeSchema();
+    if (!schema) return null;
 
     const boldMark = schema.marks.bold;
     const italicMark = schema.marks.italic;
@@ -46,8 +46,7 @@
       PM.keymap(PM.baseKeymap),
     ].concat(opts.plugins || []);
 
-    const initialDoc = opts.initialDoc
-      || schema.node('doc', null, [schema.node('paragraph')]);
+    const initialDoc = opts.initialDoc || emptyDoc(schema);
 
     const state = PM.EditorState.create({ schema, doc: initialDoc, plugins });
 
