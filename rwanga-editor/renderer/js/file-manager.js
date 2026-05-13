@@ -51,11 +51,13 @@
   async function save() {
     if (!activeDoc) return null;
     if (!activeDoc.handle) return await saveAs();
+    if (Rga.Editor && Rga.Editor.saveStateToDoc) Rga.Editor.saveStateToDoc(activeDoc);
     const content = Doc.serialize(activeDoc);
     try {
       const res = await window.rwanga.files.save(activeDoc.handle, content);
       Doc.clearDirty(activeDoc, res.savedAt);
       notifyTitle();
+      if (Rga.TabManager && Rga.TabManager.renderTabBar) Rga.TabManager.renderTabBar();
       return res;
     } catch (err) {
       alert(`Save failed:\n${err.message}`);
@@ -65,6 +67,7 @@
 
   async function saveAs() {
     if (!activeDoc) return null;
+    if (Rga.Editor && Rga.Editor.saveStateToDoc) Rga.Editor.saveStateToDoc(activeDoc);
     const content = Doc.serialize(activeDoc);
     const suggestedName = activeDoc.displayName.endsWith('.rga') ? activeDoc.displayName : 'Untitled.rga';
     try {
@@ -73,6 +76,7 @@
       Doc.rebindHandle(activeDoc, res.handle);
       Doc.clearDirty(activeDoc, res.savedAt);
       notifyTitle();
+      if (Rga.TabManager && Rga.TabManager.renderTabBar) Rga.TabManager.renderTabBar();
       return res;
     } catch (err) {
       alert(`Save As failed:\n${err.message}`);

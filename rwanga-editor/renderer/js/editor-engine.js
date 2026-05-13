@@ -559,12 +559,14 @@ Rga.Editor = {
     if (!doc) return;
     var editor = this.el || document.getElementById('editor');
     if (!editor) return;
-    doc._snapshot = Array.from(editor.children).map(function(el) {
+    var blocks = Array.from(editor.children).map(function(el) {
       return {
         type: el.dataset.blockType || 'action',
         text: el.textContent || ''
       };
     });
+    doc._snapshot = blocks;
+    if (doc.body) doc.body.blocks = blocks;
   },
 
   /**
@@ -592,6 +594,8 @@ Rga.Editor = {
 
     if (doc._snapshot && doc._snapshot.length) {
       blocks = doc._snapshot;
+    } else if (doc.body && Array.isArray(doc.body.blocks) && doc.body.blocks.length) {
+      blocks = doc.body.blocks;
     } else if (doc.body && Array.isArray(doc.body.scenes) && doc.body.scenes.length) {
       doc.body.scenes.forEach(function(scene) {
         blocks.push({
