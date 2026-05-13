@@ -54,6 +54,7 @@
     renderTabBar();
     if (editorView && tab.editorState) {
       editorView.updateState(tab.editorState);
+      editorView.focus();
     }
     if (Rga.FileManager && Rga.FileManager.setActive) Rga.FileManager.setActive(tab.doc);
   }
