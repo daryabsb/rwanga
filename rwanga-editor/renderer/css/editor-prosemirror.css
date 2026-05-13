@@ -17,7 +17,7 @@
   font-family: 'Courier Prime', 'Courier New', monospace;
   font-size: var(--editor-font-size, 12pt);
   line-height: 1.5;
-  padding: var(--editor-padding, 1in);
+  padding: 1.5rem;
   color: var(--text-primary);
   background: var(--bg-editor, var(--bg-primary));
 }

@@ -36,6 +36,10 @@
       'Mod-z': PM.undo,
       'Mod-y': PM.redo,
       'Mod-Shift-z': PM.redo,
+      // Prevent Tab from moving browser focus out of the editor.
+      // Phase 3 will replace this with screenplay block-type cycling.
+      'Tab': () => true,
+      'Shift-Tab': () => true,
     };
     if (boldMark) keymapEntries['Mod-b'] = PM.toggleMark(boldMark);
     if (italicMark) keymapEntries['Mod-i'] = PM.toggleMark(italicMark);
