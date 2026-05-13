@@ -36,8 +36,7 @@
       'Mod-z': PM.undo,
       'Mod-y': PM.redo,
       'Mod-Shift-z': PM.redo,
-      // Prevent Tab from moving browser focus out of the editor.
-      // Phase 3 will replace this with screenplay block-type cycling.
+      // Prevent Tab from escaping the editor when not in a scene (screenplay keymap handles in-scene Tab).
       'Tab': () => true,
       'Shift-Tab': () => true,
     };
@@ -49,6 +48,17 @@
       PM.keymap(keymapEntries),
       PM.keymap(PM.baseKeymap),
     ].concat(opts.plugins || []);
+
+    // Prepend screenplay keymap so it takes priority over base keymap
+    if (Rga.DocTypes && Rga.DocTypes.screenplay && Rga.DocTypes.screenplay.buildKeymap) {
+      const screenplayKeymap = Rga.DocTypes.screenplay.buildKeymap(schema);
+      plugins.unshift(PM.keymap(screenplayKeymap));
+    }
+
+    // Active-scene tracker plugin
+    if (Rga.DocTypes && Rga.DocTypes.screenplay && Rga.DocTypes.screenplay.activeScenePlugin) {
+      plugins.push(Rga.DocTypes.screenplay.activeScenePlugin());
+    }
 
     const initialDoc = opts.initialDoc || emptyDoc(schema);
 
