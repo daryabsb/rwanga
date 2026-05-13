@@ -104,8 +104,7 @@
   --editor-bg: #1e1e1e;
   --editor-page-bg: #1a1a1a;
   --editor-line-highlight: rgba(255, 255, 255, 0.04);
-  --scene-header-bg: rgba(255, 193, 7, 0.08);
-  --scene-header-border: #FFC107;
+  /* scene-header-bg/border removed in Phase 0 — scene widget deleted */
 
   /* === Text Hierarchy === */
   --text-primary: #cccccc;
@@ -219,8 +218,7 @@
   --editor-bg: #ffffff;
   --editor-page-bg: #fafafa;
   --editor-line-highlight: rgba(0, 0, 0, 0.04);
-  --scene-header-bg: rgba(255, 193, 7, 0.1);
-  --scene-header-border: #D4A017;
+  /* scene-header-bg/border removed — scene widget deleted */
 
   --text-primary: #333333;
   --text-secondary: #616161;
