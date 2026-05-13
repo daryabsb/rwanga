@@ -5,8 +5,8 @@
   const Rga = window.Rga = window.Rga || {};
 
   Rga.Constants = {
-    CURRENT_RGA_VERSION: '1.1',
-    SUPPORTED_RGA_VERSIONS: ['1.0', '1.1'],
+    CURRENT_RGA_VERSION: '2.0',
+    SUPPORTED_RGA_VERSIONS: ['1.0', '1.1', '2.0'],
 
     PRODUCTION_TYPES: [
       { value: 'feature',     label_en: 'Feature',       label_ku: 'فیلمی درێژ' },

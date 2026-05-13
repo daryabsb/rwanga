@@ -25,54 +25,74 @@
     };
   }
 
-  function emptyBody(seedDefaults) {
+  function defaultMetadata(seed) {
     const now = new Date().toISOString();
-    const seed = seedDefaults || {};
+    seed = seed || {};
     return {
-      rga_version: C.CURRENT_RGA_VERSION,
-      metadata: {
-        title: '',
-        author: seed.author || '',
-        created: now,
-        modified: now,
-        version: 1,
-        revision_notes: '',
-        language: seed.language || C.DEFAULT_SCRIPT_LANGUAGE,
-        production_type: seed.production_type || C.DEFAULT_PRODUCTION_TYPE,
-        genre: seed.genre || '',
-        logline: '',
-      },
-      settings: {
-        theme: 'dark',
-        font_size: 12,
-        show_scene_numbers: true,
-        custom_tag_colors: {},
-      },
-      scenes: [],
-      tag_registry: emptyTagRegistry(),
-      export_settings: {
-        branding: 'rwanga',
-        letterhead_url: null,
-        include_scene_numbers: true,
-        include_revision_marks: false,
-      },
-      runtime: {
-        last_cursor: null,
-        ui_state: {},
-      },
+      title: '',
+      author: seed.author || '',
+      created: now,
+      modified: now,
+      version: 1,
+      revision_notes: '',
+      language: seed.language || C.DEFAULT_SCRIPT_LANGUAGE,
+      production_type: seed.production_type || C.DEFAULT_PRODUCTION_TYPE,
+      genre: '',
+      logline: '',
     };
   }
 
+  function defaultSettings() {
+    return {
+      theme: 'dark',
+      font_size: 12,
+      font_family: 'Courier Prime',
+      show_scene_numbers: true,
+      page_size: 'Letter',
+    };
+  }
+
+  function defaultExportSettings() {
+    return {
+      branding: 'rwanga',
+      letterhead_url: null,
+      include_scene_numbers: true,
+      include_revision_marks: false,
+    };
+  }
+
+  function defaultRuntime() {
+    return {
+      last_cursor: null,
+      active_scene_id: null,
+      ui_state: {},
+    };
+  }
+
+  /**
+   * Create a new in-memory doc object. `doc.body` is null until the
+   * tab manager mounts an EditorState and assigns the PM Node.
+   */
   function create(opts) {
     opts = opts || {};
     return {
+      // System fields (not written to .rga file)
       docId: nextDocId(),
       handle: null,
       displayName: opts.displayName || nextUntitledName(),
       origin: 'untitled',
-      body: emptyBody(opts.seedDefaults),
       dirty: false,
       lastSavedAt: null,
+      // File fields
+      rgaVersion: C.CURRENT_RGA_VERSION,
+      documentType: 'screenplay',
+      metadata: defaultMetadata(opts.seedDefaults),
+      settings: defaultSettings(),
+      tagRegistry: emptyTagRegistry(),
+      exportSettings: defaultExportSettings(),
+      runtime: defaultRuntime(),
+      // PM Node — set by tab-manager via emptyDoc() / nodeFromJSON()
+      body: null,
     };
   }
 
@@ -97,57 +117,102 @@
     return parsed.major > current.major || (parsed.major === current.major && parsed.minor > current.minor);
   }
 
-  function backfill(body) {
-    if (body && body.metadata) {
-      if (typeof body.metadata.production_type === 'undefined') {
-        body.metadata.production_type = C.DEFAULT_PRODUCTION_TYPE;
-      }
-    }
-    return body;
-  }
-
   function basenameFromHandle(handle) {
     if (!handle) return null;
     const parts = String(handle).split(/[\\/]/);
     return parts[parts.length - 1] || handle;
   }
 
-  function serialize(doc) {
-    return JSON.stringify(doc.body, null, 2);
+  function getSchema() {
+    return (typeof window !== 'undefined')
+      && window.Rga
+      && window.Rga.DocTypes
+      && window.Rga.DocTypes.screenplay
+      && window.Rga.DocTypes.screenplay.schema
+      || null;
   }
 
-  function deserialize(content, handle) {
-    let body;
+  /**
+   * Serialize a doc to .rga JSON string.
+   * doc.body must be a ProseMirror Node (has .toJSON()) or null.
+   */
+  function serialize(doc) {
+    const fileObj = {
+      rga_version: doc.rgaVersion || C.CURRENT_RGA_VERSION,
+      document_type: doc.documentType || 'screenplay',
+      metadata: doc.metadata,
+      settings: doc.settings,
+      body: doc.body ? doc.body.toJSON() : null,
+      tag_registry: doc.tagRegistry,
+      export_settings: doc.exportSettings,
+      runtime: doc.runtime,
+    };
+    return JSON.stringify(fileObj, null, 2);
+  }
+
+  /**
+   * Deserialize a .rga JSON string into an in-memory doc.
+   * @param {string} content - raw file content
+   * @param {string|null} handle - file path or null
+   * @param {object} [opts] - { schema } PM schema for body reconstruction
+   */
+  function deserialize(content, handle, opts) {
+    let parsed;
     try {
-      body = JSON.parse(content);
+      parsed = JSON.parse(content);
     } catch (err) {
       throw new Error('File is corrupt or invalid JSON: ' + err.message);
     }
-    if (!body || typeof body !== 'object') {
+    if (!parsed || typeof parsed !== 'object') {
       throw new Error('File is corrupt: not a JSON object');
     }
-    if (isNewerThanSupported(body.rga_version)) {
-      throw new Error(`This .rga was created with a newer Rwanga (v${body.rga_version}). Please update Rwanga to open it.`);
+
+    const fileVersion = parsed.rga_version;
+
+    if (isNewerThanSupported(fileVersion)) {
+      throw new Error(`This .rga was created with a newer Rwanga (v${fileVersion}). Please update Rwanga to open it.`);
     }
-    if (!isAcceptedVersion(body.rga_version)) {
-      throw new Error(`Unsupported rga_version: ${body.rga_version}`);
+
+    const schema = (opts && opts.schema) || getSchema();
+    let pmBody = null;
+
+    const isV2 = fileVersion && String(fileVersion).startsWith('2.');
+
+    if (isV2 && parsed.body && schema) {
+      try {
+        pmBody = schema.nodeFromJSON(parsed.body);
+      } catch (err) {
+        throw new Error('Document body is invalid: ' + err.message);
+      }
     }
-    backfill(body);
+    // v1.x files: pmBody stays null; tab-manager will supply emptyDoc()
+
+    // Migrate v1.x metadata fields
+    const metadata = parsed.metadata || {};
+    if (!metadata.production_type) metadata.production_type = C.DEFAULT_PRODUCTION_TYPE;
+
     return {
       docId: nextDocId(),
       handle: handle || null,
       displayName: basenameFromHandle(handle) || 'Untitled.rga',
       origin: handle ? 'disk' : 'untitled',
-      body,
       dirty: false,
       lastSavedAt: null,
+      rgaVersion: C.CURRENT_RGA_VERSION,
+      documentType: parsed.document_type || 'screenplay',
+      metadata,
+      settings: parsed.settings || defaultSettings(),
+      tagRegistry: parsed.tag_registry || emptyTagRegistry(),
+      exportSettings: parsed.export_settings || defaultExportSettings(),
+      runtime: parsed.runtime || defaultRuntime(),
+      body: pmBody,
     };
   }
 
   function markDirty(doc) {
     doc.dirty = true;
-    if (doc.body && doc.body.metadata) {
-      doc.body.metadata.modified = new Date().toISOString();
+    if (doc.metadata) {
+      doc.metadata.modified = new Date().toISOString();
     }
   }
 
