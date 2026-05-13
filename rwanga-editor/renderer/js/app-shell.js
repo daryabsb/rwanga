@@ -375,6 +375,7 @@ Rga.Keyboard = {
   },
 
   _handle: function(e) {
+    if (e.defaultPrevented) return;
     var id = this._makeId(e.key, {
       ctrl: e.ctrlKey || e.metaKey,
       shift: e.shiftKey,
