@@ -65,9 +65,10 @@
       editorState: null
     };
     if (editorView) {
+      const pmDoc = doc.body || Rga.Editor.emptyDoc(editorView.state.schema);
       tab.editorState = window.RgaProseMirror.EditorState.create({
         schema: editorView.state.schema,
-        doc: Rga.Editor.emptyDoc(editorView.state.schema),
+        doc: pmDoc,
         plugins: editorView.state.plugins
       });
     }
