@@ -40,15 +40,17 @@
   }
 
   function activate(tabId) {
+    const prev = tabs.find(function(t) { return t.id === activeTabId; });
     const tab = tabs.find(function(t) { return t.id === tabId; });
     if (!tab) return;
+    // Save current editor DOM to the tab being left before switching
+    if (prev && prev.id !== tabId && Rga.Editor && Rga.Editor.saveStateToDoc) {
+      Rga.Editor.saveStateToDoc(prev.doc);
+    }
     activeTabId = tabId;
     renderTabBar();
     if (Rga.Editor && Rga.Editor.loadDocument) Rga.Editor.loadDocument(tab.doc);
     if (Rga.FileManager && Rga.FileManager.setActive) Rga.FileManager.setActive(tab.doc);
-    if (Rga.SceneManager && Rga.SceneManager.updateNavigatorFor) Rga.SceneManager.updateNavigatorFor(tab.doc, null);
-    if (Rga.TagSystem && Rga.TagSystem.updateManagerPanelFor) Rga.TagSystem.updateManagerPanelFor(tab.doc);
-    if (Rga.Problems && Rga.Problems.run) Rga.Problems.run();
   }
 
   function openDocument(doc) {

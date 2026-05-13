@@ -552,71 +552,80 @@ Rga.Editor = {
   },
 
   /**
-   * Load a Doc object into the editor surface.
-   * @param {object} doc - a Rga.Doc document object
+   * Capture the current editor state into doc._snapshot for tab switching.
+   * @param {object} doc
    */
-  loadDocument: function(doc) {
-    var editor = document.getElementById('editor');
-    if (!editor) return;
-    editor.innerHTML = '';
+  saveStateToDoc: function(doc) {
     if (!doc) return;
-    if (doc.body && Array.isArray(doc.body.scenes)) {
-      doc.body.scenes.forEach(function(scene) {
-        var sh = document.createElement('div');
-        sh.className = 'block scene-header';
-        sh.dataset.sceneId = scene.id || '';
-        sh.dataset.sceneNumber = scene.number || '';
-        sh.textContent = '#' + (scene.number || '') + ' — ' + (scene.setting || '') + '. ' + (scene.location || '') + ' — ' + (scene.time || '');
-        editor.appendChild(sh);
-        (scene.elements || []).forEach(function(el) {
-          var div = document.createElement('div');
-          div.className = 'block ' + (el.type || 'action');
-          div.dataset.elementId = el.id || '';
-          div.textContent = el.text || '';
-          editor.appendChild(div);
-        });
-      });
-    }
-    if (!editor.children.length) {
-      var first = document.createElement('div');
-      first.className = 'block action';
-      first.textContent = '';
-      editor.appendChild(first);
-    }
-    if (Rga.SceneManager && Rga.SceneManager.updateNavigator) Rga.SceneManager.updateNavigator();
-    if (Rga.TagSystem && Rga.TagSystem.updateManagerPanel) Rga.TagSystem.updateManagerPanel();
-    if (Rga.Problems && Rga.Problems.run) Rga.Problems.run();
+    var editor = this.el || document.getElementById('editor');
+    if (!editor) return;
+    doc._snapshot = Array.from(editor.children).map(function(el) {
+      return {
+        type: el.dataset.blockType || 'action',
+        text: el.textContent || ''
+      };
+    });
   },
 
   /**
-   * Doc-scoped load (Phase 6: multi-tab).
-   * Renders the document body into a specific container's editor surface,
-   * not the global #editor element.
+   * Load a Doc object into the editor surface.
+   * Restores from doc._snapshot if available (tab switch), else from doc.body.scenes.
+   * Always creates proper editor-block elements the observer understands.
+   * @param {object} doc
    */
-  loadDocumentInto: function(doc, container) {
-    if (!container) return;
-    var ed = container.querySelector('[data-role="editor"]');
-    if (!ed) return;
-    ed.innerHTML = '';
-    if (doc.body && Array.isArray(doc.body.scenes) && doc.body.scenes.length) {
+  loadDocument: function(doc) {
+    var editor = this.el || document.getElementById('editor');
+    if (!editor) return;
+
+    // Disconnect observer during bulk insert to prevent mutation storms
+    if (this._observer) this._observer.disconnect();
+
+    editor.innerHTML = '';
+
+    if (!doc) {
+      if (this._observer) this._observer.observe(editor, { childList: true, subtree: false });
+      return;
+    }
+
+    var self = this;
+    var blocks = [];
+
+    if (doc._snapshot && doc._snapshot.length) {
+      blocks = doc._snapshot;
+    } else if (doc.body && Array.isArray(doc.body.scenes) && doc.body.scenes.length) {
       doc.body.scenes.forEach(function(scene) {
-        var sh = document.createElement('div');
-        sh.className = 'block scene-header';
-        sh.dataset.sceneId = scene.id || '';
-        sh.textContent = '#' + (scene.number || '') + ' — ' + (scene.setting || '') + '. ' + (scene.location || '') + ' — ' + (scene.time || '');
-        ed.appendChild(sh);
+        blocks.push({
+          type: 'scene-header',
+          text: (scene.location || '') + (scene.time ? ' — ' + scene.time : '')
+        });
         (scene.elements || []).forEach(function(el) {
-          var div = document.createElement('div');
-          div.className = 'block ' + (el.type || 'action');
-          div.dataset.elementId = el.id || '';
-          div.textContent = el.text || '';
-          ed.appendChild(div);
+          blocks.push({ type: el.type || 'action', text: el.text || '' });
         });
       });
-    } else {
-      var first = document.createElement('div');
-      first.className = 'block action';
-      ed.appendChild(first);
     }
+
+    if (!blocks.length) {
+      blocks = [{ type: 'action', text: '' }];
+    }
+
+    blocks.forEach(function(b) {
+      var div = document.createElement('div');
+      div.className = 'editor-block';
+      div.dataset.blockType = b.type || 'action';
+      div.dataset.placeholder = self._getPlaceholder(b.type || 'action');
+      div.dataset.id = Rga.generateId('el');
+      div.textContent = b.text || '';
+      editor.appendChild(div);
+    });
+
+    // Reconnect observer
+    if (this._observer) {
+      this._observer.observe(editor, { childList: true, subtree: false });
+    }
+
+    this.updateGutter();
+    if (Rga.SceneManager && Rga.SceneManager.updateNavigatorFor) Rga.SceneManager.updateNavigatorFor(doc, null);
+    if (Rga.TagSystem && Rga.TagSystem.updateManagerPanelFor) Rga.TagSystem.updateManagerPanelFor(doc);
+    if (Rga.Problems && Rga.Problems.run) Rga.Problems.run();
   }
 };
