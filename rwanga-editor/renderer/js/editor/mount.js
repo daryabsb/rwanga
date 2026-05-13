@@ -4,30 +4,13 @@
 (function() {
   const Rga = window.Rga = window.Rga || {};
 
-  // PHASE 1 MINIMAL SCHEMA — replaced in Phase 2 by doc-types/screenplay/schema.js
-  function buildMinimalSchema(PM) {
-    return new PM.Schema({
-      nodes: {
-        doc: { content: 'block+' },
-        paragraph: {
-          content: 'inline*',
-          group: 'block',
-          parseDOM: [{ tag: 'p' }],
-          toDOM() { return ['p', 0]; }
-        },
-        text: { group: 'inline' }
-      },
-      marks: {
-        bold: {
-          parseDOM: [{ tag: 'strong' }, { tag: 'b' }],
-          toDOM() { return ['strong', 0]; }
-        },
-        italic: {
-          parseDOM: [{ tag: 'em' }, { tag: 'i' }],
-          toDOM() { return ['em', 0]; }
-        }
-      }
-    });
+  // Active schema — provided by the active document's type package.
+  // Phase 2: screenplay only. Future: lookup by doc.document_type.
+  function activeSchema() {
+    if (Rga.DocTypes && Rga.DocTypes.screenplay && Rga.DocTypes.screenplay.schema) {
+      return Rga.DocTypes.screenplay.schema;
+    }
+    throw new Error('[Rga.Editor.mount] No screenplay schema available — check bundle load order');
   }
 
   /**
@@ -44,7 +27,7 @@
     }
 
     opts = opts || {};
-    const schema = opts.schema || buildMinimalSchema(PM);
+    const schema = opts.schema || activeSchema();
 
     const boldMark = schema.marks.bold;
     const italicMark = schema.marks.italic;
@@ -104,10 +87,12 @@
    * @returns {Node}
    */
   function emptyDoc(schema) {
-    const PM = window.RgaProseMirror;
-    if (!PM) return null;
-    schema = schema || buildMinimalSchema(PM);
-    return schema.node('doc', null, [schema.node('paragraph')]);
+    schema = schema || activeSchema();
+    return schema.node('doc', null, [
+      schema.node('body', null, [
+        schema.node('paragraph')
+      ])
+    ]);
   }
 
   Rga.Editor = Rga.Editor || {};
