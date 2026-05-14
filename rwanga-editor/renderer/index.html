@@ -181,11 +181,10 @@
           <button id="tab-new" title="New Tab"></button>
         </div>
 
-        <!-- Editor Container (gutter + writing surface) -->
+        <!-- Editor Container — the "desk"; #editor is the "page" -->
         <div id="editor-container">
-          <div id="gutter"></div>
-          <!-- ProseMirror mounts here in Phase 1; contenteditable managed by PM -->
-          <div id="editor"></div>
+          <!-- ProseMirror mounts into #editor; .rga-page styles it as paper -->
+          <div id="editor" class="rga-page"></div>
         </div>
 
       </div>

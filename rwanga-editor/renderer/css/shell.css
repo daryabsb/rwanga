@@ -308,11 +308,13 @@
 }
 
 #editor-container {
-  display: grid;
-  grid-template-columns: var(--gutter-width) 1fr;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
   overflow-y: auto;
-  overflow-x: hidden;
+  overflow-x: auto;
   background: var(--editor-bg);
+  padding: 32px 0;
   position: relative;
 }
 

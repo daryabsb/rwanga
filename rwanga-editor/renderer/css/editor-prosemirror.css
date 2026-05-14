@@ -17,9 +17,22 @@
   font-family: 'Courier Prime', 'Courier New', monospace;
   font-size: var(--editor-font-size, 12pt);
   line-height: 1.5;
-  padding: 1.5rem;
+  padding: 0;
   color: var(--text-primary);
-  background: var(--bg-editor, var(--bg-primary));
+  background: transparent;
+}
+
+/* ----- THE PAGE (the paper) -----
+   width / min-height / margin-padding are set inline by page-surface.js
+   from doc.settings.pageSetup. These are fallbacks for before that runs. */
+.rga-page {
+  flex-shrink: 0;
+  background: var(--editor-page-bg);
+  box-shadow: var(--editor-page-shadow);
+  width: 8.5in;
+  min-height: 11in;
+  padding: 1in 1in 1in 1.5in;
+  position: relative;
 }
 
 /* RTL support */
