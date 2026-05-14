@@ -35,6 +35,27 @@
   position: relative;
 }
 
+/* ----- ESTIMATED PAGE BREAKS (Step A — replaced by true pagination in v0.2) ----- */
+.rga-page-break-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.rga-page-break {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-top: 1px dashed var(--border-secondary, #444);
+}
+.rga-page-break::after {
+  content: attr(data-page-label);
+  position: absolute;
+  right: 8px;
+  top: 2px;
+  font-size: var(--font-size-xs, 10px);
+  color: var(--text-tertiary, #6e6e6e);
+}
+
 /* RTL support */
 [dir="rtl"] .ProseMirror {
   font-family: var(--font-editor-rtl);
