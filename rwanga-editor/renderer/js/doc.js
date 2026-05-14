@@ -89,6 +89,7 @@
       metadata: defaultMetadata(opts.seedDefaults),
       settings: defaultSettings(),
       tagRegistry: emptyTagRegistry(),
+      flagLog: [],
       exportSettings: defaultExportSettings(),
       runtime: defaultRuntime(),
       // PM Node — set by tab-manager via emptyDoc() / nodeFromJSON()
@@ -144,6 +145,7 @@
       settings: doc.settings,
       body: doc.body ? doc.body.toJSON() : null,
       tag_registry: doc.tagRegistry,
+      flag_log: doc.flagLog || [],
       export_settings: doc.exportSettings,
       runtime: doc.runtime,
     };
@@ -203,6 +205,7 @@
       metadata,
       settings: parsed.settings || defaultSettings(),
       tagRegistry: parsed.tag_registry || emptyTagRegistry(),
+      flagLog: parsed.flag_log || [],
       exportSettings: parsed.export_settings || defaultExportSettings(),
       runtime: parsed.runtime || defaultRuntime(),
       body: pmBody,
@@ -253,6 +256,11 @@
     // via Rga.Tags.removeAllMarksForEntity(view, id)
   }
 
+  function addFlagLogEntry(doc, entry) {
+    if (!doc.flagLog) doc.flagLog = [];
+    doc.flagLog.push(entry);
+  }
+
   function markDirty(doc) {
     doc.dirty = true;
     if (doc.metadata) {
@@ -281,6 +289,7 @@
     addEntity,
     findEntity,
     removeEntity,
+    addFlagLogEntry,
     _isAcceptedVersion: isAcceptedVersion,
     _isNewerThanSupported: isNewerThanSupported,
     _basenameFromHandle: basenameFromHandle,

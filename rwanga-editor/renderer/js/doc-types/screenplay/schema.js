@@ -319,6 +319,7 @@
     },
     revisionFlag: {
       attrs: {
+        id: { default: null },
         reason: { default: '' },
         color: { default: '#F44747' },   // red | #F5A623 yellow | #4EC9B0 green
         createdAt: { default: null },
@@ -328,6 +329,7 @@
       excludes: 'annotation tag',   // writer marks are mutually exclusive
       parseDOM: [{ tag: 'span.rga-revision-flag', getAttrs(dom) {
         return {
+          id: dom.getAttribute('data-id') || null,
           reason: dom.getAttribute('data-reason') || '',
           color: dom.getAttribute('data-color') || '#F44747',
           createdAt: dom.getAttribute('data-created-at'),
@@ -337,6 +339,7 @@
       toDOM(mark) {
         return ['span', {
           class: 'rga-revision-flag rga-revision-' + mark.attrs.status,
+          'data-id': mark.attrs.id || '',
           'data-reason': mark.attrs.reason,
           'data-color': mark.attrs.color,
           'data-created-at': mark.attrs.createdAt || '',

@@ -22,6 +22,7 @@
     const { schema, selection } = view.state;
     const { from, to } = selection;
     const mark = schema.marks.revisionFlag.create({
+      id: payload.id || crypto.randomUUID(),
       reason: payload.reason || '',
       color:  payload.color  || FLAG_COLORS[0].value,
       createdAt: payload.createdAt || new Date().toISOString(),
@@ -51,6 +52,44 @@
     const { schema } = view.state;
     view.dispatch(view.state.tr.removeMark(from, to, schema.marks.revisionFlag));
     _dispatchFlagChanged();
+  }
+
+  function resolveFlag(view, id) {
+    const schema = view.state.schema;
+    let flagMark = null;
+    let firstPos = null;
+    view.state.doc.descendants(function(node, pos) {
+      if (firstPos !== null) return false;
+      if (node.isText) {
+        const m = node.marks.find(function(mk) {
+          return mk.type === schema.marks.revisionFlag && mk.attrs.id === id;
+        });
+        if (m) { flagMark = m; firstPos = pos; }
+      }
+    });
+    if (!flagMark || firstPos === null) return;
+
+    const range = _markRange(view.state.doc, firstPos, schema.marks.revisionFlag);
+    const markedText = view.state.doc.textBetween(range.from, range.to, ' ');
+    const fc = FLAG_COLORS.find(function(c) { return c.value === flagMark.attrs.color; });
+
+    // Log entry persisted to doc before mark removal so panel refresh sees it
+    const activeDoc = Rga.TabManager && Rga.TabManager.activeDoc && Rga.TabManager.activeDoc();
+    if (activeDoc && Rga.Doc && Rga.Doc.addFlagLogEntry) {
+      Rga.Doc.addFlagLogEntry(activeDoc, {
+        id: flagMark.attrs.id,
+        flaggedText: markedText,
+        color: flagMark.attrs.color,
+        hint: fc ? fc.hint : 'Flag',
+        reason: flagMark.attrs.reason || '',
+        resolvedAt: new Date().toISOString(),
+      });
+      Rga.Doc.markDirty(activeDoc);
+    }
+
+    view.dispatch(view.state.tr.removeMark(range.from, range.to, schema.marks.revisionFlag));
+    _dispatchFlagChanged();
+    view.focus();
   }
 
   function _markRange(doc, pos, markType) {
@@ -277,62 +316,123 @@
     if (!container) return;
 
     const schema = view.state.schema;
-    if (!schema || !schema.marks.revisionFlag) {
-      container.innerHTML = '<div class="flags-empty">No flags yet — select text and right-click to flag.</div>';
-      return;
-    }
-
-    const flags = [];
-    const seenRanges = new Set();
-    view.state.doc.descendants(function(node, pos) {
-      if (!node.isText) return;
-      const flagMark = node.marks.find(function(m) { return m.type === schema.marks.revisionFlag; });
-      if (!flagMark) return;
-      const range = _markRange(view.state.doc, pos, schema.marks.revisionFlag);
-      const key = range.from + ':' + range.to;
-      if (seenRanges.has(key)) return;
-      seenRanges.add(key);
-      flags.push({
-        mark: flagMark,
-        markedText: view.state.doc.textBetween(range.from, range.to, ' '),
-      });
-    });
-
     container.innerHTML = '';
-    if (!flags.length) {
-      container.innerHTML = '<div class="flags-empty">No flags yet — select text and right-click to flag.</div>';
-      return;
+
+    // ---- Open flags ----
+    const openFlags = [];
+    if (schema && schema.marks.revisionFlag) {
+      const seenIds = new Set();
+      view.state.doc.descendants(function(node, pos) {
+        if (!node.isText) return;
+        const flagMark = node.marks.find(function(m) { return m.type === schema.marks.revisionFlag; });
+        if (!flagMark) return;
+        const id = flagMark.attrs.id;
+        const rangeKey = id || (_markRange(view.state.doc, pos, schema.marks.revisionFlag).from + ':' + _markRange(view.state.doc, pos, schema.marks.revisionFlag).to);
+        if (seenIds.has(rangeKey)) return;
+        seenIds.add(rangeKey);
+        const range = _markRange(view.state.doc, pos, schema.marks.revisionFlag);
+        openFlags.push({
+          id: flagMark.attrs.id,
+          mark: flagMark,
+          markedText: view.state.doc.textBetween(range.from, range.to, ' '),
+        });
+      });
     }
 
-    flags.forEach(function(f) {
-      const fc = FLAG_COLORS.find(function(c) { return c.value === f.mark.attrs.color; });
+    if (!openFlags.length) {
+      container.innerHTML = '<div class="flags-empty">No open flags — select text and right-click to flag.</div>';
+    } else {
+      openFlags.forEach(function(f) {
+        container.appendChild(_buildFlagCard(f, view));
+      });
+    }
+
+    // ---- Resolved log ----
+    const activeDoc = Rga.TabManager && Rga.TabManager.activeDoc && Rga.TabManager.activeDoc();
+    const flagLog = (activeDoc && activeDoc.flagLog) || [];
+    if (!flagLog.length) return;
+
+    const divider = document.createElement('div');
+    divider.className = 'flags-log-divider';
+    divider.textContent = 'Resolved (' + flagLog.length + ')';
+    container.appendChild(divider);
+
+    flagLog.slice().reverse().forEach(function(entry) {
       const row = document.createElement('div');
-      row.className = 'flag-card';
-      row.style.borderLeftColor = f.mark.attrs.color;
+      row.className = 'flag-card flag-card-resolved';
+      row.style.borderLeftColor = entry.color;
 
       const dot = document.createElement('span');
       dot.className = 'rga-info-dot';
-      dot.style.background = f.mark.attrs.color;
+      dot.style.background = entry.color;
+      dot.style.opacity = '0.4';
       row.appendChild(dot);
 
       const textCol = document.createElement('div');
       textCol.className = 'flag-card-text';
 
-      if (f.markedText) {
+      if (entry.flaggedText) {
         const preview = document.createElement('div');
         preview.className = 'flag-card-preview';
-        preview.textContent = f.markedText.slice(0, 60) + (f.markedText.length > 60 ? '…' : '');
+        preview.textContent = entry.flaggedText.slice(0, 60) + (entry.flaggedText.length > 60 ? '…' : '');
         textCol.appendChild(preview);
       }
 
       const label = document.createElement('div');
       label.className = 'flag-card-label';
-      label.textContent = (fc ? fc.hint : 'Flag') + (f.mark.attrs.reason ? ': ' + f.mark.attrs.reason : '');
+      label.textContent = entry.hint + (entry.reason ? ': ' + entry.reason : '');
       textCol.appendChild(label);
+
+      const ts = document.createElement('div');
+      ts.className = 'flag-card-ts';
+      ts.textContent = '✓ ' + new Date(entry.resolvedAt).toLocaleString();
+      textCol.appendChild(ts);
 
       row.appendChild(textCol);
       container.appendChild(row);
     });
+  }
+
+  function _buildFlagCard(f, view) {
+    const fc = FLAG_COLORS.find(function(c) { return c.value === f.mark.attrs.color; });
+    const row = document.createElement('div');
+    row.className = 'flag-card';
+    row.style.borderLeftColor = f.mark.attrs.color;
+
+    const dot = document.createElement('span');
+    dot.className = 'rga-info-dot';
+    dot.style.background = f.mark.attrs.color;
+    row.appendChild(dot);
+
+    const textCol = document.createElement('div');
+    textCol.className = 'flag-card-text';
+
+    if (f.markedText) {
+      const preview = document.createElement('div');
+      preview.className = 'flag-card-preview';
+      preview.textContent = f.markedText.slice(0, 60) + (f.markedText.length > 60 ? '…' : '');
+      textCol.appendChild(preview);
+    }
+
+    const label = document.createElement('div');
+    label.className = 'flag-card-label';
+    label.textContent = (fc ? fc.hint : 'Flag') + (f.mark.attrs.reason ? ': ' + f.mark.attrs.reason : '');
+    textCol.appendChild(label);
+
+    row.appendChild(textCol);
+
+    if (f.id) {
+      const resolveBtn = document.createElement('button');
+      resolveBtn.className = 'flag-resolve-btn';
+      resolveBtn.title = 'Mark as resolved — removes underline, keeps in log';
+      resolveBtn.textContent = '✓';
+      resolveBtn.addEventListener('click', function() {
+        resolveFlag(view, f.id);
+      });
+      row.appendChild(resolveBtn);
+    }
+
+    return row;
   }
 
   function _getView() {
@@ -377,6 +477,7 @@
     addRevisionFlag,
     updateRevisionFlag,
     removeRevisionFlag,
+    resolveFlag,
     showRevisionEditor,
     hideInfoPopup,
     revisionFlagsPlugin,

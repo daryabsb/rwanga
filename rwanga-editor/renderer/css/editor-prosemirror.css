@@ -669,6 +669,51 @@
   color: var(--text-primary, #d4d4d4);
 }
 
+.flag-resolve-btn {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  border: 1px solid var(--border-subtle, #3a3a3a);
+  background: transparent;
+  color: var(--text-tertiary, #666);
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  align-self: center;
+}
+.flag-resolve-btn:hover {
+  background: rgba(78, 201, 176, 0.15);
+  color: #4EC9B0;
+  border-color: #4EC9B0;
+}
+
+.flag-card-resolved {
+  opacity: 0.55;
+}
+.flag-card-resolved .flag-card-preview,
+.flag-card-resolved .flag-card-label {
+  text-decoration: line-through;
+}
+
+.flag-card-ts {
+  font-size: 10px;
+  color: var(--text-tertiary, #666);
+  margin-top: 1px;
+}
+
+.flags-log-divider {
+  padding: 6px 4px 3px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-tertiary, #666);
+  border-top: 1px solid var(--border-subtle, #3a3a3a);
+  margin-top: 4px;
+}
+
 /* ============================================================
    TAGS PANEL ENTITY CARDS
    ============================================================ */
