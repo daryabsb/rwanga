@@ -67,6 +67,9 @@
     if (Rga.DocTypes && Rga.DocTypes.screenplay && Rga.DocTypes.screenplay.annotationsPlugin) {
       plugins.push(Rga.DocTypes.screenplay.annotationsPlugin());
     }
+    if (Rga.DocTypes && Rga.DocTypes.screenplay && Rga.DocTypes.screenplay.tagsPlugin) {
+      plugins.push(Rga.DocTypes.screenplay.tagsPlugin());
+    }
     if (Rga.DocTypes && Rga.DocTypes.screenplay && Rga.DocTypes.screenplay.revisionFlagsPlugin) {
       plugins.push(Rga.DocTypes.screenplay.revisionFlagsPlugin());
     }

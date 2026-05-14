@@ -22,9 +22,9 @@ function buildSchemaWithMarks() {
       fontFamily: { attrs: { value: {} }, toDOM(m) { return ['span', { style: 'font-family:' + m.attrs.value }, 0]; } },
       fontSize: { attrs: { value: {} }, toDOM(m) { return ['span', { style: 'font-size:' + m.attrs.value }, 0]; } },
       link: { attrs: { href: {}, title: { default: null } }, inclusive: false, toDOM(m) { return ['a', { href: m.attrs.href }, 0]; } },
-      annotation: { attrs: { id: {}, text: { default: '' }, color: { default: '#FFE08A' }, createdAt: { default: null }, author: { default: null } }, inclusive: false, excludes: '', toDOM() { return ['span', 0]; } },
-      tag: { attrs: { tagType: {}, entityId: {} }, inclusive: false, excludes: '', toDOM() { return ['span', 0]; } },
-      revisionFlag: { attrs: { reason: { default: '' }, createdAt: { default: null }, status: { default: 'open' } }, inclusive: false, excludes: '', toDOM() { return ['span', 0]; } }
+      annotation: { attrs: { id: {}, text: { default: '' }, color: { default: '#FFE08A' }, createdAt: { default: null }, author: { default: null } }, inclusive: false, excludes: 'tag revisionFlag', toDOM() { return ['span', 0]; } },
+      tag: { attrs: { tagType: {}, entityId: {} }, inclusive: false, excludes: 'annotation revisionFlag', toDOM() { return ['span', 0]; } },
+      revisionFlag: { attrs: { reason: { default: '' }, color: { default: '#F44747' }, createdAt: { default: null }, status: { default: 'open' } }, inclusive: false, excludes: 'annotation tag', toDOM() { return ['span', 0]; } }
     }
   });
 }
@@ -55,12 +55,18 @@ test('revisionFlag mark default status is open', () => {
   assert.equal(m.attrs.status, 'open');
 });
 
-test('marks can stack on same text span', () => {
+test('formatting marks (bold) can stack with writer marks', () => {
   const s = buildSchemaWithMarks();
+  // bold is a formatting mark and does not exclude writer marks
   const text = s.text('Sarah', [
     s.mark('bold'),
     s.mark('tag', { tagType: 'character', entityId: 'ent-sarah' }),
-    s.mark('annotation', { id: 'note-1', text: "Make her father's" })
   ]);
-  assert.equal(text.marks.length, 3);
+  assert.equal(text.marks.length, 2);
+});
+
+test('revisionFlag mark has color attr defaulting to red', () => {
+  const s = buildSchemaWithMarks();
+  const m = s.mark('revisionFlag', { reason: 'fix this' });
+  assert.equal(m.attrs.color, '#F44747');
 });

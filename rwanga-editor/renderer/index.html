@@ -207,7 +207,11 @@
         <div id="bottom-panel-content">
           <div class="bp-content active" data-bp-tab="notes">
             <div class="notes-header" id="notes-scene-label">Notes — No scene selected</div>
-            <textarea class="notes-textarea" id="notes-textarea" placeholder="Add notes for this scene..."></textarea>
+            <textarea class="notes-textarea" id="notes-textarea" placeholder="Add scene notes here..."></textarea>
+            <div class="annot-notes-divider" id="annot-notes-divider">Inline notes</div>
+            <div id="annotation-notes-list" class="annotation-notes-list">
+              <div class="annot-empty">No notes yet — select text and right-click to add a note.</div>
+            </div>
           </div>
           <div class="bp-content" data-bp-tab="problems">
             <div class="problems-list">
@@ -303,6 +307,7 @@
 <script src="js/doc-types/screenplay/plugins/active-scene.js"></script>
 <script src="js/doc-types/screenplay/plugins/context-menu.js"></script>
 <script src="js/doc-types/screenplay/plugins/annotations.js"></script>
+<script src="js/doc-types/screenplay/plugins/annotation-notes.js"></script>
 <script src="js/doc-types/screenplay/plugins/tags.js"></script>
 <script src="js/doc-types/screenplay/plugins/revision-flags.js"></script>
 <script src="js/editor/mount.js"></script>

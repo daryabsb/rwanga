@@ -202,6 +202,18 @@
   // MARKS
   // ============================================================
 
+  // Given a #RRGGBB hex color, return '#000000' or '#ffffff' for readable contrast.
+  function _contrastColor(hex) {
+    if (!hex || typeof hex !== 'string') return null;
+    const h = hex.replace('#', '');
+    if (h.length < 6) return null;
+    const r = parseInt(h.slice(0, 2), 16);
+    const g = parseInt(h.slice(2, 4), 16);
+    const b = parseInt(h.slice(4, 6), 16);
+    // Perceived luminance (ITU-R BT.601)
+    return (0.299 * r + 0.587 * g + 0.114 * b) > 128 ? '#000000' : '#ffffff';
+  }
+
   const marks = {
     bold: {
       parseDOM: [{ tag: 'strong' }, { tag: 'b' }, { style: 'font-weight=bold' }],
@@ -227,7 +239,11 @@
     highlight: {
       attrs: { value: {} },
       parseDOM: [{ style: 'background-color', getAttrs(value) { return { value: value }; } }],
-      toDOM(mark) { return ['span', { style: 'background-color: ' + mark.attrs.value }, 0]; }
+      toDOM(mark) {
+        const bg = mark.attrs.value;
+        const fg = _contrastColor(bg);
+        return ['span', { style: 'background-color: ' + bg + (fg ? '; color: ' + fg : '') }, 0];
+      }
     },
     fontFamily: {
       attrs: { value: {} },
@@ -256,7 +272,7 @@
         author: { default: null }
       },
       inclusive: false,
-      excludes: '',
+      excludes: 'tag revisionFlag',   // writer marks are mutually exclusive
       parseDOM: [{ tag: 'span.rga-annotation', getAttrs(dom) {
         return {
           id: dom.getAttribute('data-id'),
@@ -267,14 +283,16 @@
         };
       } }],
       toDOM(mark) {
+        const bg = mark.attrs.color;
+        const fg = _contrastColor(bg);
         return ['span', {
           class: 'rga-annotation',
           'data-id': mark.attrs.id,
           'data-text': mark.attrs.text,
-          'data-color': mark.attrs.color,
+          'data-color': bg,
           'data-created-at': mark.attrs.createdAt || '',
           'data-author': mark.attrs.author || '',
-          style: 'background-color: ' + mark.attrs.color
+          style: 'background-color: ' + bg + (fg ? '; color: ' + fg : '')
         }, 0];
       }
     },
@@ -284,7 +302,7 @@
         entityId: {}
       },
       inclusive: false,
-      excludes: '',
+      excludes: 'annotation revisionFlag',   // writer marks are mutually exclusive
       parseDOM: [{ tag: 'span.rga-tag', getAttrs(dom) {
         return {
           tagType: dom.getAttribute('data-tag-type'),
@@ -302,14 +320,16 @@
     revisionFlag: {
       attrs: {
         reason: { default: '' },
+        color: { default: '#F44747' },   // red | #F5A623 yellow | #4EC9B0 green
         createdAt: { default: null },
-        status: { default: 'open' }   // open | resolved
+        status: { default: 'open' }      // open | resolved
       },
       inclusive: false,
-      excludes: '',
+      excludes: 'annotation tag',   // writer marks are mutually exclusive
       parseDOM: [{ tag: 'span.rga-revision-flag', getAttrs(dom) {
         return {
           reason: dom.getAttribute('data-reason') || '',
+          color: dom.getAttribute('data-color') || '#F44747',
           createdAt: dom.getAttribute('data-created-at'),
           status: dom.getAttribute('data-status') || 'open'
         };
@@ -318,8 +338,10 @@
         return ['span', {
           class: 'rga-revision-flag rga-revision-' + mark.attrs.status,
           'data-reason': mark.attrs.reason,
+          'data-color': mark.attrs.color,
           'data-created-at': mark.attrs.createdAt || '',
-          'data-status': mark.attrs.status
+          'data-status': mark.attrs.status,
+          style: 'border-bottom-color: ' + mark.attrs.color
         }, 0];
       }
     }

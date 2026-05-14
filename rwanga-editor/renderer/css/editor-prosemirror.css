@@ -162,19 +162,14 @@
 .ProseMirror .rga-tag-animal    { border-bottom-color: var(--tag-animal,     #B5CEA8); }
 .ProseMirror .rga-tag-custom    { border-bottom-color: var(--tag-custom,     #888);    }
 
-/* Revision flag */
+/* Revision flag — color driven by inline style (mark.attrs.color via toDOM) */
 .ProseMirror .rga-revision-flag {
-  border-bottom: 2px dashed #F44747;
+  border-bottom: 2px dashed;   /* color from inline style */
   cursor: pointer;
-}
-.ProseMirror .rga-revision-flag::after {
-  content: '\1F6A9';
-  font-size: 0.7em;
-  margin-inline-start: 2px;
 }
 .ProseMirror .rga-revision-resolved {
   border-bottom-style: dotted;
-  opacity: 0.5;
+  opacity: 0.6;
 }
 
 /* ----- PAGE BREAK ----- */
@@ -395,4 +390,266 @@
   gap: 12px;
   align-items: center;
   font-size: 12px;
+}
+
+/* ============================================================
+   REVISION FLAG COLOR SWATCHES
+   ============================================================ */
+
+.rga-flag-swatches {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.rga-flag-swatch {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 2px solid transparent;
+  background: var(--bg-input, #1e1e1e);
+  color: var(--text-primary, #d4d4d4);
+  cursor: pointer;
+  text-align: left;
+  font-size: 12px;
+}
+.rga-flag-swatch:hover {
+  background: var(--bg-hover, #3a3a3a);
+}
+.rga-flag-swatch.active {
+  border-color: var(--text-primary, #d4d4d4);
+}
+
+.rga-flag-swatch-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+/* Each button already has a background color set via JS. Use filter to derive dot color. */
+.rga-flag-swatch .rga-flag-swatch-dot {
+  background: inherit;
+  filter: brightness(1.4);
+  border: 1px solid rgba(255,255,255,0.3);
+}
+
+.rga-flag-swatch-label {
+  font-weight: 600;
+  min-width: 44px;
+}
+
+.rga-flag-swatch-hint {
+  opacity: 0.65;
+  font-size: 11px;
+}
+
+/* ============================================================
+   MARK INFO POPUP (small click popup for all three marks)
+   ============================================================ */
+
+.rga-mark-info-popup {
+  position: fixed;
+  z-index: 8600;
+  max-width: 260px;
+  background: var(--bg-elevated, #2d2d2d);
+  border: 1px solid var(--border-default, #454545);
+  border-radius: 6px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.35);
+  padding: 8px 10px;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text-primary, #d4d4d4);
+}
+
+.rga-info-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+/* Tag type dot colors */
+.rga-tag-dot-character { background: var(--tag-character, #4FC1FF); }
+.rga-tag-dot-prop      { background: var(--tag-prop,       #FFB347); }
+.rga-tag-dot-wardrobe  { background: var(--tag-wardrobe,   #C586C0); }
+.rga-tag-dot-location  { background: var(--tag-location,   #4EC9B0); }
+.rga-tag-dot-sfx       { background: var(--tag-sfx,        #F44747); }
+.rga-tag-dot-vfx       { background: var(--tag-vfx,        #C586C0); }
+.rga-tag-dot-vehicle   { background: var(--tag-vehicle,    #DCDCAA); }
+.rga-tag-dot-animal    { background: var(--tag-animal,     #B5CEA8); }
+.rga-tag-dot-custom    { background: var(--tag-custom,     #888);    }
+
+.rga-info-label {
+  flex: 1;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.rga-info-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.rga-info-btn {
+  padding: 3px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--border-default, #454545);
+  background: var(--bg-btn, #3a3a3a);
+  color: var(--text-primary, #d4d4d4);
+  font-size: 11px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.rga-info-btn:hover {
+  background: var(--bg-hover, #4a4a4a);
+}
+.rga-info-btn.danger {
+  color: #f44747;
+  border-color: #f44747;
+  background: transparent;
+}
+.rga-info-btn.danger:hover {
+  background: rgba(244,71,71,0.1);
+}
+
+/* ============================================================
+   ANNOTATION NOTES PANEL (bottom panel Notes tab)
+   ============================================================ */
+
+.annot-notes-divider {
+  padding: 6px 12px 4px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-tertiary, #666);
+  border-top: 1px solid var(--border-subtle, #3a3a3a);
+  margin-top: 6px;
+}
+
+.annotation-notes-list {
+  padding: 4px 8px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.annot-empty {
+  font-size: 12px;
+  color: var(--text-tertiary, #666);
+  padding: 8px 4px;
+  font-style: italic;
+}
+
+.annot-card {
+  position: relative;
+  background: var(--bg-input, #1e1e1e);
+  border-radius: 4px;
+  border-left: 3px solid #FFE08A;
+  padding: 6px 28px 6px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: box-shadow 0.15s;
+}
+.annot-card.annot-card-active {
+  box-shadow: 0 0 0 1px var(--accent-primary, #007acc);
+}
+
+.annot-card-preview {
+  font-size: 11px;
+  color: var(--text-secondary, #888);
+  font-style: italic;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.annot-card-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  background: transparent;
+  border: none;
+  border-top: 1px solid var(--border-subtle, #3a3a3a);
+  color: var(--text-primary, #d4d4d4);
+  font-size: 12px;
+  font-family: inherit;
+  padding: 4px 0 0;
+  resize: none;
+  outline: none;
+}
+.annot-card-textarea:focus {
+  border-top-color: var(--accent-primary, #007acc);
+}
+
+.annot-card-remove {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  width: 18px;
+  height: 18px;
+  line-height: 16px;
+  text-align: center;
+  border-radius: 3px;
+  border: none;
+  background: transparent;
+  color: var(--text-tertiary, #666);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0;
+}
+.annot-card-remove:hover {
+  background: rgba(244,71,71,0.15);
+  color: #f44747;
+}
+
+/* ============================================================
+   TAGS PANEL ENTITY CARDS
+   ============================================================ */
+
+.tag-group {
+  margin-bottom: 10px;
+}
+
+.tag-group-header {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-tertiary, #666);
+  padding: 4px 12px 2px;
+}
+
+.tag-entity-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px;
+  font-size: 13px;
+  cursor: default;
+}
+.tag-entity-row:hover {
+  background: var(--bg-hover, #3a3a3a);
+}
+
+.tag-entity-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.tag-entity-name {
+  flex: 1;
+  color: var(--text-primary, #d4d4d4);
 }

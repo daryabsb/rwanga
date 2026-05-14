@@ -5,7 +5,7 @@
   const Rga = window.Rga = window.Rga || {};
 
   // ---------------------------------------------------------------
-  // Singleton menu element (reused across invocations)
+  // Singleton menu element
   // ---------------------------------------------------------------
   let _menuEl = null;
   let _cleanup = null;
@@ -28,18 +28,20 @@
   }
 
   // ---------------------------------------------------------------
-  // Menu item builder
+  // Item builders
   // ---------------------------------------------------------------
   function menuItem(label, action, opts) {
     opts = opts || {};
     const li = document.createElement('li');
-    li.className = 'ctx-item' + (opts.className ? ' ' + opts.className : '');
+    li.className = 'ctx-item' + (opts.className ? ' ' + opts.className : '') + (opts.disabled ? ' ctx-disabled' : '');
     li.textContent = label;
     if (opts.hasSubmenu) li.classList.add('ctx-has-submenu');
-    li.addEventListener('mousedown', function(e) {
-      e.preventDefault();
-      if (action) action();
-    });
+    if (!opts.disabled && action) {
+      li.addEventListener('mousedown', function(e) {
+        e.preventDefault();
+        action();
+      });
+    }
     return li;
   }
 
@@ -50,7 +52,9 @@
   }
 
   // ---------------------------------------------------------------
-  // Show custom context menu
+  // Show the custom context menu
+  // Always shown on right-click; mark items are enabled only when
+  // there is a non-empty selection.
   // ---------------------------------------------------------------
   function showCustomMenu(view, event) {
     const el = getMenuEl();
@@ -59,33 +63,37 @@
     el.innerHTML = '';
     el.className = 'overlay-menu rga-context-menu';
 
+    const pmSel = view.state.selection;
+    const nativeSel = window.getSelection ? window.getSelection().toString().trim() : '';
+    const hasSelection = !pmSel.empty || nativeSel.length > 0;
+
     const ul = document.createElement('ul');
     ul.className = 'ctx-list';
 
-    // -- Native clipboard actions ---
-    ul.appendChild(menuItem('Cut', function() { document.execCommand('cut'); hideMenu(); }));
-    ul.appendChild(menuItem('Copy', function() { document.execCommand('copy'); hideMenu(); }));
+    // Native clipboard
+    ul.appendChild(menuItem('Cut',   function() { document.execCommand('cut');   hideMenu(); }));
+    ul.appendChild(menuItem('Copy',  function() { document.execCommand('copy');  hideMenu(); }));
     ul.appendChild(menuItem('Paste', function() { document.execCommand('paste'); hideMenu(); }));
     ul.appendChild(menuSeparator());
 
-    // -- Mark actions ---
-    ul.appendChild(menuItem('Add note', function() {
+    // Mark actions — only enabled when there's a selection
+    ul.appendChild(menuItem('Add note', hasSelection ? function() {
       hideMenu();
-      if (Rga.Annotations && Rga.Annotations.showAnnotationEditor) {
-        Rga.Annotations.showAnnotationEditor(view);
+      if (Rga.Annotations && Rga.Annotations.addNoteFromMenu) {
+        Rga.Annotations.addNoteFromMenu(view);
       }
-    }));
+    } : null, { disabled: !hasSelection }));
 
-    const tagItem = menuItem('Tag as ▶', null, { hasSubmenu: true });
-    buildTagSubmenu(tagItem, view);
+    const tagItem = menuItem('Tag as ▶', null, { hasSubmenu: true, disabled: !hasSelection });
+    if (hasSelection) buildTagSubmenu(tagItem, view);
     ul.appendChild(tagItem);
 
-    ul.appendChild(menuItem('Flag for revision', function() {
+    ul.appendChild(menuItem('Flag for revision', hasSelection ? function() {
       hideMenu();
       if (Rga.RevisionFlags && Rga.RevisionFlags.showRevisionEditor) {
         Rga.RevisionFlags.showRevisionEditor(view);
       }
-    }));
+    } : null, { disabled: !hasSelection }));
     ul.appendChild(menuSeparator());
 
     ul.appendChild(menuItem('Open inspector', function() {
@@ -95,7 +103,7 @@
 
     el.appendChild(ul);
 
-    // Position near cursor
+    // Position near event
     const x = Math.min(event.clientX, window.innerWidth - 200);
     const y = Math.min(event.clientY, window.innerHeight - 200);
     el.style.left = x + 'px';
@@ -107,8 +115,9 @@
       if (!el.contains(e.target)) hideMenu();
     }
     function onKey(e) {
-      if (e.key === 'Escape') hideMenu();
+      if (e.key === 'Escape') { e.stopPropagation(); hideMenu(); }
     }
+    // Use setTimeout so the current right-click mousedown doesn't immediately dismiss
     setTimeout(function() {
       document.addEventListener('mousedown', onOutside, true);
       document.addEventListener('keydown', onKey, true);
@@ -153,7 +162,7 @@
   }
 
   // ---------------------------------------------------------------
-  // ProseMirror plugin
+  // ProseMirror plugin — intercepts ALL right-clicks
   // ---------------------------------------------------------------
   function contextMenuPlugin() {
     const PM = window.RgaProseMirror;
@@ -161,7 +170,7 @@
       props: {
         handleDOMEvents: {
           contextmenu: function(view, event) {
-            if (view.state.selection.empty) return false;
+            // Always suppress browser/Electron default context menu
             event.preventDefault();
             showCustomMenu(view, event);
             return true;

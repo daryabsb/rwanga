@@ -4,6 +4,12 @@
 (function() {
   const Rga = window.Rga = window.Rga || {};
 
+  const FLAG_COLORS = [
+    { value: '#F44747', label: 'Red',    hint: 'Mistake / fix' },
+    { value: '#F5A623', label: 'Yellow', hint: 'Revisit' },
+    { value: '#4EC9B0', label: 'Green',  hint: 'Love it' },
+  ];
+
   // ---------------------------------------------------------------
   // Transaction helpers
   // ---------------------------------------------------------------
@@ -13,17 +19,17 @@
     const { from, to } = selection;
     const mark = schema.marks.revisionFlag.create({
       reason: payload.reason || '',
+      color:  payload.color  || FLAG_COLORS[0].value,
       createdAt: payload.createdAt || new Date().toISOString(),
-      status: payload.status || 'open',
+      status: 'open',
     });
     view.dispatch(view.state.tr.addMark(from, to, mark));
   }
 
-  function updateRevisionFlag(view, fromPos, toPos, updates) {
+  function updateRevisionFlag(view, from, to, updates) {
     const { doc, schema } = view.state;
     let tr = view.state.tr;
-    // Find the exact mark in the range and update it
-    doc.nodesBetween(fromPos, toPos, function(node, pos) {
+    doc.nodesBetween(from, to, function(node, pos) {
       node.marks.forEach(function(m) {
         if (m.type === schema.marks.revisionFlag) {
           const newMark = m.type.create(Object.assign({}, m.attrs, updates));
@@ -35,17 +41,31 @@
     view.dispatch(tr);
   }
 
-  function removeRevisionFlag(view, fromPos, toPos) {
+  function removeRevisionFlag(view, from, to) {
     const { schema } = view.state;
-    view.dispatch(view.state.tr.removeMark(fromPos, toPos, schema.marks.revisionFlag));
+    view.dispatch(view.state.tr.removeMark(from, to, schema.marks.revisionFlag));
+  }
+
+  function _markRange(doc, pos, markType) {
+    let from = pos, to = pos;
+    doc.nodesBetween(0, doc.content.size, function(node, nodePos) {
+      if (!node.isText) return;
+      if (!node.marks.some(function(m) { return m.type === markType; })) return;
+      const start = nodePos, end = nodePos + node.nodeSize;
+      if (start <= pos && end >= pos) {
+        from = Math.min(from, start);
+        to = Math.max(to, end);
+      }
+    });
+    return { from, to };
   }
 
   // ---------------------------------------------------------------
-  // Popup UI
+  // Editor popup — color-coded (red / yellow / green) + reason
   // ---------------------------------------------------------------
 
   let _popup = null;
-  let _flagRange = null; // { from, to } of the clicked flag
+  let _flagRange = null;
 
   function closePopup() {
     if (_popup && _popup.parentNode) _popup.parentNode.removeChild(_popup);
@@ -63,37 +83,56 @@
     const popup = document.createElement('div');
     popup.className = 'rga-revision-popup';
 
-    // Reason textarea
-    const reasonLabel = document.createElement('div');
-    reasonLabel.className = 'rga-popup-label';
-    reasonLabel.textContent = 'Revision note';
-    popup.appendChild(reasonLabel);
+    // Title
+    const title = document.createElement('div');
+    title.className = 'rga-popup-label';
+    title.textContent = existingMark ? 'Edit flag' : 'Flag for revision';
+    popup.appendChild(title);
 
+    // Color swatches (red / yellow / green)
+    const swatchRow = document.createElement('div');
+    swatchRow.className = 'rga-flag-swatches';
+    let selectedColor = (existingMark && existingMark.attrs.color) || FLAG_COLORS[0].value;
+
+    FLAG_COLORS.forEach(function(fc) {
+      const btn = document.createElement('button');
+      btn.className = 'rga-flag-swatch' + (fc.value === selectedColor ? ' active' : '');
+      btn.style.background = fc.value;
+      btn.title = fc.label + ' — ' + fc.hint;
+
+      const dot = document.createElement('span');
+      dot.className = 'rga-flag-swatch-dot';
+
+      const lbl = document.createElement('span');
+      lbl.className = 'rga-flag-swatch-label';
+      lbl.textContent = fc.label;
+
+      const hint = document.createElement('span');
+      hint.className = 'rga-flag-swatch-hint';
+      hint.textContent = fc.hint;
+
+      btn.appendChild(dot);
+      btn.appendChild(lbl);
+      btn.appendChild(hint);
+
+      btn.addEventListener('click', function() {
+        selectedColor = fc.value;
+        swatchRow.querySelectorAll('.rga-flag-swatch').forEach(function(s) {
+          s.classList.remove('active');
+        });
+        btn.classList.add('active');
+      });
+      swatchRow.appendChild(btn);
+    });
+    popup.appendChild(swatchRow);
+
+    // Reason textarea
     const textarea = document.createElement('textarea');
     textarea.className = 'rga-popup-textarea';
-    textarea.placeholder = 'Reason for revision…';
-    textarea.rows = 3;
+    textarea.placeholder = 'Short reason (optional)…';
+    textarea.rows = 2;
     if (existingMark) textarea.value = existingMark.attrs.reason || '';
     popup.appendChild(textarea);
-
-    // Status radio row
-    const statusRow = document.createElement('div');
-    statusRow.className = 'rga-popup-radio-row';
-
-    ['open', 'resolved'].forEach(function(status) {
-      const lbl = document.createElement('label');
-      const radio = document.createElement('input');
-      radio.type = 'radio';
-      radio.name = 'revision-status-' + Date.now();
-      radio.value = status;
-      if (existingMark ? existingMark.attrs.status === status : status === 'open') {
-        radio.checked = true;
-      }
-      lbl.appendChild(radio);
-      lbl.appendChild(document.createTextNode(' ' + capitalize(status)));
-      statusRow.appendChild(lbl);
-    });
-    popup.appendChild(statusRow);
 
     // Buttons
     const btnRow = document.createElement('div');
@@ -102,14 +141,21 @@
     const cancelBtn = document.createElement('button');
     cancelBtn.className = 'rga-popup-btn';
     cancelBtn.textContent = 'Cancel';
-    cancelBtn.addEventListener('click', function() {
-      closePopup();
-      view.focus();
-    });
+    cancelBtn.addEventListener('click', function() { closePopup(); view.focus(); });
 
     const saveBtn = document.createElement('button');
     saveBtn.className = 'rga-popup-btn primary';
     saveBtn.textContent = existingMark ? 'Update' : 'Save';
+    saveBtn.addEventListener('click', function() {
+      const updates = { reason: textarea.value, color: selectedColor };
+      if (existingMark && range) {
+        updateRevisionFlag(view, range.from, range.to, updates);
+      } else {
+        addRevisionFlag(view, updates);
+      }
+      closePopup();
+      view.focus();
+    });
 
     if (existingMark && range) {
       const removeBtn = document.createElement('button');
@@ -123,31 +169,16 @@
       btnRow.appendChild(removeBtn);
     }
 
-    saveBtn.addEventListener('click', function() {
-      const checkedRadio = statusRow.querySelector('input[type=radio]:checked');
-      const status = checkedRadio ? checkedRadio.value : 'open';
-      const updates = { reason: textarea.value, status };
-
-      if (existingMark && range) {
-        updateRevisionFlag(view, range.from, range.to, updates);
-      } else {
-        addRevisionFlag(view, updates);
-      }
-      closePopup();
-      view.focus();
-    });
-
     btnRow.appendChild(cancelBtn);
     btnRow.appendChild(saveBtn);
     popup.appendChild(btnRow);
     document.body.appendChild(popup);
     _popup = popup;
 
-    // Position near selection
     const pos = range ? range.from : selection.from;
     const coords = view.coordsAtPos(pos);
     const x = Math.min(coords.left, window.innerWidth - 260);
-    const y = Math.min(coords.bottom + 6, window.innerHeight - 200);
+    const y = Math.min(coords.bottom + 6, window.innerHeight - 220);
     popup.style.left = x + 'px';
     popup.style.top = y + 'px';
 
@@ -162,53 +193,96 @@
   }
 
   // ---------------------------------------------------------------
-  // ProseMirror plugin — click flagged text to re-open editor
+  // Small info popup on click
+  // ---------------------------------------------------------------
+
+  let _infoPopup = null;
+
+  function hideInfoPopup() {
+    if (_infoPopup && _infoPopup.parentNode) _infoPopup.parentNode.removeChild(_infoPopup);
+    _infoPopup = null;
+  }
+
+  function showFlagInfo(view, mark, pos, range) {
+    hideInfoPopup();
+
+    const popup = document.createElement('div');
+    popup.className = 'rga-mark-info-popup';
+
+    const dot = document.createElement('span');
+    dot.className = 'rga-info-dot';
+    dot.style.background = mark.attrs.color;
+    popup.appendChild(dot);
+
+    const label = document.createElement('span');
+    label.className = 'rga-info-label';
+    const fc = FLAG_COLORS.find(function(f) { return f.value === mark.attrs.color; });
+    const colorLabel = fc ? fc.hint : 'Flag';
+    label.textContent = mark.attrs.reason ? colorLabel + ': ' + mark.attrs.reason : colorLabel;
+    popup.appendChild(label);
+
+    const actions = document.createElement('div');
+    actions.className = 'rga-info-actions';
+
+    const editBtn = document.createElement('button');
+    editBtn.className = 'rga-info-btn';
+    editBtn.textContent = 'Edit';
+    editBtn.addEventListener('click', function() {
+      hideInfoPopup();
+      showRevisionEditor(view, mark, range);
+    });
+
+    const removeBtn = document.createElement('button');
+    removeBtn.className = 'rga-info-btn danger';
+    removeBtn.textContent = 'Remove';
+    removeBtn.addEventListener('click', function() {
+      hideInfoPopup();
+      if (range) removeRevisionFlag(view, range.from, range.to);
+      view.focus();
+    });
+
+    actions.appendChild(editBtn);
+    actions.appendChild(removeBtn);
+    popup.appendChild(actions);
+    document.body.appendChild(popup);
+    _infoPopup = popup;
+
+    const coords = view.coordsAtPos(pos);
+    const x = Math.min(coords.left, window.innerWidth - 260);
+    const y = Math.min(coords.bottom + 6, window.innerHeight - 120);
+    popup.style.left = x + 'px';
+    popup.style.top = y + 'px';
+
+    setTimeout(function() {
+      function onOutside(e) {
+        if (_infoPopup && !_infoPopup.contains(e.target)) hideInfoPopup();
+      }
+      document.addEventListener('mousedown', onOutside, true);
+    }, 0);
+  }
+
+  // ---------------------------------------------------------------
+  // ProseMirror plugin
   // ---------------------------------------------------------------
 
   function revisionFlagsPlugin() {
     const PM = window.RgaProseMirror;
     return new PM.Plugin({
       props: {
-        handleClickOn: function(view, pos, node, nodePos, event) {
+        handleClickOn: function(view, pos) {
           const schema = view.state.schema;
           if (!schema.marks.revisionFlag) return false;
-
           const $pos = view.state.doc.resolve(pos);
-          const marks = $pos.marks();
-          const flagMark = marks.find(function(m) {
+          const flagMark = $pos.marks().find(function(m) {
             return m.type === schema.marks.revisionFlag;
           });
           if (!flagMark) return false;
-
-          // Find the extent of this mark around the click position
           const range = _markRange(view.state.doc, pos, schema.marks.revisionFlag);
-          showRevisionEditor(view, flagMark, range);
+          showFlagInfo(view, flagMark, pos, range);
           return true;
         }
       }
     });
-  }
-
-  // Walk outward from pos to find the full extent of a mark
-  function _markRange(doc, pos, markType) {
-    let from = pos;
-    let to = pos;
-    doc.nodesBetween(0, doc.content.size, function(node, nodePos) {
-      if (!node.isText) return;
-      const hasMark = node.marks.some(function(m) { return m.type === markType; });
-      if (!hasMark) return;
-      const start = nodePos;
-      const end = nodePos + node.nodeSize;
-      if (start <= pos && end >= pos) {
-        from = Math.min(from, start);
-        to = Math.max(to, end);
-      }
-    });
-    return { from, to };
-  }
-
-  function capitalize(str) {
-    return str ? str.charAt(0).toUpperCase() + str.slice(1) : str;
   }
 
   Rga.RevisionFlags = {
@@ -216,8 +290,9 @@
     updateRevisionFlag,
     removeRevisionFlag,
     showRevisionEditor,
-    closePopup,
+    hideInfoPopup,
     revisionFlagsPlugin,
+    FLAG_COLORS,
   };
 
   Rga.DocTypes = Rga.DocTypes || {};

@@ -27,17 +27,17 @@
       createdAt: payload.createdAt || new Date().toISOString(),
       author: payload.author || null,
     });
-    const tr = view.state.tr.addMark(from, to, mark);
-    view.dispatch(tr);
+    view.dispatch(view.state.tr.addMark(from, to, mark));
+    return mark;
   }
 
-  function updateAnnotation(view, id, updates) {
+  function updateAnnotationText(view, id, text) {
     const { doc, schema } = view.state;
     let tr = view.state.tr;
     doc.descendants(function(node, pos) {
       node.marks.forEach(function(m) {
         if (m.type === schema.marks.annotation && m.attrs.id === id) {
-          const newMark = m.type.create(Object.assign({}, m.attrs, updates));
+          const newMark = m.type.create(Object.assign({}, m.attrs, { text }));
           tr = tr.removeMark(pos, pos + node.nodeSize, m.type);
           tr = tr.addMark(pos, pos + node.nodeSize, newMark);
         }
@@ -57,150 +57,130 @@
       });
     });
     view.dispatch(tr);
+    document.dispatchEvent(new CustomEvent('editor.annotationRemoved', { detail: { id } }));
   }
 
   // ---------------------------------------------------------------
-  // Popup UI
+  // "Add note" triggered from context menu
+  // Applies the mark and fires editor.annotationAdded so the Notes
+  // panel can create a card for it.
   // ---------------------------------------------------------------
-
-  let _popup = null;
-
-  function closePopup() {
-    if (_popup && _popup.parentNode) _popup.parentNode.removeChild(_popup);
-    _popup = null;
-  }
-
-  function positionPopup(popup, anchorRect) {
-    const x = Math.min(anchorRect.left, window.innerWidth - 260);
-    const y = anchorRect.bottom + 6;
-    popup.style.left = x + 'px';
-    popup.style.top = y + 'px';
-  }
-
-  function showAnnotationEditor(view, existingMark) {
-    closePopup();
-    if (Rga.ContextMenu) Rga.ContextMenu.hide();
-
+  function addNoteFromMenu(view) {
     const { selection } = view.state;
-    if (selection.empty && !existingMark) return;
+    if (selection.empty) return;
+
+    // Capture the marked text for the card title
+    const selectedText = view.state.doc.textBetween(selection.from, selection.to, ' ');
+    const id = crypto.randomUUID();
+    const mark = addAnnotation(view, { id, color: ANNOTATION_COLORS[0] });
+
+    document.dispatchEvent(new CustomEvent('editor.annotationAdded', {
+      detail: {
+        id,
+        color: mark.attrs.color,
+        markedText: selectedText,
+        text: '',
+      }
+    }));
+
+    // Open the Notes panel and focus the new card
+    if (Rga.BottomPanel) {
+      Rga.BottomPanel.open();
+      Rga.BottomPanel.switchTab('notes');
+    }
+  }
+
+  // ---------------------------------------------------------------
+  // Small info popup on click
+  // ---------------------------------------------------------------
+  let _infoPopup = null;
+
+  function hideInfoPopup() {
+    if (_infoPopup && _infoPopup.parentNode) _infoPopup.parentNode.removeChild(_infoPopup);
+    _infoPopup = null;
+  }
+
+  function showAnnotationInfo(view, mark, pos) {
+    hideInfoPopup();
 
     const popup = document.createElement('div');
-    popup.className = 'rga-annotation-popup';
+    popup.className = 'rga-mark-info-popup';
 
-    // Color swatches
-    const swatchRow = document.createElement('div');
-    swatchRow.className = 'rga-popup-swatches';
-    let selectedColor = (existingMark && existingMark.attrs.color) || ANNOTATION_COLORS[0];
+    const colorDot = document.createElement('span');
+    colorDot.className = 'rga-info-dot';
+    colorDot.style.background = mark.attrs.color;
+    popup.appendChild(colorDot);
 
-    ANNOTATION_COLORS.forEach(function(color) {
-      const swatch = document.createElement('button');
-      swatch.className = 'rga-swatch' + (color === selectedColor ? ' active' : '');
-      swatch.style.background = color;
-      swatch.title = color;
-      swatch.addEventListener('click', function() {
-        selectedColor = color;
-        swatchRow.querySelectorAll('.rga-swatch').forEach(function(s) {
-          s.classList.toggle('active', s.style.background === color || s.style.backgroundColor === color);
-        });
-      });
-      swatchRow.appendChild(swatch);
-    });
+    const label = document.createElement('span');
+    label.className = 'rga-info-label';
+    label.textContent = mark.attrs.text || 'Note (no content yet)';
+    popup.appendChild(label);
 
-    // Textarea
-    const textarea = document.createElement('textarea');
-    textarea.className = 'rga-popup-textarea';
-    textarea.placeholder = 'Add a note…';
-    textarea.rows = 3;
-    if (existingMark) textarea.value = existingMark.attrs.text || '';
+    const actions = document.createElement('div');
+    actions.className = 'rga-info-actions';
 
-    // Buttons
-    const btnRow = document.createElement('div');
-    btnRow.className = 'rga-popup-btns';
-
-    const saveBtn = document.createElement('button');
-    saveBtn.className = 'rga-popup-btn primary';
-    saveBtn.textContent = existingMark ? 'Update' : 'Save';
-
-    const cancelBtn = document.createElement('button');
-    cancelBtn.className = 'rga-popup-btn';
-    cancelBtn.textContent = 'Cancel';
-
-    if (existingMark) {
-      const deleteBtn = document.createElement('button');
-      deleteBtn.className = 'rga-popup-btn danger';
-      deleteBtn.textContent = 'Remove';
-      deleteBtn.addEventListener('click', function() {
-        removeAnnotation(view, existingMark.attrs.id);
-        closePopup();
-        view.focus();
-      });
-      btnRow.appendChild(deleteBtn);
-    }
-
-    btnRow.appendChild(cancelBtn);
-    btnRow.appendChild(saveBtn);
-
-    popup.appendChild(swatchRow);
-    popup.appendChild(textarea);
-    popup.appendChild(btnRow);
-    document.body.appendChild(popup);
-    _popup = popup;
-
-    // Position near selection
-    const coords = view.coordsAtPos(selection.from);
-    positionPopup(popup, { left: coords.left, bottom: coords.bottom });
-
-    textarea.focus();
-
-    saveBtn.addEventListener('click', function() {
-      if (existingMark) {
-        updateAnnotation(view, existingMark.attrs.id, {
-          text: textarea.value,
-          color: selectedColor,
-        });
-      } else {
-        addAnnotation(view, { text: textarea.value, color: selectedColor });
+    const editBtn = document.createElement('button');
+    editBtn.className = 'rga-info-btn';
+    editBtn.textContent = 'Edit in Notes';
+    editBtn.addEventListener('click', function() {
+      hideInfoPopup();
+      if (Rga.BottomPanel) {
+        Rga.BottomPanel.open();
+        Rga.BottomPanel.switchTab('notes');
+        document.dispatchEvent(new CustomEvent('editor.annotationFocused', {
+          detail: { id: mark.attrs.id }
+        }));
       }
-      closePopup();
+    });
+
+    const removeBtn = document.createElement('button');
+    removeBtn.className = 'rga-info-btn danger';
+    removeBtn.textContent = 'Remove';
+    removeBtn.addEventListener('click', function() {
+      hideInfoPopup();
+      removeAnnotation(view, mark.attrs.id);
       view.focus();
     });
 
-    cancelBtn.addEventListener('click', function() {
-      closePopup();
-      view.focus();
-    });
+    actions.appendChild(editBtn);
+    actions.appendChild(removeBtn);
+    popup.appendChild(actions);
+    document.body.appendChild(popup);
+    _infoPopup = popup;
 
-    // Dismiss on outside click
+    const coords = view.coordsAtPos(pos);
+    const x = Math.min(coords.left, window.innerWidth - 260);
+    const y = Math.min(coords.bottom + 6, window.innerHeight - 120);
+    popup.style.left = x + 'px';
+    popup.style.top = y + 'px';
+
     setTimeout(function() {
       function onOutside(e) {
-        if (_popup && !_popup.contains(e.target)) closePopup();
+        if (_infoPopup && !_infoPopup.contains(e.target)) hideInfoPopup();
       }
       document.addEventListener('mousedown', onOutside, true);
-      popup._dismissOutside = onOutside;
     }, 0);
   }
 
   // ---------------------------------------------------------------
-  // ProseMirror plugin — click annotated text to re-open editor
+  // ProseMirror plugin
   // ---------------------------------------------------------------
 
   function annotationsPlugin() {
     const PM = window.RgaProseMirror;
     return new PM.Plugin({
       props: {
-        handleClickOn: function(view, pos, node, nodePos, event) {
+        handleClickOn: function(view, pos) {
           const schema = view.state.schema;
           if (!schema.marks.annotation) return false;
 
-          // Find an annotation mark at click position
           const $pos = view.state.doc.resolve(pos);
-          const marks = $pos.marks();
-          const annotMark = marks.find(function(m) {
+          const annotMark = $pos.marks().find(function(m) {
             return m.type === schema.marks.annotation;
           });
           if (!annotMark) return false;
 
-          showAnnotationEditor(view, annotMark);
+          showAnnotationInfo(view, annotMark, pos);
           return true;
         }
       }
@@ -209,10 +189,10 @@
 
   Rga.Annotations = {
     addAnnotation,
-    updateAnnotation,
+    updateAnnotationText,
     removeAnnotation,
-    showAnnotationEditor,
-    closePopup,
+    addNoteFromMenu,
+    hideInfoPopup,
     annotationsPlugin,
     ANNOTATION_COLORS,
   };
