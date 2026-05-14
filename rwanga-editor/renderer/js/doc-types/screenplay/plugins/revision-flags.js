@@ -18,9 +18,10 @@
     document.dispatchEvent(new CustomEvent('editor.flagChanged'));
   }
 
-  function addRevisionFlag(view, payload) {
+  function addRevisionFlag(view, payload, from, to) {
     const { schema, selection } = view.state;
-    const { from, to } = selection;
+    if (from === undefined) from = selection.from;
+    if (to === undefined) to = selection.to;
     const mark = schema.marks.revisionFlag.create({
       id: payload.id || crypto.randomUUID(),
       reason: payload.reason || '',
@@ -125,6 +126,9 @@
 
     const { selection } = view.state;
     if (selection.empty && !existingMark) return;
+    // Capture before textarea.focus() moves browser selection out of the editor
+    const capturedFrom = selection.from;
+    const capturedTo = selection.to;
 
     const popup = document.createElement('div');
     popup.className = 'rga-revision-popup';
@@ -197,9 +201,10 @@
       if (existingMark && range) {
         updateRevisionFlag(view, range.from, range.to, updates);
       } else {
-        addRevisionFlag(view, updates);
+        addRevisionFlag(view, updates, capturedFrom, capturedTo);
       }
       closePopup();
+      if (Rga.BottomPanel) Rga.BottomPanel.switchTo('flags');
       view.focus();
     });
 

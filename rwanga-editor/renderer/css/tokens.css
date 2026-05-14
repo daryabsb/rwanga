@@ -88,6 +88,7 @@
   --inspector-width: 280px;
   --bottom-panel-height: 200px;
   --tab-bar-height: 36px;
+  --toolbar-height: 40px;
   --gutter-width: 52px;
 
   /* === Background Layers (darkest → lightest surface) === */

@@ -73,6 +73,15 @@
     if (Rga.DocTypes && Rga.DocTypes.screenplay && Rga.DocTypes.screenplay.revisionFlagsPlugin) {
       plugins.push(Rga.DocTypes.screenplay.revisionFlagsPlugin());
     }
+    if (Rga.DocTypes && Rga.DocTypes.screenplay && Rga.DocTypes.screenplay.widgetMenuPlugin) {
+      plugins.push(Rga.DocTypes.screenplay.widgetMenuPlugin());
+    }
+    if (Rga.DocTypes && Rga.DocTypes.screenplay && Rga.DocTypes.screenplay.slashCommandPlugin) {
+      plugins.push(Rga.DocTypes.screenplay.slashCommandPlugin());
+    }
+    if (Rga.DocTypes && Rga.DocTypes.screenplay && Rga.DocTypes.screenplay.toolbarPlugin) {
+      plugins.push(Rga.DocTypes.screenplay.toolbarPlugin());
+    }
 
     const initialDoc = opts.initialDoc || emptyDoc(schema);
 
