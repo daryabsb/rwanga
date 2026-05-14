@@ -640,7 +640,7 @@
 
 .flag-card {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
   background: var(--bg-input, #1e1e1e);
   border-radius: 4px;
@@ -649,9 +649,24 @@
   font-size: 12px;
 }
 
+.flag-card-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.flag-card-preview {
+  font-size: 11px;
+  color: var(--text-secondary, #888);
+  font-style: italic;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .flag-card-label {
   color: var(--text-primary, #d4d4d4);
-  flex: 1;
 }
 
 /* ============================================================

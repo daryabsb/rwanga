@@ -14,6 +14,10 @@
   // Transaction helpers
   // ---------------------------------------------------------------
 
+  function _dispatchFlagChanged() {
+    document.dispatchEvent(new CustomEvent('editor.flagChanged'));
+  }
+
   function addRevisionFlag(view, payload) {
     const { schema, selection } = view.state;
     const { from, to } = selection;
@@ -24,6 +28,7 @@
       status: 'open',
     });
     view.dispatch(view.state.tr.addMark(from, to, mark));
+    _dispatchFlagChanged();
   }
 
   function updateRevisionFlag(view, from, to, updates) {
@@ -39,11 +44,13 @@
       });
     });
     view.dispatch(tr);
+    _dispatchFlagChanged();
   }
 
   function removeRevisionFlag(view, from, to) {
     const { schema } = view.state;
     view.dispatch(view.state.tr.removeMark(from, to, schema.marks.revisionFlag));
+    _dispatchFlagChanged();
   }
 
   function _markRange(doc, pos, markType) {
@@ -276,11 +283,18 @@
     }
 
     const flags = [];
+    const seenRanges = new Set();
     view.state.doc.descendants(function(node, pos) {
-      node.marks.forEach(function(m) {
-        if (m.type === schema.marks.revisionFlag) {
-          flags.push({ mark: m, pos });
-        }
+      if (!node.isText) return;
+      const flagMark = node.marks.find(function(m) { return m.type === schema.marks.revisionFlag; });
+      if (!flagMark) return;
+      const range = _markRange(view.state.doc, pos, schema.marks.revisionFlag);
+      const key = range.from + ':' + range.to;
+      if (seenRanges.has(key)) return;
+      seenRanges.add(key);
+      flags.push({
+        mark: flagMark,
+        markedText: view.state.doc.textBetween(range.from, range.to, ' '),
       });
     });
 
@@ -301,17 +315,37 @@
       dot.style.background = f.mark.attrs.color;
       row.appendChild(dot);
 
-      const label = document.createElement('span');
+      const textCol = document.createElement('div');
+      textCol.className = 'flag-card-text';
+
+      if (f.markedText) {
+        const preview = document.createElement('div');
+        preview.className = 'flag-card-preview';
+        preview.textContent = f.markedText.slice(0, 60) + (f.markedText.length > 60 ? '…' : '');
+        textCol.appendChild(preview);
+      }
+
+      const label = document.createElement('div');
       label.className = 'flag-card-label';
       label.textContent = (fc ? fc.hint : 'Flag') + (f.mark.attrs.reason ? ': ' + f.mark.attrs.reason : '');
-      row.appendChild(label);
+      textCol.appendChild(label);
 
+      row.appendChild(textCol);
       container.appendChild(row);
     });
   }
 
+  function _getView() {
+    return Rga.TabManager && Rga.TabManager._editorView && Rga.TabManager._editorView();
+  }
+
   document.addEventListener('editor.tabActivated', function() {
-    const view = Rga.TabManager && Rga.TabManager._editorView && Rga.TabManager._editorView();
+    const view = _getView();
+    if (view) refreshFlagsPanel(view);
+  });
+
+  document.addEventListener('editor.flagChanged', function() {
+    const view = _getView();
     if (view) refreshFlagsPanel(view);
   });
 
