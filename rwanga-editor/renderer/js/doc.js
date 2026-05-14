@@ -49,6 +49,10 @@
       font_family: 'Courier Prime',
       show_scene_numbers: true,
       page_size: 'Letter',
+      pageSetup: {
+        paperSize: 'Letter',
+        margins: { top: 1, right: 1, bottom: 1, left: 1.5 },
+      },
     };
   }
 
@@ -193,6 +197,9 @@
     const metadata = parsed.metadata || {};
     if (!metadata.production_type) metadata.production_type = C.DEFAULT_PRODUCTION_TYPE;
 
+    const settings = parsed.settings || defaultSettings();
+    if (!settings.pageSetup) settings.pageSetup = defaultSettings().pageSetup;
+
     return {
       docId: nextDocId(),
       handle: handle || null,
@@ -203,7 +210,7 @@
       rgaVersion: C.CURRENT_RGA_VERSION,
       documentType: parsed.document_type || 'screenplay',
       metadata,
-      settings: parsed.settings || defaultSettings(),
+      settings: settings,
       tagRegistry: parsed.tag_registry || emptyTagRegistry(),
       flagLog: parsed.flag_log || [],
       exportSettings: parsed.export_settings || defaultExportSettings(),

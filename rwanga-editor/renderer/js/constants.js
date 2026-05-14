@@ -27,6 +27,13 @@
 
     DEFAULT_SCRIPT_LANGUAGE: 'en',
 
+    // Paper dimensions in inches { width, height }
+    PAPER_SIZES: {
+      Letter: { width: 8.5,  height: 11 },
+      A4:     { width: 8.27, height: 11.69 },
+      Legal:  { width: 8.5,  height: 14 }
+    },
+
     AUTOSAVE_DEBOUNCE_MS: 2000,
     AUTOSAVE_MAX_INTERVAL_MS: 10000,
     WORKSPACE_WRITE_DEBOUNCE_MS: 1000,

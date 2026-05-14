@@ -119,3 +119,32 @@ test('Two Docs are independent — mutating one does not affect the other', () =
   assert.notEqual(a.metadata.title, b.metadata.title);
   assert.notEqual(a.docId, b.docId);
 });
+
+test('Doc.create includes pageSetup in settings with Letter defaults', () => {
+  const doc = Doc.create();
+  assert.equal(doc.settings.pageSetup.paperSize, 'Letter');
+  assert.deepEqual(doc.settings.pageSetup.margins, { top: 1, right: 1, bottom: 1, left: 1.5 });
+});
+
+test('Doc.serialize/deserialize round-trips pageSetup', () => {
+  const schema = buildTestSchema();
+  const doc = Doc.create();
+  doc.settings.pageSetup.paperSize = 'A4';
+  doc.settings.pageSetup.margins.left = 2;
+  const reloaded = Doc.deserialize(Doc.serialize(doc), '/p.rga', { schema });
+  assert.equal(reloaded.settings.pageSetup.paperSize, 'A4');
+  assert.equal(reloaded.settings.pageSetup.margins.left, 2);
+});
+
+test('Doc.deserialize backfills pageSetup when an older v2.0 file lacks it', () => {
+  const schema = buildTestSchema();
+  const noPageSetup = JSON.stringify({
+    rga_version: '2.0',
+    metadata: { title: 'X' },
+    settings: { theme: 'dark', font_size: 12 },
+    body: null
+  });
+  const doc = Doc.deserialize(noPageSetup, '/old2.rga', { schema });
+  assert.equal(doc.settings.pageSetup.paperSize, 'Letter');
+  assert.deepEqual(doc.settings.pageSetup.margins, { top: 1, right: 1, bottom: 1, left: 1.5 });
+});
