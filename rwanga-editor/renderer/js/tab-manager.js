@@ -80,17 +80,27 @@
     return tab;
   }
 
-  function closeTab(tabId) {
+  async function closeTab(tabId) {
     const idx = tabs.findIndex(function(t) { return t.id === tabId; });
     if (idx < 0) return;
     const tab = tabs[idx];
     if (tab.doc.dirty) {
-      const choice = confirm('"' + tab.doc.displayName + '" has unsaved changes. Discard them?');
-      if (!choice) return;
+      const choice = (Rga.Modal && Rga.Modal.showUnsaved)
+        ? await Rga.Modal.showUnsaved(tab.doc.displayName)
+        : (confirm('"' + tab.doc.displayName + '" has unsaved changes. Discard?') ? 'discard' : 'cancel');
+      if (choice === 'cancel') return;
+      if (choice === 'save') {
+        if (activeTabId !== tabId) activate(tabId);
+        const saved = await Rga.FileManager.save();
+        if (!saved) return;
+      }
     }
-    tabs.splice(idx, 1);
+    // Re-find in case tabs shifted during async save
+    const currentIdx = tabs.findIndex(function(t) { return t.id === tabId; });
+    if (currentIdx < 0) return;
+    tabs.splice(currentIdx, 1);
     if (activeTabId === tabId) {
-      const next = tabs[idx] || tabs[idx - 1];
+      const next = tabs[currentIdx] || tabs[currentIdx - 1];
       if (next) activate(next.id);
       else {
         activeTabId = null;

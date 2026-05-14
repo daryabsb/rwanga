@@ -641,6 +641,29 @@ Rga.CommandPalette = {
 };
 
 /* ============================================================
+   MODAL UTILITY
+   ============================================================ */
+Rga.Modal = {
+  showUnsaved: function(filename) {
+    return new Promise(function(resolve) {
+      var el = document.getElementById('unsaved-modal');
+      if (!el) { resolve('discard'); return; }
+      var msgEl = document.getElementById('unsaved-modal-msg');
+      if (msgEl) msgEl.textContent = '"' + filename + '" has unsaved changes.';
+      el.hidden = false;
+      function onBtnClick(e) {
+        var btn = e.target.closest('[data-choice]');
+        if (!btn) return;
+        el.hidden = true;
+        el.removeEventListener('click', onBtnClick);
+        resolve(btn.dataset.choice);
+      }
+      el.addEventListener('click', onBtnClick);
+    });
+  }
+};
+
+/* ============================================================
    BOTTOM PANEL MANAGER
    ============================================================ */
 Rga.BottomPanel = {

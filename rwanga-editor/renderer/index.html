@@ -298,6 +298,19 @@
   </div>
 </div>
 
+<!-- Unsaved Changes Modal -->
+<div id="unsaved-modal" class="modal-overlay" hidden>
+  <div class="modal-dialog">
+    <div class="modal-title">Unsaved Changes</div>
+    <div class="modal-msg" id="unsaved-modal-msg"></div>
+    <div class="modal-actions">
+      <button class="modal-btn primary" data-choice="save">Save</button>
+      <button class="modal-btn" data-choice="discard">Don't Save</button>
+      <button class="modal-btn secondary" data-choice="cancel">Cancel</button>
+    </div>
+  </div>
+</div>
+
 <!-- ============================================================
      JS — load in this order (dependencies flow downward)
      ============================================================ -->

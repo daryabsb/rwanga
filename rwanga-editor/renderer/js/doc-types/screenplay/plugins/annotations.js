@@ -122,9 +122,10 @@
     editBtn.addEventListener('click', function() {
       hideInfoPopup();
       if (Rga.BottomPanel) Rga.BottomPanel.switchTo('notes');
-      document.dispatchEvent(new CustomEvent('editor.annotationFocused', {
-        detail: { id: mark.attrs.id }
-      }));
+      if (Rga.AnnotationNotes) {
+        Rga.AnnotationNotes.highlightCard(mark.attrs.id);
+        setTimeout(function() { Rga.AnnotationNotes.focusCard(mark.attrs.id); }, 0);
+      }
     });
 
     const removeBtn = document.createElement('button');

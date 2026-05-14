@@ -157,6 +157,15 @@
     if (active) active.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
 
+  function focusCard(id) {
+    const el = getListEl();
+    if (!el) return;
+    const card = el.querySelector('.annot-card[data-id="' + id + '"]');
+    if (!card) return;
+    const ta = card.querySelector('textarea');
+    if (ta) ta.focus();
+  }
+
   // ---------------------------------------------------------------
   // Event listeners
   // ---------------------------------------------------------------
@@ -195,15 +204,7 @@
 
   document.addEventListener('editor.annotationFocused', function(e) {
     highlightCard(e.detail.id);
-    const el = getListEl();
-    if (el) {
-      const card = el.querySelector('[data-id="' + e.detail.id + '"]');
-      if (card) {
-        const ta = card.querySelector('textarea');
-        if (ta) ta.focus();
-      }
-    }
   });
 
-  Rga.AnnotationNotes = { refresh, highlightCard, navigateToAnnotation };
+  Rga.AnnotationNotes = { refresh, highlightCard, focusCard, navigateToAnnotation };
 })();

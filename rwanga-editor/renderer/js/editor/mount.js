@@ -79,7 +79,25 @@
     const state = PM.EditorState.create({ schema, doc: initialDoc, plugins });
 
     container.innerHTML = '';
-    const view = new PM.EditorView(container, { state });
+    const view = new PM.EditorView(container, {
+      state,
+      dispatchTransaction: function(tr) {
+        const newState = view.state.apply(tr);
+        view.updateState(newState);
+        if (tr.docChanged) {
+          const doc = Rga.TabManager && Rga.TabManager.activeDoc && Rga.TabManager.activeDoc();
+          if (doc) {
+            const wasClean = !doc.dirty;
+            Rga.Doc.markDirty(doc);
+            if (wasClean) {
+              // Only update UI on the clean→dirty transition to avoid DOM churn on every keystroke
+              if (Rga.TabManager.renderTabBar) Rga.TabManager.renderTabBar();
+              if (Rga.FileManager && Rga.FileManager.notifyTitle) Rga.FileManager.notifyTitle();
+            }
+          }
+        }
+      }
+    });
 
     return { view, state };
   }
