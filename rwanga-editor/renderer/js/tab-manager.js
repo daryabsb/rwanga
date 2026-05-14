@@ -56,6 +56,9 @@
       editorView.updateState(tab.editorState);
       editorView.focus();
     }
+    if (Rga.PageSurface && tab.doc && tab.doc.settings) {
+      Rga.PageSurface.apply(tab.doc.settings.pageSetup);
+    }
     if (Rga.FileManager && Rga.FileManager.setActive) Rga.FileManager.setActive(tab.doc);
     document.dispatchEvent(new CustomEvent('editor.tabActivated', { detail: { tabId } }));
   }
