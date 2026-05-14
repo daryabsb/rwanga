@@ -196,7 +196,9 @@
       <!-- BOTTOM PANEL -->
       <div id="bottom-panel">
         <div id="bottom-panel-tabs">
-          <button class="bp-tab active" data-bp-tab="notes">Notes</button>
+          <button class="bp-tab active" data-bp-tab="scene">Scene</button>
+          <button class="bp-tab" data-bp-tab="notes">Notes</button>
+          <button class="bp-tab" data-bp-tab="flags">Flags</button>
           <button class="bp-tab" data-bp-tab="problems">
             Problems <span class="badge warning problems-badge" hidden>0</span>
           </button>
@@ -205,12 +207,18 @@
           <button class="bp-tab-action" id="btn-close-bottom-panel" title="Close Panel"></button>
         </div>
         <div id="bottom-panel-content">
-          <div class="bp-content active" data-bp-tab="notes">
+          <div class="bp-content active" data-bp-tab="scene">
             <div class="notes-header" id="notes-scene-label">Notes — No scene selected</div>
             <textarea class="notes-textarea" id="notes-textarea" placeholder="Add scene notes here..."></textarea>
-            <div class="annot-notes-divider" id="annot-notes-divider">Inline notes</div>
+          </div>
+          <div class="bp-content" data-bp-tab="notes">
             <div id="annotation-notes-list" class="annotation-notes-list">
               <div class="annot-empty">No notes yet — select text and right-click to add a note.</div>
+            </div>
+          </div>
+          <div class="bp-content" data-bp-tab="flags">
+            <div id="revision-flags-list" class="revision-flags-list">
+              <div class="flags-empty">No flags yet — select text and right-click to flag.</div>
             </div>
           </div>
           <div class="bp-content" data-bp-tab="problems">

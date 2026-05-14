@@ -84,10 +84,7 @@
     }));
 
     // Open the Notes panel and focus the new card
-    if (Rga.BottomPanel) {
-      Rga.BottomPanel.open();
-      Rga.BottomPanel.switchTab('notes');
-    }
+    if (Rga.BottomPanel) Rga.BottomPanel.switchTo('notes');
   }
 
   // ---------------------------------------------------------------
@@ -124,13 +121,10 @@
     editBtn.textContent = 'Edit in Notes';
     editBtn.addEventListener('click', function() {
       hideInfoPopup();
-      if (Rga.BottomPanel) {
-        Rga.BottomPanel.open();
-        Rga.BottomPanel.switchTab('notes');
-        document.dispatchEvent(new CustomEvent('editor.annotationFocused', {
-          detail: { id: mark.attrs.id }
-        }));
-      }
+      if (Rga.BottomPanel) Rga.BottomPanel.switchTo('notes');
+      document.dispatchEvent(new CustomEvent('editor.annotationFocused', {
+        detail: { id: mark.attrs.id }
+      }));
     });
 
     const removeBtn = document.createElement('button');
@@ -166,9 +160,31 @@
   // ProseMirror plugin
   // ---------------------------------------------------------------
 
+  let _lastAnnotId = null;
+
   function annotationsPlugin() {
     const PM = window.RgaProseMirror;
     return new PM.Plugin({
+      view: function() {
+        return {
+          update: function(view) {
+            const schema = view.state.schema;
+            if (!schema.marks.annotation) return;
+            const { from } = view.state.selection;
+            const $pos = view.state.doc.resolve(from);
+            const annotMark = $pos.marks().find(function(m) {
+              return m.type === schema.marks.annotation;
+            });
+            const id = annotMark ? annotMark.attrs.id : null;
+            if (id !== _lastAnnotId) {
+              _lastAnnotId = id;
+              if (id) {
+                document.dispatchEvent(new CustomEvent('editor.annotationFocused', { detail: { id } }));
+              }
+            }
+          }
+        };
+      },
       props: {
         handleClickOn: function(view, pos) {
           const schema = view.state.schema;

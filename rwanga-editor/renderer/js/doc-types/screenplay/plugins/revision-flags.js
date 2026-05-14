@@ -262,6 +262,60 @@
   }
 
   // ---------------------------------------------------------------
+  // Flags panel refresh
+  // ---------------------------------------------------------------
+
+  function refreshFlagsPanel(view) {
+    const container = document.getElementById('revision-flags-list');
+    if (!container) return;
+
+    const schema = view.state.schema;
+    if (!schema || !schema.marks.revisionFlag) {
+      container.innerHTML = '<div class="flags-empty">No flags yet — select text and right-click to flag.</div>';
+      return;
+    }
+
+    const flags = [];
+    view.state.doc.descendants(function(node, pos) {
+      node.marks.forEach(function(m) {
+        if (m.type === schema.marks.revisionFlag) {
+          flags.push({ mark: m, pos });
+        }
+      });
+    });
+
+    container.innerHTML = '';
+    if (!flags.length) {
+      container.innerHTML = '<div class="flags-empty">No flags yet — select text and right-click to flag.</div>';
+      return;
+    }
+
+    flags.forEach(function(f) {
+      const fc = FLAG_COLORS.find(function(c) { return c.value === f.mark.attrs.color; });
+      const row = document.createElement('div');
+      row.className = 'flag-card';
+      row.style.borderLeftColor = f.mark.attrs.color;
+
+      const dot = document.createElement('span');
+      dot.className = 'rga-info-dot';
+      dot.style.background = f.mark.attrs.color;
+      row.appendChild(dot);
+
+      const label = document.createElement('span');
+      label.className = 'flag-card-label';
+      label.textContent = (fc ? fc.hint : 'Flag') + (f.mark.attrs.reason ? ': ' + f.mark.attrs.reason : '');
+      row.appendChild(label);
+
+      container.appendChild(row);
+    });
+  }
+
+  document.addEventListener('editor.tabActivated', function() {
+    const view = Rga.TabManager && Rga.TabManager._editorView && Rga.TabManager._editorView();
+    if (view) refreshFlagsPanel(view);
+  });
+
+  // ---------------------------------------------------------------
   // ProseMirror plugin
   // ---------------------------------------------------------------
 
@@ -292,6 +346,7 @@
     showRevisionEditor,
     hideInfoPopup,
     revisionFlagsPlugin,
+    refreshFlagsPanel,
     FLAG_COLORS,
   };
 

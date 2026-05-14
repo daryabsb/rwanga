@@ -644,7 +644,7 @@ Rga.CommandPalette = {
    BOTTOM PANEL MANAGER
    ============================================================ */
 Rga.BottomPanel = {
-  activeTab: 'notes',
+  activeTab: 'scene',
 
   init: function() {
     var self = this;
@@ -663,9 +663,19 @@ Rga.BottomPanel = {
         self.toggleCollapse();
       });
     }
+
+    // Ctrl+J toggles the panel
+    Rga.Keyboard.register('j', { ctrl: true, shift: false, alt: false }, function() {
+      self.toggleCollapse();
+    });
+  },
+
+  open: function() {
+    Rga.$('#center-column').classList.remove('bottom-collapsed');
   },
 
   switchTo: function(tabName) {
+    this.open();
     this.activeTab = tabName;
 
     Rga.$$('.bp-tab').forEach(function(tab) {

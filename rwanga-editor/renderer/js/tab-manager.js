@@ -57,6 +57,7 @@
       editorView.focus();
     }
     if (Rga.FileManager && Rga.FileManager.setActive) Rga.FileManager.setActive(tab.doc);
+    document.dispatchEvent(new CustomEvent('editor.tabActivated', { detail: { tabId } }));
   }
 
   function openDocument(doc) {

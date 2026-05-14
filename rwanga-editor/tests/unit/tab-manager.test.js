@@ -15,6 +15,7 @@ function bootDom() {
   `, { runScripts: 'outside-only' });
   global.window = dom.window;
   global.document = dom.window.document;
+  global.CustomEvent = dom.window.CustomEvent;
   global.confirm = () => true;
 
   // Stub ProseMirror globals
