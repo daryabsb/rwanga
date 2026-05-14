@@ -19,9 +19,9 @@ Therefore:
 
 2. **A halted build with a question is a success. A build continued on a guess is a failure by definition** — regardless of whether the guess happens to be correct.
 
-3. **The Stop-Point Register (§ 7) is the enforcement mechanism.** It lists every edge the designer currently knows about, each marked `RESOLVED`, `DECIDED`, `CONFIRM`, `GO/NO-GO`, or `STOP`. Rows marked `STOP` or `CONFIRM` must be resolved with the designer before the code that depends on them is written. When you discover a new gap not in the register, **add a row and stop** — the register is living.
+3. **The Stop-Point Register (§ 6) is the enforcement mechanism.** It lists every edge the designer currently knows about, each marked `RESOLVED`, `DECIDED`, `CONFIRM`, `GO/NO-GO`, or `STOP`. Rows marked `STOP` or `CONFIRM` must be resolved with the designer before the code that depends on them is written. When you discover a new gap not in the register, **add a row and stop** — the register is living.
 
-4. **Build risk-first, verify per-step (§ 6).** Do not build this as one "Phase 5" unit. The sequence in § 6 builds the single high-risk piece first, in isolation, behind a GO/NO-GO checkpoint, and shows every step working in the real editor before the next begins. Horizontal-build-then-reveal is the prohibited pattern.
+4. **Build risk-first, verify per-step (§ 5).** Do not build this as one "Phase 5" unit. The sequence in § 5 builds the single high-risk piece first, in isolation, behind a GO/NO-GO checkpoint, and shows every step working in the real editor before the next begins. Horizontal-build-then-reveal is the prohibited pattern.
 
 ---
 
@@ -170,7 +170,7 @@ There is **no persistent toolbar.** Formatting and writer actions live on a floa
 
 - Current: `sceneLine` has `content: 'inline*'` and `attrs: { setting, location, time }`, rendered as a plain styled div.
 - New: `sceneLine` is rendered via a **NodeView**. `attrs.setting` and `attrs.time` drive the picker zones (not text content). `attrs.location` is dropped in favor of the node's **text content being the location** (the only editable part). The NodeView composites the visible line: `[setting attr] ". " [location text] " - " [time attr]`.
-- The exact NodeView structure (whether the identity line is drawn by the `sceneLine` NodeView reading the parent scene's number, or by a `scene` NodeView wrapping it) is an implementation choice for the GO/NO-GO step (§ 6 Step B, Register row 3). The *behavior* in § 2.2–2.3 is fixed; the mechanism is the implementer's, proven by the spike.
+- The exact NodeView structure (whether the identity line is drawn by the `sceneLine` NodeView reading the parent scene's number, or by a `scene` NodeView wrapping it) is an implementation choice for the GO/NO-GO step (§ 5 Step B, Register row 3). The *behavior* in § 2.2–2.3 is fixed; the mechanism is the implementer's, proven by the spike.
 
 ### 4.2 `.rga` `settings` additions
 
@@ -241,7 +241,7 @@ Living list. `STOP` and `CONFIRM` rows must be resolved with the designer before
 |---|---|---|
 | 1 | "+" buttons appear at every body-level insertable position (not only scene-adjacent gaps), cursor-driven, as a lead/hint | **RESOLVED** |
 | 2 | "+" button tracking = cursor-driven (follows the caret line through body positions); not mouse-hover | **RESOLVED** |
-| 3 | `sceneLine` segmented-zone NodeView — three zones, constrained pickers, free-text location, Tab/Arrow/Enter navigation | **GO/NO-GO** — § 6 Step B; prove in isolation; fallback = guided free-text + validation |
+| 3 | `sceneLine` segmented-zone NodeView — three zones, constrained pickers, free-text location, Tab/Arrow/Enter navigation | **GO/NO-GO** — § 5 Step B; prove in isolation; fallback = guided free-text + validation |
 | 4 | `inlineFreeText` inside a scene — is it kept in v0.1? If kept, how is it triggered, given that no button enters a scene (candidate: `/` slash command only)? | **STOP — undecided.** Must be resolved before any `inlineFreeText` code is written. Does not block Steps A–E. |
 | 5 | Per-span font family / font size UI | **DECIDED** — `⋯` overflow on the floating selection toolbar |
 | 6 | The word "SCENE" on the identity line | **DECIDED** — part of the document vocabulary (`settings.vocabulary.sceneWord`), default `"SCENE"` |
