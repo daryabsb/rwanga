@@ -102,8 +102,9 @@
   --bg-selected: #04395e;
 
   /* === Editor Surface === */
-  --editor-bg: #1e1e1e;
-  --editor-page-bg: #1a1a1a;
+  --editor-bg: #141414;            /* the desk — darkest */
+  --editor-page-bg: #262626;       /* the page — a clear step lighter */
+  --editor-page-shadow: 0 8px 28px rgba(0, 0, 0, 0.6);
   --editor-line-highlight: rgba(255, 255, 255, 0.04);
   /* scene-header-bg/border removed in Phase 0 — scene widget deleted */
 
@@ -216,8 +217,9 @@
   --bg-active: #d4d4d4;
   --bg-selected: #c8ddf1;
 
-  --editor-bg: #ffffff;
-  --editor-page-bg: #fafafa;
+  --editor-bg: #d6d6d6;            /* the desk — grey */
+  --editor-page-bg: #ffffff;       /* the page — white */
+  --editor-page-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
   --editor-line-highlight: rgba(0, 0, 0, 0.04);
   /* scene-header-bg/border removed — scene widget deleted */
 
