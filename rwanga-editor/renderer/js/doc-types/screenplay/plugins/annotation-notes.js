@@ -133,9 +133,17 @@
   // ---------------------------------------------------------------
   // Event listeners
   // ---------------------------------------------------------------
+  function getView() {
+    return _view
+      || (Rga.TabManager && Rga.TabManager._editorView && Rga.TabManager._editorView())
+      || null;
+  }
+
   document.addEventListener('editor.annotationAdded', function(e) {
     const el = getListEl();
-    if (!el || !_view) return;
+    if (!el) return;
+    // Lazily acquire the view if refresh() was never called
+    if (!_view) _view = getView();
     // Add a single new card immediately rather than full refresh
     const annot = e.detail;
     const empty = el.querySelector('.annot-empty');
@@ -158,8 +166,9 @@
     textarea.placeholder = 'Write your note…';
     textarea.rows = 2;
     textarea.addEventListener('input', function() {
-      if (_view && Rga.Annotations && Rga.Annotations.updateAnnotationText) {
-        Rga.Annotations.updateAnnotationText(_view, annot.id, textarea.value);
+      const v = getView();
+      if (v && Rga.Annotations && Rga.Annotations.updateAnnotationText) {
+        Rga.Annotations.updateAnnotationText(v, annot.id, textarea.value);
       }
     });
     card.appendChild(textarea);
@@ -169,8 +178,9 @@
     removeBtn.title = 'Remove note';
     removeBtn.textContent = '×';
     removeBtn.addEventListener('click', function() {
-      if (_view && Rga.Annotations && Rga.Annotations.removeAnnotation) {
-        Rga.Annotations.removeAnnotation(_view, annot.id);
+      const v = getView();
+      if (v && Rga.Annotations && Rga.Annotations.removeAnnotation) {
+        Rga.Annotations.removeAnnotation(v, annot.id);
       }
       card.remove();
     });

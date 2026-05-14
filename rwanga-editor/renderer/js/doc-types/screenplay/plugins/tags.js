@@ -114,113 +114,49 @@
   });
 
   // ---------------------------------------------------------------
-  // Tag dialog popup
+  // Apply tag from context menu
+  // Uses the selected text as the entity name:
+  //   - exact case-insensitive match in registry → reuse that entity
+  //   - no match → create a new entity named after the selected text
+  // No dialog shown — the selection IS the entity identifier.
   // ---------------------------------------------------------------
 
-  let _popup = null;
-
-  function closePopup() {
-    if (_popup && _popup.parentNode) _popup.parentNode.removeChild(_popup);
-    _popup = null;
+  function _entityList(doc, tagType) {
+    const keyMap = Rga.Doc && Rga.Doc._registryKey;
+    const key = keyMap ? (keyMap[tagType] || tagType) : tagType;
+    return (doc && doc.tagRegistry && doc.tagRegistry[key]) || [];
   }
 
   function showTagDialog(view, tagType) {
-    closePopup();
     if (Rga.ContextMenu) Rga.ContextMenu.hide();
 
     const { selection } = view.state;
     if (selection.empty) return;
 
+    const selectedText = view.state.doc.textBetween(selection.from, selection.to, ' ').trim();
+    if (!selectedText) return;
+
     const activeTab = Rga.TabManager && Rga.TabManager.activeTab && Rga.TabManager.activeTab();
     const doc = activeTab && activeTab.doc;
-    const keyMap = Rga.Doc && Rga.Doc._registryKey;
-    const registryKey = keyMap ? (keyMap[tagType] || tagType) : tagType;
-    const existingEntities = (doc && doc.tagRegistry && doc.tagRegistry[registryKey]) || [];
 
-    const popup = document.createElement('div');
-    popup.className = 'rga-tag-popup';
-
-    const label = document.createElement('div');
-    label.className = 'rga-popup-label';
-    label.textContent = 'Tag as ' + (TAG_LABELS[tagType] || capitalize(tagType));
-    popup.appendChild(label);
-
-    const select = document.createElement('select');
-    select.className = 'rga-popup-select';
-
-    const newOpt = document.createElement('option');
-    newOpt.value = '__new__';
-    newOpt.textContent = '+ New entity';
-    select.appendChild(newOpt);
-
-    existingEntities.forEach(function(entity) {
-      const opt = document.createElement('option');
-      opt.value = entity.id;
-      opt.textContent = entity.name;
-      select.appendChild(opt);
+    // Find existing entity by name (case-insensitive)
+    const list = _entityList(doc, tagType);
+    const existing = list.find(function(e) {
+      return e.name.toLowerCase() === selectedText.toLowerCase();
     });
-    popup.appendChild(select);
 
-    const newNameInput = document.createElement('input');
-    newNameInput.className = 'rga-popup-input';
-    newNameInput.placeholder = 'Entity name…';
-    newNameInput.type = 'text';
-    popup.appendChild(newNameInput);
-
-    function updateVisibility() {
-      newNameInput.style.display = select.value === '__new__' ? '' : 'none';
+    let entityId;
+    if (existing) {
+      entityId = existing.id;
+    } else {
+      entityId = crypto.randomUUID();
+      if (doc && Rga.Doc && Rga.Doc.addEntity) {
+        Rga.Doc.addEntity(doc, tagType, { id: entityId, name: selectedText, color: null, notes: '' });
+      }
     }
-    updateVisibility();
-    select.addEventListener('change', updateVisibility);
 
-    const btnRow = document.createElement('div');
-    btnRow.className = 'rga-popup-btns';
-
-    const cancelBtn = document.createElement('button');
-    cancelBtn.className = 'rga-popup-btn';
-    cancelBtn.textContent = 'Cancel';
-    cancelBtn.addEventListener('click', function() { closePopup(); view.focus(); });
-
-    const applyBtn = document.createElement('button');
-    applyBtn.className = 'rga-popup-btn primary';
-    applyBtn.textContent = 'Apply';
-    applyBtn.addEventListener('click', function() {
-      let entityId;
-      if (select.value === '__new__') {
-        const name = newNameInput.value.trim();
-        if (!name) { newNameInput.focus(); return; }
-        entityId = crypto.randomUUID();
-        if (doc && Rga.Doc && Rga.Doc.addEntity) {
-          Rga.Doc.addEntity(doc, tagType, { id: entityId, name, color: null, notes: '' });
-        }
-      } else {
-        entityId = select.value;
-      }
-      applyTag(view, tagType, entityId);
-      closePopup();
-      view.focus();
-    });
-
-    btnRow.appendChild(cancelBtn);
-    btnRow.appendChild(applyBtn);
-    popup.appendChild(btnRow);
-    document.body.appendChild(popup);
-    _popup = popup;
-
-    const coords = view.coordsAtPos(selection.from);
-    const x = Math.min(coords.left, window.innerWidth - 260);
-    const y = Math.min(coords.bottom + 6, window.innerHeight - 180);
-    popup.style.left = x + 'px';
-    popup.style.top = y + 'px';
-
-    newNameInput.focus();
-
-    setTimeout(function() {
-      function onOutside(e) {
-        if (_popup && !_popup.contains(e.target)) closePopup();
-      }
-      document.addEventListener('mousedown', onOutside, true);
-    }, 0);
+    applyTag(view, tagType, entityId);
+    view.focus();
   }
 
   // ---------------------------------------------------------------
