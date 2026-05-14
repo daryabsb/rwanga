@@ -73,6 +73,12 @@
     if (Rga.DocTypes && Rga.DocTypes.screenplay && Rga.DocTypes.screenplay.revisionFlagsPlugin) {
       plugins.push(Rga.DocTypes.screenplay.revisionFlagsPlugin());
     }
+    if (Rga.DocTypes && Rga.DocTypes.screenplay && Rga.DocTypes.screenplay.pageBreaksPlugin) {
+      plugins.push(Rga.DocTypes.screenplay.pageBreaksPlugin(function() {
+        const doc = Rga.TabManager && Rga.TabManager.activeDoc && Rga.TabManager.activeDoc();
+        return doc && doc.settings ? doc.settings.pageSetup : null;
+      }));
+    }
 
     const initialDoc = opts.initialDoc || emptyDoc(schema);
 
