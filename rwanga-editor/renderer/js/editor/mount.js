@@ -82,6 +82,9 @@
     if (Rga.DocTypes && Rga.DocTypes.screenplay && Rga.DocTypes.screenplay.toolbarPlugin) {
       plugins.push(Rga.DocTypes.screenplay.toolbarPlugin());
     }
+    if (Rga.DocTypes && Rga.DocTypes.screenplay && Rga.DocTypes.screenplay.sceneLineParserPlugin) {
+      plugins.push(Rga.DocTypes.screenplay.sceneLineParserPlugin());
+    }
 
     const initialDoc = opts.initialDoc || emptyDoc(schema);
 
