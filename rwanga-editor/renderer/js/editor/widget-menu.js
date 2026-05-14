@@ -1,5 +1,5 @@
 // Copyright (c) 2026 Rwanga. Licensed under Apache 2.0.
-// Phase 5 — widget buttons ([+ Scene] | [+ ▾]), floating insert menu, slash command.
+// Phase 5 — two widget "+" buttons + slash command.
 'use strict';
 
 (function() {
@@ -8,10 +8,9 @@
   function _pm() { return window.RgaProseMirror; }
 
   // ---------------------------------------------------------------
-  // Helpers — document structure
+  // Document structure helpers
   // ---------------------------------------------------------------
 
-  // Position of the top-level block (direct child of body) containing $from.
   function _topBlockPos($from) {
     for (let d = $from.depth; d >= 1; d--) {
       if ($from.node(d - 1).type.name === 'body') return $from.before(d);
@@ -27,7 +26,6 @@
     return p;
   }
 
-  // True if any ancestor node is a scene.
   function _insideScene($from) {
     for (let d = 0; d <= $from.depth; d++) {
       if ($from.node(d).type.name === 'scene') return true;
@@ -36,15 +34,13 @@
   }
 
   // ---------------------------------------------------------------
-  // Generic insert helpers
+  // Insert helpers
   // ---------------------------------------------------------------
 
-  // Insert newNode after the current top-level block; place cursor inside it.
   function _insertAfterBlock(view, newNode) {
     const PM = _pm();
     const { state, dispatch } = view;
     const { $from } = state.selection;
-
     let blockPos = _topBlockPos($from);
 
     if (blockPos === null) {
@@ -70,18 +66,15 @@
     return true;
   }
 
-  // Insert newNode after the current scene-child block (inside-scene inserts).
   function _insertAfterSceneChild(view, newNode) {
     const PM = _pm();
     const { state, dispatch } = view;
     const { $from } = state.selection;
-
     let childPos = null;
     for (let d = $from.depth; d >= 1; d--) {
       if ($from.node(d - 1).type.name === 'scene') { childPos = $from.before(d); break; }
     }
     if (childPos === null) return _insertAfterBlock(view, newNode);
-
     const childNode = state.doc.nodeAt(childPos);
     if (!childNode) return false;
     const insertPos = childPos + childNode.nodeSize;
@@ -160,11 +153,10 @@
   }
 
   // ---------------------------------------------------------------
-  // Menu item definitions
+  // Menu item definitions (used by slash command and Ctrl+/)
   // ---------------------------------------------------------------
 
-  // "Other" items shown in the [+ ▾] dropdown (scene excluded — it has its own button).
-  const OTHER_ITEMS = [
+  const OUTSIDE_SCENE_ITEMS = [
     { id: 'title',         label: 'Title',           action: cmdTitleStrip },
     { id: 'heading1',      label: 'Heading 1',       action: _cmdHeading(1) },
     { id: 'heading2',      label: 'Heading 2',       action: _cmdHeading(2) },
@@ -174,19 +166,15 @@
     { id: 'orderedList',   label: 'Numbered list',   action: cmdOrderedList },
     { id: 'horizontalRule',label: 'Horizontal rule', action: cmdHorizontalRule },
     { id: 'pageBreak',     label: 'Page break',      action: cmdPageBreak },
+    { id: 'scene',         label: 'Scene', shortcut: 'Ctrl+Enter', action: cmdScene },
   ];
 
   const INSIDE_SCENE_ITEMS = [
     { id: 'inlineFreeText', label: 'Inline free text', action: cmdInlineFreeText },
   ];
 
-  // Full outside-scene list (used by slash command and Ctrl+/).
-  const OUTSIDE_SCENE_ITEMS = OTHER_ITEMS.concat([
-    { id: 'scene', label: 'Scene', shortcut: 'Ctrl+Enter', action: cmdScene },
-  ]);
-
   // ---------------------------------------------------------------
-  // Floating menu
+  // Slash command / Ctrl+/ floating menu
   // ---------------------------------------------------------------
 
   let _menu = null;
@@ -203,8 +191,7 @@
         menu.style.left = Math.max(8, window.innerWidth - r.width - 8) + 'px';
       }
       if (r.bottom > window.innerHeight - 8) {
-        const top = parseFloat(menu.style.top) - r.height - 8;
-        menu.style.top = Math.max(8, top) + 'px';
+        menu.style.top = Math.max(8, parseFloat(menu.style.top) - r.height - 8) + 'px';
       }
     });
   }
@@ -272,7 +259,6 @@
     }
 
     filter.addEventListener('input', function() { render(filter.value); });
-
     filter.addEventListener('keydown', function(e) {
       const visible = list.querySelectorAll('.rga-widget-item');
       if (e.key === 'ArrowDown') {
@@ -319,69 +305,30 @@
 
   function _execute(item, view, slashPos) {
     if (slashPos !== null) {
-      const tr = view.state.tr.delete(slashPos - 1, slashPos);
-      view.dispatch(tr);
+      view.dispatch(view.state.tr.delete(slashPos - 1, slashPos));
     }
     item.action(view);
   }
 
-  // ---------------------------------------------------------------
-  // Open menus
-  // ---------------------------------------------------------------
-
-  // [+ ▾] button: shows Other items (or scene-child items inside a scene).
-  function openOtherMenu(view, anchorEl) {
-    hideMenu();
-    const { $from } = view.state.selection;
-    const items = _insideScene($from) ? INSIDE_SCENE_ITEMS : OTHER_ITEMS;
-    _menu = _buildMenu(items, view, null);
-    document.body.appendChild(_menu);
-    if (anchorEl) {
-      const r = anchorEl.getBoundingClientRect();
-      _menu.style.left = r.left + 'px';
-      _menu.style.top = (r.bottom + 4) + 'px';
-    } else {
-      try {
-        const coords = view.coordsAtPos(view.state.selection.$from.pos);
-        _menu.style.left = coords.left + 'px';
-        _menu.style.top = (coords.bottom + 4) + 'px';
-      } catch (_) {
-        _menu.style.left = '200px';
-        _menu.style.top = '200px';
-      }
-    }
-    _clampToViewport(_menu);
-    const f = _menu.querySelector('.rga-widget-filter');
-    if (f) f.focus();
-  }
-
-  // Ctrl+/ shortcut: shows full outside-scene or inside-scene list.
   function openWidgetMenu(view, anchorEl) {
     hideMenu();
     const { $from } = view.state.selection;
     const items = _insideScene($from) ? INSIDE_SCENE_ITEMS : OUTSIDE_SCENE_ITEMS;
     _menu = _buildMenu(items, view, null);
     document.body.appendChild(_menu);
-    if (anchorEl) {
-      const r = anchorEl.getBoundingClientRect();
-      _menu.style.left = (r.right + 6) + 'px';
-      _menu.style.top = r.top + 'px';
-    } else {
-      try {
-        const coords = view.coordsAtPos(view.state.selection.$from.pos);
-        _menu.style.left = coords.left + 'px';
-        _menu.style.top = (coords.bottom + 4) + 'px';
-      } catch (_) {
-        _menu.style.left = '200px';
-        _menu.style.top = '200px';
-      }
+    try {
+      const coords = view.coordsAtPos(view.state.selection.$from.pos);
+      _menu.style.left = coords.left + 'px';
+      _menu.style.top = (coords.bottom + 4) + 'px';
+    } catch (_) {
+      _menu.style.left = '200px';
+      _menu.style.top = '200px';
     }
     _clampToViewport(_menu);
     const f = _menu.querySelector('.rga-widget-filter');
     if (f) f.focus();
   }
 
-  // Slash command: opens at the "/" position.
   function _openSlashMenu(view, slashPos) {
     hideMenu();
     const $from = view.state.doc.resolve(slashPos);
@@ -402,20 +349,32 @@
   }
 
   // ---------------------------------------------------------------
-  // Widget button pair — follows cursor, sits on next line
+  // Two widget buttons — left and right of the editor
+  // Left  (+) → new scene   (= Ctrl+Enter)
+  // Right (+) → inline free text (inside scene) or paragraph (outside)
   // ---------------------------------------------------------------
 
-  function _positionWrap(view, wrap) {
+  function _positionBtns(view, btnLeft, btnRight) {
     const { $from } = view.state.selection;
     try {
       const coords = view.coordsAtPos($from.pos);
-      const editorLeft = view.dom.getBoundingClientRect().left;
-      wrap.style.top = Math.round(coords.bottom + 4) + 'px';
-      wrap.style.left = Math.round(editorLeft) + 'px';
-      wrap.hidden = false;
-      wrap.classList.toggle('inside-scene', _insideScene($from));
+      const editorRect = view.dom.getBoundingClientRect();
+      const top = Math.round((coords.top + coords.bottom) / 2 - 11) + 'px';
+      const inside = _insideScene($from);
+
+      btnLeft.style.top = top;
+      btnLeft.style.left = Math.max(4, Math.round(editorRect.left) - 30) + 'px';
+      btnLeft.hidden = false;
+
+      btnRight.style.top = top;
+      btnRight.style.left = Math.round(editorRect.right) + 8 + 'px';
+      btnRight.hidden = false;
+
+      btnLeft.classList.toggle('inside-scene', inside);
+      btnRight.classList.toggle('inside-scene', inside);
     } catch (_) {
-      wrap.hidden = true;
+      btnLeft.hidden = true;
+      btnRight.hidden = true;
     }
   }
 
@@ -423,45 +382,44 @@
     const PM = _pm();
     return new PM.Plugin({
       view: function(editorView) {
-        const wrap = document.createElement('div');
-        wrap.className = 'rga-widget-wrap';
-        wrap.style.position = 'fixed';
-        wrap.style.zIndex = '200';
+        const btnLeft = document.createElement('button');
+        btnLeft.className = 'rga-widget-btn rga-widget-btn-left';
+        btnLeft.textContent = '+';
+        btnLeft.title = 'New scene (Ctrl+Enter)';
+        btnLeft.tabIndex = -1;
+        document.body.appendChild(btnLeft);
 
-        const btnScene = document.createElement('button');
-        btnScene.className = 'rga-widget-btn rga-widget-btn-primary';
-        btnScene.textContent = '+ Scene';
-        btnScene.title = 'Insert scene (Ctrl+Enter)';
-        btnScene.tabIndex = -1;
+        const btnRight = document.createElement('button');
+        btnRight.className = 'rga-widget-btn rga-widget-btn-right';
+        btnRight.textContent = '+';
+        btnRight.title = 'Insert text';
+        btnRight.tabIndex = -1;
+        document.body.appendChild(btnRight);
 
-        const btnOther = document.createElement('button');
-        btnOther.className = 'rga-widget-btn rga-widget-btn-secondary';
-        btnOther.innerHTML = '+ <span class="rga-widget-arrow">▾</span>';
-        btnOther.title = 'Insert block…';
-        btnOther.tabIndex = -1;
-
-        wrap.appendChild(btnScene);
-        wrap.appendChild(btnOther);
-        document.body.appendChild(wrap);
-
-        btnScene.addEventListener('mousedown', function(e) {
+        btnLeft.addEventListener('mousedown', function(e) {
           e.preventDefault();
           cmdScene(editorView);
         });
 
-        btnOther.addEventListener('mousedown', function(e) {
+        btnRight.addEventListener('mousedown', function(e) {
           e.preventDefault();
-          openOtherMenu(editorView, btnOther);
+          const { $from } = editorView.state.selection;
+          if (_insideScene($from)) {
+            cmdInlineFreeText(editorView);
+          } else {
+            cmdParagraph(editorView);
+          }
         });
 
         const container = document.getElementById('editor-container');
-        function onScroll() { _positionWrap(editorView, wrap); }
+        function onScroll() { _positionBtns(editorView, btnLeft, btnRight); }
         if (container) container.addEventListener('scroll', onScroll, { passive: true });
 
         return {
-          update: function(view) { _positionWrap(view, wrap); },
+          update: function(view) { _positionBtns(view, btnLeft, btnRight); },
           destroy: function() {
-            if (wrap.parentNode) wrap.parentNode.removeChild(wrap);
+            if (btnLeft.parentNode) btnLeft.parentNode.removeChild(btnLeft);
+            if (btnRight.parentNode) btnRight.parentNode.removeChild(btnRight);
             if (container) container.removeEventListener('scroll', onScroll);
           }
         };
@@ -500,7 +458,6 @@
 
   Rga.WidgetMenu = {
     openWidgetMenu,
-    openOtherMenu,
     hideMenu,
     widgetMenuPlugin,
     slashCommandPlugin,

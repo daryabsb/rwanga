@@ -842,30 +842,26 @@
 }
 
 /* ================================================================
-   PHASE 5 — WIDGET BUTTON PAIR  [+ Scene]  [+ ▾]
-   Follows cursor; sits on the line below the current cursor line.
+   PHASE 5 — WIDGET "+" BUTTONS
+   Two small round buttons, one on each side of the editor, both
+   tracking the cursor line vertically.
+   Left  (+) = new scene.   Right (+) = inline free text / paragraph.
    ================================================================ */
 
-.rga-widget-wrap {
-  display: flex;
-  gap: 4px;
-  align-items: center;
-  pointer-events: auto;
-}
-.rga-widget-wrap[hidden] { display: none; }
-
 .rga-widget-btn {
-  height: 20px;
-  padding: 0 8px;
-  border-radius: var(--radius-sm, 2px);
-  border: 1px solid var(--border-primary, #3c3c3c);
+  position: fixed;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
   background: var(--bg-tertiary, #2d2d30);
+  border: 1px solid var(--border-primary, #3c3c3c);
   color: var(--text-tertiary, #6e6e6e);
-  font-size: var(--font-size-xs, 10px);
-  font-family: var(--font-ui);
-  line-height: 18px;
+  font-size: 16px;
+  line-height: 1;
   cursor: pointer;
-  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   user-select: none;
   transition: background 0.1s, color 0.1s, border-color 0.1s;
 }
@@ -874,19 +870,16 @@
   border-color: var(--accent-primary, #007acc);
   color: #fff;
 }
-
-/* Inside a scene: Scene button gets gold accent */
-.rga-widget-wrap.inside-scene .rga-widget-btn-primary {
+.rga-widget-btn.inside-scene {
   border-color: var(--accent-gold, #c8a84b);
   color: var(--accent-gold, #c8a84b);
 }
-.rga-widget-wrap.inside-scene .rga-widget-btn-primary:hover {
+.rga-widget-btn.inside-scene:hover {
   background: var(--accent-gold, #c8a84b);
   border-color: var(--accent-gold, #c8a84b);
   color: #1e1e1e;
 }
-
-.rga-widget-arrow { font-size: 9px; }
+.rga-widget-btn[hidden] { display: none; }
 
 /* ================================================================
    PHASE 5 — WIDGET INSERT MENU
