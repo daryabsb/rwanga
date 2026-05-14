@@ -126,9 +126,37 @@
 
   function cmdScene(view) {
     const s = view.state.schema;
-    const sceneLine = s.nodes.sceneLine.createAndFill();
+    // Pre-fill slug line with "INT. " so the user is never looking at a blank header.
+    const prefill = s.text('INT. ');
+    const sceneLine = s.nodes.sceneLine.create(null, [prefill]);
     const action = s.nodes.action.createAndFill();
-    return _insertAfterBlock(view, s.nodes.scene.create(null, [sceneLine, action]));
+    const scene = s.nodes.scene.create(null, [sceneLine, action]);
+    const PM = _pm();
+    const { state, dispatch } = view;
+    const { $from } = state.selection;
+
+    let blockPos = _topBlockPos($from);
+    if (blockPos === null) {
+      const bp = _bodyPos(state.doc);
+      if (bp === null) return false;
+      const tr = state.tr.insert(bp + 1, scene);
+      // Place cursor at end of the pre-filled "INT. " text
+      const sel = PM.TextSelection.create(tr.doc, bp + 2 + prefill.nodeSize);
+      dispatch(tr.setSelection(sel));
+      view.focus();
+      return true;
+    }
+
+    const blockNode = state.doc.nodeAt(blockPos);
+    if (!blockNode) return false;
+    const insertPos = blockPos + blockNode.nodeSize;
+    const tr = state.tr.insert(insertPos, scene);
+    // Cursor lands after "INT. " — ready for the user to type the location
+    const cursorPos = insertPos + 1 + prefill.nodeSize;
+    const sel = PM.TextSelection.create(tr.doc, Math.min(cursorPos, tr.doc.content.size));
+    dispatch(tr.setSelection(sel));
+    view.focus();
+    return true;
   }
 
   function cmdTitleStrip(view) {

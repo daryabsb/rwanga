@@ -170,13 +170,15 @@
         const bodyChildDepth = Math.min($head.depth, 2);
         insertPos = $head.after(bodyChildDepth);
       }
+      const prefill = schema.text('INT. ');
       const sceneNode = schema.nodes.scene.create({}, [
-        schema.nodes.sceneLine.create(),
+        schema.nodes.sceneLine.create(null, [prefill]),
         schema.nodes.action.create()
       ]);
       tr.insert(insertPos, sceneNode);
       const TextSelection = window.RgaProseMirror.TextSelection;
-      tr.setSelection(TextSelection.near(tr.doc.resolve(insertPos + 1))); // cursor in sceneLine
+      // Cursor lands after "INT. " — ready for the user to type the location
+      tr.setSelection(TextSelection.create(tr.doc, insertPos + 1 + prefill.nodeSize));
       dispatch(tr.scrollIntoView());
       return true;
     };
