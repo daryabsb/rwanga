@@ -14,12 +14,6 @@
     const K = Rga.Keyboard;
     if (!K) return;
 
-    // Ctrl+/ — open widget insert menu at cursor
-    K.register('/', { ctrl: true, shift: false, alt: false }, function() {
-      const view = _view();
-      if (view) Rga.WidgetMenu && Rga.WidgetMenu.openWidgetMenu(view, null);
-    });
-
     // Ctrl+Shift+H — add annotation on selection
     K.register('h', { ctrl: true, shift: true, alt: false }, function() {
       const view = _view();

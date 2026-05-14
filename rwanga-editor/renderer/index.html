@@ -181,9 +181,6 @@
           <button id="tab-new" title="New Tab"></button>
         </div>
 
-        <!-- Toolbar -->
-        <div id="editor-toolbar"></div>
-
         <!-- Editor Container (gutter + writing surface) -->
         <div id="editor-container">
           <div id="gutter"></div>
@@ -334,9 +331,6 @@
 <script src="js/doc-types/screenplay/plugins/annotation-notes.js"></script>
 <script src="js/doc-types/screenplay/plugins/tags.js"></script>
 <script src="js/doc-types/screenplay/plugins/revision-flags.js"></script>
-<script src="js/doc-types/screenplay/plugins/scene-line-parser.js"></script>
-<script src="js/editor/widget-menu.js"></script>
-<script src="js/editor/toolbar.js"></script>
 <script src="js/editor/mount.js"></script>
 <script src="js/editor/shortcuts.js"></script>
 
@@ -476,7 +470,6 @@
     Rga.CommandPalette.init();
     Rga.FileTree.init();
     Rga.TabManager.init();  // mounts ProseMirror EditorView internally
-    Rga.Toolbar && Rga.Toolbar.init();
     Rga.FileManager.newScript();  // open initial Untitled document
     registerCommands();
     registerShortcuts();

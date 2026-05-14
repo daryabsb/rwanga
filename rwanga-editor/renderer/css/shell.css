@@ -302,7 +302,7 @@
    ============================================================ */
 #editor-area {
   display: grid;
-  grid-template-rows: var(--tab-bar-height) var(--toolbar-height) 1fr;
+  grid-template-rows: var(--tab-bar-height) 1fr;
   overflow: hidden;
   min-height: 0;
 }
