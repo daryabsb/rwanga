@@ -60,6 +60,17 @@
       plugins.push(Rga.DocTypes.screenplay.activeScenePlugin());
     }
 
+    // Mark plugins: context-menu, annotations, tags (click handler), revision flags
+    if (Rga.DocTypes && Rga.DocTypes.screenplay && Rga.DocTypes.screenplay.contextMenuPlugin) {
+      plugins.push(Rga.DocTypes.screenplay.contextMenuPlugin());
+    }
+    if (Rga.DocTypes && Rga.DocTypes.screenplay && Rga.DocTypes.screenplay.annotationsPlugin) {
+      plugins.push(Rga.DocTypes.screenplay.annotationsPlugin());
+    }
+    if (Rga.DocTypes && Rga.DocTypes.screenplay && Rga.DocTypes.screenplay.revisionFlagsPlugin) {
+      plugins.push(Rga.DocTypes.screenplay.revisionFlagsPlugin());
+    }
+
     const initialDoc = opts.initialDoc || emptyDoc(schema);
 
     const state = PM.EditorState.create({ schema, doc: initialDoc, plugins });

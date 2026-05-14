@@ -43,7 +43,45 @@
     });
   }
 
+  // ---------------------------------------------------------------
+  // Scene-level note and revision flag helpers
+  // These mutate scene node attrs via setNodeMarkup transactions.
+  // ---------------------------------------------------------------
+
+  function _findScenePos(doc, sceneId) {
+    let found = null;
+    doc.descendants(function(node, pos) {
+      if (found) return false;
+      if (node.type.name === 'scene' && node.attrs.id === sceneId) {
+        found = { node, pos };
+        return false;
+      }
+    });
+    return found;
+  }
+
+  function setSceneNote(view, sceneId, text) {
+    const hit = _findScenePos(view.state.doc, sceneId);
+    if (!hit) return false;
+    const tr = view.state.tr.setNodeMarkup(hit.pos, null, Object.assign({}, hit.node.attrs, { notes: text }));
+    view.dispatch(tr);
+    return true;
+  }
+
+  function flagSceneForRevision(view, sceneId, payload) {
+    const hit = _findScenePos(view.state.doc, sceneId);
+    if (!hit) return false;
+    const flag = payload
+      ? { reason: payload.reason || '', status: payload.status || 'open', createdAt: payload.createdAt || new Date().toISOString() }
+      : null;
+    const tr = view.state.tr.setNodeMarkup(hit.pos, null, Object.assign({}, hit.node.attrs, { revisionFlag: flag }));
+    view.dispatch(tr);
+    return true;
+  }
+
   Rga.DocTypes = Rga.DocTypes || {};
   Rga.DocTypes.screenplay = Rga.DocTypes.screenplay || {};
   Rga.DocTypes.screenplay.activeScenePlugin = activeScenePlugin;
+  Rga.DocTypes.screenplay.setSceneNote = setSceneNote;
+  Rga.DocTypes.screenplay.flagSceneForRevision = flagSceneForRevision;
 })();

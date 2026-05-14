@@ -209,6 +209,50 @@
     };
   }
 
+  // ---------------------------------------------------------------
+  // Tag registry operations
+  // ---------------------------------------------------------------
+
+  // Map singular tagType → registry key (plural / special cases)
+  const _registryKey = {
+    character: 'characters', prop: 'props', wardrobe: 'wardrobe',
+    location: 'locations', sfx: 'sfx', vfx: 'vfx',
+    vehicle: 'vehicles', animal: 'animals', custom: 'custom',
+  };
+
+  function _registryList(doc, tagType) {
+    const key = _registryKey[tagType] || (tagType + 's');
+    if (!doc.tagRegistry[key]) doc.tagRegistry[key] = [];
+    return doc.tagRegistry[key];
+  }
+
+  function addEntity(doc, tagType, attrs) {
+    const list = _registryList(doc, tagType);
+    const entity = {
+      id: attrs.id || crypto.randomUUID(),
+      name: attrs.name || '',
+      color: attrs.color || null,
+      notes: attrs.notes || '',
+    };
+    list.push(entity);
+    return entity.id;
+  }
+
+  function findEntity(doc, tagType, id) {
+    return _registryList(doc, tagType).find(function(e) { return e.id === id; }) || null;
+  }
+
+  function removeEntity(doc, tagType, id) {
+    const key = _registryKey[tagType] || (tagType + 's');
+    if (!doc.tagRegistry[key]) return false;
+    const idx = doc.tagRegistry[key].findIndex(function(e) { return e.id === id; });
+    if (idx === -1) return false;
+    doc.tagRegistry[key].splice(idx, 1);
+    return true;
+    // Caller is responsible for removing tag marks from the PM document
+    // via Rga.Tags.removeAllMarksForEntity(view, id)
+  }
+
   function markDirty(doc) {
     doc.dirty = true;
     if (doc.metadata) {
@@ -234,9 +278,13 @@
     markDirty,
     clearDirty,
     rebindHandle,
+    addEntity,
+    findEntity,
+    removeEntity,
     _isAcceptedVersion: isAcceptedVersion,
     _isNewerThanSupported: isNewerThanSupported,
     _basenameFromHandle: basenameFromHandle,
+    _registryKey,
   };
 
   if (typeof module !== 'undefined' && module.exports) {

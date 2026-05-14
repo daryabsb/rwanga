@@ -206,3 +206,193 @@
 [dir="rtl"] .ProseMirror .rga-transition {
   text-align: start;
 }
+
+/* ============================================================
+   CONTEXT MENU
+   ============================================================ */
+
+.rga-context-menu {
+  position: fixed;
+  z-index: 9000;
+  min-width: 180px;
+  background: var(--bg-elevated, #2d2d2d);
+  border: 1px solid var(--border-default, #454545);
+  border-radius: 6px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  padding: 4px 0;
+  font-size: 13px;
+}
+
+.ctx-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.ctx-item {
+  padding: 6px 14px;
+  cursor: pointer;
+  color: var(--text-primary, #d4d4d4);
+  white-space: nowrap;
+  position: relative;
+  user-select: none;
+}
+.ctx-item:hover {
+  background: var(--bg-hover, #3a3a3a);
+}
+
+.ctx-separator {
+  height: 1px;
+  background: var(--border-subtle, #3a3a3a);
+  margin: 4px 0;
+}
+
+.ctx-has-submenu::after {
+  content: '▶';
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 10px;
+  opacity: 0.6;
+}
+
+.ctx-submenu {
+  display: none;
+  position: absolute;
+  left: 100%;
+  top: -4px;
+  background: var(--bg-elevated, #2d2d2d);
+  border: 1px solid var(--border-default, #454545);
+  border-radius: 6px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  padding: 4px 0;
+  min-width: 140px;
+  z-index: 9001;
+}
+.ctx-has-submenu:hover .ctx-submenu {
+  display: block;
+}
+
+/* ============================================================
+   MARK POPUPS (annotation, tag, revision flag)
+   ============================================================ */
+
+.rga-annotation-popup,
+.rga-tag-popup,
+.rga-revision-popup {
+  position: fixed;
+  z-index: 8500;
+  width: 240px;
+  background: var(--bg-elevated, #2d2d2d);
+  border: 1px solid var(--border-default, #454545);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-primary, #d4d4d4);
+}
+
+.rga-popup-textarea,
+.rga-popup-input {
+  width: 100%;
+  box-sizing: border-box;
+  background: var(--bg-input, #1e1e1e);
+  border: 1px solid var(--border-default, #454545);
+  border-radius: 4px;
+  color: var(--text-primary, #d4d4d4);
+  font-family: inherit;
+  font-size: 12px;
+  padding: 6px 8px;
+  resize: vertical;
+}
+.rga-popup-textarea:focus,
+.rga-popup-input:focus {
+  outline: none;
+  border-color: var(--accent-primary, #007acc);
+}
+
+.rga-popup-swatches {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.rga-swatch {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  padding: 0;
+}
+.rga-swatch.active,
+.rga-swatch:focus {
+  border-color: var(--text-primary, #d4d4d4);
+  outline: none;
+}
+
+.rga-popup-btns {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.rga-popup-btn {
+  padding: 4px 10px;
+  border-radius: 4px;
+  border: 1px solid var(--border-default, #454545);
+  background: var(--bg-btn, #3a3a3a);
+  color: var(--text-primary, #d4d4d4);
+  font-size: 12px;
+  cursor: pointer;
+}
+.rga-popup-btn:hover {
+  background: var(--bg-hover, #4a4a4a);
+}
+.rga-popup-btn.primary {
+  background: var(--accent-primary, #007acc);
+  border-color: var(--accent-primary, #007acc);
+  color: #fff;
+}
+.rga-popup-btn.primary:hover {
+  filter: brightness(1.15);
+}
+.rga-popup-btn.danger {
+  color: #f44747;
+  border-color: #f44747;
+  background: transparent;
+}
+.rga-popup-btn.danger:hover {
+  background: rgba(244,71,71,0.1);
+}
+
+.rga-popup-label {
+  font-size: 11px;
+  color: var(--text-secondary, #888);
+  margin-bottom: 2px;
+}
+
+/* Tag entity select */
+.rga-popup-select {
+  width: 100%;
+  box-sizing: border-box;
+  background: var(--bg-input, #1e1e1e);
+  border: 1px solid var(--border-default, #454545);
+  border-radius: 4px;
+  color: var(--text-primary, #d4d4d4);
+  font-size: 12px;
+  padding: 5px 8px;
+}
+
+/* Revision status row */
+.rga-popup-radio-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  font-size: 12px;
+}
