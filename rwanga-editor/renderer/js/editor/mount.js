@@ -100,73 +100,6 @@
    * The new frame's `number` attr is set to (existing sceneFrames in doc + 1).
    * Cursor lands at the body block after the inserted frame.
    */
-  /**
-   * Enter on an empty paragraph in body: replace it with a new sceneFrame and
-   * focus its setting picker — IF the doc already has at least one scene and
-   * the empty paragraph isn't the very first body child.
-   *
-   * Per user 2026-05-15: writers think "double-click → new scene", not a
-   * precise count of enters. So any empty paragraph (immediately after a
-   * frame, or after a note section) spawns the next scene; PM's default
-   * Enter still handles splits on non-empty paragraphs.
-   */
-  function enterAfterSceneFrame(schema) {
-    return function(state, dispatch, view) {
-      const sceneFrameType = schema.nodes.sceneFrame;
-      const paragraphType  = schema.nodes.paragraph;
-      if (!sceneFrameType || !paragraphType) return false;
-
-      const $head = state.selection.$head;
-      if ($head.parent.type !== paragraphType) return false;
-      if ($head.parent.content.size > 0) return false;
-
-      // Skip if this is the very first body child (e.g., a blank fresh doc)
-      const bodyIndex = $head.index(1);
-      if (bodyIndex === 0) return false;
-
-      // Only fire when the doc has at least one sceneFrame already
-      let sceneCount = 0;
-      state.doc.descendants(function(node) {
-        if (node.type === sceneFrameType) sceneCount += 1;
-        return true;
-      });
-      if (sceneCount === 0) return false;
-
-      if (!dispatch) return true;
-
-      const newFrame = sceneFrameType.create({
-        id: 'scene-' + Date.now().toString(36),
-        number: sceneCount + 1,
-        headingStyle: null,
-        innerDoc: null
-      });
-
-      const paraStart = $head.before(2);
-      const paraEnd   = $head.after(2);
-      const tr = state.tr.replaceWith(paraStart, paraEnd, newFrame);
-
-      const newFramePos   = paraStart;
-      const afterNewFrame = newFramePos + newFrame.nodeSize;
-      const nodeAfter     = tr.doc.resolve(afterNewFrame).nodeAfter;
-      if (!nodeAfter) tr.insert(afterNewFrame, paragraphType.create());
-
-      dispatch(tr.scrollIntoView());
-
-      if (view && typeof view.nodeDOM === 'function') {
-        setTimeout(function() {
-          const frameDom = view.nodeDOM(newFramePos);
-          if (frameDom && frameDom.querySelector) {
-            const settingPicker = frameDom.querySelector('.rga-slug-setting-picker');
-            if (settingPicker && typeof settingPicker.focus === 'function') {
-              settingPicker.focus();
-            }
-          }
-        }, 0);
-      }
-      return true;
-    };
-  }
-
   function insertSceneFrame(schema) {
     return function(state, dispatch, view) {
       const sceneFrameType = schema.nodes.sceneFrame;
@@ -243,7 +176,6 @@
       'Mod-y': PM.redo,
       'Mod-Shift-z': PM.redo,
       'Mod-Enter': insertSceneFrame(schema),
-      'Enter': enterAfterSceneFrame(schema),
     };
     if (boldMark) keymapEntries['Mod-b'] = PM.toggleMark(boldMark);
     if (italicMark) keymapEntries['Mod-i'] = PM.toggleMark(italicMark);

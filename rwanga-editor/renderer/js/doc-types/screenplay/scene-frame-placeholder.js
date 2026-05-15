@@ -290,11 +290,13 @@
     this._transitionPicker.addEventListener('keydown', function(e) {
       if (e.key === 'Enter') {
         e.preventDefault();
-        self._pruneTrailingEmpties();
+        // Stay inside the frame: append an empty action block above the
+        // transition so the user can either type a note there OR press Enter
+        // again to spawn the next scene (existing block-keydown rule:
+        // Enter on empty trailing block → spawn next scene).
+        const newEl = self._appendBlock('action', '');
+        newEl.focus();
         self._dispatchInner();
-        // Exit the frame into a paragraph below it. From there, Enter on the
-        // empty paragraph spawns the next scene (outer keymap handles that).
-        self._focusAfterFrame();
       }
     });
 
@@ -448,34 +450,6 @@
     }
 
     // Other keys: default browser editing behavior
-  };
-
-  // ---- exit frame to a paragraph below it -------------------
-
-  SceneFramePlaceholder.prototype._focusAfterFrame = function() {
-    if (!this._view || !this._getPos) return;
-    const view = this._view;
-    const PM = window.RgaProseMirror;
-    if (!PM || !PM.TextSelection) return;
-    const myPos = this._getPos();
-    if (typeof myPos !== 'number') return;
-    const myNode = view.state.doc.nodeAt(myPos);
-    if (!myNode) return;
-
-    const afterFrame = myPos + myNode.nodeSize;
-    const paragraphType = view.state.schema.nodes.paragraph;
-    const $after = view.state.doc.resolve(afterFrame);
-    const nodeAfter = $after.nodeAfter;
-
-    let tr = view.state.tr;
-    if (!nodeAfter || (paragraphType && nodeAfter.type !== paragraphType)) {
-      if (!paragraphType) return;
-      tr = tr.insert(afterFrame, paragraphType.create());
-    }
-    // Position cursor inside the (existing or newly inserted) paragraph
-    tr = tr.setSelection(PM.TextSelection.near(tr.doc.resolve(afterFrame + 1)));
-    view.dispatch(tr.scrollIntoView());
-    if (typeof view.focus === 'function') view.focus();
   };
 
   // ---- spawn next scene -------------------------------------
