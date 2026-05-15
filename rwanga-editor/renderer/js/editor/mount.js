@@ -80,13 +80,26 @@
       }));
     }
 
+    if (Rga.DocTypes && Rga.DocTypes.screenplay && Rga.DocTypes.screenplay.zoneKeyPlugin) {
+      plugins.push(Rga.DocTypes.screenplay.zoneKeyPlugin());
+    }
+
     const initialDoc = opts.initialDoc || emptyDoc(schema);
 
     const state = PM.EditorState.create({ schema, doc: initialDoc, plugins });
 
+    const nodeViews = Rga.DocTypes && Rga.DocTypes.screenplay && Rga.DocTypes.screenplay.sceneLineNodeViewFactory
+      ? { sceneLine: Rga.DocTypes.screenplay.sceneLineNodeViewFactory(function() {
+            const doc = Rga.TabManager && Rga.TabManager.activeDoc && Rga.TabManager.activeDoc();
+            return doc && doc.settings ? doc.settings : null;
+          })
+        }
+      : {};
+
     container.innerHTML = '';
     const view = new PM.EditorView(container, {
       state,
+      nodeViews,
       dispatchTransaction: function(tr) {
         const newState = view.state.apply(tr);
         view.updateState(newState);
