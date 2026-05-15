@@ -175,3 +175,60 @@ test('Doc.deserialize backfills vocabulary on old file', () => {
   assert.ok(doc.settings.vocabulary, 'vocabulary must be backfilled');
   assert.equal(doc.settings.sceneHeadingStyle, 'twoLine');
 });
+
+test('Doc.deserialize migrates old sceneLine location attr to inline text content', () => {
+  const { Schema } = require('prosemirror-model');
+  const newSchema = new Schema({
+    nodes: {
+      doc: { content: 'body' },
+      body: { content: 'block*', toDOM() { return ['div', 0]; } },
+      scene: {
+        content: 'sceneLine action*',
+        group: 'block',
+        attrs: { id: { default: null }, number: { default: null }, notes: { default: '' }, revisionFlag: { default: null }, headingStyle: { default: null } },
+        toDOM() { return ['div', 0]; }
+      },
+      sceneLine: {
+        content: 'inline*',
+        group: 'screenplay',
+        attrs: { setting: { default: 'INT.' }, time: { default: 'DAY' } },
+        toDOM() { return ['div', 0]; }
+      },
+      action: { content: 'inline*', group: 'screenplay', toDOM() { return ['div', 0]; } },
+      text: { group: 'inline' }
+    },
+    marks: {}
+  });
+
+  const fileJson = {
+    rga_version: '2.0',
+    document_type: 'screenplay',
+    metadata: {},
+    settings: {},
+    body: {
+      type: 'doc',
+      content: [{
+        type: 'body',
+        content: [{
+          type: 'scene',
+          attrs: { id: null, number: null, notes: '', revisionFlag: null, headingStyle: null },
+          content: [
+            { type: 'sceneLine', attrs: { setting: 'INT', location: 'CAFÉ', time: 'DAY' }, content: [] },
+            { type: 'action', content: [] }
+          ]
+        }]
+      }]
+    },
+    tag_registry: {},
+    flag_log: [],
+    export_settings: {},
+    runtime: {}
+  };
+
+  const reloaded = Doc.deserialize(JSON.stringify(fileJson), null, { schema: newSchema });
+  const sceneLine = reloaded.body.firstChild.firstChild.child(0);
+  assert.equal(sceneLine.type.name, 'sceneLine');
+  assert.equal(sceneLine.textContent, 'CAFÉ');
+  assert.equal(sceneLine.attrs.setting, 'INT');
+  assert.equal(sceneLine.attrs.time, 'DAY');
+});

@@ -113,7 +113,8 @@
         id: { default: null },
         number: { default: null },
         notes: { default: '' },
-        revisionFlag: { default: null }
+        revisionFlag: { default: null },
+        headingStyle: { default: null }
       },
       parseDOM: [{ tag: 'div.rga-scene' }],
       toDOM(node) {
@@ -131,8 +132,7 @@
       content: 'inline*',
       group: 'screenplay',
       attrs: {
-        setting: { default: 'INT' },     // INT | EXT | INT/EXT | EXT/INT
-        location: { default: '' },
+        setting: { default: 'INT.' },   // INT. | EXT. | INT./EXT. | EXT./INT.
         time: { default: 'DAY' }
       },
       parseDOM: [{ tag: 'div.rga-scene-line' }],
@@ -140,7 +140,6 @@
         return ['div', {
           class: 'rga-scene-line',
           'data-setting': node.attrs.setting,
-          'data-location': node.attrs.location,
           'data-time': node.attrs.time
         }, 0];
       }

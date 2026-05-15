@@ -162,6 +162,22 @@
     return JSON.stringify(fileObj, null, 2);
   }
 
+  function _migrateSceneLineLocations(node) {
+    if (!node || typeof node !== 'object') return node;
+    if (node.type === 'sceneLine' && node.attrs && node.attrs.location !== undefined) {
+      const locationText = node.attrs.location;
+      const newAttrs = {};
+      if (node.attrs.setting !== undefined) newAttrs.setting = node.attrs.setting;
+      if (node.attrs.time !== undefined) newAttrs.time = node.attrs.time;
+      const newContent = locationText ? [{ type: 'text', text: locationText }] : [];
+      return { type: 'sceneLine', attrs: newAttrs, content: newContent };
+    }
+    if (Array.isArray(node.content)) {
+      return Object.assign({}, node, { content: node.content.map(_migrateSceneLineLocations) });
+    }
+    return node;
+  }
+
   /**
    * Deserialize a .rga JSON string into an in-memory doc.
    * @param {string} content - raw file content
@@ -192,7 +208,8 @@
 
     if (isV2 && parsed.body && schema) {
       try {
-        pmBody = schema.nodeFromJSON(parsed.body);
+        const migratedBody = _migrateSceneLineLocations(parsed.body);
+        pmBody = schema.nodeFromJSON(migratedBody);
       } catch (err) {
         throw new Error('Document body is invalid: ' + err.message);
       }

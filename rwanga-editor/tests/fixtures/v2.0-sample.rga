@@ -43,13 +43,14 @@
               "id": "scene-7f2a",
               "number": 1,
               "notes": "Establish mood. Camera stays wide.",
-              "revisionFlag": null
+              "revisionFlag": null,
+              "headingStyle": null
             },
             "content": [
               {
                 "type": "sceneLine",
-                "attrs": { "setting": "INT", "location": "CAFÉ", "time": "NIGHT" },
-                "content": [{ "type": "text", "text": "INT. CAFÉ — NIGHT" }]
+                "attrs": { "setting": "INT.", "time": "NIGHT" },
+                "content": [{ "type": "text", "text": "CAFÉ" }]
               },
               {
                 "type": "action",

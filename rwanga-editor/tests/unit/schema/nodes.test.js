@@ -22,10 +22,10 @@ function buildSchema() {
       scene: {
         content: 'sceneLine (action | character | dialogue | parenthetical | transition | shot | inlineFreeText)*',
         group: 'block',
-        attrs: { id: { default: null }, number: { default: null }, notes: { default: '' }, revisionFlag: { default: null } },
+        attrs: { id: { default: null }, number: { default: null }, notes: { default: '' }, revisionFlag: { default: null }, headingStyle: { default: null } },
         toDOM() { return ['div', { class: 'rga-scene' }, 0]; }
       },
-      sceneLine: { content: 'inline*', group: 'screenplay', attrs: { setting: { default: 'INT' }, location: { default: '' }, time: { default: 'DAY' } }, toDOM() { return ['div', { class: 'rga-scene-line' }, 0]; } },
+      sceneLine: { content: 'inline*', group: 'screenplay', attrs: { setting: { default: 'INT.' }, time: { default: 'DAY' } }, toDOM() { return ['div', { class: 'rga-scene-line' }, 0]; } },
       action: { content: 'inline*', group: 'screenplay', toDOM() { return ['div', { class: 'rga-action' }, 0]; } },
       character: { content: 'inline*', group: 'screenplay', toDOM() { return ['div', { class: 'rga-character' }, 0]; } },
       dialogue: { content: 'inline*', group: 'screenplay', toDOM() { return ['div', { class: 'rga-dialogue' }, 0]; } },
