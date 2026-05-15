@@ -72,3 +72,51 @@ test('sceneFrame.toDOM produces the expected element', () => {
     'data-scene-number': '3'
   }]);
 });
+
+function loadPlaceholder() {
+  const modPath = require.resolve('../../../../renderer/js/doc-types/screenplay/scene-frame-placeholder.js');
+  delete require.cache[modPath];
+  global.window = global.window || {};
+  global.window.Rga = global.window.Rga || {};
+  global.window.Rga.DocTypes = global.window.Rga.DocTypes || {};
+  global.window.Rga.DocTypes.screenplay = global.window.Rga.DocTypes.screenplay || {};
+  global.document = { createElement: function() { return { setAttribute() {}, appendChild() {}, removeChild() {}, dataset: {}, get firstChild() { return null; } }; } };
+  require(modPath);
+  return global.window.Rga.DocTypes.screenplay._slugPreview;
+}
+
+test('_slugPreview: returns formatted slug from a sceneLine with content', () => {
+  const slug = loadPlaceholder();
+  const innerDoc = {
+    type: 'doc',
+    content: [
+      { type: 'sceneLine',
+        attrs: { setting: 'INT.', time: 'NIGHT' },
+        content: [{ type: 'text', text: 'CAFÉ' }] }
+    ]
+  };
+  assert.equal(slug(innerDoc), 'INT. CAFÉ — NIGHT');
+});
+
+test('_slugPreview: empty location falls back to "SETTING — TIME"', () => {
+  const slug = loadPlaceholder();
+  const innerDoc = {
+    type: 'doc',
+    content: [{ type: 'sceneLine', attrs: { setting: 'EXT.', time: 'DAY' }, content: [] }]
+  };
+  assert.equal(slug(innerDoc), 'EXT. — DAY');
+});
+
+test('_slugPreview: null innerDoc returns null', () => {
+  const slug = loadPlaceholder();
+  assert.equal(slug(null), null);
+});
+
+test('_slugPreview: missing setting/time defaults to INT./DAY', () => {
+  const slug = loadPlaceholder();
+  const innerDoc = {
+    type: 'doc',
+    content: [{ type: 'sceneLine', attrs: {}, content: [{ type: 'text', text: 'PARK' }] }]
+  };
+  assert.equal(slug(innerDoc), 'INT. PARK — DAY');
+});

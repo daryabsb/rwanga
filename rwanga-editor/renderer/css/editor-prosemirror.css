@@ -350,6 +350,42 @@
   opacity: 0.6;
 }
 
+/* ---- F1 placeholder for sceneFrame (F2 will replace with the real inner editor) ---- */
+.ProseMirror .rga-scene-frame {
+  margin: 0 0 1em 0;
+}
+
+.rga-scene-frame-placeholder {
+  user-select: none;
+  cursor: default;
+  background: var(--bg-secondary, #2a2a2a);
+  border: 1px dashed var(--border-secondary, #555);
+  border-radius: 4px;
+  padding: 10px 14px;
+  font-family: var(--font-editor, 'Courier Prime', monospace);
+  color: var(--text-primary, #cccccc);
+}
+
+.rga-scene-frame-placeholder-num {
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.95em;
+  color: var(--text-secondary, #aaa);
+  margin-bottom: 4px;
+}
+
+.rga-scene-frame-placeholder-slug {
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 1em;
+}
+
+[data-theme="light"] .rga-scene-frame-placeholder {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.18);
+}
+
 /* ----- PAGE BREAK ----- */
 
 .ProseMirror .rga-page-break {
