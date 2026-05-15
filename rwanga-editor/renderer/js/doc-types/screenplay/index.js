@@ -19,24 +19,16 @@
     console.error('[doc-types/screenplay] scene-frame-placeholder not loaded — script order is wrong');
     return;
   }
-  // F2 dependencies (optional in registration — fall back to placeholder if any are missing)
-  const hasF2 =
-    sp.innerSchema &&
-    typeof sp.emptyInnerDoc === 'function' &&
-    typeof sp.buildInnerKeymap === 'function' &&
-    typeof sp.buildZoneKeyPlugin === 'function' &&
-    typeof sp.sceneLineNodeViewFactory === 'function' &&
-    typeof sp.sceneFrameNodeViewFactory === 'function';
-
+  // F2 NO-GO (2026-05-15): nested-EditorView-inside-atom architecture caused
+  // unrecoverable focus, right-click, and DOM-corruption issues during smoke test.
+  // Inner modules (innerSchema, innerKeymap, zone-key plugin, slug NodeView,
+  // SceneFrame NodeView) stay on disk and remain unit-tested for the next attempt,
+  // which should follow the canonical PM footnote pattern (on-demand inner view)
+  // rather than eager mount.
   const config = {
     outerNodes: sp.outerNodes,
     placeholderNodeViewFactory: sp.sceneFramePlaceholderFactory
   };
-  if (hasF2) {
-    config.sceneFrameNodeViewFactory = sp.sceneFrameNodeViewFactory;
-  } else {
-    console.warn('[doc-types/screenplay] F2 modules not all present — using F1 placeholder');
-  }
 
   Rga.DocTypes.register('screenplay', config);
 })();
