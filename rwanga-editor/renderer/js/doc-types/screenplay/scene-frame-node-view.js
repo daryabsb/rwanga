@@ -92,6 +92,9 @@
         self._innerView.updateState(newState);
         if (tr.docChanged) {
           self._propagateToOuter(newState.doc);
+          // Outer view's updateState may have stolen focus during propagation;
+          // claim it back to the inner view so further keys (Tab, etc.) target us.
+          if (self._innerView && self._innerView.focus) self._innerView.focus();
         }
       }
     });

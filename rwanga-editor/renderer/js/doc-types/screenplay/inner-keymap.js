@@ -158,11 +158,24 @@
     };
   }
 
+  function backspaceAtSceneLineStart(/* schema */) {
+    return function(state /*, dispatch */) {
+      const parent = _parentBlock(state);
+      if (!parent) return false;
+      if (parent.node.type.name !== 'sceneLine') return false;
+      const $head = state.selection.$head;
+      // Only swallow when cursor is at the start of an empty (or about-to-be-empty) location
+      if ($head.parentOffset !== 0) return false;
+      return true; // swallow — no default backspace shenanigans at slug start
+    };
+  }
+
   function buildInnerKeymap(schema) {
     const entries = {
       Tab: cycleForward(schema),
       'Shift-Tab': cycleBackward(schema),
-      Enter: enterBehavior(schema)
+      Enter: enterBehavior(schema),
+      Backspace: backspaceAtSceneLineStart(schema)
     };
     return PM.keymap(entries);
   }
@@ -172,6 +185,7 @@
     cycleForward: cycleForward,
     cycleBackward: cycleBackward,
     enterBehavior: enterBehavior,
+    backspaceAtSceneLineStart: backspaceAtSceneLineStart,
     FORWARD: FORWARD,
     BACKWARD: BACKWARD,
     ENTER_NEXT: ENTER_NEXT
