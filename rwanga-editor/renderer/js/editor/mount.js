@@ -83,18 +83,26 @@
     if (Rga.DocTypes && Rga.DocTypes.screenplay && Rga.DocTypes.screenplay.zoneKeyPlugin) {
       plugins.push(Rga.DocTypes.screenplay.zoneKeyPlugin());
     }
+    if (Rga.DocTypes && Rga.DocTypes.screenplay && Rga.DocTypes.screenplay.autoRenumberPlugin) {
+      plugins.push(Rga.DocTypes.screenplay.autoRenumberPlugin());
+    }
 
     const initialDoc = opts.initialDoc || emptyDoc(schema);
 
     const state = PM.EditorState.create({ schema, doc: initialDoc, plugins });
 
-    const nodeViews = Rga.DocTypes && Rga.DocTypes.screenplay && Rga.DocTypes.screenplay.sceneLineNodeViewFactory
-      ? { sceneLine: Rga.DocTypes.screenplay.sceneLineNodeViewFactory(function() {
-            const doc = Rga.TabManager && Rga.TabManager.activeDoc && Rga.TabManager.activeDoc();
-            return doc && doc.settings ? doc.settings : null;
-          })
-        }
-      : {};
+    const getActiveSettings = function() {
+      const doc = Rga.TabManager && Rga.TabManager.activeDoc && Rga.TabManager.activeDoc();
+      return doc && doc.settings ? doc.settings : null;
+    };
+    const nodeViews = {};
+    const sp = Rga.DocTypes && Rga.DocTypes.screenplay;
+    if (sp && sp.sceneLineNodeViewFactory) {
+      nodeViews.sceneLine = sp.sceneLineNodeViewFactory(getActiveSettings);
+    }
+    if (sp && sp.sceneNodeViewFactory) {
+      nodeViews.scene = sp.sceneNodeViewFactory(getActiveSettings);
+    }
 
     container.innerHTML = '';
     const view = new PM.EditorView(container, {
