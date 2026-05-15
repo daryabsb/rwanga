@@ -102,6 +102,7 @@
    */
   function insertSceneFrame(schema) {
     return function(state, dispatch) {
+      const PM = window.RgaProseMirror;
       const sceneFrameType = schema.nodes.sceneFrame;
       if (!sceneFrameType) return false;
       if (!dispatch) return true;
@@ -128,12 +129,12 @@
       const paragraphType = schema.nodes.paragraph;
       const tr = state.tr.insert(insertPos, frame);
       // Ensure there's a paragraph after the frame so the cursor has somewhere to land
-      let cursorPos = insertPos + frame.nodeSize;
+      const cursorPos = insertPos + frame.nodeSize;
       const nodeAfter = tr.doc.resolve(cursorPos).nodeAfter;
       if (!nodeAfter && paragraphType) {
         tr.insert(cursorPos, paragraphType.create());
       }
-      const TextSelection = PM.TextSelection;
+      const TextSelection = PM && PM.TextSelection;
       if (TextSelection) {
         tr.setSelection(TextSelection.near(tr.doc.resolve(cursorPos + 1)));
       }
