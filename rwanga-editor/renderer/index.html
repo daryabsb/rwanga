@@ -284,6 +284,11 @@
       <span class="status-item" id="status-words">0 words</span>
       <span class="status-item" id="status-pages">0 pages</span>
       <span class="status-item" id="status-block-type">Action</span>
+      <div class="view-pill" id="view-pill" title="View mode (Ctrl+Shift+V to cycle)">
+        <button class="view-pill-seg" data-view="flow">Flow</button>
+        <button class="view-pill-seg" data-view="print">Print</button>
+        <button class="view-pill-seg" data-view="draft">Draft</button>
+      </div>
       <button class="status-item status-btn" id="status-theme" title="Toggle Theme"></button>
       <button class="status-item status-btn" id="status-language">EN</button>
     </div>
@@ -294,6 +299,12 @@
 <!-- ============================================================
      OVERLAYS (rendered on top of everything)
      ============================================================ -->
+
+<!-- Top menu dropdown — generic, positioned dynamically by JS -->
+<div id="topmenu-dropdown" class="overlay-menu topmenu-dropdown" hidden></div>
+
+<!-- Draft view exit overlay -->
+<button id="draft-exit" class="draft-exit-btn" title="Exit Draft view (Esc)" hidden>×</button>
 
 <!-- Context Menu — positioned dynamically by JS -->
 <div id="context-menu" class="overlay-menu" hidden></div>
@@ -353,6 +364,7 @@
 <script src="js/editor/page-surface.js"></script>
 <script src="js/editor/page-setup-dialog.js"></script>
 <script src="js/editor/shortcuts.js"></script>
+<script src="js/view-mode.js"></script>
 
 <!-- ============================================================
      INIT — wire everything together
@@ -475,8 +487,100 @@
     K.register('i', { ctrl: true, shift: true, alt: false }, function() {
       Rga.Inspector.toggle();
     });
+    K.register('v', { ctrl: true, shift: true, alt: false }, function() {
+      Rga.ViewMode && Rga.ViewMode.cycle();
+    });
 
     // TODO[phase-9]: Ctrl+Enter — insert scene re-registered when ProseMirror keymap ships
+  }
+
+  /* ---- View-mode UI wiring ---- */
+  function wireViewMode() {
+    if (!Rga.ViewMode) return;
+    Rga.ViewMode.init();
+
+    const pill = Rga.$('#view-pill');
+    const draftExit = Rga.$('#draft-exit');
+    const viewMenuItem = document.querySelector('.menu-item[data-menu="view"]');
+    const dropdown = Rga.$('#topmenu-dropdown');
+
+    function refreshPill(mode) {
+      if (!pill) return;
+      pill.querySelectorAll('.view-pill-seg').forEach(function(seg) {
+        seg.classList.toggle('active', seg.dataset.view === mode);
+      });
+    }
+    function refreshDraftExit(mode) {
+      if (draftExit) draftExit.hidden = (mode !== 'draft');
+    }
+
+    if (pill) {
+      pill.addEventListener('click', function(e) {
+        const seg = e.target.closest('.view-pill-seg');
+        if (seg && seg.dataset.view) Rga.ViewMode.set(seg.dataset.view);
+      });
+    }
+    if (draftExit) {
+      draftExit.addEventListener('click', function() { Rga.ViewMode.exitDraft(); });
+    }
+
+    function buildViewMenu() {
+      if (!dropdown) return;
+      dropdown.innerHTML = '';
+      const current = Rga.ViewMode.get();
+      const items = [
+        { id: 'flow',  label: 'View as Flow',  shortcut: '' },
+        { id: 'print', label: 'View as Print', shortcut: '' },
+        { id: 'draft', label: 'View as Draft', shortcut: 'Esc to exit' }
+      ];
+      items.forEach(function(it) {
+        const row = document.createElement('div');
+        row.className = 'topmenu-item' + (current === it.id ? ' active' : '');
+        row.innerHTML = '<span class="topmenu-check">' + (current === it.id ? '✓' : '') + '</span>' +
+                        '<span class="topmenu-label">' + it.label + '</span>' +
+                        '<span class="topmenu-shortcut">' + (it.shortcut || (it.id === 'flow' || it.id === 'print' || it.id === 'draft' ? 'Ctrl+Shift+V' : '')) + '</span>';
+        row.addEventListener('click', function() {
+          Rga.ViewMode.set(it.id);
+          closeDropdown();
+        });
+        dropdown.appendChild(row);
+      });
+    }
+    function openDropdown() {
+      if (!dropdown || !viewMenuItem) return;
+      buildViewMenu();
+      const rect = viewMenuItem.getBoundingClientRect();
+      dropdown.style.left = rect.left + 'px';
+      dropdown.style.top = (rect.bottom + 2) + 'px';
+      dropdown.hidden = false;
+      // Close on next outside click
+      setTimeout(function() {
+        document.addEventListener('mousedown', onDocMousedown, { once: true });
+      }, 0);
+    }
+    function closeDropdown() {
+      if (dropdown) dropdown.hidden = true;
+    }
+    function onDocMousedown(e) {
+      if (dropdown && !dropdown.contains(e.target) && e.target !== viewMenuItem) {
+        closeDropdown();
+      }
+    }
+    if (viewMenuItem) {
+      viewMenuItem.addEventListener('click', function(e) {
+        e.stopPropagation();
+        if (dropdown && !dropdown.hidden) closeDropdown();
+        else openDropdown();
+      });
+    }
+
+    Rga.ViewMode.onChange(function(mode) {
+      refreshPill(mode);
+      refreshDraftExit(mode);
+    });
+    // Initial paint
+    refreshPill(Rga.ViewMode.get());
+    refreshDraftExit(Rga.ViewMode.get());
   }
 
   /* ---- BOOT SEQUENCE ---- */
@@ -496,6 +600,7 @@
     Rga.EditorShortcuts && Rga.EditorShortcuts.registerShortcuts();
     Rga.ScriptLanguage.init();
     Rga.StatusBar.init();
+    wireViewMode();
 
     // Menu actions from main process
     if (window.rwanga && window.rwanga.on && window.rwanga.on.menuAction) {
