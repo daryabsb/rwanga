@@ -217,6 +217,193 @@
     const hlAttrs = _markAttrs(state, schema.marks.highlight);
     const hl = document.getElementById('format-highlight-icon');
     if (hl) hl.style.background = (hlAttrs && hlAttrs.value) || 'transparent';
+    // Block-type select reflects the focused inner block
+    refreshBlockTypeSelect();
+  }
+
+  // ============================================================
+  // Block-type dropdown
+  // ============================================================
+
+  function _focusedSceneBlock() {
+    const ae = document.activeElement;
+    if (!ae || !ae.classList) return null;
+    if (ae.classList.contains('rga-scene-block')) return ae;
+    return null;
+  }
+
+  function _placeholderRefFor(blockEl) {
+    if (!blockEl) return null;
+    const root = blockEl.closest('.rga-scene-frame-placeholder');
+    return root ? root._rgaScenePlaceholder : null;
+  }
+
+  function changeBlockType(newType) {
+    const blockEl = _focusedSceneBlock();
+    const ref = _placeholderRefFor(blockEl);
+    if (!blockEl || !ref || !newType) return;
+    if (typeof ref._changeBlockType !== 'function') return;
+    ref._changeBlockType(blockEl, newType);
+    if (typeof ref._dispatchInner === 'function') ref._dispatchInner();
+    blockEl.focus();
+  }
+
+  function refreshBlockTypeSelect() {
+    const select = document.getElementById('format-block-type');
+    if (!select) return;
+    const blockEl = _focusedSceneBlock();
+    if (!blockEl) {
+      select.value = '';
+      select.disabled = false; // keep enabled visually but reads as '—'
+      return;
+    }
+    select.value = blockEl.dataset.blockType || '';
+  }
+
+  // ============================================================
+  // Annotation + Revision flag dialogs
+  // ============================================================
+
+  let _annotationSelectedColor = '#FFE08A';
+
+  function _annotationDialog() { return document.getElementById('format-annotation-dialog'); }
+  function _annotationText()   { return document.getElementById('format-annotation-text'); }
+  function openAnnotationDialog() {
+    const view = _view();
+    if (!view) return;
+    const { from, to, empty } = view.state.selection;
+    if (empty) return; // need a selection
+    const dlg = _annotationDialog();
+    if (!dlg) return;
+    _annotationText().value = '';
+    _annotationSelectedColor = '#FFE08A';
+    _refreshAnnotationSwatchSelection();
+    dlg.hidden = false;
+    setTimeout(function() { _annotationText().focus(); }, 0);
+  }
+  function closeAnnotationDialog() {
+    const dlg = _annotationDialog();
+    if (dlg) dlg.hidden = true;
+  }
+  function applyAnnotation() {
+    const view = _view();
+    if (!view) return closeAnnotationDialog();
+    const text = (_annotationText().value || '').trim();
+    if (!Rga.Annotations || typeof Rga.Annotations.addAnnotation !== 'function') {
+      return closeAnnotationDialog();
+    }
+    Rga.Annotations.addAnnotation(view, { text: text, color: _annotationSelectedColor });
+    closeAnnotationDialog();
+    view.focus();
+  }
+  function _refreshAnnotationSwatchSelection() {
+    const grid = document.getElementById('format-annotation-colors');
+    if (!grid) return;
+    grid.querySelectorAll('.format-swatch').forEach(function(s) {
+      s.classList.toggle('selected', s.dataset.color === _annotationSelectedColor);
+    });
+  }
+  function wireAnnotationDialog() {
+    const ok     = document.getElementById('format-annotation-ok');
+    const cancel = document.getElementById('format-annotation-cancel');
+    const grid   = document.getElementById('format-annotation-colors');
+    if (ok)     ok.addEventListener('click', applyAnnotation);
+    if (cancel) cancel.addEventListener('click', closeAnnotationDialog);
+    if (grid) {
+      grid.addEventListener('click', function(e) {
+        const sw = e.target.closest('.format-swatch');
+        if (!sw) return;
+        _annotationSelectedColor = sw.dataset.color || _annotationSelectedColor;
+        _refreshAnnotationSwatchSelection();
+      });
+    }
+    const input = _annotationText();
+    if (input) {
+      input.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter')  { e.preventDefault(); applyAnnotation(); }
+        if (e.key === 'Escape') { e.preventDefault(); closeAnnotationDialog(); }
+      });
+    }
+  }
+
+  function _flagDialog() { return document.getElementById('format-flag-dialog'); }
+  function _flagReason() { return document.getElementById('format-flag-reason'); }
+  function _flagStatus() { return document.getElementById('format-flag-status'); }
+  function openFlagDialog() {
+    const view = _view();
+    if (!view) return;
+    const { empty } = view.state.selection;
+    if (empty) return;
+    const dlg = _flagDialog();
+    if (!dlg) return;
+    _flagReason().value = '';
+    _flagStatus().value = 'open';
+    dlg.hidden = false;
+    setTimeout(function() { _flagReason().focus(); }, 0);
+  }
+  function closeFlagDialog() {
+    const dlg = _flagDialog();
+    if (dlg) dlg.hidden = true;
+  }
+  function applyFlag() {
+    const view = _view();
+    if (!view) return closeFlagDialog();
+    if (!Rga.RevisionFlags || typeof Rga.RevisionFlags.addRevisionFlag !== 'function') {
+      return closeFlagDialog();
+    }
+    const reason = (_flagReason().value || '').trim();
+    Rga.RevisionFlags.addRevisionFlag(view, { reason: reason });
+    // If user picked 'resolved' we'd update post-add, but the addRevisionFlag
+    // hard-codes status='open'. The Notes/Flags panel handles status changes.
+    closeFlagDialog();
+    view.focus();
+  }
+  function wireFlagDialog() {
+    const ok     = document.getElementById('format-flag-ok');
+    const cancel = document.getElementById('format-flag-cancel');
+    if (ok)     ok.addEventListener('click', applyFlag);
+    if (cancel) cancel.addEventListener('click', closeFlagDialog);
+    const input = _flagReason();
+    if (input) {
+      input.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter')  { e.preventDefault(); applyFlag(); }
+        if (e.key === 'Escape') { e.preventDefault(); closeFlagDialog(); }
+      });
+    }
+  }
+
+  // ============================================================
+  // Clear formatting + Undo / Redo
+  // ============================================================
+
+  function clearAllFormatting() {
+    const view = _view();
+    if (!view) return;
+    const { from, to, empty } = view.state.selection;
+    if (empty) return;
+    const PM = _PM();
+    let tr = view.state.tr;
+    const marks = view.state.schema.marks;
+    Object.keys(marks).forEach(function(name) {
+      tr = tr.removeMark(from, to, marks[name]);
+    });
+    view.dispatch(tr);
+    view.focus();
+  }
+
+  function doUndo() {
+    const view = _view();
+    if (!view) return;
+    const PM = _PM();
+    PM.undo(view.state, view.dispatch);
+    view.focus();
+  }
+  function doRedo() {
+    const view = _view();
+    if (!view) return;
+    const PM = _PM();
+    PM.redo(view.state, view.dispatch);
+    view.focus();
   }
 
   // ============================================================
@@ -232,6 +419,34 @@
       const btn = toolbar.querySelector('.format-btn[data-mark="' + name + '"]');
       if (btn) btn.addEventListener('click', toggleMarkSimple(name));
     });
+
+    // Block-type dropdown
+    const blockTypeSelect = document.getElementById('format-block-type');
+    if (blockTypeSelect) {
+      blockTypeSelect.addEventListener('change', function() {
+        if (blockTypeSelect.value) changeBlockType(blockTypeSelect.value);
+      });
+    }
+
+    // Undo / Redo
+    const undoBtn = document.getElementById('format-btn-undo');
+    const redoBtn = document.getElementById('format-btn-redo');
+    if (undoBtn) undoBtn.addEventListener('click', doUndo);
+    if (redoBtn) redoBtn.addEventListener('click', doRedo);
+
+    // Annotation
+    const annotationBtn = document.getElementById('format-btn-annotation');
+    if (annotationBtn) annotationBtn.addEventListener('click', openAnnotationDialog);
+    wireAnnotationDialog();
+
+    // Revision flag
+    const flagBtn = document.getElementById('format-btn-flag');
+    if (flagBtn) flagBtn.addEventListener('click', openFlagDialog);
+    wireFlagDialog();
+
+    // Clear formatting
+    const clearBtn = document.getElementById('format-btn-clear');
+    if (clearBtn) clearBtn.addEventListener('click', clearAllFormatting);
 
     // Color + highlight popover triggers
     const colorBtn = document.getElementById('format-btn-color');

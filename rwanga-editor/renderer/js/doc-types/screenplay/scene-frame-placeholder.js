@@ -186,6 +186,7 @@
     this.dom = document.createElement('div');
     this.dom.className = 'rga-scene-frame-placeholder';
     this.dom.setAttribute('contenteditable', 'false');
+    this.dom._rgaScenePlaceholder = this; // backref for toolbar / external commands
     this._build(node);
   }
 

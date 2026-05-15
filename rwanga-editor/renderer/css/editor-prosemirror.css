@@ -361,6 +361,67 @@ body.view-draft-active #format-toolbar {
   outline: 0;
 }
 
+/* ---- Block-type dropdown in toolbar ---- */
+.format-block-type {
+  height: 28px;
+  padding: 0 8px;
+  border: 1px solid var(--border-secondary, #444);
+  border-radius: 4px;
+  background: var(--bg-primary, #1e1e1e);
+  color: var(--text-primary, #ddd);
+  font-family: var(--font-ui, system-ui, sans-serif);
+  font-size: 12px;
+  cursor: pointer;
+  min-width: 120px;
+}
+.format-block-type:hover {
+  border-color: var(--text-tertiary, #888);
+}
+.format-block-type:focus {
+  outline: 0;
+  border-color: var(--accent-primary, #569cd6);
+}
+
+/* ---- Clear formatting button (small × subscript on the A) ---- */
+#format-btn-clear sub {
+  font-size: 0.7em;
+  margin-left: -1px;
+  vertical-align: sub;
+}
+
+/* ---- Annotation color row in dialog ---- */
+.format-annotation-colors {
+  display: flex;
+  gap: 8px;
+  margin: 6px 0 14px 0;
+}
+.format-annotation-colors .format-swatch.selected {
+  outline: 2px solid var(--accent-primary, #569cd6);
+  outline-offset: 2px;
+}
+
+/* ---- Revision-flag status row ---- */
+.format-flag-status-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 4px 0 14px 0;
+}
+.format-flag-status-label {
+  color: var(--text-tertiary, #888);
+  font-size: 12px;
+}
+.format-flag-status-select {
+  height: 28px;
+  padding: 0 8px;
+  border: 1px solid var(--border-secondary, #444);
+  border-radius: 4px;
+  background: var(--bg-primary, #1e1e1e);
+  color: var(--text-primary, #ddd);
+  font: inherit;
+  font-size: 12px;
+}
+
 /* ----- View pill (status bar) ----- */
 .view-pill {
   display: inline-flex;

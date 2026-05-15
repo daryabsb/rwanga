@@ -183,6 +183,19 @@
 
         <!-- Formatting toolbar (hidden in Draft view) -->
         <div id="format-toolbar" role="toolbar" aria-label="Text formatting">
+          <select class="format-block-type" id="format-block-type" title="Block type">
+            <option value="">—</option>
+            <option value="action">Action</option>
+            <option value="character">Character</option>
+            <option value="dialogue">Dialogue</option>
+            <option value="parenthetical">Parenthetical</option>
+            <option value="shot">Shot</option>
+            <option value="transition">Transition</option>
+          </select>
+          <div class="format-btn-sep"></div>
+          <button class="format-btn" id="format-btn-undo" title="Undo (Ctrl+Z)">↶</button>
+          <button class="format-btn" id="format-btn-redo" title="Redo (Ctrl+Y)">↷</button>
+          <div class="format-btn-sep"></div>
           <button class="format-btn format-btn--bold"    data-mark="bold"          title="Bold (Ctrl+B)">B</button>
           <button class="format-btn format-btn--italic"  data-mark="italic"        title="Italic (Ctrl+I)">I</button>
           <button class="format-btn format-btn--under"   data-mark="underline"     title="Underline">U</button>
@@ -194,6 +207,10 @@
                   data-mark="highlight" title="Highlight"><span class="format-highlight-icon" id="format-highlight-icon"></span></button>
           <div class="format-btn-sep"></div>
           <button class="format-btn format-btn--link"    data-mark="link"          title="Link">↗</button>
+          <button class="format-btn" id="format-btn-annotation" data-mark="annotation" title="Add note">✎</button>
+          <button class="format-btn" id="format-btn-flag" data-mark="revisionFlag" title="Revision flag">⚑</button>
+          <div class="format-btn-sep"></div>
+          <button class="format-btn" id="format-btn-clear" title="Clear formatting">A<sub>×</sub></button>
         </div>
 
         <!-- Editor Container — the "desk"; #editor is the "page" -->
@@ -353,6 +370,45 @@
       <button class="modal-btn primary" id="format-link-ok">Apply</button>
       <button class="modal-btn secondary" id="format-link-cancel">Cancel</button>
       <button class="modal-btn" id="format-link-remove">Remove</button>
+    </div>
+  </div>
+</div>
+
+<!-- Format-toolbar annotation dialog -->
+<div id="format-annotation-dialog" class="modal-overlay" hidden>
+  <div class="modal-dialog modal-dialog--narrow">
+    <div class="modal-title">Add Note</div>
+    <input type="text" id="format-annotation-text" class="format-link-input" placeholder="Note text…" />
+    <div class="format-annotation-colors" id="format-annotation-colors">
+      <button class="format-swatch" data-color="#FFE08A" style="background:#FFE08A"></button>
+      <button class="format-swatch" data-color="#A8F0A8" style="background:#A8F0A8"></button>
+      <button class="format-swatch" data-color="#A8D8F0" style="background:#A8D8F0"></button>
+      <button class="format-swatch" data-color="#F0A8D8" style="background:#F0A8D8"></button>
+      <button class="format-swatch" data-color="#F0C8A8" style="background:#F0C8A8"></button>
+      <button class="format-swatch" data-color="#D8A8F0" style="background:#D8A8F0"></button>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn primary" id="format-annotation-ok">Add</button>
+      <button class="modal-btn secondary" id="format-annotation-cancel">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Format-toolbar revision-flag dialog -->
+<div id="format-flag-dialog" class="modal-overlay" hidden>
+  <div class="modal-dialog modal-dialog--narrow">
+    <div class="modal-title">Revision Flag</div>
+    <input type="text" id="format-flag-reason" class="format-link-input" placeholder="Reason for flag…" />
+    <div class="format-flag-status-row">
+      <label class="format-flag-status-label">Status:</label>
+      <select id="format-flag-status" class="format-flag-status-select">
+        <option value="open">Open</option>
+        <option value="resolved">Resolved</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn primary" id="format-flag-ok">Add</button>
+      <button class="modal-btn secondary" id="format-flag-cancel">Cancel</button>
     </div>
   </div>
 </div>
