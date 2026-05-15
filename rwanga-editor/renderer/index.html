@@ -201,24 +201,6 @@
           <button class="format-btn" id="format-btn-clear" title="Clear formatting">A<sub>×</sub></button>
         </div>
 
-        <!-- Scene toolbox — DOCUMENT/SCENE-LEVEL operations.
-             v1 is a horizontal strip; future VSCode-refactor phase moves this
-             to a vertical floating Photoshop-style palette. -->
-        <div id="scene-toolbox" role="toolbar" aria-label="Scene tools">
-          <span class="scene-toolbox-label">Scene</span>
-          <select class="format-block-type" id="format-block-type" title="Block type">
-            <option value="">—</option>
-            <option value="action">Action</option>
-            <option value="character">Character</option>
-            <option value="dialogue">Dialogue</option>
-            <option value="parenthetical">Parenthetical</option>
-            <option value="shot">Shot</option>
-            <option value="transition">Transition</option>
-          </select>
-          <div class="format-btn-sep"></div>
-          <button class="format-btn" id="format-btn-annotation" data-mark="annotation" title="Add note to selection">✎ Note</button>
-          <button class="format-btn" id="format-btn-flag" data-mark="revisionFlag" title="Flag selection for revision">⚑ Flag</button>
-        </div>
 
         <!-- Editor Container — the "desk"; #editor is the "page" -->
         <div id="editor-container" class="no-doc">
@@ -238,6 +220,38 @@
             <!-- ProseMirror mounts into #editor; .rga-page styles it as paper -->
             <div id="editor" class="rga-page"></div>
           </div>
+
+          <!-- Scene toolbox — vertical palette at the right of the doc.
+               Sticky so it stays visible while scrolling. Disabled (greyed) when
+               the cursor isn't inside a scene frame. Future VSCode-refactor
+               phase will promote this to a true floating Photoshop-style palette. -->
+          <aside id="scene-toolbox" class="scene-toolbox-vertical disabled" aria-label="Scene tools">
+            <div class="scene-toolbox-header">Scene</div>
+            <select class="scene-tb-select" id="format-block-type" title="Block type">
+              <option value="">—</option>
+              <option value="action">Action</option>
+              <option value="character">Character</option>
+              <option value="dialogue">Dialogue</option>
+              <option value="parenthetical">Parenthetical</option>
+              <option value="shot">Shot</option>
+              <option value="transition">Transition</option>
+            </select>
+            <div class="scene-tb-sep"></div>
+            <button class="scene-tb-btn" id="format-btn-annotation" title="Add note to selection">✎<span class="scene-tb-label">Note</span></button>
+            <button class="scene-tb-btn" id="format-btn-flag" title="Flag selection for revision">⚑<span class="scene-tb-label">Flag</span></button>
+            <select class="scene-tb-select" id="scene-tb-tag" title="Tag selected text">
+              <option value="">＋ Tag…</option>
+              <option value="character">Character</option>
+              <option value="prop">Prop</option>
+              <option value="wardrobe">Wardrobe</option>
+              <option value="location">Location</option>
+              <option value="sfx">SFX</option>
+              <option value="vfx">VFX</option>
+              <option value="vehicle">Vehicle</option>
+              <option value="animal">Animal</option>
+              <option value="custom">Custom</option>
+            </select>
+          </aside>
         </div>
 
       </div>
@@ -727,7 +741,16 @@
     Rga.CommandPalette.init();
     Rga.FileTree.init();
     Rga.TabManager.init();  // mounts ProseMirror EditorView internally
-    Rga.FileManager.newScript();  // open initial Untitled document
+    // Try to restore the previous session's open tabs; fall back to a fresh
+    // Untitled doc if nothing was saved or every file was unreadable.
+    const sessionPromise = (Rga.TabManager && Rga.TabManager.bootSession)
+      ? Rga.TabManager.bootSession()
+      : Promise.resolve(false);
+    sessionPromise.then(function(restored) {
+      if (!restored && Rga.FileManager && Rga.FileManager.newScript) {
+        Rga.FileManager.newScript();
+      }
+    });
     registerCommands();
     registerShortcuts();
     Rga.EditorShortcuts && Rga.EditorShortcuts.registerShortcuts();

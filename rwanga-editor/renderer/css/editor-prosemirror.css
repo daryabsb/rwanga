@@ -220,36 +220,91 @@ body.view-draft-active #scene-toolbox {
   display: none;
 }
 
-/* ---- Scene toolbox: document/script-level tools, visually distinct ---- */
-#scene-toolbox {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  height: 30px;
-  padding: 0 10px;
-  background: var(--bg-primary, #1e1e1e);
-  border-bottom: 1px solid var(--border-secondary, #444);
+/* ============================================================
+   SCENE TOOLBOX — vertical palette to the right of the page.
+   Sticky so it stays visible while the page scrolls.
+   Disabled (faded + non-interactive) when cursor is not inside a scene.
+   ============================================================ */
+#scene-toolbox.scene-toolbox-vertical {
+  position: sticky;
+  top: 24px;
+  align-self: flex-start;
+  margin-left: 24px;
   flex-shrink: 0;
+  width: 96px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 8px;
+  background: var(--bg-secondary, #2a2a2a);
+  border: 1px solid var(--border-secondary, #444);
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
   user-select: none;
+  z-index: 10;
 }
-.scene-toolbox-label {
+#scene-toolbox.disabled {
+  opacity: 0.35;
+  pointer-events: none;
+}
+.scene-toolbox-header {
   font-family: var(--font-ui, system-ui, sans-serif);
   font-size: 10px;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.10em;
   color: var(--text-tertiary, #888);
-  margin-right: 6px;
+  text-align: center;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--border-secondary, #444);
+  margin-bottom: 2px;
 }
-#scene-toolbox .format-btn {
-  height: 22px;
+.scene-tb-sep {
+  height: 1px;
+  background: var(--border-secondary, #444);
+  margin: 2px 0;
+}
+.scene-tb-select {
+  width: 100%;
+  height: 26px;
+  padding: 0 6px;
+  border: 1px solid var(--border-secondary, #444);
+  border-radius: 4px;
+  background: var(--bg-primary, #1e1e1e);
+  color: var(--text-primary, #ddd);
+  font-family: var(--font-ui, system-ui, sans-serif);
+  font-size: 11px;
+  cursor: pointer;
+}
+.scene-tb-select:hover  { border-color: var(--text-tertiary, #888); }
+.scene-tb-select:focus  { outline: 0; border-color: var(--accent-primary, #569cd6); }
+
+.scene-tb-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  height: 26px;
   padding: 0 8px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-primary, #ddd);
+  font-family: var(--font-ui, system-ui, sans-serif);
   font-size: 11px;
-  width: auto;
+  cursor: pointer;
 }
-#scene-toolbox .format-block-type {
-  height: 22px;
-  font-size: 11px;
-  min-width: 130px;
+.scene-tb-btn:hover {
+  background: var(--bg-hover, rgba(255, 255, 255, 0.06));
+  border-color: var(--border-secondary, #444);
+}
+.scene-tb-label {
+  flex: 1;
+  text-align: left;
+}
+
+[dir="rtl"] #scene-toolbox.scene-toolbox-vertical {
+  margin-left: 0;
+  margin-right: 24px;
 }
 
 .format-btn {
@@ -676,7 +731,9 @@ body.view-draft-active #scene-toolbox {
   display: flex;
 }
 
-#editor-container.no-doc #editor {
+#editor-container.no-doc #editor,
+#editor-container.no-doc #scene-toolbox,
+#editor-container.no-doc .rga-page-row {
   display: none;
 }
 

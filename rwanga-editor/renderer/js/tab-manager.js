@@ -97,6 +97,7 @@
     }
     if (Rga.FileManager && Rga.FileManager.setActive) Rga.FileManager.setActive(tab.doc);
     document.dispatchEvent(new CustomEvent('editor.tabActivated', { detail: { tabId } }));
+    if (typeof _saveSession === 'function') _saveSession();
   }
 
   function openDocument(doc) {
@@ -116,6 +117,7 @@
     }
     tabs.push(tab);
     activate(tab.id);
+    if (typeof _saveSession === 'function') _saveSession();
     return tab;
   }
 
@@ -158,6 +160,7 @@
     } else {
       renderTabBar();
     }
+    if (typeof _saveSession === 'function') _saveSession();
   }
 
   function activeTab() {
@@ -206,6 +209,71 @@
     }
   }
 
+  // ============================================================
+  // Session restore — preserves open tabs across app reloads.
+  // Saved to localStorage 'rga-session-tabs' on every open/close/activate.
+  // Untitled (no-handle) docs are not saved; use Save As to persist them.
+  // ============================================================
+
+  const SESSION_KEY = 'rga-session-tabs';
+
+  function _saveSession() {
+    const payload = {
+      tabs: tabs.filter(function(t) { return t.doc && t.doc.handle; })
+                .map(function(t) {
+                  return { handle: t.doc.handle, displayName: t.doc.displayName };
+                }),
+      activeIndex: (function() {
+        const idx = tabs.findIndex(function(t) { return t.id === activeTabId; });
+        // Translate to index within the SAVED (with-handle) list
+        let savedIdx = 0;
+        for (let i = 0; i <= idx; i += 1) {
+          if (i === idx) return savedIdx;
+          if (tabs[i] && tabs[i].doc && tabs[i].doc.handle) savedIdx += 1;
+        }
+        return 0;
+      })()
+    };
+    try { localStorage.setItem(SESSION_KEY, JSON.stringify(payload)); } catch (_) {}
+  }
+
+  function _loadSession() {
+    try {
+      const raw = localStorage.getItem(SESSION_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch (_) { return null; }
+  }
+
+  function bootSession() {
+    const saved = _loadSession();
+    if (!saved || !Array.isArray(saved.tabs) || !saved.tabs.length) {
+      return Promise.resolve(false);
+    }
+    if (!window.rwanga || !window.rwanga.files || typeof window.rwanga.files.read !== 'function') {
+      return Promise.resolve(false);
+    }
+
+    const reads = saved.tabs.map(function(t) {
+      return window.rwanga.files.read(t.handle).then(function(result) {
+        if (result && result.content && Rga.FileManager && Rga.FileManager.openFromContent) {
+          Rga.FileManager.openFromContent(t.handle, result.content);
+        }
+      }).catch(function(err) {
+        console.warn('[session] failed to restore', t.handle, err && err.message);
+      });
+    });
+
+    return Promise.all(reads).then(function() {
+      // Activate the saved active tab (or first) if any were restored
+      if (tabs.length > 0) {
+        const idx = (typeof saved.activeIndex === 'number' && tabs[saved.activeIndex])
+          ? saved.activeIndex : 0;
+        activate(tabs[idx].id);
+      }
+      return tabs.length > 0;
+    });
+  }
+
   Rga.TabManager = {
     init,
     openDocument,
@@ -215,6 +283,8 @@
     activeDoc,
     tabs: getTabs,
     renderTabBar,
+    bootSession: bootSession,
+    _saveSession: _saveSession,
     _editorView: function() { return editorView; }
   };
 })();

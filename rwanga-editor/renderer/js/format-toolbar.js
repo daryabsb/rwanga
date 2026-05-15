@@ -219,6 +219,8 @@
     if (hl) hl.style.background = (hlAttrs && hlAttrs.value) || 'transparent';
     // Block-type select reflects the focused inner block
     refreshBlockTypeSelect();
+    // Scene toolbox enabled only when in a scene frame
+    refreshSceneToolboxState();
   }
 
   // ============================================================
@@ -254,10 +256,43 @@
     const blockEl = _focusedSceneBlock();
     if (!blockEl) {
       select.value = '';
-      select.disabled = false; // keep enabled visually but reads as '—'
       return;
     }
     select.value = blockEl.dataset.blockType || '';
+  }
+
+  // Scene toolbox is enabled only when the cursor / focus is inside a
+  // scene frame (a block or one of the slug/transition pickers).
+  function refreshSceneToolboxState() {
+    const tb = document.getElementById('scene-toolbox');
+    if (!tb) return;
+    const ae = document.activeElement;
+    const inFrame = !!(ae && ae.closest && ae.closest('.rga-scene-frame-placeholder'));
+    tb.classList.toggle('disabled', !inFrame);
+  }
+
+  // ============================================================
+  // Tag selection (Scene toolbox)
+  // ============================================================
+
+  function applyTagFromSelection(tagType) {
+    if (!tagType) return;
+    const view = _view();
+    if (!view) return;
+    const { from, to, empty } = view.state.selection;
+    if (empty) return;
+    const text = view.state.doc.textBetween(from, to, ' ').trim();
+    if (!text) return;
+    const doc = Rga.TabManager && Rga.TabManager.activeDoc && Rga.TabManager.activeDoc();
+    if (!doc || !Rga.Doc || typeof Rga.Doc.addEntity !== 'function') return;
+    // Add to tag_registry, get its id
+    const entityId = Rga.Doc.addEntity(doc, tagType, { name: text, color: null });
+    const mt = view.state.schema.marks.tag;
+    if (!mt) return;
+    view.dispatch(view.state.tr.addMark(from, to, mt.create({ tagType: tagType, entityId: entityId })));
+    view.focus();
+    // Mark doc dirty so save knows
+    if (Rga.Doc.markDirty) Rga.Doc.markDirty(doc);
   }
 
   // ============================================================
@@ -447,6 +482,17 @@
     // Clear formatting
     const clearBtn = document.getElementById('format-btn-clear');
     if (clearBtn) clearBtn.addEventListener('click', clearAllFormatting);
+
+    // Tag dropdown (Scene toolbox)
+    const tagSel = document.getElementById('scene-tb-tag');
+    if (tagSel) {
+      tagSel.addEventListener('change', function() {
+        const t = tagSel.value;
+        if (!t) return;
+        applyTagFromSelection(t);
+        tagSel.value = '';
+      });
+    }
 
     // Color + highlight popover triggers
     const colorBtn = document.getElementById('format-btn-color');
