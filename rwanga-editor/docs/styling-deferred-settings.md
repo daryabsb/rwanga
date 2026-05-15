@@ -80,7 +80,7 @@ The visual treatment of each block type. Industry-standard defaults plus a few r
 | `blocks.shot.align` | `'start'` | ✅ | ✅ | |
 | `blocks.shot.case` | `'upper'` | ✅ | ✅ | |
 | `blocks.inlineFreeText.style` | `'italic muted'` | ✅ | ✅ | |
-| `blocks.spacing.lineHeight` | `1.15` | ✅ | ✅ | |
+| `blocks.spacing.lineHeight` | `1.3` | ✅ | ✅ | Bumped from 1.15 per user 2026-05-15 ("more breathing space, not much"). Future Preferences slider 1.0–1.8. |
 | `blocks.spacing.betweenSameType` | `'0.3em'` | ✅ | ✅ | |
 | `blocks.spacing.beforeCharacter` | `'1em'` | ✅ | ✅ | |
 | `blocks.spacing.beforeTransition` | `'1em'` | ✅ | ✅ | |
