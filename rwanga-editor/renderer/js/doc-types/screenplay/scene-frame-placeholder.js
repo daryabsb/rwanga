@@ -213,30 +213,14 @@
     this._settingPicker.addEventListener('keydown', function(e) {
       if (e.key === 'Enter') {
         e.preventDefault();
-        self._locationInput.focus();
-        self._locationInput.select();
-      }
-    });
-
-    this._sepA = document.createElement('span');
-    this._sepA.className = 'rga-slug-separator';
-    this._sepA.textContent = ' ';
-
-    this._locationInput = document.createElement('input');
-    this._locationInput.type = 'text';
-    this._locationInput.className = 'rga-slug-location-input';
-    this._locationInput.placeholder = 'Location';
-    this._locationInput.addEventListener('input', function() { self._dispatchInner(); });
-    this._locationInput.addEventListener('keydown', function(e) {
-      if (e.key === 'Enter') {
-        e.preventDefault();
         self._timePicker.focus();
       }
     });
 
-    this._sepB = document.createElement('span');
-    this._sepB.className = 'rga-slug-separator';
-    this._sepB.textContent = ' ';
+    // Separator between Setting and the Time/Location pair (em-dash)
+    this._sepA = document.createElement('span');
+    this._sepA.className = 'rga-slug-separator rga-slug-sep-major';
+    this._sepA.textContent = ' — ';
 
     this._timePicker = document.createElement('select');
     this._timePicker.className = 'rga-slug-time-picker';
@@ -250,16 +234,36 @@
     this._timePicker.addEventListener('keydown', function(e) {
       if (e.key === 'Enter') {
         e.preventDefault();
+        self._locationInput.focus();
+        self._locationInput.select();
+      }
+    });
+
+    // Separator between Time and Location (configurable; default '/')
+    // TODO: read doc.settings.slug.timeLocationSeparator when that setting lands.
+    this._sepB = document.createElement('span');
+    this._sepB.className = 'rga-slug-separator rga-slug-sep-pair';
+    this._sepB.textContent = ' / ';
+
+    this._locationInput = document.createElement('input');
+    this._locationInput.type = 'text';
+    this._locationInput.className = 'rga-slug-location-input';
+    this._locationInput.placeholder = 'Location';
+    this._locationInput.addEventListener('input', function() { self._dispatchInner(); });
+    this._locationInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
         const firstBlock = self._blocksContainer && self._blocksContainer.firstElementChild;
         if (firstBlock && typeof firstBlock.focus === 'function') firstBlock.focus();
       }
     });
 
+    // Order per user 2026-05-15: setting — time / location
     this._slugRow.appendChild(this._settingPicker);
     this._slugRow.appendChild(this._sepA);
-    this._slugRow.appendChild(this._locationInput);
-    this._slugRow.appendChild(this._sepB);
     this._slugRow.appendChild(this._timePicker);
+    this._slugRow.appendChild(this._sepB);
+    this._slugRow.appendChild(this._locationInput);
     this.dom.appendChild(this._slugRow);
 
     // ---- Row 3+: blocks container ----

@@ -534,20 +534,30 @@ body.view-draft-active #editor-area {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  font-size: 11px;
-  color: var(--text-tertiary, #888);
-  margin: 0 0 4px 0;
+  font-size: 13px;
+  color: var(--text-secondary, #aaa);
+  margin: 0 0 6px 0;
 }
 
 .rga-scene-frame-placeholder-slug {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
   text-transform: uppercase;
   letter-spacing: 0.04em;
   font-size: 12pt;
   font-weight: 700;
-  margin: 0 0 6px 0;
+  margin: 0 0 8px 0;
+  padding-bottom: 4px;
+  border-bottom: 2px solid var(--accent-rwanga, #C2185B);
+}
+
+.rga-slug-sep-major {
+  margin: 0 6px;
+}
+.rga-slug-sep-pair {
+  margin: 0 2px;
+  color: var(--text-tertiary, #888);
 }
 
 .rga-scene-frame-placeholder-transition {

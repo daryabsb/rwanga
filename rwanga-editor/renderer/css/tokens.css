@@ -129,6 +129,7 @@
   --accent-warning: #FFB347;
   --accent-error: #F44747;
   --accent-info: #4FC1FF;
+  --accent-rwanga: #C2185B; /* dark pink — Rwanga brand identifier (slug underline etc.) */
 
   /* === Tag Colors (Dark) === */
   --tag-character: #4FC1FF;
@@ -236,6 +237,7 @@
 
   --accent-primary: #0066bf;
   --accent-primary-hover: #005bb0;
+  --accent-rwanga: #AD1457; /* dark pink — Rwanga brand identifier (slug underline etc.) */
 
   --tag-character: #0070C0;
   --tag-prop: #D48000;

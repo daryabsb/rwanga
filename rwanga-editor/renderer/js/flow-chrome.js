@@ -112,10 +112,11 @@
   // ============================================================
 
   function tintCharacters() {
-    if (!_isFlow()) return;
+    // Run in all views — character color is identity, not view-specific.
     const doc = Rga.TabManager && Rga.TabManager.activeDoc && Rga.TabManager.activeDoc();
     if (!doc || !doc.tagRegistry) return;
     const list = doc.tagRegistry.characters || [];
+    if (!list.length) return;
     const byName = {};
     list.forEach(function(c) {
       if (c && c.name) byName[String(c.name).trim().toLowerCase()] = c.color;
@@ -177,8 +178,10 @@
 
     window.addEventListener('resize', refresh);
 
-    // First paint after editor mount
+    // First paints — covers fast and slow doc-load paths.
     setTimeout(refreshNow, 100);
+    setTimeout(refreshNow, 500);
+    setTimeout(refreshNow, 1500);
   }
 
   Rga.FlowChrome = { init, refresh: refreshNow, _rebuildLineNumbers: rebuildLineNumbers, _tintCharacters: tintCharacters };
