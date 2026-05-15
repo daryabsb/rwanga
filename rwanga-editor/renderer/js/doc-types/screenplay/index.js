@@ -1,7 +1,7 @@
 // Copyright (c) 2026 Rwanga. Licensed under Apache 2.0.
 // Screenplay doc-type module — registers with Rga.DocTypes at load time.
-// F1 contribution: outer-schema additions + the placeholder NodeView factory.
-// F2+ will add: innerSchema, innerKeymap, innerPlugins, slug NodeView, etc.
+// F1: outer-schema additions + placeholder NodeView (fallback).
+// F2: innerSchema + inner keymap + slug NodeView + zone-key plugin + SceneFrame NodeView.
 'use strict';
 
 (function() {
@@ -19,11 +19,24 @@
     console.error('[doc-types/screenplay] scene-frame-placeholder not loaded — script order is wrong');
     return;
   }
+  // F2 dependencies (optional in registration — fall back to placeholder if any are missing)
+  const hasF2 =
+    sp.innerSchema &&
+    typeof sp.emptyInnerDoc === 'function' &&
+    typeof sp.buildInnerKeymap === 'function' &&
+    typeof sp.buildZoneKeyPlugin === 'function' &&
+    typeof sp.sceneLineNodeViewFactory === 'function' &&
+    typeof sp.sceneFrameNodeViewFactory === 'function';
 
-  Rga.DocTypes.register('screenplay', {
+  const config = {
     outerNodes: sp.outerNodes,
     placeholderNodeViewFactory: sp.sceneFramePlaceholderFactory
-    // F2+ keys (innerSchema, innerKeymap, innerPlugins, nodeViewFactory,
-    //  elementStyles, vocabulary, toolbox, exporters) are added in later steps.
-  });
+  };
+  if (hasF2) {
+    config.sceneFrameNodeViewFactory = sp.sceneFrameNodeViewFactory;
+  } else {
+    console.warn('[doc-types/screenplay] F2 modules not all present — using F1 placeholder');
+  }
+
+  Rga.DocTypes.register('screenplay', config);
 })();

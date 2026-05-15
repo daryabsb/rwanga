@@ -154,7 +154,9 @@
 
     const docType = Rga.DocTypes.get(documentType);
     const nodeViews = {};
-    if (typeof docType.placeholderNodeViewFactory === 'function') {
+    if (typeof docType.sceneFrameNodeViewFactory === 'function') {
+      nodeViews.sceneFrame = docType.sceneFrameNodeViewFactory();
+    } else if (typeof docType.placeholderNodeViewFactory === 'function') {
       nodeViews.sceneFrame = docType.placeholderNodeViewFactory();
     }
 
