@@ -32,9 +32,9 @@
 #editor-container.view-flow .rga-page {
   background: transparent !important;
   box-shadow: none !important;
-  width: 6.5in !important;
+  width: 8.5in !important;
   min-height: auto !important;
-  padding: 0 0.25in !important;
+  padding: 0 0.5in !important;
   border-radius: 0;
 }
 
@@ -63,9 +63,9 @@ body.view-draft-active #editor-area {
 #editor-container.view-draft .rga-page {
   background: transparent !important;
   box-shadow: none !important;
-  width: 6.5in !important;
+  width: 8.5in !important;
   min-height: auto !important;
-  padding: 0 !important;
+  padding: 0 0.5in !important;
   border-radius: 0;
 }
 
