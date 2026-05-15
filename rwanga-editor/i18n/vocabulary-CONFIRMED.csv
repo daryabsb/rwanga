@@ -1,0 +1,132 @@
+﻿key,en,ar,ku,fa,notes
+,,,,,
+sceneWord,SCENE,مشهد,دیمەن,صحنه,The word shown on the identity line above each scene heading
+interior,INT.,داخلي.,ناوەوە.,داخلی.,Setting picker value
+exterior,EXT.,خارجي.,دەرەوە.,خارجی.,Setting picker value
+interior_exterior,INT./EXT.,داخلي./خارجي.,ناوەوە./دەرەوە.,داخلی./خارجی.,Setting picker value
+exterior_interior,EXT./INT.,خارجي./داخلي.,دەرەوە./ناوەوە.,خارجی./داخلی.,Setting picker value
+day,DAY,نهار,ڕۆژ,روز,Time picker value
+night,NIGHT,ليل,شەو,شب,Time picker value
+continuous,CONTINUOUS,مستمر,بەردەوام,پیوسته,Time picker value
+dusk,DUSK,غسق,زەردەپەڕ,غروب,Time picker value
+dawn,DAWN,فجر,بەرەبەیان,سپیده‌دم,Time picker value
+morning,MORNING,صباحًا,بەیانی,صبح,Time picker value
+afternoon,AFTERNOON,بعد الظهر,نیوەڕۆ,بعدازظهر,Time picker value
+evening,EVENING,مساءً,ئێوارە,عصر,Time picker value
+later,LATER,لاحقًا,دواتر,بعد از آن,Time picker value
+moments_later,MOMENTS LATER,بعد لحظات,چەند ساتێک دواتر,لحظاتی بعد,Time picker value
+same_time,SAME TIME,نفس الوقت,هەمان کات,همان زمان,Time picker value
+,,,,,
+action,Action,وصف,وەسف (وێنە),اکشن,Block type name
+character,Character,شخصية,کارەکتەر,شخصیت,Block type name
+dialogue,Dialogue,حوار,گفتوگۆ,دیالوگ,Block type name
+parenthetical,Parenthetical,بين قوسين,نێوكەوانە,پرانتزی,Block type name
+transition,Transition,انتقال,گواستنەوە,ترانزیشن,Block type name
+shot,Shot,لقطة,گرتە,نما,Block type name
+inlineFreeText,Free Text,نص حر,دەقی ئازاد,متن آزاد,Block type name
+,,,,,
+cut_to,CUT TO:,قطع إلى:,گواستنەوە بۆ:,کات به:,Transition preset
+fade_in,FADE IN:,تلاشي للداخل:,سرنجڕاکێشانی هاتنە سەر:,محو شدن به داخل:,Transition preset
+fade_out,FADE OUT.,تلاشي للخارج.,سرنجڕاکێشانی چوونە دەرەوە.,محو شدن از پرده.,Transition preset
+dissolve_to,DISSOLVE TO:,انحلال إلى:,شیبوونەوە بۆ:,حل شدن به:,Transition preset
+match_cut,MATCH CUT:,قطع مطابق:,گواستنەوەی هاوشێوە:,کات مطابق:,Transition preset
+smash_cut_to,SMASH CUT TO:,قطع حاد إلى:,گواستنەوەی توند بۆ:,کات شدید به:,Transition preset
+,,,,,
+character,Character,شخصية,کارەکتەر,شخصیت,Tag entity type
+prop,Prop,أداة,كەرەستە,وسیله,Tag entity type
+wardrobe,Wardrobe,أزياء,جلوبەرگ,لباس,Tag entity type
+location,Location,موقع,شوێن,مکان,Tag entity type
+sfx,SFX,مؤثرات صوتية,کاریگەری دەنگی,جلوه‌های صوتی,Tag entity type — sound effects
+vfx,VFX,مؤثرات بصرية,کاریگەری بینراو,جلوه‌های بصری,Tag entity type — visual effects
+vehicle,Vehicle,مركبة,ئۆتۆمبێل,خودرو,Tag entity type
+animal,Animal,حيوان,ئاژەڵ,حیوان,Tag entity type
+custom,Custom,مخصص,تایبەتی,سفارشی,Tag entity type
+,,,,,
+red,Red — mistake,أحمر — خطأ,سوور — هەڵە,قرمز — اشتباه,Revision flag color label
+yellow,Yellow — revisit,أصفر — مراجعة,زەرد — گەڕانەوە,زرد — بازبینی,Revision flag color label
+green,Green — love it,أخضر — معجب,سەوز — حەزم لێیە,سبز — عالی,Revision flag color label
+,,,,,
+synced,Synced,متزامن,هاوکات,همگام‌سازی شد,Status bar sync indicator
+syncing,Syncing,جارٍ المزامنة,لە هاوکاتکردندایە,در حال همگام‌سازی,Status bar sync indicator
+offline,Offline,غير متصل,ئۆفلاین,آفلاین,Status bar sync indicator
+scene_label,Scene,مشهد,دیمەن,صحنه,"Status bar — ""Scene X/Y"""
+words,words,كلمة,وشە,کلمه,"Status bar — ""1234 words"""
+page,page,صفحة,لاپەڕە,صفحه,Status bar — singular
+pages,pages,صفحات,لاپەڕە,صفحه‌ها,Status bar — plural
+problems,Problems,مشكلات,کێشەکان,مشکلات,Status bar problems counter
+dark,Dark,داكن,تاریک,تیره,Theme button label
+light,Light,فاتح,ڕووناک,روشن,Theme button label
+,,,,,
+scene,Scene,مشهد,دیمەن,صحنه,Bottom panel tab
+notes,Notes,ملاحظات,تێبینی,یادداشت,Bottom panel tab
+flags,Flags,علامات,تێبینی,نشانه‌ها,Bottom panel tab
+problems,Problems,مشكلات,کێشەکان,مشکلات,Bottom panel tab
+breakdown,Breakdown,تحليل,شیکار,تجزیه,Bottom panel tab — production breakdown
+,,,,,
+explorer,Explorer,المستكشف,ئێكسپلۆرەر,اکسپلورر,Sidebar section header
+open_editors,Open Editors,المحررات المفتوحة,دەستکاریکراوە کراوەکان,ویرایشگرهای باز,Sidebar section header
+title,Inspector,المفتش,پشکنەر,بازرس,Right panel title
+empty,Select a tag or scene header to view details.,اختر علامة أو رأس مشهد لعرض التفاصيل.,تاگێک یان سەرپەڕەی دیمەنێک هەڵبژێرە بۆ بینینی وردەکارییەکان.,یک برچسب یا سرفصل صحنه را برای مشاهده انتخاب کنید.,Empty state for inspector
+,,,,,
+file,File,ملف,فایل,فایل,Top menu
+edit,Edit,تحرير,دەستکاری,ویرایش,Top menu
+view,View,عرض,پیشاندان,نما,Top menu
+script,Script,سيناريو,سکرێپت,اسکریپت,Top menu
+tags,Tags,علامات,تاگەکان,برچسب‌ها,Top menu
+export,Export,تصدير,هەناردنی,خروجی,Top menu
+help,Help,مساعدة,یارمەتی,راهنما,Top menu
+,,,,,
+new,New Script,سيناريو جديد,سکریپتی نوێ,اسکریپت جدید,File menu item
+open,Open…,فتح…,کردنەوە…,بازکردن…,File menu item
+save,Save,حفظ,پاشەکەوتکردن,ذخیره,File menu item
+save_as,Save As…,حفظ باسم…,پاشەکەوتکردن وەک…,ذخیره به عنوان…,File menu item
+close_tab,Close Tab,إغلاق التبويب,داخستنی تاب,بستن تب,File menu item
+page_setup,Page Setup…,إعداد الصفحة…,ڕێکخستنی لاپەڕە…,تنظیم صفحه…,File menu item
+quit,Quit,خروج,چوونە دەرەوە,خروج,File menu item
+,,,,,
+undo,Undo,تراجع,پاشگەزبوونەوە,لغو,Edit menu item
+redo,Redo,إعادة,دووبارە,انجام مجدد,Edit menu item
+cut,Cut,قص,بڕین,برش,Edit menu item
+copy,Copy,نسخ,لەبەرگرتنەوە,کپی,Edit menu item
+paste,Paste,لصق,لکاندن,چسباندن,Edit menu item
+find,Find…,بحث…,گەڕان…,جست‌وجو…,Edit menu item
+replace,Replace…,استبدال…,جێگۆڕکێ…,جایگزینی…,Edit menu item
+,,,,,
+apply,Apply,تطبيق,جێبەجێ کردن,اعمال,Dialog button
+cancel,Cancel,إلغاء,پاشگەزبوونەوە,انصراف,Dialog button
+ok,OK,موافق,باشە,تأیید,Dialog button
+save,Save,حفظ,پاشەکەوتکردن,ذخیره,Dialog button
+dont_save,Don't Save,لا تحفظ,پاشەکەوت مەکە,ذخیره نکن,Dialog button
+yes,Yes,نعم,بەڵێ,بله,Dialog button
+no,No,لا,نەخێر,خیر,Dialog button
+close,Close,إغلاق,داخستن,بستن,Dialog button
+remove,Remove,حذف,سڕینەوە,حذف,Dialog button
+edit,Edit,تحرير,دەستکاری,ویرایش,Dialog button
+view,View,عرض,بینین,نمایش,Dialog button
+,,,,,
+cut,Cut,قص,بڕین,برش,Right-click menu item
+copy,Copy,نسخ,لەبەرگرتنەوە,کپی,Right-click menu item
+paste,Paste,لصق,لکاندن,چسباندن,Right-click menu item
+add_note,Add note,أضف ملاحظة,تێبینی زیاد بکە,یادداشت اضافه کن,Right-click menu item
+tag_as,Tag as,علم كـ,وەک تاگ دابنێ,به عنوان برچسب,Right-click submenu label
+flag_for_revision,Flag for revision,علم للمراجعة,بۆ پێداچوونەوە ئاڵا دابنێ,برای بازبینی نشانه بگذار,Right-click menu item
+open_inspector,Open inspector,افتح المفتش,پشکنەر بکەرەوە,بازرس را باز کن,Right-click menu item
+,,,,,
+title,Page Setup,إعداد الصفحة,ڕێکخستنی لاپەڕە,تنظیم صفحه,Dialog title
+paper_size,Paper size,حجم الورق,قەبارەی کاغەز,اندازه کاغذ,Field label
+margins,Margins (inches),الهوامش (بوصة),پەراوێزەکان (ئینچ),حاشیه‌ها (اینچ),Section label
+top,Top,أعلى,سەرەوە,بالا,Margin field
+bottom,Bottom,أسفل,خوارەوە,پایین,Margin field
+left,Left,يسار,چەپ,چپ,Margin field
+right,Right,يمين,ڕاست,راست,Margin field
+,,,,,
+location,Location,موقع,شوێن,مکان,Slug Location zone placeholder
+untitled,Untitled,بدون عنوان,بێ ناونیشان,بدون عنوان,Default name for new doc
+add_scene_notes,Add scene notes here…,أضف ملاحظات المشهد هنا…,تێبینی دیمەن لێرە زیاد بکە…,یادداشت‌های صحنه را اینجا اضافه کنید…,Notes panel placeholder
+filter_tags,Type to filter…,اكتب للتصفية…,بنووسە بۆ پاڵاوتن…,برای فیلتر تایپ کنید…,Tag list filter
+no_scene_selected,No scene selected,لا يوجد مشهد محدد,هیچ دیمەنێک هەڵنەبژێردراوە,صحنه‌ای انتخاب نشده,Empty state for scene info
+,,,,,
+saved,Saved,تم الحفظ,پاشەکەوت کرا,ذخیره شد,Toast after save
+unsaved_changes,You have unsaved changes,لديك تغييرات غير محفوظة,گۆڕانکارییە پاشەکەوت نەکراوەکانت هەیە,تغییرات ذخیره‌نشده دارید,Close-tab confirm
+theme_switched,Switched to {theme} theme,تم التبديل إلى وضع {theme},ڕووکاری پرۆگرامەكە گۆڕا بۆ {theme},به تم {theme} تغییر یافت,{theme} interpolated; translate the surrounding sentence
+language_switched,Script language: {lang},لغة السيناريو: {lang},زمانی سکریپت: {lang},زبان اسکریپت: {lang},{lang} interpolated
