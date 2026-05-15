@@ -101,8 +101,7 @@
    * Cursor lands at the body block after the inserted frame.
    */
   function insertSceneFrame(schema) {
-    return function(state, dispatch) {
-      const PM = window.RgaProseMirror;
+    return function(state, dispatch, view) {
       const sceneFrameType = schema.nodes.sceneFrame;
       if (!sceneFrameType) return false;
       if (!dispatch) return true;
@@ -128,17 +127,25 @@
 
       const paragraphType = schema.nodes.paragraph;
       const tr = state.tr.insert(insertPos, frame);
-      // Ensure there's a paragraph after the frame so the cursor has somewhere to land
-      const cursorPos = insertPos + frame.nodeSize;
-      const nodeAfter = tr.doc.resolve(cursorPos).nodeAfter;
+      // Ensure there's a paragraph after the frame so future outer-typing has somewhere to land
+      const afterFramePos = insertPos + frame.nodeSize;
+      const nodeAfter = tr.doc.resolve(afterFramePos).nodeAfter;
       if (!nodeAfter && paragraphType) {
-        tr.insert(cursorPos, paragraphType.create());
+        tr.insert(afterFramePos, paragraphType.create());
       }
-      const TextSelection = PM && PM.TextSelection;
-      if (TextSelection) {
-        tr.setSelection(TextSelection.near(tr.doc.resolve(cursorPos + 1)));
-      }
+      // Don't move PM selection — leave it where it was. We move DOM focus
+      // into the new frame's setting picker so the director starts there.
       dispatch(tr.scrollIntoView());
+
+      if (view && typeof view.nodeDOM === 'function') {
+        const frameDom = view.nodeDOM(insertPos);
+        if (frameDom && frameDom.querySelector) {
+          const settingPicker = frameDom.querySelector('.rga-slug-setting-picker');
+          if (settingPicker && typeof settingPicker.focus === 'function') {
+            settingPicker.focus();
+          }
+        }
+      }
       return true;
     };
   }
