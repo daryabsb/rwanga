@@ -175,6 +175,7 @@ test('Enter on action inserts a new action after', () => {
   // doc was [sceneLine, action] (2 children) — after Enter we expect [sceneLine, action, action]
   assert.equal(next.doc.childCount, 3);
   assert.equal(next.doc.child(2).type.name, 'action');
+  assert.equal(next.selection.$head.parent.type.name, 'action');
 });
 
 test('Enter on character inserts a new dialogue after', () => {
@@ -231,4 +232,87 @@ test('Enter on inlineFreeText inserts a new inlineFreeText after', () => {
   const state = stateAt(s, doc, 1);
   const next = applyEnter(sp, state);
   assert.equal(next.doc.child(2).type.name, 'inlineFreeText');
+});
+
+test('Shift-Tab on action moves cursor to end of sceneLine (no type change)', () => {
+  const sp = loadInnerKeymap();
+  const s = buildInnerSchema();
+  const doc = docWith(s, 'action');
+  const state = stateAt(s, doc, 1);
+  const next = applyTabBackward(sp, state);
+  assert.ok(next, 'command must dispatch');
+  // Block at index 1 is still action (no type change)
+  assert.equal(next.doc.child(1).type.name, 'action');
+  // Cursor is now inside the sceneLine
+  assert.equal(next.selection.$head.parent.type.name, 'sceneLine');
+});
+
+test('Enter on sceneLine: existing action present → cursor moves into it', () => {
+  const sp = loadInnerKeymap();
+  const s = buildInnerSchema();
+  // Doc: [sceneLine, action] — cursor in sceneLine
+  const doc = s.node('doc', null, [
+    s.node('sceneLine', { setting: 'INT.', time: 'DAY' }),
+    s.node('action')
+  ]);
+  const state = stateAt(s, doc, 0);
+  const next = applyEnter(sp, state);
+  assert.ok(next, 'Enter must dispatch');
+  // No new action inserted — still 2 children
+  assert.equal(next.doc.childCount, 2);
+  // Cursor inside the existing action
+  assert.equal(next.selection.$head.parent.type.name, 'action');
+});
+
+test('Enter on sceneLine: no action present → creates one and moves cursor', () => {
+  const sp = loadInnerKeymap();
+  const s = buildInnerSchema();
+  // Doc: just [sceneLine] (no action)
+  const doc = s.node('doc', null, [
+    s.node('sceneLine', { setting: 'INT.', time: 'DAY' })
+  ]);
+  const state = stateAt(s, doc, 0);
+  const next = applyEnter(sp, state);
+  assert.ok(next, 'Enter must dispatch');
+  // Action inserted — doc now has 2 children
+  assert.equal(next.doc.childCount, 2);
+  assert.equal(next.doc.child(1).type.name, 'action');
+  // Cursor inside the new action
+  assert.equal(next.selection.$head.parent.type.name, 'action');
+});
+
+test('Shift-Tab on dialogue → character', () => {
+  const sp = loadInnerKeymap();
+  const s = buildInnerSchema();
+  const doc = docWith(s, 'dialogue');
+  const state = stateAt(s, doc, 1);
+  const next = applyTabBackward(sp, state);
+  assert.equal(next.doc.child(1).type.name, 'character');
+});
+
+test('Shift-Tab on parenthetical → dialogue', () => {
+  const sp = loadInnerKeymap();
+  const s = buildInnerSchema();
+  const doc = docWith(s, 'parenthetical');
+  const state = stateAt(s, doc, 1);
+  const next = applyTabBackward(sp, state);
+  assert.equal(next.doc.child(1).type.name, 'dialogue');
+});
+
+test('Shift-Tab on transition → parenthetical', () => {
+  const sp = loadInnerKeymap();
+  const s = buildInnerSchema();
+  const doc = docWith(s, 'transition');
+  const state = stateAt(s, doc, 1);
+  const next = applyTabBackward(sp, state);
+  assert.equal(next.doc.child(1).type.name, 'parenthetical');
+});
+
+test('Shift-Tab on shot → transition', () => {
+  const sp = loadInnerKeymap();
+  const s = buildInnerSchema();
+  const doc = docWith(s, 'shot');
+  const state = stateAt(s, doc, 1);
+  const next = applyTabBackward(sp, state);
+  assert.equal(next.doc.child(1).type.name, 'transition');
 });

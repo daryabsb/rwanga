@@ -9,8 +9,8 @@
   Rga.DocTypes.screenplay = Rga.DocTypes.screenplay || {};
 
   const PM = window.RgaProseMirror;
-  if (!PM || !PM.keymap) {
-    console.error('[inner-keymap] RgaProseMirror.keymap not available');
+  if (!PM || !PM.keymap || !PM.TextSelection) {
+    console.error('[inner-keymap] RgaProseMirror.keymap or .TextSelection not available');
     return;
   }
 
@@ -24,6 +24,8 @@
     inlineFreeText: 'action'
   };
 
+  // Note: `action` is intentionally absent — Shift-Tab on action is special-cased
+  // to move the cursor to the end of the sceneLine instead of cycling type.
   const BACKWARD = {
     character: 'action',
     dialogue: 'character',
@@ -89,9 +91,9 @@
             break;
           }
         }
-        if (sceneLinePos == null) return false;
+        if (sceneLinePos === null) return false;
         if (!dispatch) return true;
-        const TextSelection = PM.TextSelection || window.RgaProseMirror.TextSelection;
+        const TextSelection = PM.TextSelection;
         const tr = state.tr.setSelection(TextSelection.near(state.doc.resolve(sceneLinePos)));
         dispatch(tr.scrollIntoView());
         return true;
@@ -114,7 +116,7 @@
 
       if (name === 'sceneLine') {
         // Move cursor to first action (or create one) — simplest: find next action
-        const TextSelection = PM.TextSelection || window.RgaProseMirror.TextSelection;
+        const TextSelection = PM.TextSelection;
         const docNode = state.doc;
         let actionPos = null;
         let cursor = 0;
@@ -126,7 +128,7 @@
           }
           cursor += child.nodeSize;
         }
-        if (actionPos == null) {
+        if (actionPos === null) {
           // No action: append one after current block
           if (!dispatch) return true;
           const action = schema.nodes.action.create();
@@ -147,7 +149,7 @@
       const nextType = schema.nodes[nextName];
       if (!nextType) return false;
       if (!dispatch) return true;
-      const TextSelection = PM.TextSelection || window.RgaProseMirror.TextSelection;
+      const TextSelection = PM.TextSelection;
       const insertPos = parent.pos + parent.node.nodeSize;
       const tr = state.tr.insert(insertPos, nextType.create());
       tr.setSelection(TextSelection.near(tr.doc.resolve(insertPos + 1)));
