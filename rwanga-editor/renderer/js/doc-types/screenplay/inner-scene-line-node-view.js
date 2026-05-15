@@ -126,11 +126,9 @@
   };
 
   SceneLineNodeView.prototype._applyZoneValue = function(zone, value) {
-    if (!this._view) return;
+    if (!this._view || !this._node) return;
     const pos = this._getPos();
-    const node = this._view.state.doc.nodeAt(pos);
-    if (!node) return;
-    const newAttrs = Object.assign({}, node.attrs);
+    const newAttrs = Object.assign({}, this._node.attrs);
     newAttrs[zone] = value;
     const tr = this._view.state.tr.setNodeMarkup(pos, null, newAttrs);
     this._view.dispatch(tr);
