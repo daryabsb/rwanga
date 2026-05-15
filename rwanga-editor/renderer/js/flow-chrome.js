@@ -138,7 +138,20 @@
   // Scheduling
   // ============================================================
 
+  function setDocTitleVar() {
+    const doc = Rga.TabManager && Rga.TabManager.activeDoc && Rga.TabManager.activeDoc();
+    let title = '';
+    if (doc) {
+      title = (doc.metadata && doc.metadata.title) || doc.displayName || '';
+    }
+    // CSS string: wrap in quotes, escape backslashes and quotes
+    const escaped = '"' + String(title).replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"';
+    const container = _container();
+    if (container) container.style.setProperty('--doc-title', escaped);
+  }
+
   function refreshNow() {
+    setDocTitleVar();
     rebuildLineNumbers();
     tintCharacters();
   }

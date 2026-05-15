@@ -14,6 +14,8 @@
 #editor-container.view-print {
   background: var(--editor-bg);
   padding: 32px 0;
+  /* set per-doc by Rga.FlowChrome.setDocTitleVar(); pseudo-elements consume it */
+  --doc-title: "";
 }
 #editor-container.view-print .rga-page {
   background: var(--editor-page-bg) !important;
@@ -22,6 +24,66 @@
   min-height: 11in !important;
   padding: 1in 1in 1in 1.5in !important;
   border-radius: 2px;
+  position: relative;
+}
+
+/* Page 1 header — title top-left, NO page number (industry convention) */
+#editor-container.view-print .rga-page::before {
+  content: var(--doc-title);
+  position: absolute;
+  top: 0.4in;
+  left: 1.5in;
+  font-family: var(--font-editor, 'Courier Prime', 'Courier New', monospace);
+  font-size: 10pt;
+  color: var(--text-tertiary, #888);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Page-break visual in Print: a 32px gap that reads as paper boundary.
+   Extends slightly past the page edges so the gap looks like a "desk"
+   strip showing through between two sheets. */
+#editor-container.view-print .rga-page-break {
+  position: absolute;
+  left: -1.5in;
+  right: -1in;
+  height: 36px;
+  background: var(--editor-bg);
+  border-top: 1px solid var(--border-secondary, rgba(0, 0, 0, 0.18));
+  border-bottom: 1px solid var(--border-secondary, rgba(0, 0, 0, 0.18));
+  box-shadow:
+    0 -3px 8px rgba(0, 0, 0, 0.18),
+    0 3px 8px rgba(0, 0, 0, 0.18);
+  pointer-events: none;
+}
+
+/* Title at top-left of every page after page 1 — sits in the next page's
+   top margin (just below the break gap). */
+#editor-container.view-print .rga-page-break::before {
+  content: var(--doc-title);
+  position: absolute;
+  top: calc(36px + 0.4in);
+  left: 1.5in;
+  font-family: var(--font-editor, 'Courier Prime', 'Courier New', monospace);
+  font-size: 10pt;
+  color: var(--text-tertiary, #888);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* Page number at top-right of every page after page 1 */
+#editor-container.view-print .rga-page-break::after {
+  content: attr(data-page-label) ".";
+  position: absolute;
+  top: calc(36px + 0.4in);
+  right: 1in;
+  font-family: var(--font-editor, 'Courier Prime', 'Courier New', monospace);
+  font-size: 10pt;
+  color: var(--text-secondary, #aaa);
+  text-transform: capitalize;
+  letter-spacing: 0.04em;
 }
 
 /* ---- FLOW view: comfortable text column, no paper edges ---- */
