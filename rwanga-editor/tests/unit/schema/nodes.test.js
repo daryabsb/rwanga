@@ -8,69 +8,51 @@ const { Schema } = require('prosemirror-model');
 function buildSchema() {
   return new Schema({
     nodes: {
-      doc: { content: 'titleStrip? body' },
+      doc:        { content: 'titleStrip? body' },
       titleStrip: { content: 'text*', attrs: { removable: { default: true } }, toDOM() { return ['div', { class: 'rga-title-strip' }, 0]; } },
-      body: { content: 'block*', toDOM() { return ['div', { class: 'rga-body' }, 0]; } },
-      paragraph: { content: 'inline*', group: 'block', toDOM() { return ['p', 0]; } },
-      heading: { content: 'inline*', group: 'block', attrs: { level: { default: 1 } }, toDOM(n) { return ['h' + n.attrs.level, 0]; } },
-      quote: { content: 'inline*', group: 'block', toDOM() { return ['blockquote', 0]; } },
-      bulletList: { content: 'listItem+', group: 'block', toDOM() { return ['ul', 0]; } },
+      body:       { content: 'block*', toDOM() { return ['div', { class: 'rga-body' }, 0]; } },
+      paragraph:  { content: 'inline*', group: 'block', toDOM() { return ['p', 0]; } },
+      heading:    { content: 'inline*', group: 'block', attrs: { level: { default: 1 } }, toDOM(n) { return ['h' + n.attrs.level, 0]; } },
+      blockquote: { content: 'inline*', group: 'block', toDOM() { return ['blockquote', 0]; } },
+      bulletList:  { content: 'listItem+', group: 'block', toDOM() { return ['ul', 0]; } },
       orderedList: { content: 'listItem+', group: 'block', attrs: { start: { default: 1 } }, toDOM() { return ['ol', 0]; } },
-      listItem: { content: 'paragraph block*', toDOM() { return ['li', 0]; } },
+      listItem:    { content: 'paragraph block*', toDOM() { return ['li', 0]; } },
       horizontalRule: { group: 'block', toDOM() { return ['hr']; } },
-      pageBreak: { group: 'block', attrs: { manual: { default: true } }, toDOM() { return ['div', { class: 'rga-page-break' }]; } },
-      scene: {
-        content: 'sceneLine (action | character | dialogue | parenthetical | transition | shot | inlineFreeText)*',
+      pageBreak:  { group: 'block', attrs: { manual: { default: true } }, toDOM() { return ['div', { class: 'rga-page-break' }]; } },
+      sceneFrame: {
         group: 'block',
-        attrs: { id: { default: null }, number: { default: null }, notes: { default: '' }, revisionFlag: { default: null }, headingStyle: { default: null } },
-        toDOM() { return ['div', { class: 'rga-scene' }, 0]; }
+        atom: true,
+        attrs: {
+          id:           { default: null },
+          number:       { default: null },
+          headingStyle: { default: null },
+          innerDoc:     { default: null }
+        },
+        toDOM(node) {
+          return ['div', { class: 'rga-scene-frame', 'data-scene-id': node.attrs.id || '', 'data-scene-number': node.attrs.number == null ? '' : String(node.attrs.number) }];
+        }
       },
-      sceneLine: { content: 'inline*', group: 'screenplay', attrs: { setting: { default: 'INT.' }, time: { default: 'DAY' } }, toDOM() { return ['div', { class: 'rga-scene-line' }, 0]; } },
-      action: { content: 'inline*', group: 'screenplay', toDOM() { return ['div', { class: 'rga-action' }, 0]; } },
-      character: { content: 'inline*', group: 'screenplay', toDOM() { return ['div', { class: 'rga-character' }, 0]; } },
-      dialogue: { content: 'inline*', group: 'screenplay', toDOM() { return ['div', { class: 'rga-dialogue' }, 0]; } },
-      parenthetical: { content: 'inline*', group: 'screenplay', toDOM() { return ['div', { class: 'rga-parenthetical' }, 0]; } },
-      transition: { content: 'inline*', group: 'screenplay', toDOM() { return ['div', { class: 'rga-transition' }, 0]; } },
-      shot: { content: 'inline*', group: 'screenplay', toDOM() { return ['div', { class: 'rga-shot' }, 0]; } },
-      inlineFreeText: { content: 'inline*', group: 'screenplay', toDOM() { return ['div', { class: 'rga-inline-free-text' }, 0]; } },
       text: { group: 'inline' }
     },
-    marks: {
-      bold: { toDOM() { return ['strong', 0]; } },
-      italic: { toDOM() { return ['em', 0]; } }
-    }
+    marks: {}
   });
 }
 
-test('schema constructs without errors', () => {
+test('outer schema constructs without errors', () => {
   const s = buildSchema();
-  assert.ok(s.nodes.scene);
-  assert.ok(s.nodes.sceneLine);
+  assert.ok(s.nodes.paragraph);
+  assert.ok(s.nodes.sceneFrame);
 });
 
-test('all 20 spec node types exist', () => {
+test('sceneFrame can sit as a body block alongside paragraphs', () => {
   const s = buildSchema();
-  const required = [
-    'doc', 'titleStrip', 'body', 'paragraph', 'heading', 'quote',
-    'bulletList', 'orderedList', 'listItem', 'horizontalRule', 'pageBreak',
-    'scene', 'sceneLine',
-    'action', 'character', 'dialogue', 'parenthetical', 'transition', 'shot', 'inlineFreeText',
-    'text'
-  ];
-  required.forEach(name => assert.ok(s.nodes[name], `missing node: ${name}`));
-});
-
-test('can build a valid screenplay doc', () => {
-  const s = buildSchema();
+  const frame = s.node('sceneFrame', { id: 's1', number: 1, headingStyle: null, innerDoc: null });
   const doc = s.node('doc', null, [
     s.node('body', null, [
-      s.node('scene', null, [
-        s.node('sceneLine', null, [s.text('INT. CAFÉ — NIGHT')]),
-        s.node('action', null, [s.text('Sarah enters.')])
-      ])
+      s.node('paragraph', null, [s.text('hello')]),
+      frame,
+      s.node('paragraph', null, [s.text('world')])
     ])
   ]);
-  assert.equal(doc.firstChild.type.name, 'body');
-  assert.equal(doc.firstChild.firstChild.type.name, 'scene');
-  assert.equal(doc.firstChild.firstChild.firstChild.type.name, 'sceneLine');
+  assert.equal(doc.firstChild.child(1).type.name, 'sceneFrame');
 });

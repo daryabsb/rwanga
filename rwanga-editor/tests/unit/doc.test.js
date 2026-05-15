@@ -180,21 +180,14 @@ test('Doc.deserialize migrates old sceneLine location attr to inline text conten
   const { Schema } = require('prosemirror-model');
   const newSchema = new Schema({
     nodes: {
-      doc: { content: 'body' },
-      body: { content: 'block*', toDOM() { return ['div', 0]; } },
-      scene: {
-        content: 'sceneLine action*',
-        group: 'block',
-        attrs: { id: { default: null }, number: { default: null }, notes: { default: '' }, revisionFlag: { default: null }, headingStyle: { default: null } },
+      doc:        { content: 'body' },
+      body:       { content: 'block*', toDOM() { return ['div', 0]; } },
+      paragraph:  { content: 'inline*', group: 'block', toDOM() { return ['p', 0]; } },
+      sceneFrame: {
+        group: 'block', atom: true,
+        attrs: { id: { default: null }, number: { default: null }, headingStyle: { default: null }, innerDoc: { default: null } },
         toDOM() { return ['div', 0]; }
       },
-      sceneLine: {
-        content: 'inline*',
-        group: 'screenplay',
-        attrs: { setting: { default: 'INT.' }, time: { default: 'DAY' } },
-        toDOM() { return ['div', 0]; }
-      },
-      action: { content: 'inline*', group: 'screenplay', toDOM() { return ['div', 0]; } },
       text: { group: 'inline' }
     },
     marks: {}
@@ -211,9 +204,11 @@ test('Doc.deserialize migrates old sceneLine location attr to inline text conten
         type: 'body',
         content: [{
           type: 'scene',
-          attrs: { id: null, number: null, notes: '', revisionFlag: null, headingStyle: null },
+          attrs: { id: 's1', number: 1, notes: '', revisionFlag: null, headingStyle: null },
           content: [
-            { type: 'sceneLine', attrs: { setting: 'INT', location: 'CAFÉ', time: 'DAY' }, content: [] },
+            { type: 'sceneLine',
+              attrs: { setting: 'INT', location: 'CAFÉ', time: 'DAY' },
+              content: [] },
             { type: 'action', content: [] }
           ]
         }]
@@ -226,9 +221,13 @@ test('Doc.deserialize migrates old sceneLine location attr to inline text conten
   };
 
   const reloaded = Doc.deserialize(JSON.stringify(fileJson), null, { schema: newSchema });
-  const sceneLine = reloaded.body.firstChild.firstChild.child(0);
-  assert.equal(sceneLine.type.name, 'sceneLine');
-  assert.equal(sceneLine.textContent, 'CAFÉ');
+  const frame = reloaded.body.firstChild.firstChild;
+  assert.equal(frame.type.name, 'sceneFrame');
+  assert.equal(frame.attrs.id, 's1');
+  const sceneLine = frame.attrs.innerDoc.content[0];
+  assert.equal(sceneLine.type, 'sceneLine');
   assert.equal(sceneLine.attrs.setting, 'INT');
   assert.equal(sceneLine.attrs.time, 'DAY');
+  assert.equal(sceneLine.attrs.location, undefined);
+  assert.equal(sceneLine.content[0].text, 'CAFÉ');
 });

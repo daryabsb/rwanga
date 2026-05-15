@@ -7,35 +7,27 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { Schema } = require('prosemirror-model');
 
-// Re-build the full screenplay schema (mirrors schema.js without browser globals)
+// Re-build the outer schema (mirrors mount.js baseOuterNodes + baseOuterMarks without browser globals)
 function buildScreenplaySchema() {
   return new Schema({
     nodes: {
-      doc: { content: 'titleStrip? body' },
+      doc:        { content: 'titleStrip? body' },
       titleStrip: { content: 'text*', attrs: { removable: { default: true } }, toDOM() { return ['div', 0]; } },
-      body: { content: 'block*', toDOM() { return ['div', 0]; } },
-      paragraph: { content: 'inline*', group: 'block', toDOM() { return ['p', 0]; } },
-      heading: { content: 'inline*', group: 'block', attrs: { level: { default: 1 } }, toDOM(n) { return ['h' + n.attrs.level, 0]; } },
-      quote: { content: 'inline*', group: 'block', toDOM() { return ['blockquote', 0]; } },
-      bulletList: { content: 'listItem+', group: 'block', toDOM() { return ['ul', 0]; } },
+      body:       { content: 'block*', toDOM() { return ['div', 0]; } },
+      paragraph:  { content: 'inline*', group: 'block', toDOM() { return ['p', 0]; } },
+      heading:    { content: 'inline*', group: 'block', attrs: { level: { default: 1 } }, toDOM(n) { return ['h' + n.attrs.level, 0]; } },
+      blockquote: { content: 'inline*', group: 'block', toDOM() { return ['blockquote', 0]; } },
+      bulletList:  { content: 'listItem+', group: 'block', toDOM() { return ['ul', 0]; } },
       orderedList: { content: 'listItem+', group: 'block', attrs: { start: { default: 1 } }, toDOM() { return ['ol', 0]; } },
-      listItem: { content: 'paragraph block*', toDOM() { return ['li', 0]; } },
+      listItem:    { content: 'paragraph block*', toDOM() { return ['li', 0]; } },
       horizontalRule: { group: 'block', toDOM() { return ['hr']; } },
-      pageBreak: { group: 'block', attrs: { manual: { default: true } }, toDOM() { return ['div']; } },
-      scene: {
-        content: 'sceneLine (action | character | dialogue | parenthetical | transition | shot | inlineFreeText)*',
+      pageBreak:  { group: 'block', attrs: { manual: { default: true } }, toDOM() { return ['div']; } },
+      sceneFrame: {
         group: 'block',
-        attrs: { id: { default: null }, number: { default: null }, notes: { default: '' }, revisionFlag: { default: null }, headingStyle: { default: null } },
+        atom: true,
+        attrs: { id: { default: null }, number: { default: null }, headingStyle: { default: null }, innerDoc: { default: null } },
         toDOM() { return ['div', 0]; }
       },
-      sceneLine: { content: 'inline*', group: 'screenplay', attrs: { setting: { default: 'INT.' }, time: { default: 'DAY' } }, toDOM() { return ['div', 0]; } },
-      action: { content: 'inline*', group: 'screenplay', toDOM() { return ['div', 0]; } },
-      character: { content: 'inline*', group: 'screenplay', toDOM() { return ['div', 0]; } },
-      dialogue: { content: 'inline*', group: 'screenplay', toDOM() { return ['div', 0]; } },
-      parenthetical: { content: 'inline*', group: 'screenplay', toDOM() { return ['div', 0]; } },
-      transition: { content: 'inline*', group: 'screenplay', toDOM() { return ['div', 0]; } },
-      shot: { content: 'inline*', group: 'screenplay', toDOM() { return ['div', 0]; } },
-      inlineFreeText: { content: 'inline*', group: 'screenplay', toDOM() { return ['div', 0]; } },
       text: { group: 'inline' }
     },
     marks: {
@@ -50,7 +42,7 @@ function buildScreenplaySchema() {
       link: { attrs: { href: {}, title: { default: null } }, inclusive: false, toDOM(m) { return ['a', { href: m.attrs.href }, 0]; } },
       annotation: { attrs: { id: {}, text: { default: '' }, color: { default: '#FFE08A' }, createdAt: { default: null }, author: { default: null } }, inclusive: false, excludes: '', toDOM() { return ['span', 0]; } },
       tag: { attrs: { tagType: {}, entityId: {} }, inclusive: false, excludes: '', toDOM() { return ['span', 0]; } },
-      revisionFlag: { attrs: { reason: { default: '' }, createdAt: { default: null }, status: { default: 'open' } }, inclusive: false, excludes: '', toDOM() { return ['span', 0]; } }
+      revisionFlag: { attrs: { id: { default: null }, reason: { default: '' }, createdAt: { default: null }, status: { default: 'open' } }, inclusive: false, excludes: '', toDOM() { return ['span', 0]; } }
     }
   });
 }
@@ -95,25 +87,24 @@ test('v2.0 fixture round-trips losslessly', () => {
   assert.deepEqual(doc.body.toJSON(), doc2.body.toJSON());
 });
 
-test('scene structure survives the round-trip', () => {
+test('scene structure survives the round-trip — appears as sceneFrame', () => {
   const schema = buildScreenplaySchema();
   const content = fs.readFileSync(FIXTURE, 'utf8');
   const doc = Doc.deserialize(content, FIXTURE, { schema });
 
-  const bodyNode = doc.body.firstChild;  // titleStrip or body
-  // Find the body node
   let bodyContent = null;
   doc.body.forEach(child => {
     if (child.type.name === 'body') bodyContent = child;
   });
   assert.ok(bodyContent, 'body node should exist');
 
-  // Find the scene node
-  let sceneNode = null;
+  let frameNode = null;
   bodyContent.forEach(child => {
-    if (child.type.name === 'scene') sceneNode = child;
+    if (child.type.name === 'sceneFrame') frameNode = child;
   });
-  assert.ok(sceneNode, 'scene node should exist');
-  assert.equal(sceneNode.firstChild.type.name, 'sceneLine');
-  assert.equal(sceneNode.attrs.id, 'scene-7f2a');
+  assert.ok(frameNode, 'sceneFrame node should exist after migration');
+  assert.equal(frameNode.attrs.id, 'scene-7f2a');
+  assert.ok(frameNode.attrs.innerDoc, 'innerDoc must be populated');
+  assert.equal(frameNode.attrs.innerDoc.type, 'doc');
+  assert.equal(frameNode.attrs.innerDoc.content[0].type, 'sceneLine');
 });
