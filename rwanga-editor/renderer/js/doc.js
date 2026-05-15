@@ -172,8 +172,46 @@
       const newContent = locationText ? [{ type: 'text', text: locationText }] : [];
       return { type: 'sceneLine', attrs: newAttrs, content: newContent };
     }
+    let out = node;
     if (Array.isArray(node.content)) {
-      return Object.assign({}, node, { content: node.content.map(_migrateSceneLineLocations) });
+      out = Object.assign({}, out, { content: node.content.map(_migrateSceneLineLocations) });
+    }
+    if (out.attrs && out.attrs.innerDoc) {
+      out = Object.assign({}, out, {
+        attrs: Object.assign({}, out.attrs, {
+          innerDoc: _migrateSceneLineLocations(out.attrs.innerDoc)
+        })
+      });
+    }
+    return out;
+  }
+
+  function _migrateScenesToFrames(node) {
+    if (!node || typeof node !== 'object') return node;
+    if (node.type === 'scene') {
+      const oldAttrs = node.attrs || {};
+      const migratedContent = Array.isArray(node.content)
+        ? node.content.map(_migrateSceneLineLocations)
+        : [];
+      return {
+        type: 'sceneFrame',
+        attrs: {
+          id:           oldAttrs.id           || null,
+          number:       oldAttrs.number       || null,
+          headingStyle: oldAttrs.headingStyle || null,
+          innerDoc: {
+            type: 'doc',
+            attrs: {
+              notes:        oldAttrs.notes        || '',
+              revisionFlag: oldAttrs.revisionFlag || null
+            },
+            content: migratedContent
+          }
+        }
+      };
+    }
+    if (Array.isArray(node.content)) {
+      return Object.assign({}, node, { content: node.content.map(_migrateScenesToFrames) });
     }
     return node;
   }
@@ -208,8 +246,9 @@
 
     if (isV2 && parsed.body && schema) {
       try {
-        const migratedBody = _migrateSceneLineLocations(parsed.body);
-        pmBody = schema.nodeFromJSON(migratedBody);
+        const sceneMigrated = _migrateScenesToFrames(parsed.body);
+        const fullyMigrated = _migrateSceneLineLocations(sceneMigrated);
+        pmBody = schema.nodeFromJSON(fullyMigrated);
       } catch (err) {
         throw new Error('Document body is invalid: ' + err.message);
       }
@@ -326,6 +365,8 @@
     _isNewerThanSupported: isNewerThanSupported,
     _basenameFromHandle: basenameFromHandle,
     _registryKey,
+    _migrateScenesToFrames: _migrateScenesToFrames,
+    _migrateSceneLineLocations: _migrateSceneLineLocations,
   };
 
   if (typeof module !== 'undefined' && module.exports) {
