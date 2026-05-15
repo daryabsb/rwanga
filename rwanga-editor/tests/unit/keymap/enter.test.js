@@ -174,3 +174,19 @@ test('Ctrl+Enter from paragraph outside scene → new scene after paragraph', ()
   assert.equal(body.child(1).type.name, 'scene');
   assert.equal(next.selection.$head.parent.type.name, 'sceneLine');
 });
+
+test('Ctrl+Enter: new sceneLine has empty content (no prefill text) and setting attr', () => {
+  const doc = s.node('doc', null, [
+    s.node('body', null, [
+      s.node('paragraph', null, [s.text('Preamble')])
+    ])
+  ]);
+  const state = stateWithCursorIn(s, doc, 'paragraph');
+  const cmd = internals.newSceneAfterCurrent(s);
+  const next = applyCmd(state, cmd);
+  const sceneLine = next.doc.firstChild.lastChild.child(0);
+  assert.equal(sceneLine.type.name, 'sceneLine');
+  assert.equal(sceneLine.content.size, 0, 'sceneLine content must be empty — no prefill text');
+  assert.ok(sceneLine.attrs.setting, 'sceneLine must have a setting attr');
+  assert.ok(sceneLine.attrs.time, 'sceneLine must have a time attr');
+});

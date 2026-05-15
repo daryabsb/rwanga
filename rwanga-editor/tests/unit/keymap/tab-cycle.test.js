@@ -3,7 +3,8 @@
 
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const { buildSchema, stateWithCursorIn, applyCmd, loadKeymap } = require('./helpers');
+const { buildSchema, posInNode, stateWithCursorIn, applyCmd, loadKeymap } = require('./helpers');
+const { EditorState, TextSelection } = require('prosemirror-state');
 
 const internals = loadKeymap();
 const s = buildSchema();
@@ -145,10 +146,65 @@ test('Shift-Tab: action (with content) → cursor moves to sceneLine; action kep
   assert.equal($head.parent.type.name, 'sceneLine');
 });
 
-test('Shift-Tab: sceneLine → no-op (returns false)', () => {
+test('Shift-Tab: sceneLine cursor not at start → no-op (returns false)', () => {
+  // Cursor placed at END of "INT. X — DAY" content (not start) → no-op
+  const locText = s.text('INT. X — DAY');
+  const doc = s.node('doc', null, [
+    s.node('body', null, [
+      s.node('scene', null, [
+        s.node('sceneLine', null, [locText]),
+        s.node('action')
+      ])
+    ])
+  ]);
+  const base = EditorState.create({ schema: s, doc });
+  const slPos = posInNode(doc, 'sceneLine');
+  const endPos = slPos + locText.nodeSize;
+  const state = base.apply(base.tr.setSelection(TextSelection.near(base.doc.resolve(endPos))));
+  const cmd = internals.cycleBlockTypeBackward(s);
+  const handled = cmd(state, () => {});
+  assert.equal(handled, false);
+});
+
+test('Tab: sceneLine cursor at end → activates time zone (returns true)', () => {
+  const locText = s.text('CAFÉ');
+  const doc = s.node('doc', null, [
+    s.node('body', null, [
+      s.node('scene', null, [
+        s.node('sceneLine', null, [locText]),
+        s.node('action')
+      ])
+    ])
+  ]);
+  const base = EditorState.create({ schema: s, doc });
+  const slPos = posInNode(doc, 'sceneLine');
+  const endPos = slPos + locText.nodeSize;
+  const state = base.apply(base.tr.setSelection(TextSelection.near(base.doc.resolve(endPos))));
+  let capturedZone = null;
+  const mockView = { nodeDOM() { return { _rgaNodeView: { activateZone(z) { capturedZone = z; } } }; } };
+  const cmd = internals.cycleBlockTypeForward(s);
+  const handled = cmd(state, () => {}, mockView);
+  assert.equal(handled, true);
+  assert.equal(capturedZone, 'time');
+});
+
+test('Shift-Tab: sceneLine cursor at start → activates setting zone (returns true)', () => {
+  // stateWithCursorIn places cursor at pos+1 = offset 0 (start)
   const doc = sceneWithBlock('action');
   const state = stateWithCursorIn(s, doc, 'sceneLine');
+  let capturedZone = null;
+  const mockView = { nodeDOM() { return { _rgaNodeView: { activateZone(z) { capturedZone = z; } } }; } };
   const cmd = internals.cycleBlockTypeBackward(s);
+  const handled = cmd(state, () => {}, mockView);
+  assert.equal(handled, true);
+  assert.equal(capturedZone, 'setting');
+});
+
+test('Tab: sceneLine cursor not at end → no-op (returns false)', () => {
+  // Cursor at start of non-empty content — NOT at end → no-op
+  const doc = sceneWithBlock('action');
+  const state = stateWithCursorIn(s, doc, 'sceneLine');
+  const cmd = internals.cycleBlockTypeForward(s);
   const handled = cmd(state, () => {});
   assert.equal(handled, false);
 });

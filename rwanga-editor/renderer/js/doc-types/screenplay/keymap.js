@@ -71,10 +71,22 @@
   // ============================================================
 
   function cycleBlockTypeForward(schema) {
-    return function(state, dispatch) {
+    return function(state, dispatch, view) {
       const ctx = getSceneContext(state);
       if (!ctx.inSide) return false;
-      if (ctx.sceneChildNode.type.name === 'sceneLine') return false; // no-op per §3.1
+
+      if (ctx.sceneChildNode.type.name === 'sceneLine') {
+        const $head = state.selection.$head;
+        const atEnd = $head.parentOffset === ctx.sceneChildNode.content.size;
+        if (!atEnd) return false;
+        if (view) {
+          const domNode = view.nodeDOM(ctx.sceneChildPos);
+          const nv = domNode && domNode._rgaNodeView;
+          if (nv) nv.activateZone('time');
+        }
+        return true;
+      }
+
       const targetTypeName = FORWARD_CYCLE[ctx.sceneChildNode.type.name];
       if (!targetTypeName) return false;
       const targetType = schema.nodes[targetTypeName];
@@ -85,10 +97,21 @@
   }
 
   function cycleBlockTypeBackward(schema) {
-    return function(state, dispatch) {
+    return function(state, dispatch, view) {
       const ctx = getSceneContext(state);
       if (!ctx.inSide) return false;
-      if (ctx.sceneChildNode.type.name === 'sceneLine') return false;
+
+      if (ctx.sceneChildNode.type.name === 'sceneLine') {
+        const $head = state.selection.$head;
+        const atStart = $head.parentOffset === 0;
+        if (!atStart) return false;
+        if (view) {
+          const domNode = view.nodeDOM(ctx.sceneChildPos);
+          const nv = domNode && domNode._rgaNodeView;
+          if (nv) nv.activateZone('setting');
+        }
+        return true;
+      }
 
       if (ctx.sceneChildNode.type.name === 'action') {
         // Move cursor to end of sceneLine (always scene's first child)
@@ -170,15 +193,17 @@
         const bodyChildDepth = Math.min($head.depth, 2);
         insertPos = $head.after(bodyChildDepth);
       }
-      const prefill = schema.text('INT. ');
+      const vocab = (Rga.Constants && Rga.Constants.DEFAULT_VOCABULARY) || {};
+      const defaultSetting = (vocab.settings && vocab.settings[0]) || 'INT.';
+      const defaultTime = (vocab.times && vocab.times[0]) || 'DAY';
       const sceneNode = schema.nodes.scene.create({}, [
-        schema.nodes.sceneLine.create(null, [prefill]),
+        schema.nodes.sceneLine.create({ setting: defaultSetting, time: defaultTime }),
         schema.nodes.action.create()
       ]);
       tr.insert(insertPos, sceneNode);
       const TextSelection = window.RgaProseMirror.TextSelection;
-      // Cursor lands after "INT. " — ready for the user to type the location
-      tr.setSelection(TextSelection.create(tr.doc, insertPos + 1 + prefill.nodeSize));
+      // Cursor lands at position 0 of sceneLine content (location zone)
+      tr.setSelection(TextSelection.near(tr.doc.resolve(insertPos + 2)));
       dispatch(tr.scrollIntoView());
       return true;
     };
