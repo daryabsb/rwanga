@@ -193,8 +193,12 @@
             </div>
             <div id="empty-state-recent" class="editor-empty-state-recent"></div>
           </div>
-          <!-- ProseMirror mounts into #editor; .rga-page styles it as paper -->
-          <div id="editor" class="rga-page"></div>
+          <!-- Page row holds the line-gutter (Flow view) and the page itself -->
+          <div class="rga-page-row" id="rga-page-row">
+            <div class="flow-line-gutter" id="flow-line-gutter" aria-hidden="true"></div>
+            <!-- ProseMirror mounts into #editor; .rga-page styles it as paper -->
+            <div id="editor" class="rga-page"></div>
+          </div>
         </div>
 
       </div>
@@ -367,6 +371,7 @@
 <script src="js/editor/shortcuts.js"></script>
 <script src="js/view-mode.js"></script>
 <script src="js/units.js"></script>
+<script src="js/flow-chrome.js"></script>
 
 <!-- ============================================================
      INIT — wire everything together
@@ -620,6 +625,7 @@
     Rga.StatusBar.init();
     wireViewMode();
     wireUnits();
+    Rga.FlowChrome && Rga.FlowChrome.init();
 
     // Menu actions from main process
     if (window.rwanga && window.rwanga.on && window.rwanga.on.menuAction) {

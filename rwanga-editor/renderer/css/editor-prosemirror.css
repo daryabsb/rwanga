@@ -29,13 +29,63 @@
   background: var(--editor-bg);
   padding: 32px 0;
 }
+#editor-container.view-flow .rga-page-row {
+  align-items: flex-start;
+}
 #editor-container.view-flow .rga-page {
   background: transparent !important;
   box-shadow: none !important;
   width: 8.5in !important;
   min-height: auto !important;
+  height: auto !important;
   padding: 0 0.5in !important;
   border-radius: 0;
+}
+#editor-container.view-flow .flow-line-gutter {
+  display: block;
+}
+/* Flow view: page markers (existing engine, softer styling) */
+#editor-container.view-flow .rga-page-break {
+  border-top: 1px solid var(--border-secondary, rgba(128, 128, 128, 0.3));
+  opacity: 0.55;
+}
+#editor-container.view-flow .rga-page-break::after {
+  font-size: 10px;
+  color: var(--text-tertiary, #888);
+  background: var(--editor-bg);
+  padding: 0 6px;
+  inset-inline-end: 8px;
+  inset-inline-start: auto;
+}
+
+/* ---- Page row + line gutter (Flow only by default) ---- */
+.rga-page-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  width: 100%;
+}
+.flow-line-gutter {
+  display: none;
+  position: relative;
+  width: 44px;
+  min-height: 0;
+  font-family: var(--font-mono, ui-monospace, Menlo, Consolas, monospace);
+  font-size: 11px;
+  color: var(--text-tertiary, #666);
+  opacity: 0.55;
+  user-select: none;
+  pointer-events: none;
+}
+.flow-line-num {
+  position: absolute;
+  inset-inline-end: 8px;
+  text-align: end;
+  white-space: nowrap;
+  line-height: 1;
+}
+[dir="rtl"] #editor-container.view-flow .rga-page-row {
+  flex-direction: row-reverse;
 }
 
 /* ---- DRAFT view: hide all global chrome, focus on text ---- */
@@ -466,14 +516,17 @@ body.view-draft-active #editor-area {
   margin: 0 0 1em 0;
 }
 
+/* The scene frame itself is no longer a boxed placeholder — it reads as
+   real content. Vertical breathing room only, no border / background. */
 .rga-scene-frame-placeholder {
   user-select: none;
   cursor: default;
-  background: var(--bg-secondary, #2a2a2a);
-  border: 1px dashed var(--border-secondary, #555);
-  border-radius: 4px;
-  padding: 10px 14px;
-  font-family: var(--font-editor, 'Courier Prime', monospace);
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  margin: 1em 0;
+  font-family: var(--font-editor, 'Courier Prime', 'Courier New', monospace);
   color: var(--text-primary, #cccccc);
 }
 
@@ -481,70 +534,164 @@ body.view-draft-active #editor-area {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  font-size: 0.95em;
-  color: var(--text-secondary, #aaa);
-  margin-bottom: 4px;
+  font-size: 11px;
+  color: var(--text-tertiary, #888);
+  margin: 0 0 4px 0;
 }
 
 .rga-scene-frame-placeholder-slug {
+  display: flex;
+  align-items: center;
+  gap: 4px;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  font-size: 1em;
+  letter-spacing: 0.04em;
+  font-size: 12pt;
+  font-weight: 700;
+  margin: 0 0 6px 0;
 }
 
-[data-theme="light"] .rga-scene-frame-placeholder {
-  background: rgba(0, 0, 0, 0.04);
-  border-color: rgba(0, 0, 0, 0.18);
+.rga-scene-frame-placeholder-transition {
+  margin-top: 0.6em;
+  text-align: end;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
-/* ---- scene-frame placeholder: writable blocks ---- */
+/* Slug pickers + location input: blend into the slug text, hint only on
+   hover/focus so the slug reads as a single line of script. */
+.rga-slug-setting-picker,
+.rga-slug-time-picker,
+.rga-slug-transition-picker {
+  font: inherit;
+  font-weight: 700;
+  text-transform: uppercase;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  padding: 1px 4px;
+  color: inherit;
+  cursor: pointer;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+.rga-slug-setting-picker:hover,
+.rga-slug-time-picker:hover,
+.rga-slug-transition-picker:hover {
+  border-color: var(--border-secondary, rgba(128, 128, 128, 0.4));
+}
+.rga-slug-setting-picker:focus,
+.rga-slug-time-picker:focus,
+.rga-slug-transition-picker:focus {
+  border-color: var(--accent-primary, #569cd6);
+  outline: 0;
+}
+.rga-slug-location-input {
+  font: inherit;
+  font-weight: 700;
+  text-transform: uppercase;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px dashed transparent;
+  padding: 1px 4px;
+  color: inherit;
+  flex: 1;
+  min-width: 0;
+}
+.rga-slug-location-input:hover {
+  border-bottom-color: var(--border-secondary, rgba(128, 128, 128, 0.4));
+}
+.rga-slug-location-input:focus {
+  border-bottom-color: var(--accent-primary, #569cd6);
+  outline: 0;
+}
+.rga-slug-separator {
+  color: var(--text-tertiary, #888);
+  margin: 0 2px;
+}
+
+/* ============================================================
+   Screenplay block typography
+   Industry defaults (Courier 12pt, ~1.15 line-height) tuned for
+   the writing surface. Character + Dialogue centered per user
+   2026-05-15 (overrides the industry left-indent convention).
+   Side margins are CSS-variable driven so a future Page Setup
+   dialog can adjust them per doc.
+   ============================================================ */
+
+:root {
+  --dialogue-side-margin: 1in;
+  --parenthetical-side-margin: 1.6in;
+}
 
 .rga-scene-frame-placeholder-blocks {
   margin-top: 8px;
+  font-family: var(--font-editor, 'Courier Prime', 'Courier New', Courier, monospace);
+  font-size: 12pt;
+  line-height: 1.15;
 }
 
 .rga-scene-block {
-  /* width-free per 2026-05-15 — content-width, never full-width */
-  width: fit-content;
-  max-width: 100%;
-  min-width: 120px;
-  padding: 2px 6px;
-  margin: 2px 0;
-  border-left: 3px solid transparent;
+  width: 100%;
+  padding: 0;
+  margin: 0;
   outline: none;
 }
 
 .rga-scene-block:focus {
-  background: rgba(86, 156, 214, 0.08);
+  background: rgba(86, 156, 214, 0.06);
 }
 
 .rga-scene-block:empty::before {
   content: attr(data-placeholder);
   color: var(--text-tertiary, #666);
-  opacity: 0.5;
+  opacity: 0.4;
   pointer-events: none;
 }
 
-/* TEMP debug visual aid (replace in final styling pass): per-type left-border
-   color + small uppercase type tag, so Tab/Shift-Tab type changes are visible
-   without final per-type typography. */
-.rga-scene-block::after {
-  content: attr(data-block-type);
-  margin-left: 12px;
-  font-size: 0.7em;
-  color: var(--text-tertiary, #888);
-  opacity: 0.5;
+/* ---- Per-type typography ---- */
+.rga-block-action {
+  text-align: start;
+  margin: 0.6em 0 0 0;
+}
+.rga-block-character {
+  text-align: center;
   text-transform: uppercase;
-  pointer-events: none;
+  font-weight: 700;
+  margin: 1em 0 0 0;
+  letter-spacing: 0.02em;
 }
-
-.rga-block-action        { border-left-color: #888; }
-.rga-block-character     { border-left-color: #4a9; }
-.rga-block-dialogue      { border-left-color: #6a8; }
-.rga-block-parenthetical { border-left-color: #ac6; }
-.rga-block-shot          { border-left-color: #a64; }
-.rga-block-transition    { border-left-color: #d62; }
-.rga-block-inlineFreeText{ border-left-color: #888; }
+.rga-block-dialogue {
+  max-width: calc(100% - 2 * var(--dialogue-side-margin));
+  margin: 0 auto;
+  text-align: center;
+}
+.rga-block-parenthetical {
+  max-width: calc(100% - 2 * var(--parenthetical-side-margin));
+  margin: 0 auto;
+  text-align: center;
+  font-style: italic;
+}
+.rga-block-transition {
+  text-align: end;
+  text-transform: uppercase;
+  font-weight: 700;
+  margin: 1em 0 0 0;
+  letter-spacing: 0.03em;
+}
+.rga-block-shot {
+  text-align: start;
+  text-transform: uppercase;
+  font-weight: 700;
+  margin: 0.8em 0 0 0;
+  letter-spacing: 0.02em;
+}
+.rga-block-inlineFreeText {
+  font-style: italic;
+  color: var(--text-tertiary, #888);
+  margin: 0.5em 0;
+}
 
 /* ----- PAGE BREAK ----- */
 
