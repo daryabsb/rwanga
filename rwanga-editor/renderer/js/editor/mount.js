@@ -229,4 +229,5 @@
   Rga.Editor.swapState = swapState;
   Rga.Editor.setDoc = setDoc;
   Rga.Editor.emptyDoc = emptyDoc;
+  Rga.Editor.activeSchema = activeSchema;
 })();

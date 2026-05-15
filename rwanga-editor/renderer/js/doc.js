@@ -134,13 +134,14 @@
     return parts[parts.length - 1] || handle;
   }
 
-  function getSchema() {
-    return (typeof window !== 'undefined')
-      && window.Rga
-      && window.Rga.DocTypes
-      && window.Rga.DocTypes.screenplay
-      && window.Rga.DocTypes.screenplay.schema
-      || null;
+  function getSchema(documentType) {
+    if (typeof window === 'undefined' || !window.Rga) return null;
+    const rga = window.Rga;
+    documentType = documentType || 'screenplay';
+    if (rga.Editor && typeof rga.Editor.activeSchema === 'function') {
+      return rga.Editor.activeSchema(documentType);
+    }
+    return null;
   }
 
   /**
@@ -239,7 +240,8 @@
       throw new Error(`This .rga was created with a newer Rwanga (v${fileVersion}). Please update Rwanga to open it.`);
     }
 
-    const schema = (opts && opts.schema) || getSchema();
+    const documentType = (opts && opts.documentType) || (parsed && parsed.document_type) || 'screenplay';
+    const schema = (opts && opts.schema) || getSchema(documentType);
     let pmBody = null;
 
     const isV2 = fileVersion && String(fileVersion).startsWith('2.');

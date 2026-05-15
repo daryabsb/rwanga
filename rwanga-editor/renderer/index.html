@@ -182,7 +182,13 @@
         </div>
 
         <!-- Editor Container — the "desk"; #editor is the "page" -->
-        <div id="editor-container">
+        <div id="editor-container" class="no-doc">
+          <!-- Empty state — shown when no tab is open -->
+          <div id="editor-empty-state" class="editor-empty-state">
+            <div class="editor-empty-state-icon">✦</div>
+            <div class="editor-empty-state-title">No script open</div>
+            <div class="editor-empty-state-hint">File → New Script &nbsp;or&nbsp; Open…</div>
+          </div>
           <!-- ProseMirror mounts into #editor; .rga-page styles it as paper -->
           <div id="editor" class="rga-page"></div>
         </div>

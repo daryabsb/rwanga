@@ -46,11 +46,18 @@
     active.editorState = editorView.state;
   }
 
+  function setNoDocState(isEmpty) {
+    const ec = document.getElementById('editor-container');
+    if (!ec) return;
+    ec.classList.toggle('no-doc', isEmpty);
+  }
+
   function activate(tabId) {
     snapshotActive();
     const tab = tabs.find(function(t) { return t.id === tabId; });
     if (!tab) return;
     activeTabId = tabId;
+    setNoDocState(false);
     renderTabBar();
     if (editorView && tab.editorState) {
       editorView.updateState(tab.editorState);
@@ -107,6 +114,7 @@
       if (next) activate(next.id);
       else {
         activeTabId = null;
+        setNoDocState(true);
         renderTabBar();
         if (editorView) {
           const emptyState = window.RgaProseMirror.EditorState.create({
