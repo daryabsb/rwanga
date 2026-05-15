@@ -181,6 +181,21 @@
           <button id="tab-new" title="New Tab"></button>
         </div>
 
+        <!-- Formatting toolbar (hidden in Draft view) -->
+        <div id="format-toolbar" role="toolbar" aria-label="Text formatting">
+          <button class="format-btn format-btn--bold"    data-mark="bold"          title="Bold (Ctrl+B)">B</button>
+          <button class="format-btn format-btn--italic"  data-mark="italic"        title="Italic (Ctrl+I)">I</button>
+          <button class="format-btn format-btn--under"   data-mark="underline"     title="Underline">U</button>
+          <button class="format-btn format-btn--strike"  data-mark="strikethrough" title="Strikethrough">S</button>
+          <div class="format-btn-sep"></div>
+          <button class="format-btn format-btn--color" id="format-btn-color"
+                  data-mark="color" title="Text color">A<span class="format-color-swatch" id="format-color-swatch"></span></button>
+          <button class="format-btn format-btn--highlight" id="format-btn-highlight"
+                  data-mark="highlight" title="Highlight"><span class="format-highlight-icon" id="format-highlight-icon"></span></button>
+          <div class="format-btn-sep"></div>
+          <button class="format-btn format-btn--link"    data-mark="link"          title="Link">↗</button>
+        </div>
+
         <!-- Editor Container — the "desk"; #editor is the "page" -->
         <div id="editor-container" class="no-doc">
           <!-- Empty state — shown when no tab is open -->
@@ -311,6 +326,37 @@
 <!-- Draft view exit overlay -->
 <button id="draft-exit" class="draft-exit-btn" title="Exit Draft view (Esc)" hidden>×</button>
 
+<!-- Format-toolbar color popover (positioned dynamically) -->
+<div id="format-color-popover" class="format-color-popover" hidden>
+  <div class="format-color-grid">
+    <button class="format-swatch" data-color="#FFFFFF" style="background:#FFFFFF"></button>
+    <button class="format-swatch" data-color="#F44747" style="background:#F44747"></button>
+    <button class="format-swatch" data-color="#FFB347" style="background:#FFB347"></button>
+    <button class="format-swatch" data-color="#FFC107" style="background:#FFC107"></button>
+    <button class="format-swatch" data-color="#4EC9B0" style="background:#4EC9B0"></button>
+    <button class="format-swatch" data-color="#4FC1FF" style="background:#4FC1FF"></button>
+    <button class="format-swatch" data-color="#C586C0" style="background:#C586C0"></button>
+    <button class="format-swatch" data-color="#C2185B" style="background:#C2185B"></button>
+  </div>
+  <div class="format-color-actions">
+    <input type="color" id="format-color-custom" class="format-color-custom" />
+    <button class="format-swatch format-swatch--clear" data-color="" title="Remove color">×</button>
+  </div>
+</div>
+
+<!-- Format-toolbar link dialog -->
+<div id="format-link-dialog" class="modal-overlay" hidden>
+  <div class="modal-dialog modal-dialog--narrow">
+    <div class="modal-title">Insert Link</div>
+    <input type="url" id="format-link-input" class="format-link-input" placeholder="https://…" />
+    <div class="modal-actions">
+      <button class="modal-btn primary" id="format-link-ok">Apply</button>
+      <button class="modal-btn secondary" id="format-link-cancel">Cancel</button>
+      <button class="modal-btn" id="format-link-remove">Remove</button>
+    </div>
+  </div>
+</div>
+
 <!-- Context Menu — positioned dynamically by JS -->
 <div id="context-menu" class="overlay-menu" hidden></div>
 
@@ -372,6 +418,7 @@
 <script src="js/view-mode.js"></script>
 <script src="js/units.js"></script>
 <script src="js/flow-chrome.js"></script>
+<script src="js/format-toolbar.js"></script>
 
 <!-- ============================================================
      INIT — wire everything together
@@ -626,6 +673,7 @@
     wireViewMode();
     wireUnits();
     Rga.FlowChrome && Rga.FlowChrome.init();
+    Rga.FormatToolbar && Rga.FormatToolbar.init();
 
     // Menu actions from main process
     if (window.rwanga && window.rwanga.on && window.rwanga.on.menuAction) {
