@@ -457,9 +457,9 @@ Living list. `STOP` and `CONFIRM` rows must be resolved with the designer before
 | 1 | Folding state lives in `localStorage`, keyed by `docId::frameId`, not in the .rga file | **RESOLVED** |
 | 2 | Drag handle (`⠿`) always visible at the start of every frame heading | **RESOLVED** |
 | 3 | F2 GO/NO-GO criteria — nested EditorView mounts, types, exits, saves, reopens; fallback is § 7.1 | **GO/NO-GO** — § 7 Step F2 |
-| 4 | Localized vocabularies for Kurdish/Arabic/Persian — the word lists in § 3.4 are placeholders. Designer to provide authoritative translations. | **CONFIRM** before F3 |
-| 5 | Slash-command surface (`/` on empty paragraph) — kept from the 2026-05-13 spec. Lives in `renderer/js/framework/slash-menu.js`. Block catalogue from previous spec § 5.2. | **CONFIRM** scope — still in v0.2 or deferred? |
-| 6 | `inlineFreeText` inside a scene — kept or deferred? If kept, how is it triggered (slash command only)? | **STOP** — must be resolved before F3 |
+| 4 | Localized vocabularies for Kurdish/Arabic/Persian — full translation surface | **IN PROGRESS** — designer filling `rwanga-editor/i18n/vocabulary.csv`. Implementer loads this file at runtime and seeds `doc.settings.vocabulary` + the UI string table from it. |
+| 5 | Slash-command surface (`/` on empty paragraph) — block-catalogue menu | **DECIDED — kept in v0.2.** Lives in `renderer/js/framework/slash-menu.js`. Triggered when the user types `/` at the start of an empty `paragraph` in the outer view; opens a filterable menu of block types (heading, quote, list, hr, page-break, title-strip, scene-frame). Inside a scene frame the slash menu is disabled — frames have their own keymap grammar. |
+| 6 | `inlineFreeText` inside a scene | **DECIDED — kept in v0.2.** Lives as an inner-schema block type alongside action/character/dialogue. Trigger: inside a scene, on an empty action block, typing `/` opens an in-frame slash menu offering `Free Text` (and other block types). Rendered as italic indented text with a left accent bar (existing CSS). |
 | 7 | The exact toolbox tool list and groupings for v0.2 | **CONFIRM** before F7 |
 | 8 | Cross-frame find/replace | **DECIDED** — deferred to v0.3 |
 | 9 | Cross-frame text selection (drag to select text from frame A to frame B) | **DECIDED** — accepted limitation; PM doesn't support it; documented in user-facing help |

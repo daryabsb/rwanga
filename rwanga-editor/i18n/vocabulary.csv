@@ -1,0 +1,341 @@
+section,key,en,ar,ku,fa,notes
+# ============================================================================
+# RWANGA EDITOR — TRANSLATION SOURCE
+# Columns: section,key,en,ar,ku,fa,notes
+# - "en" is authoritative; never blank. Translate the others.
+# - "key" is the programmatic identifier; do NOT translate.
+# - "notes" explains where the string appears in the UI.
+# - Strings with {placeholders} keep the {placeholder} verbatim.
+# - Lines starting with # are comments — leave them.
+# ============================================================================
+
+# === SCREENPLAY GRAMMAR — goes into doc.settings.vocabulary ===
+screenplay,sceneWord,SCENE,مشهد,دیمەن,صحنه,Identity-line word above each scene
+# --- Settings (slug picker) ---
+screenplay.settings,interior,INT.,داخلي.,ناوەوە.,داخلی.,Setting picker value
+screenplay.settings,exterior,EXT.,خارجي.,دەرەوە.,خارجی.,Setting picker value
+screenplay.settings,interior_exterior,INT./EXT.,داخلي./خارجي.,ناوەوە./دەرەوە.,داخلی./خارجی.,Setting picker value
+screenplay.settings,exterior_interior,EXT./INT.,خارجي./داخلي.,دەرەوە./ناوەوە.,خارجی./داخلی.,Setting picker value
+# --- Times (slug picker) ---
+screenplay.times,day,DAY,نهار,ڕۆژ,روز,Time picker value
+screenplay.times,night,NIGHT,ليل,شەو,شب,Time picker value
+screenplay.times,continuous,CONTINUOUS,مستمر,بەردەوام,پیوسته,Time picker value
+screenplay.times,dusk,DUSK,غسق,زەردەپەڕ,غروب,Time picker value
+screenplay.times,dawn,DAWN,فجر,بەرەبەیان,سپیده‌دم,Time picker value
+screenplay.times,morning,MORNING,صباحًا,بەیانی,صبح,Time picker value
+screenplay.times,afternoon,AFTERNOON,بعد الظهر,نیوەڕۆ,بعدازظهر,Time picker value
+screenplay.times,evening,EVENING,مساءً,ئێوارە,عصر,Time picker value
+screenplay.times,later,LATER,لاحقًا,دواتر,بعد از آن,Time picker value
+screenplay.times,moments_later,MOMENTS LATER,بعد لحظات,چەند ساتێک دواتر,لحظاتی بعد,Time picker value
+screenplay.times,same_time,SAME TIME,نفس الوقت,هەمان کات,همان زمان,Time picker value
+screenplay.times,magic_hour,MAGIC HOUR,ساعة سحرية,کاتژمێری جادوویی,ساعت جادویی,Time picker value
+screenplay.times,golden_hour,GOLDEN HOUR,ساعة ذهبية,کاتژمێری زێڕین,ساعت طلایی,Time picker value
+screenplay.times,meanwhile,MEANWHILE,في غضون ذلك,لەو کاتەدا,در همین حال,Time picker value
+screenplay.times,flashback,FLASHBACK,استرجاع,گەڕانەوە بۆ ڕابردوو,بازگشت به گذشته,Time picker value
+screenplay.times,flash_forward,FLASH FORWARD,استشراف,پەلامار بۆ داهاتوو,بازگشت به آینده,Time picker value
+# --- Transitions (transition block presets) ---
+screenplay.transitions,cut_to,CUT TO:,قطع إلى:,گواستنەوە بۆ:,کات به:,Transition preset
+screenplay.transitions,fade_in,FADE IN:,تلاشي للداخل:,سرنجڕاکێشانی هاتنە سەر:,محو شدن به داخل:,Transition preset
+screenplay.transitions,fade_out,FADE OUT.,تلاشي للخارج.,سرنجڕاکێشانی چوونە دەرەوە.,محو شدن از پرده.,Transition preset
+screenplay.transitions,dissolve_to,DISSOLVE TO:,انحلال إلى:,شیبوونەوە بۆ:,حل شدن به:,Transition preset
+screenplay.transitions,match_cut,MATCH CUT:,قطع مطابق:,گواستنەوەی هاوشێوە:,کات مطابق:,Transition preset
+screenplay.transitions,smash_cut_to,SMASH CUT TO:,قطع حاد إلى:,گواستنەوەی توند بۆ:,کات شدید به:,Transition preset
+screenplay.transitions,back_to,BACK TO:,العودة إلى:,گەڕانەوە بۆ:,بازگشت به:,Transition preset
+screenplay.transitions,begin_montage,BEGIN MONTAGE:,بدء المونتاج:,سەرەتای مۆنتاج:,شروع مونتاژ:,Transition preset
+screenplay.transitions,end_montage,END MONTAGE.,نهاية المونتاج.,کۆتایی مۆنتاج.,پایان مونتاژ.,Transition preset
+screenplay.transitions,intercut,INTERCUT:,تقاطع:,نێوبڕ:,اینترکات:,Transition preset
+screenplay.transitions,time_cut,TIME CUT:,قطع زمني:,گواستنەوەی کات:,کات زمانی:,Transition preset
+screenplay.transitions,jump_cut_to,JUMP CUT TO:,قطع قافز إلى:,گواستنەوەی هەڵبەزاو بۆ:,جامپ کات به:,Transition preset
+# --- Block types — shown in status bar, toolbox, and inspector ---
+screenplay.blocks,scene_line,Scene Heading,عنوان المشهد,سەرپەڕەی دیمەن,سرفصل صحنه,Block type display name
+screenplay.blocks,action,Action,وصف,وەسف,اکشن,Block type display name
+screenplay.blocks,character,Character,شخصية,کارەکتەر,شخصیت,Block type display name
+screenplay.blocks,dialogue,Dialogue,حوار,گفتوگۆ,دیالوگ,Block type display name
+screenplay.blocks,parenthetical,Parenthetical,بين قوسين,نێوبڕاندن,پرانتزی,Block type display name
+screenplay.blocks,transition,Transition,انتقال,گواستنەوە,ترانزیشن,Block type display name
+screenplay.blocks,shot,Shot,لقطة,شات,نما,Block type display name
+screenplay.blocks,inline_free_text,Free Text,نص حر,دەقی ئازاد,متن آزاد,Block type display name
+# --- Common parentheticals (suggestions) ---
+screenplay.parentheticals,beat,(beat),(صمت),(کەمێک وەستان),(مکث),Common parenthetical
+screenplay.parentheticals,pause,(pause),(توقف),(وەستان),(توقف),Common parenthetical
+screenplay.parentheticals,whispering,(whispering),(يهمس),(چرپە),(زمزمه),Common parenthetical
+screenplay.parentheticals,shouting,(shouting),(يصرخ),(هاوار),(فریاد),Common parenthetical
+screenplay.parentheticals,off_screen,(O.S.),(خارج الشاشة),(دەرەوەی پەردە),(خارج از تصویر),"Off-screen — read aloud as 'off screen'"
+screenplay.parentheticals,voice_over,(V.O.),(تعليق صوتي),(دەنگەدا),(صدای روی تصویر),Voice-over
+screenplay.parentheticals,continued,(CONT'D),(تكملة),(درێژەکراو),(ادامه),Continued
+
+# === GENERIC UI — block-type editor surface (outer "land" view) ===
+ui.land_blocks,paragraph,Paragraph,فقرة,بەند,پاراگراف,Outer view block type
+ui.land_blocks,heading_1,Heading 1,عنوان 1,سەرپەڕە ١,عنوان ۱,Outer view block type
+ui.land_blocks,heading_2,Heading 2,عنوان 2,سەرپەڕە ٢,عنوان ۲,Outer view block type
+ui.land_blocks,heading_3,Heading 3,عنوان 3,سەرپەڕە ٣,عنوان ۳,Outer view block type
+ui.land_blocks,quote,Quote,اقتباس,وتە,نقل قول,Outer view block type
+ui.land_blocks,bullet_list,Bulleted list,قائمة نقطية,لیستی خاڵی,لیست نقطه‌ای,Outer view block type
+ui.land_blocks,ordered_list,Numbered list,قائمة مرقمة,لیستی ژمارەکراو,لیست شماره‌دار,Outer view block type
+ui.land_blocks,horizontal_rule,Divider,فاصل,دابڕین,جداکننده,Outer view block type
+ui.land_blocks,page_break,Page break,فاصل صفحات,بڕینی لاپەڕە,شکستن صفحه,Outer view block type
+ui.land_blocks,title_strip,Title,عنوان,ناونیشان,عنوان,Outer view block type
+
+# === SLASH COMMAND (block catalogue menu) ===
+ui.slash_menu,title,Insert block…,إدراج كتلة…,بلۆک زیاد بکە…,بلوک درج کن…,Slash menu title
+ui.slash_menu,no_results,No matches,لا توجد نتائج,هیچ ئەنجامێک نییە,نتیجه‌ای یافت نشد,Slash menu empty state
+ui.slash_menu,scene_frame,Scene,مشهد,دیمەن,صحنه,Slash menu item — insert scene frame
+
+# === TAG ENTITY TYPES — context menu "Tag as" submenu ===
+ui.tag_types,character,Character,شخصية,کارەکتەر,شخصیت,Tag entity type
+ui.tag_types,prop,Prop,أداة,ئامێر,وسیله,Tag entity type
+ui.tag_types,wardrobe,Wardrobe,أزياء,جلوبەرگ,لباس,Tag entity type
+ui.tag_types,location,Location,موقع,شوێن,مکان,Tag entity type
+ui.tag_types,sfx,SFX,مؤثرات صوتية,کاریگەری دەنگی,جلوه‌های صوتی,Sound effects
+ui.tag_types,vfx,VFX,مؤثرات بصرية,کاریگەری بینراو,جلوه‌های بصری,Visual effects
+ui.tag_types,vehicle,Vehicle,مركبة,ئۆتۆمبێل,خودرو,Tag entity type
+ui.tag_types,animal,Animal,حيوان,ئاژەڵ,حیوان,Tag entity type
+ui.tag_types,custom,Custom,مخصص,تایبەتی,سفارشی,Tag entity type
+
+# === REVISION FLAG COLORS / MEANINGS ===
+ui.flag_colors,red,Red — mistake,أحمر — خطأ,سوور — هەڵە,قرمز — اشتباه,Revision flag color
+ui.flag_colors,yellow,Yellow — revisit,أصفر — مراجعة,زەرد — گەڕانەوە,زرد — بازبینی,Revision flag color
+ui.flag_colors,green,Green — love it,أخضر — معجب,سەوز — حەزم لێیە,سبز — عالی,Revision flag color
+ui.flag_colors,open,Open,مفتوح,کراوە,باز,Flag status
+ui.flag_colors,resolved,Resolved,محلول,چارەسەرکراو,حل‌شده,Flag status
+
+# === STATUS BAR ===
+ui.status,synced,Synced,متزامن,هاوکات,همگام‌سازی شد,Sync indicator
+ui.status,syncing,Syncing,جارٍ المزامنة,لە هاوکاتکردندایە,در حال همگام‌سازی,Sync indicator
+ui.status,offline,Offline,غير متصل,دەرەوەی هێڵ,آفلاین,Sync indicator
+ui.status,save_failed,Save failed,فشل الحفظ,پاشەکەوتکردن سەرکەوتوو نەبوو,ذخیره ناموفق,Sync indicator
+ui.status,scene_label,Scene,مشهد,دیمەن,صحنه,"e.g. 'Scene 3/12'"
+ui.status,words,words,كلمة,وشە,کلمه,"e.g. '1,234 words'"
+ui.status,page,page,صفحة,لاپەڕە,صفحه,Singular
+ui.status,pages,pages,صفحات,لاپەڕە,صفحه‌ها,Plural
+ui.status,problems,Problems,مشكلات,کێشەکان,مشکلات,Problems counter
+ui.status,dark,Dark,داكن,تاریک,تیره,Theme button label
+ui.status,light,Light,فاتح,ڕووناک,روشن,Theme button label
+ui.status,toggle_theme,Toggle Theme,تبديل المظهر,گۆڕینی ڕووکار,تغییر تم,Theme button tooltip
+ui.status,script_language_tooltip,Script Language,لغة السيناريو,زمانی سکریپت,زبان اسکریپت,Language button tooltip
+
+# === SCRIPT LANGUAGE NAMES (in their own language for the picker) ===
+ui.languages,en,English,الإنجليزية,ئینگلیزی,انگلیسی,Display in picker
+ui.languages,ku,Kurdish (Sorani),الكردية (سوراني),کوردی (سۆرانی),کردی (سورانی),Display in picker
+ui.languages,ar,Arabic,العربية,عەرەبی,عربی,Display in picker
+ui.languages,fa,Persian,الفارسية,فارسی,فارسی,Display in picker
+
+# === TITLE BAR / WINDOW CONTROLS ===
+ui.titlebar,app_name,Rwanga,رونگا,ڕوانگە,رونگا,App name (transliterate as appropriate)
+ui.titlebar,minimize,Minimize,تصغير,بچووککردن,کوچک‌سازی,Window control tooltip
+ui.titlebar,maximize,Maximize,تكبير,گەورەکردن,بزرگ‌سازی,Window control tooltip
+ui.titlebar,restore,Restore,استعادة,گەڕانەوەی پێشوو,بازگرداندن,Window control tooltip
+ui.titlebar,close,Close,إغلاق,داخستن,بستن,Window control tooltip
+
+# === BOTTOM PANEL TABS ===
+ui.bottom_panel,scene,Scene,مشهد,دیمەن,صحنه,Bottom panel tab
+ui.bottom_panel,notes,Notes,ملاحظات,تێبینی,یادداشت,Bottom panel tab
+ui.bottom_panel,flags,Flags,علامات,ئاڵا,نشانه‌ها,Bottom panel tab
+ui.bottom_panel,problems,Problems,مشكلات,کێشەکان,مشکلات,Bottom panel tab
+ui.bottom_panel,breakdown,Breakdown,تحليل,شیکار,تجزیه,Production breakdown
+ui.bottom_panel,toggle,Toggle Panel,تبديل اللوحة,گۆڕینی پەنل,تغییر پنل,Ctrl+J button tooltip
+
+# === SIDEBAR / EXPLORER ===
+ui.sidebar,explorer,Explorer,المستكشف,گەڕان,اکسپلورر,Sidebar header
+ui.sidebar,open_editors,Open Editors,المحررات المفتوحة,دەستکاریکراوە کراوەکان,ویرایشگرهای باز,Sidebar header
+ui.sidebar,no_open_files,No open files,لا توجد ملفات مفتوحة,هیچ پەڕگەیەکی کراوە نییە,فایلی باز نیست,Empty state
+ui.sidebar,new_file,New File,ملف جديد,پەڕگەی نوێ,فایل جدید,Sidebar action
+ui.sidebar,new_folder,New Folder,مجلد جديد,بوخچەی نوێ,پوشه جدید,Sidebar action
+ui.sidebar,refresh,Refresh,تحديث,نوێکردنەوە,تازه‌سازی,Sidebar action
+ui.sidebar,collapse_all,Collapse All,طي الكل,هەمووی داخستن,بستن همه,Sidebar action
+
+# === INSPECTOR (right panel) ===
+ui.inspector,title,Inspector,المفتش,پشکنەر,بازرس,Right panel title
+ui.inspector,empty,Select a tag or scene header to view details.,اختر علامة أو رأس مشهد لعرض التفاصيل.,تاگێک یان سەرپەڕەی دیمەنێک هەڵبژێرە بۆ بینینی وردەکارییەکان.,یک برچسب یا سرفصل صحنه را برای مشاهده انتخاب کنید.,Empty state
+ui.inspector,scene_details,Scene Details,تفاصيل المشهد,وردەکارییەکانی دیمەن,جزئیات صحنه,Section
+ui.inspector,tag_details,Tag Details,تفاصيل العلامة,وردەکارییەکانی تاگ,جزئیات برچسب,Section
+ui.inspector,note,Note,ملاحظة,تێبینی,یادداشت,Field label
+ui.inspector,color,Color,لون,ڕەنگ,رنگ,Field label
+ui.inspector,created,Created,تم الإنشاء,دروستکراو,ایجاد شد,Field label
+ui.inspector,author,Author,المؤلف,نووسەر,نویسنده,Field label
+ui.inspector,status,Status,الحالة,دۆخ,وضعیت,Field label
+ui.inspector,reason,Reason,السبب,هۆکار,دلیل,Field label
+ui.inspector,entity,Entity,كيان,بوون,موجودیت,Field label
+ui.inspector,occurrences,Occurrences,التكرارات,دووبارەبوونەوەکان,تکرارها,Field label
+
+# === TOP MENU BAR ===
+ui.menu,file,File,ملف,پەڕگە,فایل,Top menu
+ui.menu,edit,Edit,تحرير,دەستکاری,ویرایش,Top menu
+ui.menu,view,View,عرض,پیشاندان,نما,Top menu
+ui.menu,script,Script,سيناريو,سکریپت,اسکریپت,Top menu
+ui.menu,tags,Tags,علامات,تاگەکان,برچسب‌ها,Top menu
+ui.menu,export,Export,تصدير,هەناردنی,خروجی,Top menu
+ui.menu,help,Help,مساعدة,یارمەتی,راهنما,Top menu
+
+# === FILE MENU ===
+ui.menu.file,new,New Script,سيناريو جديد,سکریپتی نوێ,اسکریپت جدید,Menu item
+ui.menu.file,new_tab,New Tab,تبويب جديد,تابی نوێ,تب جدید,Menu item
+ui.menu.file,open,Open…,فتح…,کردنەوە…,بازکردن…,Menu item
+ui.menu.file,open_recent,Open Recent,فتح الأخيرة,کردنەوەی دواییەکان,بازکردن اخیر,Menu submenu
+ui.menu.file,save,Save,حفظ,پاشەکەوتکردن,ذخیره,Menu item
+ui.menu.file,save_as,Save As…,حفظ باسم…,پاشەکەوتکردن وەک…,ذخیره به عنوان…,Menu item
+ui.menu.file,close_tab,Close Tab,إغلاق التبويب,داخستنی تابە,بستن تب,Menu item
+ui.menu.file,close_window,Close Window,إغلاق النافذة,داخستنی پەنجەرە,بستن پنجره,Menu item
+ui.menu.file,page_setup,Page Setup…,إعداد الصفحة…,ڕێکخستنی لاپەڕە…,تنظیم صفحه…,Menu item
+ui.menu.file,preferences,Preferences…,التفضيلات…,پەسەندکراوەکان…,تنظیمات…,Menu item
+ui.menu.file,quit,Quit,خروج,چوونە دەرەوە,خروج,Menu item
+
+# === EDIT MENU ===
+ui.menu.edit,undo,Undo,تراجع,پاشگەزبوونەوە,لغو,Menu item
+ui.menu.edit,redo,Redo,إعادة,دووبارە,انجام مجدد,Menu item
+ui.menu.edit,cut,Cut,قص,بڕین,برش,Menu item
+ui.menu.edit,copy,Copy,نسخ,لەبەرگرتنەوە,کپی,Menu item
+ui.menu.edit,paste,Paste,لصق,لکاندن,چسباندن,Menu item
+ui.menu.edit,select_all,Select All,تحديد الكل,هەمووی هەڵبژاردن,انتخاب همه,Menu item
+ui.menu.edit,find,Find…,بحث…,گەڕان…,جست‌وجو…,Menu item
+ui.menu.edit,replace,Replace…,استبدال…,جێگۆڕکێ…,جایگزینی…,Menu item
+
+# === VIEW MENU ===
+ui.menu.view,toggle_sidebar,Toggle Sidebar,تبديل الشريط الجانبي,گۆڕینی پەنلی لاتەنیشت,تغییر نوار کناری,Menu item
+ui.menu.view,toggle_inspector,Toggle Inspector,تبديل المفتش,گۆڕینی پشکنەر,تغییر بازرس,Menu item
+ui.menu.view,toggle_panel,Toggle Bottom Panel,تبديل اللوحة السفلية,گۆڕینی پەنلی خوارەوە,تغییر پنل پایین,Menu item
+ui.menu.view,command_palette,Command Palette,لوحة الأوامر,پەنلی فەرمانەکان,پنل دستورات,Menu item
+ui.menu.view,zoom_in,Zoom In,تكبير,زوومی نزیک,بزرگنمایی,Menu item
+ui.menu.view,zoom_out,Zoom Out,تصغير,زوومی دوور,کوچک‌نمایی,Menu item
+ui.menu.view,reset_zoom,Actual Size,الحجم الأصلي,قەبارەی ڕاستی,اندازه واقعی,Menu item
+ui.menu.view,fullscreen,Full Screen,ملء الشاشة,پڕی پەردە,تمام صفحه,Menu item
+
+# === SCRIPT MENU ===
+ui.menu.script,insert_scene,Insert Scene,إدراج مشهد,زیادکردنی دیمەن,درج صحنه,Menu item
+ui.menu.script,fold_all,Collapse All Scenes,طي جميع المشاهد,داخستنی هەموو دیمەنەکان,بستن همه صحنه‌ها,Menu item
+ui.menu.script,unfold_all,Expand All Scenes,توسيع جميع المشاهد,کردنەوەی هەموو دیمەنەکان,باز کردن همه صحنه‌ها,Menu item
+ui.menu.script,go_to_scene,Go to Scene…,اذهب إلى المشهد…,بڕۆ بۆ دیمەن…,برو به صحنه…,Menu item
+ui.menu.script,element_styles,Element Styles…,أنماط العناصر…,شێوازی توخمەکان…,سبک عناصر…,Menu item
+ui.menu.script,vocabulary,Vocabulary…,المفردات…,وشەنامە…,واژگان…,Menu item
+
+# === EXPORT MENU ===
+ui.menu.export,pdf,Export as PDF…,تصدير كـ PDF…,هەناردنی وەک PDF…,خروجی به PDF…,Menu item
+ui.menu.export,docx,Export as DOCX…,تصدير كـ DOCX…,هەناردنی وەک DOCX…,خروجی به DOCX…,Menu item
+ui.menu.export,fountain,Export as Fountain…,تصدير كـ Fountain…,هەناردنی وەک Fountain…,خروجی به Fountain…,Menu item
+ui.menu.export,plain_text,Export as Plain Text…,تصدير كنص عادي…,هەناردنی وەک دەقی سادە…,خروجی به متن ساده…,Menu item
+
+# === HELP MENU ===
+ui.menu.help,documentation,Documentation,التوثيق,بەڵگەنامەکان,مستندات,Menu item
+ui.menu.help,keyboard_shortcuts,Keyboard Shortcuts,اختصارات لوحة المفاتيح,قێرنجەکانی کیبۆرد,میانبرهای صفحه‌کلید,Menu item
+ui.menu.help,report_issue,Report an Issue,أبلغ عن مشكلة,کێشە ڕاپۆرت بکە,گزارش مشکل,Menu item
+ui.menu.help,about,About Rwanga,حول رونگا,دەربارەی ڕوانگە,درباره رونگا,Menu item
+
+# === COMMON DIALOG BUTTONS ===
+ui.buttons,apply,Apply,تطبيق,جێبەجێ کردن,اعمال,Dialog button
+ui.buttons,cancel,Cancel,إلغاء,پاشگەزبوونەوە,انصراف,Dialog button
+ui.buttons,ok,OK,موافق,باشە,تأیید,Dialog button
+ui.buttons,save,Save,حفظ,پاشەکەوتکردن,ذخیره,Dialog button
+ui.buttons,dont_save,Don't Save,لا تحفظ,پاشەکەوت مەکە,ذخیره نکن,Dialog button
+ui.buttons,yes,Yes,نعم,بەڵێ,بله,Dialog button
+ui.buttons,no,No,لا,نەخێر,خیر,Dialog button
+ui.buttons,close,Close,إغلاق,داخستن,بستن,Dialog button
+ui.buttons,remove,Remove,حذف,سڕینەوە,حذف,Dialog button
+ui.buttons,edit,Edit,تحرير,دەستکاری,ویرایش,Dialog button
+ui.buttons,view,View,عرض,بینین,نمایش,Dialog button
+ui.buttons,delete,Delete,حذف,سڕینەوە,حذف,Dialog button
+ui.buttons,rename,Rename,إعادة تسمية,ناولێنانەوە,تغییر نام,Dialog button
+ui.buttons,new,New,جديد,نوێ,جدید,Dialog button
+ui.buttons,add,Add,إضافة,زیاد کردن,افزودن,Dialog button
+ui.buttons,replace,Replace,استبدال,جێگۆڕکێ,جایگزینی,Dialog button
+ui.buttons,replace_all,Replace All,استبدال الكل,جێگۆڕکێی هەموو,جایگزینی همه,Dialog button
+ui.buttons,find_next,Find Next,بحث عن التالي,گەڕان بۆ دواتر,بعدی,Dialog button
+ui.buttons,find_previous,Find Previous,بحث عن السابق,گەڕان بۆ پێشوو,قبلی,Dialog button
+
+# === CONTEXT MENU (right-click in editor) ===
+ui.context_menu,cut,Cut,قص,بڕین,برش,Right-click menu
+ui.context_menu,copy,Copy,نسخ,لەبەرگرتنەوە,کپی,Right-click menu
+ui.context_menu,paste,Paste,لصق,لکاندن,چسباندن,Right-click menu
+ui.context_menu,add_note,Add note,أضف ملاحظة,تێبینی زیاد بکە,یادداشت اضافه کن,Right-click menu
+ui.context_menu,tag_as,Tag as,علم كـ,وەک تاگ دابنێ,به عنوان برچسب,Right-click submenu
+ui.context_menu,flag_for_revision,Flag for revision,علم للمراجعة,بۆ پێداچوونەوە ئاڵا دابنێ,برای بازبینی نشانه بگذار,Right-click menu
+ui.context_menu,open_inspector,Open inspector,افتح المفتش,پشکنەر بکەرەوە,بازرس را باز کن,Right-click menu
+ui.context_menu,fold_scene,Collapse scene,طي المشهد,داخستنی دیمەن,بستن صحنه,Right-click on scene
+ui.context_menu,unfold_scene,Expand scene,توسيع المشهد,کردنەوەی دیمەن,باز کردن صحنه,Right-click on scene
+ui.context_menu,delete_scene,Delete scene,حذف المشهد,سڕینەوەی دیمەن,حذف صحنه,Right-click on scene
+ui.context_menu,duplicate_scene,Duplicate scene,تكرار المشهد,لێکچوونی دیمەن,تکرار صحنه,Right-click on scene
+
+# === PAGE SETUP DIALOG ===
+ui.page_setup,title,Page Setup,إعداد الصفحة,ڕێکخستنی لاپەڕە,تنظیم صفحه,Dialog title
+ui.page_setup,paper_size,Paper size,حجم الورق,قەبارەی کاغەز,اندازه کاغذ,Field label
+ui.page_setup,margins,Margins (inches),الهوامش (بوصة),پەراوێزەکان (ئینچ),حاشیه‌ها (اینچ),Section
+ui.page_setup,top,Top,أعلى,سەرەوە,بالا,Margin field
+ui.page_setup,bottom,Bottom,أسفل,خوارەوە,پایین,Margin field
+ui.page_setup,left,Left,يسار,چەپ,چپ,Margin field
+ui.page_setup,right,Right,يمين,ڕاست,راست,Margin field
+
+# === ANNOTATION POPUP ===
+ui.annotation,title,Note,ملاحظة,تێبینی,یادداشت,Popup title
+ui.annotation,placeholder,Write a note…,اكتب ملاحظة…,تێبینیێک بنووسە…,یادداشتی بنویسید…,Textarea placeholder
+ui.annotation,color_label,Color,اللون,ڕەنگ,رنگ,Field label
+
+# === TAG POPUP ===
+ui.tag,title,Tag,علامة,تاگ,برچسب,Popup title
+ui.tag,type_label,Type,النوع,جۆر,نوع,Field label
+ui.tag,entity_label,Entity,الكيان,بوون,موجودیت,Field label
+ui.tag,new_entity,New entity…,كيان جديد…,بوونی نوێ…,موجودیت جدید…,Dropdown option
+
+# === REVISION FLAG POPUP ===
+ui.flag,title,Flag for revision,علم للمراجعة,ئاڵا بۆ پێداچوونەوە,نشانه برای بازبینی,Popup title
+ui.flag,severity,Severity,الخطورة,قورسی,شدت,Field label
+ui.flag,reason_label,Reason,السبب,هۆکار,دلیل,Field label
+ui.flag,reason_placeholder,Why does this need revision?,لماذا يحتاج هذا إلى مراجعة؟,بۆچی ئەمە پێویستی بە پێداچوونەوەیە؟,چرا این به بازبینی نیاز دارد؟,Textarea placeholder
+
+# === COMMAND PALETTE ===
+ui.command_palette,placeholder,Type a command or search…,اكتب أمرًا أو ابحث…,فەرمانێک بنووسە یان بگەڕێ…,یک دستور بنویسید یا جست‌وجو کنید…,Input placeholder
+ui.command_palette,no_results,No matching commands,لا توجد أوامر مطابقة,هیچ فەرمانێکی هاوشێوە نییە,دستور مطابقی یافت نشد,Empty state
+
+# === FIND / REPLACE ===
+ui.find,find_placeholder,Find,بحث,گەڕان,جست‌وجو,Find input
+ui.find,replace_placeholder,Replace,استبدال,جێگۆڕکێ,جایگزینی,Replace input
+ui.find,match_case,Match case,مطابقة الحالة,هاوشێوەی حاڵەت,تطبیق با حروف بزرگ/کوچک,Toggle
+ui.find,whole_word,Whole word,كلمة كاملة,وشەی تەواو,کلمه کامل,Toggle
+ui.find,regex,Regex,تعبير نمطي,ڕێگەنامەی ڕێجێکس,عبارت منظم,Toggle
+ui.find,no_matches,No matches,لا توجد تطابقات,هیچ هاوشێوەیەک نییە,موردی یافت نشد,Status
+ui.find,results_count,{count} matches,{count} تطابقات,{count} هاوشێوە,{count} نتیجه,"{count} interpolated"
+
+# === PLACEHOLDERS / EMPTY STATES ===
+ui.placeholders,location,Location,موقع,شوێن,مکان,Slug location zone
+ui.placeholders,character,CHARACTER NAME,اسم الشخصية,ناوی کارەکتەر,نام شخصیت,Empty character block
+ui.placeholders,dialogue,Dialogue…,حوار…,گفتوگۆ…,دیالوگ…,Empty dialogue block
+ui.placeholders,action,Describe the action…,صف الحدث…,وەسفی ڕووداو بکە…,اکشن را توصیف کنید…,Empty action block
+ui.placeholders,title_strip,Script title,عنوان السيناريو,ناونیشانی سکریپت,عنوان اسکریپت,Title strip placeholder
+ui.placeholders,untitled,Untitled,بدون عنوان,بێ ناونیشان,بدون عنوان,Default new-doc name
+ui.placeholders,add_scene_notes,Add scene notes here…,أضف ملاحظات المشهد هنا…,تێبینی دیمەن لێرە زیاد بکە…,یادداشت‌های صحنه را اینجا اضافه کنید…,Notes panel
+ui.placeholders,filter_tags,Type to filter…,اكتب للتصفية…,بنووسە بۆ پاڵاوتن…,برای فیلتر تایپ کنید…,Tag filter
+ui.placeholders,no_scene_selected,No scene selected,لا يوجد مشهد محدد,هیچ دیمەنێک هەڵنەبژێردراوە,صحنه‌ای انتخاب نشده,Empty state
+ui.placeholders,no_notes,No notes yet,لا توجد ملاحظات بعد,تا ئێستا هیچ تێبینی نییە,هنوز یادداشتی نیست,Empty state
+ui.placeholders,no_flags,No flags,لا توجد علامات,هیچ ئاڵایەک نییە,هیچ نشانه‌ای نیست,Empty state
+ui.placeholders,no_problems,No problems,لا توجد مشكلات,هیچ کێشەیەک نییە,مشکلی نیست,Empty state
+
+# === TOAST / CONFIRMATION MESSAGES ===
+ui.toast,saved,Saved,تم الحفظ,پاشەکەوت کرا,ذخیره شد,After successful save
+ui.toast,save_failed,Save failed,فشل الحفظ,پاشەکەوتکردن سەرکەوتوو نەبوو,ذخیره ناموفق,After failed save
+ui.toast,opened,Opened {name},تم فتح {name},{name} کرایەوە,{name} باز شد,After file open
+ui.toast,copied,Copied,تم النسخ,لەبەرگیرایەوە,کپی شد,After clipboard copy
+ui.toast,deleted,Deleted,تم الحذف,سڕایەوە,حذف شد,After delete
+ui.toast,theme_switched,Switched to {theme} theme,تم التبديل إلى وضع {theme},گۆڕایت بۆ ڕووکاری {theme},به تم {theme} تغییر یافت,{theme} interpolated
+ui.toast,language_switched,Script language: {lang},لغة السيناريو: {lang},زمانی سکریپت: {lang},زبان اسکریپت: {lang},{lang} interpolated
+
+# === UNSAVED-CHANGES DIALOG ===
+ui.unsaved,title,Unsaved changes,تغييرات غير محفوظة,گۆڕانکارییە پاشەکەوت نەکراوەکان,تغییرات ذخیره‌نشده,Modal title
+ui.unsaved,message,"{name} has unsaved changes. Save before closing?","يحتوي {name} على تغييرات غير محفوظة. هل تريد الحفظ قبل الإغلاق؟","{name} گۆڕانکارییە پاشەکەوت نەکراوەی هەیە. پاشەکەوتی بکەی پێش داخستن؟","{name} تغییرات ذخیره‌نشده دارد. قبل از بستن ذخیره شود؟",Modal body. {name} interpolated.
+
+# === LANGUAGE-SWITCH PROMPT (offered when status-bar lang changes) ===
+ui.lang_switch,title,Switch vocabulary?,تبديل المفردات؟,گۆڕینی وشەنامە؟,تغییر واژگان؟,Modal title
+ui.lang_switch,message,"You switched the script language to {lang}. Replace the document's vocabulary with the {lang} preset?","لقد قمت بتغيير لغة السيناريو إلى {lang}. هل ترغب في استبدال مفردات المستند بمجموعة {lang} الجاهزة؟","زمانی سکریپتت گۆڕی بۆ {lang}. وشەنامەی بەڵگەنامەکە بگۆڕیت بە دەستەی پێشوەختی {lang}؟","شما زبان اسکریپت را به {lang} تغییر دادید. واژگان سند با پیش‌فرض {lang} جایگزین شود؟",Modal body
+ui.lang_switch,apply,Apply,تطبيق,جێبەجێ کردن,اعمال,Confirm button
+ui.lang_switch,keep,Keep current,الإبقاء على الحالي,ئەمە بهێڵەوە,حفظ فعلی,Cancel button
+
+# === ERROR MESSAGES ===
+ui.errors,file_open_failed,Could not open file.,تعذر فتح الملف.,نەتوانرا پەڕگەکە بکرێتەوە.,نمی‌توان فایل را باز کرد.,Generic error
+ui.errors,file_corrupt,The file is corrupt or not a valid .rga.,الملف تالف أو ليس ملف .rga صالح.,پەڕگەکە تێکچووە یان .rga ی دروست نییە.,فایل خراب است یا .rga معتبر نیست.,Specific
+ui.errors,file_newer_version,This .rga was created with a newer version of Rwanga.,تم إنشاء هذا الملف باستخدام إصدار أحدث من رونگا.,ئەم پەڕگەیە بە وەشانێکی نوێتری ڕوانگە دروستکراوە.,این فایل با نسخه جدیدتری از رونگا ساخته شده است.,Specific
+ui.errors,save_failed,Could not save the file.,تعذر حفظ الملف.,نەتوانرا پەڕگەکە پاشەکەوت بکرێت.,نمی‌توان فایل را ذخیره کرد.,Generic
+
+# === EXPORT DIALOG ===
+ui.export,title,Export,تصدير,هەناردنی,خروجی,Dialog title
+ui.export,format,Format,التنسيق,فۆرمات,فرمت,Field label
+ui.export,destination,Destination,الوجهة,شوێنی نیشانە,مقصد,Field label
+ui.export,include_scene_numbers,Include scene numbers,تضمين أرقام المشاهد,ژمارەی دیمەنەکان لەخۆبگرە,شامل شماره صحنه‌ها,Checkbox
+ui.export,include_revision_marks,Include revision marks,تضمين علامات المراجعة,نیشانەکانی پێداچوونەوە لەخۆبگرە,شامل علامت‌های بازبینی,Checkbox
+ui.export,branding,Branding,العلامة التجارية,نیشانە,برندینگ,Field label
