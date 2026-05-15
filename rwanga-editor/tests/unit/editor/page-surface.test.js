@@ -16,6 +16,7 @@ test('_cssVarsFor maps a Letter pageSetup to inch CSS values', () => {
   });
   assert.equal(v.width, '8.5in');
   assert.equal(v.minHeight, '11in');
+  assert.equal(v.contentMinHeight, '9in');
   assert.equal(v.paddingTop, '1in');
   assert.equal(v.paddingLeft, '1.5in');
 });

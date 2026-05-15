@@ -11,7 +11,7 @@
     };
   }
 
-  // Pure: pageSetup -> { width, minHeight, paddingTop/Right/Bottom/Left } in CSS inch units.
+  // Pure: pageSetup -> { width, minHeight, contentMinHeight, paddingTop/Right/Bottom/Left } in CSS inch units.
   function cssVarsFor(pageSetup) {
     const sizes = _paperSizes();
     const paper = sizes[pageSetup.paperSize] || sizes.Letter;
@@ -19,6 +19,7 @@
     return {
       width: paper.width + 'in',
       minHeight: paper.height + 'in',
+      contentMinHeight: (paper.height - m.top - m.bottom) + 'in',
       paddingTop: m.top + 'in',
       paddingRight: m.right + 'in',
       paddingBottom: m.bottom + 'in',
@@ -27,6 +28,7 @@
   }
 
   // Apply to the live .rga-page element.
+  // Also sets .ProseMirror min-height so the full content area is clickable when empty.
   function apply(pageSetup) {
     const page = document.querySelector('.rga-page');
     if (!page || !pageSetup || !pageSetup.margins) return;
@@ -37,6 +39,8 @@
     page.style.paddingRight = v.paddingRight;
     page.style.paddingBottom = v.paddingBottom;
     page.style.paddingLeft = v.paddingLeft;
+    const pm = page.querySelector('.ProseMirror');
+    if (pm) pm.style.minHeight = v.contentMinHeight;
   }
 
   Rga.PageSurface = { apply, _cssVarsFor: cssVarsFor };

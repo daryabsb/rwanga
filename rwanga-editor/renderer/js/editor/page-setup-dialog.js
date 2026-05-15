@@ -25,16 +25,32 @@
       .join('');
 
     overlay.innerHTML =
-      '<div class="modal-dialog">' +
+      '<div class="modal-dialog ps-dialog">' +
         '<div class="modal-title">Page Setup</div>' +
-        '<div class="modal-msg">' +
-          '<label>Paper size ' +
-            '<select id="ps-paper">' + sizeOptions + '</select>' +
-          '</label>' +
-          '<label>Top margin (in) <input id="ps-top" type="number" step="0.1" min="0"></label>' +
-          '<label>Right margin (in) <input id="ps-right" type="number" step="0.1" min="0"></label>' +
-          '<label>Bottom margin (in) <input id="ps-bottom" type="number" step="0.1" min="0"></label>' +
-          '<label>Left margin (in) <input id="ps-left" type="number" step="0.1" min="0"></label>' +
+        '<div class="ps-body">' +
+          '<div class="ps-field-row">' +
+            '<label class="ps-label" for="ps-paper">Paper size</label>' +
+            '<select class="ps-select" id="ps-paper">' + sizeOptions + '</select>' +
+          '</div>' +
+          '<div class="ps-section-label">Margins (inches)</div>' +
+          '<div class="ps-margins">' +
+            '<div class="ps-field">' +
+              '<label class="ps-label" for="ps-top">Top</label>' +
+              '<input class="ps-input" id="ps-top" type="number" step="0.1" min="0">' +
+            '</div>' +
+            '<div class="ps-field">' +
+              '<label class="ps-label" for="ps-bottom">Bottom</label>' +
+              '<input class="ps-input" id="ps-bottom" type="number" step="0.1" min="0">' +
+            '</div>' +
+            '<div class="ps-field">' +
+              '<label class="ps-label" for="ps-left">Left</label>' +
+              '<input class="ps-input" id="ps-left" type="number" step="0.1" min="0">' +
+            '</div>' +
+            '<div class="ps-field">' +
+              '<label class="ps-label" for="ps-right">Right</label>' +
+              '<input class="ps-input" id="ps-right" type="number" step="0.1" min="0">' +
+            '</div>' +
+          '</div>' +
         '</div>' +
         '<div class="modal-actions">' +
           '<button class="modal-btn primary" data-choice="apply">Apply</button>' +

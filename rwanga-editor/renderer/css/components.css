@@ -1007,3 +1007,62 @@
   color: #fff;
 }
 .modal-btn.primary:hover { filter: brightness(1.15); }
+
+/* ----- Page Setup dialog form ----- */
+.ps-dialog { min-width: 340px; max-width: 380px; }
+
+.ps-body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.ps-field-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.ps-section-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-tertiary);
+}
+
+.ps-margins {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 16px;
+}
+
+.ps-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ps-label {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.ps-input,
+.ps-select {
+  height: 28px;
+  padding: 0 8px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-secondary);
+  border-radius: 3px;
+  color: var(--text-primary);
+  font-size: 12px;
+  font-family: inherit;
+  outline: none;
+}
+.ps-input { width: 100%; }
+.ps-select { min-width: 120px; }
+.ps-input:focus,
+.ps-select:focus { border-color: var(--accent-primary); }
