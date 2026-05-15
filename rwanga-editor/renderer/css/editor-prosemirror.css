@@ -308,6 +308,55 @@
   border-color: rgba(0, 0, 0, 0.18);
 }
 
+/* ---- scene-frame placeholder: writable blocks ---- */
+
+.rga-scene-frame-placeholder-blocks {
+  margin-top: 8px;
+}
+
+.rga-scene-block {
+  /* width-free per 2026-05-15 — content-width, never full-width */
+  width: fit-content;
+  max-width: 100%;
+  min-width: 120px;
+  padding: 2px 6px;
+  margin: 2px 0;
+  border-left: 3px solid transparent;
+  outline: none;
+}
+
+.rga-scene-block:focus {
+  background: rgba(86, 156, 214, 0.08);
+}
+
+.rga-scene-block:empty::before {
+  content: attr(data-placeholder);
+  color: var(--text-tertiary, #666);
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* TEMP debug visual aid (replace in final styling pass): per-type left-border
+   color + small uppercase type tag, so Tab/Shift-Tab type changes are visible
+   without final per-type typography. */
+.rga-scene-block::after {
+  content: attr(data-block-type);
+  margin-left: 12px;
+  font-size: 0.7em;
+  color: var(--text-tertiary, #888);
+  opacity: 0.5;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+
+.rga-block-action        { border-left-color: #888; }
+.rga-block-character     { border-left-color: #4a9; }
+.rga-block-dialogue      { border-left-color: #6a8; }
+.rga-block-parenthetical { border-left-color: #ac6; }
+.rga-block-shot          { border-left-color: #a64; }
+.rga-block-transition    { border-left-color: #d62; }
+.rga-block-inlineFreeText{ border-left-color: #888; }
+
 /* ----- PAGE BREAK ----- */
 
 .ProseMirror .rga-page-break {
