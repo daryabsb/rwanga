@@ -96,6 +96,53 @@
   }
 
   /**
+   * Ctrl+Enter command: insert a new sceneFrame at the cursor.
+   * The new frame's `number` attr is set to (existing sceneFrames in doc + 1).
+   * Cursor lands at the body block after the inserted frame.
+   */
+  function insertSceneFrame(schema) {
+    return function(state, dispatch) {
+      const sceneFrameType = schema.nodes.sceneFrame;
+      if (!sceneFrameType) return false;
+      if (!dispatch) return true;
+
+      let sceneCount = 0;
+      state.doc.descendants(function(node) {
+        if (node.type === sceneFrameType) sceneCount += 1;
+        return true;
+      });
+
+      const newId = 'scene-' + Date.now().toString(36);
+      const frame = sceneFrameType.create({
+        id: newId,
+        number: sceneCount + 1,
+        headingStyle: null,
+        innerDoc: null
+      });
+
+      const $head = state.selection.$head;
+      // Insert after the current body-level block (depth 2: doc > body > block)
+      const insertDepth = Math.min($head.depth, 2);
+      const insertPos = insertDepth >= 2 ? $head.after(insertDepth) : state.doc.content.size;
+
+      const paragraphType = schema.nodes.paragraph;
+      const tr = state.tr.insert(insertPos, frame);
+      // Ensure there's a paragraph after the frame so the cursor has somewhere to land
+      let cursorPos = insertPos + frame.nodeSize;
+      const nodeAfter = tr.doc.resolve(cursorPos).nodeAfter;
+      if (!nodeAfter && paragraphType) {
+        tr.insert(cursorPos, paragraphType.create());
+      }
+      const TextSelection = PM.TextSelection;
+      if (TextSelection) {
+        tr.setSelection(TextSelection.near(tr.doc.resolve(cursorPos + 1)));
+      }
+      dispatch(tr.scrollIntoView());
+      return true;
+    };
+  }
+
+  /**
    * Mount a ProseMirror editor into the given DOM container.
    * @param {HTMLElement} container
    * @param {object} [opts] - { initialDoc, schema, documentType }
@@ -120,6 +167,7 @@
       'Mod-z': PM.undo,
       'Mod-y': PM.redo,
       'Mod-Shift-z': PM.redo,
+      'Mod-Enter': insertSceneFrame(schema),
     };
     if (boldMark) keymapEntries['Mod-b'] = PM.toggleMark(boldMark);
     if (italicMark) keymapEntries['Mod-i'] = PM.toggleMark(italicMark);

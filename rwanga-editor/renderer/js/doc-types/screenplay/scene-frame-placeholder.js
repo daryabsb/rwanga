@@ -27,6 +27,14 @@
       : (setting + ' — ' + time);
   }
 
+  function _sceneWord() {
+    const activeDoc = Rga.TabManager && Rga.TabManager.activeDoc && Rga.TabManager.activeDoc();
+    const vocab = activeDoc && activeDoc.settings && activeDoc.settings.vocabulary;
+    if (vocab && vocab.sceneWord) return vocab.sceneWord;
+    const c = Rga.Constants && Rga.Constants.DEFAULT_VOCABULARY;
+    return (c && c.sceneWord) || 'SCENE';
+  }
+
   function SceneFramePlaceholder(node) {
     this.dom = document.createElement('div');
     this.dom.className = 'rga-scene-frame-placeholder';
@@ -39,17 +47,20 @@
 
     const num = document.createElement('div');
     num.className = 'rga-scene-frame-placeholder-num';
-    num.textContent = 'Scene ' + (node.attrs.number == null ? '?' : node.attrs.number);
+    num.textContent = _sceneWord() + ' ' + (node.attrs.number == null ? '?' : node.attrs.number);
 
     this.dom.appendChild(num);
 
     const preview = _slugPreview(node.attrs.innerDoc);
+    const slug = document.createElement('div');
+    slug.className = 'rga-scene-frame-placeholder-slug';
     if (preview) {
-      const slug = document.createElement('div');
-      slug.className = 'rga-scene-frame-placeholder-slug';
       slug.textContent = preview;
-      this.dom.appendChild(slug);
+    } else {
+      slug.textContent = '(slug line — coming soon)';
+      slug.classList.add('rga-scene-frame-placeholder-slug-empty');
     }
+    this.dom.appendChild(slug);
 
     this.dom.dataset.sceneId     = node.attrs.id     || '';
     this.dom.dataset.sceneNumber = node.attrs.number == null ? '' : String(node.attrs.number);
