@@ -395,6 +395,10 @@ Rga.Keyboard = {
    ============================================================ */
 Rga.StatusBar = {
   init: function() {
+    var themeBtn = Rga.$('#status-theme');
+    if (themeBtn) {
+      themeBtn.addEventListener('click', function() { Rga.Theme.toggle(); });
+    }
     this.update();
   },
 
