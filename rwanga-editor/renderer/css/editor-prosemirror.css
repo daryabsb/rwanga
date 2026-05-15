@@ -10,10 +10,89 @@
    make styling decisions.
    ============================================================ */
 
-/* (rules added per styling-discussion decisions go here) */
-.view-flow  { /* default writing mode — continuous, comfortable width */ }
-.view-print { /* literal pages, breaks, desk background */ }
-.view-draft { /* pure text, line, color — no widgets */ }
+/* ---- PRINT view: literal paper sheet on a desk ---- */
+#editor-container.view-print {
+  background: var(--editor-bg);
+  padding: 32px 0;
+}
+#editor-container.view-print .rga-page {
+  background: var(--editor-page-bg) !important;
+  box-shadow: var(--editor-page-shadow) !important;
+  width: 8.5in !important;
+  min-height: 11in !important;
+  padding: 1in 1in 1in 1.5in !important;
+  border-radius: 2px;
+}
+
+/* ---- FLOW view: comfortable text column, no paper edges ---- */
+#editor-container.view-flow {
+  background: var(--editor-bg);
+  padding: 32px 0;
+}
+#editor-container.view-flow .rga-page {
+  background: transparent !important;
+  box-shadow: none !important;
+  width: 6.5in !important;
+  min-height: auto !important;
+  padding: 0 0.25in !important;
+  border-radius: 0;
+}
+
+/* ---- DRAFT view: hide all global chrome, focus on text ---- */
+body.view-draft-active #menu-bar,
+body.view-draft-active #activity-bar,
+body.view-draft-active #sidebar,
+body.view-draft-active #tab-bar,
+body.view-draft-active #bottom-panel,
+body.view-draft-active #inspector-panel,
+body.view-draft-active #status-bar,
+body.view-draft-active #workspace .resize-handle {
+  display: none !important;
+}
+body.view-draft-active #workspace,
+body.view-draft-active #center-column,
+body.view-draft-active #editor-area {
+  display: block !important;
+  height: 100vh;
+}
+#editor-container.view-draft {
+  background: var(--editor-bg);
+  padding: 64px 0;
+  height: 100vh;
+}
+#editor-container.view-draft .rga-page {
+  background: transparent !important;
+  box-shadow: none !important;
+  width: 6.5in !important;
+  min-height: auto !important;
+  padding: 0 !important;
+  border-radius: 0;
+}
+
+/* In Draft, the form-controls inside scenes lose their widget look —
+   values still readable, no dropdown arrows / borders / input boxes. */
+#editor-container.view-draft select,
+#editor-container.view-draft input[type="text"] {
+  background: transparent !important;
+  border: 0 !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  appearance: none !important;
+  outline: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  color: inherit !important;
+  font: inherit !important;
+  cursor: text;
+}
+#editor-container.view-draft .rga-scene-frame-placeholder {
+  background: transparent !important;
+  border: 0 !important;
+  padding: 0 !important;
+}
+#editor-container.view-draft .rga-scene-block::after {
+  content: none !important;
+}
 
 /* ----- View pill (status bar) ----- */
 .view-pill {
