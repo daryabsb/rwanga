@@ -43,7 +43,7 @@ A future `Rga.Preferences` module will provide:
 | `pageSetup.margins.left` | `1.5` | ✅ | ✅ | Wider for binding. |
 | `units` | `'in'` | ✅ | ✅ | `'in' \| 'cm' \| 'mm' \| 'px'`. Already in `doc.settings.units`. UI: status-bar pill (live). |
 | `font_family` | `'Courier Prime'` | ✅ | ✅ | Already in `doc.settings.font_family`. |
-| `font_size` | `12` (pt) | ✅ | ✅ | Already in `doc.settings.font_size`. |
+| `font_size` | `11` (pt) | ✅ | ✅ | Dropped from 12pt per user 2026-05-15 ("feels a bit large on screen"). Industry standard for printed PDF is still 12pt — Print export may rescale when shipped. Already in `doc.settings.font_size`. |
 
 ### Slug line
 

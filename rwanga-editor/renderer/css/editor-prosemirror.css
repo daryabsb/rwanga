@@ -18,13 +18,10 @@
   --doc-title: "";
 }
 #editor-container.view-print .rga-page {
-  background: var(--editor-page-bg) !important;
-  box-shadow: var(--editor-page-shadow) !important;
-  width: 8.5in !important;
-  min-height: 11in !important;
-  padding: 1in 1in 1in 1.5in !important;
+  /* No !important on width / min-height / padding here — page-surface.js
+     writes those inline from doc.settings.pageSetup (so Page Setup works).
+     The base .rga-page rule already supplies background + shadow + position. */
   border-radius: 2px;
-  position: relative;
 }
 
 /* Page 1 header — title top-left, NO page number (industry convention) */
@@ -607,7 +604,7 @@ body.view-draft-active #editor-area {
   gap: 2px;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  font-size: 12pt;
+  font-size: 11pt;
   font-weight: 700;
   margin: 0 0 8px 0;
   padding-bottom: 4px;
@@ -700,7 +697,7 @@ body.view-draft-active #editor-area {
 .rga-scene-frame-placeholder-blocks {
   margin-top: 8px;
   font-family: var(--font-editor, 'Courier Prime', 'Courier New', Courier, monospace);
-  font-size: 12pt;
+  font-size: 11pt;
   line-height: 1.3;
 }
 
