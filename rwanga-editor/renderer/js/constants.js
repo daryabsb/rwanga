@@ -34,6 +34,12 @@
       Legal:  { width: 8.5,  height: 14 }
     },
 
+    DEFAULT_VOCABULARY: {
+      settings: ['INT.', 'EXT.', 'INT./EXT.', 'EXT./INT.'],
+      times: ['DAY', 'NIGHT', 'CONTINUOUS', 'DUSK', 'DAWN'],
+      sceneWord: 'SCENE'
+    },
+
     AUTOSAVE_DEBOUNCE_MS: 2000,
     AUTOSAVE_MAX_INTERVAL_MS: 10000,
     WORKSPACE_WRITE_DEBOUNCE_MS: 1000,

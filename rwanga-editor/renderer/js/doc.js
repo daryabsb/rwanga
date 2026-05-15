@@ -53,6 +53,12 @@
         paperSize: 'Letter',
         margins: { top: 1, right: 1, bottom: 1, left: 1.5 },
       },
+      vocabulary: {
+        settings: ['INT.', 'EXT.', 'INT./EXT.', 'EXT./INT.'],
+        times: ['DAY', 'NIGHT', 'CONTINUOUS', 'DUSK', 'DAWN'],
+        sceneWord: 'SCENE'
+      },
+      sceneHeadingStyle: 'twoLine',
     };
   }
 
@@ -199,6 +205,8 @@
 
     const settings = parsed.settings || defaultSettings();
     if (!settings.pageSetup) settings.pageSetup = defaultSettings().pageSetup;
+    if (!settings.vocabulary) settings.vocabulary = defaultSettings().vocabulary;
+    if (!settings.sceneHeadingStyle) settings.sceneHeadingStyle = 'twoLine';
 
     return {
       docId: nextDocId(),

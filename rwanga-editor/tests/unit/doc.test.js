@@ -148,3 +148,30 @@ test('Doc.deserialize backfills pageSetup when an older v2.0 file lacks it', () 
   assert.equal(doc.settings.pageSetup.paperSize, 'Letter');
   assert.deepEqual(doc.settings.pageSetup.margins, { top: 1, right: 1, bottom: 1, left: 1.5 });
 });
+
+test('Doc settings include vocabulary with default settings/times', () => {
+  const doc = Doc.create();
+  assert.ok(doc.settings.vocabulary, 'vocabulary key must exist');
+  assert.ok(Array.isArray(doc.settings.vocabulary.settings), 'settings is an array');
+  assert.ok(doc.settings.vocabulary.settings.includes('INT.'), 'INT. is present');
+  assert.ok(Array.isArray(doc.settings.vocabulary.times), 'times is an array');
+  assert.ok(doc.settings.vocabulary.times.includes('DAY'), 'DAY is present');
+});
+
+test('Doc settings include sceneHeadingStyle', () => {
+  const doc = Doc.create();
+  assert.equal(doc.settings.sceneHeadingStyle, 'twoLine');
+});
+
+test('Doc.deserialize backfills vocabulary on old file', () => {
+  const schema = buildTestSchema();
+  const noVocab = JSON.stringify({
+    rga_version: '2.0',
+    metadata: { title: 'X' },
+    settings: { theme: 'dark', font_size: 12 },
+    body: null
+  });
+  const doc = Doc.deserialize(noVocab, '/old3.rga', { schema });
+  assert.ok(doc.settings.vocabulary, 'vocabulary must be backfilled');
+  assert.equal(doc.settings.sceneHeadingStyle, 'twoLine');
+});
