@@ -39,20 +39,18 @@
   user-select: none;
 }
 
-/* Page-break visual in Print: a 32px gap that reads as paper boundary.
-   Extends slightly past the page edges so the gap looks like a "desk"
-   strip showing through between two sheets. */
+/* Page-break visual in Print: a quiet 16px hairline gap that reads as a
+   paper boundary, not a UI element. Subtle borders + faint shadow only. */
 #editor-container.view-print .rga-page-break {
   position: absolute;
-  left: -1.5in;
-  right: -1in;
-  height: 36px;
+  left: 0;
+  right: 0;
+  height: 16px;
   background: var(--editor-bg);
-  border-top: 1px solid var(--border-secondary, rgba(0, 0, 0, 0.18));
-  border-bottom: 1px solid var(--border-secondary, rgba(0, 0, 0, 0.18));
+  border-top: 1px solid rgba(0, 0, 0, 0.10);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.10);
   box-shadow:
-    0 -3px 8px rgba(0, 0, 0, 0.18),
-    0 3px 8px rgba(0, 0, 0, 0.18);
+    inset 0 1px 2px rgba(0, 0, 0, 0.05);
   pointer-events: none;
 }
 
@@ -61,7 +59,7 @@
 #editor-container.view-print .rga-page-break::before {
   content: var(--doc-title);
   position: absolute;
-  top: calc(36px + 0.4in);
+  top: calc(16px + 0.4in);
   left: 1.5in;
   font-family: var(--font-editor, 'Courier Prime', 'Courier New', monospace);
   font-size: 10pt;
@@ -74,7 +72,7 @@
 #editor-container.view-print .rga-page-break::after {
   content: attr(data-page-label) ".";
   position: absolute;
-  top: calc(36px + 0.4in);
+  top: calc(16px + 0.4in);
   right: 1in;
   font-family: var(--font-editor, 'Courier Prime', 'Courier New', monospace);
   font-size: 10pt;
@@ -217,8 +215,41 @@ body.view-draft-active #editor-area {
   flex-shrink: 0;
   user-select: none;
 }
-body.view-draft-active #format-toolbar {
+body.view-draft-active #format-toolbar,
+body.view-draft-active #scene-toolbox {
   display: none;
+}
+
+/* ---- Scene toolbox: document/script-level tools, visually distinct ---- */
+#scene-toolbox {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 30px;
+  padding: 0 10px;
+  background: var(--bg-primary, #1e1e1e);
+  border-bottom: 1px solid var(--border-secondary, #444);
+  flex-shrink: 0;
+  user-select: none;
+}
+.scene-toolbox-label {
+  font-family: var(--font-ui, system-ui, sans-serif);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-tertiary, #888);
+  margin-right: 6px;
+}
+#scene-toolbox .format-btn {
+  height: 22px;
+  padding: 0 8px;
+  font-size: 11px;
+  width: auto;
+}
+#scene-toolbox .format-block-type {
+  height: 22px;
+  font-size: 11px;
+  min-width: 130px;
 }
 
 .format-btn {
