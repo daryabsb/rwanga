@@ -46,10 +46,39 @@
     active.editorState = editorView.state;
   }
 
+  function renderRecentFiles() {
+    const container = document.getElementById('empty-state-recent');
+    if (!container) return;
+    const recent = (Rga.FileManager && Rga.FileManager.getRecent) ? Rga.FileManager.getRecent() : [];
+    container.innerHTML = '';
+    if (!recent.length) return;
+    const label = document.createElement('div');
+    label.className = 'editor-empty-state-recent-label';
+    label.textContent = 'Recently Opened';
+    container.appendChild(label);
+    recent.forEach(function(r) {
+      const item = document.createElement('button');
+      item.className = 'editor-empty-state-recent-item';
+      const name = document.createElement('span');
+      name.className = 'editor-empty-state-recent-name';
+      name.textContent = r.displayName || r.handle;
+      const path = document.createElement('span');
+      path.className = 'editor-empty-state-recent-path';
+      path.textContent = r.handle;
+      item.appendChild(name);
+      item.appendChild(path);
+      item.addEventListener('click', function() {
+        if (Rga.FileManager && Rga.FileManager.openRecent) Rga.FileManager.openRecent(r.handle);
+      });
+      container.appendChild(item);
+    });
+  }
+
   function setNoDocState(isEmpty) {
     const ec = document.getElementById('editor-container');
     if (!ec) return;
     ec.classList.toggle('no-doc', isEmpty);
+    if (isEmpty) renderRecentFiles();
   }
 
   function activate(tabId) {
@@ -159,6 +188,20 @@
     if (newBtn) {
       newBtn.addEventListener('click', function() {
         if (Rga.FileManager && Rga.FileManager.newScript) Rga.FileManager.newScript();
+      });
+    }
+
+    const emptyNew = document.getElementById('empty-state-new');
+    if (emptyNew) {
+      emptyNew.addEventListener('click', function() {
+        if (Rga.FileManager && Rga.FileManager.newScript) Rga.FileManager.newScript();
+      });
+    }
+
+    const emptyOpen = document.getElementById('empty-state-open');
+    if (emptyOpen) {
+      emptyOpen.addEventListener('click', function() {
+        if (Rga.FileManager && Rga.FileManager.openFromDialog) Rga.FileManager.openFromDialog();
       });
     }
   }

@@ -44,6 +44,7 @@
       alert(`Cannot open file:\n${err.message}`);
       return null;
     }
+    if (handle) pushRecent(handle, doc.displayName);
     Rga.TabManager.openDocument(doc);
     return doc;
   }
@@ -89,5 +90,46 @@
     }
   }
 
-  Rga.FileManager = { newScript, openFromDialog, openFromContent, save, saveAs, setActive, getActive, notifyTitle };
+  // ---- Recent files (localStorage, max 8) ----
+
+  const RECENT_KEY = 'rga-recent-files';
+  const RECENT_MAX = 8;
+
+  function pushRecent(handle, displayName) {
+    if (!handle) return;
+    try {
+      let list = getRecent();
+      list = list.filter(function(r) { return r.handle !== handle; });
+      list.unshift({ handle: handle, displayName: displayName || handle, openedAt: Date.now() });
+      if (list.length > RECENT_MAX) list = list.slice(0, RECENT_MAX);
+      localStorage.setItem(RECENT_KEY, JSON.stringify(list));
+    } catch (_) {}
+  }
+
+  function getRecent() {
+    try {
+      const raw = localStorage.getItem(RECENT_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch (_) { return []; }
+  }
+
+  function removeRecent(handle) {
+    try {
+      const list = getRecent().filter(function(r) { return r.handle !== handle; });
+      localStorage.setItem(RECENT_KEY, JSON.stringify(list));
+    } catch (_) {}
+  }
+
+  async function openRecent(handle) {
+    try {
+      const result = await window.rwanga.files.read(handle);
+      return openFromContent(handle, result.content);
+    } catch (err) {
+      removeRecent(handle);
+      alert('Cannot open file:\n' + err.message);
+      return null;
+    }
+  }
+
+  Rga.FileManager = { newScript, openFromDialog, openFromContent, openRecent, getRecent, save, saveAs, setActive, getActive, notifyTitle };
 })();

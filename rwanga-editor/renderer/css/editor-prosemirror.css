@@ -32,12 +32,96 @@
   font-size: 15px;
   font-weight: 600;
   opacity: 0.5;
+  margin-bottom: 16px;
 }
 
-.editor-empty-state-hint {
+.editor-empty-state-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  pointer-events: all;
+}
+
+.empty-state-btn {
+  padding: 7px 18px;
+  border-radius: 4px;
+  border: 1px solid var(--border-secondary, #444);
+  background: var(--bg-secondary, #2a2a2a);
+  color: var(--text-primary, #ccc);
+  font-size: 13px;
+  cursor: pointer;
+  font-family: var(--font-ui, system-ui, sans-serif);
+  transition: background 0.12s, border-color 0.12s;
+}
+
+.empty-state-btn:hover {
+  background: var(--bg-hover, #383838);
+  border-color: var(--border-primary, #666);
+}
+
+.empty-state-btn--primary {
+  background: var(--accent-primary, #569cd6);
+  border-color: var(--accent-primary, #569cd6);
+  color: #fff;
+}
+
+.empty-state-btn--primary:hover {
+  background: var(--accent-hover, #4a8abf);
+  border-color: var(--accent-hover, #4a8abf);
+}
+
+.editor-empty-state-recent {
+  margin-top: 24px;
+  width: 320px;
+  text-align: left;
+  pointer-events: all;
+}
+
+.editor-empty-state-recent-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
   opacity: 0.35;
-  font-size: 12px;
-  margin-top: 4px;
+  margin-bottom: 6px;
+  padding: 0 4px;
+}
+
+.editor-empty-state-recent-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: background 0.1s;
+}
+
+.editor-empty-state-recent-item:hover {
+  background: var(--bg-hover, #2a2a2a);
+  border-color: var(--border-subtle, #333);
+}
+
+.editor-empty-state-recent-name {
+  font-size: 13px;
+  color: var(--text-primary, #ccc);
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.editor-empty-state-recent-path {
+  font-size: 11px;
+  color: var(--text-tertiary, #666);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  direction: rtl;
+  max-width: 160px;
+  flex-shrink: 0;
 }
 
 #editor-container.no-doc .editor-empty-state {

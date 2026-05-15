@@ -186,8 +186,12 @@
           <!-- Empty state — shown when no tab is open -->
           <div id="editor-empty-state" class="editor-empty-state">
             <div class="editor-empty-state-icon">✦</div>
-            <div class="editor-empty-state-title">No script open</div>
-            <div class="editor-empty-state-hint">File → New Script &nbsp;or&nbsp; Open…</div>
+            <div class="editor-empty-state-title">Rwanga Script Editor</div>
+            <div class="editor-empty-state-actions">
+              <button id="empty-state-new" class="empty-state-btn empty-state-btn--primary">New Script</button>
+              <button id="empty-state-open" class="empty-state-btn">Open…</button>
+            </div>
+            <div id="empty-state-recent" class="editor-empty-state-recent"></div>
           </div>
           <!-- ProseMirror mounts into #editor; .rga-page styles it as paper -->
           <div id="editor" class="rga-page"></div>

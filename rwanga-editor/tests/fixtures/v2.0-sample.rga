@@ -5,7 +5,7 @@
     "title": "The Coffee Order",
     "author": "Darya",
     "created": "2026-05-13T10:00:00Z",
-    "modified": "2026-05-13T14:30:00Z",
+    "modified": "2026-05-15T11:27:05.990Z",
     "version": 1,
     "revision_notes": "",
     "language": "en",
@@ -18,15 +18,48 @@
     "font_size": 12,
     "font_family": "Courier Prime",
     "show_scene_numbers": true,
-    "page_size": "Letter"
+    "page_size": "Letter",
+    "pageSetup": {
+      "paperSize": "Letter",
+      "margins": {
+        "top": 1,
+        "right": 1,
+        "bottom": 1,
+        "left": 1.5
+      }
+    },
+    "vocabulary": {
+      "settings": [
+        "INT.",
+        "EXT.",
+        "INT./EXT.",
+        "EXT./INT."
+      ],
+      "times": [
+        "DAY",
+        "NIGHT",
+        "CONTINUOUS",
+        "DUSK",
+        "DAWN"
+      ],
+      "sceneWord": "SCENE"
+    },
+    "sceneHeadingStyle": "twoLine"
   },
   "body": {
     "type": "doc",
     "content": [
       {
         "type": "titleStrip",
-        "attrs": { "removable": true },
-        "content": [{ "type": "text", "text": "The Coffee Order" }]
+        "attrs": {
+          "removable": true
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "The Coffee Order"
+          }
+        ]
       },
       {
         "type": "body",
@@ -34,55 +67,193 @@
           {
             "type": "paragraph",
             "content": [
-              { "type": "text", "text": "Opening should feel quiet." }
+              {
+                "type": "text",
+                "text": "Indeed, this is a normal paragraph and feels like it."
+              }
             ]
           },
           {
-            "type": "scene",
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "[94]"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": ">> ئەمە خەو نیە — سوریالە"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "This is not a dream — it's surreal. Nali's reality separates from the audience's reality. This scene is 2 minutes — short and dry and terrifying."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "[95]"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": ">> بوکەڵەکە = گەشە. سەمایەکە = ئەو سەمایەیە"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "The puppet = Gesha. The dance = the same dance from Scene 43a. Everything spirals back. But this time — there's fire."
+              }
+            ]
+          },
+          {
+            "type": "paragraph"
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "[97]"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": ">> ئێستا لەناکاو هەموو شتێک مانا ئەدات"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "C1: Now suddenly everything makes sense. That gardener in Scene 2 — he was talking all along — describing the same events. The audience now knows: what \"watched you\" from Scene 2 onward — was Nali, was Nali's fear, was Nali's world — but in imagination. The entire film was Nali's imagination to see what would happen if that event happ"
+              }
+            ]
+          },
+          {
+            "type": "sceneFrame",
             "attrs": {
               "id": "scene-7f2a",
               "number": 1,
-              "notes": "Establish mood. Camera stays wide.",
-              "revisionFlag": null,
-              "headingStyle": null
-            },
-            "content": [
-              {
-                "type": "sceneLine",
-                "attrs": { "setting": "INT.", "time": "NIGHT" },
-                "content": [{ "type": "text", "text": "CAFÉ" }]
-              },
-              {
-                "type": "action",
+              "headingStyle": null,
+              "innerDoc": {
+                "type": "doc",
+                "attrs": {
+                  "notes": "Establish mood. Camera stays wide.",
+                  "revisionFlag": null
+                },
                 "content": [
-                  { "type": "text", "text": "A dimly lit café. Rain streaks the windows. " },
                   {
-                    "type": "text",
-                    "text": "Sarah",
-                    "marks": [{ "type": "tag", "attrs": { "tagType": "character", "entityId": "ent-sarah" } }]
+                    "type": "sceneLine",
+                    "attrs": {
+                      "setting": "INT.",
+                      "time": "NIGHT"
+                    },
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "CAFÉ"
+                      }
+                    ]
                   },
-                  { "type": "text", "text": " sits alone." }
-                ]
-              },
-              { "type": "character", "content": [{ "type": "text", "text": "SARAH" }] },
-              {
-                "type": "dialogue",
-                "content": [
                   {
-                    "type": "text",
-                    "text": "I've been waiting for an hour.",
-                    "marks": [{ "type": "revisionFlag", "attrs": { "reason": "Punchier?", "status": "open", "createdAt": null } }]
+                    "type": "action",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "A dimly lit café. Rain streaks the windows. "
+                      },
+                      {
+                        "type": "text",
+                        "text": "Sarah",
+                        "marks": [
+                          {
+                            "type": "tag",
+                            "attrs": {
+                              "tagType": "character",
+                              "entityId": "ent-sarah"
+                            }
+                          }
+                        ]
+                      },
+                      {
+                        "type": "text",
+                        "text": " sits alone."
+                      }
+                    ]
+                  },
+                  {
+                    "type": "character",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "SARAH"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "dialogue",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "I've been waiting for an hour.",
+                        "marks": [
+                          {
+                            "type": "revisionFlag",
+                            "attrs": {
+                              "reason": "Punchier?",
+                              "status": "open",
+                              "createdAt": null
+                            }
+                          }
+                        ]
+                      }
+                    ]
                   }
                 ]
               }
-            ]
+            }
           }
         ]
       }
     ]
   },
   "tag_registry": {
-    "characters": [{ "id": "ent-sarah", "name": "SARAH", "color": "#4FC1FF", "notes": "" }],
+    "characters": [
+      {
+        "id": "ent-sarah",
+        "name": "SARAH",
+        "color": "#4FC1FF",
+        "notes": ""
+      }
+    ],
     "props": [],
     "wardrobe": [],
     "locations": [],
@@ -92,6 +263,7 @@
     "animals": [],
     "custom": []
   },
+  "flag_log": [],
   "export_settings": {
     "branding": "rwanga",
     "letterhead_url": null,
