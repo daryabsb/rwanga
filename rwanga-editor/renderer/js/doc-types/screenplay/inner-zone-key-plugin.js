@@ -77,6 +77,11 @@
                 return true;
               }
             }
+            // Swallow Tab anywhere in sceneLine to prevent browser focus navigation
+            if (event.key === 'Tab') {
+              event.preventDefault();
+              return true;
+            }
           }
 
           return false;

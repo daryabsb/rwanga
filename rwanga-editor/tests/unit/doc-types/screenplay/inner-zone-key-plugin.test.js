@@ -185,14 +185,16 @@ test('ArrowLeft at start of location activates setting zone', () => {
   assert.ok(nv.calls.some(c => c[0] === 'activateZone' && c[1] === 'setting'));
 });
 
-test('Tab at start of location (not at end) returns false — no transition', () => {
+test('Tab at start of location (not at end) is swallowed to prevent focus leak', () => {
   const h = getHandler();
-  // cursor at start, Tab forward — not at end so no action
+  // cursor at start, Tab forward — not at end so no zone transition, but Tab
+  // must still be consumed to prevent the browser from moving focus out of the
+  // inner EditorView (Fix 3: mid-location Tab swallow).
   const { view } = makeView('location', 0, 10);
   const event = makeEvent('Tab', false);
   const result = h(view, event);
-  assert.equal(result, false);
-  assert.equal(event.defaultPrevented, false);
+  assert.equal(result, true);
+  assert.equal(event.defaultPrevented, true);
 });
 
 test('ArrowLeft in middle of location returns false', () => {

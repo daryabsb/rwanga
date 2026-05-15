@@ -34,8 +34,10 @@
     const sp = Rga.DocTypes.screenplay;
     const plugins = [];
     if (PM.history) plugins.push(PM.history());
+    // Inner keymap and zone-key plugin BEFORE baseKeymap so they win for Tab/Enter
     if (sp.buildInnerKeymap) plugins.push(sp.buildInnerKeymap(innerSchema));
     if (sp.buildZoneKeyPlugin) plugins.push(sp.buildZoneKeyPlugin());
+    if (PM.keymap && PM.baseKeymap) plugins.push(PM.keymap(PM.baseKeymap));
     return plugins;
   }
 

@@ -91,6 +91,15 @@
     this._closePicker();
   };
 
+  SceneLineNodeView.prototype.ignoreMutation = function(mutation) {
+    // Let PM handle mutations inside the location (contentDOM)
+    if (this.contentDOM && (mutation.target === this.contentDOM || this.contentDOM.contains(mutation.target))) {
+      return false;
+    }
+    // Ignore everything else (picker append/remove, setting/time text refresh)
+    return true;
+  };
+
   SceneLineNodeView.prototype._closePicker = function() {
     if (this._picker && this._picker.parentNode) {
       this._picker.parentNode.removeChild(this._picker);
