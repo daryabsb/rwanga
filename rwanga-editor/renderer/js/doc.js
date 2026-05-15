@@ -59,6 +59,7 @@
         sceneWord: 'SCENE'
       },
       sceneHeadingStyle: 'twoLine',
+      units: 'in',  // measurement unit for margins/ruler/dialogs; 'in'|'cm'|'mm'|'px'
     };
   }
 
@@ -265,6 +266,7 @@
     if (!settings.pageSetup) settings.pageSetup = defaultSettings().pageSetup;
     if (!settings.vocabulary) settings.vocabulary = defaultSettings().vocabulary;
     if (!settings.sceneHeadingStyle) settings.sceneHeadingStyle = 'twoLine';
+    if (!settings.units) settings.units = 'in';
 
     return {
       docId: nextDocId(),

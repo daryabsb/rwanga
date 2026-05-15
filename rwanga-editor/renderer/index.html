@@ -289,6 +289,7 @@
         <button class="view-pill-seg" data-view="print">Print</button>
         <button class="view-pill-seg" data-view="draft">Draft</button>
       </div>
+      <button class="status-item status-btn" id="status-units" title="Measurement unit (click to cycle)">in</button>
       <button class="status-item status-btn" id="status-theme" title="Toggle Theme"></button>
       <button class="status-item status-btn" id="status-language">EN</button>
     </div>
@@ -365,6 +366,7 @@
 <script src="js/editor/page-setup-dialog.js"></script>
 <script src="js/editor/shortcuts.js"></script>
 <script src="js/view-mode.js"></script>
+<script src="js/units.js"></script>
 
 <!-- ============================================================
      INIT — wire everything together
@@ -583,6 +585,22 @@
     refreshDraftExit(Rga.ViewMode.get());
   }
 
+  /* ---- Units pill wiring ---- */
+  function wireUnits() {
+    if (!Rga.Units) return;
+    const btn = Rga.$('#status-units');
+    function paint() {
+      if (btn) btn.textContent = Rga.Units.current();
+    }
+    if (btn) {
+      btn.addEventListener('click', function() { Rga.Units.cycle(); });
+    }
+    Rga.Units.onChange(paint);
+    // Also refresh on tab switch (per-doc units may differ).
+    document.addEventListener('editor.tabActivated', paint);
+    paint();
+  }
+
   /* ---- BOOT SEQUENCE ---- */
   function boot() {
     injectIcons();
@@ -601,6 +619,7 @@
     Rga.ScriptLanguage.init();
     Rga.StatusBar.init();
     wireViewMode();
+    wireUnits();
 
     // Menu actions from main process
     if (window.rwanga && window.rwanga.on && window.rwanga.on.menuAction) {
