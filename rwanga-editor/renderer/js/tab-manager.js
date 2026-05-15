@@ -139,7 +139,7 @@
 
     const editorEl = document.getElementById('editor');
     if (editorEl && Rga.Editor && Rga.Editor.mount) {
-      const mounted = Rga.Editor.mount(editorEl);
+      const mounted = Rga.Editor.mount(editorEl, { documentType: 'screenplay' });
       if (mounted) {
         editorView = mounted.view;
       } else {

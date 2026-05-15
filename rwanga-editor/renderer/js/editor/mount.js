@@ -4,18 +4,101 @@
 (function() {
   const Rga = window.Rga = window.Rga || {};
 
-  // Active schema — provided by the active document's type package.
-  // Phase 2: screenplay only. Future: lookup by doc.document_type.
-  function activeSchema() {
-    const s = Rga.DocTypes && Rga.DocTypes.screenplay && Rga.DocTypes.screenplay.schema;
-    if (!s) console.error('[Rga.Editor] No screenplay schema — is doc-types/screenplay/schema.js loaded after bundle.js?');
-    return s || null;
+  // Base nodes present in every outer document, regardless of doc-type.
+  const baseOuterNodes = {
+    doc:        { content: 'titleStrip? body' },
+    titleStrip: {
+      content: 'text*',
+      attrs: { removable: { default: true } },
+      parseDOM: [{ tag: 'div.rga-title-strip' }],
+      toDOM: function(node) {
+        return ['div', { class: 'rga-title-strip', 'data-removable': String(node.attrs.removable) }, 0];
+      }
+    },
+    body: {
+      content: 'block*',
+      parseDOM: [{ tag: 'div.rga-body' }],
+      toDOM: function() { return ['div', { class: 'rga-body' }, 0]; }
+    },
+    paragraph: {
+      content: 'inline*',
+      group: 'block',
+      parseDOM: [{ tag: 'p' }],
+      toDOM: function() { return ['p', 0]; }
+    },
+    heading: {
+      content: 'inline*',
+      group: 'block',
+      attrs: { level: { default: 1 } },
+      parseDOM: [
+        { tag: 'h1', attrs: { level: 1 } },
+        { tag: 'h2', attrs: { level: 2 } },
+        { tag: 'h3', attrs: { level: 3 } }
+      ],
+      toDOM: function(node) { return ['h' + node.attrs.level, 0]; }
+    },
+    blockquote: {
+      content: 'inline*',
+      group: 'block',
+      parseDOM: [{ tag: 'blockquote' }],
+      toDOM: function() { return ['blockquote', 0]; }
+    },
+    bulletList: {
+      content: 'listItem+',
+      group: 'block',
+      parseDOM: [{ tag: 'ul' }],
+      toDOM: function() { return ['ul', 0]; }
+    },
+    orderedList: {
+      content: 'listItem+',
+      group: 'block',
+      attrs: { start: { default: 1 } },
+      parseDOM: [{ tag: 'ol', getAttrs: function(dom) { return { start: +dom.getAttribute('start') || 1 }; } }],
+      toDOM: function(node) {
+        return node.attrs.start === 1 ? ['ol', 0] : ['ol', { start: node.attrs.start }, 0];
+      }
+    },
+    listItem: {
+      content: 'paragraph block*',
+      parseDOM: [{ tag: 'li' }],
+      toDOM: function() { return ['li', 0]; }
+    },
+    horizontalRule: {
+      group: 'block',
+      parseDOM: [{ tag: 'hr' }],
+      toDOM: function() { return ['hr']; }
+    },
+    pageBreak: {
+      group: 'block',
+      attrs: { manual: { default: true } },
+      parseDOM: [{ tag: 'div.rga-page-break' }],
+      toDOM: function() { return ['div', { class: 'rga-page-break' }]; }
+    },
+    text: { group: 'inline' }
+  };
+
+  // Build the active outer schema by composing base nodes/marks with the
+  // registered doc-type's outerNodes.
+  function activeSchema(documentType) {
+    const PM = window.RgaProseMirror;
+    if (!PM) {
+      console.error('[Rga.Editor] ProseMirror bundle not loaded');
+      return null;
+    }
+    if (!Rga.DocTypes || !Rga.DocTypes.has(documentType)) {
+      console.error('[Rga.Editor] No doc-type registered for "' + documentType + '"');
+      return null;
+    }
+    const docType = Rga.DocTypes.get(documentType);
+    const nodes = Object.assign({}, baseOuterNodes, docType.outerNodes);
+    const marks = (Rga.Framework && Rga.Framework.baseOuterMarks) || {};
+    return new PM.Schema({ nodes: nodes, marks: marks });
   }
 
   /**
    * Mount a ProseMirror editor into the given DOM container.
-   * @param {HTMLElement} container - the target element (will be cleared)
-   * @param {object} [opts] - { initialDoc, schema, plugins }
+   * @param {HTMLElement} container
+   * @param {object} [opts] - { initialDoc, schema, documentType }
    * @returns {{ view: EditorView, state: EditorState } | null}
    */
   function mount(container, opts) {
@@ -26,7 +109,8 @@
     }
 
     opts = opts || {};
-    const schema = opts.schema || activeSchema();
+    const documentType = opts.documentType || 'screenplay';
+    const schema = opts.schema || activeSchema(documentType);
     if (!schema) return null;
 
     const boldMark = schema.marks.bold;
@@ -36,9 +120,6 @@
       'Mod-z': PM.undo,
       'Mod-y': PM.redo,
       'Mod-Shift-z': PM.redo,
-      // Prevent Tab from escaping the editor when not in a scene (screenplay keymap handles in-scene Tab).
-      'Tab': () => true,
-      'Shift-Tab': () => true,
     };
     if (boldMark) keymapEntries['Mod-b'] = PM.toggleMark(boldMark);
     if (italicMark) keymapEntries['Mod-i'] = PM.toggleMark(italicMark);
@@ -49,60 +130,37 @@
       PM.keymap(PM.baseKeymap),
     ].concat(opts.plugins || []);
 
-    // Prepend screenplay keymap so it takes priority over base keymap
-    if (Rga.DocTypes && Rga.DocTypes.screenplay && Rga.DocTypes.screenplay.buildKeymap) {
-      const screenplayKeymap = Rga.DocTypes.screenplay.buildKeymap(schema);
-      plugins.unshift(PM.keymap(screenplayKeymap));
+    // Mark plugins: context-menu, annotations, tags, revision flags, page-breaks.
+    // These are no-ops on atom nodes (sceneFrame) in F1 but become active in F2+.
+    const sp = Rga.DocTypes && Rga.DocTypes.screenplay;
+    if (sp && sp.contextMenuPlugin) {
+      plugins.push(sp.contextMenuPlugin());
     }
-
-    // Active-scene tracker plugin
-    if (Rga.DocTypes && Rga.DocTypes.screenplay && Rga.DocTypes.screenplay.activeScenePlugin) {
-      plugins.push(Rga.DocTypes.screenplay.activeScenePlugin());
+    if (sp && sp.annotationsPlugin) {
+      plugins.push(sp.annotationsPlugin());
     }
-
-    // Mark plugins: context-menu, annotations, tags (click handler), revision flags
-    if (Rga.DocTypes && Rga.DocTypes.screenplay && Rga.DocTypes.screenplay.contextMenuPlugin) {
-      plugins.push(Rga.DocTypes.screenplay.contextMenuPlugin());
+    if (sp && sp.tagsPlugin) {
+      plugins.push(sp.tagsPlugin());
     }
-    if (Rga.DocTypes && Rga.DocTypes.screenplay && Rga.DocTypes.screenplay.annotationsPlugin) {
-      plugins.push(Rga.DocTypes.screenplay.annotationsPlugin());
+    if (sp && sp.revisionFlagsPlugin) {
+      plugins.push(sp.revisionFlagsPlugin());
     }
-    if (Rga.DocTypes && Rga.DocTypes.screenplay && Rga.DocTypes.screenplay.tagsPlugin) {
-      plugins.push(Rga.DocTypes.screenplay.tagsPlugin());
-    }
-    if (Rga.DocTypes && Rga.DocTypes.screenplay && Rga.DocTypes.screenplay.revisionFlagsPlugin) {
-      plugins.push(Rga.DocTypes.screenplay.revisionFlagsPlugin());
-    }
-    if (Rga.DocTypes && Rga.DocTypes.screenplay && Rga.DocTypes.screenplay.pageBreaksPlugin) {
-      plugins.push(Rga.DocTypes.screenplay.pageBreaksPlugin(function() {
+    if (sp && sp.pageBreaksPlugin) {
+      plugins.push(sp.pageBreaksPlugin(function() {
         const doc = Rga.TabManager && Rga.TabManager.activeDoc && Rga.TabManager.activeDoc();
         return doc && doc.settings ? doc.settings.pageSetup : null;
       }));
     }
 
-    if (Rga.DocTypes && Rga.DocTypes.screenplay && Rga.DocTypes.screenplay.zoneKeyPlugin) {
-      plugins.push(Rga.DocTypes.screenplay.zoneKeyPlugin());
-    }
-    if (Rga.DocTypes && Rga.DocTypes.screenplay && Rga.DocTypes.screenplay.autoRenumberPlugin) {
-      plugins.push(Rga.DocTypes.screenplay.autoRenumberPlugin());
+    const docType = Rga.DocTypes.get(documentType);
+    const nodeViews = {};
+    if (typeof docType.placeholderNodeViewFactory === 'function') {
+      nodeViews.sceneFrame = docType.placeholderNodeViewFactory();
     }
 
     const initialDoc = opts.initialDoc || emptyDoc(schema);
 
     const state = PM.EditorState.create({ schema, doc: initialDoc, plugins });
-
-    const getActiveSettings = function() {
-      const doc = Rga.TabManager && Rga.TabManager.activeDoc && Rga.TabManager.activeDoc();
-      return doc && doc.settings ? doc.settings : null;
-    };
-    const nodeViews = {};
-    const sp = Rga.DocTypes && Rga.DocTypes.screenplay;
-    if (sp && sp.sceneLineNodeViewFactory) {
-      nodeViews.sceneLine = sp.sceneLineNodeViewFactory(getActiveSettings);
-    }
-    if (sp && sp.sceneNodeViewFactory) {
-      nodeViews.scene = sp.sceneNodeViewFactory(getActiveSettings);
-    }
 
     container.innerHTML = '';
     const view = new PM.EditorView(container, {
@@ -117,7 +175,6 @@
             const wasClean = !doc.dirty;
             Rga.Doc.markDirty(doc);
             if (wasClean) {
-              // Only update UI on the clean→dirty transition to avoid DOM churn on every keystroke
               if (Rga.TabManager.renderTabBar) Rga.TabManager.renderTabBar();
               if (Rga.FileManager && Rga.FileManager.notifyTitle) Rga.FileManager.notifyTitle();
             }
@@ -159,7 +216,7 @@
    * @returns {Node}
    */
   function emptyDoc(schema) {
-    schema = schema || activeSchema();
+    schema = schema || activeSchema('screenplay');
     return schema.node('doc', null, [
       schema.node('body', null, [
         schema.node('paragraph')
