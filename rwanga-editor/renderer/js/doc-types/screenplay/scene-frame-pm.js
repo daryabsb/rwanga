@@ -234,17 +234,32 @@
     this._refreshValues(node);
   };
 
+  // Step 4d: dispose of an inner PM EditorView attached to a block div.
+  // Must be called before removing the block from the DOM, otherwise PM
+  // listeners + plugin state leak. Safe to call on a block that was never
+  // mounted (no-op).
+  SceneFramePm.prototype._destroyBlockInnerEditor = function(blockEl) {
+    if (!blockEl || !blockEl._innerView) return;
+    try { blockEl._innerView.destroy(); } catch (_) { /* swallow — already destroyed */ }
+    blockEl._innerView = null;
+  };
+
   // Step 4a: render each block from attrs.innerDoc as a non-editable div.
   // Step 4b: clicking a block mounts a tiny inner PM EditorView in place.
+  // Step 4d: each existing block's inner editor is properly destroyed
+  // before the container is cleared, so re-renders don't leak PM state.
   // Idempotent: called on initial build and on every external node update.
   // The loop guard in _refreshValues prevents echo re-renders from
   // self-dispatch destroying a mounted inner editor mid-keystroke.
   SceneFramePm.prototype._renderBlocksReadOnly = function(node) {
     const container = this._blocksContainer;
     if (!container) return;
+    const self = this;
+    Array.prototype.slice.call(container.children).forEach(function(child) {
+      self._destroyBlockInnerEditor(child);
+    });
     while (container.firstChild) container.removeChild(container.firstChild);
 
-    const self = this;
     const blocks = _extractBlocks(node.attrs.innerDoc);
     blocks.forEach(function(b, index) {
       const el = document.createElement('div');
@@ -428,6 +443,19 @@
   // controls are owned by the browser and must not reach the outer PM view.
   SceneFramePm.prototype.stopEvent = function() { return true; };
   SceneFramePm.prototype.ignoreMutation = function() { return true; };
+
+  // Step 4d: PM NodeView lifecycle hook — called when the outer destroys
+  // this NodeView (e.g. the sceneFrame node was removed from the outer doc,
+  // or the EditorView itself is being torn down on tab close). Destroy
+  // every inner editor we created so PM listeners / plugin state don't
+  // outlive the NodeView.
+  SceneFramePm.prototype.destroy = function() {
+    if (!this._blocksContainer) return;
+    const self = this;
+    Array.prototype.slice.call(this._blocksContainer.children).forEach(function(child) {
+      self._destroyBlockInnerEditor(child);
+    });
+  };
 
   // ============================================================
   // Factory — exposed but NOT yet registered with Rga.DocTypes (Step 3).
