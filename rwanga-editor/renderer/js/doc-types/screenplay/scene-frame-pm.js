@@ -235,9 +235,23 @@
     popup.appendChild(yes);
     popup.appendChild(no);
 
-    const rect = blockEl.getBoundingClientRect();
-    popup.style.left = Math.min(rect.right + 8, window.innerWidth - 220) + 'px';
-    popup.style.top = (rect.top + window.scrollY) + 'px';
+    // Position right next to where the typed text ENDS, not the block's
+    // right edge — character cue blocks are centered, so the block's
+    // right edge is far from the visible name. Falls back to block rect
+    // if coordsAtPos throws (eg destroyed view).
+    const endPos = Math.max(0, innerView.state.doc.content.size - 1);
+    let coords = null;
+    try { coords = innerView.coordsAtPos(endPos); } catch (_) { coords = null; }
+    if (coords) {
+      const x = Math.min(coords.right + 8, window.innerWidth - 220);
+      const y = (coords.top + window.scrollY) - 4;
+      popup.style.left = x + 'px';
+      popup.style.top = y + 'px';
+    } else {
+      const rect = blockEl.getBoundingClientRect();
+      popup.style.left = Math.min(rect.right + 8, window.innerWidth - 220) + 'px';
+      popup.style.top = (rect.top + window.scrollY) + 'px';
+    }
     document.body.appendChild(popup);
     blockEl._tagSuggestPopup = popup;
 
