@@ -87,9 +87,28 @@
     return { setting: 'INT.', location: '', time: 'DAY' };
   }
 
+  // Read the trailing transition text out of innerDoc. Defaults to 'CUT'
+  // when no transition node is present (consistent with v1 placeholder).
+  function _extractTransition(innerDoc) {
+    if (innerDoc && Array.isArray(innerDoc.content)) {
+      for (let i = innerDoc.content.length - 1; i >= 1; i -= 1) {
+        const node = innerDoc.content[i];
+        if (node && node.type === 'transition') {
+          let text = '';
+          if (Array.isArray(node.content)) {
+            node.content.forEach(function(c) {
+              if (c.type === 'text' && typeof c.text === 'string') text += c.text;
+            });
+          }
+          return text || 'CUT';
+        }
+      }
+    }
+    return 'CUT';
+  }
+
   // Pull every non-sceneLine, non-transition block out of innerDoc as
-  // { type, text } records. Transition is structural and handled separately
-  // (deferred to Step 6 in the v2 migration roadmap).
+  // { type, text } records. Transition is structural (its own picker row).
   function _extractBlocks(innerDoc) {
     if (!innerDoc || !Array.isArray(innerDoc.content)) return [];
     return innerDoc.content.slice(1)
@@ -247,7 +266,20 @@
     this._blocksContainer.className = 'rga-scene-frame-placeholder-blocks';
     this.dom.appendChild(this._blocksContainer);
 
-    // ---- Transition: deferred to Step 6. ----
+    // ---- Last row: transition picker (structural — always present) ----
+    this._transitionRow = document.createElement('div');
+    this._transitionRow.className = 'rga-scene-frame-placeholder-transition';
+    this._transitionPicker = document.createElement('select');
+    this._transitionPicker.className = 'rga-slug-transition-picker';
+    TRANSITION_OPTIONS.forEach(function(opt) {
+      const o = document.createElement('option');
+      o.className = 'rga-slug-picker-option';
+      o.value = opt; o.textContent = opt;
+      self._transitionPicker.appendChild(o);
+    });
+    this._transitionPicker.addEventListener('change', function() { self._dispatchInner(); });
+    this._transitionRow.appendChild(this._transitionPicker);
+    this.dom.appendChild(this._transitionRow);
 
     // Initial block render — bypasses the loop guard in _refreshValues
     // (which exists for echo updates after self-dispatch). Mirrors the v1
@@ -358,15 +390,14 @@
       });
     }
 
-    // 3. transition — preserve whatever the previous innerDoc had. Step 6
-    // replaces this with a real transition picker reading from a form control.
-    const tail = [];
-    for (let j = 0; j < prevContent.length; j += 1) {
-      if (prevContent[j] && prevContent[j].type === 'transition') {
-        tail.push(prevContent[j]);
-        break;
-      }
-    }
+    // 3. transition — read from the picker (Package 2). Always emit one
+    // transition node so each scene ends visually closed; default 'CUT'
+    // matches v1 and the spec.
+    const transitionText = (this._transitionPicker && this._transitionPicker.value) || 'CUT';
+    const tail = [{
+      type: 'transition',
+      content: [{ type: 'text', text: transitionText }]
+    }];
 
     const newInnerDoc = {
       type: 'doc',
@@ -483,6 +514,13 @@
     this.dom.dataset.sceneNumber = node.attrs.number == null ? '' : String(node.attrs.number);
   };
 
+  SceneFramePm.prototype._refreshTransition = function(node) {
+    if (!this._transitionPicker) return;
+    if (document.activeElement === this._transitionPicker) return;
+    const value = _extractTransition(node.attrs.innerDoc);
+    _setPickerValue(this._transitionPicker, value, TRANSITION_OPTIONS);
+  };
+
   SceneFramePm.prototype._refreshSlug = function(node) {
     const slug = _extractSlug(node.attrs.innerDoc);
     if (document.activeElement !== this._locationInput && this._locationInput.value !== slug.location) {
@@ -500,6 +538,7 @@
     this._node = node;
     this._refreshNum(node);
     this._refreshSlug(node);
+    this._refreshTransition(node);
     // Skip the block re-render if this update is our own self-dispatch echo
     // (slug edits today, block edits in Step 4c) — otherwise we'd clobber
     // the user's in-flight typing the moment Step 4b's inner editor lands.
