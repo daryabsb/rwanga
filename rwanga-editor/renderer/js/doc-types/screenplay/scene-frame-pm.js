@@ -164,7 +164,7 @@
       o.value = opt; o.textContent = opt;
       self._settingPicker.appendChild(o);
     });
-    this._settingPicker.addEventListener('change', function() { self._dispatchSlug(); });
+    this._settingPicker.addEventListener('change', function() { self._dispatchInner(); });
     this._settingPicker.addEventListener('keydown', function(e) {
       if (e.key === 'Enter') { e.preventDefault(); self._timePicker.focus(); }
     });
@@ -181,7 +181,7 @@
       o.value = opt; o.textContent = opt;
       self._timePicker.appendChild(o);
     });
-    this._timePicker.addEventListener('change', function() { self._dispatchSlug(); });
+    this._timePicker.addEventListener('change', function() { self._dispatchInner(); });
     this._timePicker.addEventListener('keydown', function(e) {
       if (e.key === 'Enter') {
         e.preventDefault();
@@ -198,7 +198,7 @@
     this._locationInput.type = 'text';
     this._locationInput.className = 'rga-slug-location-input';
     this._locationInput.placeholder = 'Location';
-    this._locationInput.addEventListener('input', function() { self._dispatchSlug(); });
+    this._locationInput.addEventListener('input', function() { self._dispatchInner(); });
     this._locationInput.addEventListener('keydown', function(e) {
       if (e.key === 'Enter') {
         e.preventDefault();
@@ -272,11 +272,12 @@
     });
   };
 
-  // Patch only the sceneLine in attrs.innerDoc; preserve every block + the
-  // trailing transition untouched. This means an early-iteration v2 user can
-  // edit slug values without destroying scene content that v2 doesn't render
-  // yet — a safety guarantee while the migration is in progress.
-  SceneFramePm.prototype._dispatchSlug = function() {
+  // Build the full innerDoc from live UI state — form controls for the slug,
+  // each block's inner ProseMirror editor for the block text, and the trailing
+  // transition preserved-from-previous (Step 6 plugs the real picker in).
+  // Single dispatch path keeps slug-change and block-change from clobbering
+  // each other's in-flight edits, replacing the Step-2 _dispatchSlug helper.
+  SceneFramePm.prototype._dispatchInner = function() {
     if (!this._view || !this._getPos) return;
     const pos = this._getPos();
     if (typeof pos !== 'number') return;
@@ -286,7 +287,8 @@
     const prevInnerDoc = outerNode.attrs.innerDoc || { type: 'doc', attrs: { notes: '', revisionFlag: null }, content: [] };
     const prevContent = Array.isArray(prevInnerDoc.content) ? prevInnerDoc.content : [];
 
-    const newSceneLine = {
+    // 1. sceneLine — straight from form controls.
+    const sceneLine = {
       type: 'sceneLine',
       attrs: { setting: this._settingPicker.value, time: this._timePicker.value },
       content: this._locationInput.value
@@ -294,18 +296,43 @@
         : []
     };
 
-    // Replace the first child if it's a sceneLine; otherwise prepend.
-    let restContent;
-    if (prevContent.length > 0 && prevContent[0] && prevContent[0].type === 'sceneLine') {
-      restContent = prevContent.slice(1);
-    } else {
-      restContent = prevContent.slice();
+    // 2. blocks — read each block div's current text. Prefer the inner PM
+    // editor when mounted (Step 4b made this the default); fall back to the
+    // div's textContent for the rare unmounted case (e.g. mount race).
+    const blocks = [];
+    const blockEls = this._blocksContainer ? this._blocksContainer.children : [];
+    for (let i = 0; i < blockEls.length; i += 1) {
+      const el = blockEls[i];
+      const blockType = el.dataset.blockType || 'action';
+      let text = '';
+      if (el._innerView) {
+        const innerDoc = el._innerView.state.doc;
+        // Inner schema is currently single-paragraph; join cross-paragraph
+        // splits with newline so Enter inside a block doesn't lose text.
+        text = innerDoc.textBetween(0, innerDoc.content.size, '\n');
+      } else {
+        text = el.textContent || '';
+      }
+      blocks.push({
+        type: blockType,
+        content: text ? [{ type: 'text', text: text }] : []
+      });
+    }
+
+    // 3. transition — preserve whatever the previous innerDoc had. Step 6
+    // replaces this with a real transition picker reading from a form control.
+    const tail = [];
+    for (let j = 0; j < prevContent.length; j += 1) {
+      if (prevContent[j] && prevContent[j].type === 'transition') {
+        tail.push(prevContent[j]);
+        break;
+      }
     }
 
     const newInnerDoc = {
       type: 'doc',
       attrs: prevInnerDoc.attrs || { notes: '', revisionFlag: null },
-      content: [newSceneLine].concat(restContent)
+      content: [sceneLine].concat(blocks).concat(tail)
     };
 
     this._lastDispatchedInnerDoc = newInnerDoc;
@@ -338,7 +365,20 @@
     const state = PM.EditorState.create({ schema: schema, doc: innerDoc });
 
     while (blockEl.firstChild) blockEl.removeChild(blockEl.firstChild);
-    const innerView = new PM.EditorView(blockEl, { state: state });
+    const self = this;
+    const innerView = new PM.EditorView(blockEl, {
+      state: state,
+      // Step 4c: apply the transaction locally, then propagate to outer
+      // attrs.innerDoc whenever the inner doc changes so block edits
+      // persist to .rga. The outer's _refreshValues loop guard recognises
+      // this as a self-dispatch and skips re-rendering the blocks, so the
+      // inner editor isn't destroyed mid-keystroke.
+      dispatchTransaction: function(tr) {
+        const newState = innerView.state.apply(tr);
+        innerView.updateState(newState);
+        if (tr.docChanged) self._dispatchInner();
+      }
+    });
     blockEl._innerView = innerView;
     // Only steal focus on explicit caller request (click) — eager mount on
     // initial render must NOT focus, else the last block of the last scene
