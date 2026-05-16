@@ -76,6 +76,24 @@
     return { setting: 'INT.', location: '', time: 'DAY' };
   }
 
+  // Pull every non-sceneLine, non-transition block out of innerDoc as
+  // { type, text } records. Transition is structural and handled separately
+  // (deferred to Step 6 in the v2 migration roadmap).
+  function _extractBlocks(innerDoc) {
+    if (!innerDoc || !Array.isArray(innerDoc.content)) return [];
+    return innerDoc.content.slice(1)
+      .filter(function(node) { return node && node.type !== 'transition'; })
+      .map(function(node) {
+        let text = '';
+        if (Array.isArray(node.content)) {
+          node.content.forEach(function(child) {
+            if (child.type === 'text' && typeof child.text === 'string') text += child.text;
+          });
+        }
+        return { type: node.type, text: text };
+      });
+  }
+
   function _setPickerValue(picker, value, options) {
     if (options.indexOf(value) === -1) {
       const o = document.createElement('option');
@@ -176,10 +194,41 @@
     this._slugRow.appendChild(this._locationInput);
     this.dom.appendChild(this._slugRow);
 
-    // ---- Blocks + transition: deferred to later steps. ----
-    // The blocks container and transition picker land in Step 4 / Step 5+.
+    // ---- Row 3+: blocks container ----
+    // Step 4a: read-only render of each block as a static div. Same CSS
+    // classes as the locked v1 placeholder so Flow-view typography applies
+    // unchanged. Step 4b mounts an inner ProseMirror EditorView in place of
+    // a block when the user clicks to edit.
+    this._blocksContainer = document.createElement('div');
+    this._blocksContainer.className = 'rga-scene-frame-placeholder-blocks';
+    this.dom.appendChild(this._blocksContainer);
 
+    // ---- Transition: deferred to Step 6. ----
+
+    // Initial block render — bypasses the loop guard in _refreshValues
+    // (which exists for echo updates after self-dispatch). Mirrors the v1
+    // placeholder's pattern at scene-frame-placeholder.js:311.
+    this._renderBlocksReadOnly(node);
     this._refreshValues(node);
+  };
+
+  // Step 4a: render each block from attrs.innerDoc as a non-editable div.
+  // No PM, no event wiring — pure DOM mirror of the JSON we already have.
+  // Idempotent: called on initial build and on every node update.
+  SceneFramePm.prototype._renderBlocksReadOnly = function(node) {
+    const container = this._blocksContainer;
+    if (!container) return;
+    while (container.firstChild) container.removeChild(container.firstChild);
+
+    const blocks = _extractBlocks(node.attrs.innerDoc);
+    blocks.forEach(function(b) {
+      const el = document.createElement('div');
+      el.className = 'rga-scene-block rga-block-' + b.type;
+      el.dataset.blockType = b.type;
+      el.contentEditable = 'false';
+      el.textContent = b.text;
+      container.appendChild(el);
+    });
   };
 
   // Patch only the sceneLine in attrs.innerDoc; preserve every block + the
@@ -247,6 +296,12 @@
     this._node = node;
     this._refreshNum(node);
     this._refreshSlug(node);
+    // Skip the block re-render if this update is our own self-dispatch echo
+    // (slug edits today, block edits in Step 4c) — otherwise we'd clobber
+    // the user's in-flight typing the moment Step 4b's inner editor lands.
+    if (node.attrs.innerDoc !== this._lastDispatchedInnerDoc) {
+      this._renderBlocksReadOnly(node);
+    }
   };
 
   // PM NodeView contract.
