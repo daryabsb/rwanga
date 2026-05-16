@@ -542,7 +542,16 @@
     });
     while (container.firstChild) container.removeChild(container.firstChild);
 
-    const blocks = _extractBlocks(node.attrs.innerDoc);
+    let blocks = _extractBlocks(node.attrs.innerDoc);
+    // Freshly spawned scenes (Mod-Enter / second-Enter escalation) arrive
+    // with attrs.innerDoc=null → _extractBlocks returns []. Seed one empty
+    // action block so the new scene has a body to type into; otherwise
+    // the transition picker renders immediately after the slug with no
+    // typeable area between them. Mirrors v1 placeholder's empty-scene
+    // seed at scene-frame-placeholder.js:_renderBlocks.
+    if (blocks.length === 0) {
+      blocks = [{ type: 'action', content: [] }];
+    }
     blocks.forEach(function(b, index) {
       const el = document.createElement('div');
       el.className = 'rga-scene-block rga-block-' + b.type;
