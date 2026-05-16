@@ -32,6 +32,17 @@
   Rga.DocTypes.screenplay = Rga.DocTypes.screenplay || {};
 
   // ============================================================
+  // Block-type cycle tables — mirror v1 placeholder behavior.
+  // Transition is structural (last picker row), not in the cycle.
+  // ============================================================
+  const FORWARD_TAB  = { action: 'character', character: 'dialogue', dialogue: 'shot', shot: 'action' };
+  const BACKWARD_TAB = { action: 'shot',     character: 'action',   dialogue: 'character', shot: 'dialogue' };
+
+  const TRANSITION_OPTIONS = [
+    'CUT', 'MIX', 'FADE IN', 'FADE OUT', 'DISSOLVE', 'MATCH CUT', 'SMASH CUT', 'JUMP CUT'
+  ];
+
+  // ============================================================
   // Slug helpers — duplicated from scene-frame-placeholder.js to keep the
   // locked module untouched. Collapses to a single copy when v1 archives.
   // ============================================================
@@ -412,6 +423,25 @@
         if (schema.marks.underline)     keymapEntries['Mod-u'] = PM.toggleMark(schema.marks.underline);
         if (schema.marks.strikethrough) keymapEntries['Mod-Shift-x'] = PM.toggleMark(schema.marks.strikethrough);
       }
+      // Tab / Shift-Tab cycle the OUTER block's type (action ↔ character ↔
+      // dialogue ↔ shot). Captured here as closures over blockEl + self so
+      // each block's keymap knows which block it lives on.
+      keymapEntries['Tab'] = function() {
+        const currentType = blockEl.dataset.blockType;
+        const nextType = FORWARD_TAB[currentType];
+        if (!nextType) return false;
+        self._changeBlockType(blockEl, nextType);
+        self._dispatchInner();
+        return true;
+      };
+      keymapEntries['Shift-Tab'] = function() {
+        const currentType = blockEl.dataset.blockType;
+        const prevType = BACKWARD_TAB[currentType];
+        if (!prevType) return false;
+        self._changeBlockType(blockEl, prevType);
+        self._dispatchInner();
+        return true;
+      };
       innerPlugins.push(PM.keymap(keymapEntries));
       if (PM.baseKeymap) innerPlugins.push(PM.keymap(PM.baseKeymap));
     }
@@ -437,6 +467,14 @@
     // initial render must NOT focus, else the last block of the last scene
     // grabs focus on file open.
     if (shouldFocus) innerView.focus();
+  };
+
+  // Mutates the block div's type — used by the inner Tab keymap and by the
+  // scene-toolbox block-type dropdown (which finds this via _rgaScenePlaceholder).
+  SceneFramePm.prototype._changeBlockType = function(blockEl, newType) {
+    if (!blockEl || !newType) return;
+    blockEl.dataset.blockType = newType;
+    blockEl.className = 'rga-scene-block rga-block-' + newType;
   };
 
   SceneFramePm.prototype._refreshNum = function(node) {
