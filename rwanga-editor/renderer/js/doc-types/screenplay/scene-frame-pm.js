@@ -105,6 +105,28 @@
   }
 
   // ============================================================
+  // Inner ProseMirror schema (Step 4b — minimal possible)
+  // ============================================================
+  // Deliberately stripped: doc -> paragraph+ -> text. No marks, no block
+  // types. Step 4b only proves the mount mechanics — schema additions
+  // (bold/italic/annotation/tag/revisionFlag etc.) land once mount is stable.
+  // Lazy-init so the module loads before window.RgaProseMirror is ready.
+  let _innerSchema = null;
+  function _getInnerSchema() {
+    if (_innerSchema) return _innerSchema;
+    const PM = window.RgaProseMirror;
+    if (!PM || !PM.Schema) return null;
+    _innerSchema = new PM.Schema({
+      nodes: {
+        doc:       { content: 'paragraph+' },
+        paragraph: { content: 'text*', toDOM: function() { return ['p', 0]; } },
+        text:      {}
+      }
+    });
+    return _innerSchema;
+  }
+
+  // ============================================================
   // NodeView
   // ============================================================
 
@@ -213,21 +235,40 @@
   };
 
   // Step 4a: render each block from attrs.innerDoc as a non-editable div.
-  // No PM, no event wiring — pure DOM mirror of the JSON we already have.
-  // Idempotent: called on initial build and on every node update.
+  // Step 4b: clicking a block mounts a tiny inner PM EditorView in place.
+  // Idempotent: called on initial build and on every external node update.
+  // The loop guard in _refreshValues prevents echo re-renders from
+  // self-dispatch destroying a mounted inner editor mid-keystroke.
   SceneFramePm.prototype._renderBlocksReadOnly = function(node) {
     const container = this._blocksContainer;
     if (!container) return;
     while (container.firstChild) container.removeChild(container.firstChild);
 
+    const self = this;
     const blocks = _extractBlocks(node.attrs.innerDoc);
-    blocks.forEach(function(b) {
+    blocks.forEach(function(b, index) {
       const el = document.createElement('div');
       el.className = 'rga-scene-block rga-block-' + b.type;
       el.dataset.blockType = b.type;
+      el.dataset.blockIndex = String(index);
       el.contentEditable = 'false';
       el.textContent = b.text;
+      // Click handler kept as a defensive fallback: the eager mount below
+      // should always have populated _innerView already, in which case the
+      // guard inside _mountInnerEditor makes this a no-op. shouldFocus=true
+      // because if we ever fall through here, the user just clicked and
+      // expects the cursor.
+      el.addEventListener('click', function() {
+        self._mountInnerEditor(el, b.type, b.text, true);
+      });
       container.appendChild(el);
+      // Eager mount, no focus — every block is alive from first paint so
+      // blocks feel real, not "dead until clicked". Safe at playground
+      // scale (5 scenes × ~5 blocks ≈ 25 inner editors). At full-script
+      // scale this will be scoped to "active page ± N pages" via viewport
+      // tracking once Steps 4c (propagation) and 4d (teardown) land —
+      // both are prerequisites for safely unmounting offscreen blocks.
+      self._mountInnerEditor(el, b.type, b.text, false);
     });
   };
 
@@ -271,6 +312,38 @@
     const newAttrs = Object.assign({}, outerNode.attrs, { innerDoc: newInnerDoc });
     const tr = this._view.state.tr.setNodeMarkup(pos, null, newAttrs);
     this._view.dispatch(tr);
+  };
+
+  // Step 4b: replace a read-only block div with a live inner PM EditorView.
+  // Scope is deliberately narrow — proves the mount mechanics work without
+  // F2's eager-everywhere failure mode. Edits are LOCAL only: typing
+  // works inside the editor but is not propagated back to attrs.innerDoc.
+  // Step 4c wires propagation; Step 4d wires blur-teardown.
+  //
+  // Known temporary edge case until Step 4d lands: if an outer-doc update
+  // (e.g. undo) fires _renderBlocksReadOnly while an inner editor is
+  // mounted, the editor is destroyed along with its in-flight edits. The
+  // loop guard in _refreshValues already protects against self-dispatch
+  // echoes (slug edits); other paths are rare in normal playground use.
+  SceneFramePm.prototype._mountInnerEditor = function(blockEl, blockType, blockText, shouldFocus) {
+    if (blockEl._innerView) return; // already mounted — re-call is a no-op
+    const PM = window.RgaProseMirror;
+    const schema = _getInnerSchema();
+    if (!PM || !schema || !PM.EditorState || !PM.EditorView) return;
+
+    const paragraphContent = blockText ? [schema.text(blockText)] : [];
+    const innerDoc = schema.node('doc', null, [
+      schema.node('paragraph', null, paragraphContent)
+    ]);
+    const state = PM.EditorState.create({ schema: schema, doc: innerDoc });
+
+    while (blockEl.firstChild) blockEl.removeChild(blockEl.firstChild);
+    const innerView = new PM.EditorView(blockEl, { state: state });
+    blockEl._innerView = innerView;
+    // Only steal focus on explicit caller request (click) — eager mount on
+    // initial render must NOT focus, else the last block of the last scene
+    // grabs focus on file open.
+    if (shouldFocus) innerView.focus();
   };
 
   SceneFramePm.prototype._refreshNum = function(node) {

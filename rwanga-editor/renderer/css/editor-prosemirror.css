@@ -1015,6 +1015,18 @@ body.view-draft-active #scene-toolbox {
   outline: none;
 }
 
+/* Inner ProseMirror editor mounted inside a scene block (v2 nested-PM,
+   Step 4b+) must layout-match the read-only div so click-to-mount does
+   not visibly shift the block. Strips the 1em bottom margin .ProseMirror p
+   gets from the outer rule above. */
+.rga-scene-block .ProseMirror {
+  outline: none;
+}
+.rga-scene-block .ProseMirror p {
+  margin: 0;
+  padding: 0;
+}
+
 .rga-scene-block:focus {
   background: rgba(86, 156, 214, 0.06);
 }
