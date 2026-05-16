@@ -153,7 +153,10 @@
     if (!PM || !PM.Schema) return null;
     const baseOuterMarks = (Rga.Framework && Rga.Framework.baseOuterMarks) || {};
     const innerMarks = {};
-    ['bold', 'italic', 'underline', 'strikethrough'].forEach(function(name) {
+    // Step 5a: toggle marks. Package 3: color/highlight/link (attrs marks,
+    // toolbar popovers/dialogs already route to focused view via _view).
+    ['bold', 'italic', 'underline', 'strikethrough',
+     'color', 'highlight', 'link'].forEach(function(name) {
       if (baseOuterMarks[name]) innerMarks[name] = baseOuterMarks[name];
     });
     _innerSchema = new PM.Schema({
