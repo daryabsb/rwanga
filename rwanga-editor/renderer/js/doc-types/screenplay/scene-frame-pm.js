@@ -194,6 +194,79 @@
     return null;
   }
 
+  // Exact case-insensitive match — used by the on-blur "Tag as NALI?"
+  // popup that catches the case where the writer ignored autocomplete and
+  // typed the full name manually.
+  function _findCharacterByExactName(text) {
+    const doc = Rga.TabManager && Rga.TabManager.activeDoc && Rga.TabManager.activeDoc();
+    if (!doc || !doc.tagRegistry) return null;
+    const chars = doc.tagRegistry.characters || [];
+    const trimmed = text.trim();
+    if (!trimmed) return null;
+    const lower = trimmed.toLowerCase();
+    for (let i = 0; i < chars.length; i += 1) {
+      const c = chars[i];
+      if (c && c.name && String(c.name).toLowerCase() === lower) return c;
+    }
+    return null;
+  }
+
+  // Small confirmation popup near a character cue block, fired on blur
+  // when the typed text exactly matches a registered character but has
+  // no tag mark yet. Auto-dismisses after 6s; click anywhere to act.
+  function _showTagSuggestPopup(blockEl, innerView, match) {
+    // Reject duplicates — if a popup is already up for this block, leave it.
+    if (blockEl._tagSuggestPopup) return;
+
+    const popup = document.createElement('div');
+    popup.className = 'rga-tag-suggest-popup';
+
+    const label = document.createElement('span');
+    label.className = 'rga-tag-suggest-label';
+    label.textContent = 'Tag as ' + match.name + ' ?';
+    popup.appendChild(label);
+
+    const yes = document.createElement('button');
+    yes.className = 'rga-tag-suggest-btn rga-tag-suggest-yes';
+    yes.textContent = 'Yes';
+    const no = document.createElement('button');
+    no.className = 'rga-tag-suggest-btn rga-tag-suggest-no';
+    no.textContent = 'No';
+    popup.appendChild(yes);
+    popup.appendChild(no);
+
+    const rect = blockEl.getBoundingClientRect();
+    popup.style.left = Math.min(rect.right + 8, window.innerWidth - 220) + 'px';
+    popup.style.top = (rect.top + window.scrollY) + 'px';
+    document.body.appendChild(popup);
+    blockEl._tagSuggestPopup = popup;
+
+    function dismiss() {
+      clearTimeout(timer);
+      if (popup.parentNode) popup.parentNode.removeChild(popup);
+      blockEl._tagSuggestPopup = null;
+    }
+    const timer = setTimeout(dismiss, 6000);
+
+    yes.addEventListener('mousedown', function(e) {
+      e.preventDefault();
+      const schema = innerView.state.schema;
+      const tagMark = schema.marks.tag;
+      if (tagMark) {
+        const tr = innerView.state.tr.addMark(0, innerView.state.doc.content.size, tagMark.create({
+          tagType: 'character',
+          entityId: match.id
+        }));
+        innerView.dispatch(tr);
+      }
+      dismiss();
+    });
+    no.addEventListener('mousedown', function(e) {
+      e.preventDefault();
+      dismiss();
+    });
+  }
+
   function _buildCharacterAutocompletePlugin(blockEl) {
     const PM = window.RgaProseMirror;
     if (!PM || !PM.Plugin || !PM.PluginKey || !PM.Decoration || !PM.DecorationSet) return null;
@@ -221,17 +294,29 @@
           const widget = document.createElement('span');
           widget.className = 'rga-autocomplete-ghost';
           widget.textContent = remainder;
+          // Small arrow hint so the writer knows to press → to accept.
+          // (Enter / Tab can't accept — they're already taken by Enter-flow
+          // and block-type cycle.)
+          const arrow = document.createElement('span');
+          arrow.className = 'rga-autocomplete-arrow';
+          arrow.textContent = ' →';
+          widget.appendChild(arrow);
           const insertPos = Math.max(0, state.doc.content.size - 1);
           return PM.DecorationSet.create(state.doc, [
             PM.Decoration.widget(insertPos, widget, { side: 1 })
           ]);
         },
         handleKeyDown: function(view, event) {
-          if (event.key !== 'Enter' && event.key !== 'Tab' && event.key !== 'ArrowRight') return false;
+          // ArrowRight only — Enter creates next block (ENTER_NEXT) and Tab
+          // cycles block type; both are higher-priority screenplay rules.
+          if (event.key !== 'ArrowRight') return false;
           const ps = key.getState(view.state);
           if (!ps || !ps.match) return false;
           const text = view.state.doc.textContent;
           if (!text || ps.match.name.length <= text.length) return false;
+          // Only trigger when cursor is at the end of the typed text — pressing
+          // ArrowRight in the middle of "NA" should still move the caret.
+          if (view.state.selection.from < view.state.doc.content.size - 1) return false;
           event.preventDefault();
 
           const schema = view.state.schema;
@@ -589,9 +674,27 @@
     if (PM.keymap) {
       const keymapEntries = {};
       if (PM.undo) {
-        keymapEntries['Mod-z'] = PM.undo;
-        keymapEntries['Mod-y'] = PM.redo;
-        keymapEntries['Mod-Shift-z'] = PM.redo;
+        // Inner undo first; if inner history is empty (which is the case
+        // for outer-level changes like spawn-next-scene that the user
+        // wants to undo from the previous scene's inner editor), fall
+        // through to the outer view's undo so the spawn becomes
+        // reversible.
+        keymapEntries['Mod-z'] = function(innerState, innerDispatch) {
+          if (PM.undo(innerState, innerDispatch)) return true;
+          if (self._view && PM.undo) {
+            PM.undo(self._view.state, self._view.dispatch.bind(self._view));
+          }
+          return true;
+        };
+        const redoFn = function(innerState, innerDispatch) {
+          if (PM.redo(innerState, innerDispatch)) return true;
+          if (self._view && PM.redo) {
+            PM.redo(self._view.state, self._view.dispatch.bind(self._view));
+          }
+          return true;
+        };
+        keymapEntries['Mod-y'] = redoFn;
+        keymapEntries['Mod-Shift-z'] = redoFn;
       }
       if (PM.toggleMark) {
         if (schema.marks.bold)          keymapEntries['Mod-b'] = PM.toggleMark(schema.marks.bold);
@@ -718,6 +821,39 @@
       }
     });
     blockEl._innerView = innerView;
+    // Blur listener for the "Tag as NALI?" suggestion popup — fires when
+    // focus leaves the inner editor with text that exactly matches a
+    // registered character but has no tag mark yet. Only relevant for
+    // character cue blocks.
+    if (innerView.dom && innerView.dom.addEventListener) {
+      innerView.dom.addEventListener('blur', function() {
+        // Defer so the focus has settled and so quick click-into-another-
+        // block doesn't fire a popup the user immediately overrides.
+        setTimeout(function() {
+          if (!blockEl || !blockEl.parentNode) return;
+          if (blockEl.dataset.blockType !== 'character') return;
+          const v = blockEl._innerView;
+          if (!v) return;
+          const text = v.state.doc.textContent;
+          if (!text || !text.trim()) return;
+          const tagMark = v.state.schema.marks.tag;
+          if (!tagMark) return;
+          // Skip if any text node in the block already carries a tag mark —
+          // either from autocomplete or from a prior confirmation.
+          let alreadyTagged = false;
+          v.state.doc.descendants(function(n) {
+            if (alreadyTagged) return false;
+            if (n.isText && n.marks.some(function(m) { return m.type === tagMark; })) {
+              alreadyTagged = true;
+            }
+          });
+          if (alreadyTagged) return;
+          const match = _findCharacterByExactName(text);
+          if (!match) return;
+          _showTagSuggestPopup(blockEl, v, match);
+        }, 100);
+      });
+    }
     // Only steal focus on explicit caller request (click) — eager mount on
     // initial render must NOT focus, else the last block of the last scene
     // grabs focus on file open.

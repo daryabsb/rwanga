@@ -1578,7 +1578,8 @@ body.view-draft-active #scene-toolbox {
 /* Character-cue autocomplete ghost text. Light gray, inherits font /
    weight / case from the .rga-block-character host so the suggested
    tail visually matches the typed prefix. Non-interactive — pure
-   visual hint until the user confirms with Enter / Tab / ArrowRight. */
+   visual hint until the user confirms with ArrowRight (Enter / Tab
+   are reserved for the screenplay-rule keymaps). */
 .rga-autocomplete-ghost {
   color: var(--text-tertiary, #888);
   opacity: 0.55;
@@ -1588,6 +1589,56 @@ body.view-draft-active #scene-toolbox {
   letter-spacing: inherit;
   pointer-events: none;
   user-select: none;
+}
+/* Arrow hint — tells the writer which key accepts the suggestion. */
+.rga-autocomplete-arrow {
+  font-weight: 400;
+  font-size: 0.8em;
+  opacity: 0.75;
+  margin-left: 4px;
+  letter-spacing: 0;
+}
+
+/* "Tag as NALI?" suggestion popup — fires on blur from a character cue
+   whose typed text exactly matches a registered character but has no
+   tag mark yet. Floats next to the block; auto-dismisses after 6s. */
+.rga-tag-suggest-popup {
+  position: absolute;
+  z-index: 8700;
+  background: var(--menu-bg, #2d2d30);
+  border: 1px solid var(--border-primary, #3c3c3c);
+  border-radius: 6px;
+  padding: 6px 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text-primary, #cccccc);
+  box-shadow: var(--shadow-md, 0 4px 12px rgba(0,0,0,0.5));
+  font-family: var(--font-ui, system-ui, sans-serif);
+}
+.rga-tag-suggest-label {
+  font-weight: 600;
+}
+.rga-tag-suggest-btn {
+  padding: 2px 10px;
+  border-radius: 3px;
+  border: 1px solid var(--border-primary, #3c3c3c);
+  background: transparent;
+  color: var(--text-primary, #cccccc);
+  cursor: pointer;
+  font-size: 11px;
+  font-family: inherit;
+}
+.rga-tag-suggest-yes:hover {
+  background: rgba(78, 201, 176, 0.18);
+  color: #4EC9B0;
+  border-color: #4EC9B0;
+}
+.rga-tag-suggest-no:hover {
+  background: rgba(244, 71, 71, 0.15);
+  color: #f44747;
+  border-color: #f44747;
 }
 
 /* Click-from-panel flash — temporarily highlights the marked text in the
