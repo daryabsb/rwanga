@@ -4,10 +4,21 @@
    editor area, bottom panel, inspector, status bar, resize handles.
    ============================================================ */
 
-/* ---- App Root Grid ---- */
+/* ---- App Root Grid ----
+   Row tracks (top → bottom):
+     1. Shell titlebar (#rga-shell-titlebar) — added by Slice 1.
+        Height owned by .rga-shell-titlebar's own rule (28px); `auto`
+        here lets that rule drive the track size without a new token.
+     2. Menu bar (#menu-bar) — fixed at --menu-bar-height.
+     3. Workspace (#workspace) — 1fr, takes all remaining vertical space.
+     4. Status bar (#status-bar) — fixed at --status-bar-height.
+   IMPORTANT: track count MUST equal child count of #app. Adding a new
+   chrome row without expanding this template will collapse #workspace
+   into the next track and the editor becomes invisible. See the
+   guard test in tests/unit/shell/css-layout.test.js. */
 #app {
   display: grid;
-  grid-template-rows: var(--menu-bar-height) 1fr var(--status-bar-height);
+  grid-template-rows: auto var(--menu-bar-height) 1fr var(--status-bar-height);
   height: 100vh;
   width: 100vw;
   overflow: hidden;
@@ -396,3 +407,94 @@
 .status-sync-dot.pending  { background: var(--accent-warning); }
 .status-sync-dot.offline  { background: var(--text-disabled); }
 .status-sync-dot.error    { background: var(--accent-error); }
+
+/* ============================================================
+   SLICE 1 SHELL COMPONENTS (.rga-shell-*)
+   Owned by Rga.Shell.* modules. Layered alongside the existing
+   shell grid; selectors prefixed to avoid bleed into editor or
+   prior chrome. See docs/rwanga-shell-slice-1-plan.md.
+   ============================================================ */
+
+/* --- Title bar (slice 1: thin strip above #menu-bar) --- */
+.rga-shell-titlebar {
+  display: flex;
+  align-items: center;
+  height: 28px;
+  padding: 0 12px;
+  background: var(--bg-primary, #1e1e1e);
+  color: var(--text-muted, #9a9a9a);
+  font-family: var(--font-sans, system-ui, sans-serif);
+  font-size: 12px;
+  border-bottom: 1px solid var(--border-subtle, rgba(128,128,128,0.18));
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-app-region: drag;  /* OS title-bar drag region on Electron */
+}
+.rga-shell-titlebar-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.rga-shell-titlebar-sep {
+  opacity: 0.5;
+}
+.rga-shell-titlebar-script-name {
+  color: var(--text-primary, #d4d4d4);
+}
+.rga-shell-titlebar-dirty {
+  color: var(--accent-warning, #cca700);
+  margin-left: 2px;
+}
+.rga-shell-titlebar-spacer { flex: 1; }
+.rga-shell-titlebar-avatar-placeholder {
+  font-size: 14px;
+  opacity: 0.55;
+  padding: 0 4px;
+  -webkit-app-region: no-drag;
+}
+
+/* --- Activity rail (slice 1: replaces hardcoded .activity-icon buttons) --- */
+.rga-shell-rail-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 40px;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  font-size: 18px;
+  color: var(--text-muted, #858585);
+  position: relative;
+  transition: color 120ms ease, background 120ms ease;
+}
+.rga-shell-rail-item:hover {
+  color: var(--text-primary, #d4d4d4);
+  background: var(--bg-hover, rgba(255,255,255,0.04));
+}
+.rga-shell-rail-item-active {
+  color: var(--text-primary, #ffffff);
+}
+.rga-shell-rail-item-active::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--accent-primary, #007acc);
+}
+
+/* --- Sidebar host (slice 1: panel mount target) --- */
+.rga-shell-sidebar-host {
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rga-shell-rail-item { transition: none; }
+}
