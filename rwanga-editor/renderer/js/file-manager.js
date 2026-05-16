@@ -55,17 +55,26 @@
   }
 
   async function save() {
-    if (!activeDoc) return null;
-    if (!activeDoc.handle) return await saveAs();
+    if (!activeDoc) {
+      console.warn('[Rga.FileManager.save] no active doc — save no-op');
+      return null;
+    }
+    if (!activeDoc.handle) {
+      console.info('[Rga.FileManager.save] no handle — falling through to saveAs');
+      return await saveAs();
+    }
     captureEditorState(activeDoc);
     const content = Doc.serialize(activeDoc);
+    console.info('[Rga.FileManager.save] writing', activeDoc.handle, '(', content.length, 'bytes )');
     try {
       const res = await window.rwanga.files.save(activeDoc.handle, content);
       Doc.clearDirty(activeDoc, res.savedAt);
       notifyTitle();
       if (Rga.TabManager && Rga.TabManager.renderTabBar) Rga.TabManager.renderTabBar();
+      console.info('[Rga.FileManager.save] OK', res);
       return res;
     } catch (err) {
+      console.error('[Rga.FileManager.save] FAILED', err);
       alert(`Save failed:\n${err.message}`);
       return null;
     }

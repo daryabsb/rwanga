@@ -522,10 +522,16 @@
 
   // Mutates the block div's type — used by the inner Tab keymap and by the
   // scene-toolbox block-type dropdown (which finds this via _rgaScenePlaceholder).
+  // Triggers FlowChrome.refresh so character tinting + line gutter pick up
+  // the new className — FlowChrome's MutationObserver doesn't watch attribute
+  // changes, only childList/subtree/characterData.
   SceneFramePm.prototype._changeBlockType = function(blockEl, newType) {
     if (!blockEl || !newType) return;
     blockEl.dataset.blockType = newType;
     blockEl.className = 'rga-scene-block rga-block-' + newType;
+    if (Rga.FlowChrome && typeof Rga.FlowChrome.refresh === 'function') {
+      Rga.FlowChrome.refresh();
+    }
   };
 
   SceneFramePm.prototype._refreshNum = function(node) {

@@ -1140,7 +1140,7 @@ body.view-draft-active #scene-toolbox {
 
 .ctx-separator {
   height: 1px;
-  background: var(--border-subtle, #3a3a3a);
+  background: var(--border-secondary, #3a3a3a);
   margin: 4px 0;
 }
 
@@ -1197,7 +1197,7 @@ body.view-draft-active #scene-toolbox {
 .rga-popup-input {
   width: 100%;
   box-sizing: border-box;
-  background: var(--bg-input, #1e1e1e);
+  background: var(--bg-tertiary, #1e1e1e);
   border: 1px solid var(--border-default, #454545);
   border-radius: 4px;
   color: var(--text-primary, #d4d4d4);
@@ -1278,7 +1278,7 @@ body.view-draft-active #scene-toolbox {
 .rga-popup-select {
   width: 100%;
   box-sizing: border-box;
-  background: var(--bg-input, #1e1e1e);
+  background: var(--bg-tertiary, #1e1e1e);
   border: 1px solid var(--border-default, #454545);
   border-radius: 4px;
   color: var(--text-primary, #d4d4d4);
@@ -1311,7 +1311,7 @@ body.view-draft-active #scene-toolbox {
   padding: 6px 10px;
   border-radius: 6px;
   border: 2px solid transparent;
-  background: var(--bg-input, #1e1e1e);
+  background: var(--bg-tertiary, #1e1e1e);
   color: var(--text-primary, #d4d4d4);
   cursor: pointer;
   text-align: left;
@@ -1433,7 +1433,7 @@ body.view-draft-active #scene-toolbox {
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--text-tertiary, #666);
-  border-top: 1px solid var(--border-subtle, #3a3a3a);
+  border-top: 1px solid var(--border-secondary, #3a3a3a);
   margin-top: 6px;
 }
 
@@ -1455,7 +1455,7 @@ body.view-draft-active #scene-toolbox {
 
 .annot-card {
   position: relative;
-  background: var(--bg-input, #1e1e1e);
+  background: var(--bg-tertiary, #1e1e1e);
   border-radius: 4px;
   border-left: 3px solid #FFE08A;
   padding: 6px 10px;
@@ -1493,7 +1493,7 @@ body.view-draft-active #scene-toolbox {
   box-sizing: border-box;
   background: transparent;
   border: none;
-  border-top: 1px solid var(--border-subtle, #3a3a3a);
+  border-top: 1px solid var(--border-secondary, #3a3a3a);
   color: var(--text-primary, #d4d4d4);
   font-size: 12px;
   font-family: inherit;
@@ -1514,7 +1514,7 @@ body.view-draft-active #scene-toolbox {
   width: 22px;
   height: 22px;
   border-radius: 4px;
-  border: 1px solid var(--border-subtle, #3a3a3a);
+  border: 1px solid var(--border-secondary, #3a3a3a);
   background: transparent;
   color: var(--text-tertiary, #666);
   font-size: 13px;
@@ -1564,7 +1564,7 @@ body.view-draft-active #scene-toolbox {
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--text-tertiary, #666);
-  border-top: 1px solid var(--border-subtle, #3a3a3a);
+  border-top: 1px solid var(--border-secondary, #3a3a3a);
   margin-top: 4px;
 }
 
@@ -1592,7 +1592,7 @@ body.view-draft-active #scene-toolbox {
   display: flex;
   align-items: flex-start;
   gap: 8px;
-  background: var(--bg-input, #1e1e1e);
+  background: var(--bg-tertiary, #1e1e1e);
   border-radius: 4px;
   border-left: 3px solid #F44747;
   padding: 6px 10px;
@@ -1624,7 +1624,7 @@ body.view-draft-active #scene-toolbox {
   width: 22px;
   height: 22px;
   border-radius: 4px;
-  border: 1px solid var(--border-subtle, #3a3a3a);
+  border: 1px solid var(--border-secondary, #3a3a3a);
   background: transparent;
   color: var(--text-tertiary, #666);
   font-size: 13px;
@@ -1644,7 +1644,7 @@ body.view-draft-active #scene-toolbox {
   width: 22px;
   height: 22px;
   border-radius: 4px;
-  border: 1px solid var(--border-subtle, #3a3a3a);
+  border: 1px solid var(--border-secondary, #3a3a3a);
   background: transparent;
   color: var(--text-tertiary, #666);
   font-size: 14px;
@@ -1680,7 +1680,7 @@ body.view-draft-active #scene-toolbox {
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--text-tertiary, #666);
-  border-top: 1px solid var(--border-subtle, #3a3a3a);
+  border-top: 1px solid var(--border-secondary, #3a3a3a);
   margin-top: 4px;
 }
 
