@@ -43,9 +43,26 @@
   }
   function routedFactory() { return routeSceneFrameNodeView; }
 
+  // Schema selection (Phase 3) — opt-in to the v3 single-doc schema via
+  // `metadata.useSchemaV3: true`. Without the flag, returns null so doc.js
+  // falls back to the legacy v2 path (unchanged behaviour for every v2 file
+  // already in the wild). With the flag, returns the v3 schema produced
+  // by schema-v3.js's buildSchemaV3 factory.
+  //
+  // The flag is checked AFTER migration runs, so files migrated v1.x → v2
+  // → v3 in memory present the right shape for the v3 schema.
+  function selectSchema(parsed) {
+    const meta = parsed && parsed.metadata;
+    const wantsV3 = !!(meta && meta.useSchemaV3 === true);
+    if (!wantsV3) return null; // legacy path
+    if (typeof sp.buildSchemaV3 !== 'function') return null;
+    return sp.buildSchemaV3();
+  }
+
   const config = {
     outerNodes: sp.outerNodes,
-    placeholderNodeViewFactory: routedFactory
+    placeholderNodeViewFactory: routedFactory,
+    selectSchema: selectSchema
   };
 
   Rga.DocTypes.register('screenplay', config);

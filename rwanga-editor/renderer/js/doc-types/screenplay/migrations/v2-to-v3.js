@@ -155,8 +155,10 @@
       }
     };
     // Preserve content (location text + any marks); empty if absent.
+    // Strip empty text-node fragments (v3 PM rejects them).
     if (Array.isArray(sceneLineNode.content) && sceneLineNode.content.length > 0) {
-      sceneHeading.content = sceneLineNode.content;
+      const cleaned = _stripEmptyTextNodes(sceneLineNode.content);
+      if (cleaned.length > 0) sceneHeading.content = cleaned;
     }
     return sceneHeading;
   }
@@ -173,15 +175,31 @@
   }
 
   function _parentheticalV2toV3(parenNode) {
+    const cleaned = _stripEmptyTextNodes(parenNode.content);
     return Object.assign({}, parenNode, {
-      content: _wrapParentheticalContent(parenNode.content)
+      content: _wrapParentheticalContent(cleaned)
+    });
+  }
+
+  // Strip empty text-node fragments — v2 serialization sometimes emits
+  // { type:'text', text:'' } as a leading or interstitial fragment in
+  // multi-text blocks; the v3 PM schema rejects empty text nodes on
+  // nodeFromJSON. Marks on non-empty fragments survive untouched.
+  function _stripEmptyTextNodes(content) {
+    if (!Array.isArray(content)) return content;
+    return content.filter(function(child) {
+      if (!child) return false;
+      if (child.type === 'text' && (typeof child.text !== 'string' || child.text.length === 0)) return false;
+      return true;
     });
   }
 
   // Pass-through for blocks that don't change shape (action, character,
-  // dialogue, shot). Their content + marks survive byte-for-byte.
+  // dialogue, shot). Their content + marks survive byte-for-byte (except
+  // empty text fragments are stripped — v3 schema rejects them).
   function _passThroughBlock(node) {
-    return node;
+    if (!node || !Array.isArray(node.content)) return node;
+    return Object.assign({}, node, { content: _stripEmptyTextNodes(node.content) });
   }
 
   // ----------------------------------------------------------------

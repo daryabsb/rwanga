@@ -92,7 +92,9 @@ test('Doc.deserialize accepts v1.x and backfills production_type=untyped; body i
 });
 
 test('Doc.deserialize rejects a newer rga_version', () => {
-  const future = JSON.stringify({ rga_version: '3.0', metadata: {}, body: null });
+  // v3.0 is now SUPPORTED (readable via Phase 3 pipeline); rejection
+  // semantics target TRULY-newer formats we don't know how to read yet.
+  const future = JSON.stringify({ rga_version: '4.0', metadata: {}, body: null });
   assert.throws(() => Doc.deserialize(future, '/future.rga'), /newer Rwanga/);
 });
 

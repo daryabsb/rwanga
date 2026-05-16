@@ -6,7 +6,9 @@
 
   Rga.Constants = {
     CURRENT_RGA_VERSION: '2.0',
-    SUPPORTED_RGA_VERSIONS: ['1.0', '1.1', '2.0'],
+    // v3.0 is readable via the Phase 3 pipeline (opt-in metadata.useSchemaV3).
+    // CURRENT_RGA_VERSION stays at 2.0 — Phase 9 cleanup bumps the writer.
+    SUPPORTED_RGA_VERSIONS: ['1.0', '1.1', '2.0', '3.0'],
 
     PRODUCTION_TYPES: [
       { value: 'feature',     label_en: 'Feature',       label_ku: 'فیلمی درێژ' },

@@ -125,8 +125,18 @@
   function isNewerThanSupported(version) {
     const parsed = parseVersion(version);
     if (!parsed) return false;
-    const current = parseVersion(C.CURRENT_RGA_VERSION);
-    return parsed.major > current.major || (parsed.major === current.major && parsed.minor > current.minor);
+    const supported = C.SUPPORTED_RGA_VERSIONS || [];
+    // Reject only if NO supported version's major/minor reaches this one.
+    // (CURRENT_RGA_VERSION is what the writer emits; we may READ newer
+    // versions in the SUPPORTED list — e.g. v3 via the Phase 3 pipeline
+    // while the writer is still at v2.)
+    for (let i = 0; i < supported.length; i += 1) {
+      const s = parseVersion(supported[i]);
+      if (!s) continue;
+      if (s.major > parsed.major) return false;
+      if (s.major === parsed.major && s.minor >= parsed.minor) return false;
+    }
+    return true;
   }
 
   function basenameFromHandle(handle) {
@@ -218,6 +228,67 @@
     return node;
   }
 
+  // Phase 3 pipeline:
+  //   parsed (already JSON.parse'd, useSchemaV3 flag asserted by caller)
+  //   → Rga.Migrations.detectVersion / migrate (chains v1→v2→v3)
+  //   → Rga.DocTypes.detect (docType from file)
+  //   → Rga.DocTypes.selectSchema (per-doctype config picks v3 schema)
+  //   → schema.nodeFromJSON(parsed.body)
+  //   → returns the same in-memory Doc shape as the legacy path.
+  //
+  // Migration / schema / doc-type detection are intentionally decoupled:
+  // migration knows nothing about schemas; schemas know nothing about
+  // file versions; doc-type detection is independent. Future doc-types
+  // (e.g., stage play, TV episode template) plug in by registering their
+  // own selectSchema without touching this code.
+  function _deserializeV3(parsedIn, handle) {
+    let parsed = parsedIn;
+    if (Rga.Migrations && typeof Rga.Migrations.migrate === 'function') {
+      parsed = Rga.Migrations.migrate(parsed);
+    }
+    const documentType = Rga.DocTypes.detect(parsed);
+    const schema = Rga.DocTypes.selectSchema(parsed);
+    if (!schema) {
+      throw new Error('No v3 schema available for doc-type "' + documentType + '"');
+    }
+    let pmBody = null;
+    if (parsed.body) {
+      try {
+        pmBody = schema.nodeFromJSON(parsed.body);
+      } catch (err) {
+        throw new Error('Document body (v3) is invalid: ' + err.message);
+      }
+    }
+
+    // Doc shape mirrors the legacy path — same fields, just with a v3
+    // schema-rooted pmBody. Metadata / settings / registries pass through.
+    const metadata = parsed.metadata || {};
+    if (!metadata.production_type) metadata.production_type = C.DEFAULT_PRODUCTION_TYPE;
+    const settings = parsed.settings || defaultSettings();
+    if (!settings.pageSetup) settings.pageSetup = defaultSettings().pageSetup;
+    if (!settings.vocabulary) settings.vocabulary = defaultSettings().vocabulary;
+    if (!settings.sceneHeadingStyle) settings.sceneHeadingStyle = 'twoLine';
+    if (!settings.units) settings.units = 'in';
+
+    return {
+      docId: nextDocId(),
+      handle: handle || null,
+      displayName: basenameFromHandle(handle) || 'Untitled.rga',
+      origin: handle ? 'disk' : 'untitled',
+      dirty: false,
+      lastSavedAt: null,
+      rgaVersion: parsed.rga_version || C.CURRENT_RGA_VERSION,
+      documentType: documentType,
+      metadata: metadata,
+      settings: settings,
+      tagRegistry: parsed.tag_registry || emptyTagRegistry(),
+      flagLog: parsed.flag_log || [],
+      exportSettings: parsed.export_settings || defaultExportSettings(),
+      runtime: parsed.runtime || defaultRuntime(),
+      body: pmBody
+    };
+  }
+
   /**
    * Deserialize a .rga JSON string into an in-memory doc.
    * @param {string} content - raw file content
@@ -239,6 +310,16 @@
 
     if (isNewerThanSupported(fileVersion)) {
       throw new Error(`This .rga was created with a newer Rwanga (v${fileVersion}). Please update Rwanga to open it.`);
+    }
+
+    // Phase 3: opt-in v3 pipeline. When the file carries
+    // metadata.useSchemaV3: true, we route through the new pipeline —
+    // migrate → DocTypes.detect → DocTypes.selectSchema → nodeFromJSON.
+    // Files without the flag keep the existing legacy path verbatim,
+    // so no v2 doc in the wild changes behaviour.
+    const wantsV3 = !!(parsed.metadata && parsed.metadata.useSchemaV3 === true);
+    if (wantsV3 && Rga.Migrations && Rga.DocTypes && typeof Rga.DocTypes.selectSchema === 'function') {
+      return _deserializeV3(parsed, handle);
     }
 
     const documentType = (opts && opts.documentType) || (parsed && parsed.document_type) || 'screenplay';
