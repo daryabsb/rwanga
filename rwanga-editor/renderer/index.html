@@ -472,7 +472,14 @@
 <script src="js/doc-types/screenplay/plugins/annotation-notes.js"></script>
 <script src="js/doc-types/screenplay/plugins/tags.js"></script>
 <script src="js/doc-types/screenplay/plugins/revision-flags.js"></script>
-<script src="js/doc-types/screenplay/plugins/paginator-v2.js"></script>
+<!-- Screenplay layout layer — pure functions, no DOM. Load order matters:
+     profiles → wrap → normalizer → engine (each depends on the prior). -->
+<script src="js/doc-types/screenplay/layout/profiles.js"></script>
+<script src="js/doc-types/screenplay/layout/wrap.js"></script>
+<script src="js/doc-types/screenplay/layout/normalizer.js"></script>
+<script src="js/doc-types/screenplay/layout/engine.js"></script>
+<!-- Stupid renderer — consumes PageMap, emits decorations. Never measures. -->
+<script src="js/doc-types/screenplay/plugins/paginator-renderer.js"></script>
 <script src="js/editor/mount.js"></script>
 <script src="js/editor/page-surface.js"></script>
 <script src="js/editor/page-setup-dialog.js"></script>
