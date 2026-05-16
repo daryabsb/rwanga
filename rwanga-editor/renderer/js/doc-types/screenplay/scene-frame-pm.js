@@ -108,20 +108,27 @@
   }
 
   // Pull every non-sceneLine, non-transition block out of innerDoc as
-  // { type, text } records. Transition is structural (its own picker row).
+  // { type, content } records. content is the JSON array of inline children
+  // — preserves marks (bold, italic, annotation, tag, revisionFlag, etc.)
+  // so reopen + remount doesn't drop the user's saved annotations / flags /
+  // tags. Transition is structural (its own picker row).
   function _extractBlocks(innerDoc) {
     if (!innerDoc || !Array.isArray(innerDoc.content)) return [];
     return innerDoc.content.slice(1)
       .filter(function(node) { return node && node.type !== 'transition'; })
       .map(function(node) {
-        let text = '';
-        if (Array.isArray(node.content)) {
-          node.content.forEach(function(child) {
-            if (child.type === 'text' && typeof child.text === 'string') text += child.text;
-          });
-        }
-        return { type: node.type, text: text };
+        return { type: node.type, content: Array.isArray(node.content) ? node.content : [] };
       });
+  }
+
+  // Plain-text concat of a block's JSON content (fallback when the inner PM
+  // editor hasn't mounted yet — e.g. mount race during initial paint).
+  function _blockJsonToText(content) {
+    let text = '';
+    (content || []).forEach(function(child) {
+      if (child && child.type === 'text' && typeof child.text === 'string') text += child.text;
+    });
+    return text;
   }
 
   function _setPickerValue(picker, value, options) {
@@ -329,14 +336,14 @@
       el.dataset.blockType = b.type;
       el.dataset.blockIndex = String(index);
       el.contentEditable = 'false';
-      el.textContent = b.text;
+      el.textContent = _blockJsonToText(b.content);
       // Click handler kept as a defensive fallback: the eager mount below
       // should always have populated _innerView already, in which case the
       // guard inside _mountInnerEditor makes this a no-op. shouldFocus=true
       // because if we ever fall through here, the user just clicked and
       // expects the cursor.
       el.addEventListener('click', function() {
-        self._mountInnerEditor(el, b.type, b.text, true);
+        self._mountInnerEditor(el, b.type, b.content, true);
       });
       container.appendChild(el);
       // Eager mount, no focus — every block is alive from first paint so
@@ -345,7 +352,7 @@
       // scale this will be scoped to "active page ± N pages" via viewport
       // tracking once Steps 4c (propagation) and 4d (teardown) land —
       // both are prerequisites for safely unmounting offscreen blocks.
-      self._mountInnerEditor(el, b.type, b.text, false);
+      self._mountInnerEditor(el, b.type, b.content, false);
     });
   };
 
@@ -430,13 +437,29 @@
   // mounted, the editor is destroyed along with its in-flight edits. The
   // loop guard in _refreshValues already protects against self-dispatch
   // echoes (slug edits); other paths are rare in normal playground use.
-  SceneFramePm.prototype._mountInnerEditor = function(blockEl, blockType, blockText, shouldFocus) {
+  SceneFramePm.prototype._mountInnerEditor = function(blockEl, blockType, blockContent, shouldFocus) {
     if (blockEl._innerView) return; // already mounted — re-call is a no-op
     const PM = window.RgaProseMirror;
     const schema = _getInnerSchema();
     if (!PM || !schema || !PM.EditorState || !PM.EditorView) return;
 
-    const paragraphContent = blockText ? [schema.text(blockText)] : [];
+    // blockContent is the JSON array of inline children from attrs.innerDoc
+    // (or [{type:'text', text:'foo'}] for fresh-typed blocks). Marks on each
+    // text node are validated against the inner schema; missing mark types
+    // are silently dropped so the inner editor never crashes on schema
+    // mismatch. This is the read path that pairs with _dispatchInner's
+    // mark-preserving write path — together they round-trip annotations /
+    // flags / tags / bold / italic etc through save + reopen.
+    const paragraphContent = [];
+    (blockContent || []).forEach(function(child) {
+      if (!child || child.type !== 'text' || typeof child.text !== 'string' || !child.text) return;
+      const marks = (child.marks || []).map(function(mJson) {
+        const mt = schema.marks[mJson.type];
+        if (!mt) return null;
+        try { return mt.create(mJson.attrs || null); } catch (_) { return null; }
+      }).filter(Boolean);
+      paragraphContent.push(schema.text(child.text, marks));
+    });
     const innerDoc = schema.node('doc', null, [
       schema.node('paragraph', null, paragraphContent)
     ]);

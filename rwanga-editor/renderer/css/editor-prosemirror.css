@@ -1018,9 +1018,13 @@ body.view-draft-active #scene-toolbox {
 /* Inner ProseMirror editor mounted inside a scene block (v2 nested-PM,
    Step 4b+) must layout-match the read-only div so click-to-mount does
    not visibly shift the block. Strips the 1em bottom margin .ProseMirror p
-   gets from the outer rule above. */
+   gets from the outer rule above. Also forces color inheritance so
+   tintCharacters' inline style.color on the OUTER block reaches the
+   text — otherwise the .ProseMirror { color: var(--text-primary); }
+   rule above wins and per-character coloring stops working. */
 .rga-scene-block .ProseMirror {
   outline: none;
+  color: inherit;
 }
 .rga-scene-block .ProseMirror p {
   margin: 0;
@@ -1112,8 +1116,8 @@ body.view-draft-active #scene-toolbox {
   position: fixed;
   z-index: 9000;
   min-width: 180px;
-  background: var(--bg-elevated, #2d2d2d);
-  border: 1px solid var(--border-default, #454545);
+  background: var(--menu-bg, #2d2d2d);
+  border: 1px solid var(--border-primary, #454545);
   border-radius: 6px;
   box-shadow: 0 8px 24px rgba(0,0,0,0.4);
   padding: 4px 0;
@@ -1159,8 +1163,8 @@ body.view-draft-active #scene-toolbox {
   position: absolute;
   left: 100%;
   top: -4px;
-  background: var(--bg-elevated, #2d2d2d);
-  border: 1px solid var(--border-default, #454545);
+  background: var(--menu-bg, #2d2d2d);
+  border: 1px solid var(--border-primary, #454545);
   border-radius: 6px;
   box-shadow: 0 8px 24px rgba(0,0,0,0.4);
   padding: 4px 0;
@@ -1181,8 +1185,8 @@ body.view-draft-active #scene-toolbox {
   position: fixed;
   z-index: 8500;
   width: 240px;
-  background: var(--bg-elevated, #2d2d2d);
-  border: 1px solid var(--border-default, #454545);
+  background: var(--menu-bg, #2d2d2d);
+  border: 1px solid var(--border-primary, #454545);
   border-radius: 8px;
   box-shadow: 0 8px 24px rgba(0,0,0,0.4);
   padding: 12px;
@@ -1198,7 +1202,7 @@ body.view-draft-active #scene-toolbox {
   width: 100%;
   box-sizing: border-box;
   background: var(--bg-tertiary, #1e1e1e);
-  border: 1px solid var(--border-default, #454545);
+  border: 1px solid var(--border-primary, #454545);
   border-radius: 4px;
   color: var(--text-primary, #d4d4d4);
   font-family: inherit;
@@ -1242,8 +1246,8 @@ body.view-draft-active #scene-toolbox {
 .rga-popup-btn {
   padding: 4px 10px;
   border-radius: 4px;
-  border: 1px solid var(--border-default, #454545);
-  background: var(--bg-btn, #3a3a3a);
+  border: 1px solid var(--border-primary, #454545);
+  background: var(--bg-tertiary, #3a3a3a);
   color: var(--text-primary, #d4d4d4);
   font-size: 12px;
   cursor: pointer;
@@ -1279,7 +1283,7 @@ body.view-draft-active #scene-toolbox {
   width: 100%;
   box-sizing: border-box;
   background: var(--bg-tertiary, #1e1e1e);
-  border: 1px solid var(--border-default, #454545);
+  border: 1px solid var(--border-primary, #454545);
   border-radius: 4px;
   color: var(--text-primary, #d4d4d4);
   font-size: 12px;
@@ -1356,8 +1360,8 @@ body.view-draft-active #scene-toolbox {
   position: fixed;
   z-index: 8600;
   max-width: 260px;
-  background: var(--bg-elevated, #2d2d2d);
-  border: 1px solid var(--border-default, #454545);
+  background: var(--menu-bg, #2d2d2d);
+  border: 1px solid var(--border-primary, #454545);
   border-radius: 6px;
   box-shadow: 0 4px 16px rgba(0,0,0,0.35);
   padding: 8px 10px;
@@ -1403,8 +1407,8 @@ body.view-draft-active #scene-toolbox {
 .rga-info-btn {
   padding: 3px 8px;
   border-radius: 4px;
-  border: 1px solid var(--border-default, #454545);
-  background: var(--bg-btn, #3a3a3a);
+  border: 1px solid var(--border-primary, #454545);
+  background: var(--bg-tertiary, #3a3a3a);
   color: var(--text-primary, #d4d4d4);
   font-size: 11px;
   cursor: pointer;

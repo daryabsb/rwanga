@@ -156,6 +156,10 @@
           editorView.updateState(emptyState);
           editorView.setProps({ editable: function() { return false; } });
         }
+        // Last tab closed — fire editor.tabActivated so the panels
+        // (Notes, Flags, Breakdown) refresh against the now-empty doc
+        // and clear their orphan cards from the just-closed file.
+        document.dispatchEvent(new CustomEvent('editor.tabActivated', { detail: { tabId: null } }));
       }
     } else {
       renderTabBar();
