@@ -1575,6 +1575,21 @@ body.view-draft-active #scene-toolbox {
   align-self: flex-start;
 }
 
+/* Character-cue autocomplete ghost text. Light gray, inherits font /
+   weight / case from the .rga-block-character host so the suggested
+   tail visually matches the typed prefix. Non-interactive — pure
+   visual hint until the user confirms with Enter / Tab / ArrowRight. */
+.rga-autocomplete-ghost {
+  color: var(--text-tertiary, #888);
+  opacity: 0.55;
+  font: inherit;
+  font-weight: inherit;
+  text-transform: inherit;
+  letter-spacing: inherit;
+  pointer-events: none;
+  user-select: none;
+}
+
 /* Click-from-panel flash — temporarily highlights the marked text in the
    script so the writer can locate the passage a (resolved or open) note
    refers to. JS adds the class, removes it after ~1.6s; CSS transitions

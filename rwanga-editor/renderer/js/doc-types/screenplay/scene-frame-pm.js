@@ -142,6 +142,107 @@
   }
 
   // ============================================================
+  // Character-cue autocomplete (no-AI, registry-only)
+  // ============================================================
+  // When the user types in a character cue block and the typed prefix
+  // (>= 2 chars, case-insensitive) matches an already-registered
+  // character name, a ghost-text suggestion appears at the cursor
+  // showing the remainder of the name. Enter / Tab / ArrowRight confirms:
+  // the full name is inserted with the tag mark already applied + the
+  // matching entityId. No AI, no scoring, no fuzzy matching — pure
+  // startsWith lookup against doc.tagRegistry.characters. AI-flavoured
+  // suggestions across other block types stay deferred to v2/Pro.
+  //
+  // Plugin runs on every inner editor but only fires when the block
+  // currently has type=character (reads blockEl.dataset.blockType on
+  // each transaction — so Tab-cycling into character mid-typing also
+  // activates the suggestion without remounting the editor).
+
+  let _autocompleteKey = null;
+  function _getAutocompleteKey(PM) {
+    if (!_autocompleteKey) _autocompleteKey = new PM.PluginKey('rga-character-autocomplete');
+    return _autocompleteKey;
+  }
+
+  function _findCharacterMatch(text) {
+    const doc = Rga.TabManager && Rga.TabManager.activeDoc && Rga.TabManager.activeDoc();
+    if (!doc || !doc.tagRegistry) return null;
+    const chars = doc.tagRegistry.characters || [];
+    if (!chars.length) return null;
+    const lower = text.toLowerCase();
+    for (let i = 0; i < chars.length; i += 1) {
+      const c = chars[i];
+      if (!c || !c.name) continue;
+      const name = String(c.name);
+      if (name.length > text.length && name.toLowerCase().indexOf(lower) === 0) {
+        return c;
+      }
+    }
+    return null;
+  }
+
+  function _buildCharacterAutocompletePlugin(blockEl) {
+    const PM = window.RgaProseMirror;
+    if (!PM || !PM.Plugin || !PM.PluginKey || !PM.Decoration || !PM.DecorationSet) return null;
+    const key = _getAutocompleteKey(PM);
+    return new PM.Plugin({
+      key: key,
+      state: {
+        init: function() { return { match: null }; },
+        apply: function(tr, prev, oldState, newState) {
+          if (!blockEl || blockEl.dataset.blockType !== 'character') return { match: null };
+          const text = newState.doc.textContent;
+          if (text.length < 2) return { match: null };
+          return { match: _findCharacterMatch(text) };
+        }
+      },
+      props: {
+        decorations: function(state) {
+          const ps = key.getState(state);
+          if (!ps || !ps.match) return PM.DecorationSet.empty;
+          const text = state.doc.textContent;
+          const remainder = ps.match.name.slice(text.length);
+          if (!remainder) return PM.DecorationSet.empty;
+          // Widget at end of the paragraph's text (last position inside the
+          // paragraph node — content.size - 1 in a single-paragraph doc).
+          const widget = document.createElement('span');
+          widget.className = 'rga-autocomplete-ghost';
+          widget.textContent = remainder;
+          const insertPos = Math.max(0, state.doc.content.size - 1);
+          return PM.DecorationSet.create(state.doc, [
+            PM.Decoration.widget(insertPos, widget, { side: 1 })
+          ]);
+        },
+        handleKeyDown: function(view, event) {
+          if (event.key !== 'Enter' && event.key !== 'Tab' && event.key !== 'ArrowRight') return false;
+          const ps = key.getState(view.state);
+          if (!ps || !ps.match) return false;
+          const text = view.state.doc.textContent;
+          if (!text || ps.match.name.length <= text.length) return false;
+          event.preventDefault();
+
+          const schema = view.state.schema;
+          const tagMark = schema.marks.tag;
+          const fullName = ps.match.name;
+          const taggedText = tagMark
+            ? schema.text(fullName, [tagMark.create({ tagType: 'character', entityId: ps.match.id })])
+            : schema.text(fullName);
+          const newP = schema.node('paragraph', null, [taggedText]);
+          let tr = view.state.tr.replaceWith(0, view.state.doc.content.size, newP);
+          // Place cursor at end of the inserted name.
+          const endPos = tr.doc.content.size - 1;
+          if (PM.TextSelection) {
+            tr = tr.setSelection(PM.TextSelection.create(tr.doc, endPos));
+          }
+          view.dispatch(tr);
+          view.focus();
+          return true;
+        }
+      }
+    });
+  }
+
+  // ============================================================
   // Inner ProseMirror schema
   // ============================================================
   // Step 4b: doc -> paragraph+ -> text (no marks).
@@ -519,6 +620,12 @@
       if (sp.tagsPlugin)          innerPlugins.push(sp.tagsPlugin());
       if (sp.revisionFlagsPlugin) innerPlugins.push(sp.revisionFlagsPlugin());
     }
+    // Character-cue autocomplete: ghost-text suggestion from
+    // doc.tagRegistry.characters when this block is type=character. The
+    // plugin gates on blockEl.dataset.blockType per-transaction so a Tab
+    // cycle into character also activates suggestions without remounting.
+    const acPlugin = _buildCharacterAutocompletePlugin(blockEl);
+    if (acPlugin) innerPlugins.push(acPlugin);
     const state = PM.EditorState.create({ schema: schema, doc: innerDoc, plugins: innerPlugins });
 
     while (blockEl.firstChild) blockEl.removeChild(blockEl.firstChild);
