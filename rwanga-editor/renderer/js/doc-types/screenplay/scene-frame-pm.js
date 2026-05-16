@@ -105,23 +105,34 @@
   }
 
   // ============================================================
-  // Inner ProseMirror schema (Step 4b — minimal possible)
+  // Inner ProseMirror schema
   // ============================================================
-  // Deliberately stripped: doc -> paragraph+ -> text. No marks, no block
-  // types. Step 4b only proves the mount mechanics — schema additions
-  // (bold/italic/annotation/tag/revisionFlag etc.) land once mount is stable.
+  // Step 4b: doc -> paragraph+ -> text (no marks).
+  // Step 5a: adds the four simple toggle marks (bold/italic/underline/
+  //          strikethrough) — lifted from Rga.Framework.baseOuterMarks so
+  //          the inner and outer schemas can't drift apart on shared
+  //          marks. Mark specs have no attrs and serialize cleanly via
+  //          the existing parseDOM/toDOM rules.
+  // Later steps add color/highlight (5b), annotation/tag/revisionFlag (5c+).
+  //
   // Lazy-init so the module loads before window.RgaProseMirror is ready.
   let _innerSchema = null;
   function _getInnerSchema() {
     if (_innerSchema) return _innerSchema;
     const PM = window.RgaProseMirror;
     if (!PM || !PM.Schema) return null;
+    const baseOuterMarks = (Rga.Framework && Rga.Framework.baseOuterMarks) || {};
+    const innerMarks = {};
+    ['bold', 'italic', 'underline', 'strikethrough'].forEach(function(name) {
+      if (baseOuterMarks[name]) innerMarks[name] = baseOuterMarks[name];
+    });
     _innerSchema = new PM.Schema({
       nodes: {
         doc:       { content: 'paragraph+' },
         paragraph: { content: 'text*', toDOM: function() { return ['p', 0]; } },
         text:      {}
-      }
+      },
+      marks: innerMarks
     });
     return _innerSchema;
   }
@@ -311,26 +322,28 @@
         : []
     };
 
-    // 2. blocks — read each block div's current text. Prefer the inner PM
-    // editor when mounted (Step 4b made this the default); fall back to the
-    // div's textContent for the rare unmounted case (e.g. mount race).
+    // 2. blocks — serialize each block's content while preserving marks
+    // (Step 5a). We walk the inner doc's text nodes and toJSON each, which
+    // emits { type:'text', text, marks?:[...] } records — exactly the shape
+    // the outer block expects. Falls back to the div's plain textContent
+    // for the rare unmounted case (mount race).
     const blocks = [];
     const blockEls = this._blocksContainer ? this._blocksContainer.children : [];
     for (let i = 0; i < blockEls.length; i += 1) {
       const el = blockEls[i];
       const blockType = el.dataset.blockType || 'action';
-      let text = '';
+      let blockContent = [];
       if (el._innerView) {
-        const innerDoc = el._innerView.state.doc;
-        // Inner schema is currently single-paragraph; join cross-paragraph
-        // splits with newline so Enter inside a block doesn't lose text.
-        text = innerDoc.textBetween(0, innerDoc.content.size, '\n');
+        el._innerView.state.doc.descendants(function(n) {
+          if (n.isText) blockContent.push(n.toJSON());
+        });
       } else {
-        text = el.textContent || '';
+        const text = el.textContent || '';
+        if (text) blockContent = [{ type: 'text', text: text }];
       }
       blocks.push({
         type: blockType,
-        content: text ? [{ type: 'text', text: text }] : []
+        content: blockContent
       });
     }
 
@@ -377,7 +390,32 @@
     const innerDoc = schema.node('doc', null, [
       schema.node('paragraph', null, paragraphContent)
     ]);
-    const state = PM.EditorState.create({ schema: schema, doc: innerDoc });
+
+    // Step 5a: per-block plugins — history (Ctrl+Z scoped to this block,
+    // not the entire outer doc) + keymap with mark toggles for the four
+    // simple text marks + baseKeymap so Enter/Backspace/etc. behave.
+    // Mark commands are resolved against this inner schema; missing marks
+    // (e.g. when later schema steps add color/highlight) yield no-op
+    // commands, never throws.
+    const innerPlugins = [];
+    if (PM.history) innerPlugins.push(PM.history());
+    if (PM.keymap) {
+      const keymapEntries = {};
+      if (PM.undo) {
+        keymapEntries['Mod-z'] = PM.undo;
+        keymapEntries['Mod-y'] = PM.redo;
+        keymapEntries['Mod-Shift-z'] = PM.redo;
+      }
+      if (PM.toggleMark) {
+        if (schema.marks.bold)          keymapEntries['Mod-b'] = PM.toggleMark(schema.marks.bold);
+        if (schema.marks.italic)        keymapEntries['Mod-i'] = PM.toggleMark(schema.marks.italic);
+        if (schema.marks.underline)     keymapEntries['Mod-u'] = PM.toggleMark(schema.marks.underline);
+        if (schema.marks.strikethrough) keymapEntries['Mod-Shift-x'] = PM.toggleMark(schema.marks.strikethrough);
+      }
+      innerPlugins.push(PM.keymap(keymapEntries));
+      if (PM.baseKeymap) innerPlugins.push(PM.keymap(PM.baseKeymap));
+    }
+    const state = PM.EditorState.create({ schema: schema, doc: innerDoc, plugins: innerPlugins });
 
     while (blockEl.firstChild) blockEl.removeChild(blockEl.firstChild);
     const self = this;

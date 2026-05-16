@@ -16,7 +16,20 @@
   // ============================================================
 
   function _PM() { return window.RgaProseMirror; }
+  // _view returns whichever EditorView currently owns user focus — the inner
+  // PM editor inside a scene block when one is active (so toolbar commands
+  // target inline content inside scenes), otherwise the outer view (title,
+  // treatment, etc.). Reads from the _lastSceneBlock cache so the lookup
+  // survives the toolbar button's brief focus theft. Falls back to walking
+  // activeElement directly when the cache is cold.
   function _view() {
+    const cached = _lastSceneBlock;
+    if (cached && cached._innerView) return cached._innerView;
+    const ae = document.activeElement;
+    if (ae && ae.closest) {
+      const blockEl = ae.closest('.rga-scene-block');
+      if (blockEl && blockEl._innerView) return blockEl._innerView;
+    }
     return Rga.TabManager && Rga.TabManager._editorView && Rga.TabManager._editorView();
   }
   function _markType(name) {
@@ -268,11 +281,13 @@
     // While focus lives in the toolbar, popovers, or modal dialogs, preserve
     // the cached scene-block so the user can still act on it.
     if (_isToolbarFocus(t)) return;
-    if (t.classList && t.classList.contains('rga-scene-block')) {
-      _lastSceneBlock = t;
-    } else {
-      _lastSceneBlock = null;
-    }
+    // Scene block can be either:
+    //   - the .rga-scene-block div itself (v1 placeholder path), OR
+    //   - a descendant ProseMirror contenteditable child (v2 scene-frame-pm
+    //     mounts an inner editor whose DOM lives inside the block div).
+    // closest() handles both.
+    const blockEl = (t.closest && t.closest('.rga-scene-block')) || null;
+    _lastSceneBlock = blockEl;
     _lastSceneFrame = (t.closest && t.closest('.rga-scene-frame-placeholder')) || null;
     refreshActiveStates();
   }
