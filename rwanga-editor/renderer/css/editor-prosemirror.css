@@ -39,46 +39,28 @@
   user-select: none;
 }
 
-/* Page-break visual in Print: a quiet 16px hairline gap that reads as a
-   paper boundary, not a UI element. Subtle borders + faint shadow only. */
-#editor-container.view-print .rga-page-break {
-  position: absolute;
-  left: 0;
-  right: 0;
+/* Page-break visual in Print — v2 paginator (paginator-v2.js) inserts
+   these as flow-block widget decorations, so the 16px desk-strip TAKES
+   real vertical space and content below is genuinely pushed past it,
+   never masked (the v1 absolute-overlay bug Darya reported). Negative
+   left/right margins extend the strip across the full page width
+   (into the .rga-page's 1.5in/1in padding) so it reads as the gap
+   between two paper sheets, not a thin slice inside the column.
+
+   Title + page-N labels are deferred — reinstating them needs an
+   explicit "top margin" reservation per page (otherwise the absolute-
+   positioned labels overlap next-page content). Tracked as polish. */
+.rga-page-break {
+  display: block;
+  position: relative;
   height: 16px;
+  margin: 0 -1in 0 -1.5in;
   background: var(--editor-bg);
   border-top: 1px solid rgba(0, 0, 0, 0.10);
   border-bottom: 1px solid rgba(0, 0, 0, 0.10);
-  box-shadow:
-    inset 0 1px 2px rgba(0, 0, 0, 0.05);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
   pointer-events: none;
-}
-
-/* Title at top-left of every page after page 1 — sits in the next page's
-   top margin (just below the break gap). */
-#editor-container.view-print .rga-page-break::before {
-  content: var(--doc-title);
-  position: absolute;
-  top: calc(16px + 0.4in);
-  left: 1.5in;
-  font-family: var(--font-editor, 'Courier Prime', 'Courier New', monospace);
-  font-size: 10pt;
-  color: var(--text-tertiary, #888);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-/* Page number at top-right of every page after page 1 */
-#editor-container.view-print .rga-page-break::after {
-  content: attr(data-page-label) ".";
-  position: absolute;
-  top: calc(16px + 0.4in);
-  right: 1in;
-  font-family: var(--font-editor, 'Courier Prime', 'Courier New', monospace);
-  font-size: 10pt;
-  color: var(--text-secondary, #aaa);
-  text-transform: capitalize;
-  letter-spacing: 0.04em;
+  user-select: none;
 }
 
 /* ---- FLOW view: comfortable text column, no paper edges ---- */
@@ -101,18 +83,18 @@
 #editor-container.view-flow .flow-line-gutter {
   display: block;
 }
-/* Flow view: page markers (existing engine, softer styling) */
+/* Flow view: subtler break — Flow has no paper-edge metaphor, just a
+   thin divider so the writer can see where pages roughly fall. v2
+   paginator uses the same DOM widget; this rule overrides the
+   print-view chrome to a quieter dashed line. */
 #editor-container.view-flow .rga-page-break {
-  border-top: 1px solid var(--border-secondary, rgba(128, 128, 128, 0.3));
+  height: 1px;
+  background: transparent;
+  border-top: 1px dashed var(--border-secondary, rgba(128, 128, 128, 0.3));
+  border-bottom: none;
+  box-shadow: none;
   opacity: 0.55;
-}
-#editor-container.view-flow .rga-page-break::after {
-  font-size: 10px;
-  color: var(--text-tertiary, #888);
-  background: var(--editor-bg);
-  padding: 0 6px;
-  inset-inline-end: 8px;
-  inset-inline-start: auto;
+  margin: 8px 0;
 }
 
 /* ---- Page row + line gutter (Flow only by default) ---- */

@@ -201,11 +201,12 @@
     if (sp && sp.revisionFlagsPlugin) {
       plugins.push(sp.revisionFlagsPlugin());
     }
-    if (sp && sp.pageBreaksPlugin) {
-      plugins.push(sp.pageBreaksPlugin(function() {
+    if (sp && sp.paginatorV2Plugin) {
+      const v2 = sp.paginatorV2Plugin(function() {
         const doc = Rga.TabManager && Rga.TabManager.activeDoc && Rga.TabManager.activeDoc();
         return doc && doc.settings ? doc.settings.pageSetup : null;
-      }));
+      });
+      if (v2) plugins.push(v2);
     }
 
     const docType = Rga.DocTypes.get(documentType);
