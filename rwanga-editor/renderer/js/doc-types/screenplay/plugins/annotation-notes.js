@@ -68,9 +68,18 @@
   // ---------------------------------------------------------------
   function navigateToAnnotation(id) {
     const el = document.querySelector('.rga-annotation[data-id="' + id + '"]');
-    if (el && typeof el.scrollIntoView === 'function') {
+    if (!el) return;
+    if (typeof el.scrollIntoView === 'function') {
       el.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
+    // Brief blue flash so the writer can see WHICH passage the panel
+    // card refers to — particularly useful for resolved notes whose
+    // background highlight has been stripped from the script.
+    el.classList.remove('rga-annotation-focused'); // re-trigger if rapid clicks
+    // Force reflow so the class re-addition restarts the CSS transition.
+    void el.offsetWidth;
+    el.classList.add('rga-annotation-focused');
+    setTimeout(function() { el.classList.remove('rga-annotation-focused'); }, 1600);
   }
 
   // ---------------------------------------------------------------
@@ -83,11 +92,20 @@
     card.dataset.id = annot.id;
     card.style.borderLeftColor = annot.color;
 
+    if (isResolved) {
+      const badge = document.createElement('div');
+      badge.className = 'annot-card-resolved-badge';
+      badge.textContent = 'Resolved';
+      card.appendChild(badge);
+    }
+
     if (annot.markedText) {
       const preview = document.createElement('div');
       preview.className = 'annot-card-preview';
       preview.textContent = annot.markedText.slice(0, 60) + (annot.markedText.length > 60 ? '…' : '');
-      preview.title = 'Click to jump to this note in the editor';
+      preview.title = isResolved
+        ? 'Click to flash the passage this note was about'
+        : 'Click to jump to this note in the editor';
       preview.addEventListener('click', function() {
         navigateToAnnotation(annot.id);
       });
