@@ -751,26 +751,9 @@ body.view-draft-active #scene-toolbox {
   position: relative;
 }
 
-/* ----- ESTIMATED PAGE BREAKS (Step A — replaced by true pagination in v0.2) ----- */
-.rga-page-break-layer {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
-.rga-page-break {
-  position: absolute;
-  left: 0;
-  right: 0;
-  border-top: 1px dashed var(--border-secondary, #444);
-}
-.rga-page-break::after {
-  content: attr(data-page-label);
-  position: absolute;
-  right: 8px;
-  top: 2px;
-  font-size: var(--font-size-xs, 10px);
-  color: var(--text-tertiary, #6e6e6e);
-}
+/* (v1 estimate engine page-break rules removed 2026-05-16. The new flow-
+   based paginator's styling lives near the top of this file; archived
+   reference engine at archived/page-breaks-v1.js.) */
 
 /* RTL support */
 [dir="rtl"] .ProseMirror {
@@ -1074,13 +1057,10 @@ body.view-draft-active #scene-toolbox {
   margin: 0.5em 0;
 }
 
-/* ----- PAGE BREAK ----- */
-
-.ProseMirror .rga-page-break {
-  break-after: page;
-  border-bottom: 1px dashed var(--border-subtle);
-  margin: 2em 0;
-}
+/* (Old `.ProseMirror .rga-page-break` rule removed 2026-05-16 — was
+   overriding the new flow-based paginator styling via specificity. The
+   real rule lives near the top of this file with the v2 paginator
+   integration notes.) */
 
 /* ----- SELECTION ----- */
 
