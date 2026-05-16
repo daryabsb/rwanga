@@ -857,7 +857,14 @@ body.view-draft-active #scene-toolbox {
   border-bottom: 2px solid var(--accent-primary);
   cursor: help;
 }
-.ProseMirror .rga-tag-character { border-bottom-color: var(--tag-character, #4FC1FF); }
+/* Character tag also tints the text color — replaces the old per-character
+   rainbow tint applied via flow-chrome's tintCharacters. Tagged character
+   names share the single tag-character color; untagged names inherit the
+   default block text color. */
+.ProseMirror .rga-tag-character {
+  border-bottom-color: var(--tag-character, #4FC1FF);
+  color: var(--tag-character, #4FC1FF);
+}
 .ProseMirror .rga-tag-prop      { border-bottom-color: var(--tag-prop,       #FFB347); }
 .ProseMirror .rga-tag-wardrobe  { border-bottom-color: var(--tag-wardrobe,   #C586C0); }
 .ProseMirror .rga-tag-location  { border-bottom-color: var(--tag-location,   #4EC9B0); }

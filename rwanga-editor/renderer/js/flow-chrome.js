@@ -111,26 +111,17 @@
   // Character tinting (color from tag_registry)
   // ============================================================
 
+  // Cleanup pass — the old per-character rainbow tint (one color per name from
+  // doc.tagRegistry.characters[].color) was retired 2026-05-16 in favour of a
+  // single tag-character color applied via CSS to .rga-tag-character spans.
+  // This pass strips any stale inline color residue from the rainbow era so
+  // reopening a file that was previously tinted doesn't leave dangling
+  // per-character colors locked in via inline style.
   function tintCharacters() {
-    // Run in all views — character color is identity, not view-specific.
-    const doc = Rga.TabManager && Rga.TabManager.activeDoc && Rga.TabManager.activeDoc();
-    if (!doc || !doc.tagRegistry) return;
-    const list = doc.tagRegistry.characters || [];
-    if (!list.length) return;
-    const byName = {};
-    list.forEach(function(c) {
-      if (c && c.name) byName[String(c.name).trim().toLowerCase()] = c.color;
-    });
     const editor = _editor();
     if (!editor) return;
     editor.querySelectorAll('.rga-block-character').forEach(function(el) {
-      const name = (el.textContent || '').trim().toLowerCase();
-      const color = byName[name];
-      if (color) {
-        el.style.color = color;
-      } else {
-        el.style.color = '';
-      }
+      if (el.style.color) el.style.color = '';
     });
   }
 
