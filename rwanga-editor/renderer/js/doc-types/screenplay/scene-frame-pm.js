@@ -38,6 +38,19 @@
   const FORWARD_TAB  = { action: 'character', character: 'dialogue', dialogue: 'shot', shot: 'action' };
   const BACKWARD_TAB = { action: 'shot',     character: 'action',   dialogue: 'character', shot: 'dialogue' };
 
+  // Enter from block of type X creates a new sibling block of type
+  // ENTER_NEXT[X]. Mirrors v1 placeholder rules — writers expect Enter from
+  // CHARACTER to land in DIALOGUE, Enter from DIALOGUE to make another
+  // DIALOGUE (continued speech), Enter from SHOT back to ACTION, etc.
+  const ENTER_NEXT = {
+    action:         'action',
+    character:      'dialogue',
+    dialogue:       'dialogue',
+    shot:           'action',
+    parenthetical:  'dialogue',
+    inlineFreeText: 'inlineFreeText'
+  };
+
   const TRANSITION_OPTIONS = [
     'CUT', 'MIX', 'FADE IN', 'FADE OUT', 'DISSOLVE', 'MATCH CUT', 'SMASH CUT', 'JUMP CUT'
   ];
@@ -605,6 +618,67 @@
         self._dispatchInner();
         return true;
       };
+
+      // Enter — screenplay rule:
+      //   * empty trailing block → spawn next scene (the "second Enter"
+      //     escalation that writers expect after closing the previous one)
+      //   * otherwise → create a new sibling block of type ENTER_NEXT
+      //     [currentType] and move focus there. NEVER lets PM's baseKeymap
+      //     fire (which would split the inner editor's paragraph in-place,
+      //     leaving the writer stuck inside one block — the bug this
+      //     replaces).
+      keymapEntries['Enter'] = function(state) {
+        const currentType = blockEl.dataset.blockType;
+        const currentText = state.doc.textContent;
+        const blocksContainer = self._blocksContainer;
+        const blockCount = blocksContainer ? blocksContainer.children.length : 0;
+
+        if (currentText.length === 0 && blockCount > 1) {
+          self._spawnNextScene();
+          return true;
+        }
+
+        const nextType = ENTER_NEXT[currentType] || currentType;
+        const newEl = self._insertBlockAfter(blockEl, nextType, []);
+        if (newEl && newEl._innerView) newEl._innerView.focus();
+        self._dispatchInner();
+        return true;
+      };
+
+      // Mod-Enter from anywhere inside an inner editor spawns the next
+      // scene immediately. Mirrors mount.js's outer Mod-Enter binding,
+      // which never reaches us because the NodeView's stopEvent=true
+      // prevents events bubbling out of the inner contenteditable.
+      keymapEntries['Mod-Enter'] = function() {
+        self._spawnNextScene();
+        return true;
+      };
+
+      // Backspace at the start of an empty block removes the block and
+      // moves the cursor to the end of the previous block. For non-empty
+      // blocks (or non-start cursor) we return false → PM's baseKeymap
+      // joinBackward / default deletion takes over.
+      keymapEntries['Backspace'] = function(state) {
+        const text = state.doc.textContent;
+        const cursorPos = state.selection.from;
+        const atStart = cursorPos <= 1; // pos 1 = start of paragraph
+        if (text.length !== 0 || !atStart) return false;
+        const prevEl = blockEl.previousElementSibling;
+        if (!prevEl) return false;
+        self._removeBlock(blockEl);
+        if (prevEl._innerView) {
+          prevEl._innerView.focus();
+          if (PM.TextSelection) {
+            const endPos = Math.max(0, prevEl._innerView.state.doc.content.size - 1);
+            const tr = prevEl._innerView.state.tr.setSelection(
+              PM.TextSelection.create(prevEl._innerView.state.doc, endPos)
+            );
+            prevEl._innerView.dispatch(tr);
+          }
+        }
+        return true;
+      };
+
       innerPlugins.push(PM.keymap(keymapEntries));
       if (PM.baseKeymap) innerPlugins.push(PM.keymap(PM.baseKeymap));
     }
@@ -662,6 +736,68 @@
     if (Rga.FlowChrome && typeof Rga.FlowChrome.refresh === 'function') {
       Rga.FlowChrome.refresh();
     }
+  };
+
+  // Insert a new sibling scene-block AFTER refBlockEl with its own mounted
+  // inner editor. Returns the new block element. Used by the inner Enter
+  // keymap to create the "next typed block" per ENTER_NEXT.
+  SceneFramePm.prototype._insertBlockAfter = function(refBlockEl, type, content) {
+    if (!refBlockEl || !this._blocksContainer) return null;
+    const self = this;
+    const el = document.createElement('div');
+    el.className = 'rga-scene-block rga-block-' + type;
+    el.dataset.blockType = type;
+    el.contentEditable = 'false';
+    el.addEventListener('click', function() {
+      self._mountInnerEditor(el, type, content || [], true);
+    });
+    refBlockEl.parentNode.insertBefore(el, refBlockEl.nextSibling);
+    this._mountInnerEditor(el, type, content || [], false);
+    return el;
+  };
+
+  // Remove a block + its inner editor. Used by the inner Backspace keymap
+  // when the user backspaces at the start of an empty trailing block.
+  SceneFramePm.prototype._removeBlock = function(blockEl) {
+    if (!blockEl || !this._blocksContainer) return;
+    this._destroyBlockInnerEditor(blockEl);
+    if (blockEl.parentNode === this._blocksContainer) {
+      this._blocksContainer.removeChild(blockEl);
+    }
+    this._dispatchInner();
+  };
+
+  // Insert a fresh empty sceneFrame after this one in the outer doc. Mirrors
+  // mount.js's insertSceneFrame command — duplicated inline here because
+  // mount.js doesn't export it and pulling it down through Rga.Editor would
+  // create a coupling we'd have to unwind when v2 archives v1. New scene's
+  // number = current scene count + 1; the routing factory's per-doc check
+  // picks v2 / v1 NodeView based on metadata.useV2SceneFrame.
+  SceneFramePm.prototype._spawnNextScene = function() {
+    const PM = window.RgaProseMirror;
+    if (!PM || !this._view || !this._getPos) return;
+    const view = this._view;
+    const sceneFrameType = view.state.schema.nodes.sceneFrame;
+    if (!sceneFrameType) return;
+
+    let sceneCount = 0;
+    view.state.doc.descendants(function(node) {
+      if (node.type === sceneFrameType) sceneCount += 1;
+    });
+
+    const newFrame = sceneFrameType.create({
+      id: 'scene-' + Date.now().toString(36),
+      number: sceneCount + 1,
+      headingStyle: null,
+      innerDoc: null
+    });
+
+    const pos = this._getPos();
+    if (typeof pos !== 'number') return;
+    const currentNode = view.state.doc.nodeAt(pos);
+    const insertPos = pos + (currentNode ? currentNode.nodeSize : 1);
+    const tr = view.state.tr.insert(insertPos, newFrame);
+    view.dispatch(tr);
   };
 
   SceneFramePm.prototype._refreshNum = function(node) {
