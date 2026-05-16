@@ -458,6 +458,12 @@
 <!-- v3 schema (Phase 1) — pure module, not yet wired into mount. Exposes
      Rga.DocTypes.screenplay.buildSchemaV3() for tests + future phases. -->
 <script src="js/doc-types/screenplay/schema-v3.js"></script>
+<!-- Migrations framework (Phase 2) — pure JSON → JSON. Steps first, then
+     the chain entry point. Exposes Rga.Migrations.{detectVersion, migrate}.
+     Not yet wired into doc.js deserialize (Phase 3+). -->
+<script src="js/doc-types/screenplay/migrations/v1-to-v2.js"></script>
+<script src="js/doc-types/screenplay/migrations/v2-to-v3.js"></script>
+<script src="js/doc-types/screenplay/migrations/index.js"></script>
 <script src="js/doc-types/screenplay/scene-frame-placeholder.js"></script>
 <!-- Nested-PM Scene NodeView — exposes Rga.DocTypes.screenplay.sceneFramePmFactory.
      Replacement-in-progress for the placeholder above. Loaded but not yet
