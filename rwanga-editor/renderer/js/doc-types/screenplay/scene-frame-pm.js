@@ -155,8 +155,13 @@
     const innerMarks = {};
     // Step 5a: toggle marks. Package 3: color/highlight/link (attrs marks,
     // toolbar popovers/dialogs already route to focused view via _view).
+    // Package 4: annotation, tag, revisionFlag — the original "notes/flags/
+    // tags inside scenes" motivation. With these in the inner schema, the
+    // mark commands fired by the toolbar Note/Flag/Tag buttons + the
+    // annotation/tag/revision-flag plugins below apply to inner content.
     ['bold', 'italic', 'underline', 'strikethrough',
-     'color', 'highlight', 'link'].forEach(function(name) {
+     'color', 'highlight', 'link',
+     'annotation', 'tag', 'revisionFlag'].forEach(function(name) {
       if (baseOuterMarks[name]) innerMarks[name] = baseOuterMarks[name];
     });
     _innerSchema = new PM.Schema({
@@ -478,6 +483,18 @@
       };
       innerPlugins.push(PM.keymap(keymapEntries));
       if (PM.baseKeymap) innerPlugins.push(PM.keymap(PM.baseKeymap));
+    }
+    // Package 4: mount the same context-menu / annotations / tags /
+    // revision-flags plugins on each inner editor so right-click works
+    // inside scenes and click-on-mark popups open at the right coords.
+    // Plugins are no-ops on schemas missing their target marks, safe to
+    // attach unconditionally.
+    const sp = Rga.DocTypes && Rga.DocTypes.screenplay;
+    if (sp) {
+      if (sp.contextMenuPlugin)   innerPlugins.push(sp.contextMenuPlugin());
+      if (sp.annotationsPlugin)   innerPlugins.push(sp.annotationsPlugin());
+      if (sp.tagsPlugin)          innerPlugins.push(sp.tagsPlugin());
+      if (sp.revisionFlagsPlugin) innerPlugins.push(sp.revisionFlagsPlugin());
     }
     const state = PM.EditorState.create({ schema: schema, doc: innerDoc, plugins: innerPlugins });
 

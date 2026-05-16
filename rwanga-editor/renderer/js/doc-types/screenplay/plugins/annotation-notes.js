@@ -22,27 +22,54 @@
   }
 
   // ---------------------------------------------------------------
-  // Navigate editor cursor to the first occurrence of an annotation
+  // Locate the EditorView that currently owns an annotation by id —
+  // outer view first, then walks every mounted inner editor (v2 scene
+  // blocks). Returns null if the annotation no longer exists anywhere.
+  // ---------------------------------------------------------------
+  function findViewForAnnotation(id) {
+    const outer = getView();
+    if (outer) {
+      const schema = outer.state.schema;
+      const annotMark = schema && schema.marks.annotation;
+      if (annotMark) {
+        let found = false;
+        outer.state.doc.descendants(function(node) {
+          if (found) return false;
+          if (node.marks.some(function(m) { return m.type === annotMark && m.attrs.id === id; })) {
+            found = true;
+          }
+        });
+        if (found) return outer;
+      }
+    }
+    const blocks = document.querySelectorAll('.rga-scene-block');
+    for (let i = 0; i < blocks.length; i++) {
+      const v = blocks[i]._innerView;
+      if (!v) continue;
+      const innerAnnot = v.state.schema.marks.annotation;
+      if (!innerAnnot) continue;
+      let found = false;
+      v.state.doc.descendants(function(node) {
+        if (found) return false;
+        if (node.marks.some(function(m) { return m.type === innerAnnot && m.attrs.id === id; })) {
+          found = true;
+        }
+      });
+      if (found) return v;
+    }
+    return null;
+  }
+
+  // ---------------------------------------------------------------
+  // Navigate to the first DOM occurrence of an annotation. Works for
+  // both outer-doc and inner-editor marks — both render as the same
+  // <span class="rga-annotation" data-id="..."> via the shared mark
+  // spec, so a global querySelector hits either.
   // ---------------------------------------------------------------
   function navigateToAnnotation(id) {
-    const view = getView();
-    if (!view) return;
-    const schema = view.state.schema;
-    let targetPos = null;
-    view.state.doc.descendants(function(node, pos) {
-      if (targetPos !== null) return false;
-      if (node.marks.some(function(m) {
-        return m.type === schema.marks.annotation && m.attrs.id === id;
-      })) {
-        targetPos = pos;
-        return false;
-      }
-    });
-    if (targetPos !== null) {
-      const PM = window.RgaProseMirror;
-      const tr = view.state.tr.setSelection(PM.TextSelection.create(view.state.doc, targetPos));
-      view.dispatch(tr.scrollIntoView());
-      view.focus();
+    const el = document.querySelector('.rga-annotation[data-id="' + id + '"]');
+    if (el && typeof el.scrollIntoView === 'function') {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
   }
 
@@ -83,7 +110,7 @@
       textarea.value = annot.text;
       textarea.rows = 2;
       textarea.addEventListener('input', function() {
-        const v = view || getView();
+        const v = findViewForAnnotation(annot.id) || view || getView();
         if (v && Rga.Annotations && Rga.Annotations.updateAnnotationText) {
           Rga.Annotations.updateAnnotationText(v, annot.id, textarea.value);
         }
@@ -100,7 +127,7 @@
       restoreBtn.title = 'Restore the highlight and move the note back to open';
       restoreBtn.textContent = '↺';
       restoreBtn.addEventListener('click', function() {
-        const v = view || getView();
+        const v = findViewForAnnotation(annot.id) || view || getView();
         if (v && Rga.Annotations && Rga.Annotations.restoreAnnotation) {
           Rga.Annotations.restoreAnnotation(v, annot.id);
         }
@@ -112,7 +139,7 @@
       resolveBtn.title = 'Resolve — removes the highlight, keeps the note here struck through';
       resolveBtn.textContent = '✓';
       resolveBtn.addEventListener('click', function() {
-        const v = view || getView();
+        const v = findViewForAnnotation(annot.id) || view || getView();
         if (v && Rga.Annotations && Rga.Annotations.resolveAnnotation) {
           Rga.Annotations.resolveAnnotation(v, annot.id);
         }
@@ -125,7 +152,7 @@
     removeBtn.title = 'Delete the note entirely (cannot be restored)';
     removeBtn.textContent = '×';
     removeBtn.addEventListener('click', function() {
-      const v = view || getView();
+      const v = findViewForAnnotation(annot.id) || view || getView();
       if (v && Rga.Annotations && Rga.Annotations.removeAnnotation) {
         Rga.Annotations.removeAnnotation(v, annot.id);
       }
@@ -150,6 +177,9 @@
     const open = [];
     const resolved = [];
     const seen = new Set();
+
+    // 1. Outer-doc annotations (title, treatment, anything outside a
+    //    sceneFrame atom).
     view.state.doc.descendants(function(node) {
       node.marks.forEach(function(m) {
         if (m.type === schema.marks.annotation && !seen.has(m.attrs.id)) {
@@ -159,11 +189,40 @@
             color: m.attrs.color,
             text: m.attrs.text || '',
             status: m.attrs.status || 'open',
-            markedText: _extractMarkedText(view, m.attrs.id),
+            markedText: _extractMarkedText(view, m.attrs.id)
           };
           if (card.status === 'resolved') resolved.push(card);
           else open.push(card);
         }
+      });
+    });
+
+    // 2. Inner-doc annotations — walk each sceneFrame's attrs.innerDoc
+    //    JSON. Source of truth on file open (before any inner editor is
+    //    even mounted) and during normal operation.
+    view.state.doc.descendants(function(node) {
+      if (!node.type || node.type.name !== 'sceneFrame') return;
+      const innerDoc = node.attrs && node.attrs.innerDoc;
+      if (!innerDoc || !Array.isArray(innerDoc.content)) return;
+      innerDoc.content.forEach(function(block) {
+        if (!block || !Array.isArray(block.content)) return;
+        block.content.forEach(function(textNode) {
+          if (!textNode || textNode.type !== 'text' || !Array.isArray(textNode.marks)) return;
+          textNode.marks.forEach(function(m) {
+            if (m && m.type === 'annotation' && m.attrs && !seen.has(m.attrs.id)) {
+              seen.add(m.attrs.id);
+              const card = {
+                id: m.attrs.id,
+                color: m.attrs.color,
+                text: m.attrs.text || '',
+                status: m.attrs.status || 'open',
+                markedText: textNode.text || ''
+              };
+              if (card.status === 'resolved') resolved.push(card);
+              else open.push(card);
+            }
+          });
+        });
       });
     });
 

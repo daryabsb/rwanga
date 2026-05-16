@@ -93,6 +93,47 @@
     view.focus();
   }
 
+  // Locate the EditorView that currently owns a revisionFlag by id —
+  // outer view first, then walks every mounted v2 inner editor. Returns
+  // null if the flag has been deleted everywhere.
+  function _findViewForFlag(id) {
+    const outer = _getView();
+    if (outer) {
+      const schema = outer.state.schema;
+      const flagMark = schema && schema.marks.revisionFlag;
+      if (flagMark) {
+        let found = false;
+        outer.state.doc.descendants(function(node) {
+          if (found) return false;
+          if (node.isText) {
+            if (node.marks.some(function(m) { return m.type === flagMark && m.attrs.id === id; })) {
+              found = true;
+            }
+          }
+        });
+        if (found) return outer;
+      }
+    }
+    const blocks = document.querySelectorAll('.rga-scene-block');
+    for (let i = 0; i < blocks.length; i++) {
+      const v = blocks[i]._innerView;
+      if (!v) continue;
+      const innerFlag = v.state.schema.marks.revisionFlag;
+      if (!innerFlag) continue;
+      let found = false;
+      v.state.doc.descendants(function(node) {
+        if (found) return false;
+        if (node.isText) {
+          if (node.marks.some(function(m) { return m.type === innerFlag && m.attrs.id === id; })) {
+            found = true;
+          }
+        }
+      });
+      if (found) return v;
+    }
+    return null;
+  }
+
   function _markRange(doc, pos, markType) {
     let from = pos, to = pos;
     doc.nodesBetween(0, doc.content.size, function(node, nodePos) {
@@ -325,24 +366,52 @@
 
     // ---- Open flags ----
     const openFlags = [];
+    const seenIds = new Set();
+
+    // 1. Outer-doc revisionFlag marks.
     if (schema && schema.marks.revisionFlag) {
-      const seenIds = new Set();
       view.state.doc.descendants(function(node, pos) {
         if (!node.isText) return;
         const flagMark = node.marks.find(function(m) { return m.type === schema.marks.revisionFlag; });
         if (!flagMark) return;
         const id = flagMark.attrs.id;
-        const rangeKey = id || (_markRange(view.state.doc, pos, schema.marks.revisionFlag).from + ':' + _markRange(view.state.doc, pos, schema.marks.revisionFlag).to);
+        const range = _markRange(view.state.doc, pos, schema.marks.revisionFlag);
+        const rangeKey = id || (range.from + ':' + range.to);
         if (seenIds.has(rangeKey)) return;
         seenIds.add(rangeKey);
-        const range = _markRange(view.state.doc, pos, schema.marks.revisionFlag);
         openFlags.push({
-          id: flagMark.attrs.id,
+          id: id,
           mark: flagMark,
-          markedText: view.state.doc.textBetween(range.from, range.to, ' '),
+          markedText: view.state.doc.textBetween(range.from, range.to, ' ')
         });
       });
     }
+
+    // 2. Inner-doc revisionFlag marks — walk every sceneFrame's attrs.
+    //    innerDoc JSON so flags created inside scenes appear on file open
+    //    as well as runtime via events.
+    view.state.doc.descendants(function(node) {
+      if (!node.type || node.type.name !== 'sceneFrame') return;
+      const innerDoc = node.attrs && node.attrs.innerDoc;
+      if (!innerDoc || !Array.isArray(innerDoc.content)) return;
+      innerDoc.content.forEach(function(block) {
+        if (!block || !Array.isArray(block.content)) return;
+        block.content.forEach(function(textNode) {
+          if (!textNode || textNode.type !== 'text' || !Array.isArray(textNode.marks)) return;
+          textNode.marks.forEach(function(m) {
+            if (!m || m.type !== 'revisionFlag' || !m.attrs) return;
+            const id = m.attrs.id;
+            if (!id || seenIds.has(id)) return;
+            seenIds.add(id);
+            openFlags.push({
+              id: id,
+              mark: { attrs: m.attrs },  // shape-compatible with PM mark for _buildFlagCard
+              markedText: textNode.text || ''
+            });
+          });
+        });
+      });
+    });
 
     if (!openFlags.length) {
       container.innerHTML = '<div class="flags-empty">No open flags — select text and right-click to flag.</div>';
@@ -432,7 +501,8 @@
       resolveBtn.title = 'Accept — marks resolved, keeps the entry in the log below';
       resolveBtn.textContent = '✓';
       resolveBtn.addEventListener('click', function() {
-        resolveFlag(view, f.id);
+        const liveView = _findViewForFlag(f.id) || view;
+        resolveFlag(liveView, f.id);
       });
       row.appendChild(resolveBtn);
 
@@ -441,8 +511,10 @@
       removeBtn.title = 'Remove flag entirely — does not appear in the log';
       removeBtn.textContent = '×';
       removeBtn.addEventListener('click', function() {
-        const range = _markRange(view.state.doc, _firstFlagPos(view, f.id), view.state.schema.marks.revisionFlag);
-        if (range) removeRevisionFlag(view, range.from, range.to);
+        const liveView = _findViewForFlag(f.id) || view;
+        const flagMark = liveView.state.schema.marks.revisionFlag;
+        const range = _markRange(liveView.state.doc, _firstFlagPos(liveView, f.id), flagMark);
+        if (range) removeRevisionFlag(liveView, range.from, range.to);
       });
       row.appendChild(removeBtn);
     }
