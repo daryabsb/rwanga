@@ -456,6 +456,10 @@
 <script src="js/framework/base-outer-marks.js"></script>
 <script src="js/doc-types/screenplay/outer-schema-additions.js"></script>
 <script src="js/doc-types/screenplay/scene-frame-placeholder.js"></script>
+<!-- Nested-PM Scene NodeView — exposes Rga.DocTypes.screenplay.sceneFramePmFactory.
+     Replacement-in-progress for the placeholder above. Loaded but not yet
+     registered; opt-in per-doc via metadata.useV2SceneFrame (Step 3+). -->
+<script src="js/doc-types/screenplay/scene-frame-pm.js"></script>
 <!-- F2 inner-editor modules — order matters: schema → keymap/views/plugins → frame node view -->
 <script src="js/doc-types/screenplay/inner-schema.js"></script>
 <script src="js/doc-types/screenplay/inner-keymap.js"></script>

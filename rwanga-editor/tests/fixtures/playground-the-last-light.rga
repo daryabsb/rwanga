@@ -2,6 +2,7 @@
   "rga_version": "2.0",
   "document_type": "screenplay",
   "metadata": {
+    "useV2SceneFrame": true,
     "title": "The Last Light",
     "author": "Rwanga Sample",
     "created": "2026-05-15T00:00:00.000Z",
