@@ -40,7 +40,7 @@ function buildScreenplaySchema() {
       fontFamily: { attrs: { value: {} }, toDOM(m) { return ['span', 0]; } },
       fontSize: { attrs: { value: {} }, toDOM(m) { return ['span', 0]; } },
       link: { attrs: { href: {}, title: { default: null } }, inclusive: false, toDOM(m) { return ['a', { href: m.attrs.href }, 0]; } },
-      annotation: { attrs: { id: {}, text: { default: '' }, color: { default: '#FFE08A' }, createdAt: { default: null }, author: { default: null } }, inclusive: false, excludes: '', toDOM() { return ['span', 0]; } },
+      annotation: { attrs: { id: {}, text: { default: '' }, color: { default: '#FFE08A' }, createdAt: { default: null }, author: { default: null }, status: { default: 'open' } }, inclusive: false, excludes: '', toDOM() { return ['span', 0]; } },
       tag: { attrs: { tagType: {}, entityId: {} }, inclusive: false, excludes: '', toDOM() { return ['span', 0]; } },
       revisionFlag: { attrs: { id: { default: null }, reason: { default: '' }, createdAt: { default: null }, status: { default: 'open' } }, inclusive: false, excludes: '', toDOM() { return ['span', 0]; } }
     }

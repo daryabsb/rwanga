@@ -26,8 +26,20 @@
       color: payload.color || ANNOTATION_COLORS[0],
       createdAt: payload.createdAt || new Date().toISOString(),
       author: payload.author || null,
+      status: payload.status || 'open',
     });
     view.dispatch(view.state.tr.addMark(from, to, mark));
+    // Capture marked text from the doc state we just dispatched.
+    const markedText = view.state.doc.textBetween(from, to, ' ');
+    document.dispatchEvent(new CustomEvent('editor.annotationAdded', {
+      detail: {
+        id: mark.attrs.id,
+        color: mark.attrs.color,
+        text: mark.attrs.text,
+        markedText: markedText,
+        status: mark.attrs.status,
+      }
+    }));
     return mark;
   }
 
@@ -60,6 +72,38 @@
     document.dispatchEvent(new CustomEvent('editor.annotationRemoved', { detail: { id } }));
   }
 
+  // Flip the status attr in place. Keeps the mark in the doc so restore can
+  // bring the highlight back without searching for the original range.
+  function _setAnnotationStatus(view, id, status) {
+    const { doc, schema } = view.state;
+    let tr = view.state.tr;
+    let changed = false;
+    doc.descendants(function(node, pos) {
+      node.marks.forEach(function(m) {
+        if (m.type === schema.marks.annotation && m.attrs.id === id && m.attrs.status !== status) {
+          const newMark = m.type.create(Object.assign({}, m.attrs, { status: status }));
+          tr = tr.removeMark(pos, pos + node.nodeSize, m.type);
+          tr = tr.addMark(pos, pos + node.nodeSize, newMark);
+          changed = true;
+        }
+      });
+    });
+    if (changed) view.dispatch(tr);
+    return changed;
+  }
+
+  function resolveAnnotation(view, id) {
+    if (_setAnnotationStatus(view, id, 'resolved')) {
+      document.dispatchEvent(new CustomEvent('editor.annotationResolved', { detail: { id } }));
+    }
+  }
+
+  function restoreAnnotation(view, id) {
+    if (_setAnnotationStatus(view, id, 'open')) {
+      document.dispatchEvent(new CustomEvent('editor.annotationRestored', { detail: { id } }));
+    }
+  }
+
   // ---------------------------------------------------------------
   // "Add note" triggered from context menu
   // Applies the mark and fires editor.annotationAdded so the Notes
@@ -68,22 +112,8 @@
   function addNoteFromMenu(view) {
     const { selection } = view.state;
     if (selection.empty) return;
-
-    // Capture the marked text for the card title
-    const selectedText = view.state.doc.textBetween(selection.from, selection.to, ' ');
-    const id = crypto.randomUUID();
-    const mark = addAnnotation(view, { id, color: ANNOTATION_COLORS[0] });
-
-    document.dispatchEvent(new CustomEvent('editor.annotationAdded', {
-      detail: {
-        id,
-        color: mark.attrs.color,
-        markedText: selectedText,
-        text: '',
-      }
-    }));
-
-    // Open the Notes panel and focus the new card
+    // addAnnotation already fires editor.annotationAdded for the panel.
+    addAnnotation(view, { id: crypto.randomUUID(), color: ANNOTATION_COLORS[0] });
     if (Rga.BottomPanel) Rga.BottomPanel.switchTo('notes');
   }
 
@@ -128,9 +158,24 @@
       }
     });
 
+    const isResolved = mark.attrs.status === 'resolved';
+    const toggleBtn = document.createElement('button');
+    toggleBtn.className = 'rga-info-btn';
+    toggleBtn.textContent = isResolved ? 'Restore' : 'Resolve';
+    toggleBtn.title = isResolved
+      ? 'Restore the highlight and move the card back to open'
+      : 'Mark resolved — removes the highlight, keeps the note in the panel struck through';
+    toggleBtn.addEventListener('click', function() {
+      hideInfoPopup();
+      if (isResolved) restoreAnnotation(view, mark.attrs.id);
+      else resolveAnnotation(view, mark.attrs.id);
+      view.focus();
+    });
+
     const removeBtn = document.createElement('button');
     removeBtn.className = 'rga-info-btn danger';
     removeBtn.textContent = 'Remove';
+    removeBtn.title = 'Delete the note entirely (cannot be restored)';
     removeBtn.addEventListener('click', function() {
       hideInfoPopup();
       removeAnnotation(view, mark.attrs.id);
@@ -138,6 +183,7 @@
     });
 
     actions.appendChild(editBtn);
+    actions.appendChild(toggleBtn);
     actions.appendChild(removeBtn);
     popup.appendChild(actions);
     document.body.appendChild(popup);
@@ -208,6 +254,8 @@
     addAnnotation,
     updateAnnotationText,
     removeAnnotation,
+    resolveAnnotation,
+    restoreAnnotation,
     addNoteFromMenu,
     hideInfoPopup,
     annotationsPlugin,

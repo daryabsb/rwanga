@@ -71,7 +71,8 @@
         text: { default: '' },
         color: { default: '#FFE08A' },
         createdAt: { default: null },
-        author: { default: null }
+        author: { default: null },
+        status: { default: 'open' }
       },
       inclusive: false,
       excludes: 'tag revisionFlag',
@@ -81,20 +82,23 @@
           text: dom.getAttribute('data-text') || '',
           color: dom.getAttribute('data-color') || '#FFE08A',
           createdAt: dom.getAttribute('data-created-at'),
-          author: dom.getAttribute('data-author')
+          author: dom.getAttribute('data-author'),
+          status: dom.getAttribute('data-status') || 'open'
         };
       } }],
       toDOM(mark) {
+        const resolved = mark.attrs.status === 'resolved';
         const bg = mark.attrs.color;
         const fg = _contrastColor(bg);
         return ['span', {
-          class: 'rga-annotation',
+          class: resolved ? 'rga-annotation rga-annotation-resolved' : 'rga-annotation',
           'data-id': mark.attrs.id,
           'data-text': mark.attrs.text,
           'data-color': bg,
           'data-created-at': mark.attrs.createdAt || '',
           'data-author': mark.attrs.author || '',
-          style: 'background-color: ' + bg + (fg ? '; color: ' + fg : '')
+          'data-status': mark.attrs.status,
+          style: resolved ? '' : 'background-color: ' + bg + (fg ? '; color: ' + fg : '')
         }, 0];
       }
     },

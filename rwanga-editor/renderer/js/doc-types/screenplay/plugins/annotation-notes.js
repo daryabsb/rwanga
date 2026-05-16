@@ -50,8 +50,9 @@
   // Build a single card element
   // ---------------------------------------------------------------
   function _buildCard(annot, view) {
+    const isResolved = annot.status === 'resolved';
     const card = document.createElement('div');
-    card.className = 'annot-card';
+    card.className = isResolved ? 'annot-card annot-card-resolved' : 'annot-card';
     card.dataset.id = annot.id;
     card.style.borderLeftColor = annot.color;
 
@@ -66,22 +67,62 @@
       card.appendChild(preview);
     }
 
-    const textarea = document.createElement('textarea');
-    textarea.className = 'annot-card-textarea';
-    textarea.placeholder = 'Write your note…';
-    textarea.value = annot.text;
-    textarea.rows = 2;
-    textarea.addEventListener('input', function() {
-      const v = view || getView();
-      if (v && Rga.Annotations && Rga.Annotations.updateAnnotationText) {
-        Rga.Annotations.updateAnnotationText(v, annot.id, textarea.value);
+    if (isResolved) {
+      // Resolved cards are read-only — the note text shows as a small label
+      // and the action buttons toggle restore / remove.
+      if (annot.text) {
+        const label = document.createElement('div');
+        label.className = 'annot-card-text';
+        label.textContent = annot.text;
+        card.appendChild(label);
       }
-    });
-    card.appendChild(textarea);
+    } else {
+      const textarea = document.createElement('textarea');
+      textarea.className = 'annot-card-textarea';
+      textarea.placeholder = 'Write your note…';
+      textarea.value = annot.text;
+      textarea.rows = 2;
+      textarea.addEventListener('input', function() {
+        const v = view || getView();
+        if (v && Rga.Annotations && Rga.Annotations.updateAnnotationText) {
+          Rga.Annotations.updateAnnotationText(v, annot.id, textarea.value);
+        }
+      });
+      card.appendChild(textarea);
+    }
+
+    const actions = document.createElement('div');
+    actions.className = 'annot-card-actions';
+
+    if (isResolved) {
+      const restoreBtn = document.createElement('button');
+      restoreBtn.className = 'annot-card-btn';
+      restoreBtn.title = 'Restore the highlight and move the note back to open';
+      restoreBtn.textContent = '↺';
+      restoreBtn.addEventListener('click', function() {
+        const v = view || getView();
+        if (v && Rga.Annotations && Rga.Annotations.restoreAnnotation) {
+          Rga.Annotations.restoreAnnotation(v, annot.id);
+        }
+      });
+      actions.appendChild(restoreBtn);
+    } else {
+      const resolveBtn = document.createElement('button');
+      resolveBtn.className = 'annot-card-btn';
+      resolveBtn.title = 'Resolve — removes the highlight, keeps the note here struck through';
+      resolveBtn.textContent = '✓';
+      resolveBtn.addEventListener('click', function() {
+        const v = view || getView();
+        if (v && Rga.Annotations && Rga.Annotations.resolveAnnotation) {
+          Rga.Annotations.resolveAnnotation(v, annot.id);
+        }
+      });
+      actions.appendChild(resolveBtn);
+    }
 
     const removeBtn = document.createElement('button');
-    removeBtn.className = 'annot-card-remove';
-    removeBtn.title = 'Remove note';
+    removeBtn.className = 'annot-card-btn annot-card-remove';
+    removeBtn.title = 'Delete the note entirely (cannot be restored)';
     removeBtn.textContent = '×';
     removeBtn.addEventListener('click', function() {
       const v = view || getView();
@@ -89,8 +130,9 @@
         Rga.Annotations.removeAnnotation(v, annot.id);
       }
     });
-    card.appendChild(removeBtn);
+    actions.appendChild(removeBtn);
 
+    card.appendChild(actions);
     return card;
   }
 
@@ -105,30 +147,40 @@
     const schema = view.state.schema;
     if (!schema || !schema.marks.annotation) return;
 
-    const annotations = [];
+    const open = [];
+    const resolved = [];
     const seen = new Set();
     view.state.doc.descendants(function(node) {
       node.marks.forEach(function(m) {
         if (m.type === schema.marks.annotation && !seen.has(m.attrs.id)) {
           seen.add(m.attrs.id);
-          annotations.push({
+          const card = {
             id: m.attrs.id,
             color: m.attrs.color,
             text: m.attrs.text || '',
+            status: m.attrs.status || 'open',
             markedText: _extractMarkedText(view, m.attrs.id),
-          });
+          };
+          if (card.status === 'resolved') resolved.push(card);
+          else open.push(card);
         }
       });
     });
 
     el.innerHTML = '';
-    if (!annotations.length) {
+    if (!open.length && !resolved.length) {
       el.innerHTML = '<div class="annot-empty">No notes yet — select text and right-click to add a note.</div>';
       return;
     }
-    annotations.forEach(function(annot) {
-      el.appendChild(_buildCard(annot, view));
-    });
+    open.forEach(function(annot) { el.appendChild(_buildCard(annot, view)); });
+
+    if (resolved.length) {
+      const divider = document.createElement('div');
+      divider.className = 'annot-log-divider';
+      divider.textContent = 'Resolved (' + resolved.length + ')';
+      el.appendChild(divider);
+      resolved.forEach(function(annot) { el.appendChild(_buildCard(annot, view)); });
+    }
   }
 
   function _extractMarkedText(view, id) {
@@ -204,6 +256,18 @@
 
   document.addEventListener('editor.annotationFocused', function(e) {
     highlightCard(e.detail.id);
+  });
+
+  // Resolve / restore: full refresh — section membership changes and card
+  // shape differs (textarea vs read-only label).
+  document.addEventListener('editor.annotationResolved', function() {
+    const v = getView();
+    if (v) refresh(v);
+  });
+
+  document.addEventListener('editor.annotationRestored', function() {
+    const v = getView();
+    if (v) refresh(v);
   });
 
   Rga.AnnotationNotes = { refresh, highlightCard, focusCard, navigateToAnnotation };

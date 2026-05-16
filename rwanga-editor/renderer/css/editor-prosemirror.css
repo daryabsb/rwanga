@@ -1446,7 +1446,7 @@ body.view-draft-active #scene-toolbox {
   background: var(--bg-input, #1e1e1e);
   border-radius: 4px;
   border-left: 3px solid #FFE08A;
-  padding: 6px 28px 6px 10px;
+  padding: 6px 10px;
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -1470,6 +1470,12 @@ body.view-draft-active #scene-toolbox {
   text-decoration: underline;
 }
 
+.annot-card-text {
+  font-size: 12px;
+  color: var(--text-primary, #d4d4d4);
+  padding: 2px 0 0;
+}
+
 .annot-card-textarea {
   width: 100%;
   box-sizing: border-box;
@@ -1487,25 +1493,67 @@ body.view-draft-active #scene-toolbox {
   border-top-color: var(--accent-primary, #007acc);
 }
 
-.annot-card-remove {
-  position: absolute;
-  top: 4px;
-  right: 6px;
-  width: 18px;
-  height: 18px;
-  line-height: 16px;
-  text-align: center;
-  border-radius: 3px;
-  border: none;
+.annot-card-actions {
+  display: flex;
+  gap: 4px;
+  justify-content: flex-end;
+}
+.annot-card-btn {
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  border: 1px solid var(--border-subtle, #3a3a3a);
   background: transparent;
   color: var(--text-tertiary, #666);
-  font-size: 14px;
+  font-size: 13px;
+  line-height: 1;
   cursor: pointer;
   padding: 0;
 }
-.annot-card-remove:hover {
+.annot-card-btn:hover {
+  background: rgba(78, 201, 176, 0.15);
+  color: #4EC9B0;
+  border-color: #4EC9B0;
+}
+.annot-card-btn.annot-card-remove:hover {
   background: rgba(244,71,71,0.15);
   color: #f44747;
+  border-color: #f44747;
+}
+
+/* Resolved annotation in the editor — strip the highlight, strike-through. */
+.ProseMirror .rga-annotation-resolved {
+  background: transparent !important;
+  color: inherit !important;
+  text-decoration: line-through;
+  text-decoration-color: #f44747;
+  text-decoration-thickness: 2px;
+  opacity: 0.6;
+}
+
+/* Resolved annotation card — red strikethrough on text preview/note. */
+.annot-card-resolved {
+  opacity: 0.65;
+}
+.annot-card-resolved .annot-card-preview,
+.annot-card-resolved .annot-card-text {
+  text-decoration: line-through;
+  text-decoration-color: #f44747;
+  text-decoration-thickness: 1.5px;
+}
+.annot-card-resolved .annot-card-preview {
+  cursor: pointer;
+}
+
+.annot-log-divider {
+  padding: 6px 4px 3px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-tertiary, #666);
+  border-top: 1px solid var(--border-subtle, #3a3a3a);
+  margin-top: 4px;
 }
 
 /* ============================================================
@@ -1577,6 +1625,26 @@ body.view-draft-active #scene-toolbox {
   background: rgba(78, 201, 176, 0.15);
   color: #4EC9B0;
   border-color: #4EC9B0;
+}
+
+.flag-remove-btn {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  border: 1px solid var(--border-subtle, #3a3a3a);
+  background: transparent;
+  color: var(--text-tertiary, #666);
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  align-self: center;
+}
+.flag-remove-btn:hover {
+  background: rgba(244, 71, 71, 0.15);
+  color: #f44747;
+  border-color: #f44747;
 }
 
 .flag-card-resolved {

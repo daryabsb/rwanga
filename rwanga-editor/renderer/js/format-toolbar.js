@@ -227,11 +227,54 @@
   // Block-type dropdown
   // ============================================================
 
-  function _focusedSceneBlock() {
-    const ae = document.activeElement;
-    if (!ae || !ae.classList) return null;
-    if (ae.classList.contains('rga-scene-block')) return ae;
+  // Cached references so the scene toolbox can act on the prior scene block
+  // even after focus moves to one of the toolbar's own controls. activeElement
+  // becomes the <select> the instant the user clicks it, which is too late to
+  // resolve the block being edited. Tracked via a focusin listener (see init).
+  let _lastSceneBlock = null;
+  let _lastSceneFrame = null;
+
+  function _isToolbarFocus(node) {
+    if (!node || !node.closest) return false;
+    return !!(
+      node.closest('#format-toolbar') ||
+      node.closest('#scene-toolbox') ||
+      node.closest('#format-color-popover') ||
+      node.closest('#format-link-dialog') ||
+      node.closest('#format-annotation-dialog') ||
+      node.closest('#format-flag-dialog')
+    );
+  }
+
+  function _validSceneBlock() {
+    if (_lastSceneBlock && document.body && document.body.contains(_lastSceneBlock)) {
+      return _lastSceneBlock;
+    }
+    _lastSceneBlock = null;
     return null;
+  }
+
+  function _validSceneFrame() {
+    if (_lastSceneFrame && document.body && document.body.contains(_lastSceneFrame)) {
+      return _lastSceneFrame;
+    }
+    _lastSceneFrame = null;
+    return null;
+  }
+
+  function _onFocusIn(e) {
+    const t = e.target;
+    if (!t) return;
+    // While focus lives in the toolbar, popovers, or modal dialogs, preserve
+    // the cached scene-block so the user can still act on it.
+    if (_isToolbarFocus(t)) return;
+    if (t.classList && t.classList.contains('rga-scene-block')) {
+      _lastSceneBlock = t;
+    } else {
+      _lastSceneBlock = null;
+    }
+    _lastSceneFrame = (t.closest && t.closest('.rga-scene-frame-placeholder')) || null;
+    refreshActiveStates();
   }
 
   function _placeholderRefFor(blockEl) {
@@ -241,7 +284,7 @@
   }
 
   function changeBlockType(newType) {
-    const blockEl = _focusedSceneBlock();
+    const blockEl = _validSceneBlock();
     const ref = _placeholderRefFor(blockEl);
     if (!blockEl || !ref || !newType) return;
     if (typeof ref._changeBlockType !== 'function') return;
@@ -253,7 +296,7 @@
   function refreshBlockTypeSelect() {
     const select = document.getElementById('format-block-type');
     if (!select) return;
-    const blockEl = _focusedSceneBlock();
+    const blockEl = _validSceneBlock();
     if (!blockEl) {
       select.value = '';
       return;
@@ -261,14 +304,14 @@
     select.value = blockEl.dataset.blockType || '';
   }
 
-  // Scene toolbox is enabled only when the cursor / focus is inside a
-  // scene frame (a block or one of the slug/transition pickers).
+  // Scene toolbox is enabled when the most recent non-toolbar focus was
+  // inside a scene frame (block, slug pickers, transition picker). Reading
+  // the cache rather than activeElement keeps the toolbox usable while the
+  // user is interacting with its own controls.
   function refreshSceneToolboxState() {
     const tb = document.getElementById('scene-toolbox');
     if (!tb) return;
-    const ae = document.activeElement;
-    const inFrame = !!(ae && ae.closest && ae.closest('.rga-scene-frame-placeholder'));
-    tb.classList.toggle('disabled', !inFrame);
+    tb.classList.toggle('disabled', !_validSceneFrame());
   }
 
   // ============================================================
@@ -361,49 +404,15 @@
     }
   }
 
-  function _flagDialog() { return document.getElementById('format-flag-dialog'); }
-  function _flagReason() { return document.getElementById('format-flag-reason'); }
-  function _flagStatus() { return document.getElementById('format-flag-status'); }
-  function openFlagDialog() {
+  // The toolbar Flag button delegates to Rga.RevisionFlags.showRevisionEditor,
+  // which is the same rich popup the right-click menu uses (3 severity
+  // swatches + reason). No local dialog is needed.
+  function openFlagPopup() {
     const view = _view();
     if (!view) return;
-    const { empty } = view.state.selection;
-    if (empty) return;
-    const dlg = _flagDialog();
-    if (!dlg) return;
-    _flagReason().value = '';
-    _flagStatus().value = 'open';
-    dlg.hidden = false;
-    setTimeout(function() { _flagReason().focus(); }, 0);
-  }
-  function closeFlagDialog() {
-    const dlg = _flagDialog();
-    if (dlg) dlg.hidden = true;
-  }
-  function applyFlag() {
-    const view = _view();
-    if (!view) return closeFlagDialog();
-    if (!Rga.RevisionFlags || typeof Rga.RevisionFlags.addRevisionFlag !== 'function') {
-      return closeFlagDialog();
-    }
-    const reason = (_flagReason().value || '').trim();
-    Rga.RevisionFlags.addRevisionFlag(view, { reason: reason });
-    // If user picked 'resolved' we'd update post-add, but the addRevisionFlag
-    // hard-codes status='open'. The Notes/Flags panel handles status changes.
-    closeFlagDialog();
-    view.focus();
-  }
-  function wireFlagDialog() {
-    const ok     = document.getElementById('format-flag-ok');
-    const cancel = document.getElementById('format-flag-cancel');
-    if (ok)     ok.addEventListener('click', applyFlag);
-    if (cancel) cancel.addEventListener('click', closeFlagDialog);
-    const input = _flagReason();
-    if (input) {
-      input.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter')  { e.preventDefault(); applyFlag(); }
-        if (e.key === 'Escape') { e.preventDefault(); closeFlagDialog(); }
-      });
+    if (view.state.selection.empty) return;
+    if (Rga.RevisionFlags && typeof Rga.RevisionFlags.showRevisionEditor === 'function') {
+      Rga.RevisionFlags.showRevisionEditor(view, null, null);
     }
   }
 
@@ -474,10 +483,9 @@
     if (annotationBtn) annotationBtn.addEventListener('click', openAnnotationDialog);
     wireAnnotationDialog();
 
-    // Revision flag
+    // Revision flag — opens the same rich popup as right-click.
     const flagBtn = document.getElementById('format-btn-flag');
-    if (flagBtn) flagBtn.addEventListener('click', openFlagDialog);
-    wireFlagDialog();
+    if (flagBtn) flagBtn.addEventListener('click', openFlagPopup);
 
     // Clear formatting
     const clearBtn = document.getElementById('format-btn-clear');
@@ -516,9 +524,17 @@
     if (linkBtn) linkBtn.addEventListener('click', openLinkDialog);
     wireLinkDialog();
 
+    // Focus tracking — keeps a cached reference to the last scene block /
+    // frame so toolbar controls can target it after stealing focus.
+    document.addEventListener('focusin', _onFocusIn);
+
     // Selection-aware refresh
     document.addEventListener('selectionchange', refreshActiveStates);
-    document.addEventListener('editor.tabActivated', refreshActiveStates);
+    document.addEventListener('editor.tabActivated', function() {
+      _lastSceneBlock = null;
+      _lastSceneFrame = null;
+      refreshActiveStates();
+    });
     document.addEventListener('mouseup', refreshActiveStates);
     document.addEventListener('keyup', refreshActiveStates);
 

@@ -429,15 +429,40 @@
     if (f.id) {
       const resolveBtn = document.createElement('button');
       resolveBtn.className = 'flag-resolve-btn';
-      resolveBtn.title = 'Mark as resolved — removes underline, keeps in log';
+      resolveBtn.title = 'Accept — marks resolved, keeps the entry in the log below';
       resolveBtn.textContent = '✓';
       resolveBtn.addEventListener('click', function() {
         resolveFlag(view, f.id);
       });
       row.appendChild(resolveBtn);
+
+      const removeBtn = document.createElement('button');
+      removeBtn.className = 'flag-remove-btn';
+      removeBtn.title = 'Remove flag entirely — does not appear in the log';
+      removeBtn.textContent = '×';
+      removeBtn.addEventListener('click', function() {
+        const range = _markRange(view.state.doc, _firstFlagPos(view, f.id), view.state.schema.marks.revisionFlag);
+        if (range) removeRevisionFlag(view, range.from, range.to);
+      });
+      row.appendChild(removeBtn);
     }
 
     return row;
+  }
+
+  function _firstFlagPos(view, id) {
+    const schema = view.state.schema;
+    let pos = 0;
+    view.state.doc.descendants(function(node, nodePos) {
+      if (pos) return false;
+      if (node.isText && node.marks.some(function(m) {
+        return m.type === schema.marks.revisionFlag && m.attrs.id === id;
+      })) {
+        pos = nodePos;
+        return false;
+      }
+    });
+    return pos;
   }
 
   function _getView() {

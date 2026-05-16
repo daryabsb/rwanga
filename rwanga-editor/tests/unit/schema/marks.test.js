@@ -22,7 +22,7 @@ function buildSchemaWithMarks() {
       fontFamily: { attrs: { value: {} }, toDOM(m) { return ['span', { style: 'font-family:' + m.attrs.value }, 0]; } },
       fontSize: { attrs: { value: {} }, toDOM(m) { return ['span', { style: 'font-size:' + m.attrs.value }, 0]; } },
       link: { attrs: { href: {}, title: { default: null } }, inclusive: false, toDOM(m) { return ['a', { href: m.attrs.href }, 0]; } },
-      annotation: { attrs: { id: {}, text: { default: '' }, color: { default: '#FFE08A' }, createdAt: { default: null }, author: { default: null } }, inclusive: false, excludes: 'tag revisionFlag', toDOM() { return ['span', 0]; } },
+      annotation: { attrs: { id: {}, text: { default: '' }, color: { default: '#FFE08A' }, createdAt: { default: null }, author: { default: null }, status: { default: 'open' } }, inclusive: false, excludes: 'tag revisionFlag', toDOM() { return ['span', 0]; } },
       tag: { attrs: { tagType: {}, entityId: {} }, inclusive: false, excludes: 'annotation revisionFlag', toDOM() { return ['span', 0]; } },
       revisionFlag: { attrs: { reason: { default: '' }, color: { default: '#F44747' }, createdAt: { default: null }, status: { default: 'open' } }, inclusive: false, excludes: 'annotation tag', toDOM() { return ['span', 0]; } }
     }
@@ -40,6 +40,12 @@ test('annotation mark with id and text', () => {
   const m = s.mark('annotation', { id: 'note-1', text: 'A note', color: '#FFE08A' });
   assert.equal(m.attrs.id, 'note-1');
   assert.equal(m.attrs.text, 'A note');
+});
+
+test('annotation mark default status is open', () => {
+  const s = buildSchemaWithMarks();
+  const m = s.mark('annotation', { id: 'note-2' });
+  assert.equal(m.attrs.status, 'open');
 });
 
 test('tag mark with tagType and entityId', () => {
