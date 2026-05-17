@@ -615,18 +615,28 @@ Rga.BottomPanel = {
       self.toggleCollapse();
     });
 
-    // Initial Layout sync: the bottom panel starts OPEN unless Layout
-    // says otherwise. Layout's default is studioPanel.visible = false
-    // but the legacy DOM starts open — preserve the legacy default
-    // by initialising Layout to match the DOM-as-shipped state.
+    // Initial Layout sync — order:
+    //   1. Read persisted visibility from localStorage (if set on a
+    //      prior session). Persistence is Runtime-Ownership-Slice-1
+    //      scope — full workspace persistence is Slice 4 territory.
+    //   2. If no persisted value, fall back to the DOM-as-shipped
+    //      state (legacy default: open) so reload behaviour is
+    //      unchanged for first-time users.
+    //   3. Write the resolved value to Layout (SSOT) and let the
+    //      subscriber paint the DOM.
+    // Save on every Layout.studioPanel.visible change so a reload
+    // restores the panel state the user last left.
     if (Rga.Shell && Rga.Shell.Layout) {
+      var persisted = self._readPersistedVisibility();
       var col = Rga.$('#center-column');
-      var isOpen = !(col && col.classList.contains('bottom-collapsed'));
-      Rga.Shell.Layout.set({ studioPanel: { visible: isOpen } });
+      var domOpen = !(col && col.classList.contains('bottom-collapsed'));
+      var initialVisible = persisted == null ? domOpen : persisted;
+      Rga.Shell.Layout.set({ studioPanel: { visible: initialVisible } });
       Rga.Shell.Layout.subscribe(function(next, prev) {
         if (!next || !next.studioPanel) return;
         if (prev && prev.studioPanel && prev.studioPanel.visible === next.studioPanel.visible) return;
         self._syncDomFromLayout(next.studioPanel.visible);
+        self._writePersistedVisibility(next.studioPanel.visible);
       });
     }
   },
@@ -668,6 +678,23 @@ Rga.BottomPanel = {
     if (!col) return;
     if (visible) col.classList.remove('bottom-collapsed');
     else         col.classList.add('bottom-collapsed');
+  },
+
+  // Persistence — scoped to the studio panel only. Slice 4 will own
+  // full workspace persistence; this is the minimal slice needed for
+  // the user-facing reload-survives-state acceptance.
+  _STORAGE_KEY: 'rga-shell-studio-panel-visible',
+  _readPersistedVisibility: function() {
+    try {
+      var raw = localStorage.getItem(this._STORAGE_KEY);
+      if (raw === '0' || raw === 'false') return false;
+      if (raw === '1' || raw === 'true')  return true;
+      return null;
+    } catch (_) { return null; }
+  },
+  _writePersistedVisibility: function(visible) {
+    try { localStorage.setItem(this._STORAGE_KEY, visible ? '1' : '0'); }
+    catch (_) { /* private mode / quota — silent. */ }
   }
 };
 

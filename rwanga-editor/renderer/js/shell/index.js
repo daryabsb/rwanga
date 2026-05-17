@@ -129,13 +129,25 @@
       e.stopPropagation();
       return;
     }
-    // V1.1 fix 6: Studio Panel (bottom panel) visibility toggle.
-    // Ctrl+` matches VS Code convention; Ctrl+J stays via the legacy
-    // Rga.Keyboard registration in app-shell.js. Both flip Layout —
-    // the DOM follows from there.
+    // Studio Panel (bottom panel) visibility toggle. Cmd+` matches
+    // VS Code convention; Cmd+J stays via the legacy Rga.Keyboard
+    // registration in app-shell.js. Both routes converge on the SAME
+    // public API — Rga.BottomPanel.toggleCollapse — so the ownership
+    // matrix entry for BottomPanel has exactly one mutator surface.
+    // BottomPanel.toggleCollapse internally flips Layout (SSOT); the
+    // Layout subscriber updates the DOM. See
+    // docs/design-system/rwanga-ownership-matrix.md (Runtime
+    // Ownership Stabilization Slice 1).
     if (combo === 'cmd+`') {
-      const sv = Rga.Shell.Layout.get().studioPanel.visible;
-      Rga.Shell.Layout.set({ studioPanel: { visible: !sv } });
+      if (Rga.BottomPanel && typeof Rga.BottomPanel.toggleCollapse === 'function') {
+        Rga.BottomPanel.toggleCollapse();
+      } else if (Rga.Shell.Layout) {
+        // Fallback for early-boot / unloaded BottomPanel: still flip
+        // Layout so the state reaches the SSOT even without the public
+        // API. The DOM sync subscriber catches up.
+        const sv = Rga.Shell.Layout.get().studioPanel.visible;
+        Rga.Shell.Layout.set({ studioPanel: { visible: !sv } });
+      }
       e.preventDefault();
       e.stopPropagation();
     }
