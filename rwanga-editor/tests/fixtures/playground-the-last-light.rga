@@ -6,7 +6,7 @@
     "title": "The Last Light",
     "author": "Rwanga Sample",
     "created": "2026-05-15T00:00:00.000Z",
-    "modified": "2026-05-15T00:00:00.000Z",
+    "modified": "2026-05-16T11:48:48.814Z",
     "version": 1,
     "revision_notes": "",
     "language": "en",
@@ -22,55 +22,113 @@
     "page_size": "Letter",
     "pageSetup": {
       "paperSize": "Letter",
-      "margins": { "top": 1, "right": 1, "bottom": 1, "left": 1.5 }
+      "margins": {
+        "top": 1,
+        "right": 1,
+        "bottom": 1,
+        "left": 1.5
+      }
     },
     "vocabulary": {
-      "settings": ["INT.", "EXT.", "INT./EXT.", "EXT./INT."],
-      "times": ["DAY", "NIGHT", "CONTINUOUS", "DUSK", "DAWN"],
+      "settings": [
+        "INT.",
+        "EXT.",
+        "INT./EXT.",
+        "EXT./INT."
+      ],
+      "times": [
+        "DAY",
+        "NIGHT",
+        "CONTINUOUS",
+        "DUSK",
+        "DAWN"
+      ],
       "sceneWord": "SCENE"
     },
-    "sceneHeadingStyle": "twoLine"
+    "sceneHeadingStyle": "twoLine",
+    "units": "in"
   },
   "body": {
     "type": "doc",
     "content": [
       {
         "type": "titleStrip",
-        "attrs": { "removable": true },
-        "content": [{ "type": "text", "text": "The Last Light" }]
+        "attrs": {
+          "removable": true
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "The Last Light"
+          }
+        ]
       },
       {
         "type": "body",
         "content": [
           {
             "type": "heading",
-            "attrs": { "level": 2 },
-            "content": [{ "type": "text", "text": "Logline" }]
+            "attrs": {
+              "level": 2
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "Logline"
+              }
+            ]
           },
           {
             "type": "paragraph",
             "content": [
-              { "type": "text", "text": "On the morning of her grandmother's death, a young woman returns to her childhood home in search of one final memory." }
+              {
+                "type": "text",
+                "text": "On the morning of her grandmother's death, a young woman returns to her childhood home in search of one final memory."
+              }
             ]
           },
           {
             "type": "heading",
-            "attrs": { "level": 2 },
-            "content": [{ "type": "text", "text": "Characters" }]
+            "attrs": {
+              "level": 2
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "Characters"
+              }
+            ]
           },
           {
             "type": "paragraph",
-            "content": [{ "type": "text", "text": "NALI — 28, the granddaughter. Tired eyes, steady hands." }]
+            "content": [
+              {
+                "type": "text",
+                "text": "NALI — 28, the granddaughter. Tired eyes, steady hands."
+              }
+            ]
           },
           {
             "type": "paragraph",
-            "content": [{ "type": "text", "text": "BABAN — 84, the grandmother. Frail but lucid; a lifetime in every breath." }]
+            "content": [
+              {
+                "type": "text",
+                "text": "BABAN — 84, the grandmother. Frail but lucid; a lifetime in every breath."
+              }
+            ]
           },
           {
             "type": "paragraph",
-            "content": [{ "type": "text", "text": "DR. HASSAN — 60s, the family doctor. Calm, patient, has seen this many times." }]
+            "content": [
+              {
+                "type": "text",
+                "text": "DR. HASSAN — 60s, the family doctor. Calm, patient, has seen this many times."
+              }
+            ]
           },
-          { "type": "paragraph" },
+          {
+            "type": "paragraph"
+          },
           {
             "type": "sceneFrame",
             "attrs": {
@@ -79,22 +137,106 @@
               "headingStyle": null,
               "innerDoc": {
                 "type": "doc",
-                "attrs": { "notes": "Open quiet. Mist as a character.", "revisionFlag": null },
+                "attrs": {
+                  "notes": "Open quiet. Mist as a character.",
+                  "revisionFlag": null
+                },
                 "content": [
-                  { "type": "sceneLine", "attrs": { "setting": "EXT.", "time": "DAWN" }, "content": [{ "type": "text", "text": "OLD HOUSE — ROSE GARDEN" }] },
-                  { "type": "action", "content": [{ "type": "text", "text": "A beat-up car rolls to a stop at the end of a long gravel drive. The engine ticks as it cools. Mist drifts low through an overgrown rose garden." }] },
-                  { "type": "action", "content": [
-                    { "type": "text", "text": "" },
-                    { "type": "text", "text": "NALI", "marks": [{ "type": "tag", "attrs": { "tagType": "character", "entityId": "ent-nali" } }] },
-                    { "type": "text", "text": " (28) steps out, holding a thin coat against the cold. She looks at the house — and the house looks back." }
-                  ] },
-                  { "type": "action", "content": [{ "type": "text", "text": "She does not move. The wind moves for her, lifting a single white petal across her shoe." }] },
-                  { "type": "transition", "content": [{ "type": "text", "text": "CUT" }] }
+                  {
+                    "type": "sceneLine",
+                    "attrs": {
+                      "setting": "EXT.",
+                      "time": "DAWN"
+                    },
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "OLD HOUSE — ROSE GARDEN"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "action",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "A beat-up car rolls to a stop at the end of a long gravel drive. The "
+                      },
+                      {
+                        "type": "text",
+                        "marks": [
+                          {
+                            "type": "bold"
+                          }
+                        ],
+                        "text": "engine"
+                      },
+                      {
+                        "type": "text",
+                        "text": " "
+                      },
+                      {
+                        "type": "text",
+                        "marks": [
+                          {
+                            "type": "underline"
+                          }
+                        ],
+                        "text": "ticks"
+                      },
+                      {
+                        "type": "text",
+                        "text": " as it "
+                      },
+                      {
+                        "type": "text",
+                        "marks": [
+                          {
+                            "type": "italic"
+                          }
+                        ],
+                        "text": "cools"
+                      },
+                      {
+                        "type": "text",
+                        "text": ". Mist drifts low through an overgrown rose garden."
+                      }
+                    ]
+                  },
+                  {
+                    "type": "action",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "NALI (28) steps out, holding a thin coat against the cold. She looks at the house — and the house looks back."
+                      }
+                    ]
+                  },
+                  {
+                    "type": "action",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "She does not move. The wind moves for her, lifting a single white petal across her shoe."
+                      }
+                    ]
+                  },
+                  {
+                    "type": "transition",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "CUT"
+                      }
+                    ]
+                  }
                 ]
               }
             }
           },
-          { "type": "paragraph" },
+          {
+            "type": "paragraph"
+          },
           {
             "type": "sceneFrame",
             "attrs": {
@@ -103,28 +245,159 @@
               "headingStyle": null,
               "innerDoc": {
                 "type": "doc",
-                "attrs": { "notes": "Hold on hands meeting. Two generations.", "revisionFlag": null },
+                "attrs": {
+                  "notes": "Hold on hands meeting. Two generations.",
+                  "revisionFlag": null
+                },
                 "content": [
-                  { "type": "sceneLine", "attrs": { "setting": "INT.", "time": "DAY" }, "content": [{ "type": "text", "text": "BABAN'S BEDROOM" }] },
-                  { "type": "action", "content": [
-                    { "type": "text", "text": "" },
-                    { "type": "text", "text": "BABAN", "marks": [{ "type": "tag", "attrs": { "tagType": "character", "entityId": "ent-baban" } }] },
-                    { "type": "text", "text": " lies under an embroidered quilt. Sunlight pools on the floor. " },
-                    { "type": "text", "text": "NALI", "marks": [{ "type": "tag", "attrs": { "tagType": "character", "entityId": "ent-nali" } }] },
-                    { "type": "text", "text": " kneels at the bedside, her hand finding her grandmother's." }
-                  ] },
-                  { "type": "character", "content": [{ "type": "text", "text": "BABAN" }] },
-                  { "type": "parenthetical", "content": [{ "type": "text", "text": "barely a whisper" }] },
-                  { "type": "dialogue", "content": [{ "type": "text", "text": "You came." }] },
-                  { "type": "character", "content": [{ "type": "text", "text": "NALI" }] },
-                  { "type": "dialogue", "content": [{ "type": "text", "text": "I always do." }] },
-                  { "type": "action", "content": [{ "type": "text", "text": "A long silence. Baban's eyes drift to the window — to a tree neither of them has spoken about in years." }] },
-                  { "type": "transition", "content": [{ "type": "text", "text": "CUT" }] }
+                  {
+                    "type": "sceneLine",
+                    "attrs": {
+                      "setting": "EXT.",
+                      "time": "CONTINUOUS"
+                    },
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "BABAN'S BEDROOM"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "action",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "BABAN lies under an embroidered quilt. Sunlight pools on the floor. NALI kneels at the bedside, her hand finding her grandmother's. This is adding to the script not to the body."
+                      }
+                    ]
+                  },
+                  {
+                    "type": "character",
+                    "content": [
+                      {
+                        "type": "text",
+                        "marks": [
+                          {
+                            "type": "tag",
+                            "attrs": {
+                              "tagType": "character",
+                              "entityId": "47a05ccf-a967-4d5c-9f65-aa62f2542158"
+                            }
+                          }
+                        ],
+                        "text": "BABAN"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "parenthetical",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "barely a whisper"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "dialogue",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "You came."
+                      }
+                    ]
+                  },
+                  {
+                    "type": "character",
+                    "content": [
+                      {
+                        "type": "text",
+                        "marks": [
+                          {
+                            "type": "tag",
+                            "attrs": {
+                              "tagType": "character",
+                              "entityId": "15201fa6-09cf-4786-a384-3c0bbd973dd8"
+                            }
+                          }
+                        ],
+                        "text": "NALI"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "dialogue",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "I always do."
+                      }
+                    ]
+                  },
+                  {
+                    "type": "action",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "A long silence. "
+                      },
+                      {
+                        "type": "text",
+                        "marks": [
+                          {
+                            "type": "tag",
+                            "attrs": {
+                              "tagType": "character",
+                              "entityId": "e578a64f-e6d2-4d69-97ba-1771805b974d"
+                            }
+                          }
+                        ],
+                        "text": "Baban"
+                      },
+                      {
+                        "type": "text",
+                        "text": "'s eyes drift to the window — to a tree neither of them has "
+                      },
+                      {
+                        "type": "text",
+                        "marks": [
+                          {
+                            "type": "annotation",
+                            "attrs": {
+                              "id": "c7e36f96-3770-4668-90b8-9fd25b69dc73",
+                              "text": "in months not years or days",
+                              "color": "#FFE08A",
+                              "createdAt": "2026-05-16T11:40:40.432Z",
+                              "author": null,
+                              "status": "resolved"
+                            }
+                          }
+                        ],
+                        "text": "spoken about in years"
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ]
+                  },
+                  {
+                    "type": "transition",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "CUT"
+                      }
+                    ]
+                  }
                 ]
               }
             }
           },
-          { "type": "paragraph" },
+          {
+            "type": "paragraph"
+          },
           {
             "type": "sceneFrame",
             "attrs": {
@@ -133,32 +406,155 @@
               "headingStyle": null,
               "innerDoc": {
                 "type": "doc",
-                "attrs": { "notes": "The photograph turn — pivot of the film.", "revisionFlag": null },
+                "attrs": {
+                  "notes": "The photograph turn — pivot of the film.",
+                  "revisionFlag": null
+                },
                 "content": [
-                  { "type": "sceneLine", "attrs": { "setting": "INT.", "time": "DAY" }, "content": [{ "type": "text", "text": "KITCHEN" }] },
-                  { "type": "action", "content": [
-                    { "type": "text", "text": "Steam rises from a kettle. " },
-                    { "type": "text", "text": "NALI", "marks": [{ "type": "tag", "attrs": { "tagType": "character", "entityId": "ent-nali" } }] },
-                    { "type": "text", "text": " moves like a guest in her own childhood, opening the wrong drawers. She finds a small tin box behind the sugar jar." }
-                  ] },
-                  { "type": "action", "content": [{ "type": "text", "text": "Inside: a single black-and-white photograph. A girl, ten years old, standing by a lake. Nali stares at it. She doesn't remember the lake. She doesn't remember being the girl." }] },
-                  { "type": "action", "content": [
-                    { "type": "text", "text": "" },
-                    { "type": "text", "text": "DR. HASSAN", "marks": [{ "type": "tag", "attrs": { "tagType": "character", "entityId": "ent-hassan" } }] },
-                    { "type": "text", "text": " (60s) steps into the doorway, leather bag in hand. He has watched many families do this." }
-                  ] },
-                  { "type": "character", "content": [{ "type": "text", "text": "DR. HASSAN" }] },
-                  { "type": "dialogue", "content": [{ "type": "text", "text": "She doesn't have long." }] },
-                  { "type": "character", "content": [{ "type": "text", "text": "NALI" }] },
-                  { "type": "parenthetical", "content": [{ "type": "text", "text": "not looking up" }] },
-                  { "type": "dialogue", "content": [{ "type": "text", "text": "She doesn't need long. She needs me." }] },
-                  { "type": "action", "content": [{ "type": "text", "text": "She slides the photograph into her coat pocket." }] },
-                  { "type": "transition", "content": [{ "type": "text", "text": "CUT" }] }
+                  {
+                    "type": "sceneLine",
+                    "attrs": {
+                      "setting": "INT.",
+                      "time": "DAY"
+                    },
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "KITCHEN"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "action",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Steam rises from a kettle. "
+                      },
+                      {
+                        "type": "text",
+                        "text": "NALI",
+                        "marks": [
+                          {
+                            "type": "tag",
+                            "attrs": {
+                              "tagType": "character",
+                              "entityId": "ent-nali"
+                            }
+                          }
+                        ]
+                      },
+                      {
+                        "type": "text",
+                        "text": " moves like a guest in her own childhood, opening the wrong drawers. She finds a small tin box behind the sugar jar."
+                      }
+                    ]
+                  },
+                  {
+                    "type": "action",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Inside: a single black-and-white photograph. A girl, ten years old, standing by a lake. Nali stares at it. She doesn't remember the lake. She doesn't remember being the girl."
+                      }
+                    ]
+                  },
+                  {
+                    "type": "action",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": ""
+                      },
+                      {
+                        "type": "text",
+                        "text": "DR. HASSAN",
+                        "marks": [
+                          {
+                            "type": "tag",
+                            "attrs": {
+                              "tagType": "character",
+                              "entityId": "ent-hassan"
+                            }
+                          }
+                        ]
+                      },
+                      {
+                        "type": "text",
+                        "text": " (60s) steps into the doorway, leather bag in hand. He has watched many families do this."
+                      }
+                    ]
+                  },
+                  {
+                    "type": "character",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "DR. HASSAN"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "dialogue",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "She doesn't have long."
+                      }
+                    ]
+                  },
+                  {
+                    "type": "character",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "NALI"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "parenthetical",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "not looking up"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "dialogue",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "She doesn't need long. She needs me."
+                      }
+                    ]
+                  },
+                  {
+                    "type": "action",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "She slides the photograph into her coat pocket."
+                      }
+                    ]
+                  },
+                  {
+                    "type": "transition",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "CUT"
+                      }
+                    ]
+                  }
                 ]
               }
             }
           },
-          { "type": "paragraph" },
+          {
+            "type": "paragraph"
+          },
           {
             "type": "sceneFrame",
             "attrs": {
@@ -167,26 +563,139 @@
               "headingStyle": null,
               "innerDoc": {
                 "type": "doc",
-                "attrs": { "notes": "The promise. Soft light only.", "revisionFlag": null },
+                "attrs": {
+                  "notes": "The promise. Soft light only.",
+                  "revisionFlag": null
+                },
                 "content": [
-                  { "type": "sceneLine", "attrs": { "setting": "INT.", "time": "DUSK" }, "content": [{ "type": "text", "text": "BABAN'S BEDROOM" }] },
-                  { "type": "action", "content": [{ "type": "text", "text": "The room is gold and shadow. Baban's breathing is shallow. Nali holds the photograph between them so they can both see it." }] },
-                  { "type": "character", "content": [{ "type": "text", "text": "BABAN" }] },
-                  { "type": "dialogue", "content": [{ "type": "text", "text": "You were happy there. We both were. I couldn't tell you why we stopped going." }] },
-                  { "type": "character", "content": [{ "type": "text", "text": "NALI" }] },
-                  { "type": "dialogue", "content": [{ "type": "text", "text": "Tell me now." }] },
-                  { "type": "character", "content": [{ "type": "text", "text": "BABAN" }] },
-                  { "type": "parenthetical", "content": [{ "type": "text", "text": "a small smile" }] },
-                  { "type": "dialogue", "content": [{ "type": "text", "text": "I'm too tired for the long answer. Just — promise me you'll go back to the lake." }] },
-                  { "type": "character", "content": [{ "type": "text", "text": "NALI" }] },
-                  { "type": "dialogue", "content": [{ "type": "text", "text": "I promise." }] },
-                  { "type": "action", "content": [{ "type": "text", "text": "Baban's hand goes still. Nali doesn't cry. Not yet." }] },
-                  { "type": "transition", "content": [{ "type": "text", "text": "DISSOLVE" }] }
+                  {
+                    "type": "sceneLine",
+                    "attrs": {
+                      "setting": "INT.",
+                      "time": "DUSK"
+                    },
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "BABAN'S BEDROOM"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "action",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "The room is gold and shadow. Baban's breathing is shallow. Nali holds the photograph between them so they can both see it."
+                      }
+                    ]
+                  },
+                  {
+                    "type": "character",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "BABAN"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "dialogue",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "You were happy there. We both were. I couldn't tell you why we stopped going."
+                      }
+                    ]
+                  },
+                  {
+                    "type": "character",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "NALI"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "dialogue",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Tell me now."
+                      }
+                    ]
+                  },
+                  {
+                    "type": "character",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "BABAN"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "parenthetical",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "a small smile"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "dialogue",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "I'm too tired for the long answer. Just — promise me you'll go back to the lake."
+                      }
+                    ]
+                  },
+                  {
+                    "type": "character",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "NALI"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "dialogue",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "I promise."
+                      }
+                    ]
+                  },
+                  {
+                    "type": "action",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Baban's hand goes still. Nali doesn't cry. Not yet."
+                      }
+                    ]
+                  },
+                  {
+                    "type": "transition",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "DISSOLVE"
+                      }
+                    ]
+                  }
                 ]
               }
             }
           },
-          { "type": "paragraph" },
+          {
+            "type": "paragraph"
+          },
           {
             "type": "sceneFrame",
             "attrs": {
@@ -195,52 +704,200 @@
               "headingStyle": null,
               "innerDoc": {
                 "type": "doc",
-                "attrs": { "notes": "End on motion forward — never backward.", "revisionFlag": null },
+                "attrs": {
+                  "notes": "End on motion forward — never backward.",
+                  "revisionFlag": null
+                },
                 "content": [
-                  { "type": "sceneLine", "attrs": { "setting": "EXT.", "time": "NIGHT" }, "content": [{ "type": "text", "text": "OLD HOUSE — DRIVEWAY" }] },
-                  { "type": "action", "content": [
-                    { "type": "text", "text": "" },
-                    { "type": "text", "text": "NALI", "marks": [{ "type": "tag", "attrs": { "tagType": "character", "entityId": "ent-nali" } }] },
-                    { "type": "text", "text": " walks back to the car. The photograph is in her hand, not her pocket. Behind her, one lit window in the house goes dark." }
-                  ] },
-                  { "type": "action", "content": [{ "type": "text", "text": "She gets in. Looks at the photo on the steering wheel. Starts the engine." }] },
-                  { "type": "shot", "content": [{ "type": "text", "text": "TAIL LIGHTS RECEDE" }] },
-                  { "type": "action", "content": [{ "type": "text", "text": "Down the long drive, into the road, into the morning that is becoming." }] },
-                  { "type": "transition", "content": [{ "type": "text", "text": "FADE OUT" }] }
+                  {
+                    "type": "sceneLine",
+                    "attrs": {
+                      "setting": "EXT.",
+                      "time": "NIGHT"
+                    },
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "OLD HOUSE — DRIVEWAY"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "action",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": ""
+                      },
+                      {
+                        "type": "text",
+                        "text": "NALI",
+                        "marks": [
+                          {
+                            "type": "tag",
+                            "attrs": {
+                              "tagType": "character",
+                              "entityId": "ent-nali"
+                            }
+                          }
+                        ]
+                      },
+                      {
+                        "type": "text",
+                        "text": " walks back to the car. The photograph is in her hand, not her pocket. Behind her, one lit window in the house goes dark."
+                      }
+                    ]
+                  },
+                  {
+                    "type": "action",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "She gets in. Looks at the photo on the steering wheel. Starts the engine."
+                      }
+                    ]
+                  },
+                  {
+                    "type": "shot",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "TAIL LIGHTS RECEDE"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "action",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Down the long drive, into the road, into the morning that is becoming."
+                      }
+                    ]
+                  },
+                  {
+                    "type": "transition",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "FADE OUT"
+                      }
+                    ]
+                  }
                 ]
               }
             }
           },
-          { "type": "paragraph" }
+          {
+            "type": "paragraph"
+          }
         ]
       }
     ]
   },
   "tag_registry": {
     "characters": [
-      { "id": "ent-nali",   "name": "NALI",       "color": "#4FC1FF", "notes": "Protagonist. Carries the film." },
-      { "id": "ent-baban",  "name": "BABAN",      "color": "#FFB86C", "notes": "Grandmother. The reason we are here." },
-      { "id": "ent-hassan", "name": "DR. HASSAN", "color": "#A8F0A8", "notes": "Family doctor. Witness." }
+      {
+        "id": "ent-nali",
+        "name": "NALI",
+        "color": "#4FC1FF",
+        "notes": "Protagonist. Carries the film."
+      },
+      {
+        "id": "ent-baban",
+        "name": "BABAN",
+        "color": "#FFB86C",
+        "notes": "Grandmother. The reason we are here."
+      },
+      {
+        "id": "ent-hassan",
+        "name": "DR. HASSAN",
+        "color": "#A8F0A8",
+        "notes": "Family doctor. Witness."
+      },
+      {
+        "id": "e578a64f-e6d2-4d69-97ba-1771805b974d",
+        "name": "Baban",
+        "color": null,
+        "notes": ""
+      },
+      {
+        "id": "47a05ccf-a967-4d5c-9f65-aa62f2542158",
+        "name": "BABAN",
+        "color": null,
+        "notes": ""
+      },
+      {
+        "id": "15201fa6-09cf-4786-a384-3c0bbd973dd8",
+        "name": "NALI",
+        "color": null,
+        "notes": ""
+      }
     ],
     "props": [
-      { "id": "ent-photo", "name": "PHOTOGRAPH", "color": "#F0A8D8", "notes": "Old black-and-white. Lake. Ten years old." },
-      { "id": "ent-tinbox", "name": "TIN BOX",   "color": "#D8A8F0", "notes": "Behind the sugar jar." }
+      {
+        "id": "ent-photo",
+        "name": "PHOTOGRAPH",
+        "color": "#F0A8D8",
+        "notes": "Old black-and-white. Lake. Ten years old."
+      },
+      {
+        "id": "ent-tinbox",
+        "name": "TIN BOX",
+        "color": "#D8A8F0",
+        "notes": "Behind the sugar jar."
+      },
+      {
+        "id": "52617b89-4f5c-40ad-b5c4-c98a73a07835",
+        "name": "window",
+        "color": null,
+        "notes": ""
+      }
     ],
     "wardrobe": [],
     "locations": [
-      { "id": "loc-house",   "name": "OLD HOUSE",        "color": null, "notes": "Childhood home; rose garden; one lit window." },
-      { "id": "loc-bedroom", "name": "BABAN'S BEDROOM",  "color": null, "notes": "Embroidered quilt; window onto a tree." },
-      { "id": "loc-kitchen", "name": "KITCHEN",          "color": null, "notes": "Kettle, sugar jar, tin box." }
+      {
+        "id": "loc-house",
+        "name": "OLD HOUSE",
+        "color": null,
+        "notes": "Childhood home; rose garden; one lit window."
+      },
+      {
+        "id": "loc-bedroom",
+        "name": "BABAN'S BEDROOM",
+        "color": null,
+        "notes": "Embroidered quilt; window onto a tree."
+      },
+      {
+        "id": "loc-kitchen",
+        "name": "KITCHEN",
+        "color": null,
+        "notes": "Kettle, sugar jar, tin box."
+      }
     ],
     "sfx": [],
     "vfx": [],
     "vehicles": [
-      { "id": "veh-car", "name": "BEAT-UP CAR", "color": null, "notes": "Nali's. Engine ticks when it cools." }
+      {
+        "id": "veh-car",
+        "name": "BEAT-UP CAR",
+        "color": null,
+        "notes": "Nali's. Engine ticks when it cools."
+      }
     ],
     "animals": [],
     "custom": []
   },
-  "flag_log": [],
+  "flag_log": [
+    {
+      "id": "e7a8628f-21e1-48d8-a11b-17aa1ea6da70",
+      "flaggedText": "Baban's",
+      "color": "#F44747",
+      "hint": "Mistake / fix",
+      "reason": "this is not done",
+      "resolvedAt": "2026-05-16T11:40:21.583Z"
+    }
+  ],
   "export_settings": {
     "branding": "rwanga",
     "letterhead_url": null,

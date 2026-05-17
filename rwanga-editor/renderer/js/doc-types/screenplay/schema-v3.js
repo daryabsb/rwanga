@@ -1,10 +1,7 @@
 // Copyright (c) 2026 Rwanga. Licensed under Apache 2.0.
 // v3 screenplay schema — single canonical ProseMirror document with real
-// screenplay nodes (scene + sceneHeading + sceneBody+). Replaces the v2
-// sceneFrame-atom + attrs.innerDoc model.
-//
-// Phase 1 deliverable: schema exists as a callable factory. No registration
-// into mount yet (Phase 3); no migration yet (Phase 2); no UI yet.
+// screenplay nodes (scene + sceneHeading + sceneBody+). The primary
+// editor schema; selected by the screenplay doc-type's selectSchema hook.
 //
 // Contract reference: docs/phase0-final-schema-contract.md.
 //

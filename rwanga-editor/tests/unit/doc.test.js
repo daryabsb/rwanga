@@ -26,13 +26,13 @@ function buildTestSchema() {
   });
 }
 
-test('Doc.create produces an Untitled doc with dirty=false and rgaVersion=2.0', () => {
+test('Doc.create produces an Untitled doc with dirty=false and rgaVersion=3.0', () => {
   const doc = Doc.create();
   assert.equal(doc.handle, null);
   assert.equal(doc.origin, 'untitled');
   assert.equal(doc.dirty, false);
   assert.match(doc.displayName, /^Untitled/);
-  assert.equal(doc.rgaVersion, '2.0');
+  assert.equal(doc.rgaVersion, '3.0');
   assert.equal(doc.body, null);   // PM Node not set until tab-manager mounts
 });
 
@@ -60,7 +60,7 @@ test('Doc.serialize then Doc.deserialize round-trips metadata losslessly (v2.0)'
   assert.equal(reloaded.body.type.name, 'doc');
 });
 
-test('Doc.serialize produces valid v2.0 JSON with PM tree in body field', () => {
+test('Doc.serialize produces valid v3.0 JSON with PM tree in body field', () => {
   const schema = buildTestSchema();
   const doc = Doc.create();
   doc.metadata.title = 'Café';
@@ -68,7 +68,7 @@ test('Doc.serialize produces valid v2.0 JSON with PM tree in body field', () => 
     schema.node('body', null, [schema.node('paragraph')])
   ]);
   const parsed = JSON.parse(Doc.serialize(doc));
-  assert.equal(parsed.rga_version, '2.0');
+  assert.equal(parsed.rga_version, '3.0');
   assert.equal(parsed.document_type, 'screenplay');
   assert.equal(parsed.metadata.title, 'Café');
   assert.equal(parsed.body.type, 'doc');
@@ -86,7 +86,7 @@ test('Doc.deserialize accepts v1.x and backfills production_type=untyped; body i
     runtime: {}
   });
   const doc = Doc.deserialize(v11, '/old.rga');
-  assert.equal(doc.rgaVersion, '2.0');          // always upgraded on load
+  assert.equal(doc.rgaVersion, '3.0');          // always upgraded on load
   assert.equal(doc.metadata.production_type, 'untyped');
   assert.equal(doc.body, null);                  // no PM body from v1.x
 });
@@ -178,58 +178,6 @@ test('Doc.deserialize backfills vocabulary on old file', () => {
   assert.equal(doc.settings.sceneHeadingStyle, 'twoLine');
 });
 
-test('Doc.deserialize migrates old sceneLine location attr to inline text content', () => {
-  const { Schema } = require('prosemirror-model');
-  const newSchema = new Schema({
-    nodes: {
-      doc:        { content: 'body' },
-      body:       { content: 'block*', toDOM() { return ['div', 0]; } },
-      paragraph:  { content: 'inline*', group: 'block', toDOM() { return ['p', 0]; } },
-      sceneFrame: {
-        group: 'block', atom: true,
-        attrs: { id: { default: null }, number: { default: null }, headingStyle: { default: null }, innerDoc: { default: null } },
-        toDOM() { return ['div', 0]; }
-      },
-      text: { group: 'inline' }
-    },
-    marks: {}
-  });
-
-  const fileJson = {
-    rga_version: '2.0',
-    document_type: 'screenplay',
-    metadata: {},
-    settings: {},
-    body: {
-      type: 'doc',
-      content: [{
-        type: 'body',
-        content: [{
-          type: 'scene',
-          attrs: { id: 's1', number: 1, notes: '', revisionFlag: null, headingStyle: null },
-          content: [
-            { type: 'sceneLine',
-              attrs: { setting: 'INT', location: 'CAFÉ', time: 'DAY' },
-              content: [] },
-            { type: 'action', content: [] }
-          ]
-        }]
-      }]
-    },
-    tag_registry: {},
-    flag_log: [],
-    export_settings: {},
-    runtime: {}
-  };
-
-  const reloaded = Doc.deserialize(JSON.stringify(fileJson), null, { schema: newSchema });
-  const frame = reloaded.body.firstChild.firstChild;
-  assert.equal(frame.type.name, 'sceneFrame');
-  assert.equal(frame.attrs.id, 's1');
-  const sceneLine = frame.attrs.innerDoc.content[0];
-  assert.equal(sceneLine.type, 'sceneLine');
-  assert.equal(sceneLine.attrs.setting, 'INT');
-  assert.equal(sceneLine.attrs.time, 'DAY');
-  assert.equal(sceneLine.attrs.location, undefined);
-  assert.equal(sceneLine.content[0].text, 'CAFÉ');
-});
+// Phase 9: the legacy scene → sceneFrame + sceneLine-location migrations
+// were deleted alongside the v2 schema. v1.x → v3 lift is covered by the
+// migration chain (tests/unit/doc-types/screenplay/migrations/).

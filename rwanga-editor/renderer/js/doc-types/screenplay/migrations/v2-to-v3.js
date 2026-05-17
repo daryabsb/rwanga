@@ -164,13 +164,20 @@
   }
 
   function _transitionV2toV3(transitionNode) {
-    const text = _concatTextContent(transitionNode.content);
+    const cleaned = _stripEmptyTextNodes(transitionNode && transitionNode.content);
+    const text = _concatTextContent(cleaned);
     const presetType = _derivePresetType(text);
-    const contentText = text.length > 0 ? text : 'CUT';
+    const fallbackText = text.length > 0 ? text : 'CUT';
+    // Preserve original content (and any annotation/tag/revisionFlag marks
+    // on the transition text) when non-empty. Only synthesise a fresh text
+    // node when the source had no content at all.
+    const content = (Array.isArray(cleaned) && cleaned.length > 0)
+      ? cleaned
+      : [{ type: 'text', text: fallbackText }];
     return {
       type: 'transition',
-      attrs: { presetType: presetType || (contentText.toUpperCase() === 'CUT' ? 'CUT' : null) },
-      content: [{ type: 'text', text: contentText }]
+      attrs: { presetType: presetType || (fallbackText.toUpperCase() === 'CUT' ? 'CUT' : null) },
+      content: content
     };
   }
 

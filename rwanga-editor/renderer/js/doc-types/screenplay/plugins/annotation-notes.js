@@ -22,42 +22,24 @@
   }
 
   // ---------------------------------------------------------------
-  // Locate the EditorView that currently owns an annotation by id —
-  // outer view first, then walks every mounted inner editor (v2 scene
-  // blocks). Returns null if the annotation no longer exists anywhere.
+  // Locate the EditorView that owns an annotation by id. Phase 9: v3
+  // is single-doc, so there is exactly one EditorView to check — the
+  // active tab's.
   // ---------------------------------------------------------------
   function findViewForAnnotation(id) {
     const outer = getView();
-    if (outer) {
-      const schema = outer.state.schema;
-      const annotMark = schema && schema.marks.annotation;
-      if (annotMark) {
-        let found = false;
-        outer.state.doc.descendants(function(node) {
-          if (found) return false;
-          if (node.marks.some(function(m) { return m.type === annotMark && m.attrs.id === id; })) {
-            found = true;
-          }
-        });
-        if (found) return outer;
+    if (!outer) return null;
+    const schema = outer.state.schema;
+    const annotMark = schema && schema.marks.annotation;
+    if (!annotMark) return null;
+    let found = false;
+    outer.state.doc.descendants(function(node) {
+      if (found) return false;
+      if (node.marks.some(function(m) { return m.type === annotMark && m.attrs.id === id; })) {
+        found = true;
       }
-    }
-    const blocks = document.querySelectorAll('.rga-scene-block');
-    for (let i = 0; i < blocks.length; i++) {
-      const v = blocks[i]._innerView;
-      if (!v) continue;
-      const innerAnnot = v.state.schema.marks.annotation;
-      if (!innerAnnot) continue;
-      let found = false;
-      v.state.doc.descendants(function(node) {
-        if (found) return false;
-        if (node.marks.some(function(m) { return m.type === innerAnnot && m.attrs.id === id; })) {
-          found = true;
-        }
-      });
-      if (found) return v;
-    }
-    return null;
+    });
+    return found ? outer : null;
   }
 
   // ---------------------------------------------------------------
@@ -215,34 +197,10 @@
       });
     });
 
-    // 2. Inner-doc annotations — walk each sceneFrame's attrs.innerDoc
-    //    JSON. Source of truth on file open (before any inner editor is
-    //    even mounted) and during normal operation.
-    view.state.doc.descendants(function(node) {
-      if (!node.type || node.type.name !== 'sceneFrame') return;
-      const innerDoc = node.attrs && node.attrs.innerDoc;
-      if (!innerDoc || !Array.isArray(innerDoc.content)) return;
-      innerDoc.content.forEach(function(block) {
-        if (!block || !Array.isArray(block.content)) return;
-        block.content.forEach(function(textNode) {
-          if (!textNode || textNode.type !== 'text' || !Array.isArray(textNode.marks)) return;
-          textNode.marks.forEach(function(m) {
-            if (m && m.type === 'annotation' && m.attrs && !seen.has(m.attrs.id)) {
-              seen.add(m.attrs.id);
-              const card = {
-                id: m.attrs.id,
-                color: m.attrs.color,
-                text: m.attrs.text || '',
-                status: m.attrs.status || 'open',
-                markedText: textNode.text || ''
-              };
-              if (card.status === 'resolved') resolved.push(card);
-              else open.push(card);
-            }
-          });
-        });
-      });
-    });
+    // (Phase 9: the v2 sceneFrame-atom + innerDoc scan branch was
+    // retired alongside the v2 schema. v3 carries annotations as
+    // marks on text nodes directly inside scene → action / dialogue
+    // / etc., which the outer-doc walk above already collects.)
 
     el.innerHTML = '';
     if (!open.length && !resolved.length) {

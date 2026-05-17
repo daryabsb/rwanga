@@ -45,11 +45,11 @@
   }
 
   // Delegate schema selection to the registered config's selectSchema(parsed)
-  // hook. Each doc-type knows its own schema-versioning rules (e.g. the
-  // screenplay config inspects metadata.useSchemaV3 to choose between v2
-  // and v3 schemas). Returns null when the config doesn't expose a
-  // selectSchema hook, signalling to the caller to use the legacy path.
-  // Throws only for unknown doc-types — by design, so callers find out
+  // hook. Each doc-type owns its schema choice — screenplay returns its v3
+  // schema; future doc-types (stage play, TV template) return theirs.
+  // Returns null when the config exposes no selectSchema hook (which is
+  // unsupported in Phase 9+ — every doc-type must opt in to a schema).
+  // Throws for unknown doc-types — by design, so callers find out
   // immediately if a file claims an unsupported document_type.
   function selectSchema(parsed) {
     const name = detect(parsed);

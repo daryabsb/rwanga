@@ -16,20 +16,10 @@
   // ============================================================
 
   function _PM() { return window.RgaProseMirror; }
-  // _view returns whichever EditorView currently owns user focus — the inner
-  // PM editor inside a scene block when one is active (so toolbar commands
-  // target inline content inside scenes), otherwise the outer view (title,
-  // treatment, etc.). Reads from the _lastSceneBlock cache so the lookup
-  // survives the toolbar button's brief focus theft. Falls back to walking
-  // activeElement directly when the cache is cold.
+  // _view returns the canonical EditorView for the active tab.
+  // Phase 9: there is exactly one PM editor (v3 single doc), so the
+  // old inner-editor lookup is gone.
   function _view() {
-    const cached = _lastSceneBlock;
-    if (cached && cached._innerView) return cached._innerView;
-    const ae = document.activeElement;
-    if (ae && ae.closest) {
-      const blockEl = ae.closest('.rga-scene-block');
-      if (blockEl && blockEl._innerView) return blockEl._innerView;
-    }
     return Rga.TabManager && Rga.TabManager._editorView && Rga.TabManager._editorView();
   }
   function _markType(name) {
@@ -237,96 +227,43 @@
   }
 
   // ============================================================
-  // Block-type dropdown
+  // Scene toolbox state
   // ============================================================
-
-  // Cached references so the scene toolbox can act on the prior scene block
-  // even after focus moves to one of the toolbar's own controls. activeElement
-  // becomes the <select> the instant the user clicks it, which is too late to
-  // resolve the block being edited. Tracked via a focusin listener (see init).
-  let _lastSceneBlock = null;
-  let _lastSceneFrame = null;
-
-  function _isToolbarFocus(node) {
-    if (!node || !node.closest) return false;
-    return !!(
-      node.closest('#format-toolbar') ||
-      node.closest('#scene-toolbox') ||
-      node.closest('#format-color-popover') ||
-      node.closest('#format-link-dialog') ||
-      node.closest('#format-annotation-dialog') ||
-      node.closest('#format-flag-dialog')
-    );
+  // Phase 9: v3 is a single PM doc with structural scene nodes. The
+  // toolbox stays enabled while the editor has any scenes (the cursor
+  // is always inside a scene by construction — emptyDoc seeds one).
+  // The legacy block-type dropdown (action / character / dialogue) is
+  // driven from the keyboard via Tab cycle (v3-keymap.js) — no DOM
+  // wiring needed here.
+  function refreshSceneToolboxState() {
+    const tb = document.getElementById('scene-toolbox');
+    if (!tb) return;
+    const view = _view();
+    const hasScene = !!(view && view.state && _docHasScene(view.state.doc));
+    tb.classList.toggle('disabled', !hasScene);
   }
 
-  function _validSceneBlock() {
-    if (_lastSceneBlock && document.body && document.body.contains(_lastSceneBlock)) {
-      return _lastSceneBlock;
-    }
-    _lastSceneBlock = null;
-    return null;
-  }
-
-  function _validSceneFrame() {
-    if (_lastSceneFrame && document.body && document.body.contains(_lastSceneFrame)) {
-      return _lastSceneFrame;
-    }
-    _lastSceneFrame = null;
-    return null;
-  }
-
-  function _onFocusIn(e) {
-    const t = e.target;
-    if (!t) return;
-    // While focus lives in the toolbar, popovers, or modal dialogs, preserve
-    // the cached scene-block so the user can still act on it.
-    if (_isToolbarFocus(t)) return;
-    // Scene block can be either:
-    //   - the .rga-scene-block div itself (v1 placeholder path), OR
-    //   - a descendant ProseMirror contenteditable child (v2 scene-frame-pm
-    //     mounts an inner editor whose DOM lives inside the block div).
-    // closest() handles both.
-    const blockEl = (t.closest && t.closest('.rga-scene-block')) || null;
-    _lastSceneBlock = blockEl;
-    _lastSceneFrame = (t.closest && t.closest('.rga-scene-frame-placeholder')) || null;
-    refreshActiveStates();
-  }
-
-  function _placeholderRefFor(blockEl) {
-    if (!blockEl) return null;
-    const root = blockEl.closest('.rga-scene-frame-placeholder');
-    return root ? root._rgaScenePlaceholder : null;
-  }
-
-  function changeBlockType(newType) {
-    const blockEl = _validSceneBlock();
-    const ref = _placeholderRefFor(blockEl);
-    if (!blockEl || !ref || !newType) return;
-    if (typeof ref._changeBlockType !== 'function') return;
-    ref._changeBlockType(blockEl, newType);
-    if (typeof ref._dispatchInner === 'function') ref._dispatchInner();
-    blockEl.focus();
+  function _docHasScene(doc) {
+    if (!doc || typeof doc.descendants !== 'function') return false;
+    let found = false;
+    doc.descendants(function(n) {
+      if (found) return false;
+      if (n.type && n.type.name === 'scene') { found = true; return false; }
+      return true;
+    });
+    return found;
   }
 
   function refreshBlockTypeSelect() {
     const select = document.getElementById('format-block-type');
     if (!select) return;
-    const blockEl = _validSceneBlock();
-    if (!blockEl) {
-      select.value = '';
-      return;
-    }
-    select.value = blockEl.dataset.blockType || '';
-  }
-
-  // Scene toolbox is enabled when the most recent non-toolbar focus was
-  // inside a scene frame (block, slug pickers, transition picker). Reading
-  // the cache rather than activeElement keeps the toolbox usable while the
-  // user is interacting with its own controls.
-  function refreshSceneToolboxState() {
-    const tb = document.getElementById('scene-toolbox');
-    if (!tb) return;
-    tb.classList.toggle('disabled', !_validSceneFrame());
+    // v3: block-type is reflected from the current selection's enclosing
+    // body block (action / character / etc.). Look up via $from.parent.
+    const view = _view();
+    if (!view || !view.state) { select.value = ''; return; }
+    const $from = view.state.selection.$from;
+    const parent = $from && $from.parent;
+    select.value = (parent && parent.type && parent.type.name) || '';
   }
 
   // ============================================================
@@ -479,11 +416,23 @@
       if (btn) btn.addEventListener('click', toggleMarkSimple(name));
     });
 
-    // Block-type dropdown
+    // Block-type dropdown — Phase 9 v3: drives the v3 cycleBlockType
+    // command (the same one Tab fires). The dropdown stays for users
+    // who prefer mouse-driven block switching.
     const blockTypeSelect = document.getElementById('format-block-type');
     if (blockTypeSelect) {
       blockTypeSelect.addEventListener('change', function() {
-        if (blockTypeSelect.value) changeBlockType(blockTypeSelect.value);
+        const newType = blockTypeSelect.value;
+        if (!newType) return;
+        const view = _view();
+        const sp = Rga.DocTypes && Rga.DocTypes.screenplay;
+        const PM = _PM();
+        if (!view || !sp || !PM) return;
+        const schema = view.state.schema;
+        const nodeType = schema.nodes[newType];
+        if (!nodeType || !PM.setBlockType) return;
+        PM.setBlockType(nodeType)(view.state, view.dispatch.bind(view));
+        view.focus();
       });
     }
 
@@ -539,17 +488,10 @@
     if (linkBtn) linkBtn.addEventListener('click', openLinkDialog);
     wireLinkDialog();
 
-    // Focus tracking — keeps a cached reference to the last scene block /
-    // frame so toolbar controls can target it after stealing focus.
-    document.addEventListener('focusin', _onFocusIn);
-
-    // Selection-aware refresh
+    // Selection-aware refresh — the v3 editor's single PM doc emits
+    // selectionchange + key events that this listener reacts to.
     document.addEventListener('selectionchange', refreshActiveStates);
-    document.addEventListener('editor.tabActivated', function() {
-      _lastSceneBlock = null;
-      _lastSceneFrame = null;
-      refreshActiveStates();
-    });
+    document.addEventListener('editor.tabActivated', refreshActiveStates);
     document.addEventListener('mouseup', refreshActiveStates);
     document.addEventListener('keyup', refreshActiveStates);
 

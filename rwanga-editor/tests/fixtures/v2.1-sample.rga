@@ -1,0 +1,124 @@
+{
+  "rga_version": "2.0",
+  "document_type": "screenplay",
+  "metadata": {
+    "title": "",
+    "author": "",
+    "created": "2026-05-15T15:02:45.895Z",
+    "modified": "2026-05-15T15:03:13.970Z",
+    "version": 1,
+    "revision_notes": "",
+    "language": "en",
+    "production_type": "untyped",
+    "genre": "",
+    "logline": ""
+  },
+  "settings": {
+    "theme": "dark",
+    "font_size": 12,
+    "font_family": "Courier Prime",
+    "show_scene_numbers": true,
+    "page_size": "Letter",
+    "pageSetup": {
+      "paperSize": "Letter",
+      "margins": {
+        "top": 1,
+        "right": 1,
+        "bottom": 1,
+        "left": 1.5
+      }
+    },
+    "vocabulary": {
+      "settings": [
+        "INT.",
+        "EXT.",
+        "INT./EXT.",
+        "EXT./INT."
+      ],
+      "times": [
+        "DAY",
+        "NIGHT",
+        "CONTINUOUS",
+        "DUSK",
+        "DAWN"
+      ],
+      "sceneWord": "SCENE"
+    },
+    "sceneHeadingStyle": "twoLine"
+  },
+  "body": {
+    "type": "doc",
+    "content": [
+      {
+        "type": "body",
+        "content": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "this is a new script"
+              }
+            ]
+          },
+          {
+            "type": "sceneFrame",
+            "attrs": {
+              "id": "scene-mp71raa9",
+              "number": 1,
+              "headingStyle": null,
+              "innerDoc": {
+                "type": "doc",
+                "attrs": {
+                  "notes": "",
+                  "revisionFlag": null
+                },
+                "content": [
+                  {
+                    "type": "sceneLine",
+                    "attrs": {
+                      "setting": "INT./EXT.",
+                      "time": "NIGHT"
+                    },
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "garden"
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "type": "paragraph"
+          }
+        ]
+      }
+    ]
+  },
+  "tag_registry": {
+    "characters": [],
+    "props": [],
+    "wardrobe": [],
+    "locations": [],
+    "sfx": [],
+    "vfx": [],
+    "vehicles": [],
+    "animals": [],
+    "custom": []
+  },
+  "flag_log": [],
+  "export_settings": {
+    "branding": "rwanga",
+    "letterhead_url": null,
+    "include_scene_numbers": true,
+    "include_revision_marks": false
+  },
+  "runtime": {
+    "last_cursor": null,
+    "active_scene_id": null,
+    "ui_state": {}
+  }
+}

@@ -98,40 +98,19 @@
   // null if the flag has been deleted everywhere.
   function _findViewForFlag(id) {
     const outer = _getView();
-    if (outer) {
-      const schema = outer.state.schema;
-      const flagMark = schema && schema.marks.revisionFlag;
-      if (flagMark) {
-        let found = false;
-        outer.state.doc.descendants(function(node) {
-          if (found) return false;
-          if (node.isText) {
-            if (node.marks.some(function(m) { return m.type === flagMark && m.attrs.id === id; })) {
-              found = true;
-            }
-          }
-        });
-        if (found) return outer;
+    if (!outer) return null;
+    const schema = outer.state.schema;
+    const flagMark = schema && schema.marks.revisionFlag;
+    if (!flagMark) return null;
+    let found = false;
+    outer.state.doc.descendants(function(node) {
+      if (found) return false;
+      if (node.isText &&
+          node.marks.some(function(m) { return m.type === flagMark && m.attrs.id === id; })) {
+        found = true;
       }
-    }
-    const blocks = document.querySelectorAll('.rga-scene-block');
-    for (let i = 0; i < blocks.length; i++) {
-      const v = blocks[i]._innerView;
-      if (!v) continue;
-      const innerFlag = v.state.schema.marks.revisionFlag;
-      if (!innerFlag) continue;
-      let found = false;
-      v.state.doc.descendants(function(node) {
-        if (found) return false;
-        if (node.isText) {
-          if (node.marks.some(function(m) { return m.type === innerFlag && m.attrs.id === id; })) {
-            found = true;
-          }
-        }
-      });
-      if (found) return v;
-    }
-    return null;
+    });
+    return found ? outer : null;
   }
 
   function _markRange(doc, pos, markType) {
@@ -387,31 +366,9 @@
       });
     }
 
-    // 2. Inner-doc revisionFlag marks — walk every sceneFrame's attrs.
-    //    innerDoc JSON so flags created inside scenes appear on file open
-    //    as well as runtime via events.
-    view.state.doc.descendants(function(node) {
-      if (!node.type || node.type.name !== 'sceneFrame') return;
-      const innerDoc = node.attrs && node.attrs.innerDoc;
-      if (!innerDoc || !Array.isArray(innerDoc.content)) return;
-      innerDoc.content.forEach(function(block) {
-        if (!block || !Array.isArray(block.content)) return;
-        block.content.forEach(function(textNode) {
-          if (!textNode || textNode.type !== 'text' || !Array.isArray(textNode.marks)) return;
-          textNode.marks.forEach(function(m) {
-            if (!m || m.type !== 'revisionFlag' || !m.attrs) return;
-            const id = m.attrs.id;
-            if (!id || seenIds.has(id)) return;
-            seenIds.add(id);
-            openFlags.push({
-              id: id,
-              mark: { attrs: m.attrs },  // shape-compatible with PM mark for _buildFlagCard
-              markedText: textNode.text || ''
-            });
-          });
-        });
-      });
-    });
+    // (Phase 9: the v2 sceneFrame innerDoc scan was retired. v3 stores
+    // revisionFlag marks directly on text nodes inside scene body blocks;
+    // the outer-doc walk above captures them.)
 
     if (!openFlags.length) {
       container.innerHTML = '<div class="flags-empty">No open flags — select text and right-click to flag.</div>';

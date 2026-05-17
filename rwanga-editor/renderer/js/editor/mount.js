@@ -1,10 +1,23 @@
 // Copyright (c) 2026 Rwanga. Licensed under Apache 2.0.
+// Editor mount — composes the v3 screenplay editor:
+//   schema (v3, structural scene nodes) +
+//   keymap (history + v3 block-cycle/Enter/Mod-Enter/Backspace) +
+//   NodeViews (SceneNodeView + SceneHeadingNodeView) +
+//   plugins (nav-index → scene numbering & page markers,
+//            annotations / tags / revisionFlags / context-menu).
+//
+// Phase 9: v2 architecture retired. No sceneFrame, no inner EditorViews,
+// no paginator-renderer, no compatibility branches. Schema comes from
+// the doc-type's selectSchema; for screenplay that is always
+// Rga.DocTypes.screenplay.buildSchemaV3().
 'use strict';
 
 (function() {
   const Rga = window.Rga = window.Rga || {};
 
   // Base nodes present in every outer document, regardless of doc-type.
+  // The screenplay v3 schema layers its own node tree (doc → titleStrip? body,
+  // with scene structural nodes) on top of these — see schema-v3.js.
   const baseOuterNodes = {
     doc:        { content: 'titleStrip? body' },
     titleStrip: {
@@ -77,8 +90,10 @@
     text: { group: 'inline' }
   };
 
-  // Build the active outer schema by composing base nodes/marks with the
-  // registered doc-type's outerNodes.
+  // Pick the schema for a given doc-type. The screenplay doc-type returns
+  // its v3 schema; future doc-types provide their own selectSchema. If a
+  // doc-type has no selectSchema, we compose a baseline outer schema from
+  // baseOuterNodes alone — minimal but valid (doc → body → paragraph).
   function activeSchema(documentType) {
     const PM = window.RgaProseMirror;
     if (!PM) {
@@ -90,70 +105,19 @@
       return null;
     }
     const docType = Rga.DocTypes.get(documentType);
-    const nodes = Object.assign({}, baseOuterNodes, docType.outerNodes);
+    if (typeof docType.selectSchema === 'function') {
+      const schema = docType.selectSchema(null);
+      if (schema) return schema;
+    }
+    // Fallback for doc-types that have no selectSchema (none in v3).
     const marks = (Rga.Framework && Rga.Framework.baseOuterMarks) || {};
-    return new PM.Schema({ nodes: nodes, marks: marks });
-  }
-
-  /**
-   * Ctrl+Enter command: insert a new sceneFrame at the cursor.
-   * The new frame's `number` attr is set to (existing sceneFrames in doc + 1).
-   * Cursor lands at the body block after the inserted frame.
-   */
-  function insertSceneFrame(schema) {
-    return function(state, dispatch, view) {
-      const sceneFrameType = schema.nodes.sceneFrame;
-      if (!sceneFrameType) return false;
-      if (!dispatch) return true;
-
-      let sceneCount = 0;
-      state.doc.descendants(function(node) {
-        if (node.type === sceneFrameType) sceneCount += 1;
-        return true;
-      });
-
-      const newId = 'scene-' + Date.now().toString(36);
-      const frame = sceneFrameType.create({
-        id: newId,
-        number: sceneCount + 1,
-        headingStyle: null,
-        innerDoc: null
-      });
-
-      const $head = state.selection.$head;
-      // Insert after the current body-level block (depth 2: doc > body > block)
-      const insertDepth = Math.min($head.depth, 2);
-      const insertPos = insertDepth >= 2 ? $head.after(insertDepth) : state.doc.content.size;
-
-      const paragraphType = schema.nodes.paragraph;
-      const tr = state.tr.insert(insertPos, frame);
-      // Ensure there's a paragraph after the frame so future outer-typing has somewhere to land
-      const afterFramePos = insertPos + frame.nodeSize;
-      const nodeAfter = tr.doc.resolve(afterFramePos).nodeAfter;
-      if (!nodeAfter && paragraphType) {
-        tr.insert(afterFramePos, paragraphType.create());
-      }
-      // Don't move PM selection — leave it where it was. We move DOM focus
-      // into the new frame's setting picker so the director starts there.
-      dispatch(tr.scrollIntoView());
-
-      if (view && typeof view.nodeDOM === 'function') {
-        const frameDom = view.nodeDOM(insertPos);
-        if (frameDom && frameDom.querySelector) {
-          const settingPicker = frameDom.querySelector('.rga-slug-setting-picker');
-          if (settingPicker && typeof settingPicker.focus === 'function') {
-            settingPicker.focus();
-          }
-        }
-      }
-      return true;
-    };
+    return new PM.Schema({ nodes: baseOuterNodes, marks: marks });
   }
 
   /**
    * Mount a ProseMirror editor into the given DOM container.
    * @param {HTMLElement} container
-   * @param {object} [opts] - { initialDoc, schema, documentType }
+   * @param {object} [opts] - { initialDoc, schema, documentType, plugins }
    * @returns {{ view: EditorView, state: EditorState } | null}
    */
   function mount(container, opts) {
@@ -170,15 +134,24 @@
 
     const boldMark = schema.marks.bold;
     const italicMark = schema.marks.italic;
+    const sp = Rga.DocTypes && Rga.DocTypes.screenplay;
 
+    // Universal keymap entries (work on any schema).
     const keymapEntries = {
       'Mod-z': PM.undo,
       'Mod-y': PM.redo,
-      'Mod-Shift-z': PM.redo,
-      'Mod-Enter': insertSceneFrame(schema),
+      'Mod-Shift-z': PM.redo
     };
     if (boldMark) keymapEntries['Mod-b'] = PM.toggleMark(boldMark);
     if (italicMark) keymapEntries['Mod-i'] = PM.toggleMark(italicMark);
+
+    // v3 block-level keymap (Tab/Shift-Tab/Enter/Mod-Enter/Backspace) —
+    // layered above the universal entries so block navigation wins
+    // where it overlaps.
+    if (sp && typeof sp.buildV3Keymap === 'function') {
+      const v3Keys = sp.buildV3Keymap(schema);
+      if (v3Keys) Object.assign(keymapEntries, v3Keys);
+    }
 
     const plugins = [
       PM.history(),
@@ -186,35 +159,23 @@
       PM.keymap(PM.baseKeymap),
     ].concat(opts.plugins || []);
 
-    // Mark plugins: context-menu, annotations, tags, revision flags, page-breaks.
-    // These are no-ops on atom nodes (sceneFrame) in F1 but become active in F2+.
-    const sp = Rga.DocTypes && Rga.DocTypes.screenplay;
-    if (sp && sp.contextMenuPlugin) {
-      plugins.push(sp.contextMenuPlugin());
-    }
-    if (sp && sp.annotationsPlugin) {
-      plugins.push(sp.annotationsPlugin());
-    }
-    if (sp && sp.tagsPlugin) {
-      plugins.push(sp.tagsPlugin());
-    }
-    if (sp && sp.revisionFlagsPlugin) {
-      plugins.push(sp.revisionFlagsPlugin());
-    }
-    if (sp && sp.paginatorRendererPlugin) {
-      const pr = sp.paginatorRendererPlugin(function() {
-        const doc = Rga.TabManager && Rga.TabManager.activeDoc && Rga.TabManager.activeDoc();
-        return doc && doc.settings ? doc.settings.pageSetup : null;
-      });
-      if (pr) plugins.push(pr);
+    // Cross-schema mark plugins (annotations / tags / revisionFlags /
+    // context-menu) — schema-agnostic; operate on PM marks directly.
+    if (sp && sp.contextMenuPlugin)     plugins.push(sp.contextMenuPlugin());
+    if (sp && sp.annotationsPlugin)     plugins.push(sp.annotationsPlugin());
+    if (sp && sp.tagsPlugin)            plugins.push(sp.tagsPlugin());
+    if (sp && sp.revisionFlagsPlugin)   plugins.push(sp.revisionFlagsPlugin());
+
+    // Scene-index plugin: emits scene-number NodeDecorations + page-break
+    // widget decorations (Flow-view page markers) from the canonical PM doc.
+    if (sp && typeof sp.buildV3ScenePlugins === 'function') {
+      plugins.push.apply(plugins, sp.buildV3ScenePlugins());
     }
 
-    const docType = Rga.DocTypes.get(documentType);
     const nodeViews = {};
-    if (typeof docType.sceneFrameNodeViewFactory === 'function') {
-      nodeViews.sceneFrame = docType.sceneFrameNodeViewFactory();
-    } else if (typeof docType.placeholderNodeViewFactory === 'function') {
-      nodeViews.sceneFrame = docType.placeholderNodeViewFactory();
+    if (sp && typeof sp.buildV3NodeViews === 'function') {
+      const v3Views = sp.buildV3NodeViews();
+      if (v3Views) Object.assign(nodeViews, v3Views);
     }
 
     const initialDoc = opts.initialDoc || emptyDoc(schema);
@@ -270,16 +231,36 @@
   }
 
   /**
-   * Create a fresh document (one empty paragraph) under the given schema.
+   * Create a fresh v3 document under the given schema:
+   *   doc → body → one default scene (sceneHeading INT./DAY +
+   *   empty action + CUT transition).
+   * The user lands inside a valid scene; the scene-toolbox and page
+   * markers are immediately wired.
    * @param {Schema} [schema]
    * @returns {Node}
    */
   function emptyDoc(schema) {
     schema = schema || activeSchema('screenplay');
+    if (!schema) return null;
+    const sp = Rga.DocTypes && Rga.DocTypes.screenplay;
+    const v3Commands = sp && sp.v3Commands;
+    let scene;
+    if (v3Commands && typeof v3Commands.makeEmptyScene === 'function') {
+      scene = v3Commands.makeEmptyScene(schema);
+    } else {
+      // Defensive — assemble the minimum valid scene by hand.
+      scene = schema.node('scene',
+        { id: 'scene-' + Date.now().toString(36), notes: '', revisionFlag: null,
+          metadata: { linkedScenes: [], references: [], production: {} } },
+        [
+          schema.node('sceneHeading', { setting: 'INT.', time: 'DAY', headingStyle: null }),
+          schema.node('action'),
+          schema.node('transition', { presetType: 'CUT' }, schema.text('CUT'))
+        ]
+      );
+    }
     return schema.node('doc', null, [
-      schema.node('body', null, [
-        schema.node('paragraph')
-      ])
+      schema.node('body', null, [scene])
     ]);
   }
 

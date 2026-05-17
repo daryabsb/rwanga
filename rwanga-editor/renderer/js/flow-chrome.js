@@ -26,16 +26,21 @@
     return Rga.ViewMode && Rga.ViewMode.get() === 'flow';
   }
 
-  // Collect every leaf-text "row-producing" element under the editor.
-  // We treat each contenteditable block, each outer paragraph/heading, and
-  // each slug/transition picker line inside the placeholder as line sources.
+  // Collect every "row-producing" element under the editor.
+  // Phase 9: v3 single-doc structure — scene chrome lives in
+  // .rga-scene-v3 NodeViews (heading + per-block children) plus the
+  // baseline outer body blocks (title strip, paragraphs, headings).
   function _collectRowElements(root) {
     if (!root) return [];
     const selectors = [
-      '.rga-scene-frame-placeholder-num',
-      '.rga-scene-frame-placeholder-slug',
-      '.rga-scene-block',
-      '.rga-scene-frame-placeholder-transition',
+      '.rga-scene-v3-num',
+      '.rga-scene-heading-v3',
+      '.rga-scene-v3-content .rga-block-action',
+      '.rga-scene-v3-content .rga-block-character',
+      '.rga-scene-v3-content .rga-block-parenthetical',
+      '.rga-scene-v3-content .rga-block-dialogue',
+      '.rga-scene-v3-content .rga-block-shot',
+      '.rga-scene-v3-content .rga-block-transition',
       // Outer body content:
       '.ProseMirror > .rga-title-strip',
       '.ProseMirror p',

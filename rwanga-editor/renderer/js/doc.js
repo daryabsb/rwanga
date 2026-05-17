@@ -145,16 +145,6 @@
     return parts[parts.length - 1] || handle;
   }
 
-  function getSchema(documentType) {
-    if (typeof window === 'undefined' || !window.Rga) return null;
-    const rga = window.Rga;
-    documentType = documentType || 'screenplay';
-    if (rga.Editor && typeof rga.Editor.activeSchema === 'function') {
-      return rga.Editor.activeSchema(documentType);
-    }
-    return null;
-  }
-
   /**
    * Serialize a doc to .rga JSON string.
    * doc.body must be a ProseMirror Node (has .toJSON()) or null.
@@ -174,73 +164,19 @@
     return JSON.stringify(fileObj, null, 2);
   }
 
-  function _migrateSceneLineLocations(node) {
-    if (!node || typeof node !== 'object') return node;
-    if (node.type === 'sceneLine' && node.attrs && node.attrs.location !== undefined) {
-      const locationText = node.attrs.location;
-      const newAttrs = {};
-      if (node.attrs.setting !== undefined) newAttrs.setting = node.attrs.setting;
-      if (node.attrs.time !== undefined) newAttrs.time = node.attrs.time;
-      const newContent = locationText ? [{ type: 'text', text: locationText }] : [];
-      return { type: 'sceneLine', attrs: newAttrs, content: newContent };
-    }
-    let out = node;
-    if (Array.isArray(node.content)) {
-      out = Object.assign({}, out, { content: node.content.map(_migrateSceneLineLocations) });
-    }
-    if (out.attrs && out.attrs.innerDoc) {
-      out = Object.assign({}, out, {
-        attrs: Object.assign({}, out.attrs, {
-          innerDoc: _migrateSceneLineLocations(out.attrs.innerDoc)
-        })
-      });
-    }
-    return out;
-  }
-
-  function _migrateScenesToFrames(node) {
-    if (!node || typeof node !== 'object') return node;
-    if (node.type === 'scene') {
-      const oldAttrs = node.attrs || {};
-      const migratedContent = Array.isArray(node.content)
-        ? node.content.map(_migrateSceneLineLocations)
-        : [];
-      return {
-        type: 'sceneFrame',
-        attrs: {
-          id:           oldAttrs.id           || null,
-          number:       oldAttrs.number       || null,
-          headingStyle: oldAttrs.headingStyle || null,
-          innerDoc: {
-            type: 'doc',
-            attrs: {
-              notes:        oldAttrs.notes        || '',
-              revisionFlag: oldAttrs.revisionFlag || null
-            },
-            content: migratedContent
-          }
-        }
-      };
-    }
-    if (Array.isArray(node.content)) {
-      return Object.assign({}, node, { content: node.content.map(_migrateScenesToFrames) });
-    }
-    return node;
-  }
-
-  // Phase 3 pipeline:
-  //   parsed (already JSON.parse'd, useSchemaV3 flag asserted by caller)
-  //   → Rga.Migrations.detectVersion / migrate (chains v1→v2→v3)
+  // The v3 deserialize pipeline:
+  //   parsed (JSON.parse'd file content)
+  //   → Rga.Migrations.detectVersion / migrate (chains v1.x → v2.x → v3)
   //   → Rga.DocTypes.detect (docType from file)
   //   → Rga.DocTypes.selectSchema (per-doctype config picks v3 schema)
   //   → schema.nodeFromJSON(parsed.body)
-  //   → returns the same in-memory Doc shape as the legacy path.
+  //   → returns the in-memory Doc object the rest of the app uses.
   //
   // Migration / schema / doc-type detection are intentionally decoupled:
   // migration knows nothing about schemas; schemas know nothing about
   // file versions; doc-type detection is independent. Future doc-types
-  // (e.g., stage play, TV episode template) plug in by registering their
-  // own selectSchema without touching this code.
+  // (stage play, TV episode template) register their own selectSchema
+  // without touching this code.
   function _deserializeV3(parsedIn, handle) {
     let parsed = parsedIn;
     if (Rga.Migrations && typeof Rga.Migrations.migrate === 'function') {
@@ -259,34 +195,7 @@
         throw new Error('Document body (v3) is invalid: ' + err.message);
       }
     }
-
-    // Doc shape mirrors the legacy path — same fields, just with a v3
-    // schema-rooted pmBody. Metadata / settings / registries pass through.
-    const metadata = parsed.metadata || {};
-    if (!metadata.production_type) metadata.production_type = C.DEFAULT_PRODUCTION_TYPE;
-    const settings = parsed.settings || defaultSettings();
-    if (!settings.pageSetup) settings.pageSetup = defaultSettings().pageSetup;
-    if (!settings.vocabulary) settings.vocabulary = defaultSettings().vocabulary;
-    if (!settings.sceneHeadingStyle) settings.sceneHeadingStyle = 'twoLine';
-    if (!settings.units) settings.units = 'in';
-
-    return {
-      docId: nextDocId(),
-      handle: handle || null,
-      displayName: basenameFromHandle(handle) || 'Untitled.rga',
-      origin: handle ? 'disk' : 'untitled',
-      dirty: false,
-      lastSavedAt: null,
-      rgaVersion: parsed.rga_version || C.CURRENT_RGA_VERSION,
-      documentType: documentType,
-      metadata: metadata,
-      settings: settings,
-      tagRegistry: parsed.tag_registry || emptyTagRegistry(),
-      flagLog: parsed.flag_log || [],
-      exportSettings: parsed.export_settings || defaultExportSettings(),
-      runtime: parsed.runtime || defaultRuntime(),
-      body: pmBody
-    };
+    return _buildDocFromParsed(parsed, handle, pmBody);
   }
 
   /**
@@ -312,43 +221,46 @@
       throw new Error(`This .rga was created with a newer Rwanga (v${fileVersion}). Please update Rwanga to open it.`);
     }
 
-    // Phase 3: opt-in v3 pipeline. When the file carries
-    // metadata.useSchemaV3: true, we route through the new pipeline —
-    // migrate → DocTypes.detect → DocTypes.selectSchema → nodeFromJSON.
-    // Files without the flag keep the existing legacy path verbatim,
-    // so no v2 doc in the wild changes behaviour.
-    const wantsV3 = !!(parsed.metadata && parsed.metadata.useSchemaV3 === true);
-    if (wantsV3 && Rga.Migrations && Rga.DocTypes && typeof Rga.DocTypes.selectSchema === 'function') {
-      return _deserializeV3(parsed, handle);
-    }
-
-    const documentType = (opts && opts.documentType) || (parsed && parsed.document_type) || 'screenplay';
-    const schema = (opts && opts.schema) || getSchema(documentType);
-    let pmBody = null;
-
-    const isV2 = fileVersion && String(fileVersion).startsWith('2.');
-
-    if (isV2 && parsed.body && schema) {
-      try {
-        const sceneMigrated = _migrateScenesToFrames(parsed.body);
-        const fullyMigrated = _migrateSceneLineLocations(sceneMigrated);
-        pmBody = schema.nodeFromJSON(fullyMigrated);
-      } catch (err) {
-        throw new Error('Document body is invalid: ' + err.message);
+    // Caller-supplied schema escape hatch — bypass the DocTypes
+    // registry entirely. Used by unit tests that build minimal schemas
+    // and by future non-screenplay doc-types that don't need migration.
+    // This is the one explicit compatibility layer kept after Phase 9
+    // retirement (Rule 12: keep only what's genuinely needed).
+    if (opts && opts.schema) {
+      let pmBody = null;
+      if (parsed.body) {
+        try { pmBody = opts.schema.nodeFromJSON(parsed.body); }
+        catch (err) { throw new Error('Document body is invalid: ' + err.message); }
       }
+      return _buildDocFromParsed(parsed, handle, pmBody);
     }
-    // v1.x files: pmBody stays null; tab-manager will supply emptyDoc()
 
-    // Migrate v1.x metadata fields
+    // Phase 9: v3 is the only pipeline. Every screenplay file flows
+    // through Migrations.migrate (v1.x / v2.x / v3 → latest v3) and
+    // then nodeFromJSON against the v3 schema. selectSchema returns
+    // a v3 schema for every registered doc-type that has one.
+    if (Rga.Migrations && typeof Rga.Migrations.migrate === 'function'
+        && Rga.DocTypes && typeof Rga.DocTypes.selectSchema === 'function') {
+      const probeSchema = Rga.DocTypes.selectSchema(parsed);
+      if (probeSchema) return _deserializeV3(parsed, handle);
+    }
+
+    // No schema route available — return a doc with body=null. v1.x files
+    // arrive here too (they have no PM body to reconstruct); tab-manager
+    // supplies an emptyDoc on mount.
+    return _buildDocFromParsed(parsed, handle, null);
+  }
+
+  // Shared doc-shape assembly — same fields whether the body came from
+  // the v3 pipeline, an explicit caller schema, or null (v1.x carrier files).
+  function _buildDocFromParsed(parsed, handle, pmBody) {
     const metadata = parsed.metadata || {};
     if (!metadata.production_type) metadata.production_type = C.DEFAULT_PRODUCTION_TYPE;
-
     const settings = parsed.settings || defaultSettings();
-    if (!settings.pageSetup) settings.pageSetup = defaultSettings().pageSetup;
-    if (!settings.vocabulary) settings.vocabulary = defaultSettings().vocabulary;
+    if (!settings.pageSetup)         settings.pageSetup       = defaultSettings().pageSetup;
+    if (!settings.vocabulary)        settings.vocabulary      = defaultSettings().vocabulary;
     if (!settings.sceneHeadingStyle) settings.sceneHeadingStyle = 'twoLine';
-    if (!settings.units) settings.units = 'in';
-
+    if (!settings.units)             settings.units           = 'in';
     return {
       docId: nextDocId(),
       handle: handle || null,
@@ -358,13 +270,13 @@
       lastSavedAt: null,
       rgaVersion: C.CURRENT_RGA_VERSION,
       documentType: parsed.document_type || 'screenplay',
-      metadata,
+      metadata: metadata,
       settings: settings,
       tagRegistry: parsed.tag_registry || emptyTagRegistry(),
       flagLog: parsed.flag_log || [],
       exportSettings: parsed.export_settings || defaultExportSettings(),
       runtime: parsed.runtime || defaultRuntime(),
-      body: pmBody,
+      body: pmBody
     };
   }
 
@@ -450,8 +362,6 @@
     _isNewerThanSupported: isNewerThanSupported,
     _basenameFromHandle: basenameFromHandle,
     _registryKey,
-    _migrateScenesToFrames: _migrateScenesToFrames,
-    _migrateSceneLineLocations: _migrateSceneLineLocations,
   };
 
   if (typeof module !== 'undefined' && module.exports) {

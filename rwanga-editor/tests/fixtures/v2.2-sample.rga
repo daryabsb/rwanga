@@ -2,14 +2,14 @@
   "rga_version": "2.0",
   "document_type": "screenplay",
   "metadata": {
-    "title": "The Coffee Order",
-    "author": "Darya",
-    "created": "2026-05-13T10:00:00Z",
-    "modified": "2026-05-15T14:57:02.380Z",
+    "title": "",
+    "author": "",
+    "created": "2026-05-15T15:51:45.486Z",
+    "modified": "2026-05-15T15:58:55.740Z",
     "version": 1,
     "revision_notes": "",
     "language": "en",
-    "production_type": "short",
+    "production_type": "untyped",
     "genre": "",
     "logline": ""
   },
@@ -50,18 +50,6 @@
     "type": "doc",
     "content": [
       {
-        "type": "titleStrip",
-        "attrs": {
-          "removable": true
-        },
-        "content": [
-          {
-            "type": "text",
-            "text": "The Coffee Order"
-          }
-        ]
-      },
-      {
         "type": "body",
         "content": [
           {
@@ -69,7 +57,7 @@
             "content": [
               {
                 "type": "text",
-                "text": "Indeed, this is a normal paragraph and feels like it."
+                "text": "This is a TITLE"
               }
             ]
           },
@@ -78,60 +66,33 @@
             "content": [
               {
                 "type": "text",
-                "text": "fire."
-              }
-            ]
-          },
-          {
-            "type": "paragraph",
-            "content": [
-              {
-                "type": "text",
-                "text": "[97]"
-              }
-            ]
-          },
-          {
-            "type": "paragraph",
-            "content": [
-              {
-                "type": "text",
-                "text": ">> ئێستا لەناکاو هەموو شتێک مانا ئەدات"
-              }
-            ]
-          },
-          {
-            "type": "paragraph",
-            "content": [
-              {
-                "type": "text",
-                "text": "C1: Now suddenly everything makes sense. That gardener in Scene 2 — he was talking all along — describing the same events. The audience now knows: what \"watched you\" from Scene 2 onward — was Nali, was Nali's fear, was Nali's world — but in imagination. The entire film was Nali's imagination to see what would happen if that event happ"
+                "text": "this is a normal text line"
               }
             ]
           },
           {
             "type": "sceneFrame",
             "attrs": {
-              "id": "scene-7f2a",
+              "id": "scene-mp73nzdd",
               "number": 1,
               "headingStyle": null,
               "innerDoc": {
                 "type": "doc",
                 "attrs": {
-                  "notes": "Establish mood. Camera stays wide.",
+                  "notes": "",
                   "revisionFlag": null
                 },
                 "content": [
                   {
                     "type": "sceneLine",
                     "attrs": {
-                      "setting": "INT.",
-                      "time": "NIGHT"
+                      "setting": "INT./EXT.",
+                      "time": "CONTINUOUS"
                     },
                     "content": [
                       {
                         "type": "text",
-                        "text": "CAFÉ"
+                        "text": "Garde"
                       }
                     ]
                   },
@@ -140,24 +101,7 @@
                     "content": [
                       {
                         "type": "text",
-                        "text": "A dimly lit café. Rain streaks the windows. "
-                      },
-                      {
-                        "type": "text",
-                        "text": "Sarah",
-                        "marks": [
-                          {
-                            "type": "tag",
-                            "attrs": {
-                              "tagType": "character",
-                              "entityId": "ent-sarah"
-                            }
-                          }
-                        ]
-                      },
-                      {
-                        "type": "text",
-                        "text": " sits alone."
+                        "text": "this is an action line"
                       }
                     ]
                   },
@@ -166,7 +110,7 @@
                     "content": [
                       {
                         "type": "text",
-                        "text": "SARAH"
+                        "text": "NALI"
                       }
                     ]
                   },
@@ -175,26 +119,35 @@
                     "content": [
                       {
                         "type": "text",
-                        "text": "I've been waiting for an hour.",
-                        "marks": [
-                          {
-                            "type": "revisionFlag",
-                            "attrs": {
-                              "reason": "Punchier?",
-                              "status": "open",
-                              "createdAt": null
-                            }
-                          }
-                        ]
+                        "text": "This is a dialogue"
                       }
                     ]
+                  },
+                  {
+                    "type": "shot",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "WIDE SHOT: Nali is tired, his face is red"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "transition",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "CUT"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "action",
+                    "content": []
                   }
                 ]
               }
             }
-          },
-          {
-            "type": "paragraph"
           },
           {
             "type": "paragraph"
@@ -204,14 +157,7 @@
     ]
   },
   "tag_registry": {
-    "characters": [
-      {
-        "id": "ent-sarah",
-        "name": "SARAH",
-        "color": "#4FC1FF",
-        "notes": ""
-      }
-    ],
+    "characters": [],
     "props": [],
     "wardrobe": [],
     "locations": [],
@@ -230,7 +176,7 @@
   },
   "runtime": {
     "last_cursor": null,
-    "active_scene_id": "scene-7f2a",
+    "active_scene_id": null,
     "ui_state": {}
   }
 }

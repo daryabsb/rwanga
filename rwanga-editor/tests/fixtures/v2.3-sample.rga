@@ -1,0 +1,188 @@
+{
+  "rga_version": "2.0",
+  "document_type": "screenplay",
+  "metadata": {
+    "title": "",
+    "author": "",
+    "created": "2026-05-15T16:47:19.490Z",
+    "modified": "2026-05-15T16:49:37.972Z",
+    "version": 1,
+    "revision_notes": "",
+    "language": "en",
+    "production_type": "untyped",
+    "genre": "",
+    "logline": ""
+  },
+  "settings": {
+    "theme": "dark",
+    "font_size": 12,
+    "font_family": "Courier Prime",
+    "show_scene_numbers": true,
+    "page_size": "Letter",
+    "pageSetup": {
+      "paperSize": "Letter",
+      "margins": {
+        "top": 1,
+        "right": 1,
+        "bottom": 1,
+        "left": 1.5
+      }
+    },
+    "vocabulary": {
+      "settings": [
+        "INT.",
+        "EXT.",
+        "INT./EXT.",
+        "EXT./INT."
+      ],
+      "times": [
+        "DAY",
+        "NIGHT",
+        "CONTINUOUS",
+        "DUSK",
+        "DAWN"
+      ],
+      "sceneWord": "SCENE"
+    },
+    "sceneHeadingStyle": "twoLine"
+  },
+  "body": {
+    "type": "doc",
+    "content": [
+      {
+        "type": "body",
+        "content": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "This is the title"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "This is a normal paragraph."
+              }
+            ]
+          },
+          {
+            "type": "sceneFrame",
+            "attrs": {
+              "id": "scene-mp75icg2",
+              "number": 1,
+              "headingStyle": null,
+              "innerDoc": {
+                "type": "doc",
+                "attrs": {
+                  "notes": "",
+                  "revisionFlag": null
+                },
+                "content": [
+                  {
+                    "type": "sceneLine",
+                    "attrs": {
+                      "setting": "EXT.",
+                      "time": "CONTINUOUS"
+                    },
+                    "content": []
+                  },
+                  {
+                    "type": "action",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "this is an action line, where it needs to be done."
+                      }
+                    ]
+                  },
+                  {
+                    "type": "character",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Nali"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "dialogue",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "What is going on?"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "character",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Gesh"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "dialogue",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "What do you mean?"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "shot",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "CLOSE-UP: Nali listens to Gesha on the phone."
+                      }
+                    ]
+                  },
+                  {
+                    "type": "transition",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "MIX"
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "tag_registry": {
+    "characters": [],
+    "props": [],
+    "wardrobe": [],
+    "locations": [],
+    "sfx": [],
+    "vfx": [],
+    "vehicles": [],
+    "animals": [],
+    "custom": []
+  },
+  "flag_log": [],
+  "export_settings": {
+    "branding": "rwanga",
+    "letterhead_url": null,
+    "include_scene_numbers": true,
+    "include_revision_marks": false
+  },
+  "runtime": {
+    "last_cursor": null,
+    "active_scene_id": null,
+    "ui_state": {}
+  }
+}

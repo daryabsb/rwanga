@@ -5,9 +5,9 @@
   const Rga = window.Rga = window.Rga || {};
 
   Rga.Constants = {
-    CURRENT_RGA_VERSION: '2.0',
-    // v3.0 is readable via the Phase 3 pipeline (opt-in metadata.useSchemaV3).
-    // CURRENT_RGA_VERSION stays at 2.0 — Phase 9 cleanup bumps the writer.
+    CURRENT_RGA_VERSION: '3.0',
+    // Older versions (1.x, 2.x) load through the migration chain in
+    // Rga.Migrations.migrate and are saved back as v3.
     SUPPORTED_RGA_VERSIONS: ['1.0', '1.1', '2.0', '3.0'],
 
     PRODUCTION_TYPES: [
