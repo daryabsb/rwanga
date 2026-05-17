@@ -362,6 +362,187 @@ test('G6: every localStorage key touched by renderer JS is either OWNED or LEGAC
 // G7 — restore path must exist for owned keys (Slice 4 §C)
 // ----------------------------------------------------------------
 
+// ----------------------------------------------------------------
+// Session-Boundary registry — referenced by G8 / G9 / G10 (Slice 7).
+// Mirror of Rga.SessionBoundary._MANIFEST. Kept in sync by hand;
+// G8 below also asserts that the mirror matches the JS source so the
+// two cannot drift in opposite directions silently.
+// ----------------------------------------------------------------
+const SESSION_BOUNDARY = {
+  ScriptSession: {
+    semantic: 'writer-context',
+    module:   'renderer/js/shell/script-session.js',
+    fields:   [
+      'activeScript', 'currentScene', 'currentPage', 'currentView',
+      'currentSelection', 'openPanels', 'activePanel'
+    ]
+  },
+  ScriptMetrics: {
+    semantic: 'derived-analytics',
+    module:   'renderer/js/shell/script-metrics.js',
+    fields:   [
+      'wordCount', 'currentBlockType',
+      'dialogueWords', 'actionWords', 'sceneCount', 'estimatedRuntime'
+    ]
+  },
+  ViewManager: {
+    semantic: 'view-mode',
+    module:   'renderer/js/framework/view-manager.js',
+    fields:   ['current']
+  },
+  WorkspaceState: {
+    semantic: 'workspace-persistence',
+    module:   'renderer/js/shell/workspace-state.js',
+    fields:   ['sidebar', 'studioPanel', 'inspector', 'titleBar', 'statusBar']
+  }
+};
+
+// ----------------------------------------------------------------
+// G8 — ScriptSession snapshot shape stays writer-context-only
+// ----------------------------------------------------------------
+
+test('G8: Rga.ScriptSession snapshot exposes EXACTLY the SessionBoundary writer-context fields', () => {
+  // Source audit on the live module: scan EMPTY_SNAPSHOT for the
+  // key set and assert it matches SessionBoundary.ScriptSession.fields.
+  // A future contributor adding e.g. `wordCount: null` to
+  // EMPTY_SNAPSHOT fails this guard with a clear pointer to
+  // Rga.ScriptMetrics.
+  const src = stripComments(readText(path.join(REPO, 'renderer/js/shell/script-session.js')));
+  const m = src.match(/EMPTY_SNAPSHOT\s*=\s*\{([\s\S]*?)\}/);
+  assert.ok(m, 'script-session.js must declare EMPTY_SNAPSHOT');
+  const body = m[1];
+  // Extract field names: lines like `  activeScript: null,` → 'activeScript'.
+  const fieldMatches = body.match(/^\s*([A-Za-z_][A-Za-z0-9_]*)\s*:/gm) || [];
+  const found = fieldMatches.map(function(s) { return s.replace(/[\s:]/g, ''); }).sort();
+  const expected = SESSION_BOUNDARY.ScriptSession.fields.slice().sort();
+  assert.deepEqual(found, expected,
+    'G8 — Rga.ScriptSession.EMPTY_SNAPSHOT must contain EXACTLY the SessionBoundary writer-context fields.\n' +
+    '  expected: ' + expected.join(', ') + '\n' +
+    '  found:    ' + found.join(', ') + '\n' +
+    'If you need a new field, decide its OWNER (Rga.SessionBoundary) and put it on the right snapshot. ' +
+    'Analytics fields belong on Rga.ScriptMetrics.');
+});
+
+// ----------------------------------------------------------------
+// G9 — ScriptMetrics snapshot stays derived-analytics-only
+// ----------------------------------------------------------------
+
+test('G9: Rga.ScriptMetrics get() snapshot exposes EXACTLY the SessionBoundary analytics fields', () => {
+  // Source-level: scan get()'s returned object literal and the
+  // RESERVED constant; the union must match SessionBoundary.fields.
+  // (We don't execute the module here to avoid JSDOM setup; the
+  // boundary tests in ownership-stab-slice7.test.js do that.)
+  const src = stripComments(readText(path.join(REPO, 'renderer/js/shell/script-metrics.js')));
+  // Live fields: appear in `const snap = { wordCount: ..., currentBlockType: ... };`
+  const liveMatch = src.match(/const\s+snap\s*=\s*\{([\s\S]*?)\}/);
+  assert.ok(liveMatch, 'script-metrics.js must declare a `const snap = { ... }` literal in get()');
+  const liveBody = liveMatch[1];
+  const liveFields = (liveBody.match(/^\s*([A-Za-z_][A-Za-z0-9_]*)\s*:/gm) || [])
+    .map(function(s) { return s.replace(/[\s:]/g, ''); });
+  // Reserved fields: appear in `const RESERVED = ['...', '...', ...];`
+  const resMatch = src.match(/const\s+RESERVED\s*=\s*\[([\s\S]*?)\]/);
+  assert.ok(resMatch, 'script-metrics.js must declare a RESERVED array');
+  const resFields = (resMatch[1].match(/['"]([A-Za-z_][A-Za-z0-9_]*)['"]/g) || [])
+    .map(function(s) { return s.replace(/['"]/g, ''); });
+  const found = liveFields.concat(resFields).sort();
+  const expected = SESSION_BOUNDARY.ScriptMetrics.fields.slice().sort();
+  assert.deepEqual(found, expected,
+    'G9 — Rga.ScriptMetrics get() + RESERVED must contain EXACTLY the SessionBoundary analytics fields.\n' +
+    '  expected: ' + expected.join(', ') + '\n' +
+    '  found:    ' + found.join(', ') + '\n' +
+    'If you need a new field, decide its OWNER (Rga.SessionBoundary). ' +
+    'Writer-context fields belong on Rga.ScriptSession.');
+});
+
+// ----------------------------------------------------------------
+// G10 — consumers may not read fields from the wrong owner
+// ----------------------------------------------------------------
+
+test('G10: no shell-js consumer reads an analytics field from Rga.ScriptSession.get()', () => {
+  // Source audit. Walk shell-js, skipping ScriptSession's own module
+  // (it owns its snapshot shape; this guard targets CONSUMERS).
+  // Pattern: `<ident>.<field>` where <ident> resolves to a
+  // ScriptSession.get() snapshot. We use a generous regex that catches
+  // the common patterns:
+  //   • Rga.ScriptSession.get().<analyticsField>
+  //   • const ss = Rga.ScriptSession.get(); ... ss.<analyticsField>
+  // The second pattern needs flow analysis; we approximate by matching
+  // the FIELD NAME as a property access within a file that ALSO
+  // contains a ScriptSession.get() call.
+  const files = shellJsFiles().filter(function(f) {
+    return relativeFromRepo(f) !== 'renderer/js/shell/script-session.js' &&
+           relativeFromRepo(f) !== 'renderer/js/shell/script-metrics.js' &&
+           relativeFromRepo(f) !== 'renderer/js/shell/session-boundary.js';
+  });
+  const offenders = [];
+  const analyticsFields = SESSION_BOUNDARY.ScriptMetrics.fields;
+  files.forEach(function(file) {
+    const src = stripComments(readText(file));
+    // Direct pattern: Rga.ScriptSession.get().<analyticsField>
+    analyticsFields.forEach(function(f) {
+      const direct = new RegExp(
+        'Rga\\.ScriptSession\\.get\\(\\)\\.' + f + '\\b', 'g');
+      if (direct.test(src)) {
+        offenders.push(relativeFromRepo(file) +
+          ' reads "' + f + '" via Rga.ScriptSession.get() — that field is owned by Rga.ScriptMetrics');
+      }
+    });
+    // Indirect pattern: file binds ScriptSession.get() to a local
+    // variable, then accesses an analytics field on it. We catch the
+    // most common shape: `<var>.<analyticsField>` where the file
+    // also has a `ScriptSession.get()` call AND no `ScriptMetrics.get()`
+    // call. Conservative — only fires when we're confident the field
+    // access is on a ScriptSession snapshot.
+    const hasSessionGet = /Rga\.ScriptSession\.get\s*\(/.test(src);
+    const hasMetricsGet = /Rga\.ScriptMetrics\.get\s*\(/.test(src);
+    if (hasSessionGet && !hasMetricsGet) {
+      analyticsFields.forEach(function(f) {
+        // Look for `<ident>.<field>` patterns (not preceded by `.`).
+        const re = new RegExp('(?:^|[^.\\w])([A-Za-z_][A-Za-z0-9_]*)\\.' + f + '\\b', 'g');
+        let m;
+        while ((m = re.exec(src))) {
+          // Skip the ScriptSession.foo / ScriptMetrics.foo patterns
+          // (they're API namespace lookups, not field reads).
+          if (m[1] === 'ScriptSession' || m[1] === 'ScriptMetrics' ||
+              m[1] === 'Rga' || m[1] === 'Shell' ||
+              m[1] === 'Object' || m[1] === 'Array') continue;
+          offenders.push(relativeFromRepo(file) +
+            ' contains "' + m[1] + '.' + f + '" while reading ScriptSession.get() — ' +
+            'likely a ScriptSession-snapshot consumer reading an analytics field. ' +
+            'Read it via Rga.ScriptMetrics.get() instead.');
+        }
+      });
+    }
+  });
+  assert.deepEqual(offenders, [],
+    'G10 violations:\n  - ' + offenders.join('\n  - ') + '\n' +
+    'Consumers must read each field from its SessionBoundary-declared owner. ' +
+    'Analytics fields → Rga.ScriptMetrics; writer-context fields → Rga.ScriptSession.');
+});
+
+test('G10 (reverse): no shell-js consumer reads a writer-context field from Rga.ScriptMetrics.get()', () => {
+  const files = shellJsFiles().filter(function(f) {
+    return relativeFromRepo(f) !== 'renderer/js/shell/script-session.js' &&
+           relativeFromRepo(f) !== 'renderer/js/shell/script-metrics.js' &&
+           relativeFromRepo(f) !== 'renderer/js/shell/session-boundary.js';
+  });
+  const offenders = [];
+  const writerFields = SESSION_BOUNDARY.ScriptSession.fields;
+  files.forEach(function(file) {
+    const src = stripComments(readText(file));
+    writerFields.forEach(function(f) {
+      const direct = new RegExp(
+        'Rga\\.ScriptMetrics\\.get\\(\\)\\.' + f + '\\b', 'g');
+      if (direct.test(src)) {
+        offenders.push(relativeFromRepo(file) +
+          ' reads "' + f + '" via Rga.ScriptMetrics.get() — that field is owned by Rga.ScriptSession');
+      }
+    });
+  });
+  assert.deepEqual(offenders, [],
+    'G10 reverse violations:\n  - ' + offenders.join('\n  - '));
+});
+
 test('G7: every owned key has a corresponding restore (getItem) call in its restoreIn module', () => {
   // A persistence key is only useful if SOMETHING reads it back on
   // boot. This guard scans each registered key's restoreIn module
