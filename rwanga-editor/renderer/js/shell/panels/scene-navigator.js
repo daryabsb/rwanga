@@ -37,7 +37,7 @@
   const _controller = {
     id: 'sceneNavigator',
     label: 'Scenes',
-    icon: '📋',
+    icon: 'clapperboard',
     shortcut: 'Cmd-Shift-S',
     available: true,
     mount: function(container) {
