@@ -29,7 +29,42 @@
     // title bar surface, so the title-bar module manages them.
     // Idempotent — safe to call multiple times (handlers added once).
     _wireWindowControls();
+    // Studio Shell Recovery — Workstream A5: double-click on the
+    // drag region → maximize / restore. Same IPC bridge as the
+    // window-control button; no new transport.
+    _wireDoubleClickMaximize();
     return true;
+  }
+
+  // Studio Shell Recovery — Workstream A5: double-click the title
+  // bar's drag surface → window.rwanga.window.maximize() (the IPC
+  // handler in electron/bridge/window-controls.js toggles maximize/
+  // unmaximize on each call, so a second double-click restores).
+  //
+  // The dblclick listener is on the titlebar root, but we must not
+  // fire when the user double-clicks an interactive child (a window
+  // control, theme toggle, avatar, menu item — all already declared
+  // as no-drag islands). Those children handle their own clicks;
+  // the dblclick path is reserved for the drag surface itself.
+  function _wireDoubleClickMaximize() {
+    if (typeof document === 'undefined') return;
+    const titlebar = document.getElementById('rga-shell-titlebar');
+    if (!titlebar || titlebar.dataset.dblclickWired) return;
+    titlebar.dataset.dblclickWired = '1';
+    titlebar.addEventListener('dblclick', function(e) {
+      // No-drag island? Ignore — the child owns the interaction.
+      if (e.target.closest(
+        '.rga-shell-window-control,' +
+        '.rga-shell-titlebar-action,' +
+        '.rga-shell-titlebar-avatar-placeholder,' +
+        '.rga-shell-menubar-item,' +
+        'button, input, select'
+      )) return;
+      if (typeof window !== 'undefined' && window.rwanga && window.rwanga.window &&
+          typeof window.rwanga.window.maximize === 'function') {
+        window.rwanga.window.maximize();
+      }
+    });
   }
 
   function _wireWindowControls() {
