@@ -534,6 +534,17 @@
 }
 .rga-shell-titlebar-script-name {
   color: var(--text-primary, #d4d4d4);
+  /* §B Shell Final Polish — standard application-title behavior:
+     single line only, truncate with ellipsis when the script name
+     is longer than the available center zone. min-width: 0 lets
+     the flex child shrink below its content size so ellipsis can
+     engage; the full title is exposed via the `title` attribute set
+     by Rga.Shell.TitleBar.refresh (hover tooltip). */
+  min-width: 0;
+  max-width: 60ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .rga-shell-titlebar-dirty {
   color: var(--accent-warning, #cca700);
@@ -788,7 +799,8 @@
 }
 .rga-shell-toolbar-sep {
   width: 1px;
-  height: 18px;
+  /* §C Shell Final Polish — separator proportional to bumped buttons. */
+  height: 20px;
   align-self: center;
   margin: 0 6px;
   background: var(--border-subtle, rgba(128, 128, 128, 0.18));
@@ -802,9 +814,12 @@
   border-radius: var(--radius-md, 4px);
   color: var(--text-secondary, #9a9a9a);
   font-family: var(--font-ui, system-ui, sans-serif);
-  font-size: 13px;
-  width: 28px;
-  height: 28px;
+  /* §C Shell Final Polish — small visibility bump: 13px → 14px glyph,
+     28×28 → 30×30 button. Toolbar height (36px) preserved — 30px
+     buttons leave 3px breathing room top + bottom. */
+  font-size: 14px;
+  width: 30px;
+  height: 30px;
   align-self: center;
   display: inline-flex;
   align-items: center;
@@ -920,7 +935,10 @@
 .rga-shell-toolbar-btn--text {
   width: auto;
   padding: 0 10px;
-  font-size: 12px;
+  /* §C Shell Final Polish — text-label variant bumped 12px → 13px to
+     match the +1px glyph bump on icon buttons (Block ▾, + Scene, Note,
+     Flag, Undo, Redo, Screenplay/Text). */
+  font-size: 13px;
   letter-spacing: 0.02em;
 }
 

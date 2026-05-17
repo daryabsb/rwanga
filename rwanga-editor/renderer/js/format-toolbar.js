@@ -225,68 +225,13 @@
       if (!mt) return;
       btn.classList.toggle('active', _markActive(state, mt));
     });
-    // Legacy .format-btn selector path — passive after §D1 (no
-    // matching DOM in shipping app), kept for any out-of-tree fixtures.
-    toolbar.querySelectorAll('.format-btn[data-mark]').forEach(function(btn) {
-      const name = btn.dataset.mark;
-      const mt = schema.marks[name];
-      if (!mt) return;
-      btn.classList.toggle('active', _markActive(state, mt));
-    });
     // Color swatches reflect current selection's color value, if any.
-    // §D1 — the Row 3 toolbar emits a new swatch id.
     const colorAttrs = _markAttrs(state, schema.marks.color);
-    const sw = document.getElementById('rga-shell-toolbar-color-swatch') ||
-               document.getElementById('format-color-swatch');
+    const sw = document.getElementById('rga-shell-toolbar-color-swatch');
     if (sw) sw.style.background = (colorAttrs && colorAttrs.value) || 'transparent';
     const hlAttrs = _markAttrs(state, schema.marks.highlight);
-    const hl = document.getElementById('rga-shell-toolbar-highlight-icon') ||
-               document.getElementById('format-highlight-icon');
+    const hl = document.getElementById('rga-shell-toolbar-highlight-icon');
     if (hl) hl.style.background = (hlAttrs && hlAttrs.value) || 'transparent';
-    // Block-type select reflects the focused inner block
-    refreshBlockTypeSelect();
-    // Scene toolbox enabled only when in a scene frame
-    refreshSceneToolboxState();
-  }
-
-  // ============================================================
-  // Scene toolbox state
-  // ============================================================
-  // Phase 9: v3 is a single PM doc with structural scene nodes. The
-  // toolbox stays enabled while the editor has any scenes (the cursor
-  // is always inside a scene by construction — emptyDoc seeds one).
-  // The legacy block-type dropdown (action / character / dialogue) is
-  // driven from the keyboard via Tab cycle (v3-keymap.js) — no DOM
-  // wiring needed here.
-  function refreshSceneToolboxState() {
-    const tb = document.getElementById('scene-toolbox');
-    if (!tb) return;
-    const view = _view();
-    const hasScene = !!(view && view.state && _docHasScene(view.state.doc));
-    tb.classList.toggle('disabled', !hasScene);
-  }
-
-  function _docHasScene(doc) {
-    if (!doc || typeof doc.descendants !== 'function') return false;
-    let found = false;
-    doc.descendants(function(n) {
-      if (found) return false;
-      if (n.type && n.type.name === 'scene') { found = true; return false; }
-      return true;
-    });
-    return found;
-  }
-
-  function refreshBlockTypeSelect() {
-    const select = document.getElementById('format-block-type');
-    if (!select) return;
-    // v3: block-type is reflected from the current selection's enclosing
-    // body block (action / character / etc.). Look up via $from.parent.
-    const view = _view();
-    if (!view || !view.state) { select.value = ''; return; }
-    const $from = view.state.selection.$from;
-    const parent = $from && $from.parent;
-    select.value = (parent && parent.type && parent.type.name) || '';
   }
 
   // ============================================================
@@ -429,11 +374,11 @@
   // Init
   // ============================================================
 
-  // §D2 — shared block-type dispatcher. Both the Scene Toolbox
-  // dropdown (#format-block-type) AND the Row 3 toolbar dropdown
-  // (#rga-shell-toolbar-blocktype) call this single helper, so the
-  // PM.setBlockType invocation lives in one place. Mission rule:
-  // "no duplicate command logic".
+  // §D2 — shared block-type dispatcher. The Row 3 toolbar dropdown
+  // (#rga-shell-toolbar-blocktype) calls this single helper, so the
+  // PM.setBlockType invocation lives in one place. (Scene Toolbox
+  // dropdown — the prior second consumer — was retired in §A Shell
+  // Final Polish; controls migrated entirely to Row 3.)
   function _dispatchBlockType(nodeTypeName) {
     if (!nodeTypeName) return;
     const view = _view();
@@ -602,16 +547,7 @@
       });
     }
 
-    // Block-type dropdown — Scene Toolbox surface. §D2 routes through
-    // the shared _dispatchBlockType helper (no duplicate command logic).
-    const sceneToolboxBlockType = document.getElementById('format-block-type');
-    if (sceneToolboxBlockType) {
-      sceneToolboxBlockType.addEventListener('change', function() {
-        _dispatchBlockType(sceneToolboxBlockType.value);
-      });
-    }
-
-    // §D2 — Row 3 block-type dropdown. Same shared dispatcher.
+    // §D2 — Row 3 block-type dropdown. Shared _dispatchBlockType helper.
     // Selection-aware: subscribes to Rga.ScriptMetrics so the
     // dropdown's value tracks the cursor's current block type.
     const row3BlockType = document.getElementById('rga-shell-toolbar-blocktype');
@@ -637,31 +573,16 @@
       }
     }
 
-    // Scene toolbox surfaces — kept intact for D1 (D3 may move them
-    // into Row 3). Annotation + Flag + Tag dropdown all live in
-    // #scene-toolbox today.
-    const annotationBtn = document.getElementById('format-btn-annotation');
-    if (annotationBtn) annotationBtn.addEventListener('click', openAnnotationDialog);
+    // Annotation dialog handlers (the dialog DOM lives elsewhere
+    // in the page; this only wires the dialog's internal OK/Cancel/
+    // color-grid buttons — the launch button is the Row 3 Note button
+    // routed via writing.note → openAnnotationDialog).
     wireAnnotationDialog();
 
-    const flagBtn = document.getElementById('format-btn-flag');
-    if (flagBtn) flagBtn.addEventListener('click', openFlagPopup);
-
-    const tagSel = document.getElementById('scene-tb-tag');
-    if (tagSel) {
-      tagSel.addEventListener('change', function() {
-        const t = tagSel.value;
-        if (!t) return;
-        applyTagFromSelection(t);
-        tagSel.value = '';
-      });
-    }
-
-    // §D3 — Row 3 Tag dropdown. Same handler (applyTagFromSelection)
-    // as the Scene Toolbox tag dropdown; the toolbar surface is a
-    // second consumer of the existing tagging logic. After applying,
-    // reset the dropdown to its placeholder option so re-selecting
-    // the same tag re-fires the change event.
+    // §D3 — Row 3 Tag dropdown. Calls applyTagFromSelection (the
+    // single tagging logic). After applying, reset the dropdown to
+    // its placeholder option so re-selecting the same tag re-fires
+    // the change event.
     const row3Tag = document.getElementById('rga-shell-toolbar-tag');
     if (row3Tag) {
       row3Tag.addEventListener('change', function() {

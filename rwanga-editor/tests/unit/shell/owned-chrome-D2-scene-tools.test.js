@@ -141,16 +141,13 @@ test('§D2: block-type dispatch is shared via the _dispatchBlockType helper (no 
   const src = read(FORMAT_TOOLBAR_JS);
   assert.ok(/function _dispatchBlockType\b/.test(src),
     'a single _dispatchBlockType helper must exist (no duplicate PM.setBlockType call sites)');
-  // Both the Scene Toolbox dropdown handler AND the Row 3 dropdown
-  // handler must call the shared helper.
-  const sceneToolboxHandler = src.match(/sceneToolboxBlockType\.addEventListener\([\s\S]{0,200}\}\);/);
-  assert.ok(sceneToolboxHandler, 'scene-toolbox block-type handler must exist');
-  assert.ok(/_dispatchBlockType\s*\(/.test(sceneToolboxHandler[0]),
-    'scene-toolbox dropdown change handler must call _dispatchBlockType');
+  // §A Shell Final Polish retired the Scene Toolbox, so only the
+  // Row 3 dropdown handler remains. The shared-helper contract still
+  // holds — it's now the single owner of PM.setBlockType dispatch.
   const row3Handler = src.match(/row3BlockType\.addEventListener\([\s\S]{0,200}\}\);/);
   assert.ok(row3Handler, 'Row 3 block-type handler must exist');
   assert.ok(/_dispatchBlockType\s*\(/.test(row3Handler[0]),
-    'Row 3 dropdown change handler must call the same _dispatchBlockType');
+    'Row 3 dropdown change handler must call _dispatchBlockType');
 });
 
 test('§D2: PM.setBlockType is invoked from exactly one site in format-toolbar.js (single owner)', () => {

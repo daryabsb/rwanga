@@ -134,18 +134,18 @@ test('§D3: Undo / Redo NOT re-registered in format-toolbar.js (consume the §A4
 // 5. Tag dispatch shared with Scene Toolbox (no duplicate logic)
 // ----------------------------------------------------------------
 
-test('§D3: Tag dispatch routes through the existing applyTagFromSelection (shared with Scene Toolbox)', () => {
+test('§D3: Tag dispatch routes through the existing applyTagFromSelection', () => {
   const src = read(FORMAT_TOOLBAR_JS);
-  // Both the scene-tb-tag handler AND the new rga-shell-toolbar-tag
-  // handler must call applyTagFromSelection.
-  const sceneToolbox = src.match(/scene-tb-tag[\s\S]{0,500}\}\);/);
-  const row3Tag      = src.match(/rga-shell-toolbar-tag[\s\S]{0,500}\}\);/);
-  assert.ok(sceneToolbox, 'scene-tb-tag handler must still exist');
-  assert.ok(row3Tag,      'rga-shell-toolbar-tag handler must exist');
-  assert.ok(/applyTagFromSelection/.test(sceneToolbox[0]),
-    'scene-toolbox tag handler must call applyTagFromSelection');
+  // §A Shell Final Polish retired the Scene Toolbox; only the Row 3
+  // tag dropdown remains. applyTagFromSelection is still the single
+  // logic owner — Row 3 routes through it.
+  const row3Tag = src.match(/rga-shell-toolbar-tag[\s\S]{0,500}\}\);/);
+  assert.ok(row3Tag, 'rga-shell-toolbar-tag handler must exist');
   assert.ok(/applyTagFromSelection/.test(row3Tag[0]),
-    'Row 3 tag handler must call the same applyTagFromSelection');
+    'Row 3 tag handler must call applyTagFromSelection');
+  // The single owner still exists in the file.
+  assert.ok(/function applyTagFromSelection\b/.test(src),
+    'applyTagFromSelection helper must still exist (single tagging logic owner)');
 });
 
 // ----------------------------------------------------------------

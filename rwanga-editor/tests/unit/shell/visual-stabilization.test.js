@@ -161,20 +161,16 @@ test('VS7 — current and selected row states render distinctly (separation inva
 
 // ----------------------------------------------------------------
 // T4 — Scene toolbox guards
+// RETIRED §A Shell Final Polish: #scene-toolbox surface was retired
+// (controls migrated to Row 3). VS8 (sticky avoidance) is moot —
+// no surface to anchor. Negative guard kept: nothing must
+// reintroduce a sticky toolbox rule.
 // ----------------------------------------------------------------
 
-test('VS8 — scene toolbox is no longer position: sticky (out of clipping flex flow)', () => {
+test('VS8 (retired) — no #scene-toolbox rule must reappear in editor CSS', () => {
   const css = readText(EDITOR_PM_CSS);
-  const body = ruleBody(css, /#scene-toolbox\.scene-toolbox-vertical/);
-  assert.ok(body, '#scene-toolbox.scene-toolbox-vertical rule must exist');
-  assert.ok(
-    /position\s*:\s*(absolute|fixed)/.test(body),
-    'toolbox must use position: absolute (option A) or fixed — option B (sticky + padding-right) is also allowed; ' +
-    'sticky alone clips the toolbox when sidebar+inspector squeeze the workspace. Got: ' + body.match(/position\s*:\s*\w+/)
-  );
-  // Either option must reserve right-side space on the editor container
-  // OR position the toolbox out of flow. Asserting position is enough
-  // for the option-A path that landed.
+  assert.equal(/#scene-toolbox\.scene-toolbox-vertical\s*\{/.test(css), false,
+    '#scene-toolbox.scene-toolbox-vertical rule must NOT be reintroduced — Scene Toolbox was retired in §A Shell Final Polish.');
 });
 
 // ----------------------------------------------------------------

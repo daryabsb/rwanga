@@ -142,13 +142,13 @@ test('Bundle 2 §B: writer-facing language only — no "Node" / "Document" / "Pr
 // CSS — hierarchy + Draft hide + tokens-only
 // ----------------------------------------------------------------
 
-test('Bundle 2 §B: CSS hides the breadcrumb in Draft view (parallel to format-toolbar / scene-toolbox)', () => {
+test('Bundle 2 §B: CSS hides the breadcrumb in Draft view (parallel to format-toolbar)', () => {
   const css = read(EDITOR_CSS);
-  // The Draft hide group covers format-toolbar, scene-toolbox AND
-  // rga-shell-breadcrumb together — they're all editor-area chrome
-  // that Draft strips.
+  // The Draft hide group covers format-toolbar AND rga-shell-
+  // breadcrumb together — both are editor-area chrome that Draft
+  // strips. (Scene Toolbox was retired in §A Shell Final Polish.)
   assert.ok(/body\.view-draft-active\s+#rga-shell-breadcrumb/.test(css),
-    'Draft view must hide #rga-shell-breadcrumb (CSS grouped with format-toolbar / scene-toolbox)');
+    'Draft view must hide #rga-shell-breadcrumb (CSS grouped with format-toolbar)');
 });
 
 test('Bundle 2 §B: visual hierarchy reads script → scene → heading (font-size ascends)', () => {

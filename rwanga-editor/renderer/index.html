@@ -280,37 +280,11 @@
           </div>
         </div>
 
-        <!-- Scene toolbox — V1.1 fix 5: moved OUT of #editor-container
-             (the scrolling container) into #editor-area so the toolbox
-             stays available while the page scrolls. Positioned absolutely
-             relative to #editor-area (see editor-prosemirror.css). -->
-        <aside id="scene-toolbox" class="scene-toolbox-vertical disabled" aria-label="Scene tools">
-          <div class="scene-toolbox-header">Scene</div>
-          <select class="scene-tb-select" id="format-block-type" title="Block type">
-            <option value="">—</option>
-            <option value="action">Action</option>
-            <option value="character">Character</option>
-            <option value="dialogue">Dialogue</option>
-            <option value="parenthetical">Parenthetical</option>
-            <option value="shot">Shot</option>
-            <option value="transition">Transition</option>
-          </select>
-          <div class="scene-tb-sep"></div>
-          <button class="scene-tb-btn" id="format-btn-annotation" title="Add note to selection">✎<span class="scene-tb-label">Note</span></button>
-          <button class="scene-tb-btn" id="format-btn-flag" title="Flag selection for revision">⚑<span class="scene-tb-label">Flag</span></button>
-          <select class="scene-tb-select" id="scene-tb-tag" title="Tag selected text">
-            <option value="">＋ Tag…</option>
-            <option value="character">Character</option>
-            <option value="prop">Prop</option>
-            <option value="wardrobe">Wardrobe</option>
-            <option value="location">Location</option>
-            <option value="sfx">SFX</option>
-            <option value="vfx">VFX</option>
-            <option value="vehicle">Vehicle</option>
-            <option value="animal">Animal</option>
-            <option value="custom">Custom</option>
-          </select>
-        </aside>
+        <!-- §A Shell Final Polish — Scene Toolbox retired. Every
+             control (block type, Note, Flag, Tag) is now owned by
+             the Row 3 #rga-shell-toolbar (D2 + D3). Zero ownership
+             remains on this surface; the <aside> + its CSS were
+             removed in the same bundle. -->
 
       </div>
 
@@ -914,7 +888,12 @@
         return;
       }
       crumb.hidden = false;
-      scriptName.textContent = script.displayName || 'Untitled.rga';
+      var name = script.displayName || 'Untitled.rga';
+      scriptName.textContent = name;
+      // §B Shell Final Polish — full title via hover tooltip when
+      // ellipsis truncates the breadcrumb's script name (it already
+      // has max-width: 60ch + text-overflow: ellipsis).
+      scriptName.title = name;
       var scene = snap.currentScene;
       if (scene && scene.sceneNumber != null) {
         sceneEl.textContent  = 'Scene S' + scene.sceneNumber;

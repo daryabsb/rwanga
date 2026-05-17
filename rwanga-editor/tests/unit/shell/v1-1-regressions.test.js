@@ -124,37 +124,18 @@ test('V1.1 fix 4: scrollToScene includes a DOM-level scrollIntoView backup via v
 
 // ----------------------------------------------------------------
 // V1.1 fix 5 — Toolbox stays visible during scroll
+// RETIRED §A Shell Final Polish: #scene-toolbox surface was retired
+// (every control migrated to Row 3 via D2 + D3). The "toolbox must
+// not be inside the scrolling container" + "editor-area is the
+// position:relative anchor" invariants are moot — no toolbox exists
+// to anchor. Negative guard kept below: nothing must re-introduce
+// #scene-toolbox without an architectural review.
 // ----------------------------------------------------------------
 
-test('V1.1 fix 5: #scene-toolbox is NOT a DOM child of the scrolling #editor-container', () => {
-  // Parse the real HTML — text slicing on this file is unreliable.
+test('V1.1 fix 5 (retired): #scene-toolbox surface has been retired (§A Shell Final Polish)', () => {
   const html = readText(INDEX_HTML);
-  const dom = new JSDOM(html);
-  const doc = dom.window.document;
-  const toolbox = doc.getElementById('scene-toolbox');
-  const container = doc.getElementById('editor-container');
-  const editorArea = doc.getElementById('editor-area');
-  assert.ok(toolbox, '#scene-toolbox must exist');
-  assert.ok(container, '#editor-container must exist');
-  assert.ok(editorArea, '#editor-area must exist');
-  assert.equal(
-    container.contains(toolbox), false,
-    '#scene-toolbox must not be a descendant of #editor-container (the scrolling container) — V1.1 fix 5 moved it to #editor-area.'
-  );
-  assert.ok(
-    editorArea.contains(toolbox),
-    '#scene-toolbox must be a descendant of #editor-area (the position: relative anchor).'
-  );
-});
-
-test('V1.1 fix 5: #editor-area is position: relative (anchor for the absolute toolbox)', () => {
-  const css = readText(SHELL_CSS);
-  const match = css.match(/#editor-area\s*\{([^}]*)\}/);
-  assert.ok(match, 'shell.css must declare an #editor-area rule');
-  assert.ok(
-    /position\s*:\s*relative/.test(match[1]),
-    '#editor-area must declare position: relative so the moved toolbox anchors against it (V1.1 fix 5)'
-  );
+  assert.equal(/<aside[^>]*id="scene-toolbox"/.test(html), false,
+    '#scene-toolbox markup must NOT be reintroduced — every control migrated to Row 3 (#rga-shell-toolbar) via D2 + D3.');
 });
 
 // ----------------------------------------------------------------

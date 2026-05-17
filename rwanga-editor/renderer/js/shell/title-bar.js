@@ -141,6 +141,14 @@
         _titleEl.appendChild(dirty);
       }
     }
+    // §B Shell Final Polish — full title available via hover tooltip
+    // (the script-name span truncates with ellipsis when it exceeds
+    // the center zone). Cleared when no script is open.
+    if (activeScript) {
+      _titleEl.setAttribute('title', text.plain);
+    } else {
+      _titleEl.removeAttribute('title');
+    }
   }
 
   function _appendText(parent, text) {
