@@ -248,12 +248,18 @@
   }
 
   function _wireKeyboardShortcut() {
-    // Ctrl-J — registered via Rga.Keyboard (which delegates to
-    // KeyboardRegistry per Slice 2 §A). The Cmd+` shortcut is
-    // registered in shell/index.js and also routes through us.
-    if (Rga.Keyboard && typeof Rga.Keyboard.register === 'function') {
-      Rga.Keyboard.register('j', { ctrl: true, shift: false, alt: false }, function() {
-        toggle();
+    // Ctrl-J — Studio Panel toggle. Studio Shell Recovery §A4.1
+    // routes through KR.registerCommand so the View → Studio Panel
+    // menu item resolves its accelerator label by command id.
+    // (Cmd+` is registered separately in shell/index.js as
+    // 'view.studioPanelAlt' and also routes through this toggle.)
+    if (Rga.KeyboardRegistry && typeof Rga.KeyboardRegistry.registerCommand === 'function') {
+      Rga.KeyboardRegistry.registerCommand({
+        command: 'view.studioPanel',
+        label: 'Studio Panel',
+        key: 'j', mods: { ctrl: true },
+        handler: function() { toggle(); },
+        source: 'Rga.Shell.StudioPanel'
       });
     }
   }

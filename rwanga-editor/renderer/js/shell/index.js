@@ -112,8 +112,13 @@
   // Migrated to Rga.KeyboardRegistry in Runtime Ownership Stab. Slice
   // 2 — this file no longer owns a document.keydown listener.
   // ----------------------------------------------------------------
+  // Studio Shell Recovery §A4.1: panel.sceneNavigator moves OFF
+  // Ctrl+Shift+S (which is the industry-standard Save As accelerator
+  // and was lost to native-menu suppression in A4). It moves to
+  // Ctrl+Shift+1 — VS-Code-style numbered panel access. All other
+  // panel shortcuts keep their letter mnemonic.
   const _PANEL_SHORTCUTS = [
-    { key: 's', panel: 'sceneNavigator' },
+    { key: '1', panel: 'sceneNavigator' },
     { key: 'e', panel: 'scriptWorkspace' },
     { key: 'o', panel: 'outline' },
     { key: 'c', panel: 'characters' },
@@ -122,40 +127,67 @@
   ];
 
   function _wireKeyboardShortcuts() {
-    if (!Rga.KeyboardRegistry || typeof Rga.KeyboardRegistry.register !== 'function') return;
+    if (!Rga.KeyboardRegistry || typeof Rga.KeyboardRegistry.registerCommand !== 'function') return;
     const KR = Rga.KeyboardRegistry;
 
-    // Cmd-Shift-{S,E,O,C,F,R} → panel toggles.
+    // Cmd-Shift-{1,E,O,C,F,R} → panel toggles. §A4.1 routes these
+    // through KR.registerCommand so the menu / command palette can
+    // resolve their accelerator labels by command id.
     _PANEL_SHORTCUTS.forEach(function(spec) {
-      KR.register(spec.key, { ctrl: true, shift: true }, function() {
-        if (Rga.Shell.Sidebar.registered().indexOf(spec.panel) < 0) return;
-        _togglePanel(spec.panel);
-      }, 'Rga.Shell (panel toggle: ' + spec.panel + ')');
+      KR.registerCommand({
+        command: 'panel.' + spec.panel,
+        label: 'Toggle ' + spec.panel,
+        key: spec.key,
+        mods: { ctrl: true, shift: true },
+        handler: function() {
+          if (Rga.Shell.Sidebar.registered().indexOf(spec.panel) < 0) return;
+          _togglePanel(spec.panel);
+        },
+        source: 'Rga.Shell (panel toggle: ' + spec.panel + ')'
+      });
     });
 
     // Cmd-, → Settings panel toggle.
-    KR.register(',', { ctrl: true }, function() {
-      if (Rga.Shell.Sidebar.registered().indexOf('settings') < 0) return;
-      _togglePanel('settings');
-    }, 'Rga.Shell (panel toggle: settings)');
+    KR.registerCommand({
+      command: 'panel.settings',
+      label: 'Settings',
+      key: ',', mods: { ctrl: true },
+      handler: function() {
+        if (Rga.Shell.Sidebar.registered().indexOf('settings') < 0) return;
+        _togglePanel('settings');
+      },
+      source: 'Rga.Shell (panel toggle: settings)'
+    });
 
     // Cmd-B → Sidebar visibility toggle.
-    KR.register('b', { ctrl: true }, function() {
-      const visible = Rga.Shell.Layout.get().sidebar.visible;
-      Rga.Shell.Layout.set({ sidebar: { visible: !visible } });
-    }, 'Rga.Shell (sidebar visibility toggle)');
+    KR.registerCommand({
+      command: 'view.toggleSidebar',
+      label: 'Toggle Sidebar',
+      key: 'b', mods: { ctrl: true },
+      handler: function() {
+        const visible = Rga.Shell.Layout.get().sidebar.visible;
+        Rga.Shell.Layout.set({ sidebar: { visible: !visible } });
+      },
+      source: 'Rga.Shell (sidebar visibility toggle)'
+    });
 
     // Cmd-` → Studio (bottom) Panel toggle. Routes through the same
-    // public mutator (Rga.BottomPanel.toggleCollapse) as Cmd+J + the
-    // close button + the command palette entry → single mutator surface.
-    KR.register('`', { ctrl: true }, function() {
-      if (Rga.BottomPanel && typeof Rga.BottomPanel.toggleCollapse === 'function') {
-        Rga.BottomPanel.toggleCollapse();
-      } else if (Rga.Shell.Layout) {
-        const sv = Rga.Shell.Layout.get().studioPanel.visible;
-        Rga.Shell.Layout.set({ studioPanel: { visible: !sv } });
-      }
-    }, 'Rga.Shell (studio panel toggle)');
+    // public mutator (Rga.BottomPanel.toggleCollapse) as the close
+    // button + the command palette entry → single mutator surface.
+    KR.registerCommand({
+      command: 'view.studioPanelAlt',
+      label: 'Toggle Studio Panel (alt)',
+      key: '`', mods: { ctrl: true },
+      handler: function() {
+        if (Rga.BottomPanel && typeof Rga.BottomPanel.toggleCollapse === 'function') {
+          Rga.BottomPanel.toggleCollapse();
+        } else if (Rga.Shell.Layout) {
+          const sv = Rga.Shell.Layout.get().studioPanel.visible;
+          Rga.Shell.Layout.set({ studioPanel: { visible: !sv } });
+        }
+      },
+      source: 'Rga.Shell (studio panel toggle — Ctrl+`)'
+    });
   }
 
   function _togglePanel(id) {

@@ -238,10 +238,24 @@ test('§E: native View menu has a Studio Panel entry routing to view.studioPanel
     'Studio Panel menu entry must route via the menu.action IPC channel with id "view.studioPanel"');
 });
 
-test('§E: renderer routes view.studioPanel menu action through Rga.Shell.StudioPanel.toggle (single owner)', () => {
-  const src = readText(INDEX_HTML);
-  assert.ok(/case\s+['"]view\.studioPanel['"]\s*:[\s\S]{0,300}Rga\.Shell\.StudioPanel\.toggle/.test(src),
-    'renderer must route view.studioPanel to Rga.Shell.StudioPanel.toggle (no duplicate ownership)');
+test('§E: view.studioPanel command routes through Rga.Shell.StudioPanel.toggle (single owner)', () => {
+  // §A4.1 — the view.studioPanel command is registered via
+  // KR.registerCommand inside studio-panel.js _wireKeyboardShortcut.
+  // The command's handler calls Studio Panel toggle. Both the
+  // keyboard accelerator (Ctrl+J) AND the View menu item invoke
+  // this command — no duplicate routing.
+  const studioSrc = readText(path.join(REPO, 'renderer/js/shell/studio-panel.js'));
+  assert.ok(
+    /registerCommand\(\{[\s\S]{0,300}command:\s*['"]view\.studioPanel['"][\s\S]{0,300}toggle\(\)/.test(studioSrc),
+    'studio-panel.js must register the view.studioPanel command whose handler calls toggle()'
+  );
+  // Renderer dispatch unifies under KR.invokeCommand — verify the
+  // menuAction handler routes through KR (not a per-action switch).
+  const rendererSrc = readText(INDEX_HTML);
+  assert.ok(
+    /Rga\.KeyboardRegistry\.invokeCommand\(action\)/.test(rendererSrc),
+    'renderer menu-action handler must route via KR.invokeCommand(action) — no per-case ownership duplication'
+  );
 });
 
 test('§E: minimize button DOM exists in index.html with the expected id', () => {

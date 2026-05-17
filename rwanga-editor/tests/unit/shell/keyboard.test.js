@@ -79,18 +79,22 @@ test('Cmd-Shift-C activates the Characters panel', () => {
   assert.equal(Rga.Shell.Sidebar.current(), 'characters');
 });
 
-test('Cmd-Shift-S toggles the Scene Navigator off when it is currently active', () => {
+test('§A4.1: Cmd-Shift-1 toggles the Scene Navigator off (moved from Cmd-Shift-S to free Save As)', () => {
+  // Studio Shell Recovery §A4.1: panel.sceneNavigator moved off
+  // Ctrl+Shift+S (now Save As) to Ctrl+Shift+1 — VS-Code-style
+  // numbered panel access. The toggle BEHAVIOUR is unchanged;
+  // only the combo moved.
   const { Rga } = boot();
   assert.equal(Rga.Shell.Sidebar.current(), 'sceneNavigator');
-  fireKey({ key: 's', metaKey: true, shiftKey: true });
+  fireKey({ key: '1', metaKey: true, shiftKey: true });
   assert.equal(Rga.Shell.Sidebar.current(), null);
   assert.equal(Rga.Shell.Layout.get().sidebar.visible, false);
 });
 
-test('Cmd-Shift-S re-activates the Scene Navigator when it was toggled off', () => {
+test('§A4.1: Cmd-Shift-1 re-activates the Scene Navigator when it was toggled off', () => {
   const { Rga } = boot();
-  fireKey({ key: 's', metaKey: true, shiftKey: true });  // toggle off
-  fireKey({ key: 's', metaKey: true, shiftKey: true });  // toggle on
+  fireKey({ key: '1', metaKey: true, shiftKey: true });  // toggle off
+  fireKey({ key: '1', metaKey: true, shiftKey: true });  // toggle on
   assert.equal(Rga.Shell.Sidebar.current(), 'sceneNavigator');
   assert.equal(Rga.Shell.Layout.get().sidebar.visible, true);
 });

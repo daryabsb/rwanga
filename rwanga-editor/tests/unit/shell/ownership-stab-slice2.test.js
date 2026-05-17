@@ -182,25 +182,29 @@ test('A: legacy Rga.Keyboard.register is a shim that delegates to the registry',
 });
 
 test('A: no source-level Ctrl+J or Ctrl+B duplicates (deduplication landed)', () => {
-  // Count distinct call sites that register the same combo.
-  const indexHtml  = readText(INDEX_HTML);
-  const appShell   = readText(APP_SHELL_JS);
-  const shellIndex = readText(SHELL_INDEX_JS);
+  // §A4.1 — registrations migrated to KR.registerCommand. Match both
+  // the legacy KR.register style AND the new KR.registerCommand spec
+  // (where key + mods live inside a config object).
+  const indexHtml      = readText(INDEX_HTML);
+  const appShell       = readText(APP_SHELL_JS);
+  const shellIndex     = readText(SHELL_INDEX_JS);
+  const studioPanelJs  = readText(path.join(REPO, 'renderer/js/shell/studio-panel.js'));
 
-  // Ctrl+J — should be registered EXACTLY ONCE.
-  // Look for K.register('j', { ctrl: true ... in init script,
-  // Rga.Keyboard.register('j', { ctrl: true ... or
-  // Rga.KeyboardRegistry.register('j', { ctrl: true ... in app code.
-  function countCtrlReg(text, key) {
-    const re = new RegExp(
+  function countAllReg(text, key) {
+    // Match KR.register('j', { ctrl: true ... — legacy form
+    const legacy = new RegExp(
       "(?:K|Rga\\.Keyboard|Rga\\.KeyboardRegistry|KR)\\s*\\.register\\s*\\(\\s*['\"]" + key + "['\"]\\s*,\\s*\\{\\s*ctrl\\s*:\\s*true",
       'g');
-    return (text.match(re) || []).length;
+    // Match KR.registerCommand({ command: ..., key: 'j', mods: { ctrl: true ... — new form
+    const command = new RegExp(
+      "registerCommand\\(\\{[\\s\\S]{0,200}key:\\s*['\"]" + key + "['\"][\\s\\S]{0,150}mods:\\s*\\{[^}]*ctrl:\\s*true",
+      'g');
+    return (text.match(legacy) || []).length + (text.match(command) || []).length;
   }
-  const totalJ = countCtrlReg(indexHtml, 'j') + countCtrlReg(appShell, 'j') + countCtrlReg(shellIndex, 'j');
+  const totalJ = countAllReg(indexHtml, 'j') + countAllReg(appShell, 'j') + countAllReg(shellIndex, 'j') + countAllReg(studioPanelJs, 'j');
   assert.equal(totalJ, 1, 'Ctrl+J must be registered exactly once across the renderer; got ' + totalJ);
 
-  const totalB = countCtrlReg(indexHtml, 'b') + countCtrlReg(appShell, 'b') + countCtrlReg(shellIndex, 'b');
+  const totalB = countAllReg(indexHtml, 'b') + countAllReg(appShell, 'b') + countAllReg(shellIndex, 'b') + countAllReg(studioPanelJs, 'b');
   assert.equal(totalB, 1, 'Ctrl+B must be registered exactly once across the renderer; got ' + totalB);
 });
 

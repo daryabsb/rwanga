@@ -655,30 +655,29 @@
   }
 
   /* ---- Register Keyboard Shortcuts ---- */
+  /* §A4.1 cleaned this block up. Three pre-§A4.1 K.register calls
+     duplicated bindings that registerMenuCommands / studio-panel.js
+     now own via KR.registerCommand:
+       Ctrl+Shift+P → tools.commandPalette
+       Ctrl+J       → view.studioPanel
+       Ctrl+Shift+T → tools.toggleTheme
+     The two remaining bindings have no §A4.1 menu equivalent; they
+     migrate here to KR.registerCommand so audit() sees them. */
   function registerShortcuts() {
-    var K = Rga.Keyboard;
-
-    K.register('p', { ctrl: true, shift: true, alt: false }, function() {
-      Rga.CommandPalette.open();
+    if (!Rga.KeyboardRegistry || typeof Rga.KeyboardRegistry.registerCommand !== 'function') return;
+    var KR = Rga.KeyboardRegistry;
+    KR.registerCommand({
+      command: 'view.toggleInspector', label: 'Toggle Inspector',
+      key: 'i', mods: { ctrl: true, shift: true },
+      handler: function() { if (Rga.Inspector && Rga.Inspector.toggle) Rga.Inspector.toggle(); },
+      source: 'index.html (Toggle Inspector)'
     });
-    // Ctrl+B (sidebar toggle) is registered by the shell keyboard
-    // wiring (renderer/js/shell/index.js) as combo "cmd+b", routing
-    // through Layout.set. The duplicate registration that lived here
-    // was removed in Runtime Ownership Stab. Slice 2 — single SSOT
-    // (Rga.KeyboardRegistry) catches duplicates with a console warning.
-    K.register('j', { ctrl: true, shift: false, alt: false }, function() {
-      Rga.BottomPanel.toggleCollapse();
+    KR.registerCommand({
+      command: 'view.cycle', label: 'Cycle View Mode',
+      key: 'v', mods: { ctrl: true, shift: true },
+      handler: function() { if (Rga.ViewMode && Rga.ViewMode.cycle) Rga.ViewMode.cycle(); },
+      source: 'index.html (Cycle View Mode)'
     });
-    K.register('t', { ctrl: true, shift: true, alt: false }, function() {
-      Rga.Theme.toggle();
-    });
-    K.register('i', { ctrl: true, shift: true, alt: false }, function() {
-      Rga.Inspector.toggle();
-    });
-    K.register('v', { ctrl: true, shift: true, alt: false }, function() {
-      Rga.ViewMode && Rga.ViewMode.cycle();
-    });
-
     // TODO[phase-9]: Ctrl+Enter — insert scene re-registered when ProseMirror keymap ships
   }
 
@@ -853,51 +852,30 @@
      fire on every relevant upstream event; the footer is hidden by CSS
      (display: none) except when body.view-draft-active. No new
      computation, no new ownership module. */
-  /* ---- Owned menu bar (Studio Shell Recovery — Workstream A4) ----
-     Eight top-level dropdowns rendered into #rga-shell-menubar.
-     Each item routes through an existing SSOT mutator — no menu
-     item performs a direct DOM action, no command logic is
-     duplicated. Disabled items get aria-disabled="true" and are
-     unclickable. The dropdown overlay is the existing
-     #rga-shell-menubar-dropdown element, content-swapped per menu.
+  /* ---- Owned menu bar (Studio Shell Recovery — §A4 + §A4.1) ----
+     Menu items reference command IDs. KeyboardRegistry is the SSOT
+     for both the handler (KR.invokeCommand) and the accelerator
+     label (KR.commandAccelerator). The menu UI is a pure consumer —
+     it does NOT define accelerator strings inline and does NOT own
+     command handlers.
 
-     File / Open Recent / Manage Storage / Quit are disabled because
-     no SSOT path exists for them in the renderer; native menu carried
-     them via Electron roles. They re-enable when wired in later
-     workstreams. */
+     Disabled items have no command id; they render with aria-disabled
+     and no accelerator label. */
   var MENU_DEFS = {
     file: [
-      { label: 'New Script',  accelerator: 'Ctrl+N',       action: function() { if (Rga.FileManager) Rga.FileManager.newScript(); } },
-      { label: 'Open…',  accelerator: 'Ctrl+O',       action: function() { if (Rga.FileManager) Rga.FileManager.openFromDialog(); } },
-      { label: 'Save',        accelerator: 'Ctrl+S',       action: function() { if (Rga.FileManager) Rga.FileManager.save(); } },
-      { label: 'Save As…', accelerator: 'Ctrl+Shift+S', action: function() { if (Rga.FileManager) Rga.FileManager.saveAs(); } },
+      { label: 'New Script',  command: 'file.new' },
+      { label: 'Open…',       command: 'file.open' },
+      { label: 'Save',        command: 'file.save' },
+      { label: 'Save As…',    command: 'file.saveAs' },
       { type: 'separator' },
-      { label: 'Open Recent…', disabled: true },
+      { label: 'Open Recent…',    disabled: true },
       { label: 'Manage Storage…', disabled: true },
       { type: 'separator' },
       { label: 'Quit', disabled: true }
     ],
     edit: [
-      // Undo/Redo route through ProseMirror's history plugin —
-      // window.RgaProseMirror.undo/redo. Cut/Copy/Paste/SelectAll
-      // work natively in contenteditable and are left disabled in
-      // the menu (the keyboard accelerators still fire natively).
-      { label: 'Undo', accelerator: 'Ctrl+Z',
-        action: function() {
-          var view = Rga.TabManager && Rga.TabManager._editorView && Rga.TabManager._editorView();
-          if (view && window.RgaProseMirror && window.RgaProseMirror.undo) {
-            window.RgaProseMirror.undo(view.state, view.dispatch);
-            view.focus();
-          }
-        } },
-      { label: 'Redo', accelerator: 'Ctrl+Y',
-        action: function() {
-          var view = Rga.TabManager && Rga.TabManager._editorView && Rga.TabManager._editorView();
-          if (view && window.RgaProseMirror && window.RgaProseMirror.redo) {
-            window.RgaProseMirror.redo(view.state, view.dispatch);
-            view.focus();
-          }
-        } },
+      { label: 'Undo', command: 'edit.undo' },
+      { label: 'Redo', command: 'edit.redo' },
       { type: 'separator' },
       { label: 'Cut',        disabled: true },
       { label: 'Copy',       disabled: true },
@@ -905,44 +883,34 @@
       { label: 'Select All', disabled: true }
     ],
     view: [
-      { label: 'Flow',  action: function() { if (Rga.ViewMode) Rga.ViewMode.set('flow');  } },
-      { label: 'Draft', action: function() { if (Rga.ViewMode) Rga.ViewMode.set('draft'); } },
-      { label: 'Print', action: function() { if (Rga.ViewMode) Rga.ViewMode.set('print'); } },
+      { label: 'Flow',  command: 'view.flow'  },
+      { label: 'Draft', command: 'view.draft' },
+      { label: 'Print', command: 'view.print' },
       { type: 'separator' },
-      { label: 'Studio Panel', accelerator: 'Ctrl+J',
-        action: function() {
-          if (Rga.Shell && Rga.Shell.StudioPanel && Rga.Shell.StudioPanel.toggle) {
-            Rga.Shell.StudioPanel.toggle();
-          }
-        } },
-      // Toolbox stays disabled until Workstream C lands its SSOT
-      // (Layout.sceneToolbox). A4 must not add a new owner; surfacing
-      // the menu item disabled keeps the menu structure stable while
-      // the action waits for its owner.
+      { label: 'Studio Panel', command: 'view.studioPanel' },
+      // Toolbox stays disabled until Workstream C lands its SSOT.
       { label: 'Toolbox', disabled: true },
       { type: 'separator' },
-      { label: 'Toggle Sidebar',   disabled: true },
-      { label: 'Toggle Inspector', disabled: true }
+      { label: 'Toggle Sidebar',   command: 'view.toggleSidebar' },
+      { label: 'Toggle Inspector', command: 'view.toggleInspector' }
     ],
     script: [
       { label: 'Insert Scene',         disabled: true },
       { label: 'Renumber Scenes',      disabled: true },
-      { label: 'Go to Scene…',    disabled: true },
+      { label: 'Go to Scene…',         disabled: true },
       { type: 'separator' },
       { label: 'Insert Page Break',    disabled: true },
-      { label: 'Set Page Setup…', disabled: true },
+      { label: 'Set Page Setup…',      disabled: true },
       { label: 'Set Script Language…', disabled: true }
     ],
     tags: [
-      { label: 'Open Tag Manager',    disabled: true },
+      { label: 'Open Tag Manager',     disabled: true },
       { label: 'Add Tag to Selection', disabled: true },
-      { label: 'Filter by Tag…', disabled: true }
+      { label: 'Filter by Tag…',       disabled: true }
     ],
     tools: [
-      { label: 'Command Palette', accelerator: 'Ctrl+Shift+P',
-        action: function() { if (Rga.CommandPalette && Rga.CommandPalette.open) Rga.CommandPalette.open(); } },
-      { label: 'Toggle Theme', accelerator: 'Ctrl+Shift+T',
-        action: function() { if (Rga.Theme && Rga.Theme.toggle) Rga.Theme.toggle(); } },
+      { label: 'Command Palette', command: 'tools.commandPalette' },
+      { label: 'Toggle Theme',    command: 'tools.toggleTheme' },
       { type: 'separator' },
       { label: 'Load Sample Script', disabled: true },
       { label: 'Settings',           disabled: true }
@@ -950,9 +918,9 @@
     export: [
       { label: 'Export to PDF…', disabled: true },
       { type: 'separator' },
-      { label: 'Export to DOCX',         disabled: true },
-      { label: 'Export to Fountain',     disabled: true },
-      { label: 'Export to Final Draft',  disabled: true }
+      { label: 'Export to DOCX',        disabled: true },
+      { label: 'Export to Fountain',    disabled: true },
+      { label: 'Export to Final Draft', disabled: true }
     ],
     help: [
       { label: 'Documentation', disabled: true },
@@ -960,6 +928,66 @@
       { label: 'About Rwanga',  disabled: true }
     ]
   };
+
+  // §A4.1 — register the menu commands once, before wireMenubar runs.
+  // KR.registerCommand both creates the keyboard binding (if key+mods
+  // are present) AND records the command so the menu can resolve the
+  // accelerator label by id.
+  function registerMenuCommands() {
+    if (!Rga.KeyboardRegistry || typeof Rga.KeyboardRegistry.registerCommand !== 'function') return;
+    var KR = Rga.KeyboardRegistry;
+    KR.registerCommand({ command: 'file.new',    label: 'New Script', key: 'n', mods: { ctrl: true },
+      handler: function() { if (Rga.FileManager) Rga.FileManager.newScript(); }, source: 'A4.1 menu (File → New)' });
+    KR.registerCommand({ command: 'file.open',   label: 'Open…',      key: 'o', mods: { ctrl: true },
+      handler: function() { if (Rga.FileManager) Rga.FileManager.openFromDialog(); }, source: 'A4.1 menu (File → Open)' });
+    KR.registerCommand({ command: 'file.save',   label: 'Save',       key: 's', mods: { ctrl: true },
+      handler: function() { if (Rga.FileManager) Rga.FileManager.save(); }, source: 'A4.1 menu (File → Save)' });
+    // §A4.1 — Save As keyboard path RESTORED on Ctrl+Shift+S. Made
+    // possible because panel.sceneNavigator moved off Ctrl+Shift+S to
+    // Ctrl+Shift+1 in shell/index.js (one command per accelerator —
+    // the §A4.1 invariant).
+    KR.registerCommand({ command: 'file.saveAs', label: 'Save As…',   key: 's', mods: { ctrl: true, shift: true },
+      handler: function() { if (Rga.FileManager) Rga.FileManager.saveAs(); }, source: 'A4.1 menu (File → Save As)' });
+
+    // Edit. Undo/Redo dispatched against the active editor via the PM
+    // history plugin (already imported as window.RgaProseMirror).
+    KR.registerCommand({ command: 'edit.undo', label: 'Undo', key: 'z', mods: { ctrl: true },
+      handler: function() {
+        var view = Rga.TabManager && Rga.TabManager._editorView && Rga.TabManager._editorView();
+        if (view && window.RgaProseMirror && window.RgaProseMirror.undo) {
+          window.RgaProseMirror.undo(view.state, view.dispatch);
+          view.focus();
+        }
+      }, source: 'A4.1 menu (Edit → Undo)' });
+    KR.registerCommand({ command: 'edit.redo', label: 'Redo', key: 'y', mods: { ctrl: true },
+      handler: function() {
+        var view = Rga.TabManager && Rga.TabManager._editorView && Rga.TabManager._editorView();
+        if (view && window.RgaProseMirror && window.RgaProseMirror.redo) {
+          window.RgaProseMirror.redo(view.state, view.dispatch);
+          view.focus();
+        }
+      }, source: 'A4.1 menu (Edit → Redo)' });
+
+    // View. Flow / Draft / Print have NO keyboard accelerator — they
+    // live in the menu + status-bar dropdown (Bundle 1 §A) + the
+    // status-bar viewMode segment. Registering as commands without
+    // key+mods means the menu can still invoke them and the menu shows
+    // no accelerator label.
+    KR.registerCommand({ command: 'view.flow',  label: 'Flow',
+      handler: function() { if (Rga.ViewMode) Rga.ViewMode.set('flow');  }, source: 'A4.1 menu (View → Flow)' });
+    KR.registerCommand({ command: 'view.draft', label: 'Draft',
+      handler: function() { if (Rga.ViewMode) Rga.ViewMode.set('draft'); }, source: 'A4.1 menu (View → Draft)' });
+    KR.registerCommand({ command: 'view.print', label: 'Print',
+      handler: function() { if (Rga.ViewMode) Rga.ViewMode.set('print'); }, source: 'A4.1 menu (View → Print)' });
+
+    // Tools. Command Palette + Toggle Theme — owned by their modules;
+    // the menu wraps them under tools.* commands with the same
+    // accelerators those modules already bind.
+    KR.registerCommand({ command: 'tools.commandPalette', label: 'Command Palette', key: 'p', mods: { ctrl: true, shift: true },
+      handler: function() { if (Rga.CommandPalette && Rga.CommandPalette.open) Rga.CommandPalette.open(); }, source: 'A4.1 menu (Tools → Command Palette)' });
+    KR.registerCommand({ command: 'tools.toggleTheme',    label: 'Toggle Theme',    key: 't', mods: { ctrl: true, shift: true },
+      handler: function() { if (Rga.Theme && Rga.Theme.toggle) Rga.Theme.toggle(); }, source: 'A4.1 menu (Tools → Toggle Theme)' });
+  }
 
   function wireMenubar() {
     var menubar  = Rga.$('#rga-shell-menubar');
@@ -996,7 +1024,7 @@
         row.type = 'button';
         row.className = 'rga-shell-menubar-dropdown-item';
         row.setAttribute('role', 'menuitem');
-        if (item.disabled) {
+        if (item.disabled || !item.command) {
           row.disabled = true;
           row.setAttribute('aria-disabled', 'true');
         }
@@ -1004,17 +1032,26 @@
         label.className = 'rga-shell-menubar-dropdown-item-label';
         label.textContent = item.label;
         row.appendChild(label);
-        if (item.accelerator) {
-          var acc = document.createElement('span');
-          acc.className = 'rga-shell-menubar-dropdown-item-acc';
-          acc.textContent = item.accelerator;
-          row.appendChild(acc);
+        // §A4.1 — accelerator label comes from KR.commandAccelerator(commandId),
+        // NOT from a hardcoded string on the menu item. One SSOT for "what
+        // accelerator does this command have."
+        if (item.command && Rga.KeyboardRegistry && typeof Rga.KeyboardRegistry.commandAccelerator === 'function') {
+          var accLabel = Rga.KeyboardRegistry.commandAccelerator(item.command);
+          if (accLabel) {
+            var acc = document.createElement('span');
+            acc.className = 'rga-shell-menubar-dropdown-item-acc';
+            acc.textContent = accLabel;
+            row.appendChild(acc);
+          }
         }
-        if (!item.disabled && typeof item.action === 'function') {
+        if (item.command && !item.disabled) {
           row.addEventListener('click', function() {
             closeMenu();
-            try { item.action(); }
-            catch (err) { console.error('[wireMenubar] action threw for "' + item.label + '":', err); }
+            // §A4.1 — invoke via KR (single owner). The menu never
+            // calls Rga.FileManager / Rga.ViewMode / etc. directly.
+            if (Rga.KeyboardRegistry && typeof Rga.KeyboardRegistry.invokeCommand === 'function') {
+              Rga.KeyboardRegistry.invokeCommand(item.command);
+            }
           });
         }
         dropdown.appendChild(row);
@@ -1063,22 +1100,10 @@
       openMenu(key, btn);
     });
 
-    // Preserve keyboard accelerators that previously rode on the
-    // native Electron menu. Native menu is suppressed on Win/Linux
-    // (electron/menu.js); these KeyboardRegistry registrations
-    // recover the file actions. Cmd+J was already registered by
-    // Rga.Shell.StudioPanel; Cmd+Shift+P, Cmd+Shift+T, etc. were
-    // already registered by their owners. Cmd+Shift+S = Save As is
-    // NOT registered here — it conflicts with the existing
-    // Cmd+Shift+S panel-shortcut (scene navigator) registration;
-    // the menu click path for Save As still works. Flagged as a
-    // Workstream B follow-up.
-    if (Rga.KeyboardRegistry && typeof Rga.KeyboardRegistry.register === 'function') {
-      var KR = Rga.KeyboardRegistry;
-      KR.register('n', { ctrl: true }, function() { if (Rga.FileManager) Rga.FileManager.newScript(); }, 'A4 menu (File → New)');
-      KR.register('o', { ctrl: true }, function() { if (Rga.FileManager) Rga.FileManager.openFromDialog(); }, 'A4 menu (File → Open)');
-      KR.register('s', { ctrl: true }, function() { if (Rga.FileManager) Rga.FileManager.save(); }, 'A4 menu (File → Save)');
-    }
+    // §A4.1 — file / edit / view / tools command registrations live in
+    // registerMenuCommands() which runs once in boot() BEFORE
+    // wireMenubar. KR is the single owner; this function only paints
+    // the menu UI.
   }
 
   function wireDraftFooter() {
@@ -1176,31 +1201,33 @@
     wireUnits();
     wireBreadcrumb();     // Recovery Bundle 2 §B — writer-context breadcrumb
     wireDraftFooter();    // Editor Recovery Phase 3 / C6 — populates the draft footer
+    // §A4.1 — command registrations MUST run before the menu paints
+    // so wireMenubar can resolve accelerator labels by command id.
+    registerMenuCommands();
     wireMenubar();        // Studio Shell Recovery §A4 — owned menu surface (Row 2)
     Rga.FlowChrome && Rga.FlowChrome.init();
     Rga.FormatToolbar && Rga.FormatToolbar.init();
 
-    // Menu actions from main process
+    // Menu actions from main process. §A4.1 — every action routes
+    // through KR.invokeCommand (the single command-owner). The macOS
+    // native menu and the renderer-owned menubar both invoke commands
+    // by id — neither calls SSOT mutators directly.
     if (window.rwanga && window.rwanga.on && window.rwanga.on.menuAction) {
       window.rwanga.on.menuAction(function(action) {
+        if (Rga.KeyboardRegistry && typeof Rga.KeyboardRegistry.invokeCommand === 'function') {
+          if (Rga.KeyboardRegistry.invokeCommand(action)) return;  // handled by a command
+        }
+        // Fallback for legacy macOS native-menu actions that do not
+        // yet have a registered command. Phase A3 (macOS hybrid)
+        // unifies these into commands.
         switch (action) {
-          case 'file.new': Rga.FileManager.newScript(); break;
-          case 'file.open': Rga.FileManager.openFromDialog(); break;
-          case 'file.save': Rga.FileManager.save(); break;
-          case 'file.saveAs': Rga.FileManager.saveAs(); break;
-          // Bundle 1 §A — View menu routes through the SSOT
-          // (Rga.ViewMode.set). Same owner as the status-bar dropdown
-          // — no duplicate logic.
-          case 'view.flow':  if (Rga.ViewMode) Rga.ViewMode.set('flow');  break;
-          case 'view.draft': if (Rga.ViewMode) Rga.ViewMode.set('draft'); break;
-          case 'view.print': if (Rga.ViewMode) Rga.ViewMode.set('print'); break;
-          // Studio Shell Recovery §E — View → Studio Panel routes
-          // through Rga.Shell.StudioPanel.toggle (single owner).
-          case 'view.studioPanel':
-            if (Rga.Shell && Rga.Shell.StudioPanel && Rga.Shell.StudioPanel.toggle) {
-              Rga.Shell.StudioPanel.toggle();
-            }
+          case 'file.openFolder':
+            if (Rga.FileManager && Rga.FileManager.openFromDialog) Rga.FileManager.openFromDialog();
             break;
+          // file.exportPdf / file.manageStorage / help.loadSample /
+          // help.checkUpdates — not yet wired. Native macOS menu
+          // still includes them; they will be promoted to commands
+          // in Phase A3.
         }
       });
     }

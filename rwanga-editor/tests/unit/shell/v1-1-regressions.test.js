@@ -187,11 +187,13 @@ test('V1.1 fix 6: Rga.BottomPanel.toggleCollapse writes to Rga.Shell.Layout.stud
 
 test('V1.1 fix 6: shell/index.js registers Cmd/Ctrl+` for the studio panel toggle', () => {
   const src = readText(SHELL_INDEX_JS);
-  // Slice 2 migrated this from an inline _onKeydown gate to a
-  // Rga.KeyboardRegistry.register('`', { ctrl: true }, ...) call.
+  // §A4.1 migrated from KR.register to KR.registerCommand. The
+  // command id is 'view.studioPanelAlt' (the "alt" suffix
+  // distinguishes it from the primary Cmd+J binding which lives in
+  // studio-panel.js — both invoke the same toggle mutator).
   assert.ok(
-    /KR\.register\s*\(\s*['"]`['"]\s*,\s*\{\s*ctrl\s*:\s*true/.test(src),
-    'shell/index.js must register the backtick combo with ctrl: true via Rga.KeyboardRegistry'
+    /registerCommand\(\{[\s\S]{0,300}key:\s*['"]`['"][\s\S]{0,150}mods:\s*\{[^}]*ctrl:\s*true/.test(src),
+    'shell/index.js must register the backtick combo via Rga.KeyboardRegistry.registerCommand (§A4.1 — was .register pre-§A4.1)'
   );
   // Must route through BottomPanel.toggleCollapse (single mutator) or
   // fall back to Layout.studioPanel.visible. Both flip the SSOT.

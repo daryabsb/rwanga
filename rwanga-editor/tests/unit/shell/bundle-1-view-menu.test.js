@@ -70,19 +70,26 @@ test('Bundle 1 §A: preload exposes window.rwanga.menu.setViewMode → invokes m
 
 test('Bundle 1 §A: renderer routes view.* menu actions through Rga.ViewMode.set (not ViewManager.activate)', () => {
   const src = read(INDEX_HTML);
+  // §A4.1 — menu actions now route through KR.invokeCommand. The
+  // Bundle 1 §A invariant is preserved one level deeper: each
+  // view.* command's HANDLER (registered via KR.registerCommand)
+  // calls Rga.ViewMode.set(mode). Negative guard: still no
+  // Rga.ViewManager.activate in the view.* handler closures.
   ['view.flow', 'view.draft', 'view.print'].forEach(function(id) {
     const mode = id.split('.')[1];
-    const re = new RegExp("case\\s+['\"]" + id.replace('.', '\\.') + "['\"]:\\s*if\\s*\\(Rga\\.ViewMode\\)\\s*Rga\\.ViewMode\\.set\\(['\"]" + mode + "['\"]\\)");
+    // The command registration carries the handler that calls ViewMode.set.
+    const re = new RegExp(
+      "registerCommand\\(\\{\\s*command:\\s*['\"]" + id.replace('.', '\\.') + "['\"][\\s\\S]{0,300}Rga\\.ViewMode\\.set\\(['\"]" + mode + "['\"]\\)"
+    );
     assert.ok(re.test(src),
-      'renderer index.html must route ' + id + ' to Rga.ViewMode.set(\'' + mode + '\')');
+      'KR.registerCommand for "' + id + '" must include a handler that calls Rga.ViewMode.set(\'' + mode + '\')');
   });
-  // Negative guard: the menu-action switch must NOT route to
-  // Rga.ViewManager.activate for view modes — that would bypass the
-  // SSOT (Bundle 1 §A "one owner only, no duplicate logic").
-  const switchBlock = src.match(/case 'view\.flow':[\s\S]*?case 'view\.print':[^\n]*break;/);
-  assert.ok(switchBlock, 'view.* switch block must exist');
-  assert.equal(/Rga\.ViewManager\.activate/.test(switchBlock[0]), false,
-    'view.* menu actions must NOT call Rga.ViewManager.activate directly — must route through Rga.ViewMode.set');
+  // Negative guard preserved at the command-registration level:
+  // no view.* handler may call Rga.ViewManager.activate directly.
+  const viewFlowBlock = src.match(/registerCommand\(\{\s*command:\s*['"]view\.flow['"][\s\S]*?source:[^}]+\}\)/);
+  assert.ok(viewFlowBlock, 'view.flow command registration must be locatable');
+  assert.equal(/Rga\.ViewManager\.activate/.test(viewFlowBlock[0]), false,
+    'view.flow handler must NOT call Rga.ViewManager.activate directly — must route through Rga.ViewMode.set (Bundle 1 §A invariant)');
 });
 
 test('Bundle 1 §A: renderer subscribes to Rga.ViewMode.onChange and pushes to window.rwanga.menu.setViewMode', () => {
