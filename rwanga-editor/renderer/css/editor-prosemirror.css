@@ -240,22 +240,36 @@ body.view-draft-active #scene-toolbox {
 }
 
 /* ============================================================
-   SCENE TOOLBOX — vertical palette anchored to the editor-container's
-   right edge. Visual Stabilization V1 (T4) moved it out of the
+   SCENE TOOLBOX — vertical palette anchored next to the writing
+   column. Visual Stabilization V1 (T4) moved it out of the
    editor-container flex flow because the previous sticky-flex-item
    layout extended past the container's right edge and got clipped
    when the inspector + sidebar squeezed the workspace width.
 
-   Now: absolute-positioned to the container's top-right corner.
-   editor-container reserves right-side padding so the centred page
-   does not visually intersect the toolbox.
+   Bundle 1 §C: was anchored to the editor-area's top-right viewport
+   corner (right: 16px) — user reported "physically fixed to viewport
+   and disconnected from writing context". Now anchored to the
+   centred .rga-page's right edge so it visually attaches to the
+   manuscript instead of floating in the gutter. The V1 §T4 invariant
+   ("toolbox lives in #editor-area, NOT in #editor-container so it
+   survives page scroll") is preserved — only the horizontal anchor
+   moves.
+
+   Math: .rga-page is 8.5in wide (4.25in either side of centre).
+   Toolbox is ~106px wide (88px + 2*8px padding + 2*1px border) and
+   we want a 12px gap to the page edge → 118px clearance. So when the
+   workspace is at least 8.5in + 2*118px ≈ 1052px wide, the toolbox
+   sits in the gutter at the page edge. Below that width the max()
+   clamp falls back to right: 16px (the original V1 §T4 position),
+   protecting narrow workspaces where sidebar + inspector squeeze
+   editor-area.
 
    Disabled (faded + non-interactive) when cursor is not inside a scene.
    ============================================================ */
 #scene-toolbox.scene-toolbox-vertical {
   position: absolute;
   top: 32px;
-  right: 16px;
+  right: max(16px, calc(50% - 4.25in - 118px));
   width: 88px;
   display: flex;
   flex-direction: column;
@@ -329,7 +343,7 @@ body.view-draft-active #scene-toolbox {
 
 [dir="rtl"] #scene-toolbox.scene-toolbox-vertical {
   right: auto;
-  left: 16px;
+  left: max(16px, calc(50% - 4.25in - 118px));
 }
 
 .format-btn {
