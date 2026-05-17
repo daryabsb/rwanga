@@ -543,6 +543,138 @@ test('G10 (reverse): no shell-js consumer reads a writer-context field from Rga.
     'G10 reverse violations:\n  - ' + offenders.join('\n  - '));
 });
 
+// ----------------------------------------------------------------
+// G11 — extraction drift guards (Slice 8 §B)
+// ----------------------------------------------------------------
+//
+// Lock app-shell.js's allowed top-level Rga.* declarations. The list
+// below is the EXACT set of modules permitted to live in
+// renderer/js/app-shell.js after Runtime Ownership Stab. Slice 8.
+// Adding a new module here (instead of creating a new file under
+// renderer/js/shell/) fails G11; moving an extracted module back
+// INTO app-shell.js fails G11; growing the responsibility count
+// fails G11.
+//
+// To EXTRACT a module: delete it from app-shell.js, create
+// renderer/js/shell/<name>.js with the same IIFE+Rga.* assignment,
+// load it in renderer/index.html, then REMOVE its name from this
+// list. CI will then enforce the smaller surface.
+//
+// To ADD a new module: open a new file under renderer/js/shell/.
+// Do NOT add it to app-shell.js. (If the addition is unavoidable —
+// e.g. tightly coupled to existing legacy code — amend this list
+// in the same PR with a one-paragraph justification.)
+const APP_SHELL_ALLOWED_MODULES = [
+  'Theme',                  // single-owner per Slice 2 §B
+  'Sidebar',                // 5-LOC no-op shim for engine consumer tags.js:206
+  'Keyboard',               // 12-LOC delegating shim → Rga.KeyboardRegistry
+  'BottomPanel',            // engine consumers annotations.js, revision-flags.js
+  'Inspector',              // engine consumer context-menu.js
+  'SceneNotesConnector'     // deferred to StudioPanel migration
+];
+
+test('G11: app-shell.js declares ONLY the allow-listed Rga.* modules', () => {
+  const src = readText(path.join(REPO, 'renderer/js/app-shell.js'));
+  // Match top-level `Rga.<Name> = {` declarations. Comments stripped
+  // so deletion-pointer comments don't trigger false positives.
+  const code = stripComments(src);
+  const re = /^Rga\.([A-Z][A-Za-z0-9_]*)\s*=\s*\{/gm;
+  const found = [];
+  let m;
+  while ((m = re.exec(code))) found.push(m[1]);
+  const foundSorted = found.slice().sort();
+  const allowedSorted = APP_SHELL_ALLOWED_MODULES.slice().sort();
+  assert.deepEqual(foundSorted, allowedSorted,
+    'G11 — app-shell.js module surface drift:\n' +
+    '  expected (allow-list): ' + allowedSorted.join(', ') + '\n' +
+    '  found:                 ' + foundSorted.join(', ') + '\n' +
+    'New modules belong in renderer/js/shell/<name>.js, not app-shell.js. ' +
+    'If you extracted a module, update APP_SHELL_ALLOWED_MODULES in the same PR. ' +
+    'If you re-introduced a previously-extracted module, that is a regression — ' +
+    'extracted responsibilities cannot move back to app-shell.js.');
+});
+
+test('G11: extracted modules (Toast / Modal / CommandPalette / Resize / ScriptLanguage / FileTree / Tabs) do NOT appear in app-shell.js', () => {
+  // Explicit denylist — names that have been extracted or deleted
+  // and must never come back. Pairs with G11 above to give a clear
+  // error message when a regression is attempted.
+  const FORBIDDEN_IN_APP_SHELL = [
+    'Toast',          // extracted Slice 8 §A → shell/toast.js
+    'Modal',          // extracted Slice 8 §A → shell/modal.js
+    'CommandPalette', // extracted Slice 8 §A → shell/command-palette.js
+    'Resize',         // extracted Slice 8 §A → shell/resize.js
+    'ScriptLanguage', // extracted Slice 8 §A → shell/script-language.js
+    'FileTree',       // deleted Slice 3 §A (zero consumers; dead DOM target)
+    'Tabs'            // deleted Slice 3 §A (zero consumers; replaced by Rga.TabManager)
+  ];
+  const code = stripComments(readText(path.join(REPO, 'renderer/js/app-shell.js')));
+  const violations = [];
+  FORBIDDEN_IN_APP_SHELL.forEach(function(name) {
+    const re = new RegExp('^Rga\\.' + name + '\\s*=\\s*\\{', 'm');
+    if (re.test(code)) violations.push(name);
+  });
+  assert.deepEqual(violations, [],
+    'G11 — these modules were extracted/deleted and must NOT reappear in app-shell.js: ' +
+    violations.join(', ') + '. ' +
+    'Each name maps to a documented destination in the legacy-extraction-roadmap.');
+});
+
+test('G11: app-shell.js stays at or under its post-Slice-8 size ceiling', () => {
+  // Soft ceiling — prevents stealth re-growth. The ceiling grows the
+  // file's then-current size by a small headroom. Bump deliberately
+  // when a justified addition lands (and document why in the same PR).
+  // Post-Slice-8 §A: 397 LOC. Ceiling: 450 LOC (~13% headroom).
+  const CEILING = 450;
+  const src = readText(path.join(REPO, 'renderer/js/app-shell.js'));
+  const lineCount = src.split('\n').length;
+  assert.ok(lineCount <= CEILING,
+    'G11 — app-shell.js exceeds the post-Slice-8 line-count ceiling of ' + CEILING +
+    ' (currently ' + lineCount + '). If the growth is justified, raise the ceiling in this guard ' +
+    'AND document the addition in the legacy-extraction-roadmap.');
+});
+
+test('G11: every ownership-matrix module-path reference points at an existing file', () => {
+  // Walks the ownership matrix + extraction roadmap + runtime audit
+  // for `renderer/js/...` paths in backtick-quoted form and asserts
+  // each path exists on disk. Prevents matrix drift when a file
+  // moves but the docs don't.
+  //
+  // ASPIRATIONAL_PATHS: file paths the roadmap names as a FUTURE
+  // destination for a planned extraction. Listed here so the guard
+  // doesn't fail until the extraction lands. Remove a path from
+  // this set when the file is created.
+  const ASPIRATIONAL_PATHS = new Set([
+    'renderer/js/shell/panels/notes-connector.js'  // SceneNotesConnector — bundled with StudioPanel migration
+  ]);
+  const DOC_FILES = [
+    'docs/design-system/rwanga-ownership-matrix.md',
+    'docs/design-system/rwanga-legacy-extraction-roadmap.md',
+    'docs/design-system/rwanga-runtime-audit.md',
+    'docs/design-system/rwanga-storage-ownership.md'
+  ];
+  const missing = [];
+  DOC_FILES.forEach(function(docRel) {
+    const docPath = path.join(REPO, docRel);
+    if (!fs.existsSync(docPath)) return;
+    const src = readText(docPath);
+    const re = /`(renderer\/js\/[A-Za-z0-9_\-./]+\.js)`/g;
+    const seen = new Set();
+    let m;
+    while ((m = re.exec(src))) {
+      const p = m[1];
+      if (seen.has(p)) continue;
+      seen.add(p);
+      if (ASPIRATIONAL_PATHS.has(p)) continue;  // future destination — allowed
+      const full = path.join(REPO, p);
+      if (!fs.existsSync(full)) missing.push(docRel + '  →  ' + p);
+    }
+  });
+  assert.deepEqual(missing, [],
+    'G11 — ownership docs reference non-existent files:\n  ' + missing.join('\n  ') + '\n' +
+    'Either the file was renamed/extracted (update the doc) or the doc has a typo. ' +
+    'If the path is a planned future destination, add it to ASPIRATIONAL_PATHS.');
+});
+
 test('G7: every owned key has a corresponding restore (getItem) call in its restoreIn module', () => {
   // A persistence key is only useful if SOMETHING reads it back on
   // boot. This guard scans each registered key's restoreIn module
