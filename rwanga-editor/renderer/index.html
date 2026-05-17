@@ -480,20 +480,11 @@
     var bpClose = Rga.$('#btn-close-bottom-panel');
     if (bpClose) bpClose.innerHTML = Rga.Icons.close;
 
-    // File tree icons
-    Rga.$$('.tree-icon[data-icon]').forEach(function(el) {
-      var name = el.dataset.icon;
-      if (Rga.Icons[name]) el.innerHTML = Rga.Icons[name];
-    });
-
-    // Tree chevrons
-    Rga.$$('.tree-chevron').forEach(function(el) {
-      el.innerHTML = Rga.Icons.chevronDown;
-    });
-
-    // Sync logo
-    var syncLogo = Rga.$('#sync-logo-icon');
-    if (syncLogo) syncLogo.innerHTML = Rga.Icons.rwangaLogo;
+    // Slice 3 §A: legacy File-tree / tree-chevron / #sync-logo-icon
+    // injections retired with the Rga.FileTree module. Their DOM
+    // targets (.tree-icon, .tree-chevron, #sync-logo-icon) were
+    // removed when Slice 2 replaced the hardcoded explorer with the
+    // Script Workspace panel.
   }
 
   /* ---- Register Commands for the Command Palette ---- */
@@ -706,7 +697,9 @@
     Rga.Keyboard.init();
     Rga.BottomPanel.init();
     Rga.CommandPalette.init();
-    Rga.FileTree.init();
+    // Rga.FileTree.init() — deleted in Ownership Stab. Slice 3 §A
+    // along with the Rga.FileTree module itself; #file-tree DOM target
+    // was removed when Script Workspace took over workspace navigation.
     // Slice 1 shell boot — must run BEFORE TabManager so the editor mounts
     // into a chrome-ready shell, and AFTER ViewMode (registered via
     // ViewManager) so ScriptSession picks up the current view on init.

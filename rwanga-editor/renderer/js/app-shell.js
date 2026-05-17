@@ -163,186 +163,13 @@ Rga.Sidebar = {
 };
 
 /* ============================================================
-   TAB MANAGER
-   Manages editor tabs (create, switch, close, dirty state).
+   Rga.Tabs — DELETED in Runtime Ownership Stab. Slice 3 §A.
+   The 185-line legacy module had zero consumers across renderer/
+   and tests/. It predated `Rga.TabManager` (renderer/js/tab-manager.js),
+   which owns tabs end-to-end (open/close/activate, session restore,
+   dirty tracking) via a ProseMirror EditorView mount. No replacement
+   needed; see git history for the pre-deletion source.
    ============================================================ */
-Rga.Tabs = {
-  tabs: [],
-  activeTabId: null,
-
-  init: function() {
-    var self = this;
-    // "New tab" button
-    var newBtn = Rga.$('#tab-new');
-    if (newBtn) {
-      newBtn.addEventListener('click', function() {
-        self.create('Untitled.rga', 'rga');
-      });
-    }
-  },
-
-  /**
-   * Create a new tab.
-   * @param {string} title
-   * @param {string} fileType - 'rga', 'txt', 'md'
-   * @returns {string} tabId
-   */
-  create: function(title, fileType) {
-    var tabId = Rga.generateId('tab');
-    var tab = {
-      id: tabId,
-      title: title || 'Untitled.rga',
-      fileType: fileType || 'rga',
-      filePath: null,
-      isDirty: false,
-      editorHTML: '',
-      scrollPosition: 0,
-      scenes: [],
-      tagRegistry: {},
-      notes: {},
-      problems: []
-    };
-    this.tabs.push(tab);
-    this._renderTab(tab);
-    this.switchTo(tabId);
-    return tabId;
-  },
-
-  /**
-   * Switch to a tab by ID.
-   */
-  switchTo: function(tabId) {
-    // Save current tab state
-    if (this.activeTabId) {
-      this._saveCurrentState();
-    }
-
-    this.activeTabId = tabId;
-
-    // Update tab bar UI
-    Rga.$$('.tab').forEach(function(el) {
-      el.classList.toggle('active', el.dataset.tabId === tabId);
-    });
-
-    // Load tab state into editor
-    var tab = this._getTab(tabId);
-    if (tab) {
-      this._loadState(tab);
-    }
-  },
-
-  /**
-   * Close a tab by ID.
-   */
-  close: function(tabId) {
-    var index = this.tabs.findIndex(function(t) { return t.id === tabId; });
-    if (index === -1) return;
-
-    // Remove tab data
-    this.tabs.splice(index, 1);
-
-    // Remove tab element
-    var tabEl = Rga.$('.tab[data-tab-id="' + tabId + '"]');
-    if (tabEl) tabEl.remove();
-
-    // If we closed the active tab, switch to nearest
-    if (this.activeTabId === tabId) {
-      if (this.tabs.length > 0) {
-        var newIndex = Math.min(index, this.tabs.length - 1);
-        this.switchTo(this.tabs[newIndex].id);
-      } else {
-        // No tabs left — create a new one
-        this.create('Untitled.rga', 'rga');
-      }
-    }
-  },
-
-  /**
-   * Mark a tab as dirty (unsaved changes).
-   */
-  setDirty: function(tabId, isDirty) {
-    var tab = this._getTab(tabId);
-    if (!tab) return;
-    tab.isDirty = isDirty;
-
-    var tabEl = Rga.$('.tab[data-tab-id="' + tabId + '"]');
-    if (!tabEl) return;
-    var dirtyDot = Rga.$('.tab-dirty', tabEl);
-    if (dirtyDot) dirtyDot.hidden = !isDirty;
-  },
-
-  /* ---- Internal methods ---- */
-
-  _getTab: function(tabId) {
-    return this.tabs.find(function(t) { return t.id === tabId; }) || null;
-  },
-
-  _renderTab: function(tab) {
-    var tabBar = Rga.$('#tab-bar');
-    var newBtn = Rga.$('#tab-new');
-
-    var tabEl = document.createElement('div');
-    tabEl.className = 'tab';
-    tabEl.dataset.tabId = tab.id;
-
-    // Icon
-    var iconEl = document.createElement('span');
-    iconEl.className = 'tab-icon';
-    var iconMap = { rga: 'fileRga', txt: 'fileTxt', md: 'fileMd' };
-    iconEl.innerHTML = Rga.Icons[iconMap[tab.fileType] || 'fileTxt'] || '';
-    tabEl.appendChild(iconEl);
-
-    // Title
-    var titleEl = document.createElement('span');
-    titleEl.className = 'tab-title';
-    titleEl.textContent = tab.title;
-    tabEl.appendChild(titleEl);
-
-    // Dirty indicator
-    var dirtyEl = document.createElement('span');
-    dirtyEl.className = 'tab-dirty';
-    dirtyEl.textContent = '\u25CF'; // ●
-    dirtyEl.hidden = !tab.isDirty;
-    tabEl.appendChild(dirtyEl);
-
-    // Close button
-    var closeEl = document.createElement('button');
-    closeEl.className = 'tab-close';
-    closeEl.title = 'Close';
-    closeEl.innerHTML = Rga.Icons.close;
-    tabEl.appendChild(closeEl);
-
-    // Events
-    var self = this;
-    tabEl.addEventListener('click', function(e) {
-      if (!e.target.closest('.tab-close')) {
-        self.switchTo(tab.id);
-      }
-    });
-    closeEl.addEventListener('click', function(e) {
-      e.stopPropagation();
-      self.close(tab.id);
-    });
-
-    tabBar.insertBefore(tabEl, newBtn);
-  },
-
-  _saveCurrentState: function() {
-    var tab = this._getTab(this.activeTabId);
-    if (!tab) return;
-    var editor = Rga.$('#editor');
-    var container = Rga.$('#editor-container');
-    if (editor) tab.editorHTML = editor.innerHTML;
-    if (container) tab.scrollPosition = container.scrollTop;
-  },
-
-  _loadState: function(tab) {
-    var editor = Rga.$('#editor');
-    var container = Rga.$('#editor-container');
-    if (editor) editor.innerHTML = tab.editorHTML;
-    if (container) container.scrollTop = tab.scrollPosition;
-  }
-};
 
 /* ============================================================
    KEYBOARD SHORTCUT MANAGER (legacy API → KeyboardRegistry shim)
@@ -781,93 +608,15 @@ Rga.Toast = {
 };
 
 /* ============================================================
-   FILE TREE — interactive folder expand/collapse + file select
+   Rga.FileTree — DELETED in Runtime Ownership Stab. Slice 3 §A.
+   The 85-line module targeted #file-tree, a legacy DOM element that
+   was removed when the Script Workspace panel (Slice 2) took over
+   workspace navigation. With the target gone, init() always early-
+   returned. Zero consumers in renderer/ or tests/.
    ============================================================ */
-Rga.FileTree = {
-  init: function() {
-    var tree = Rga.$('#file-tree');
-    if (!tree) return;
-
-    tree.addEventListener('click', function(e) {
-      var item = e.target.closest('.tree-item');
-      if (!item) return;
-
-      if (item.classList.contains('folder')) {
-        // Toggle folder open/closed
-        item.classList.toggle('open');
-        var chevron = Rga.$('.tree-chevron', item);
-        if (chevron) {
-          chevron.innerHTML = item.classList.contains('open')
-            ? Rga.Icons.chevronDown
-            : Rga.Icons.chevronRight;
-        }
-        var icon = Rga.$('.tree-icon', item);
-        if (icon) {
-          icon.innerHTML = item.classList.contains('open')
-            ? (Rga.Icons.folderOpen || Rga.Icons.folder)
-            : Rga.Icons.folder;
-        }
-
-        // Toggle visibility of children (items with greater indent)
-        var indent = parseInt(item.style.paddingLeft) || 0;
-        var sibling = item.nextElementSibling;
-        while (sibling && sibling.classList.contains('tree-item')) {
-          var sibIndent = parseInt(sibling.style.paddingLeft) || 0;
-          if (sibIndent <= indent) break;
-
-          sibling.hidden = !item.classList.contains('open');
-          sibling = sibling.nextElementSibling;
-        }
-      } else if (item.classList.contains('file')) {
-        // Select file
-        Rga.$$('.tree-item', tree).forEach(function(i) {
-          i.classList.remove('active');
-        });
-        item.classList.add('active');
-
-        // Get filename
-        var label = Rga.$('.tree-label', item);
-        var filename = label ? label.textContent : '';
-        Rga.Toast.show('Opened: ' + filename, 'info', 1500);
-      }
-    });
-
-    // Double-click to rename
-    tree.addEventListener('dblclick', function(e) {
-      var label = e.target.closest('.tree-label');
-      if (!label) return;
-      var item = label.closest('.tree-item');
-      if (!item) return;
-
-      var currentName = label.textContent;
-      var input = document.createElement('input');
-      input.type = 'text';
-      input.value = currentName;
-      input.style.cssText = 'width:100%;background:var(--bg-primary);border:1px solid var(--border-focus);' +
-        'border-radius:2px;padding:1px 4px;font:inherit;color:inherit;outline:none;';
-
-      label.textContent = '';
-      label.appendChild(input);
-      input.focus();
-      input.select();
-
-      function finish() {
-        var newName = input.value.trim() || currentName;
-        label.textContent = newName;
-      }
-
-      input.addEventListener('blur', finish);
-      input.addEventListener('keydown', function(e2) {
-        if (e2.key === 'Enter') { e2.preventDefault(); input.blur(); }
-        if (e2.key === 'Escape') { input.value = currentName; input.blur(); }
-      });
-    });
-  }
-};
 
 /* ============================================================
-   SCENE ↔ BOTTOM PANEL CONNECTOR
-   Tracks which scene the cursor is in and updates the Notes tab.
+   SCENE NOTES CONNECTOR
    ============================================================ */
 Rga.SceneNotesConnector = {
   _currentSceneId: null,
