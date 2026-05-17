@@ -45,6 +45,10 @@ function boot(opts) {
   ['../../../renderer/js/shell/layout.js',
    '../../../renderer/js/shell/sidebar.js',
    '../../../renderer/js/shell/script-session.js',
+   // Slice 5 §A: StatusBar reads wordCount / currentBlockType via
+   // ScriptMetrics (delegating layer over ScriptSession). Must load
+   // before status-bar.js so the consumer can find it.
+   '../../../renderer/js/shell/script-metrics.js',
    '../../../renderer/js/shell/status-bar.js'
   ].forEach(function(p) { delete require.cache[require.resolve(p)]; require(p); });
 

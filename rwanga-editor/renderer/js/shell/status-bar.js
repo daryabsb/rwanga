@@ -64,13 +64,20 @@
 
   function refresh() {
     if (!_container) return;
-    const snap = (Rga.ScriptSession && typeof Rga.ScriptSession.get === 'function')
+    // Writer-context fields (scene / page / viewMode) read from
+    // Rga.ScriptSession (the writer-context SSOT). Derived analytics
+    // (wordCount / currentBlockType) read from Rga.ScriptMetrics
+    // (the analytics SSOT — Slice 5 §A). Language reads from the
+    // active doc's metadata (per-script setting, not writer-context).
+    const ss = (Rga.ScriptSession && typeof Rga.ScriptSession.get === 'function')
       ? Rga.ScriptSession.get() : null;
-    _renderScene(snap);
-    _renderPage(snap);
-    _renderBlockType(snap);
-    _renderWordCount(snap);
-    _renderViewMode(snap);
+    const sm = (Rga.ScriptMetrics && typeof Rga.ScriptMetrics.get === 'function')
+      ? Rga.ScriptMetrics.get() : null;
+    _renderScene(ss);
+    _renderPage(ss);
+    _renderBlockType(sm);
+    _renderWordCount(sm);
+    _renderViewMode(ss);
     _renderLanguage();
     // offline is static in slice 1
   }
