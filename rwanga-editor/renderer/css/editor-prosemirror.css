@@ -1937,27 +1937,35 @@ body.view-draft-active .rga-draft-footer {
  * Editor Recovery Phase 2 (C5): the dark-pink underline already
  * existed pre-Phase-2; what was missing was screenplay identity
  * presence. Phase 2 strengthens the treatment so each scene heading
- * reads as an immediately-recognisable manuscript slug:
- *   - thicker (3px) dark-pink underline — the brand identifier
- *   - letter-spacing on the uppercase text (uppercase needs spacing
- *     to read crisply at 12pt monospace)
- *   - more breathing room above (1em margin-top) — scene break
- *     separation from the previous block
- *   - slightly more padding below the text before the underline so
- *     the rule sits clear of the descenders
- * No node-view / schema changes; no engine changes. */
+ * reads as an immediately-recognisable manuscript slug.
+ *
+ * Recovery Bundle 2 §A: still blending visually with surrounding
+ * action/dialogue at the same 12pt monospace weight. Hierarchy now
+ * recovered through TYPE-STEP + NEGATIVE-SPACE only — no new ink,
+ * no new color, no chrome elements added:
+ *   - font-size: 12pt → 13pt (one type-notch above body)
+ *   - margin-top: 1em → 1.6em (stronger separation from the
+ *     preceding block; the heading reads as the start of a new
+ *     section, not as another line of body text)
+ *   - margin-bottom: 0.6em → 0.9em (more visual gap between slug
+ *     and the first action line)
+ *   - padding-bottom: 0.3em → 0.4em (underline sits clear of
+ *     uppercase descenders at the bumped size)
+ * The 3px brand-pink underline, letter-spacing, and uppercase
+ * remain unchanged. No node-view / schema changes; no engine
+ * changes. */
 .rga-scene-heading-v3 {
   display: flex;
   align-items: center;
   gap: 0;
   font-family: var(--font-editor, 'Courier Prime', 'Courier New', monospace);
-  font-size: 12pt;
+  font-size: 13pt;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
   border-bottom: 3px solid var(--accent-rwanga, #C2185B);
-  margin: 1em 0 0.6em 0;
-  padding: 0 0 0.3em 0;
+  margin: 1.6em 0 0.9em 0;
+  padding: 0 0 0.4em 0;
 }
 
 .rga-scene-heading-v3-setting,
