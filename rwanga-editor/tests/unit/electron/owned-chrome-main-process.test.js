@@ -1,15 +1,15 @@
 // Copyright (c) 2026 Rwanga. Licensed under Apache 2.0.
-// Workstream A — owned chrome main-process guards.
+// Owned Chrome — G-OC-1: main-process frame ownership.
+// PERMANENT (post-A6). Phase A1 SHIPPED 2026-05-17.
 //
 // G-OC-1: main process uses platform-conditional frame settings.
 //   Windows + Linux: frame: false  (owned chrome)
 //   macOS:           titleBarStyle: 'hiddenInset' (hybrid; native traffic lights preserved)
 //
-// Stage gate (skip pattern): until Workstream A1 lands, main.js still
-// declares `frame: true`. The guard skips the assertion in that
-// pre-implementation state — the test PASSES but does not assert.
-// Once A1 lands, the skip predicate becomes false and the assertion
-// runs.
+// A6 removed the transitional `isA1Landed` skip-gate — the guard
+// now asserts unconditionally because A1 is locked in code at
+// commit 4bf4d9b0. Any future revert that re-introduces frame:true
+// fails this guard at CI.
 'use strict';
 
 const { test } = require('node:test');
@@ -22,25 +22,11 @@ const MAIN_JS = path.join(REPO, 'electron/main.js');
 
 function read(p) { return fs.readFileSync(p, 'utf8'); }
 
-// Stage gate — Workstream A1 has not landed if main.js still says `frame: true`
-// without any platform-conditional handling. While the gate is open, this
-// guard is a placeholder; once A1 closes the gate, it activates fully.
-function isA1Landed(src) {
-  return /frame\s*:\s*!isWin/.test(src) ||
-         /frame\s*:\s*\(?\s*process\.platform/.test(src) ||
-         /frame\s*:\s*false/.test(src);
-}
-
 test('G-OC-1: main.js uses platform-conditional frame setting (Win/Linux frameless, macOS hiddenInset)', () => {
   const src = read(MAIN_JS);
-  if (!isA1Landed(src)) {
-    // A1 has not landed yet — this guard is dormant. It will activate
-    // automatically once main.js sets frame: false (or equivalent
-    // platform-conditional). Until then, no assertion runs.
-    return;
-  }
-  // Windows + Linux must NOT use frame: true.
-  // Look for the platform-aware frame declaration.
+  // Windows + Linux must use frame: false. Two valid construction
+  // styles are accepted: inline `new BrowserWindow({ frame: false, … })`
+  // or build-and-pass `const opts = {…}; opts.frame = false`.
   const hasFrameFalse = /frame\s*:\s*false/.test(src) ||
                         /frame\s*:\s*!isWin\s*&&\s*!isLin/.test(src) ||
                         /frame\s*:\s*\(?\s*process\.platform\s*===\s*['"]darwin['"]/.test(src);
@@ -52,21 +38,13 @@ test('G-OC-1: main.js uses platform-conditional frame setting (Win/Linux framele
     'main.js must include titleBarStyle: \'hiddenInset\' for the macOS hybrid path');
 });
 
-test('G-OC-1: main.js does NOT declare frame: true after A1 (regression guard for the reversal)', () => {
+test('G-OC-1: main.js does NOT declare frame: true (regression guard for the §A reversal)', () => {
   const src = read(MAIN_JS);
-  if (!isA1Landed(src)) return;  // dormant until A1
   // Strip comments first — frame: true inside an explanatory comment
   // is allowed (the comment may legitimately discuss the old setting).
   const stripped = src
     .replace(/\/\*[\s\S]*?\*\//g, '')
     .replace(/(^|[^:])\/\/[^\n]*/g, '$1');
-  // The reversal is binary: anywhere in real code, frame: true is the
-  // pre-A1 state. After A1, only frame: false (or its absence on the
-  // macOS hiddenInset path) is allowed. Two valid construction styles:
-  //   (a) inline:    new BrowserWindow({ frame: false, … })
-  //   (b) build-and-pass: const opts = { … }; opts.frame = false;
-  //                       new BrowserWindow(opts);
-  // Both styles are accepted; we just forbid the literal frame: true.
   assert.equal(/frame\s*:\s*true/.test(stripped), false,
-    'main.js must not declare frame: true after A1 — that is the reversal we performed');
+    'main.js must not declare frame: true — that is the V1/T1 native-first state §A reversed at commit 4bf4d9b0');
 });

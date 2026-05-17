@@ -42,25 +42,42 @@ function ruleBody(css, selectorRegex) {
 // T1 — Chrome stack guards
 // ----------------------------------------------------------------
 
-test('VS1 — index.html contains no #menu-bar element (legacy custom menu deleted)', () => {
-  const html = readText(INDEX_HTML);
-  assert.equal(
-    /<(?:header|nav|div|aside|footer)[^>]*\sid="menu-bar"/.test(html),
-    false,
-    'Legacy #menu-bar must be deleted per T1 (native Electron menu is the source of truth).'
-  );
-});
-
-test('VS2 — index.html contains no fake window controls and no #app-logo (deleted with #menu-bar)', () => {
-  const html = readText(INDEX_HTML);
-  ['win-minimize', 'win-maximize', 'win-close', 'app-logo'].forEach(function(id) {
-    assert.equal(
-      new RegExp('id="' + id + '"').test(html),
-      false,
-      '#' + id + ' must not exist in index.html — retired with the legacy custom menu bar (T1).'
-    );
-  });
-});
+// VS1 RETIRED — Studio Shell Recovery §A6 (2026-05-17).
+// Pre-A6 contract: "index.html contains no #menu-bar element (legacy
+// custom menu deleted)". The V1/T1 native-first decision that
+// motivated VS1 was authorized for reversal in the Studio Shell
+// Recovery mission; Workstream A4 introduced an owned in-window menu
+// surface on a NEW element id (#rga-shell-menubar), which respects
+// VS1's letter trivially. The constructive G-OC-4 guard
+// (tests/unit/shell/owned-chrome-menu-ownership.test.js) replaces
+// VS1 with an active assertion: #rga-shell-menubar must exist with
+// exactly 8 entries (File · Edit · View · Script · Tags · Tools ·
+// Export · Help) and every entry must be a button with data-menu.
+//
+// VS2 RETIRED — Studio Shell Recovery §A6 (2026-05-17).
+// Pre-A6 contract: "no fake window controls and no #app-logo". The
+// "fake" qualifier was the entire point — pre-§A6 window controls
+// would have been visual stand-ins for missing IPC. A3 wired real
+// window controls (#rga-shell-window-{min,max,close}) to the
+// pre-existing window.rwanga.window.* IPC bridge. G-OC-3
+// (tests/unit/shell/owned-chrome-window-controls.test.js) replaces
+// VS2 with: the three controls exist, each routes to real IPC, each
+// carries aria-label, each declares -webkit-app-region: no-drag,
+// close has the --danger variant for hover affordance.
+//
+// VS11 RETIRED — Studio Shell Recovery §A6 (2026-05-17).
+// Pre-A6 contract: "main process does not call Menu.setApplicationMenu".
+// Workstream A4 introduced platform-conditional menu suppression:
+// Menu.setApplicationMenu(null) on Windows/Linux (suppress native),
+// Menu.setApplicationMenu(builtMenu) on macOS (HIG-required global
+// menu). G-OC-5 (tests/unit/shell/owned-chrome-menu-ownership.test.js)
+// replaces VS11 with the new contract: the platform branch is
+// explicit and grep-able; both branches are required.
+//
+// VS3–VS10 remain active — they protect concerns unrelated to chrome
+// ownership (status bar background, tokens, scene-navigator grid,
+// scene-toolbox sticky avoidance, bp-tab indicator, inspector header
+// casing) and continue to pass without modification.
 
 test('VS3 — exactly one Rwanga-owned identity surface (#rga-shell-titlebar-title) in index.html', () => {
   const html = readText(INDEX_HTML);
@@ -206,40 +223,5 @@ test('VS10 — Inspector header is title-case and no stylesheet applies text-tra
   });
 });
 
-// ----------------------------------------------------------------
-// T1 drift guard — main process must not own the menu
-// ----------------------------------------------------------------
-
-test('VS11 — main process does not call Menu.setApplicationMenu (native menu stays source of truth)', () => {
-  // The 2026-05-17 T1 correction binds V1 to leave the native Electron
-  // application menu untouched. Any future contributor who reintroduces
-  // a renderer-owned menu would also be tempted to suppress the native
-  // one via Menu.setApplicationMenu(null) — that's the drift this guard
-  // exists to prevent.
-  if (!fs.existsSync(MAIN_JS)) {
-    // No main.js file at this exact path — search the typical alts.
-    const alts = [
-      path.join(REPO, 'main.js'),
-      path.join(REPO, 'main', 'index.js'),
-      path.join(REPO, 'src', 'main.js')
-    ];
-    let found = null;
-    for (let i = 0; i < alts.length; i += 1) {
-      if (fs.existsSync(alts[i])) { found = alts[i]; break; }
-    }
-    assert.ok(found, 'Cannot locate the Electron main process file to audit. Checked: ' + MAIN_JS + ', ' + alts.join(', '));
-    const src = readText(found);
-    assert.equal(
-      /Menu\s*\.\s*setApplicationMenu/.test(src),
-      false,
-      'main process must not call Menu.setApplicationMenu — native menu is the source of truth (T1 / 2026-05-17 correction)'
-    );
-    return;
-  }
-  const src = readText(MAIN_JS);
-  assert.equal(
-    /Menu\s*\.\s*setApplicationMenu/.test(src),
-    false,
-    'main process must not call Menu.setApplicationMenu — native menu is the source of truth (T1 / 2026-05-17 correction)'
-  );
-});
+// VS11 retired in §A6 — see the retirement notes at the top of the
+// VS3 block above. G-OC-5 carries the new contract.

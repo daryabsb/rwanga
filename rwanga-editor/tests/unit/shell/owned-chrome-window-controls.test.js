@@ -1,5 +1,6 @@
 // Copyright (c) 2026 Rwanga. Licensed under Apache 2.0.
-// Workstream A — owned window controls guards.
+// Owned Chrome — G-OC-3: owned window controls (Row 1 right).
+// PERMANENT (post-A6). Phase A1 SHIPPED 2026-05-17.
 //
 // G-OC-3: renderer declares three window-control buttons
 //         (#rga-shell-window-min, #rga-shell-window-max,
@@ -10,8 +11,8 @@
 //   • declares -webkit-app-region: no-drag in CSS
 //   • close button has a --danger variant class for hover affordance
 //
-// Stage gate: until A3 lands, the buttons do not exist. The guard
-// skips until the close button id appears in index.html.
+// A6 removed the transitional `isA3Landed` skip-gates. The buttons
+// are locked in code at commit d28c6b51.
 'use strict';
 
 const { test } = require('node:test');
@@ -26,13 +27,8 @@ const PRELOAD_JS = path.join(REPO, 'electron/preload.js');
 
 function read(p) { return fs.readFileSync(p, 'utf8'); }
 
-function isA3Landed(html) {
-  return /id="rga-shell-window-close"/.test(html);
-}
-
 test('G-OC-3: window-control buttons exist (min / max / close)', () => {
   const html = read(INDEX_HTML);
-  if (!isA3Landed(html)) return;  // dormant until A3
   ['rga-shell-window-min', 'rga-shell-window-max', 'rga-shell-window-close'].forEach(function(id) {
     assert.ok(html.indexOf('id="' + id + '"') >= 0,
       'window control button #' + id + ' must exist');
@@ -41,7 +37,6 @@ test('G-OC-3: window-control buttons exist (min / max / close)', () => {
 
 test('G-OC-3: each window-control button carries aria-label (accessibility non-negotiable)', () => {
   const html = read(INDEX_HTML);
-  if (!isA3Landed(html)) return;
   ['rga-shell-window-min', 'rga-shell-window-max', 'rga-shell-window-close'].forEach(function(id) {
     // Find the button tag and verify aria-label.
     const re = new RegExp('<button[^>]*id="' + id + '"[^>]*aria-label\\s*=', 'i');
@@ -52,7 +47,6 @@ test('G-OC-3: each window-control button carries aria-label (accessibility non-n
 
 test('G-OC-3: window-control buttons declare -webkit-app-region: no-drag in CSS', () => {
   const html = read(INDEX_HTML);
-  if (!isA3Landed(html)) return;
   const css = read(SHELL_CSS);
   // Either a .rga-shell-window-control class rule or per-id rules
   // must declare no-drag. The shared class is the cleaner pattern.
@@ -64,7 +58,6 @@ test('G-OC-3: window-control buttons declare -webkit-app-region: no-drag in CSS'
 
 test('G-OC-3: close button has the --danger variant class for hover affordance', () => {
   const html = read(INDEX_HTML);
-  if (!isA3Landed(html)) return;
   // The close button must carry the --danger modifier so hover
   // styling can distinguish it (industry pattern — close hover is
   // typically red).
@@ -75,7 +68,6 @@ test('G-OC-3: close button has the --danger variant class for hover affordance',
 
 test('G-OC-3: window-control click handlers route through window.rwanga.window.* IPC (no DOM-only behaviour)', () => {
   const html = read(INDEX_HTML);
-  if (!isA3Landed(html)) return;
   // The buttons must wire to the existing preload IPC bridge — not
   // perform direct DOM mutations. Look for the IPC call references
   // in the renderer source (index.html boot script OR title-bar.js).

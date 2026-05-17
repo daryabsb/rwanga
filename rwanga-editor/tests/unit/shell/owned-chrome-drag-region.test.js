@@ -1,5 +1,7 @@
 // Copyright (c) 2026 Rwanga. Licensed under Apache 2.0.
-// Workstream A — drag-region + double-click + accessibility guards.
+// Owned Chrome — G-OC-6 + G-OC-7 + G-OC-8: drag-region, double-click,
+// and accessibility invariants.
+// PERMANENT (post-A6). Phase A1 SHIPPED 2026-05-17.
 //
 // G-OC-6: every interactive element inside the title bar declares
 //         -webkit-app-region: no-drag (drag-island invariant).
@@ -12,11 +14,10 @@
 // G-OC-8: accessibility — every chrome control has aria-label or
 //         visible text; tab order through menu items is sequential.
 //
-// Stage gates:
-//   G-OC-6: activates when buttons appear in the title bar (A3 first,
-//           fully when A5 polishes the islands).
-//   G-OC-7: activates in A5.
-//   G-OC-8: activates incrementally; final form lands in A5.
+// A6 removed the transitional skip-gates (isA3OrLaterLanded,
+// isA5Landed). All three guards now assert unconditionally.
+// Behavior is locked in code at commits d28c6b51 (A3), e19ef643 (A4),
+// 2ef40715 (A5).
 'use strict';
 
 const { test } = require('node:test');
@@ -36,14 +37,8 @@ function readIf(p) { return fs.existsSync(p) ? read(p) : ''; }
 // G-OC-6 — drag-island invariant
 // ----------------------------------------------------------------
 
-function isA3OrLaterLanded(html) {
-  // The first window-control button is the marker.
-  return /id="rga-shell-window-close"/.test(html);
-}
-
 test('G-OC-6: every interactive title-bar element declares -webkit-app-region: no-drag', () => {
   const html = read(INDEX_HTML);
-  if (!isA3OrLaterLanded(html)) return;  // dormant until controls exist
   const css = read(SHELL_CSS);
   // Three classes of interactive elements inside the title bar must
   // each have no-drag declared somewhere reachable by CSS specificity:
@@ -91,19 +86,9 @@ test('G-OC-6: -webkit-app-region: no-drag declarations are scoped to title-bar /
 // G-OC-7 — double-click maximize handler
 // ----------------------------------------------------------------
 
-function isA5Landed(srcs) {
-  // The handler must exist somewhere — title-bar.js is the natural
-  // place. Detect via the IPC call (window.rwanga.window.maximize)
-  // appearing in a dblclick handler context.
-  const combined = srcs.join('\n');
-  return /dblclick[\s\S]{0,400}window\.rwanga\.window\.maximize/.test(combined) ||
-         /double[Cc]lick[\s\S]{0,400}window\.rwanga\.window\.maximize/.test(combined);
-}
-
 test('G-OC-7: double-click on title-bar drag region calls window.rwanga.window.maximize()', () => {
   const html = read(INDEX_HTML);
   const titleBarSrc = readIf(TITLE_BAR_JS);
-  if (!isA5Landed([html, titleBarSrc])) return;  // dormant until A5
   // After A5: somewhere (title-bar.js or boot-script) a dblclick
   // listener on the title bar calls window.rwanga.window.maximize.
   const combined = html + '\n' + titleBarSrc;
@@ -119,7 +104,6 @@ test('G-OC-7: double-click on title-bar drag region calls window.rwanga.window.m
 
 test('G-OC-8: every .rga-shell-window-control has either visible text content or aria-label', () => {
   const html = read(INDEX_HTML);
-  if (!isA3OrLaterLanded(html)) return;
   // Find every window-control button and verify each has aria-label OR non-empty text.
   const re = /<button[^>]*class="[^"]*rga-shell-window-control[^"]*"[^>]*>([\s\S]*?)<\/button>/g;
   let m;
@@ -138,7 +122,6 @@ test('G-OC-8: every .rga-shell-window-control has either visible text content or
 
 test('G-OC-8: every menubar item is keyboard-focusable (default <button> tab order is correct)', () => {
   const html = read(INDEX_HTML);
-  if (!/id="rga-shell-menubar"/.test(html)) return;  // dormant until A4
   // Every menubar item is a <button> per G-OC-4. <button> elements
   // are tab-focusable by default — no tabindex needed. But if any
   // item declares tabindex="-1" (which would skip it), that's a
