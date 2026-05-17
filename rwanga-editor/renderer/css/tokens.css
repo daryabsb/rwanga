@@ -90,6 +90,12 @@
   --tab-bar-height: 36px;
   --toolbar-height: 40px;
   --gutter-width: 52px;
+  /* §D1.1: page-width is the single source of manuscript geometry.
+     Consumed by .rga-page (the writing surface) AND by
+     .rga-shell-toolbar-inner (Row 3 toolbar's centered band that
+     aligns to the page column). Adding a third consumer would
+     mean three consumers, one source — that's the right shape. */
+  --page-width: 8.5in;
 
   /* === Background Layers (darkest → lightest surface) === */
   --bg-base: #181818;

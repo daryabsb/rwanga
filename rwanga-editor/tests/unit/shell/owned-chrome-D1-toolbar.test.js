@@ -211,3 +211,75 @@ test('§D1: no text command claims a KR keyboard binding (Ctrl+B is PM-owned; KR
       'text command "' + cmd + '" must NOT declare a KR keyboard binding (key: …) — PM keymap owns Ctrl+B/I; the others have no accelerator. KR-side binding would conflict with another command in the registry.');
   });
 });
+
+// ----------------------------------------------------------------
+// §D1.1 — Manuscript-alignment correction (toolbar inner band)
+// ----------------------------------------------------------------
+
+test('§D1.1: --page-width token is the single source of manuscript geometry', () => {
+  const TOKENS_CSS = path.join(REPO, 'renderer/css/tokens.css');
+  const tokensCss  = read(TOKENS_CSS);
+  // Token defined in :root / dark theme block (no light-theme override
+  // needed — geometry doesn't theme).
+  assert.ok(/--page-width\s*:\s*8\.5in/.test(tokensCss),
+    'tokens.css must define --page-width: 8.5in');
+});
+
+test('§D1.1: .rga-page consumes --page-width (no hardcoded 8.5in literal)', () => {
+  const EDITOR_CSS = path.join(REPO, 'renderer/css/editor-prosemirror.css');
+  const css = read(EDITOR_CSS);
+  // The base .rga-page rule must reference var(--page-width).
+  // Use the same line-anchored ruleBody helper pattern other tests use.
+  const baseRule = css.match(/(?:^|\n)\s*\.rga-page\s*\{[^}]*\}/);
+  assert.ok(baseRule, '.rga-page rule must exist');
+  assert.ok(/width\s*:\s*var\(\s*--page-width/.test(baseRule[0]),
+    '.rga-page must consume var(--page-width) instead of a hardcoded literal');
+});
+
+test('§D1.1: toolbar inner band exists and consumes --page-width', () => {
+  const html = read(INDEX_HTML);
+  assert.ok(/class="rga-shell-toolbar-inner"/.test(html),
+    'index.html must wrap toolbar groups in <div class="rga-shell-toolbar-inner">');
+  const shellCss = read(SHELL_CSS);
+  const innerRule = shellCss.match(/(?:^|\n)\s*\.rga-shell-toolbar-inner\s*\{[^}]*\}/);
+  assert.ok(innerRule, '.rga-shell-toolbar-inner rule must exist');
+  assert.ok(/var\(\s*--page-width/.test(innerRule[0]),
+    '.rga-shell-toolbar-inner must consume var(--page-width) — single geometry source with .rga-page');
+});
+
+test('§D1.1: toolbar uses workspace-style grid columns (alignment with editor-area)', () => {
+  const css = read(SHELL_CSS);
+  const toolbarRule = css.match(/#rga-shell-toolbar\.rga-shell-toolbar\s*\{[^}]*\}/);
+  assert.ok(toolbarRule);
+  // Must be a CSS grid mirroring workspace's column template.
+  assert.ok(/display\s*:\s*grid/.test(toolbarRule[0]),
+    '#rga-shell-toolbar must be display: grid (column-mirror of #workspace)');
+  // Columns reference the same tokens workspace uses.
+  ['--activity-bar-width', '--sidebar-width', '--inspector-width'].forEach(function(t) {
+    assert.ok(toolbarRule[0].indexOf(t) >= 0,
+      '#rga-shell-toolbar grid-template-columns must reference ' + t + ' (mirror workspace)');
+  });
+  // 1fr column for the editor track.
+  assert.ok(/1fr/.test(toolbarRule[0]),
+    '#rga-shell-toolbar grid must include a 1fr track (the editor column the toolbar inner lives in)');
+});
+
+test('§D1.1: toolbar inner lives in grid-column 4 (the 1fr editor track) and centres horizontally', () => {
+  const css = read(SHELL_CSS);
+  const innerRule = css.match(/\.rga-shell-toolbar-inner\s*\{[^}]*\}/);
+  assert.ok(innerRule);
+  assert.ok(/grid-column\s*:\s*4/.test(innerRule[0]),
+    '.rga-shell-toolbar-inner must declare grid-column: 4 (the editor column)');
+  assert.ok(/justify-self\s*:\s*center/.test(innerRule[0]),
+    '.rga-shell-toolbar-inner must declare justify-self: center');
+});
+
+test('§D1.1: collapsed-state mirrors keep the toolbar synced with workspace via :has()', () => {
+  const css = read(SHELL_CSS);
+  // Sidebar-collapsed mirror.
+  assert.ok(/#app:has\(#workspace\.sidebar-collapsed\)\s+#rga-shell-toolbar/.test(css),
+    'CSS must mirror #workspace.sidebar-collapsed onto #rga-shell-toolbar via :has()');
+  // Inspector-hidden mirror.
+  assert.ok(/#app:has\(#workspace\.inspector-hidden\)\s+#rga-shell-toolbar/.test(css),
+    'CSS must mirror #workspace.inspector-hidden onto #rga-shell-toolbar via :has()');
+});

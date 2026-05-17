@@ -74,7 +74,7 @@
 #editor-container.view-flow .rga-page {
   background: transparent !important;
   box-shadow: none !important;
-  width: 8.5in !important;
+  width: var(--page-width) !important;
   min-height: auto !important;
   height: auto !important;
   padding: 0 0.5in !important;
@@ -930,7 +930,10 @@ body.view-draft-active .rga-draft-footer {
   flex-shrink: 0;
   background: var(--editor-page-bg);
   box-shadow: var(--editor-page-shadow);
-  width: 8.5in;
+  /* §D1.1: width sourced from --page-width token (defined in
+     tokens.css). The same token drives the Row 3 toolbar's inner
+     band so the toolbar visually aligns with the manuscript column. */
+  width: var(--page-width);
   min-height: 11in;
   padding: 1in 1in 1in 1.5in;
   position: relative;
