@@ -212,12 +212,17 @@
     <!-- ---- RESIZE: editor ↔ inspector ---- -->
     <div class="resize-handle" data-resize="inspector"></div>
 
-    <!-- INSPECTOR PANEL -->
-    <aside id="inspector-panel">
+    <!-- INSPECTOR PANEL — Visual Stabilization V1 (T5): calmer
+         empty state. Header is title-case. Body uses .inspector-empty
+         classes (see components.css) so future content can replace
+         the empty block without touching the wrapper. -->
+    <aside id="inspector-panel" aria-label="Inspector">
       <div class="inspector-header">Inspector</div>
-      <div class="inspector-body">
-        <div style="padding:16px;color:var(--text-tertiary);font-size:12px;">
-          Select a tag or scene header to view details.
+      <div class="inspector-body" aria-live="polite">
+        <div class="inspector-empty">
+          <div class="inspector-empty-icon" aria-hidden="true">◌</div>
+          <div class="inspector-empty-title">No details to show.</div>
+          <div class="inspector-empty-help">Select a tag or a scene heading to inspect it.</div>
         </div>
       </div>
     </aside>
