@@ -179,7 +179,11 @@ test('Slice 2: status bar mounts into #status-bar (no #rga-shell-statusbar indir
   Rga.Shell.init();
   const statusBar = document.getElementById('status-bar');
   assert.ok(statusBar.classList.contains('rga-shell-statusbar'), 'StatusBar attached class to #status-bar');
-  assert.equal(statusBar.querySelectorAll('.rga-shell-status-segment').length, 7);
+  // Studio Shell Recovery §F: 7 preserved segments + 1 new theme
+  // instrument (reads existing Rga.Theme SSOT). See
+  // tests/unit/shell/studio-shell-F-status-bar.test.js for the
+  // grouping invariants.
+  assert.equal(statusBar.querySelectorAll('.rga-shell-status-segment').length, 8);
 });
 
 test('Slice 7 §A: ScriptSession snapshot has NO analytics fields (moved to Rga.ScriptMetrics)', () => {

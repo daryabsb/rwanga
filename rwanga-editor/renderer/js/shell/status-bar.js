@@ -13,7 +13,9 @@
 
   let _container = null;
   let _segments = {};
+  let _sections = {};                       // Studio Shell Recovery §F: { left, center, right }
   let _unsubscribeSession = null;
+  let _unsubscribeTheme = null;             // Studio Shell Recovery §F
   let _tabActivatedHandler = null;
 
   function init(container) {
@@ -28,24 +30,53 @@
     // Language is per-script (not writer-context) — listen to tab-activated.
     _tabActivatedHandler = function() { _renderLanguage(); };
     document.addEventListener('editor.tabActivated', _tabActivatedHandler);
+    // Studio Shell Recovery §F: theme is a right-side instrument now;
+    // re-render on theme change so the "Dark" / "Light" label stays
+    // synced with Rga.Theme.current (the single owner).
+    if (_unsubscribeTheme) _unsubscribeTheme();
+    if (Rga.Theme && typeof Rga.Theme.onChange === 'function') {
+      _unsubscribeTheme = Rga.Theme.onChange(function() { _renderTheme(); });
+    }
     return true;
   }
 
   function _build() {
     _container.innerHTML = '';
     _container.classList.add('rga-shell-statusbar');
-    // Segment order per slice-2 plan §3.4 / §12 OQ1:
-    //   scene · page · blockType · wordCount · viewMode · lang · offline
-    // Grouped: writer-context (scene/page/block/words) then tool-context
-    // (view/lang/sync).
+
+    // Studio Shell Recovery §F: three-section layout. Existing 7 segments
+    // are regrouped (no new sources, no new features) plus one new
+    // right-side instrument (theme indicator that reads Rga.Theme.current
+    // — an existing SSOT — and toggles via Rga.Theme.toggle on click).
+    //
+    //   LEFT    sync/local state   →  offline  (the "Local" indicator)
+    //           scene position     →  scene
+    //   CENTER  current context    →  blockType ("Scene Heading" etc.)
+    //           page position      →  page ("Page: N/M")
+    //   RIGHT   words              →  wordCount
+    //           view mode          →  viewMode (the dropdown)
+    //           language           →  language
+    //           theme              →  theme  (NEW instrument; reads
+    //                                         existing Rga.Theme SSOT)
+    //
+    // The segment data-segment attributes are preserved unchanged so
+    // ScriptSession / ScriptMetrics / ViewMode wiring keeps working.
+
+    _sections = {
+      left:   _appendSection('rga-shell-statusbar-left'),
+      center: _appendSection('rga-shell-statusbar-center'),
+      right:  _appendSection('rga-shell-statusbar-right')
+    };
+
     const defs = [
-      { id: 'scene',     cls: 'rga-shell-status-scene',     initial: 'Scene: —' },
-      { id: 'page',      cls: 'rga-shell-status-page',      initial: 'Page: —/—' },
-      { id: 'blockType', cls: 'rga-shell-status-blocktype', initial: '—' },
-      { id: 'wordCount', cls: 'rga-shell-status-wordcount', initial: '0 words' },
-      { id: 'viewMode',  cls: 'rga-shell-status-viewmode',  build: _buildViewModeSegment },
-      { id: 'language',  cls: 'rga-shell-status-language',  initial: '—' },
-      { id: 'offline',   cls: 'rga-shell-status-offline',   initial: 'Local' }
+      { id: 'offline',   section: 'left',   cls: 'rga-shell-status-offline',   initial: 'Local' },
+      { id: 'scene',     section: 'left',   cls: 'rga-shell-status-scene',     initial: 'Scene: —' },
+      { id: 'blockType', section: 'center', cls: 'rga-shell-status-blocktype', initial: '—' },
+      { id: 'page',      section: 'center', cls: 'rga-shell-status-page',      initial: 'Page: —/—' },
+      { id: 'wordCount', section: 'right',  cls: 'rga-shell-status-wordcount', initial: '0 words' },
+      { id: 'viewMode',  section: 'right',  cls: 'rga-shell-status-viewmode',  build: _buildViewModeSegment },
+      { id: 'language',  section: 'right',  cls: 'rga-shell-status-language',  initial: '—' },
+      { id: 'theme',     section: 'right',  cls: 'rga-shell-status-theme',     build: _buildThemeSegment }
     ];
     _segments = {};
     defs.forEach(function(d) {
@@ -54,9 +85,42 @@
       sp.setAttribute('data-segment', d.id);
       if (d.build) d.build(sp);
       else sp.textContent = d.initial;
-      _container.appendChild(sp);
+      _sections[d.section].appendChild(sp);
       _segments[d.id] = sp;
     });
+  }
+
+  function _appendSection(cls) {
+    const sec = document.createElement('div');
+    sec.className = 'rga-shell-statusbar-section ' + cls;
+    _container.appendChild(sec);
+    return sec;
+  }
+
+  // Studio Shell Recovery §F: theme instrument. Reads Rga.Theme.current
+  // (existing SSOT), shows "Dark" / "Light" as a text instrument, and
+  // toggles on click via Rga.Theme.toggle (existing API). No new
+  // toggle button — this is a text segment that happens to be clickable,
+  // matching the brief's "text/light-icons as instruments, do not turn
+  // status bar into a button strip" rule.
+  function _buildThemeSegment(spanEl) {
+    spanEl.textContent = _themeLabel();
+    spanEl.setAttribute('role', 'button');
+    spanEl.setAttribute('aria-label', 'Toggle theme');
+    spanEl.addEventListener('click', _onThemeClick);
+  }
+  function _onThemeClick() {
+    if (Rga.Theme && typeof Rga.Theme.toggle === 'function') {
+      Rga.Theme.toggle();
+    }
+  }
+  function _themeLabel() {
+    const t = (Rga.Theme && Rga.Theme.current) || 'dark';
+    return t === 'light' ? 'Light' : 'Dark';
+  }
+  function _renderTheme() {
+    if (!_segments.theme) return;
+    _segments.theme.textContent = _themeLabel();
   }
 
   // Bundle 1 §A — labelled View dropdown. Native <select> for native
@@ -124,6 +188,7 @@
     _renderWordCount(sm);
     _renderViewMode(ss);
     _renderLanguage();
+    _renderTheme();
     // offline is static in slice 1
   }
 
@@ -204,6 +269,7 @@
 
   function _reset() {
     if (_unsubscribeSession) { _unsubscribeSession(); _unsubscribeSession = null; }
+    if (_unsubscribeTheme) { _unsubscribeTheme(); _unsubscribeTheme = null; }
     if (_tabActivatedHandler) {
       document.removeEventListener('editor.tabActivated', _tabActivatedHandler);
       _tabActivatedHandler = null;
@@ -211,6 +277,7 @@
     if (_container) _container.innerHTML = '';
     _container = null;
     _segments = {};
+    _sections = {};
   }
 
   Rga.Shell.StatusBar.init    = init;

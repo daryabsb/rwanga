@@ -56,6 +56,26 @@ function boot(opts) {
     getOutline: function() { return stub.outline || { statistics: { words: 0, sceneCount: 0, pages: 0 } }; }
   };
 
+  // Studio Shell Recovery §F: StatusBar now also reads Rga.Theme
+  // (existing SSOT) for the right-side theme instrument. Provide a
+  // minimal stub the test loader sees BEFORE status-bar.js loads.
+  global.window.Rga.Theme = global.window.Rga.Theme || {
+    current: opts.theme || 'dark',
+    _listeners: [],
+    toggle: function() {
+      this.current = this.current === 'dark' ? 'light' : 'dark';
+      this._listeners.forEach(function(fn) { try { fn(); } catch (_) {} });
+    },
+    onChange: function(fn) {
+      this._listeners.push(fn);
+      var self = this;
+      return function() {
+        var i = self._listeners.indexOf(fn);
+        if (i >= 0) self._listeners.splice(i, 1);
+      };
+    }
+  };
+
   ['../../../renderer/js/shell/layout.js',
    '../../../renderer/js/shell/sidebar.js',
    '../../../renderer/js/shell/script-session.js',
@@ -80,10 +100,12 @@ function viewWithCursor(pos) {
   return { state: { selection: { from: pos, to: pos, empty: true } } };
 }
 
-test('init creates 7 segment elements (Slice 2 added blockType + wordCount); no-active-script state', () => {
+test('init creates 8 segment elements (Studio Shell Recovery §F added theme instrument); no-active-script state', () => {
   const { status } = boot();
   const segments = status.querySelectorAll('.rga-shell-status-segment');
-  assert.equal(segments.length, 7);
+  // Studio Shell Recovery §F: 7 existing segments + 1 new theme
+  // instrument that reads Rga.Theme.current (existing SSOT).
+  assert.equal(segments.length, 8);
   assert.equal(status.querySelector('[data-segment="scene"]').textContent, 'Scene: —');
   assert.equal(status.querySelector('[data-segment="page"]').textContent, 'Page: —/—');
   assert.equal(status.querySelector('[data-segment="blockType"]').textContent, '—');
@@ -102,6 +124,8 @@ test('init creates 7 segment elements (Slice 2 added blockType + wordCount); no-
   assert.equal(vmSelect.value, 'flow');
   assert.equal(status.querySelector('[data-segment="language"]').textContent, '—');
   assert.equal(status.querySelector('[data-segment="offline"]').textContent, 'Local');
+  // Theme defaults to 'Dark' (stub default in the boot helper).
+  assert.equal(status.querySelector('[data-segment="theme"]').textContent, 'Dark');
 });
 
 test('Slice 2: wordCount segment shows "0 words" when script is open but empty', () => {
@@ -112,11 +136,26 @@ test('Slice 2: wordCount segment shows "0 words" when script is open but empty',
   assert.equal(status.querySelector('[data-segment="wordCount"]').textContent, '0 words');
 });
 
-test('Slice 2: segment order matches plan §3.4 (scene · page · blockType · wordCount · viewMode · lang · offline)', () => {
+test('Studio Shell Recovery §F: segments are grouped left / center / right (replaces slice-2 flat order)', () => {
   const { status } = boot();
-  const ids = Array.from(status.querySelectorAll('.rga-shell-status-segment'))
-                   .map(function(el) { return el.getAttribute('data-segment'); });
-  assert.deepEqual(ids, ['scene', 'page', 'blockType', 'wordCount', 'viewMode', 'language', 'offline']);
+  // Three section wrappers exist.
+  const left   = status.querySelector('.rga-shell-statusbar-left');
+  const center = status.querySelector('.rga-shell-statusbar-center');
+  const right  = status.querySelector('.rga-shell-statusbar-right');
+  assert.ok(left && center && right, 'all three statusbar sections must exist');
+  function ids(section) {
+    return Array.from(section.querySelectorAll('.rga-shell-status-segment'))
+                .map(function(el) { return el.getAttribute('data-segment'); });
+  }
+  // Left:   sync/local (offline) → scene position (scene)
+  // Center: current context (blockType) → page position (page)
+  // Right:  words → view mode → language → theme
+  assert.deepEqual(ids(left),   ['offline', 'scene'],
+    'left section: sync/local state then scene position');
+  assert.deepEqual(ids(center), ['blockType', 'page'],
+    'center section: current context then page position');
+  assert.deepEqual(ids(right),  ['wordCount', 'viewMode', 'language', 'theme'],
+    'right section: words / view mode / language / theme');
 });
 
 test('Bundle 1 §A: viewMode select reflects Rga.ViewManager.current() via ScriptSession', () => {

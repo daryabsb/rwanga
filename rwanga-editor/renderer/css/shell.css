@@ -340,13 +340,30 @@
 
 /* ---- Slice 1 shell status-bar segments ----
    Rga.Shell.StatusBar emits .rga-shell-statusbar on #status-bar, plus
-   .rga-shell-status-segment children. Visual Stabilization V1 (T2)
-   gives them deliberate spacing, a left-rule separator on the right
-   group (viewMode + language + offline), and a clear hover affordance
-   on the clickable viewMode segment. */
+   .rga-shell-status-segment children grouped into three sections.
+
+   Studio Shell Recovery §F: the status bar regroups its 7 existing
+   segments (plus one new theme instrument that reads the existing
+   Rga.Theme SSOT) into three sections — left / center / right — so
+   it reads as a set of instruments instead of a left-aligned text
+   dump. No new sources, no buttons, no validation system added. */
 #status-bar.rga-shell-statusbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: stretch;
   gap: 0;
   padding: 0 8px;
+}
+.rga-shell-statusbar-section {
+  display: inline-flex;
+  align-items: center;
+  height: var(--status-bar-height);
+}
+.rga-shell-statusbar-center {
+  /* The center section sits between the flex-pushed left and right
+     groups via space-between on the parent. flex: 0 0 auto keeps it
+     intrinsically sized rather than stretching. */
+  flex: 0 0 auto;
 }
 .rga-shell-status-segment {
   display: inline-flex;
@@ -356,13 +373,31 @@
   color: var(--statusbar-fg);
   white-space: nowrap;
 }
-/* Right-side tool-context group: thin left-rule separator so writer-
-   context and tool-context read as two visual blocks, not seven loose
-   words. */
-.rga-shell-status-segment[data-segment="viewMode"],
-.rga-shell-status-segment[data-segment="language"],
-.rga-shell-status-segment[data-segment="offline"] {
+/* Subtle separator BETWEEN sections — instruments group visually
+   instead of via per-segment dividers. Drawn on the inner edge of the
+   center section so it reads as the boundary between left and center,
+   and the boundary between center and right. */
+.rga-shell-statusbar-center .rga-shell-status-segment:first-child {
   border-left: 1px solid var(--border-subtle);
+  margin-left: 4px;
+  padding-left: 16px;
+}
+.rga-shell-statusbar-right .rga-shell-status-segment:first-child {
+  border-left: 1px solid var(--border-subtle);
+  margin-left: 4px;
+  padding-left: 16px;
+}
+
+/* Theme instrument — text segment that reads Rga.Theme.current and
+   toggles via Rga.Theme.toggle on click. Instrument (text + cursor),
+   not a button: matches "do not turn status bar into a button strip". */
+.rga-shell-status-segment[data-segment="theme"] {
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+.rga-shell-status-segment[data-segment="theme"]:hover {
+  background: var(--statusbar-segment-hover-bg);
+  color: var(--statusbar-fg-hover);
 }
 /* Bundle 1 §A — labelled View dropdown. Hosts a "View:" prefix + a
    native <select>. Pre-Bundle-1 the segment was a click-cycle whose
