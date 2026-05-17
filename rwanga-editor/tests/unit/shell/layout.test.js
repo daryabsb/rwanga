@@ -133,7 +133,10 @@ test('Layout._reset() restores defaults', () => {
     studioPanel: { state: 'open', visible: true,  height: 200, activeTab: null },
     inspector:   { visible: true,  width: 280 },
     titleBar:    { visible: true },
-    statusBar:   { visible: true }
+    statusBar:   { visible: true },
+    // Studio Shell Recovery §D4: toolbar zone added so the Row 3
+    // Mode toggle (Screenplay / Text) persists via WorkspaceState.
+    toolbar:     { mode: 'screenplay' }
   });
 });
 

@@ -41,7 +41,13 @@
     // commit `--inspector-width` to on drag end (was CSS-only before).
     inspector:   { visible: true,  width: 280 },
     titleBar:    { visible: true },
-    statusBar:   { visible: true }
+    statusBar:   { visible: true },
+    // Studio Shell Recovery §D4: toolbar zone added so the Row 3
+    // mode toggle (Screenplay / Text) persists via the existing
+    // WorkspaceState pipeline (same extension pattern Slice 4 used
+    // to add `inspector`). Pure visibility control; no commands
+    // unregistered when 'text' hides Scene + Writing groups.
+    toolbar:     { mode: 'screenplay' }
   };
 
   let _current = _cloneDeepDefaults();
@@ -53,7 +59,8 @@
       studioPanel: Object.assign({}, DEFAULTS.studioPanel),
       inspector:   Object.assign({}, DEFAULTS.inspector),
       titleBar:    Object.assign({}, DEFAULTS.titleBar),
-      statusBar:   Object.assign({}, DEFAULTS.statusBar)
+      statusBar:   Object.assign({}, DEFAULTS.statusBar),
+      toolbar:     Object.assign({}, DEFAULTS.toolbar)
     };
   }
 
@@ -63,7 +70,8 @@
       studioPanel: Object.assign({}, _current.studioPanel),
       inspector:   Object.assign({}, _current.inspector),
       titleBar:    Object.assign({}, _current.titleBar),
-      statusBar:   Object.assign({}, _current.statusBar)
+      statusBar:   Object.assign({}, _current.statusBar),
+      toolbar:     Object.assign({}, _current.toolbar)
     };
   }
 
@@ -157,7 +165,7 @@
     }
     // Validate: every zone present must be a plain object. Unknown zones
     // pass through (forward-compat).
-    const knownZones = ['sidebar', 'studioPanel', 'inspector', 'titleBar', 'statusBar'];
+    const knownZones = ['sidebar', 'studioPanel', 'inspector', 'titleBar', 'statusBar', 'toolbar'];
     for (let i = 0; i < knownZones.length; i += 1) {
       const z = knownZones[i];
       if (snap[z] !== undefined && (snap[z] === null || typeof snap[z] !== 'object' || Array.isArray(snap[z]))) {

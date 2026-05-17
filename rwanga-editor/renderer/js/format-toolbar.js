@@ -515,6 +515,69 @@
       handler: openFlagPopup,        source: 'D3 toolbar (writing.flag)' });
   }
 
+  // §D4 — Mode toggle helpers. Source of truth: Rga.Shell.Layout.
+  // toolbar.mode ('screenplay' | 'text'). DOM mirror: #rga-shell-
+  // toolbar[data-mode] + aria-checked on the segmented buttons.
+  // Persistence rides the existing WorkspaceState pipeline — no new
+  // storage key, no new module.
+  const TOOLBAR_MODES = ['screenplay', 'text'];
+
+  function _readToolbarMode() {
+    if (!window.Rga || !window.Rga.Shell || !window.Rga.Shell.Layout) return 'screenplay';
+    const snap = window.Rga.Shell.Layout.get();
+    const m = snap && snap.toolbar && snap.toolbar.mode;
+    return (TOOLBAR_MODES.indexOf(m) !== -1) ? m : 'screenplay';
+  }
+
+  function _applyToolbarMode(mode) {
+    if (TOOLBAR_MODES.indexOf(mode) === -1) mode = 'screenplay';
+    const bar = document.getElementById('rga-shell-toolbar');
+    if (bar) bar.setAttribute('data-mode', mode);
+    const btns = document.querySelectorAll('.rga-shell-toolbar-mode-btn[data-toolbar-mode]');
+    btns.forEach(function(b) {
+      const checked = (b.getAttribute('data-toolbar-mode') === mode);
+      b.setAttribute('aria-checked', checked ? 'true' : 'false');
+      b.classList.toggle('active', checked);
+    });
+  }
+
+  function _wireToolbarMode() {
+    const group = document.querySelector('.rga-shell-toolbar-mode[data-group="mode"]');
+    if (!group || group.dataset.wired) return;
+    group.dataset.wired = '1';
+    // Apply persisted mode on init (Layout.fromJSON has already run
+    // via WorkspaceState by the time format-toolbar.init() fires —
+    // the boot order in index.html enforces this).
+    _applyToolbarMode(_readToolbarMode());
+    // Click → write Layout. Layout's subscriber pipeline triggers
+    // WorkspaceState._save, so persistence happens for free.
+    group.addEventListener('click', function(e) {
+      const btn = e.target.closest('.rga-shell-toolbar-mode-btn[data-toolbar-mode]');
+      if (!btn) return;
+      e.stopPropagation();
+      const next = btn.getAttribute('data-toolbar-mode');
+      if (TOOLBAR_MODES.indexOf(next) === -1) return;
+      if (next === _readToolbarMode()) return; // no-op, no notify
+      if (window.Rga && window.Rga.Shell && window.Rga.Shell.Layout) {
+        window.Rga.Shell.Layout.set({ toolbar: { mode: next } });
+      } else {
+        // Layout missing (test fixture, defensive) — still update DOM
+        // so the surface stays consistent within this session.
+        _applyToolbarMode(next);
+      }
+    });
+    // Subscribe to Layout — keep DOM mirror in sync with any
+    // out-of-band writers (palette, menu, future surfaces).
+    if (window.Rga && window.Rga.Shell && window.Rga.Shell.Layout &&
+        typeof window.Rga.Shell.Layout.subscribe === 'function') {
+      window.Rga.Shell.Layout.subscribe(function(next, prev) {
+        const a = next && next.toolbar && next.toolbar.mode;
+        const b = prev && prev.toolbar && prev.toolbar.mode;
+        if (a !== b) _applyToolbarMode(a);
+      });
+    }
+  }
+
   function init() {
     // §D1 — register text commands FIRST so the Row 3 click delegation
     // and any future menu items can resolve them. Idempotent — KR
@@ -608,6 +671,15 @@
         row3Tag.value = '';
       });
     }
+
+    // §D4 — Mode toggle (Screenplay / Text). State owned by
+    // Rga.Shell.Layout.toolbar.mode (existing shell-truth surface;
+    // persisted via WorkspaceState — no new ownership). Switching
+    // mode toggles the data-mode attribute on #rga-shell-toolbar;
+    // CSS handles the visibility of Scene + Writing groups. Nothing
+    // is unregistered — Scene + Writing commands stay registered in
+    // KR and remain reachable via menus / keyboard / scene toolbox.
+    _wireToolbarMode();
 
     // Color / link popover support DOM (popovers live elsewhere in the
     // page; wire their internal handlers regardless of which surface

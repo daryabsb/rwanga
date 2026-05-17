@@ -181,6 +181,23 @@
         <button class="rga-shell-toolbar-btn rga-shell-toolbar-btn--text"
                 data-command="edit.redo" type="button" title="Redo">Redo</button>
       </div>
+      <!-- §D4 — Mode toggle. Segmented control at the right edge of
+           the inner band. Toggles #rga-shell-toolbar[data-mode] between
+           "screenplay" (default; all groups visible) and "text" (Scene
+           + Writing groups hidden via CSS — pure visibility, nothing
+           unregistered). Persisted as Layout.toolbar.mode through the
+           existing WorkspaceState pipeline (no new ownership surface).
+           Wiring lives in renderer/js/format-toolbar.js. -->
+      <div class="rga-shell-toolbar-group-sep" role="separator" aria-hidden="true"></div>
+      <div class="rga-shell-toolbar-group rga-shell-toolbar-mode"
+           data-group="mode" role="radiogroup" aria-label="Toolbar mode">
+        <button class="rga-shell-toolbar-btn rga-shell-toolbar-btn--text rga-shell-toolbar-mode-btn"
+                data-toolbar-mode="screenplay" type="button" role="radio"
+                aria-checked="true" title="Screenplay mode — full toolbar">Screenplay</button>
+        <button class="rga-shell-toolbar-btn rga-shell-toolbar-btn--text rga-shell-toolbar-mode-btn"
+                data-toolbar-mode="text" type="button" role="radio"
+                aria-checked="false" title="Text mode — text tools only">Text</button>
+      </div>
     </div>
   </div>
 

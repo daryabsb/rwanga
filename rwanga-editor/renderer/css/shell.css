@@ -924,6 +924,42 @@
   letter-spacing: 0.02em;
 }
 
+/* §D4 — Mode toggle (segmented control: Screenplay / Text).
+   Buttons reuse the existing .rga-shell-toolbar-btn--text styling;
+   .rga-shell-toolbar-mode-btn adds segmented-pill rounding + active-
+   pressed state. aria-checked is the SSOT for visual selection
+   (kept in sync by format-toolbar.js with #rga-shell-toolbar[data-mode]). */
+.rga-shell-toolbar-mode {
+  gap: 0;
+}
+.rga-shell-toolbar-mode-btn {
+  border-radius: 0;
+}
+.rga-shell-toolbar-mode-btn:first-of-type {
+  border-top-left-radius: 4px;
+  border-bottom-left-radius: 4px;
+}
+.rga-shell-toolbar-mode-btn:last-of-type {
+  border-top-right-radius: 4px;
+  border-bottom-right-radius: 4px;
+}
+.rga-shell-toolbar-mode-btn[aria-checked="true"] {
+  background: var(--accent-bg, rgba(255, 255, 255, 0.10));
+  color: var(--text-primary);
+}
+
+/* §D4 — Text-mode hides Scene + Writing groups (pure visibility).
+   The group-seps adjacent to hidden groups also collapse so the
+   toolbar doesn't show orphaned dividers. :has() is supported in
+   Electron 31+ (same baseline as the D1.1 .rga-shell-toolbar-inner
+   mirror rules above). */
+#rga-shell-toolbar[data-mode="text"] .rga-shell-toolbar-group[data-group="scene"],
+#rga-shell-toolbar[data-mode="text"] .rga-shell-toolbar-group[data-group="writing"],
+#rga-shell-toolbar[data-mode="text"] .rga-shell-toolbar-group-sep:has(+ .rga-shell-toolbar-group[data-group="scene"]),
+#rga-shell-toolbar[data-mode="text"] .rga-shell-toolbar-group-sep:has(+ .rga-shell-toolbar-group[data-group="writing"]) {
+  display: none;
+}
+
 /* Draft view hides the toolbar — Draft is distraction-free. Mirror
    pattern from the format-toolbar / scene-toolbox hide rule in
    editor-prosemirror.css. */
