@@ -6,22 +6,20 @@
 
 /* ---- App Root Grid ----
    Row tracks (top → bottom):
-     1. Shell titlebar (#rga-shell-titlebar) — Slice 1; the SINGLE
-        Rwanga-owned identity surface. Height owned by the titlebar's
-        own rule (28px); `auto` lets that rule drive the track size.
-     2. Workspace (#workspace) — 1fr, takes all remaining vertical space.
-     3. Status bar (#status-bar) — fixed at --status-bar-height.
-   The legacy #menu-bar row was retired in Visual Stabilization V1
-   (chrome stack T1): native-first chrome means the native OS title +
-   native Electron menu (File·Edit·View·Help) own all menu surfaces;
-   the renderer owns identity only.
+     1. Shell titlebar (#rga-shell-titlebar) — Row 1 of owned chrome.
+     2. Menu bar (#rga-shell-menubar)        — Row 2; Studio Shell
+        Recovery §A4 re-introduced an owned menu bar (replaced the
+        native Electron menu on Win/Linux; macOS keeps native via
+        Apple HIG). Auto track — height owned by the element.
+     3. Workspace (#workspace) — 1fr, takes all remaining vertical space.
+     4. Status bar (#status-bar) — fixed at --status-bar-height.
    IMPORTANT: track count MUST equal child count of #app. Adding a new
    chrome row without expanding this template will collapse #workspace
    into the next track and the editor becomes invisible. See the
    guard test in tests/unit/shell/css-layout.test.js. */
 #app {
   display: grid;
-  grid-template-rows: auto 1fr var(--status-bar-height);
+  grid-template-rows: auto auto 1fr var(--status-bar-height);
   height: 100vh;
   width: 100vw;
   overflow: hidden;
@@ -608,6 +606,113 @@
 .rga-shell-window-control--danger:hover {
   background: var(--accent-error, #c42b1c);
   color: #ffffff;
+}
+
+/* ============================================================
+   Studio Shell Recovery — Workstream A4: owned menu surface (Row 2).
+   Eight top-level menu buttons + a dropdown overlay that re-anchors
+   under whichever menu button is open. Reuses existing tokens
+   (--bg-tertiary / --bg-hover / --text-secondary / --text-primary /
+   --border-subtle); no new colors, no new sizes, no new visual
+   language. Treatment mirrors .bp-tab (calm muted resting text,
+   hover bumps color, active drops a fill) per
+   docs/design-system/03-rwanga-component-system.md §3.
+   ============================================================ */
+#rga-shell-menubar.rga-shell-menubar {
+  display: flex;
+  align-items: stretch;
+  height: 28px;
+  padding: 0 8px;
+  background: var(--bg-secondary, #2a2a2a);
+  border-bottom: 1px solid var(--border-subtle, rgba(128, 128, 128, 0.18));
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-app-region: drag;
+}
+.rga-shell-menubar-item {
+  -webkit-app-region: no-drag;
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+  border: 0;
+  color: var(--text-secondary, #9a9a9a);
+  font-family: var(--font-ui, system-ui, sans-serif);
+  font-size: 12px;
+  padding: 0 10px;
+  height: 28px;
+  cursor: pointer;
+  transition: background var(--transition-fast, 0.1s ease),
+              color var(--transition-fast, 0.1s ease);
+}
+.rga-shell-menubar-item:hover {
+  background: var(--bg-hover, rgba(255, 255, 255, 0.06));
+  color: var(--text-primary, #cccccc);
+}
+.rga-shell-menubar-item:focus-visible {
+  outline: 1px solid var(--border-secondary, #444);
+  outline-offset: -2px;
+}
+.rga-shell-menubar-item-open {
+  background: var(--bg-hover, rgba(255, 255, 255, 0.06));
+  color: var(--text-primary, #cccccc);
+}
+
+/* Dropdown overlay — absolutely positioned by JS under the clicked
+   menubar item. Calm, compact, no animation. */
+.rga-shell-menubar-dropdown {
+  position: fixed;
+  z-index: 1500;
+  min-width: 220px;
+  padding: 4px 0;
+  background: var(--bg-secondary, #2a2a2a);
+  border: 1px solid var(--border-subtle, rgba(128, 128, 128, 0.18));
+  border-radius: 4px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.30);
+  font-family: var(--font-ui, system-ui, sans-serif);
+  font-size: 12px;
+  color: var(--text-primary, #cccccc);
+}
+.rga-shell-menubar-dropdown[hidden] { display: none; }
+.rga-shell-menubar-dropdown-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  width: 100%;
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+  border: 0;
+  color: var(--text-primary, #cccccc);
+  font: inherit;
+  text-align: left;
+  padding: 6px 14px;
+  cursor: pointer;
+  transition: background var(--transition-fast, 0.1s ease),
+              color var(--transition-fast, 0.1s ease);
+}
+.rga-shell-menubar-dropdown-item:hover:not(:disabled) {
+  background: var(--bg-hover, rgba(255, 255, 255, 0.06));
+}
+.rga-shell-menubar-dropdown-item:disabled,
+.rga-shell-menubar-dropdown-item[aria-disabled="true"] {
+  color: var(--text-disabled, #6e6e6e);
+  cursor: default;
+  opacity: 0.6;
+}
+.rga-shell-menubar-dropdown-item-label {
+  flex: 1 1 auto;
+}
+.rga-shell-menubar-dropdown-item-acc {
+  flex: 0 0 auto;
+  color: var(--text-tertiary, #888);
+  font-size: 11px;
+  letter-spacing: 0.02em;
+}
+.rga-shell-menubar-dropdown-sep {
+  height: 1px;
+  margin: 4px 8px;
+  background: var(--border-subtle, rgba(128, 128, 128, 0.18));
 }
 
 /* ============================================================

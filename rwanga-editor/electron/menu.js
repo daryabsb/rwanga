@@ -83,8 +83,19 @@ function buildMenu(mainWindow) {
     },
   ];
 
-  const menu = Menu.buildFromTemplate(template);
-  Menu.setApplicationMenu(menu);
+  // Studio Shell Recovery — Workstream A4: native menu is suppressed
+  // on Windows + Linux (the renderer now owns the menu surface as
+  // Row 2). macOS keeps the native menu populated per Apple HIG —
+  // the global Mac menu bar is OS-owned chrome that cannot be moved
+  // into the window. Bundle 1 §A's view-radio sync (setViewMenuRadio)
+  // continues to operate on the macOS path; on Win/Linux it no-ops
+  // because Menu.getApplicationMenu() returns null.
+  if (isMac) {
+    const menu = Menu.buildFromTemplate(template);
+    Menu.setApplicationMenu(menu);
+  } else {
+    Menu.setApplicationMenu(null);
+  }
 }
 
 function sendMenuAction(window, action) {

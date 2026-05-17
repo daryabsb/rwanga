@@ -75,12 +75,27 @@
     </div>
   </header>
 
-  <!-- Legacy custom #menu-bar removed in Visual Stabilization V1
-       (chrome stack T1 — native-first). File · Edit · View · Help
-       live in the native Electron application menu now. Fake window
-       controls retired in favour of the native OS title bar's real
-       ones. The Slice 1 titlebar above is the only Rwanga-owned
-       chrome surface. -->
+  <!-- Studio Shell Recovery — Workstream A4: owned menu surface
+       (Row 2). Eight top-level entries; each <button> carries a
+       data-menu attribute. Dropdowns are anchored under the clicked
+       item via #rga-shell-menubar-dropdown. Menu items route
+       through existing SSOTs (Rga.FileManager, Rga.ViewMode,
+       Rga.Shell.StudioPanel, Rga.Theme, Rga.CommandPalette);
+       disabled items have aria-disabled="true" and no action.
+       Native Electron menu is suppressed on Win/Linux via
+       Menu.setApplicationMenu(null); macOS keeps the native menu
+       per Apple HIG. -->
+  <nav id="rga-shell-menubar" class="rga-shell-menubar" aria-label="Application menu">
+    <button class="rga-shell-menubar-item" data-menu="file"   type="button">File</button>
+    <button class="rga-shell-menubar-item" data-menu="edit"   type="button">Edit</button>
+    <button class="rga-shell-menubar-item" data-menu="view"   type="button">View</button>
+    <button class="rga-shell-menubar-item" data-menu="script" type="button">Script</button>
+    <button class="rga-shell-menubar-item" data-menu="tags"   type="button">Tags</button>
+    <button class="rga-shell-menubar-item" data-menu="tools"  type="button">Tools</button>
+    <button class="rga-shell-menubar-item" data-menu="export" type="button">Export</button>
+    <button class="rga-shell-menubar-item" data-menu="help"   type="button">Help</button>
+  </nav>
+  <div id="rga-shell-menubar-dropdown" class="rga-shell-menubar-dropdown" hidden role="menu" aria-hidden="true"></div>
 
   <!-- ============================================================
        WORKSPACE (activity bar + sidebar + editor + inspector)
@@ -838,6 +853,234 @@
      fire on every relevant upstream event; the footer is hidden by CSS
      (display: none) except when body.view-draft-active. No new
      computation, no new ownership module. */
+  /* ---- Owned menu bar (Studio Shell Recovery — Workstream A4) ----
+     Eight top-level dropdowns rendered into #rga-shell-menubar.
+     Each item routes through an existing SSOT mutator — no menu
+     item performs a direct DOM action, no command logic is
+     duplicated. Disabled items get aria-disabled="true" and are
+     unclickable. The dropdown overlay is the existing
+     #rga-shell-menubar-dropdown element, content-swapped per menu.
+
+     File / Open Recent / Manage Storage / Quit are disabled because
+     no SSOT path exists for them in the renderer; native menu carried
+     them via Electron roles. They re-enable when wired in later
+     workstreams. */
+  var MENU_DEFS = {
+    file: [
+      { label: 'New Script',  accelerator: 'Ctrl+N',       action: function() { if (Rga.FileManager) Rga.FileManager.newScript(); } },
+      { label: 'Open…',  accelerator: 'Ctrl+O',       action: function() { if (Rga.FileManager) Rga.FileManager.openFromDialog(); } },
+      { label: 'Save',        accelerator: 'Ctrl+S',       action: function() { if (Rga.FileManager) Rga.FileManager.save(); } },
+      { label: 'Save As…', accelerator: 'Ctrl+Shift+S', action: function() { if (Rga.FileManager) Rga.FileManager.saveAs(); } },
+      { type: 'separator' },
+      { label: 'Open Recent…', disabled: true },
+      { label: 'Manage Storage…', disabled: true },
+      { type: 'separator' },
+      { label: 'Quit', disabled: true }
+    ],
+    edit: [
+      // Undo/Redo route through ProseMirror's history plugin —
+      // window.RgaProseMirror.undo/redo. Cut/Copy/Paste/SelectAll
+      // work natively in contenteditable and are left disabled in
+      // the menu (the keyboard accelerators still fire natively).
+      { label: 'Undo', accelerator: 'Ctrl+Z',
+        action: function() {
+          var view = Rga.TabManager && Rga.TabManager._editorView && Rga.TabManager._editorView();
+          if (view && window.RgaProseMirror && window.RgaProseMirror.undo) {
+            window.RgaProseMirror.undo(view.state, view.dispatch);
+            view.focus();
+          }
+        } },
+      { label: 'Redo', accelerator: 'Ctrl+Y',
+        action: function() {
+          var view = Rga.TabManager && Rga.TabManager._editorView && Rga.TabManager._editorView();
+          if (view && window.RgaProseMirror && window.RgaProseMirror.redo) {
+            window.RgaProseMirror.redo(view.state, view.dispatch);
+            view.focus();
+          }
+        } },
+      { type: 'separator' },
+      { label: 'Cut',        disabled: true },
+      { label: 'Copy',       disabled: true },
+      { label: 'Paste',      disabled: true },
+      { label: 'Select All', disabled: true }
+    ],
+    view: [
+      { label: 'Flow',  action: function() { if (Rga.ViewMode) Rga.ViewMode.set('flow');  } },
+      { label: 'Draft', action: function() { if (Rga.ViewMode) Rga.ViewMode.set('draft'); } },
+      { label: 'Print', action: function() { if (Rga.ViewMode) Rga.ViewMode.set('print'); } },
+      { type: 'separator' },
+      { label: 'Studio Panel', accelerator: 'Ctrl+J',
+        action: function() {
+          if (Rga.Shell && Rga.Shell.StudioPanel && Rga.Shell.StudioPanel.toggle) {
+            Rga.Shell.StudioPanel.toggle();
+          }
+        } },
+      // Toolbox stays disabled until Workstream C lands its SSOT
+      // (Layout.sceneToolbox). A4 must not add a new owner; surfacing
+      // the menu item disabled keeps the menu structure stable while
+      // the action waits for its owner.
+      { label: 'Toolbox', disabled: true },
+      { type: 'separator' },
+      { label: 'Toggle Sidebar',   disabled: true },
+      { label: 'Toggle Inspector', disabled: true }
+    ],
+    script: [
+      { label: 'Insert Scene',         disabled: true },
+      { label: 'Renumber Scenes',      disabled: true },
+      { label: 'Go to Scene…',    disabled: true },
+      { type: 'separator' },
+      { label: 'Insert Page Break',    disabled: true },
+      { label: 'Set Page Setup…', disabled: true },
+      { label: 'Set Script Language…', disabled: true }
+    ],
+    tags: [
+      { label: 'Open Tag Manager',    disabled: true },
+      { label: 'Add Tag to Selection', disabled: true },
+      { label: 'Filter by Tag…', disabled: true }
+    ],
+    tools: [
+      { label: 'Command Palette', accelerator: 'Ctrl+Shift+P',
+        action: function() { if (Rga.CommandPalette && Rga.CommandPalette.open) Rga.CommandPalette.open(); } },
+      { label: 'Toggle Theme', accelerator: 'Ctrl+Shift+T',
+        action: function() { if (Rga.Theme && Rga.Theme.toggle) Rga.Theme.toggle(); } },
+      { type: 'separator' },
+      { label: 'Load Sample Script', disabled: true },
+      { label: 'Settings',           disabled: true }
+    ],
+    export: [
+      { label: 'Export to PDF…', disabled: true },
+      { type: 'separator' },
+      { label: 'Export to DOCX',         disabled: true },
+      { label: 'Export to Fountain',     disabled: true },
+      { label: 'Export to Final Draft',  disabled: true }
+    ],
+    help: [
+      { label: 'Documentation', disabled: true },
+      { label: 'Report a Bug',  disabled: true },
+      { label: 'About Rwanga',  disabled: true }
+    ]
+  };
+
+  function wireMenubar() {
+    var menubar  = Rga.$('#rga-shell-menubar');
+    var dropdown = Rga.$('#rga-shell-menubar-dropdown');
+    if (!menubar || !dropdown) return;
+    var _openMenuKey = null;
+    var _outsideHandler = null;
+
+    // Esc → close dropdown. Registered once via KeyboardRegistry with a
+    // `when` predicate so it only fires while a dropdown is open. This
+    // satisfies G1 (no document.keydown listeners in init scripts) and
+    // mirrors how Rga.ViewMode binds Esc-exits-Draft.
+    if (Rga.KeyboardRegistry && typeof Rga.KeyboardRegistry.register === 'function') {
+      Rga.KeyboardRegistry.register('escape',
+        { when: function() { return _openMenuKey !== null; } },
+        function() { closeMenu(); },
+        'A4 menubar (Esc closes dropdown)');
+    }
+
+    function openMenu(menuKey, anchorBtn) {
+      var def = MENU_DEFS[menuKey];
+      if (!def) return;
+      // Build dropdown content.
+      dropdown.innerHTML = '';
+      def.forEach(function(item) {
+        if (item.type === 'separator') {
+          var sep = document.createElement('div');
+          sep.className = 'rga-shell-menubar-dropdown-sep';
+          sep.setAttribute('role', 'separator');
+          dropdown.appendChild(sep);
+          return;
+        }
+        var row = document.createElement('button');
+        row.type = 'button';
+        row.className = 'rga-shell-menubar-dropdown-item';
+        row.setAttribute('role', 'menuitem');
+        if (item.disabled) {
+          row.disabled = true;
+          row.setAttribute('aria-disabled', 'true');
+        }
+        var label = document.createElement('span');
+        label.className = 'rga-shell-menubar-dropdown-item-label';
+        label.textContent = item.label;
+        row.appendChild(label);
+        if (item.accelerator) {
+          var acc = document.createElement('span');
+          acc.className = 'rga-shell-menubar-dropdown-item-acc';
+          acc.textContent = item.accelerator;
+          row.appendChild(acc);
+        }
+        if (!item.disabled && typeof item.action === 'function') {
+          row.addEventListener('click', function() {
+            closeMenu();
+            try { item.action(); }
+            catch (err) { console.error('[wireMenubar] action threw for "' + item.label + '":', err); }
+          });
+        }
+        dropdown.appendChild(row);
+      });
+      // Anchor under the menu button.
+      var rect = anchorBtn.getBoundingClientRect();
+      dropdown.style.left = rect.left + 'px';
+      dropdown.style.top  = rect.bottom + 'px';
+      dropdown.hidden = false;
+      dropdown.setAttribute('aria-hidden', 'false');
+      anchorBtn.classList.add('rga-shell-menubar-item-open');
+      _openMenuKey = menuKey;
+      // Close on outside mousedown OR Esc.
+      _outsideHandler = function(e) {
+        if (dropdown.contains(e.target)) return;
+        if (e.target.closest('.rga-shell-menubar-item')) return;  // a sibling click handles its own
+        closeMenu();
+      };
+      // Defer attach so the click that opened us doesn't immediately close.
+      setTimeout(function() {
+        document.addEventListener('mousedown', _outsideHandler);
+      }, 0);
+    }
+
+    function closeMenu() {
+      dropdown.hidden = true;
+      dropdown.setAttribute('aria-hidden', 'true');
+      dropdown.innerHTML = '';
+      menubar.querySelectorAll('.rga-shell-menubar-item-open').forEach(function(b) {
+        b.classList.remove('rga-shell-menubar-item-open');
+      });
+      _openMenuKey = null;
+      if (_outsideHandler) { document.removeEventListener('mousedown', _outsideHandler); _outsideHandler = null; }
+      // Esc handler is a KeyboardRegistry registration with a `when`
+      // predicate gated on _openMenuKey — no manual removeEventListener
+      // needed; it self-disables when _openMenuKey is null.
+    }
+
+    menubar.addEventListener('click', function(e) {
+      var btn = e.target.closest('.rga-shell-menubar-item');
+      if (!btn) return;
+      var key = btn.dataset.menu;
+      // Click-the-same-menu-button → close. Click-different-menu → swap.
+      if (_openMenuKey === key) { closeMenu(); return; }
+      closeMenu();
+      openMenu(key, btn);
+    });
+
+    // Preserve keyboard accelerators that previously rode on the
+    // native Electron menu. Native menu is suppressed on Win/Linux
+    // (electron/menu.js); these KeyboardRegistry registrations
+    // recover the file actions. Cmd+J was already registered by
+    // Rga.Shell.StudioPanel; Cmd+Shift+P, Cmd+Shift+T, etc. were
+    // already registered by their owners. Cmd+Shift+S = Save As is
+    // NOT registered here — it conflicts with the existing
+    // Cmd+Shift+S panel-shortcut (scene navigator) registration;
+    // the menu click path for Save As still works. Flagged as a
+    // Workstream B follow-up.
+    if (Rga.KeyboardRegistry && typeof Rga.KeyboardRegistry.register === 'function') {
+      var KR = Rga.KeyboardRegistry;
+      KR.register('n', { ctrl: true }, function() { if (Rga.FileManager) Rga.FileManager.newScript(); }, 'A4 menu (File → New)');
+      KR.register('o', { ctrl: true }, function() { if (Rga.FileManager) Rga.FileManager.openFromDialog(); }, 'A4 menu (File → Open)');
+      KR.register('s', { ctrl: true }, function() { if (Rga.FileManager) Rga.FileManager.save(); }, 'A4 menu (File → Save)');
+    }
+  }
+
   function wireDraftFooter() {
     var pageEl  = Rga.$('#rga-draft-footer-page');
     var wordsEl = Rga.$('#rga-draft-footer-words');
@@ -933,6 +1176,7 @@
     wireUnits();
     wireBreadcrumb();     // Recovery Bundle 2 §B — writer-context breadcrumb
     wireDraftFooter();    // Editor Recovery Phase 3 / C6 — populates the draft footer
+    wireMenubar();        // Studio Shell Recovery §A4 — owned menu surface (Row 2)
     Rga.FlowChrome && Rga.FlowChrome.init();
     Rga.FormatToolbar && Rga.FormatToolbar.init();
 

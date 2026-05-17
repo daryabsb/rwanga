@@ -28,7 +28,11 @@ function countAppChildren(html) {
   const after = html.slice(start);
   // Find children: any top-level tag whose opening sits at indent "  <"
   // and which has an id attribute we recognise as an #app direct child.
-  const knownChildIds = ['rga-shell-titlebar', 'menu-bar', 'workspace', 'status-bar'];
+  // Studio Shell Recovery §A4 added `rga-shell-menubar` as the owned
+  // menu surface (Row 2). The legacy `menu-bar` ID was deleted in V1
+  // but kept in this list as a tombstone — it never matches, but
+  // documents the rename intent for future readers.
+  const knownChildIds = ['rga-shell-titlebar', 'rga-shell-menubar', 'menu-bar', 'workspace', 'status-bar'];
   let count = 0;
   knownChildIds.forEach(function(id) {
     const tagOpen = new RegExp('<(?:header|nav|div|aside|footer|main|section)[^>]*\\sid="' + id + '"', 'g');
