@@ -138,6 +138,17 @@
       label: spec.label || spec.command,
       key: spec.key || null,
       mods: spec.mods || {},
+      // Studio Shell Recovery §D1 — optional displayAccelerator lets a
+      // command surface a keyboard label even when KR does NOT own the
+      // binding (e.g., text marks like Ctrl+B are bound by the
+      // ProseMirror history/keymap plugin in the editor's contenteditable
+      // focus context). Without this, commandAccelerator(id) would
+      // return '' because there's no KR key+mods. With it, menus and
+      // toolbar buttons can show the accurate label without forcing a
+      // KR registration that would conflict with another renderer-side
+      // command (Ctrl+B = view.toggleSidebar in KR; PM owns Ctrl+B in
+      // editor focus). Falsy → fall back to computed accelerator.
+      displayAccelerator: spec.displayAccelerator || null,
       handler: spec.handler,
       source: spec.source || spec.command
     });
@@ -159,7 +170,11 @@
 
   function commandAccelerator(commandId) {
     const cmd = _commands.get(commandId);
-    if (!cmd || !cmd.key) return '';
+    if (!cmd) return '';
+    // §D1 — displayAccelerator wins when set (for PM-keymap-owned
+    // bindings that have no KR key+mods).
+    if (cmd.displayAccelerator) return cmd.displayAccelerator;
+    if (!cmd.key) return '';
     return _formatAccelerator(cmd.key, cmd.mods);
   }
 

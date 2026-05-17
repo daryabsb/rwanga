@@ -100,7 +100,15 @@
 
   let activeColorMark = null; // 'color' | 'highlight'
 
-  function _toolbar()  { return document.getElementById('format-toolbar'); }
+  // §D1: the toolbar surface moved from inline #format-toolbar
+  // (inside #editor-area) to #rga-shell-toolbar (Row 3 of #app). The
+  // resolver tries the new id first; the legacy id is kept as a
+  // fallback so the (post-§D1) test fixtures that don't include
+  // Row 3 yet don't crash.
+  function _toolbar() {
+    return document.getElementById('rga-shell-toolbar') ||
+           document.getElementById('format-toolbar');
+  }
   function _popover()  { return document.getElementById('format-color-popover'); }
   function _customColor() { return document.getElementById('format-color-custom'); }
 
@@ -207,18 +215,33 @@
     if (!view || !toolbar) return;
     const state = view.state;
     const schema = state.schema;
+    // §D1 — Row 3 buttons use data-command="text.<markname>" instead
+    // of data-mark. Map the command suffix back to the mark name for
+    // active-state lookup.
+    toolbar.querySelectorAll('.rga-shell-toolbar-btn[data-command^="text."]').forEach(function(btn) {
+      const cmd = btn.dataset.command;
+      const name = cmd.slice('text.'.length);
+      const mt = schema.marks[name];
+      if (!mt) return;
+      btn.classList.toggle('active', _markActive(state, mt));
+    });
+    // Legacy .format-btn selector path — passive after §D1 (no
+    // matching DOM in shipping app), kept for any out-of-tree fixtures.
     toolbar.querySelectorAll('.format-btn[data-mark]').forEach(function(btn) {
       const name = btn.dataset.mark;
       const mt = schema.marks[name];
       if (!mt) return;
       btn.classList.toggle('active', _markActive(state, mt));
     });
-    // Color swatches reflect current selection's color value, if any
+    // Color swatches reflect current selection's color value, if any.
+    // §D1 — the Row 3 toolbar emits a new swatch id.
     const colorAttrs = _markAttrs(state, schema.marks.color);
-    const sw = document.getElementById('format-color-swatch');
+    const sw = document.getElementById('rga-shell-toolbar-color-swatch') ||
+               document.getElementById('format-color-swatch');
     if (sw) sw.style.background = (colorAttrs && colorAttrs.value) || 'transparent';
     const hlAttrs = _markAttrs(state, schema.marks.highlight);
-    const hl = document.getElementById('format-highlight-icon');
+    const hl = document.getElementById('rga-shell-toolbar-highlight-icon') ||
+               document.getElementById('format-highlight-icon');
     if (hl) hl.style.background = (hlAttrs && hlAttrs.value) || 'transparent';
     // Block-type select reflects the focused inner block
     refreshBlockTypeSelect();
@@ -406,19 +429,67 @@
   // Init
   // ============================================================
 
+  // §D1 — register the eight Text-tools commands via the §A4.1
+  // command layer. KR is the single owner; the Row 3 toolbar invokes
+  // via KR.invokeCommand. Bold/Italic carry displayAccelerator
+  // ("Ctrl+B" / "Ctrl+I") so the toolbar can show the label — the
+  // actual keyboard binding lives in ProseMirror's editor keymap
+  // (renderer/js/editor/mount.js) which fires in editor focus context.
+  // Underline / Strikethrough / Color / Highlight / Link / Clear have
+  // no keyboard accelerator anywhere; their commandAccelerator is ''.
+  function registerTextCommands() {
+    if (!window.Rga || !window.Rga.KeyboardRegistry ||
+        typeof window.Rga.KeyboardRegistry.registerCommand !== 'function') return;
+    const KR = window.Rga.KeyboardRegistry;
+    KR.registerCommand({ command: 'text.bold',          label: 'Bold',          displayAccelerator: 'Ctrl+B',
+      handler: toggleMarkSimple('bold'),          source: 'D1 toolbar (text.bold)' });
+    KR.registerCommand({ command: 'text.italic',        label: 'Italic',        displayAccelerator: 'Ctrl+I',
+      handler: toggleMarkSimple('italic'),        source: 'D1 toolbar (text.italic)' });
+    KR.registerCommand({ command: 'text.underline',     label: 'Underline',
+      handler: toggleMarkSimple('underline'),     source: 'D1 toolbar (text.underline)' });
+    KR.registerCommand({ command: 'text.strikethrough', label: 'Strikethrough',
+      handler: toggleMarkSimple('strikethrough'), source: 'D1 toolbar (text.strikethrough)' });
+    KR.registerCommand({ command: 'text.color',         label: 'Text color',
+      handler: function() {
+        const anchor = document.querySelector('.rga-shell-toolbar-btn[data-command="text.color"]');
+        if (anchor) openColorPopover('color', anchor);
+      }, source: 'D1 toolbar (text.color)' });
+    KR.registerCommand({ command: 'text.highlight',     label: 'Highlight',
+      handler: function() {
+        const anchor = document.querySelector('.rga-shell-toolbar-btn[data-command="text.highlight"]');
+        if (anchor) openColorPopover('highlight', anchor);
+      }, source: 'D1 toolbar (text.highlight)' });
+    KR.registerCommand({ command: 'text.link',          label: 'Link',
+      handler: openLinkDialog,                    source: 'D1 toolbar (text.link)' });
+    KR.registerCommand({ command: 'text.clear',         label: 'Clear formatting',
+      handler: clearAllFormatting,                source: 'D1 toolbar (text.clear)' });
+  }
+
   function init() {
-    const toolbar = _toolbar();
-    if (!toolbar) return;
+    // §D1 — register text commands FIRST so the Row 3 click delegation
+    // and any future menu items can resolve them. Idempotent — KR
+    // dedupes commands by id.
+    registerTextCommands();
 
-    // Simple toggle buttons
-    ['bold', 'italic', 'underline', 'strikethrough'].forEach(function(name) {
-      const btn = toolbar.querySelector('.format-btn[data-mark="' + name + '"]');
-      if (btn) btn.addEventListener('click', toggleMarkSimple(name));
-    });
+    // §D1 — Row 3 owned toolbar. Click delegation by data-command
+    // attribute: every button declares its commandId, dispatch
+    // routes through KR.invokeCommand (single owner). No per-button
+    // event listeners, no hardcoded mark-name → handler tables.
+    const row3 = document.getElementById('rga-shell-toolbar');
+    if (row3 && !row3.dataset.wired) {
+      row3.dataset.wired = '1';
+      row3.addEventListener('click', function(e) {
+        const btn = e.target.closest('.rga-shell-toolbar-btn[data-command]');
+        if (!btn) return;
+        e.stopPropagation();
+        const KR = window.Rga && window.Rga.KeyboardRegistry;
+        if (KR && typeof KR.invokeCommand === 'function') {
+          KR.invokeCommand(btn.dataset.command);
+        }
+      });
+    }
 
-    // Block-type dropdown — Phase 9 v3: drives the v3 cycleBlockType
-    // command (the same one Tab fires). The dropdown stays for users
-    // who prefer mouse-driven block switching.
+    // Block-type dropdown (Scene toolbox surface, NOT touched by D1).
     const blockTypeSelect = document.getElementById('format-block-type');
     if (blockTypeSelect) {
       blockTypeSelect.addEventListener('change', function() {
@@ -436,26 +507,16 @@
       });
     }
 
-    // Undo / Redo
-    const undoBtn = document.getElementById('format-btn-undo');
-    const redoBtn = document.getElementById('format-btn-redo');
-    if (undoBtn) undoBtn.addEventListener('click', doUndo);
-    if (redoBtn) redoBtn.addEventListener('click', doRedo);
-
-    // Annotation
+    // Scene toolbox surfaces — kept intact for D1 (D3 may move them
+    // into Row 3). Annotation + Flag + Tag dropdown all live in
+    // #scene-toolbox today.
     const annotationBtn = document.getElementById('format-btn-annotation');
     if (annotationBtn) annotationBtn.addEventListener('click', openAnnotationDialog);
     wireAnnotationDialog();
 
-    // Revision flag — opens the same rich popup as right-click.
     const flagBtn = document.getElementById('format-btn-flag');
     if (flagBtn) flagBtn.addEventListener('click', openFlagPopup);
 
-    // Clear formatting
-    const clearBtn = document.getElementById('format-btn-clear');
-    if (clearBtn) clearBtn.addEventListener('click', clearAllFormatting);
-
-    // Tag dropdown (Scene toolbox)
     const tagSel = document.getElementById('scene-tb-tag');
     if (tagSel) {
       tagSel.addEventListener('change', function() {
@@ -466,26 +527,10 @@
       });
     }
 
-    // Color + highlight popover triggers
-    const colorBtn = document.getElementById('format-btn-color');
-    if (colorBtn) {
-      colorBtn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        openColorPopover('color', colorBtn);
-      });
-    }
-    const highlightBtn = document.getElementById('format-btn-highlight');
-    if (highlightBtn) {
-      highlightBtn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        openColorPopover('highlight', highlightBtn);
-      });
-    }
+    // Color / link popover support DOM (popovers live elsewhere in the
+    // page; wire their internal handlers regardless of which surface
+    // opened them).
     wireColorPopover();
-
-    // Link
-    const linkBtn = toolbar.querySelector('.format-btn[data-mark="link"]');
-    if (linkBtn) linkBtn.addEventListener('click', openLinkDialog);
     wireLinkDialog();
 
     // Selection-aware refresh — the v3 editor's single PM doc emits

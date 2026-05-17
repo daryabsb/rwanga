@@ -7,19 +7,18 @@
 /* ---- App Root Grid ----
    Row tracks (top → bottom):
      1. Shell titlebar (#rga-shell-titlebar) — Row 1 of owned chrome.
-     2. Menu bar (#rga-shell-menubar)        — Row 2; Studio Shell
-        Recovery §A4 re-introduced an owned menu bar (replaced the
-        native Electron menu on Win/Linux; macOS keeps native via
-        Apple HIG). Auto track — height owned by the element.
-     3. Workspace (#workspace) — 1fr, takes all remaining vertical space.
-     4. Status bar (#status-bar) — fixed at --status-bar-height.
+     2. Menu bar (#rga-shell-menubar)        — Row 2; §A4 introduced.
+     3. Toolbar (#rga-shell-toolbar)         — Row 3; §D1 introduced
+        (writing instruments — replaces the inline #format-toolbar).
+     4. Workspace (#workspace) — 1fr, takes all remaining vertical space.
+     5. Status bar (#status-bar) — fixed at --status-bar-height.
    IMPORTANT: track count MUST equal child count of #app. Adding a new
    chrome row without expanding this template will collapse #workspace
    into the next track and the editor becomes invisible. See the
    guard test in tests/unit/shell/css-layout.test.js. */
 #app {
   display: grid;
-  grid-template-rows: auto auto 1fr var(--status-bar-height);
+  grid-template-rows: auto auto auto 1fr var(--status-bar-height);
   height: 100vh;
   width: 100vw;
   overflow: hidden;
@@ -714,6 +713,112 @@
   margin: 4px 8px;
   background: var(--border-subtle, rgba(128, 128, 128, 0.18));
 }
+
+/* ============================================================
+   Studio Shell Recovery — Workstream D1: owned toolbar (Row 3).
+   Writing-instruments surface. D1 ships the Text-tools group only;
+   D2 / D3 add Scene + Writing groups; D4 adds the Mode toggle.
+   Mirrors .rga-shell-menubar's voice (compact row, drag region with
+   no-drag islands, --bg-secondary, --border-subtle bottom edge).
+   Button styling follows the existing .btn-icon 28x28 pattern
+   (docs/design-system/03-rwanga-component-system.md §1.3). No new
+   tokens, no new visual language.
+   ============================================================ */
+#rga-shell-toolbar.rga-shell-toolbar {
+  display: flex;
+  align-items: stretch;
+  height: 36px;
+  padding: 0 8px;
+  background: var(--bg-secondary, #2a2a2a);
+  border-bottom: 1px solid var(--border-subtle, rgba(128, 128, 128, 0.18));
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-app-region: drag;
+  flex-shrink: 0;
+}
+.rga-shell-toolbar-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+.rga-shell-toolbar-sep {
+  width: 1px;
+  height: 18px;
+  align-self: center;
+  margin: 0 6px;
+  background: var(--border-subtle, rgba(128, 128, 128, 0.18));
+}
+.rga-shell-toolbar-btn {
+  -webkit-app-region: no-drag;
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-md, 4px);
+  color: var(--text-secondary, #9a9a9a);
+  font-family: var(--font-ui, system-ui, sans-serif);
+  font-size: 13px;
+  width: 28px;
+  height: 28px;
+  align-self: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  cursor: pointer;
+  transition: background var(--transition-fast, 0.1s ease),
+              color var(--transition-fast, 0.1s ease);
+}
+.rga-shell-toolbar-btn:hover {
+  background: var(--bg-hover, rgba(255, 255, 255, 0.06));
+  color: var(--text-primary, #cccccc);
+}
+.rga-shell-toolbar-btn:focus-visible {
+  outline: 1px solid var(--border-secondary, #444);
+  outline-offset: -2px;
+}
+.rga-shell-toolbar-btn.active {
+  color: var(--text-primary, #cccccc);
+  background: var(--bg-active, rgba(255, 255, 255, 0.10));
+}
+.rga-shell-toolbar-btn i,
+.rga-shell-toolbar-btn u,
+.rga-shell-toolbar-btn s {
+  /* Don't paint underline/italic semantics on the glyph — these
+     are decorative. The active state communicates the toggle. */
+  font-style: inherit;
+  text-decoration: none;
+}
+.rga-shell-toolbar-btn[data-command="text.bold"]          { font-weight: 700; }
+.rga-shell-toolbar-btn[data-command="text.italic"]   i    { font-style: italic; }
+.rga-shell-toolbar-btn[data-command="text.underline"] u   { text-decoration: underline; }
+.rga-shell-toolbar-btn[data-command="text.strikethrough"] s { text-decoration: line-through; }
+/* Color + highlight swatches — small visible indicators of the
+   currently chosen colour. Same affordance as the inline toolbar
+   used pre-§D1. */
+.rga-shell-toolbar-color-swatch {
+  display: inline-block;
+  width: 10px;
+  height: 3px;
+  margin-left: 2px;
+  background: transparent;
+  border-radius: 1px;
+}
+.rga-shell-toolbar-highlight-icon {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  background: var(--accent-warning, #cca700);
+  opacity: 0.35;
+  border-radius: 2px;
+}
+/* Draft view hides the toolbar — Draft is distraction-free. Mirror
+   pattern from the format-toolbar / scene-toolbox hide rule in
+   editor-prosemirror.css. */
+body.view-draft-active #rga-shell-toolbar { display: none; }
+/* Print Preview hides the toolbar via #workspace's hide rule
+   (the toolbar is OUTSIDE #workspace, so we add an explicit rule). */
+body.view-print-preview-active #rga-shell-toolbar { display: none; }
 
 /* ============================================================
    ACTIVITY RAIL — implements the Activity Rail Doctrine

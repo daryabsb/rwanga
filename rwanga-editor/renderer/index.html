@@ -97,6 +97,30 @@
   </nav>
   <div id="rga-shell-menubar-dropdown" class="rga-shell-menubar-dropdown" hidden role="menu" aria-hidden="true"></div>
 
+  <!-- Studio Shell Recovery — Workstream D1: Row 3 owned toolbar
+       (writing instruments). D1 ships the Text-tools group only;
+       Scene tools land in D2, Writing tools in D3, Mode toggle in D4.
+       Buttons invoke commands via Rga.KeyboardRegistry.invokeCommand
+       (the §A4.1 SSOT). Accelerator labels resolve via
+       KR.commandAccelerator(commandId). All visual decisions reuse
+       existing Claude Design patterns — .btn-icon 28x28 + the .bp-tab
+       hover voice (per docs/design-system/03-rwanga-component-system.md). -->
+  <div id="rga-shell-toolbar" class="rga-shell-toolbar" role="toolbar" aria-label="Writing instruments">
+    <div class="rga-shell-toolbar-group" data-group="text">
+      <button class="rga-shell-toolbar-btn" data-command="text.bold"          type="button" title="Bold">B</button>
+      <button class="rga-shell-toolbar-btn" data-command="text.italic"        type="button" title="Italic"><i>I</i></button>
+      <button class="rga-shell-toolbar-btn" data-command="text.underline"     type="button" title="Underline"><u>U</u></button>
+      <button class="rga-shell-toolbar-btn" data-command="text.strikethrough" type="button" title="Strikethrough"><s>S</s></button>
+      <div class="rga-shell-toolbar-sep" role="separator" aria-hidden="true"></div>
+      <button class="rga-shell-toolbar-btn" data-command="text.color"         type="button" title="Text color">A<span class="rga-shell-toolbar-color-swatch" id="rga-shell-toolbar-color-swatch"></span></button>
+      <button class="rga-shell-toolbar-btn" data-command="text.highlight"     type="button" title="Highlight"><span class="rga-shell-toolbar-highlight-icon" id="rga-shell-toolbar-highlight-icon"></span></button>
+      <div class="rga-shell-toolbar-sep" role="separator" aria-hidden="true"></div>
+      <button class="rga-shell-toolbar-btn" data-command="text.link"          type="button" title="Link">↗</button>
+      <div class="rga-shell-toolbar-sep" role="separator" aria-hidden="true"></div>
+      <button class="rga-shell-toolbar-btn" data-command="text.clear"         type="button" title="Clear formatting">A<sub>×</sub></button>
+    </div>
+  </div>
+
   <!-- ============================================================
        WORKSPACE (activity bar + sidebar + editor + inspector)
        ============================================================ -->
@@ -149,25 +173,11 @@
           <div class="rga-shell-breadcrumb-heading" id="rga-shell-breadcrumb-heading"></div>
         </nav>
 
-        <!-- Format toolbar — APP-LEVEL text formatting only (hidden in Draft) -->
-        <div id="format-toolbar" role="toolbar" aria-label="Text formatting">
-          <button class="format-btn" id="format-btn-undo" title="Undo (Ctrl+Z)">↶</button>
-          <button class="format-btn" id="format-btn-redo" title="Redo (Ctrl+Y)">↷</button>
-          <div class="format-btn-sep"></div>
-          <button class="format-btn format-btn--bold"    data-mark="bold"          title="Bold (Ctrl+B)">B</button>
-          <button class="format-btn format-btn--italic"  data-mark="italic"        title="Italic (Ctrl+I)">I</button>
-          <button class="format-btn format-btn--under"   data-mark="underline"     title="Underline">U</button>
-          <button class="format-btn format-btn--strike"  data-mark="strikethrough" title="Strikethrough">S</button>
-          <div class="format-btn-sep"></div>
-          <button class="format-btn format-btn--color" id="format-btn-color"
-                  data-mark="color" title="Text color">A<span class="format-color-swatch" id="format-color-swatch"></span></button>
-          <button class="format-btn format-btn--highlight" id="format-btn-highlight"
-                  data-mark="highlight" title="Highlight"><span class="format-highlight-icon" id="format-highlight-icon"></span></button>
-          <div class="format-btn-sep"></div>
-          <button class="format-btn format-btn--link"    data-mark="link"          title="Link">↗</button>
-          <div class="format-btn-sep"></div>
-          <button class="format-btn" id="format-btn-clear" title="Clear formatting">A<sub>×</sub></button>
-        </div>
+        <!-- §D1 — the inline #format-toolbar was DELETED and its Text
+             tools moved to Row 3 (#rga-shell-toolbar above the
+             workspace). Undo/Redo + Scene tools + Writing tools land
+             in Row 3 across D2/D3. -->
+
 
 
         <!-- Editor Container — the "desk"; #editor is the "page" -->

@@ -73,8 +73,9 @@ test('G-OC-6: -webkit-app-region: no-drag declarations are scoped to title-bar /
     const m = rule.match(/^([^{]+)\{/);
     if (!m) return;
     const selector = m[1].trim();
-    // Allowed surfaces: titlebar/* family, window-control, menubar (A4+).
-    if (!/rga-shell-titlebar|rga-shell-window-control|rga-shell-menubar/.test(selector)) {
+    // Allowed surfaces: titlebar/* family, window-control, menubar
+    // (A4+), toolbar (D1+).
+    if (!/rga-shell-titlebar|rga-shell-window-control|rga-shell-menubar|rga-shell-toolbar/.test(selector)) {
       offenders.push(selector);
     }
   });

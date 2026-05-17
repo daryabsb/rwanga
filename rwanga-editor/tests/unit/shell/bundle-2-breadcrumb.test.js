@@ -48,15 +48,22 @@ test('Bundle 2 §B: breadcrumb starts hidden (no script open)', () => {
     'breadcrumb must start hidden — CSS + JS reveal once a script is active');
 });
 
-test('Bundle 2 §B: breadcrumb sits inside #editor-area, between #tab-bar and #format-toolbar', () => {
+test('Bundle 2 §B: breadcrumb sits inside #editor-area, after #tab-bar (writer-context indicator at the top of the editor surface)', () => {
+  // §D1 removed the inline #format-toolbar (text tools moved to Row 3
+  // #rga-shell-toolbar in app chrome). The breadcrumb's position is
+  // now anchored after #tab-bar and before the editor container; the
+  // pre-§D1 "before #format-toolbar" check is replaced by "before
+  // #editor-container".
   const html = read(INDEX_HTML);
   const tabBarIdx     = html.indexOf('id="tab-bar"');
   const crumbIdx      = html.indexOf('id="rga-shell-breadcrumb"');
-  const formatBarIdx  = html.indexOf('id="format-toolbar"');
-  assert.ok(tabBarIdx > 0 && crumbIdx > 0 && formatBarIdx > 0,
-    'tab-bar / breadcrumb / format-toolbar must all exist');
-  assert.ok(tabBarIdx < crumbIdx && crumbIdx < formatBarIdx,
-    'breadcrumb must sit between #tab-bar and #format-toolbar (writer-context indicator at the top of the editor surface)');
+  const editorContIdx = html.indexOf('id="editor-container"');
+  assert.ok(tabBarIdx > 0 && crumbIdx > 0 && editorContIdx > 0,
+    'tab-bar / breadcrumb / editor-container must all exist');
+  assert.ok(tabBarIdx < crumbIdx,
+    'breadcrumb must sit AFTER #tab-bar');
+  assert.ok(crumbIdx < editorContIdx,
+    'breadcrumb must sit BEFORE #editor-container (writer-context indicator at the top of the editor surface)');
 });
 
 // ----------------------------------------------------------------
