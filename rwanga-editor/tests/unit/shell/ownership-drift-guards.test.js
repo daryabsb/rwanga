@@ -684,6 +684,82 @@ test('G11: every ownership-matrix module-path reference points at an existing fi
     'If the path is a planned future destination, add it to ASPIRATIONAL_PATHS.');
 });
 
+// ----------------------------------------------------------------
+// G12 — StudioPanel ownership lock (Slice 9 §B)
+// ----------------------------------------------------------------
+//
+// After Slice 9 §A, Rga.Shell.StudioPanel is the sole owner of
+// bottom-panel + inspector + scene-notes routing. The G12 quadruplet
+// prevents the consolidated ownership from breaking up again:
+//
+//   • BottomPanel implementation cannot move back into app-shell.js
+//     (the shim is allowed; the body is not).
+//   • Inspector implementation cannot move back.
+//   • SceneNotesConnector cannot return (was deleted).
+//   • StudioPanel stays the sole owner of bottom-collapsed +
+//     inspector-hidden DOM classes.
+
+test('G12: Rga.BottomPanel in app-shell.js is a thin shim (delegates to StudioPanel; not an owner)', () => {
+  const src = stripComments(readText(path.join(REPO, 'renderer/js/app-shell.js')));
+  // Extract the Rga.BottomPanel = { ... } block.
+  const m = src.match(/Rga\.BottomPanel\s*=\s*\{([\s\S]*?)\n\}/);
+  assert.ok(m, 'app-shell.js must declare Rga.BottomPanel (as a shim)');
+  const body = m[1];
+  // The shim's methods must all call into Rga.Shell.StudioPanel.
+  // Count delegating call sites — there must be one for each shim method.
+  const delegates = (body.match(/Rga\.Shell\.StudioPanel\.\w+\(/g) || []).length;
+  assert.ok(delegates >= 4,
+    'Rga.BottomPanel shim must delegate to Rga.Shell.StudioPanel — found only ' +
+    delegates + ' delegate call(s). Each shim method (init / open / switchTo / toggleCollapse) ' +
+    'must route through StudioPanel.');
+  // Forbidden: Layout.set inside the shim body (that would mean the
+  // shim is reaching past the SSOT it's supposed to delegate through).
+  assert.equal(/Rga\.Shell\.Layout\.set/.test(body), false,
+    'Rga.BottomPanel shim must NOT call Layout.set directly — delegate to StudioPanel instead.');
+});
+
+test('G12: Rga.Inspector in app-shell.js is a thin shim (delegates to StudioPanel; not an owner)', () => {
+  const src = stripComments(readText(path.join(REPO, 'renderer/js/app-shell.js')));
+  const m = src.match(/Rga\.Inspector\s*=\s*\{([\s\S]*?)\n\}/);
+  assert.ok(m, 'app-shell.js must declare Rga.Inspector (as a shim)');
+  const body = m[1];
+  const delegates = (body.match(/Rga\.Shell\.StudioPanel\.\w+\(/g) || []).length;
+  assert.ok(delegates >= 2,
+    'Rga.Inspector shim must delegate to Rga.Shell.StudioPanel — found only ' +
+    delegates + ' delegate call(s). Both methods (toggle / open) must route through StudioPanel.');
+  // Forbidden: directly touching the #workspace classList inside the
+  // shim — that's StudioPanel's job.
+  assert.equal(/classList\.(add|remove|toggle)\s*\(\s*['"]inspector-hidden['"]/.test(body), false,
+    'Rga.Inspector shim must NOT toggle the inspector-hidden class directly — delegate to StudioPanel.');
+});
+
+test('G12: Rga.SceneNotesConnector cannot return to app-shell.js (deleted Slice 9 §A)', () => {
+  // Already covered by G11's deny-list, but G12 keeps the boundary
+  // explicit alongside the rest of the StudioPanel ownership story.
+  const src = stripComments(readText(path.join(REPO, 'renderer/js/app-shell.js')));
+  assert.equal(/^Rga\.SceneNotesConnector\s*=\s*\{/m.test(src), false,
+    'Rga.SceneNotesConnector was deleted in Slice 9 §A; its scene-notes-routing ' +
+    'behavior lives in Rga.Shell.StudioPanel now. Do not re-introduce.');
+});
+
+test('G12: Rga.Shell.StudioPanel is the SOLE writer of inspector-hidden class', () => {
+  // Walk shell-js. Only studio-panel.js (and inspector-hidden CSS
+  // rules, which don't appear in JS) may toggle / add / remove it.
+  const files = shellJsFiles();
+  const offenders = [];
+  files.forEach(function(file) {
+    const src = stripComments(readText(file));
+    if (/classList\.(?:add|remove|toggle)\s*\(\s*['"]inspector-hidden['"]/.test(src)) {
+      const rel = relativeFromRepo(file);
+      if (rel !== 'renderer/js/shell/studio-panel.js') offenders.push(rel);
+    }
+  });
+  assert.deepEqual(offenders, [],
+    'G12 — only Rga.Shell.StudioPanel may toggle the inspector-hidden class. ' +
+    'Unexpected writers: ' + offenders.join(', ') + '. Route through ' +
+    'StudioPanel.toggleInspector / StudioPanel.openInspector.');
+});
+
 test('G7: every owned key has a corresponding restore (getItem) call in its restoreIn module', () => {
   // A persistence key is only useful if SOMETHING reads it back on
   // boot. This guard scans each registered key's restoreIn module
