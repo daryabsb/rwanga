@@ -892,6 +892,31 @@
   background: var(--bg-secondary, #2a2a2a);
   color: var(--text-primary, #cccccc);
 }
+/* §D3 — Tag dropdown shares the blocktype voice (same native <select>
+   styling). Separate selector so future divergence (e.g., per-tag
+   colour swatches in the popup) is straightforward. */
+.rga-shell-toolbar-tag {
+  -webkit-app-region: no-drag;
+  appearance: auto;
+  -webkit-appearance: auto;
+  background: transparent;
+  color: var(--text-secondary, #9a9a9a);
+  border: 0;
+  padding: 0 4px;
+  margin-right: 4px;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  outline: none;
+}
+.rga-shell-toolbar-tag:focus-visible {
+  outline: 1px solid var(--border-secondary, #444);
+  outline-offset: 1px;
+}
+.rga-shell-toolbar-tag option {
+  background: var(--bg-secondary, #2a2a2a);
+  color: var(--text-primary, #cccccc);
+}
 .rga-shell-toolbar-btn--text {
   width: auto;
   padding: 0 10px;

@@ -147,6 +147,40 @@
         <button class="rga-shell-toolbar-btn rga-shell-toolbar-btn--text"
                 data-command="scene.insert" type="button" title="Insert scene after current">+ Scene</button>
       </div>
+      <!-- §D3 — Writing tools group. Note + Flag + Tag reuse the
+           existing format-toolbar.js handlers (openAnnotationDialog /
+           openFlagPopup / applyTagFromSelection) that the Scene
+           Toolbox also calls — one logic, two surfaces (same dedup
+           pattern §D2 used for block-type). Undo + Redo route through
+           the §A4.1 edit.undo / edit.redo commands (already registered
+           by index.html's registerMenuCommands — no new ownership).
+           Icon policy: no vendored icons for note/flag/tag/undo/redo
+           → text labels per the §D3 brief. -->
+      <div class="rga-shell-toolbar-group-sep" role="separator" aria-hidden="true"></div>
+      <div class="rga-shell-toolbar-group" data-group="writing">
+        <button class="rga-shell-toolbar-btn rga-shell-toolbar-btn--text"
+                data-command="writing.note" type="button" title="Add note to selection">Note</button>
+        <button class="rga-shell-toolbar-btn rga-shell-toolbar-btn--text"
+                data-command="writing.flag" type="button" title="Flag selection for revision">Flag</button>
+        <select class="rga-shell-toolbar-tag" id="rga-shell-toolbar-tag"
+                aria-label="Tag selected text" title="Tag selected text">
+          <option value="">Tag…</option>
+          <option value="character">Character</option>
+          <option value="prop">Prop</option>
+          <option value="wardrobe">Wardrobe</option>
+          <option value="location">Location</option>
+          <option value="sfx">SFX</option>
+          <option value="vfx">VFX</option>
+          <option value="vehicle">Vehicle</option>
+          <option value="animal">Animal</option>
+          <option value="custom">Custom</option>
+        </select>
+        <div class="rga-shell-toolbar-sep" role="separator" aria-hidden="true"></div>
+        <button class="rga-shell-toolbar-btn rga-shell-toolbar-btn--text"
+                data-command="edit.undo" type="button" title="Undo">Undo</button>
+        <button class="rga-shell-toolbar-btn rga-shell-toolbar-btn--text"
+                data-command="edit.redo" type="button" title="Redo">Redo</button>
+      </div>
     </div>
   </div>
 

@@ -498,6 +498,21 @@
     // v3-keymap.js — neither conflict with a toolbar button).
     KR.registerCommand({ command: 'scene.insert', label: 'Insert Scene',
       handler: _dispatchInsertScene, source: 'D2 toolbar (scene.insert)' });
+
+    // §D3 — Writing tools. Note + Flag wrap the existing
+    // openAnnotationDialog / openFlagPopup handlers (the Scene Toolbox
+    // buttons call the same functions directly — single owner, two
+    // surfaces). Tag is a parameterised dropdown (handled inline on
+    // change rather than as a single-fire command). Undo / Redo are
+    // NOT re-registered here: the §A4.1 edit.undo / edit.redo commands
+    // already own them; the Row 3 buttons declare data-command="edit.
+    // undo|redo" and the click delegation invokes via KR.invokeCommand
+    // (no new ownership; the toolbar is a third consumer of an
+    // existing command).
+    KR.registerCommand({ command: 'writing.note', label: 'Add Note',
+      handler: openAnnotationDialog, source: 'D3 toolbar (writing.note)' });
+    KR.registerCommand({ command: 'writing.flag', label: 'Flag Revision',
+      handler: openFlagPopup,        source: 'D3 toolbar (writing.flag)' });
   }
 
   function init() {
@@ -576,6 +591,21 @@
         if (!t) return;
         applyTagFromSelection(t);
         tagSel.value = '';
+      });
+    }
+
+    // §D3 — Row 3 Tag dropdown. Same handler (applyTagFromSelection)
+    // as the Scene Toolbox tag dropdown; the toolbar surface is a
+    // second consumer of the existing tagging logic. After applying,
+    // reset the dropdown to its placeholder option so re-selecting
+    // the same tag re-fires the change event.
+    const row3Tag = document.getElementById('rga-shell-toolbar-tag');
+    if (row3Tag) {
+      row3Tag.addEventListener('change', function() {
+        const t = row3Tag.value;
+        if (!t) return;
+        applyTagFromSelection(t);
+        row3Tag.value = '';
       });
     }
 
