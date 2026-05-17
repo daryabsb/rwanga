@@ -261,6 +261,20 @@
 <!-- Draft view exit overlay -->
 <button id="draft-exit" class="draft-exit-btn" title="Exit Draft view (Esc)" hidden>×</button>
 
+<!-- Draft mode minimal context footer (Editor Recovery Phase 3 / C6).
+     Hidden by default; CSS reveals it when body.view-draft-active.
+     Populated at runtime by wireDraftFooter() in the boot script —
+     reads from existing Rga.ScriptSession + Rga.ScriptMetrics only. -->
+<footer id="draft-mode-footer" class="rga-draft-footer" aria-live="polite" hidden>
+  <span class="rga-draft-footer-mode">DRAFT MODE</span>
+  <span class="rga-draft-footer-sep" aria-hidden="true">·</span>
+  <span class="rga-draft-footer-page" id="rga-draft-footer-page"></span>
+  <span class="rga-draft-footer-sep" aria-hidden="true">·</span>
+  <span class="rga-draft-footer-words" id="rga-draft-footer-words"></span>
+  <span class="rga-draft-footer-sep" aria-hidden="true">·</span>
+  <span class="rga-draft-footer-hint">Esc to exit</span>
+</footer>
+
 <!-- Format-toolbar color popover (positioned dynamically) -->
 <div id="format-color-popover" class="format-color-popover" hidden>
   <div class="format-color-grid">
@@ -715,6 +729,56 @@
     }
   }
 
+  /* ---- Draft mode footer (Editor Recovery Phase 3 / C6) ----
+     Populates the #draft-mode-footer surface with existing data only —
+     ScriptSession.currentPage + ScriptMetrics.wordCount. Subscribers
+     fire on every relevant upstream event; the footer is hidden by CSS
+     (display: none) except when body.view-draft-active. No new
+     computation, no new ownership module. */
+  function wireDraftFooter() {
+    var pageEl  = Rga.$('#rga-draft-footer-page');
+    var wordsEl = Rga.$('#rga-draft-footer-words');
+    if (!pageEl && !wordsEl) return;  // DOM target absent — safe no-op
+
+    function renderPage() {
+      if (!pageEl) return;
+      if (!Rga.ScriptSession || typeof Rga.ScriptSession.get !== 'function') {
+        pageEl.textContent = '';
+        return;
+      }
+      var snap = Rga.ScriptSession.get();
+      var p = snap && snap.currentPage;
+      if (!p || p.number == null) { pageEl.textContent = ''; return; }
+      var total = p.total != null ? String(p.total) : '—';
+      pageEl.textContent = 'Page ' + p.number + ' of ' + total;
+    }
+    function renderWords() {
+      if (!wordsEl) return;
+      if (!Rga.ScriptMetrics || typeof Rga.ScriptMetrics.get !== 'function') {
+        wordsEl.textContent = '';
+        return;
+      }
+      var m = Rga.ScriptMetrics.get();
+      var wc = m && m.wordCount;
+      if (wc == null) { wordsEl.textContent = ''; return; }
+      if (wc === 1) { wordsEl.textContent = '1 word'; return; }
+      // Thousands separator (Intl-free, matches StatusBar's formatter).
+      wordsEl.textContent = String(Math.max(0, Math.floor(wc)))
+        .replace(/\B(?=(\d{3})+(?!\d))/g, ',') + ' words';
+    }
+
+    // Subscribe to existing event surfaces only — no new computation.
+    if (Rga.ScriptSession && typeof Rga.ScriptSession.subscribe === 'function') {
+      Rga.ScriptSession.subscribe(renderPage);
+    }
+    if (Rga.ScriptMetrics && typeof Rga.ScriptMetrics.subscribe === 'function') {
+      Rga.ScriptMetrics.subscribe(renderWords);
+    }
+    // Initial paint.
+    renderPage();
+    renderWords();
+  }
+
   /* ---- BOOT SEQUENCE ---- */
   function boot() {
     injectIcons();
@@ -764,6 +828,7 @@
     // Rga.Shell.StatusBar (commits 3 + 8) populates #status-bar now.
     wireViewMode();
     wireUnits();
+    wireDraftFooter();    // Editor Recovery Phase 3 / C6 — populates the draft footer
     Rga.FlowChrome && Rga.FlowChrome.init();
     Rga.FormatToolbar && Rga.FormatToolbar.init();
 
