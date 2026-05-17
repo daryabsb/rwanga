@@ -404,12 +404,19 @@
      first refresh. -->
 <script src="js/shell/icons-lucide.js"></script>
 <script src="js/shell/activity-rail.js"></script>
+<!-- SessionBoundary — Runtime Ownership Stab. Slice 7 §A. Canonical
+     manifest of which session-side fields belong to which owner
+     (ScriptSession / ScriptMetrics / ViewManager / WorkspaceState).
+     Load order doesn't matter functionally (no runtime dependency)
+     but keep it before ScriptSession + ScriptMetrics so audit hooks
+     could see it if they ever poll at boot. -->
+<script src="js/shell/session-boundary.js"></script>
 <script src="js/shell/script-session.js"></script>
-<!-- ScriptMetrics — Runtime Ownership Stab. Slice 5 §A. Delegating
-     layer over ScriptSession for derived analytics (wordCount,
-     currentBlockType, plus reserved future fields). Must load AFTER
-     script-session.js (consumes its API). Resolves Compatibility
-     Inventory entry #6. -->
+<!-- ScriptMetrics — Runtime Ownership Stab. Slice 5 §A introduced as
+     a delegating layer; Slice 7 §A made it derive independently
+     (Compatibility Inventory entry #6 RESOLVED). Must load AFTER
+     script-session.js — it subscribes to ScriptSession for the
+     cheap "something upstream changed" trigger, then re-derives. -->
 <script src="js/shell/script-metrics.js"></script>
 <script src="js/shell/panels/scene-navigator.js"></script>
 <script src="js/shell/panels/script-workspace.js"></script>

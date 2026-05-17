@@ -182,13 +182,16 @@ test('Slice 2: status bar mounts into #status-bar (no #rga-shell-statusbar indir
   assert.equal(statusBar.querySelectorAll('.rga-shell-status-segment').length, 7);
 });
 
-test('Slice 2: ScriptSession new fields populate after init (wordCount + currentBlockType)', () => {
+test('Slice 7 §A: ScriptSession snapshot has NO analytics fields (moved to Rga.ScriptMetrics)', () => {
   const { Rga } = boot();
   Rga.Shell.init();
   const snap = Rga.ScriptSession.get();
-  // No active view in this minimal boot → null fields, but they exist in the snapshot shape.
-  assert.ok('wordCount' in snap);
-  assert.ok('currentBlockType' in snap);
+  // Slice 7 §A moved wordCount + currentBlockType out of ScriptSession's
+  // snapshot. They now live on Rga.ScriptMetrics. The ScriptSession
+  // snapshot is locked to its 7 writer-context fields per
+  // Rga.SessionBoundary.
+  assert.equal('wordCount'        in snap, false, 'wordCount must not appear on ScriptSession');
+  assert.equal('currentBlockType' in snap, false, 'currentBlockType must not appear on ScriptSession');
 });
 
 test('Slice 2: Outline panel click routes through Scene Navigator (cross-panel integration)', () => {

@@ -27,6 +27,13 @@
   const Rga = window.Rga = window.Rga || {};
   Rga.ScriptSession = Rga.ScriptSession || {};
 
+  // Slice 7 §A: snapshot shape is now LOCKED to the 7 writer-context
+  // fields declared by Rga.SessionBoundary.ScriptSession.fields.
+  // Adding any field to this snapshot fails the G8 drift guard with
+  // a message naming the correct owner (typically ScriptMetrics for
+  // analytics fields). The pre-Slice-7 wordCount + currentBlockType
+  // fields were removed; derivation lives in Rga.ScriptMetrics now.
+  // (Closes Compatibility Inventory entry #6.)
   const EMPTY_SNAPSHOT = {
     activeScript:     null,
     currentScene:     null,
@@ -34,11 +41,7 @@
     currentView:      null,
     currentSelection: null,
     openPanels:       [],
-    activePanel:      null,
-    // Slice 2 additions — see slice-2 plan §2.1. Both derived from
-    // existing engine state; no new primary ownership introduced.
-    wordCount:        null,   // total word count of the active script
-    currentBlockType: null    // block-type name at the cursor (action/character/dialogue/...)
+    activePanel:      null
   };
 
   let _snapshot = _clone(EMPTY_SNAPSHOT);
@@ -117,9 +120,8 @@
       currentView:      _deriveCurrentView(),
       currentSelection: _deriveCurrentSelection(view),
       openPanels:       _deriveOpenPanels(),
-      activePanel:      _deriveActivePanel(),
-      wordCount:        _deriveWordCount(view),
-      currentBlockType: _deriveCurrentBlockType(view)
+      activePanel:      _deriveActivePanel()
+      // Slice 7 §A: wordCount + currentBlockType moved to ScriptMetrics.
     };
     if (_snapshotEquals(_snapshot, next)) return;  // calm by default
     const prev = _snapshot;
@@ -198,25 +200,10 @@
     return Rga.Shell.Sidebar.current();
   }
 
-  // Slice 2: pure derivation from Rga.Nav.getOutline statistics. No new walk.
-  function _deriveWordCount(view) {
-    if (!view || !view.state) return null;
-    if (!Rga.Nav || typeof Rga.Nav.getOutline !== 'function') return null;
-    const outline = Rga.Nav.getOutline(view.state);
-    if (!outline || !outline.statistics) return null;
-    return typeof outline.statistics.words === 'number' ? outline.statistics.words : null;
-  }
-
-  // Slice 2: pure cursor-walk to the enclosing structural block's type name.
-  function _deriveCurrentBlockType(view) {
-    if (!view || !view.state || !view.state.selection) return null;
-    const $from = view.state.selection.$from;
-    if (!$from || !$from.parent || !$from.parent.type) return null;
-    const name = $from.parent.type.name;
-    // Filter out structural wrappers — only return body-block names.
-    const BODY_BLOCKS = ['sceneHeading','action','character','parenthetical','dialogue','shot','transition','paragraph','heading'];
-    return BODY_BLOCKS.indexOf(name) >= 0 ? name : null;
-  }
+  // Slice 7 §A: _deriveWordCount and _deriveCurrentBlockType moved to
+  // renderer/js/shell/script-metrics.js (the analytics SSOT per
+  // Rga.SessionBoundary). ScriptSession no longer carries derived
+  // analytics; consumers read those fields from Rga.ScriptMetrics.
 
   // ----------------------------------------------------------------
   // Helpers
@@ -238,9 +225,7 @@
       currentView:      snap.currentView,
       currentSelection: snap.currentSelection ? Object.assign({}, snap.currentSelection) : null,
       openPanels:       Array.isArray(snap.openPanels) ? snap.openPanels.slice() : [],
-      activePanel:      snap.activePanel,
-      wordCount:        snap.wordCount,
-      currentBlockType: snap.currentBlockType
+      activePanel:      snap.activePanel
     };
   }
 
@@ -255,8 +240,6 @@
     for (let i = 0; i < a.openPanels.length; i += 1) {
       if (a.openPanels[i] !== b.openPanels[i]) return false;
     }
-    if (a.wordCount !== b.wordCount) return false;
-    if (a.currentBlockType !== b.currentBlockType) return false;
     return true;
   }
 

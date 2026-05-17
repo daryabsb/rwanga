@@ -203,64 +203,19 @@ test('ScriptSession exposes no setters — get / subscribe / init / _reset only'
 });
 
 // ----------------------------------------------------------------
-// Slice 2 additions — wordCount + currentBlockType
+// Slice 7 §A — snapshot shape boundary
+// (wordCount + currentBlockType migrated to Rga.ScriptMetrics; the
+// equivalent tests now live in script-metrics.test.js.)
 // ----------------------------------------------------------------
 
-test('Slice 2: wordCount field derives from Rga.Nav.getOutline(state).statistics.words', () => {
-  const { Session, stub } = boot();
-  stub.activeView = { state: { selection: { from: 0, to: 0, empty: true } } };
-  stub.outline = { statistics: { words: 3420, sceneCount: 8, pages: 12 } };
-  Session.init();
-  assert.equal(Session.get().wordCount, 3420);
-});
-
-test('Slice 2: wordCount is null when there is no active view', () => {
+test('Slice 7 §A: ScriptSession snapshot shape is locked to the 7 writer-context fields', () => {
   const { Session } = boot();
   Session.init();
-  assert.equal(Session.get().wordCount, null);
-});
-
-test('Slice 2: currentBlockType derives from cursor\'s enclosing parent type', () => {
-  const { Session, stub } = boot();
-  const fakeParent = { type: { name: 'dialogue' } };
-  stub.activeView = {
-    state: {
-      selection: { from: 0, to: 0, empty: true, $from: { parent: fakeParent } }
-    }
-  };
-  Session.init();
-  assert.equal(Session.get().currentBlockType, 'dialogue');
-});
-
-test('Slice 2: currentBlockType filters out structural wrappers — returns null for non-body parents', () => {
-  const { Session, stub } = boot();
-  // Cursor's parent is the doc wrapper, not a body block.
-  const fakeParent = { type: { name: 'doc' } };
-  stub.activeView = {
-    state: {
-      selection: { from: 0, to: 0, empty: true, $from: { parent: fakeParent } }
-    }
-  };
-  Session.init();
-  assert.equal(Session.get().currentBlockType, null);
-});
-
-test('Slice 2: shallow-eq filter handles new fields — same wordCount/blockType → no notification', () => {
-  const { Session, stub } = boot();
-  const fakeParent = { type: { name: 'action' } };
-  stub.activeView = {
-    state: { selection: { from: 0, to: 0, empty: true, $from: { parent: fakeParent } } }
-  };
-  stub.outline = { statistics: { words: 100, sceneCount: 1, pages: 1 } };
-  Session.init();
-  let count = 0;
-  Session.subscribe(function() { count += 1; });
-  // Trigger a recompute event without changing any field.
-  document.dispatchEvent(new Event('selectionchange'));
-  document.dispatchEvent(new Event('selectionchange'));
-  assert.equal(count, 0, 'no notifications when nothing changed');
-  // Now change wordCount → one notification.
-  stub.outline.statistics.words = 200;
-  document.dispatchEvent(new Event('selectionchange'));
-  assert.equal(count, 1);
+  const snap = Session.get();
+  assert.deepEqual(Object.keys(snap).sort(), [
+    'activePanel', 'activeScript', 'currentPage', 'currentScene',
+    'currentSelection', 'currentView', 'openPanels'
+  ], 'snapshot must contain ONLY the 7 writer-context fields — no analytics leakage');
+  assert.equal('wordCount'        in snap, false, 'wordCount must not be on ScriptSession snapshot');
+  assert.equal('currentBlockType' in snap, false, 'currentBlockType must not be on ScriptSession snapshot');
 });
