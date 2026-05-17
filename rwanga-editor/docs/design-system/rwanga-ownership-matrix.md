@@ -30,8 +30,8 @@ is broken and must be flagged (see §4).
 | **Sidebar** (which panel + visible) | `Rga.Shell.Sidebar` (active panel) + `Rga.Shell.Layout.sidebar` (visibility, width) | Same — design is intentional; Sidebar owns the registry + active selection, Layout owns geometry/visibility | Legacy `Rga.Sidebar` reduced to 5-LOC no-op shim (kept only for the engine-side `tags.js:206` call) | Slice 3 (when Characters panel + Breakdown tab subsume the legacy tags concept; see Compatibility Inventory entry #2) | `Rga.Shell.Sidebar.current()` for active panel id; `Rga.Shell.Layout.get().sidebar` for visible/width/activePanel mirror |
 | **BottomPanel** (visibility + active tab) | `Rga.Shell.Layout.studioPanel` is the SSOT; `Rga.BottomPanel` is the public mutator API | Future `Rga.Shell.StudioPanel` (per master plan §7); the legacy `Rga.BottomPanel` retires when that ships | Legacy `Rga.BottomPanel` kept as the public API; all writes converge through it; engine plugins (`annotations.js`, `revision-flags.js`) call `Rga.BottomPanel.switchTo(...)` and continue working | Slice 3 (when `Rga.Shell.StudioPanel` is introduced; Compatibility Inventory entry #5) | `Rga.Shell.Layout.get().studioPanel.visible` for visibility; `Rga.BottomPanel.activeTab` for active tab (planned to migrate to `Layout.studioPanel.activeTab` in Slice 3) |
 | **StatusBar** (segment contents + rendering) | `Rga.Shell.StatusBar` (renderer) reads from `Rga.ScriptSession` (writer-context) + `Rga.TabManager.activeDoc()` (language). Visibility flag in `Rga.Shell.Layout.statusBar` (currently always true) | Same — Slice 2 introduced this division and it has held | Legacy `Rga.StatusBar` was retired in Slice 2; no shim remains | RESOLVED (Slice 2, inventory entry #1) | `Rga.ScriptSession.get()` for the writer-context fields the bar displays; `Rga.Shell.Layout.get().statusBar` for visibility |
-| **Keyboard** (shortcuts dispatch) | TWO listeners coexist: `Rga.Keyboard` (registry-based, on `document.keydown`) + `Rga.Shell.init`'s `_onKeydown` (combo-based, on `document.keydown`). Both run on bubble phase | Single keyboard registry owning all app shortcuts. Likely `Rga.Shell.Keyboard` consolidating both | Both listeners coexist now; each handles its own subset (Rga.Keyboard for app-shell, Shell.init for sidebar/studio toggles) | TBD — currently UN-OWNED for unification; see [open issue](#open-issues) | NONE — this is the matrix's one **inconsistency** today; each registration is the source of truth for its own combo, but there is no central registry. Adding a new shortcut requires picking the right registrar |
-| **Theme** (dark / light mode) | `Rga.Theme` (current + apply + toggle). Persists to `localStorage['rga-theme']` | Same — Theme is intentionally simple | None — Theme has been single-owner since inception | n/a (no removal scheduled) | `Rga.Theme.current` (in-memory) mirrored to `localStorage['rga-theme']` (persistence) |
+| **Keyboard** (shortcuts dispatch) | **`Rga.KeyboardRegistry`** is the SSOT (Runtime Ownership Stab. Slice 2 §A). Single document.keydown listener. The legacy `Rga.Keyboard.register` is preserved as a thin shim that delegates to the registry, so engine consumers (notably `renderer/js/editor/page-setup-dialog.js`, off-limits) keep working unchanged. `Rga.Shell._onKeydown` was retired; shell shortcuts now call `Rga.KeyboardRegistry.register(...)` directly with a `source` label for audit | Same — `Rga.KeyboardRegistry` is the long-term home. A future slice may rename the legacy shim or remove it once `editor/page-setup-dialog.js` is touchable | `Rga.Keyboard` legacy shim — delegates `.register()` to the registry. Removable when nothing in `renderer/js/editor/*` calls it (off-limits this slice) | TBD — gated on `editor/*` becoming touchable; minor (~10 LOC) | **`Rga.KeyboardRegistry`** owns the single combo→handler map. Combos are normalised to canonical strings (`cmd+shift+p` / `escape` / `cmd+\``). Last-wins per combo; duplicates emit a `console.warn` for the audit trail (the no-duplicate-bindings guard test asserts zero duplicates at boot) |
+| **Theme** (dark / light mode) | `Rga.Theme` — owns active theme + apply + toggle + **`onChange(fn)` event emitter** (Runtime Ownership Stab. Slice 2 §B). Persists to `localStorage['rga-theme']`; init reads it back. Source-audit guard test asserts no other file in `renderer/js/*` writes `data-theme` or `rga-theme` | Same — Theme is intentionally simple. The onChange surface is the extension point for future consumers (status-bar swatch, syntax-highlight switch, etc.) without anyone bypassing the SSOT | None — Theme has been single-owner since inception; Slice 2 added the missing event-emitter capability | n/a | `Rga.Theme.current` (in-memory) is the SSOT; mirrored to `localStorage['rga-theme']` (persistence). Subscribe via `Rga.Theme.onChange(fn) → unsubscribe` |
 | **ViewManager** (Flow / Print / PrintPreview / Draft view mode) | `Rga.ViewManager` is the SSOT for active view id + body class side-effect. `Rga.ViewMode` is a user-facing UX layer (persistence + Esc-exits-Draft + previous-mode memory) that **reacts** to ViewManager via `onChange` | Same — Phase 7 correction made this division explicit; status-bar bypass works because ViewMode mirrors ViewManager state | None — the status-bar viewMode segment calling `Rga.ViewManager.activate(next)` directly is the documented bypass; ViewMode catches up via `onChange` (V1.1 fix 3) | n/a (no removal scheduled) | `Rga.ViewManager.current()` (in-memory) is the SSOT; `localStorage['rga-view-mode']` (persistence, owned by `Rga.ViewMode._persist`) |
 | **Scene Navigator** (current scene mark + selected row + click-to-navigate) | Two visual marks, two SSOTs:<br>• `Rga.Shell.SceneNavigator.row-current` reflects the editor cursor — sourced from `Rga.ScriptSession.currentScene.nodeId`<br>• `Rga.Shell.SceneNavigator.row-selected` reflects keyboard focus — sourced from the panel's internal `_selectedNodeId` | Same — separation is intentional (the "separation invariant"); a future slice may surface `_selectedNodeId` if other panels need it | None — the separation is the design | n/a (no removal scheduled) | `Rga.ScriptSession.get().currentScene.nodeId` for cursor-following highlight; `Rga.Shell.SceneNavigator._selectedNodeId` (panel-private) for keyboard focus |
 
@@ -89,24 +89,64 @@ through.
 
 ## 4. Open issues
 
-### OI-1 — Keyboard consolidation
+### OI-1 — Keyboard consolidation — **RESOLVED 2026-05-17 (Runtime Ownership Stab. Slice 2 §A)**
 
-The Keyboard row in §1 is the only entry with `SSOT: NONE`. Two
-listeners (`Rga.Keyboard._handle` and `Rga.Shell._onKeydown`) both
-attach to `document.keydown` on bubble phase. They handle different
-combo sets and don't collide today, but:
+**Resolution.** `Rga.KeyboardRegistry` was introduced as the single
+keyboard SSOT. All three pre-existing document-level keydown listeners
+were migrated into it:
 
-- New shortcuts must guess which registrar to use.
-- ProseMirror's keymap can shadow either (Ctrl+J shadowing observed
-  in some Electron builds — V1.1 fix 6 added Cmd+\` as an alternate).
-- No central place lists every registered shortcut for documentation
-  or palette generation.
+| Listener | Pre-Slice-2 location | Post-Slice-2 destination |
+|---|---|---|
+| Legacy `Rga.Keyboard` | `app-shell.js:318` — own listener + `_shortcuts` map | Shim — `Rga.Keyboard.register` delegates to `Rga.KeyboardRegistry.register`; `init()` just ensures the registry's listener is attached. The shim exists so off-limits engine consumers (notably `renderer/js/editor/page-setup-dialog.js`) keep working unchanged. |
+| Shell `_onKeydown` | `shell/index.js:100` — own listener + combo-string matcher | Each combo registered individually via `Rga.KeyboardRegistry.register(key, opts, handler, source)` with an explicit `source` label. Dead `_comboString` helper removed. |
+| `view-mode.js` Escape | `view-mode.js:147` — own listener with `if (current === 'draft')` gate | `Rga.KeyboardRegistry.register('escape', { when: () => current === 'draft' }, ...)` — the gate moves into the registry binding's `when` predicate. |
 
-A future "Keyboard consolidation" slice should unify both into a
-single `Rga.Shell.Keyboard` with a documented registration API. Until
-then, prefer `Rga.Shell._onKeydown` for sidebar-style shortcuts and
-`Rga.Keyboard.register` for everything else; document the choice in
-the slice plan.
+**Migration notes.**
+
+- Two duplicate registrations were caught and removed during the
+  migration: `Ctrl+J` was registered both in the boot `registerShortcuts()`
+  and again in `BottomPanel.init`; `Ctrl+B` was registered both via
+  `Rga.Keyboard` (boot) and via `Rga.Shell._onKeydown` (`cmd+b`). Both
+  pairs called identical handlers, so behaviour is unchanged; the
+  ownership matrix is cleaner.
+- The registry's last-wins-per-combo policy is paired with a
+  `console.warn` the first time a duplicate appears. The visual-stab
+  guard `A: no source-level Ctrl+J or Ctrl+B duplicates` enforces this
+  at build time.
+- `editor/page-setup-dialog.js` (Ctrl+Shift+G) is off-limits this
+  slice and continues to call `Rga.Keyboard.register`. The shim
+  forwards it to the registry transparently. When `editor/*` is
+  touchable, that consumer can migrate to a direct registry call and
+  the shim can be deleted (see the matrix's Removal-Slice column).
+
+### OI-2 — Theme — **RESOLVED 2026-05-17 (Runtime Ownership Stab. Slice 2 §B)**
+
+**Resolution.** `Rga.Theme` was already single-owner; the slice added
+the missing `onChange(fn) → unsubscribe` event surface so consumers can
+react to theme flips without polling `data-theme` or `localStorage`.
+
+**Migration notes.**
+
+- `apply()` now snapshots subscribers before dispatch so an unsubscribe
+  during iteration doesn't skip later listeners.
+- Same-theme `apply()` is a no-op for subscribers (idempotent).
+- Unknown theme strings are rejected (defensive).
+- `localStorage` reads/writes wrapped in `try/catch` so private-mode /
+  quota errors don't crash boot.
+- A source-audit guard test enforces that **only** `renderer/js/app-shell.js`
+  writes `data-theme` or `rga-theme`; any future module that tries
+  to mutate the theme will fail the guard.
+
+### OI-3 — Layout-wide persistence (Slice 4)
+
+`Rga.Shell.Layout.toJSON / fromJSON` exist but are not wired to
+localStorage. Slice 4 is supposed to handle workspace persistence
+end-to-end. Until then, individual rows that need persist-across-
+reload behaviour add their own scoped localStorage keys (see
+`rga-shell-studio-panel-visible`). When Slice 4 lands, those scoped
+keys should migrate into a single workspace blob.
+
+*(Renumbered from OI-2 after Slice 2 closed both Keyboard and Theme.)*
 
 ### OI-2 — Layout-wide persistence (Slice 4)
 
