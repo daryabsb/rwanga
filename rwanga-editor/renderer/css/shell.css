@@ -241,6 +241,11 @@
   grid-template-rows: var(--tab-bar-height) 1fr;
   overflow: hidden;
   min-height: 0;
+  /* V1.1 fix 5: the scene toolbox is now a child of #editor-area (not
+     #editor-container, which scrolls). #editor-area must be position:
+     relative so the toolbox's absolute positioning anchors here and
+     it stays visible while the page scrolls inside #editor-container. */
+  position: relative;
 }
 
 #editor-container {
@@ -250,10 +255,10 @@
   overflow-y: auto;
   overflow-x: auto;
   background: var(--editor-bg);
-  /* Visual Stabilization V1 (T4): reserve right-side padding so the
-     scene toolbox (now position: absolute at right: 16px, width 88px)
-     has a no-overlap safe zone alongside the centred page. RTL flips
-     the reservation to the left. */
+  /* V1.1 fix 5: padding-right reserves visual space for the scene
+     toolbox, which now lives in #editor-area (one level up, outside
+     this scrolling container) and floats over this padded right
+     edge. RTL mirrors to the left. */
   padding: 32px 120px 32px 32px;
   position: relative;
 }
