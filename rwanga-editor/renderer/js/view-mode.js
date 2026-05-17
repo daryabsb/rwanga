@@ -2,6 +2,13 @@
 // View modes — Flow (default), Print, Draft.
 // State lives in localStorage as a per-app global preference. Esc inside
 // Draft restores the previous view.
+//
+// Phase 7 correction: the actual view switch (body classes, container
+// classes) is owned by Rga.ViewManager. ViewMode keeps the user-facing UX
+// (persistence, cycle, Esc-exits-Draft, listeners) and registers one
+// controller per mode with the manager. Each controller is responsible
+// only for its own DOM side effects (the editor-container class arithmetic
+// that used to live in _apply()).
 'use strict';
 
 (function() {
@@ -29,13 +36,54 @@
     try { localStorage.setItem(KEY, current); } catch (_) {}
   }
 
-  function _apply() {
-    const target = document.getElementById('editor-container') || document.body;
+  // Per-mode controllers — each handles its OWN editor-container class
+  // arithmetic. ViewManager applies the body class (if any) and runs
+  // activate/deactivate in mutual exclusion.
+  function _applyContainerClass(mode) {
+    const target = document.getElementById('editor-container');
     if (!target) return;
     MODES.forEach(function(m) {
-      target.classList.toggle('view-' + m, m === current);
+      target.classList.toggle('view-' + m, m === mode);
     });
-    document.body.classList.toggle('view-draft-active', current === 'draft');
+  }
+  function _clearContainerClasses() {
+    const target = document.getElementById('editor-container');
+    if (!target) return;
+    MODES.forEach(function(m) { target.classList.remove('view-' + m); });
+  }
+
+  const _flowController = {
+    bodyClass: null,                              // flow = default; no body class
+    activate: function() { _applyContainerClass('flow'); },
+    deactivate: function() { /* next activate overwrites the class */ }
+  };
+  const _printController = {
+    bodyClass: 'view-print-active',
+    activate: function() { _applyContainerClass('print'); },
+    deactivate: function() {}
+  };
+  const _draftController = {
+    bodyClass: 'view-draft-active',
+    activate: function() { _applyContainerClass('draft'); },
+    deactivate: function() {}
+  };
+
+  function _registerWithViewManager() {
+    if (!Rga.ViewManager || typeof Rga.ViewManager.register !== 'function') return;
+    Rga.ViewManager.register('flow',  _flowController);
+    Rga.ViewManager.register('print', _printController);
+    Rga.ViewManager.register('draft', _draftController);
+  }
+
+  function _activate(mode) {
+    if (Rga.ViewManager && typeof Rga.ViewManager.activate === 'function') {
+      Rga.ViewManager.activate(mode);
+    } else {
+      // Fallback for tests / contexts where ViewManager is absent.
+      _applyContainerClass(mode);
+      document.body.classList.toggle('view-draft-active', mode === 'draft');
+      document.body.classList.toggle('view-print-active', mode === 'print');
+    }
   }
 
   function _notify() {
@@ -50,7 +98,7 @@
     if (current !== 'draft') previous = current;
     current = mode;
     _persist();
-    _apply();
+    _activate(mode);
     _notify();
   }
 
@@ -69,10 +117,31 @@
     listeners.push(fn);
   }
 
+  // V1.1 fix 3 (Draft mode trap): when other surfaces (status-bar,
+  // command palette, future menu items) call Rga.ViewManager.activate
+  // directly, they bypass Rga.ViewMode.set and the local `current`
+  // diverges from the true active mode. This made the Esc handler
+  // misfire (it gated on `current === 'draft'` while ViewManager said
+  // draft). Subscribing to ViewManager keeps `current` and `previous`
+  // in sync regardless of who flipped the mode.
+  function _syncFromViewManager() {
+    if (!Rga.ViewManager || typeof Rga.ViewManager.onChange !== 'function') return function() {};
+    return Rga.ViewManager.onChange(function(mode) {
+      if (!mode || MODES.indexOf(mode) === -1) return;
+      if (mode === current) return;
+      if (current !== 'draft') previous = current;
+      current = mode;
+      _persist();
+      _notify();
+    });
+  }
+
   function init() {
     _load();
-    _apply();
+    _registerWithViewManager();
+    _activate(current);
     _notify();
+    _syncFromViewManager();
 
     // Esc exits Draft globally
     document.addEventListener('keydown', function(e) {
@@ -83,5 +152,12 @@
     });
   }
 
-  Rga.ViewMode = { init, get, set, cycle, exitDraft, onChange, MODES };
+  Rga.ViewMode = {
+    init: init, get: get, set: set, cycle: cycle,
+    exitDraft: exitDraft, onChange: onChange, MODES: MODES,
+    // Test/diagnostic exposure of the controllers we register.
+    _flowController:  _flowController,
+    _printController: _printController,
+    _draftController: _draftController
+  };
 })();
