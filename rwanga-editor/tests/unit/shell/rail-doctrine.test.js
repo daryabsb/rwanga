@@ -64,7 +64,7 @@ test('Rule 1: every rail panel\'s icon registration is a Lucide name (not an emo
   Object.keys(expected).forEach(function(file) {
     const src = readText(path.join(PANELS_DIR, file));
     const m = src.match(/icon:\s*['"]([^'"]+)['"]/);
-    assert.ok(m, file + ': must declare icon: '...' as a string literal');
+    assert.ok(m, file + ': must declare an icon: string literal');
     assert.equal(m[1], expected[file],
       file + ' icon must be "' + expected[file] + '" (Lucide name), got "' + m[1] + '"');
   });
