@@ -203,58 +203,76 @@ test('G3: no shell-state classes (bottom-collapsed, sidebar-collapsed, view-*-ac
 // G4 — no direct localStorage writes outside named owner modules
 // ----------------------------------------------------------------
 
-test('G4: every localStorage write key is claimed by exactly one owner module', () => {
-  // The ownership matrix's "Persistence keys" §2 names five keys + their
-  // owners. This guard enforces the list at source level.
-  const allowedOwners = {
-    'rga-theme':                       ['renderer/js/app-shell.js'],
-    'rga-view-mode':                   ['renderer/js/view-mode.js'],
-    'rga-script-lang':                 ['renderer/js/app-shell.js'],
-    'rga-session-tabs':                ['renderer/js/tab-manager.js'],
-    'rga-shell-studio-panel-visible':  ['renderer/js/app-shell.js']
-  };
+// ----------------------------------------------------------------
+// Storage ownership registry — referenced by G4 / G5 / G6 / G7.
+// Slice 4 §C: pull this out of the G4 closure so the new guards can
+// share it; keep here so the registry lives next to the guards that
+// enforce it. The canonical doc is
+// docs/design-system/rwanga-storage-ownership.md.
+// ----------------------------------------------------------------
+const STORAGE_OWNERS = {
+  'rga-theme':              { writers: ['renderer/js/app-shell.js'],     restoreIn: ['renderer/js/app-shell.js']     },
+  'rga-view-mode':          { writers: ['renderer/js/view-mode.js'],     restoreIn: ['renderer/js/view-mode.js']     },
+  'rga-script-lang':        { writers: ['renderer/js/app-shell.js'],     restoreIn: ['renderer/js/app-shell.js']     },
+  'rga-session-tabs':       { writers: ['renderer/js/tab-manager.js'],   restoreIn: ['renderer/js/tab-manager.js']   },
+  'rga-workspace-layout':   { writers: ['renderer/js/shell/workspace-state.js'], restoreIn: ['renderer/js/shell/workspace-state.js'] }
+};
 
+// Legacy keys: WorkspaceState READS these once during migration; no
+// module is allowed to WRITE them anymore. Listed so the unknown-key
+// guard knows they're known-but-deprecated rather than truly unknown.
+const LEGACY_KEYS = {
+  'rga-shell-studio-panel-visible': { migratedTo: 'rga-workspace-layout', migratedIn: 'Slice 4 §A' }
+};
+
+test('G4: every localStorage write key is claimed by exactly one owner module', () => {
   const files = shellJsFiles();
-  const knownKeys = Object.keys(allowedOwners);
   const offenders = [];
 
   files.forEach(function(file) {
-    const src = readText(file);
-    // Match localStorage.setItem(...) calls capturing the first string arg.
+    const src = stripComments(readText(file));
     const re = /localStorage\.setItem\s*\(\s*['"]([^'"]+)['"]/g;
     let m;
     while ((m = re.exec(src))) {
       const key = m[1];
       const rel = relativeFromRepo(file);
-      const allowed = allowedOwners[key];
-      if (!allowed) {
-        offenders.push(rel + ' writes UNREGISTERED key "' + key + '". Add it to the ownership matrix §2 + this guard.');
+      const owner = STORAGE_OWNERS[key];
+      if (!owner) {
+        if (LEGACY_KEYS[key]) {
+          offenders.push(rel + ' writes LEGACY key "' + key +
+            '" — migrated to "' + LEGACY_KEYS[key].migratedTo + '" in ' +
+            LEGACY_KEYS[key].migratedIn + '. Read-only allowed during migration; no writes.');
+        } else {
+          offenders.push(rel + ' writes UNREGISTERED key "' + key +
+            '". Add it to STORAGE_OWNERS + docs/design-system/rwanga-storage-ownership.md.');
+        }
         continue;
       }
-      if (allowed.indexOf(rel) < 0) {
-        offenders.push(rel + ' writes key "' + key + '" which is owned by ' + allowed.join(' / '));
+      if (owner.writers.indexOf(rel) < 0) {
+        offenders.push(rel + ' writes key "' + key + '" which is owned by ' + owner.writers.join(' / '));
       }
     }
   });
 
   assert.deepEqual(offenders, [],
     'G4 violations:\n  - ' + offenders.join('\n  - ') + '\n' +
-    'All localStorage writes must come from the module that owns the key per the ownership matrix.');
+    'All localStorage writes must come from the module that owns the key per the storage-ownership doc.');
 });
 
 test('G4: no shell module reads localStorage for keys it does not own', () => {
-  // Read-side variant — narrower; we only enforce for the four keys
-  // whose READS are also single-owner. (rga-theme reads in TitleBar
-  // etc. are not blocked because reading is harmless; writes are the
-  // ownership-determining act.)
+  // Read-side variant — narrower; we only enforce for the keys
+  // whose READS are also single-owner.
   const files = shellJsFiles();
   const offenders = [];
-  // Today only rga-session-tabs has a strict read-side owner.
+  // Keys whose reads must come from a single module. rga-theme reads
+  // in TitleBar etc. are not blocked because reading is harmless;
+  // writes are the ownership-determining act.
   const RESTRICTED_READS = {
-    'rga-session-tabs': ['renderer/js/tab-manager.js']
+    'rga-session-tabs':     ['renderer/js/tab-manager.js'],
+    'rga-workspace-layout': ['renderer/js/shell/workspace-state.js']
   };
   files.forEach(function(file) {
-    const src = readText(file);
+    const src = stripComments(readText(file));
     const re = /localStorage\.getItem\s*\(\s*['"]([^'"]+)['"]/g;
     let m;
     while ((m = re.exec(src))) {
@@ -269,4 +287,96 @@ test('G4: no shell module reads localStorage for keys it does not own', () => {
   });
   assert.deepEqual(offenders, [],
     'G4 read-side violations:\n  - ' + offenders.join('\n  - '));
+});
+
+// ----------------------------------------------------------------
+// G5 — no duplicate persistence ownership (Slice 4 §C)
+// ----------------------------------------------------------------
+
+test('G5: every storage key has exactly one writer module', () => {
+  // The STORAGE_OWNERS registry above defines a one-module writer
+  // list per key. This guard re-asserts it as a structural property
+  // (no key may declare a multi-element `writers` array) — a future
+  // contributor cannot quietly relax single-owner semantics.
+  const offenders = [];
+  Object.keys(STORAGE_OWNERS).forEach(function(key) {
+    const writers = STORAGE_OWNERS[key].writers;
+    if (!Array.isArray(writers) || writers.length !== 1) {
+      offenders.push(key + ' has ' + (writers ? writers.length : 0) +
+        ' writers; must be exactly 1');
+    }
+  });
+  assert.deepEqual(offenders, [],
+    'G5 — storage-ownership registry violations: ' + offenders.join('; '));
+});
+
+// ----------------------------------------------------------------
+// G6 — no unregistered storage keys (Slice 4 §C)
+// ----------------------------------------------------------------
+
+test('G6: every localStorage key touched by renderer JS is either OWNED or LEGACY', () => {
+  // Catches the "new contributor added a key without updating the
+  // registry" case. Scans BOTH reads and writes; flags any key not
+  // in STORAGE_OWNERS and not in LEGACY_KEYS.
+  const files = shellJsFiles();
+  const unknown = new Set();
+  const re = /localStorage\.(?:getItem|setItem|removeItem)\s*\(\s*['"]([^'"]+)['"]/g;
+  files.forEach(function(file) {
+    const src = stripComments(readText(file));
+    let m;
+    while ((m = re.exec(src))) {
+      const key = m[1];
+      if (STORAGE_OWNERS[key]) continue;
+      if (LEGACY_KEYS[key]) continue;
+      unknown.add(key + '  (in ' + relativeFromRepo(file) + ')');
+    }
+  });
+  assert.deepEqual(Array.from(unknown), [],
+    'G6 — unregistered storage keys: ' + Array.from(unknown).join('; ') +
+    '. Each must be registered in STORAGE_OWNERS + the storage-ownership doc, ' +
+    'or — if it is a migration target — in LEGACY_KEYS.');
+});
+
+// ----------------------------------------------------------------
+// G7 — restore path must exist for owned keys (Slice 4 §C)
+// ----------------------------------------------------------------
+
+test('G7: every owned key has a corresponding restore (getItem) call in its restoreIn module', () => {
+  // A persistence key is only useful if SOMETHING reads it back on
+  // boot. This guard scans each registered key's restoreIn module
+  // for evidence of a restore path:
+  //   (a) the literal key string appears somewhere in the file
+  //       (typically a `const KEY = '<key>'` declaration), AND
+  //   (b) the file contains at least one localStorage.getItem(...)
+  //       call (with any argument shape — literal, variable, etc.).
+  // Both together are strong evidence that the module reads the key
+  // on boot; an enforced literal-only regex was too strict (modules
+  // legitimately store keys in constants).
+  const offenders = [];
+  Object.keys(STORAGE_OWNERS).forEach(function(key) {
+    const owner = STORAGE_OWNERS[key];
+    if (!owner.restoreIn || owner.restoreIn.length === 0) {
+      offenders.push(key + ' has no restoreIn module declared');
+      return;
+    }
+    owner.restoreIn.forEach(function(rel) {
+      const full = path.join(REPO, rel);
+      if (!fs.existsSync(full)) {
+        offenders.push(key + ': restoreIn file ' + rel + ' does not exist');
+        return;
+      }
+      const src = stripComments(readText(full));
+      const hasKeyLiteral = src.indexOf("'" + key + "'") >= 0 || src.indexOf('"' + key + '"') >= 0;
+      const hasGetItem    = /localStorage\.getItem\s*\(/.test(src);
+      if (!hasKeyLiteral) {
+        offenders.push(key + ': restoreIn ' + rel + ' does NOT contain the key literal "' + key + '"');
+        return;
+      }
+      if (!hasGetItem) {
+        offenders.push(key + ': restoreIn ' + rel + ' contains the key literal but no localStorage.getItem(...) call — no restore path exists');
+      }
+    });
+  });
+  assert.deepEqual(offenders, [],
+    'G7 — owned keys without a restore path:\n  - ' + offenders.join('\n  - '));
 });
