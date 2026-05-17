@@ -52,14 +52,21 @@ test('G-OC-1: main.js uses platform-conditional frame setting (Win/Linux framele
     'main.js must include titleBarStyle: \'hiddenInset\' for the macOS hybrid path');
 });
 
-test('G-OC-1: main.js does NOT use frame: true unconditionally (regression guard for the reversal)', () => {
+test('G-OC-1: main.js does NOT declare frame: true after A1 (regression guard for the reversal)', () => {
   const src = read(MAIN_JS);
   if (!isA1Landed(src)) return;  // dormant until A1
-  // Specifically catch a regression to the old `frame: true` literal.
-  // After A1 lands, frame: true should not appear as a top-level
-  // BrowserWindow option.
-  const bwBlock = src.match(/new BrowserWindow\(\{[\s\S]*?\}\)/);
-  assert.ok(bwBlock, 'BrowserWindow construction must be discoverable in main.js');
-  assert.equal(/frame\s*:\s*true/.test(bwBlock[0]), false,
-    'BrowserWindow must not declare frame: true after A1 — that is the reversal we performed');
+  // Strip comments first — frame: true inside an explanatory comment
+  // is allowed (the comment may legitimately discuss the old setting).
+  const stripped = src
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .replace(/(^|[^:])\/\/[^\n]*/g, '$1');
+  // The reversal is binary: anywhere in real code, frame: true is the
+  // pre-A1 state. After A1, only frame: false (or its absence on the
+  // macOS hiddenInset path) is allowed. Two valid construction styles:
+  //   (a) inline:    new BrowserWindow({ frame: false, … })
+  //   (b) build-and-pass: const opts = { … }; opts.frame = false;
+  //                       new BrowserWindow(opts);
+  // Both styles are accepted; we just forbid the literal frame: true.
+  assert.equal(/frame\s*:\s*true/.test(stripped), false,
+    'main.js must not declare frame: true after A1 — that is the reversal we performed');
 });

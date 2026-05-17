@@ -12,13 +12,33 @@ const { buildMenu, registerIpc: registerMenuIpc } = require('./menu');
 let mainWindow = null;
 const DEV = process.argv.includes('--dev');
 
+// Studio Shell Recovery — Workstream A1: frameless window transport.
+//
+// Platform-conditional chrome ownership (Option B hybrid, per
+// docs/owned-chrome-architecture-report.md):
+//   • Windows + Linux: frame: false — Rwanga owns title bar, menu,
+//     window controls. Renderer paints all chrome in subsequent
+//     stages (A2 title bar, A3 controls, A4 menu, A5 drag polish).
+//   • macOS: titleBarStyle: 'hiddenInset' — native traffic lights
+//     preserved per Apple HIG; Rwanga paints title content beside
+//     them. macOS keeps its global native menu bar.
+//
+// A1 ONLY changes the transport layer. Renderer is untouched until
+// A2 lands the owned title bar. The temporary state on Windows
+// after A1 is: no native title bar, no native menu, no window
+// controls. Resize edges still work; Win+arrow snap, Alt+F4, Win+M
+// still work; mouse drag does NOT yet (drag region declaration is
+// part of A2). This is a verification state, not daily use.
+const _isMac = process.platform === 'darwin';
+const _isWin = process.platform === 'win32';
+const _isLin = process.platform === 'linux';
+
 function createMainWindow() {
-  mainWindow = new BrowserWindow({
+  const _windowOptions = {
     width: 1440,
     height: 900,
     minWidth: 900,
     minHeight: 600,
-    frame: true,
     backgroundColor: '#1e1e1e',
     webPreferences: {
       nodeIntegration: false,
@@ -27,7 +47,17 @@ function createMainWindow() {
       preload: path.join(__dirname, 'preload.js'),
     },
     show: false,
-  });
+  };
+  if (_isMac) {
+    // macOS hybrid: hiddenInset keeps traffic lights, lets us paint
+    // chrome alongside them (Phase A3 mission turn).
+    _windowOptions.titleBarStyle = 'hiddenInset';
+  } else {
+    // Windows + Linux: fully frameless. Renderer owns every chrome
+    // surface starting with A2.
+    _windowOptions.frame = false;
+  }
+  mainWindow = new BrowserWindow(_windowOptions);
 
   mainWindow.loadFile(path.join(__dirname, '..', 'renderer', 'index.html'));
   buildMenu(mainWindow);
