@@ -173,7 +173,12 @@
         <div id="bottom-panel-content">
           <div class="bp-content active" data-bp-tab="scene">
             <div class="notes-header" id="notes-scene-label">Notes — No scene selected</div>
-            <textarea class="notes-textarea" id="notes-textarea" placeholder="Add scene notes here..."></textarea>
+            <!-- Visual Stabilization V1 (T6): textarea is disabled by
+                 default; the wiring re-enables it when a scene becomes
+                 active. The sibling .notes-empty-state replaces it
+                 visually whenever [disabled] is present (CSS-only). -->
+            <textarea class="notes-textarea" id="notes-textarea" placeholder="Add scene notes here..." disabled></textarea>
+            <div class="notes-empty-state">Select a scene to add notes.</div>
           </div>
           <div class="bp-content" data-bp-tab="notes">
             <div id="annotation-notes-list" class="annotation-notes-list">

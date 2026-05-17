@@ -130,6 +130,10 @@
   --statusbar-fg: #9e9e9e;            /* matches --text-secondary */
   --statusbar-fg-hover: #cccccc;      /* matches --text-primary */
   --statusbar-segment-hover-bg: rgba(255, 255, 255, 0.06);
+  /* Bottom-panel active-tab indicator — scoped token so the tab
+     underline does NOT twin with --accent-primary surfaces (Visual
+     Stabilization V1, T6). */
+  --tab-active-indicator: #cccccc;
 
   /* === Accent Colors === */
   --accent-primary: #007acc;
@@ -246,11 +250,12 @@
   --border-subtle: rgba(0, 0, 0, 0.06);
   --border-focus: #0066bf;
 
-  /* Chrome surface tokens (Visual Stabilization V1, T2). */
+  /* Chrome surface tokens (Visual Stabilization V1, T2 + T6). */
   --statusbar-bg: #e8e8e8;
   --statusbar-fg: #616161;
   --statusbar-fg-hover: #333333;
   --statusbar-segment-hover-bg: rgba(0, 0, 0, 0.06);
+  --tab-active-indicator: #333333;
 
   --accent-primary: #0066bf;
   --accent-primary-hover: #005bb0;
