@@ -92,15 +92,15 @@ catch it at CI.
 | **Event source** | • `Rga.Shell.Sidebar.onChange(fn)` — fires on `activate` / `deactivate`.<br>• `Rga.Shell.Layout.subscribe(fn)` — fires on `Layout.set` mutations (including the activePanel mirror writes from `Sidebar._syncLayoutMirror`). |
 | **Open risks** | • A contributor could still write `Layout.set({sidebar: {activePanel: 'foo'}})` directly without calling `Sidebar.activate('foo')` — Layout would change but the registry wouldn't run mount/unmount. **G2 drift guard expanded in Slice 5 §B** to restrict `activePanel` writes to layout.js + sidebar.js only; any other writer fails CI with a clear pointer to `Sidebar.activate`.<br>• `Sidebar.deactivate()` does NOT clear `Layout.sidebar.activePanel` — preserves "user's logical choice" across a hide so reopen restores the same panel. Visibility is the separate `sidebar.visible` field. Documented in `sidebar.js`'s deactivate comment. |
 
-### 1.5 BottomPanel
+### 1.5 BottomPanel / Inspector / StudioPanel (consolidated Slice 9 §A)
 
 | Field | Value |
 |---|---|
-| **SSOT** | `Rga.Shell.Layout.studioPanel.visible` (in-memory + persisted). `Rga.BottomPanel` is the public mutator API; the DOM class `bottom-collapsed` is a SIDE EFFECT applied by `Rga.BottomPanel._syncDomFromLayout` from a Layout subscriber. |
-| **Consumers** | • `Rga.BottomPanel.toggleCollapse()` / `Rga.BottomPanel.open()` / `Rga.BottomPanel.switchTo(tabName)` — the public mutator surface. Called by: close button (`#btn-close-bottom-panel`); Ctrl+J shortcut (registered in index.html boot); Cmd+\` shortcut (registered in `shell/index.js`); command palette "Toggle Bottom Panel"; engine plugins `annotations.js` + `revision-flags.js` (off-limits) call `switchTo('notes')` / `switchTo('flags')` after annotation/flag actions. |
-| **Persistence** | `Rga.WorkspaceState` (Slice 4 §A) — the workspace blob `rga-workspace-layout` includes `studioPanel.visible` (and now `studioPanel.height` via Resize). BottomPanel no longer owns a scoped key; its `_STORAGE_KEY` / `_readPersistedVisibility` / `_writePersistedVisibility` helpers were removed. |
-| **Event source** | • `Rga.Shell.Layout.subscribe(fn)` — single subscriber routes `next.studioPanel.visible` → `_syncDomFromLayout` + `_writePersistedVisibility`. |
-| **Open risks** | • `activeTab` is currently held only on the `Rga.BottomPanel` instance (`this.activeTab = 'scene'`). The ownership matrix says it should migrate to `Layout.studioPanel.activeTab` in Slice 3+ — not done yet. Until then, the active tab is lost across reload (only visibility persists).<br>• The G3 drift guard restricts the `bottom-collapsed` class writer to `app-shell.js` (BottomPanel) but doesn't enforce that nobody mutates `Layout.studioPanel` directly. The G2 guard does cover that direction. |
+| **SSOT** | `Rga.Shell.StudioPanel` (`renderer/js/shell/studio-panel.js`) — the consolidated owner of bottom-panel visibility + active tab + notes surface + inspector routing + scene-notes routing. Persisted state lives in `Rga.Shell.Layout.studioPanel.{visible,activeTab,height}` (delegated through StudioPanel). Pre-Slice-9 the responsibilities were split across `Rga.BottomPanel` + `Rga.Inspector` + `Rga.SceneNotesConnector` (the third was dead code — init never wired). |
+| **Consumers** | • `Rga.Shell.StudioPanel.{show,hide,toggle,switchTo,activeTab,toggleInspector,openInspector}` — the canonical API.<br>• Legacy shims in `app-shell.js`:<br>&nbsp;&nbsp;− `Rga.BottomPanel.{init,open,switchTo,toggleCollapse}` → delegates to StudioPanel.<br>&nbsp;&nbsp;− `Rga.Inspector.{toggle,open}` → delegates to StudioPanel.<br>• Engine consumers (off-limits, preserved via shims):<br>&nbsp;&nbsp;− `annotations.js:117,154` → `Rga.BottomPanel.switchTo('notes')`<br>&nbsp;&nbsp;− `revision-flags.js:227` → `Rga.BottomPanel.switchTo('flags')`<br>&nbsp;&nbsp;− `context-menu.js:101` → `Rga.Inspector.open()` (Slice 9 §A added the `open()` method; pre-Slice-9 it didn't exist and the engine call was a defensive no-op).<br>• Shell consumers: close button, Ctrl+J, Cmd+`, command palette "Toggle Bottom Panel". |
+| **Persistence** | `Rga.WorkspaceState` (Slice 4 §A) — the workspace blob `rga-workspace-layout` includes `studioPanel.{visible,activeTab,height}`. Slice 9 §A made `activeTab` actually get written: pre-Slice-9 the Layout field existed but nothing wrote it, so the active tab was lost on reload; now `StudioPanel.switchTo` writes it. |
+| **Event source** | • `Rga.Shell.Layout.subscribe(fn)` — single subscriber in StudioPanel routes `next.studioPanel.visible` → `_syncVisibilityFromLayout` and `next.studioPanel.activeTab` → `_renderActiveTab`. |
+| **Open risks** | • The G3 drift guard restricts the `bottom-collapsed` class writer to `studio-panel.js`. G12 (Slice 9 §B) additionally restricts `inspector-hidden` writes to studio-panel.js, and forces the `Rga.BottomPanel` / `Rga.Inspector` definitions in app-shell.js to remain thin delegating shims (counts delegate call sites + forbids direct Layout.set or class writes inside the shim).<br>• `Rga.Shell.StudioPanel._wireSceneNotesConnector` walks editor DOM via `Rga.Cursor.getCurrentBlock` — if a future engine refactor changes scene-header DOM markers (`data-blockType="scene-header"`), this wiring silently degrades. Will be replaced by a proper "current scene" event subscription when the engine exposes one. |
 
 ### 1.6 Scene Navigator
 
@@ -229,22 +229,37 @@ don't get duplicated on every row.
   `rga-view-mode`, `rga-theme`, `rga-script-lang`, `rga-session-tabs`
   intentionally stay separate (per-app preferences / per-app session
   state, not per-workspace UI state).
-- **The G1–G11 drift guards** are the runtime safety net for this
+- **The G1–G12 drift guards** are the runtime safety net for this
   audit. If a future contributor violates an audit row's SSOT, the
-  guards either fail at CI (G1/G3/G4/G5/G6/G7/G8/G9/G10/G11) or emit
-  a console warn at runtime (KeyboardRegistry duplicate detection).
-  They cannot catch all drift — semantic regressions (e.g.
-  ViewMode.previous tracking the wrong mode after printPreview)
+  guards either fail at CI (G1/G3/G4/G5/G6/G7/G8/G9/G10/G11/G12) or
+  emit a console warn at runtime (KeyboardRegistry duplicate
+  detection). They cannot catch all drift — semantic regressions
+  (e.g. ViewMode.previous tracking the wrong mode after printPreview)
   require regression tests.
 - **Slice 8 §A — app-shell.js extraction Stage 2.** Toast / Modal /
   CommandPalette / Resize / ScriptLanguage all moved out of
   `renderer/js/app-shell.js` into their own files under
-  `renderer/js/shell/`. None of these are audit-row owners (they're
-  UI primitives, not state-ownership concerns). The audit rows
-  themselves are unaffected, but the file-path references in §1
-  remain valid because none of the audit rows ever pointed at
-  app-shell.js for these five modules. G11 (Slice 8 §B) prevents
-  any of them moving back.
+  `renderer/js/shell/`. None of these are audit-row owners (UI
+  primitives). G11 (Slice 8 §B) prevents any of them moving back.
+- **Slice 9 §A — StudioPanel consolidation.** `Rga.BottomPanel` +
+  `Rga.Inspector` + `Rga.SceneNotesConnector` collapsed into a
+  single new owner `Rga.Shell.StudioPanel`
+  (`renderer/js/shell/studio-panel.js`). The first two retain thin
+  delegating shims in `app-shell.js` because engine plugins call
+  them (annotations.js, revision-flags.js, context-menu.js); the
+  third was deleted (zero callers — init was never wired). Audit
+  row §1.5 was rewritten to reflect the consolidation. G12 (Slice
+  9 §B) pins the shim shape and ensures `inspector-hidden` /
+  `bottom-collapsed` are only written by StudioPanel.
+- **Engine touchability is the last gate.** With Slice 9 §A
+  complete, every remaining audit-row owner that lives in
+  `app-shell.js` (Keyboard / Sidebar / BottomPanel / Inspector
+  shims) is blocked on the same gate: when `editor/*` /
+  `doc-types/*` become touchable, the engine consumers can migrate
+  to the canonical APIs (`Rga.KeyboardRegistry`, `Rga.Shell.Sidebar`,
+  `Rga.Shell.StudioPanel`) and the four shims (~47 LOC total) can
+  be deleted. `app-shell.js` would shrink to ~80 LOC — just
+  `Rga.Theme`.
 
 ---
 
