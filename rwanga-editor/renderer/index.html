@@ -27,142 +27,40 @@
 <div id="app">
 
   <!-- ============================================================
-       MENU BAR
+       TITLE BAR — slice 1: shows "Rwanga • {script name} *".
+       Populated by Rga.Shell.TitleBar.init (commit 10).
+       Avatar placeholder is decorative in slice 1; slice 3 wires identity.
        ============================================================ -->
-  <header id="menu-bar">
-    <span class="menu-title" id="app-logo"></span>
-    <span class="menu-item" data-menu="file">File</span>
-    <span class="menu-item" data-menu="edit">Edit</span>
-    <span class="menu-item" data-menu="view">View</span>
-    <span class="menu-item" data-menu="script">Script</span>
-    <span class="menu-item" data-menu="tags">Tags</span>
-    <span class="menu-item" data-menu="export">Export</span>
-    <span class="menu-item" data-menu="help">Help</span>
-    <span class="menu-spacer"></span>
-    <div class="menu-window-controls">
-      <button class="menu-window-btn" id="win-minimize" title="Minimize"></button>
-      <button class="menu-window-btn" id="win-maximize" title="Maximize"></button>
-      <button class="menu-window-btn close" id="win-close" title="Close"></button>
-    </div>
+  <header id="rga-shell-titlebar" class="rga-shell-titlebar">
+    <div class="rga-shell-titlebar-title" id="rga-shell-titlebar-title">Rwanga</div>
+    <div class="rga-shell-titlebar-spacer"></div>
+    <div class="rga-shell-titlebar-avatar-placeholder" aria-hidden="true">👤</div>
   </header>
+
+  <!-- Legacy custom #menu-bar removed in Visual Stabilization V1
+       (chrome stack T1 — native-first). File · Edit · View · Help
+       live in the native Electron application menu now. Fake window
+       controls retired in favour of the native OS title bar's real
+       ones. The Slice 1 titlebar above is the only Rwanga-owned
+       chrome surface. -->
 
   <!-- ============================================================
        WORKSPACE (activity bar + sidebar + editor + inspector)
        ============================================================ -->
   <div id="workspace">
 
-    <!-- ---- ACTIVITY BAR (leftmost icon strip) ---- -->
-    <nav id="activity-bar">
-      <div class="activity-bar-top">
-        <button class="activity-icon active" data-panel="explorer" title="Explorer"></button>
-        <button class="activity-icon" data-panel="scenes" title="Scenes"></button>
-        <button class="activity-icon" data-panel="tags" title="Tags"></button>
-        <button class="activity-icon" data-panel="sync" title="Rwanga Sync"></button>
-      </div>
-      <div class="activity-bar-bottom">
-        <button class="activity-icon" data-panel="extensions" title="Extensions"></button>
-        <button class="activity-icon" id="btn-settings" title="Settings"></button>
-      </div>
-    </nav>
+    <!-- ---- ACTIVITY BAR — slice 1: empty container; Rga.Shell.ActivityRail.init populates it. ---- -->
+    <nav id="activity-bar" class="rga-shell-rail"></nav>
 
-    <!-- ---- SIDEBAR ---- -->
+    <!-- ---- SIDEBAR — slice 1: panel host wired by Rga.Shell.Sidebar.setHost ----
+         The old hardcoded panels (Explorer/Scenes/Tags/Sync/Extensions) were
+         placeholders. The new shell modules register real panels and mount
+         them into #rga-shell-sidebar-host. Header text is set by panel labels. -->
+    <!-- Slice 2 entry #3 resolution: #sidebar-header placeholder removed.
+         #rga-shell-sidebar-host is the canonical mount target. -->
     <aside id="sidebar">
-      <div id="sidebar-header">
-        <span id="sidebar-header-text">Explorer</span>
-        <div id="sidebar-header-actions"></div>
-      </div>
       <div id="sidebar-content">
-
-        <!-- PANEL: Explorer (File Tree) -->
-        <div class="sidebar-panel active" data-panel="explorer">
-          <div class="sidebar-section-header">
-            <span>Open Editors</span>
-          </div>
-          <div class="file-tree" id="file-tree">
-            <!-- Populated by JS or static for prototype -->
-            <div class="tree-item folder open">
-              <span class="tree-chevron"></span>
-              <span class="tree-icon" data-icon="folderOpen"></span>
-              <span class="tree-label">My Project</span>
-            </div>
-            <div class="tree-item file active" style="padding-left:28px">
-              <span class="tree-icon" data-icon="fileRga"></span>
-              <span class="tree-label">The Last Light.rga</span>
-            </div>
-            <div class="tree-item file" style="padding-left:28px">
-              <span class="tree-icon" data-icon="fileTxt"></span>
-              <span class="tree-label">Notes.txt</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- PANEL: Scenes (Scene Navigator) -->
-        <div class="sidebar-panel" data-panel="scenes">
-          <div class="sidebar-section-header">
-            <span>Scenes</span>
-            <span class="badge muted scenes-badge">0</span>
-          </div>
-          <div class="scene-list">
-            <!-- Dynamically populated by SceneManager.updateNavigator() -->
-          </div>
-        </div>
-
-        <!-- PANEL: Tags (Tag Manager) -->
-        <div class="sidebar-panel" data-panel="tags">
-          <div class="sidebar-search">
-            <input type="text" placeholder="Filter tags..." id="tag-filter-input">
-          </div>
-          <div class="tag-groups-container">
-            <!-- Dynamically populated by TagSystem.updateManagerPanel() -->
-          </div>
-          <button class="sidebar-btn-full" id="btn-create-tag-type">+ Create Custom Tag Type</button>
-        </div>
-
-        <!-- PANEL: Rwanga Sync -->
-        <div class="sidebar-panel" data-panel="sync">
-          <div class="sync-login">
-            <div class="sync-logo" id="sync-logo-icon"></div>
-            <p>Sign in to Rwanga to sync your scripts across devices and access version history.</p>
-            <button class="btn-primary">Sign In</button>
-            <button class="btn-secondary">Create Account</button>
-          </div>
-        </div>
-
-        <!-- PANEL: Extensions -->
-        <div class="sidebar-panel" data-panel="extensions">
-          <div class="sidebar-search">
-            <input type="text" placeholder="Search extensions...">
-          </div>
-          <div class="extension-card locked">
-            <div class="extension-icon">🤖</div>
-            <div class="extension-info">
-              <div class="extension-name">Claude AI Assistant</div>
-              <div class="extension-desc">AI-powered script analysis, dialogue suggestions, and story structure feedback</div>
-            </div>
-            <span class="pro-badge">PRO</span>
-          </div>
-          <div class="extension-card locked">
-            <div class="extension-icon">💬</div>
-            <div class="extension-info">
-              <div class="extension-name">ChatGPT</div>
-              <div class="extension-desc">OpenAI writing assistant for dialogue, character development, and brainstorming</div>
-            </div>
-            <span class="pro-badge">PRO</span>
-          </div>
-          <div class="extension-card locked">
-            <div class="extension-icon">🔌</div>
-            <div class="extension-info">
-              <div class="extension-name">MCP Server</div>
-              <div class="extension-desc">Connect any AI platform via the Model Context Protocol</div>
-            </div>
-            <span class="pro-badge">PRO</span>
-          </div>
-          <div class="extensions-cta">
-            <p>AI extensions require a Pro plan.</p>
-            <button class="btn-primary">Upgrade to Pro</button>
-          </div>
-        </div>
-
+        <div id="rga-shell-sidebar-host" class="rga-shell-sidebar-host"></div>
       </div>
     </aside>
 
@@ -329,28 +227,10 @@
   <!-- ============================================================
        STATUS BAR
        ============================================================ -->
-  <footer id="status-bar">
-    <div class="status-left">
-      <span class="status-item" id="status-sync">
-        <span class="status-sync-dot synced"></span> Synced
-      </span>
-      <span class="status-item" id="status-scene">Scene 0/0</span>
-      <span class="status-item" id="status-problems" title="Problems">⚠ 0</span>
-    </div>
-    <div class="status-right">
-      <span class="status-item" id="status-words">0 words</span>
-      <span class="status-item" id="status-pages">0 pages</span>
-      <span class="status-item" id="status-block-type">Action</span>
-      <div class="view-pill" id="view-pill" title="View mode (Ctrl+Shift+V to cycle)">
-        <button class="view-pill-seg" data-view="flow">Flow</button>
-        <button class="view-pill-seg" data-view="print">Print</button>
-        <button class="view-pill-seg" data-view="draft">Draft</button>
-      </div>
-      <button class="status-item status-btn" id="status-units" title="Measurement unit (click to cycle)">in</button>
-      <button class="status-item status-btn" id="status-theme" title="Toggle Theme"></button>
-      <button class="status-item status-btn" id="status-language">EN</button>
-    </div>
-  </footer>
+  <!-- Slice 2 status-bar takeover: legacy hardcoded #status-* children
+       removed (entry #1 resolution). Rga.Shell.StatusBar populates this
+       footer from Rga.ScriptSession at runtime. -->
+  <footer id="status-bar"></footer>
 
 </div>
 
@@ -454,41 +334,78 @@
 <script src="js/editor/bundle.js"></script>
 <script src="js/framework/doc-type-registry.js"></script>
 <script src="js/framework/base-outer-marks.js"></script>
-<script src="js/doc-types/screenplay/outer-schema-additions.js"></script>
-<!-- v3 schema (Phase 1) — pure module, not yet wired into mount. Exposes
-     Rga.DocTypes.screenplay.buildSchemaV3() for tests + future phases. -->
+<!-- Doc-state navigation index (Phase 4) — pure NavigationIndex + PM plugin
+     that emits NodeDecorations carrying derived scene numbers. Source
+     for numbering / filtering / focus / pagination. No DOM walks.
+     Phase 5 extension: richer scene metadata + characters/tags/notes/flags.
+     Phase 6: ScreenplayNormalizer + LayoutProfile + PageMap engine feed
+     NavigationIndex.pages + DocumentOutline.statistics.pages, and emit
+     widget Decorations as Flow-view page-break markers.
+     Load order matters: normalizer + layout-profile + pagemap-engine +
+     document-outline ALL load BEFORE nav-index so the plugin's state.init
+     can call them. -->
+<script src="js/framework/screenplay-normalizer.js"></script>
+<script src="js/framework/layout-profile.js"></script>
+<script src="js/framework/pagemap-engine.js"></script>
+<script src="js/framework/document-outline.js"></script>
+<script src="js/framework/nav-index.js"></script>
+<!-- Phase 7 — Read-only PrintPreview. Consumes the same Normalizer +
+     LayoutProfile + PageMap pipeline; produces a RenderModel that the
+     PrintRenderer paints as N fixed-dimension .rga-page-sheet elements.
+     Phase 7 correction: ViewManager owns view-mode state; PrintPreview
+     and ViewMode both register controllers with it, so body classes
+     become a render side-effect of activation rather than the truth.
+     view-manager.js MUST load before any consumer that registers. -->
+<!-- RuntimeProfile — single source of truth for editor-level runtime
+     modes (editorArchitecture, compatibilityMode, future experimental/AI
+     /debug/safe). Must load BEFORE doc.js and mount.js, both of which
+     read it for compatibility-mode routing. -->
+<script src="js/framework/runtime-profile.js"></script>
+<script src="js/framework/view-manager.js"></script>
+<script src="js/framework/render-model.js"></script>
+<script src="js/framework/print-renderer.js"></script>
+<script src="js/framework/print-preview.js"></script>
+<!-- Slice 1 shell — Layout (state truth), Sidebar (panel host), ActivityRail.
+     Loaded BEFORE engine + panel modules so the registries exist when panel
+     IIFEs run. Remaining slice-1 modules (ScriptSession, panels, status bar,
+     title bar, index bootstrap) load in commits 5-12. -->
+<script src="js/shell/layout.js"></script>
+<script src="js/shell/sidebar.js"></script>
+<script src="js/shell/activity-rail.js"></script>
+<script src="js/shell/script-session.js"></script>
+<script src="js/shell/panels/scene-navigator.js"></script>
+<script src="js/shell/panels/script-workspace.js"></script>
+<script src="js/shell/panels/outline.js"></script>
+<script src="js/shell/panels/characters.js"></script>
+<script src="js/shell/panels/search.js"></script>
+<script src="js/shell/panels/revisions.js"></script>
+<script src="js/shell/panels/settings.js"></script>
+<script src="js/shell/status-bar.js"></script>
+<script src="js/shell/title-bar.js"></script>
+<script src="js/shell/index.js"></script>
+<!-- v3 screenplay schema — single canonical PM doc with structural
+     scene nodes. Exposes Rga.DocTypes.screenplay.buildSchemaV3(). -->
 <script src="js/doc-types/screenplay/schema-v3.js"></script>
-<!-- Migrations framework (Phase 2) — pure JSON → JSON. Steps first, then
-     the chain entry point. Exposes Rga.Migrations.{detectVersion, migrate}.
-     Not yet wired into doc.js deserialize (Phase 3+). -->
+<!-- Migration chain — v1.x → v2.x → v3 (pure JSON → JSON). Required to
+     load files saved before v3 became the primary path. -->
 <script src="js/doc-types/screenplay/migrations/v1-to-v2.js"></script>
 <script src="js/doc-types/screenplay/migrations/v2-to-v3.js"></script>
 <script src="js/doc-types/screenplay/migrations/index.js"></script>
-<script src="js/doc-types/screenplay/scene-frame-placeholder.js"></script>
-<!-- Nested-PM Scene NodeView — exposes Rga.DocTypes.screenplay.sceneFramePmFactory.
-     Replacement-in-progress for the placeholder above. Loaded but not yet
-     registered; opt-in per-doc via metadata.useV2SceneFrame (Step 3+). -->
-<script src="js/doc-types/screenplay/scene-frame-pm.js"></script>
-<!-- F2 inner-editor modules — order matters: schema → keymap/views/plugins → frame node view -->
-<script src="js/doc-types/screenplay/inner-schema.js"></script>
-<script src="js/doc-types/screenplay/inner-keymap.js"></script>
-<script src="js/doc-types/screenplay/inner-scene-line-node-view.js"></script>
-<script src="js/doc-types/screenplay/inner-zone-key-plugin.js"></script>
-<script src="js/doc-types/screenplay/scene-frame-node-view.js"></script>
+<!-- v3 editor surface: NodeViews (Scene + SceneHeading), keymap
+     (Tab cycle / Enter flow / Mod-Enter spawn / Backspace join),
+     commands (makeEmptyScene / cycleBlockType / etc.). -->
+<script src="js/doc-types/screenplay/v3-commands.js"></script>
+<script src="js/doc-types/screenplay/v3-keymap.js"></script>
+<script src="js/doc-types/screenplay/v3-node-views.js"></script>
+<!-- Screenplay doc-type registration — wires Rga.DocTypes.screenplay
+     into the registry with selectSchema → buildSchemaV3. -->
 <script src="js/doc-types/screenplay/index.js"></script>
+<!-- Cross-schema mark plugins — work on the v3 doc via PM marks. -->
 <script src="js/doc-types/screenplay/plugins/context-menu.js"></script>
 <script src="js/doc-types/screenplay/plugins/annotations.js"></script>
 <script src="js/doc-types/screenplay/plugins/annotation-notes.js"></script>
 <script src="js/doc-types/screenplay/plugins/tags.js"></script>
 <script src="js/doc-types/screenplay/plugins/revision-flags.js"></script>
-<!-- Screenplay layout layer — pure functions, no DOM. Load order matters:
-     profiles → wrap → normalizer → engine (each depends on the prior). -->
-<script src="js/doc-types/screenplay/layout/profiles.js"></script>
-<script src="js/doc-types/screenplay/layout/wrap.js"></script>
-<script src="js/doc-types/screenplay/layout/normalizer.js"></script>
-<script src="js/doc-types/screenplay/layout/engine.js"></script>
-<!-- Stupid renderer — consumes PageMap, emits decorations. Never measures. -->
-<script src="js/doc-types/screenplay/plugins/paginator-renderer.js"></script>
 <script src="js/editor/mount.js"></script>
 <script src="js/editor/page-surface.js"></script>
 <script src="js/editor/page-setup-dialog.js"></script>
@@ -526,17 +443,9 @@
     var settingsBtn = Rga.$('#btn-settings');
     if (settingsBtn) settingsBtn.innerHTML = Rga.Icons.settings;
 
-    // App logo
-    var logo = Rga.$('#app-logo');
-    if (logo) logo.innerHTML = Rga.Icons.rwangaLogo + ' Rwanga';
-
-    // Window controls
-    var minBtn = Rga.$('#win-minimize');
-    if (minBtn) minBtn.innerHTML = Rga.Icons.minimize;
-    var maxBtn = Rga.$('#win-maximize');
-    if (maxBtn) maxBtn.innerHTML = Rga.Icons.maximize;
-    var closeBtn = Rga.$('#win-close');
-    if (closeBtn) closeBtn.innerHTML = Rga.Icons.windowClose;
+    // Visual Stabilization V1: #app-logo and #win-* injections retired
+    // with the legacy #menu-bar block. Native OS chrome owns identity
+    // glyph and window controls.
 
     // Tab new button
     var tabNew = Rga.$('#tab-new');
@@ -570,7 +479,10 @@
       action: function() { Rga.Theme.toggle(); }
     });
     P.register({ label: 'Toggle Sidebar', shortcut: 'Ctrl+B', category: 'View',
-      action: function() { Rga.Sidebar.toggleCollapse(); }
+      action: function() {
+        const cur = Rga.Shell && Rga.Shell.Layout ? Rga.Shell.Layout.get().sidebar.visible : true;
+        if (Rga.Shell && Rga.Shell.Layout) Rga.Shell.Layout.set({ sidebar: { visible: !cur } });
+      }
     });
     P.register({ label: 'Toggle Inspector', shortcut: 'Ctrl+Shift+I', category: 'View',
       action: function() { Rga.Inspector.toggle(); }
@@ -579,13 +491,22 @@
       action: function() { Rga.BottomPanel.toggleCollapse(); }
     });
     P.register({ label: 'Show Scenes Panel', category: 'View',
-      action: function() { Rga.Sidebar.switchTo('scenes'); }
+      action: function() {
+        if (Rga.Shell && Rga.Shell.Sidebar) Rga.Shell.Sidebar.activate('sceneNavigator');
+      }
     });
     P.register({ label: 'Show Tags Panel', category: 'View',
-      action: function() { Rga.Sidebar.switchTo('tags'); }
+      action: function() {
+        // Slice 2: the legacy 'tags' sidebar panel was retired. Until the
+        // Characters panel (Slice 3) ships, this command falls back to
+        // the Script Workspace as the closest writer-context surface.
+        if (Rga.Shell && Rga.Shell.Sidebar) Rga.Shell.Sidebar.activate('scriptWorkspace');
+      }
     });
     P.register({ label: 'Show Explorer', category: 'View',
-      action: function() { Rga.Sidebar.switchTo('explorer'); }
+      action: function() {
+        if (Rga.Shell && Rga.Shell.Sidebar) Rga.Shell.Sidebar.activate('scriptWorkspace');
+      }
     });
     // TODO[phase-9]: re-register when Rga.Commands (ProseMirror command layer) ships
     // P.register({ label: 'New Scene', shortcut: 'Ctrl+Enter', category: 'Script', ... });
@@ -608,7 +529,9 @@
       Rga.CommandPalette.open();
     });
     K.register('b', { ctrl: true, shift: false, alt: false }, function() {
-      Rga.Sidebar.toggleCollapse();
+      // Slice 2 entry #2 migration:
+      const cur = Rga.Shell && Rga.Shell.Layout ? Rga.Shell.Layout.get().sidebar.visible : true;
+      if (Rga.Shell && Rga.Shell.Layout) Rga.Shell.Layout.set({ sidebar: { visible: !cur } });
     });
     K.register('j', { ctrl: true, shift: false, alt: false }, function() {
       Rga.BottomPanel.toggleCollapse();
@@ -736,11 +659,20 @@
     injectIcons();
     Rga.Theme.init();
     Rga.Resize.init();
-    Rga.Sidebar.init();
+    // Slice 2 entry #2 migration: Rga.Sidebar.init() no longer called.
+    // Rga.Shell.Sidebar (Slice 1) owns the sidebar; Rga.Shell.Layout owns
+    // visibility. The legacy module remains as a minimal no-op shim only
+    // so the engine plugin tags.js:206 (`Rga.Sidebar.switchTo('tags')`)
+    // keeps working without an engine change. See compatibility inventory
+    // entry #2 — BLOCKED on engine-side dependency; full removal in Slice 3.
     Rga.Keyboard.init();
     Rga.BottomPanel.init();
     Rga.CommandPalette.init();
     Rga.FileTree.init();
+    // Slice 1 shell boot — must run BEFORE TabManager so the editor mounts
+    // into a chrome-ready shell, and AFTER ViewMode (registered via
+    // ViewManager) so ScriptSession picks up the current view on init.
+    if (Rga.Shell && typeof Rga.Shell.init === 'function') Rga.Shell.init();
     Rga.TabManager.init();  // mounts ProseMirror EditorView internally
     // Try to restore the previous session's open tabs; fall back to a fresh
     // Untitled doc if nothing was saved or every file was unreadable.
@@ -756,7 +688,8 @@
     registerShortcuts();
     Rga.EditorShortcuts && Rga.EditorShortcuts.registerShortcuts();
     Rga.ScriptLanguage.init();
-    Rga.StatusBar.init();
+    // Slice 2 entry #1 resolution: Rga.StatusBar.init() removed.
+    // Rga.Shell.StatusBar (commits 3 + 8) populates #status-bar now.
     wireViewMode();
     wireUnits();
     Rga.FlowChrome && Rga.FlowChrome.init();

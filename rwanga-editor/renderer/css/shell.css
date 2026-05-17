@@ -6,19 +6,22 @@
 
 /* ---- App Root Grid ----
    Row tracks (top → bottom):
-     1. Shell titlebar (#rga-shell-titlebar) — added by Slice 1.
-        Height owned by .rga-shell-titlebar's own rule (28px); `auto`
-        here lets that rule drive the track size without a new token.
-     2. Menu bar (#menu-bar) — fixed at --menu-bar-height.
-     3. Workspace (#workspace) — 1fr, takes all remaining vertical space.
-     4. Status bar (#status-bar) — fixed at --status-bar-height.
+     1. Shell titlebar (#rga-shell-titlebar) — Slice 1; the SINGLE
+        Rwanga-owned identity surface. Height owned by the titlebar's
+        own rule (28px); `auto` lets that rule drive the track size.
+     2. Workspace (#workspace) — 1fr, takes all remaining vertical space.
+     3. Status bar (#status-bar) — fixed at --status-bar-height.
+   The legacy #menu-bar row was retired in Visual Stabilization V1
+   (chrome stack T1): native-first chrome means the native OS title +
+   native Electron menu (File·Edit·View·Help) own all menu surfaces;
+   the renderer owns identity only.
    IMPORTANT: track count MUST equal child count of #app. Adding a new
    chrome row without expanding this template will collapse #workspace
    into the next track and the editor becomes invisible. See the
    guard test in tests/unit/shell/css-layout.test.js. */
 #app {
   display: grid;
-  grid-template-rows: auto var(--menu-bar-height) 1fr var(--status-bar-height);
+  grid-template-rows: auto 1fr var(--status-bar-height);
   height: 100vh;
   width: 100vw;
   overflow: hidden;
@@ -26,92 +29,14 @@
   color: var(--text-primary);
 }
 
-/* ============================================================
-   MENU BAR
-   ============================================================ */
-#menu-bar {
-  display: flex;
-  align-items: center;
-  height: var(--menu-bar-height);
-  background: var(--bg-tertiary);
-  border-bottom: 1px solid var(--border-secondary);
-  padding: 0 8px;
-  gap: 0;
-  user-select: none;
-  -webkit-app-region: drag; /* Electron: draggable title bar area */
-}
-
-.menu-title {
-  -webkit-app-region: no-drag;
-  font-weight: 600;
-  font-size: var(--font-size-base);
-  color: var(--text-primary);
-  margin-right: 16px;
-  letter-spacing: 0.02em;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.menu-title svg {
-  width: 16px;
-  height: 16px;
-  color: var(--accent-gold);
-}
-
-.menu-item {
-  -webkit-app-region: no-drag;
-  padding: 4px 10px;
-  font-size: var(--font-size-base);
-  color: var(--text-secondary);
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  transition: background var(--transition-fast), color var(--transition-fast);
-}
-.menu-item:hover {
-  background: var(--bg-hover);
-  color: var(--text-primary);
-}
-.menu-item.active {
-  background: var(--bg-active);
-  color: var(--text-primary);
-}
-
-.menu-spacer {
-  flex: 1;
-  -webkit-app-region: drag;
-}
-
-.menu-window-controls {
-  display: flex;
-  -webkit-app-region: no-drag;
-  gap: 0;
-  margin-inline-start: auto;
-}
-.menu-window-btn {
-  width: 32px;
-  height: var(--menu-bar-height);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text-secondary);
-  transition: background var(--transition-fast), color var(--transition-fast);
-}
-.menu-window-btn:hover {
-  background: var(--bg-hover);
-  color: var(--text-primary);
-}
-.menu-window-btn.close:hover {
-  background: var(--accent-error);
-  color: #ffffff;
-}
-.menu-window-btn svg {
-  width: 14px;
-  height: 14px;
-}
+/* Legacy custom #menu-bar / .menu-title / .menu-item / .menu-spacer /
+   .menu-window-controls / .menu-window-btn rules removed in Visual
+   Stabilization V1 (chrome stack T1 — native-first). All menu surfaces
+   are now owned by the native Electron application menu; window
+   controls are owned by the native OS title bar. */
 
 /* ============================================================
-   WORKSPACE (between menu bar and status bar)
+   WORKSPACE (between titlebar and status bar)
    ============================================================ */
 #workspace {
   display: grid;
