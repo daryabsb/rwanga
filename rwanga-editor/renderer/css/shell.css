@@ -492,13 +492,45 @@
   -webkit-user-select: none;
   -webkit-app-region: drag;  /* OS title-bar drag region on Electron */
 }
-.rga-shell-titlebar-title {
+/* Studio Shell Recovery — Workstream A2: three-zone title bar layout.
+   The titlebar is flex; three zones consume it as:
+     [app  fixed]  [title  flex:1 centered]  [actions  fixed right]
+   The whole row is the drag region (declared on .rga-shell-titlebar
+   above). Each interactive child declares -webkit-app-region: no-drag
+   so clicks reach them — see G-OC-6 (drag-island invariant guard). */
+.rga-shell-titlebar-app {
+  /* LEFT zone — app identity. Static "Rwanga" word-mark. Same type
+     tokens as the existing titlebar; no new visual language. */
   display: inline-flex;
   align-items: center;
+  flex: 0 0 auto;
+  padding: 0 12px;
+  color: var(--text-primary, #d4d4d4);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+.rga-shell-titlebar-title {
+  /* CENTER zone — script identity. Rga.Shell.TitleBar paints children
+     here (script name + dirty asterisk). Flex:1 takes remaining width;
+     content centred. */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   gap: 6px;
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 0 12px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+.rga-shell-titlebar-actions {
+  /* RIGHT zone — actions. Existing theme toggle + avatar live here;
+     A3 will add window controls (min/max/close) at the end. */
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
 }
 .rga-shell-titlebar-sep {
   opacity: 0.5;
@@ -510,6 +542,8 @@
   color: var(--accent-warning, #cca700);
   margin-left: 2px;
 }
+/* Legacy spacer kept as a no-op for any out-of-tree references; the
+   3-zone flex layout above is what actually structures the bar. */
 .rga-shell-titlebar-spacer { flex: 1; }
 /* V1.1 fix 2: theme-toggle action sits in the titlebar's action zone.
    no-drag so the OS drag region doesn't swallow clicks. */

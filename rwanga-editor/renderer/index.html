@@ -31,17 +31,26 @@
        Populated by Rga.Shell.TitleBar.init (commit 10).
        Avatar placeholder is decorative in slice 1; slice 3 wires identity.
        ============================================================ -->
+  <!-- Studio Shell Recovery — Workstream A2: owned title bar with
+       three zones. Drag region is the whole row; interactive children
+       declare no-drag islands so clicks reach them.
+         LEFT    app identity      — static "Rwanga"
+         CENTER  script identity   — Rga.Shell.TitleBar paints here
+         RIGHT   actions           — theme toggle, avatar; will hold
+                                     window controls in A3 -->
   <header id="rga-shell-titlebar" class="rga-shell-titlebar">
-    <div class="rga-shell-titlebar-title" id="rga-shell-titlebar-title">Rwanga</div>
-    <div class="rga-shell-titlebar-spacer"></div>
-    <!-- V1.1 fix 2: theme toggle. Keyboard path (Ctrl+Shift+T) is also
-         registered in app-shell.js; this is the visible affordance. -->
-    <button id="rga-shell-titlebar-theme"
-            class="rga-shell-titlebar-action"
-            type="button"
-            title="Toggle theme (Ctrl+Shift+T)"
-            aria-label="Toggle theme">◐</button>
-    <div class="rga-shell-titlebar-avatar-placeholder" aria-hidden="true">👤</div>
+    <div class="rga-shell-titlebar-app" id="rga-shell-titlebar-app">Rwanga</div>
+    <div class="rga-shell-titlebar-title" id="rga-shell-titlebar-title"></div>
+    <div class="rga-shell-titlebar-actions" id="rga-shell-titlebar-actions">
+      <!-- V1.1 fix 2: theme toggle. Keyboard path (Ctrl+Shift+T) is also
+           registered in app-shell.js; this is the visible affordance. -->
+      <button id="rga-shell-titlebar-theme"
+              class="rga-shell-titlebar-action"
+              type="button"
+              title="Toggle theme (Ctrl+Shift+T)"
+              aria-label="Toggle theme">◐</button>
+      <div class="rga-shell-titlebar-avatar-placeholder" aria-hidden="true">👤</div>
+    </div>
   </header>
 
   <!-- Legacy custom #menu-bar removed in Visual Stabilization V1

@@ -8,9 +8,17 @@ const { JSDOM } = require('jsdom');
 
 function boot(opts) {
   opts = opts || {};
+  // Studio Shell Recovery — Workstream A2: three-zone titlebar fixture.
+  // Left zone (#rga-shell-titlebar-app) statically owns "Rwanga"; the
+  // center zone (#rga-shell-titlebar-title) is what Rga.Shell.TitleBar
+  // populates with script content.
   const dom = new JSDOM(
     '<!DOCTYPE html><html><body>' +
-    '<header id="rga-shell-titlebar"><div id="rga-shell-titlebar-title">Rwanga</div></header>' +
+    '<header id="rga-shell-titlebar">' +
+      '<div id="rga-shell-titlebar-app">Rwanga</div>' +
+      '<div id="rga-shell-titlebar-title"></div>' +
+      '<div id="rga-shell-titlebar-actions"></div>' +
+    '</header>' +
     '<div id="host"></div></body></html>',
     { url: 'http://localhost/' });
   global.window = dom.window;
@@ -45,22 +53,30 @@ function boot(opts) {
   return { Rga, stub, titleEl: document.getElementById('rga-shell-titlebar-title') };
 }
 
-test('title text is "Rwanga" when no script is open', () => {
+test('A2: center zone is empty when no script is open; left zone is "Rwanga"; document.title is "Rwanga"', () => {
   const { titleEl } = boot();
-  assert.equal(titleEl.textContent, 'Rwanga');
+  // A2: app identity lives in the LEFT zone (static markup); the
+  // center zone is empty until a script opens.
+  assert.equal(titleEl.textContent, '');
+  assert.equal(document.getElementById('rga-shell-titlebar-app').textContent, 'Rwanga');
+  // OS window title (document.title) keeps its full composite form for the taskbar.
   assert.equal(document.title, 'Rwanga');
 });
 
-test('title text is "Rwanga • {displayName}" when a clean script is active', () => {
+test('A2: center zone shows script name when a clean script is active; document.title composes "Rwanga • {displayName}"', () => {
   const { titleEl } = boot({
     activeDoc: { docId: 'd', displayName: 'The Last Light', dirty: false }
   });
-  assert.equal(titleEl.textContent, 'Rwanga•The Last Light');  // text nodes concatenated; visual gap via CSS gap
-  assert.equal(document.title, 'Rwanga • The Last Light');
-  assert.ok(titleEl.querySelector('.rga-shell-titlebar-sep'));
+  // Center zone holds script name only (no "Rwanga • " prefix here —
+  // the left zone owns app identity).
+  assert.equal(titleEl.textContent, 'The Last Light');
   assert.ok(titleEl.querySelector('.rga-shell-titlebar-script-name'));
   assert.equal(titleEl.querySelector('.rga-shell-titlebar-script-name').textContent, 'The Last Light');
   assert.equal(titleEl.querySelector('.rga-shell-titlebar-dirty'), null);
+  // Left zone unchanged.
+  assert.equal(document.getElementById('rga-shell-titlebar-app').textContent, 'Rwanga');
+  // OS title composes the full string for the taskbar.
+  assert.equal(document.title, 'Rwanga • The Last Light');
 });
 
 test('title text is "Rwanga • {displayName} *" when the active script is dirty', () => {

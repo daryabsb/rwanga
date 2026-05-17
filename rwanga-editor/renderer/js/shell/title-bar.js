@@ -52,9 +52,15 @@
 
   function _renderTitle(text, activeScript) {
     _titleEl.innerHTML = '';
-    _appendText(_titleEl, 'Rwanga');
+    // Studio Shell Recovery — Workstream A2: the left-zone element
+    // #rga-shell-titlebar-app statically owns "Rwanga" in markup.
+    // This center zone (#rga-shell-titlebar-title) renders only the
+    // script-identity content: script name + dirty asterisk, or
+    // nothing when no script is open. Empty center is intentional —
+    // the static "Rwanga" on the left carries app identity on its own.
+    // The OS window title (document.title) continues to compose the
+    // full "Rwanga • {script}" string for the taskbar.
     if (activeScript) {
-      _appendSpan(_titleEl, 'rga-shell-titlebar-sep', '•');
       _appendSpan(_titleEl, 'rga-shell-titlebar-script-name', text.script || '');
       if (text.dirty) {
         const dirty = document.createElement('span');
@@ -84,7 +90,9 @@
 
   function _reset() {
     if (_unsubscribeSession) { _unsubscribeSession(); _unsubscribeSession = null; }
-    if (_titleEl) _titleEl.innerHTML = 'Rwanga';
+    // A2: center zone resets to empty (left-zone "Rwanga" is static
+    // markup, untouched here).
+    if (_titleEl) _titleEl.innerHTML = '';
     _titleEl = null;
   }
 
