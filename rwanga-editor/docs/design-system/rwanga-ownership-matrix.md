@@ -66,7 +66,11 @@ Current persistence keys:
 | `rga-view-mode` | `Rga.ViewMode._persist` | flow/print/draft |
 | `rga-script-lang` | `Rga.ScriptLanguage` | per-app script writing language |
 | `rga-session-tabs` | `Rga.TabManager._saveSession` | open tabs across reload |
-| `rga-shell-studio-panel-visible` | `Rga.BottomPanel._writePersistedVisibility` | bottom panel visibility (Ownership Stab. Slice 1) |
+| `rga-workspace-layout` | `Rga.WorkspaceState._save` | full Layout blob — sidebar / studioPanel / inspector / titleBar / statusBar (Slice 4 §A; supersedes the scoped `rga-shell-studio-panel-visible` from Slice 1) |
+
+Canonical per-key reference is now
+`docs/design-system/rwanga-storage-ownership.md` (Slice 4 §B), with
+the G4–G7 drift guards enforcing the registry at CI time.
 
 ---
 
@@ -137,14 +141,44 @@ react to theme flips without polling `data-theme` or `localStorage`.
   writes `data-theme` or `rga-theme`; any future module that tries
   to mutate the theme will fail the guard.
 
-### OI-3 — Layout-wide persistence (Slice 4)
+### OI-3 — Layout-wide persistence — **RESOLVED 2026-05-17 (Runtime Ownership Stab. Slice 4 §A)**
 
-`Rga.Shell.Layout.toJSON / fromJSON` exist but are not wired to
-localStorage. Slice 4 is supposed to handle workspace persistence
-end-to-end. Until then, individual rows that need persist-across-
-reload behaviour add their own scoped localStorage keys (see
-`rga-shell-studio-panel-visible`). When Slice 4 lands, those scoped
-keys should migrate into a single workspace blob.
+**Resolution.** `Rga.WorkspaceState`
+(`renderer/js/shell/workspace-state.js`) was introduced as the single
+owner of layout persistence. It writes `Rga.Shell.Layout.toJSON()` to
+the single localStorage key `rga-workspace-layout` on every Layout
+change, and reads it back on boot via `Layout.fromJSON`.
+
+**Migration notes.**
+
+- The Slice-1 scoped key `rga-shell-studio-panel-visible` was migrated
+  in one shot: WorkspaceState reads it on first boot, folds the value
+  into the workspace blob via `studioPanel.visible`, then
+  `localStorage.removeItem`s the scoped key. The legacy key is logged
+  in `LEGACY_KEYS` of the drift guards so G6 recognises it as
+  known-but-deprecated; G4 fails any future write attempt.
+- `Layout.DEFAULTS.studioPanel.visible` flipped false → true to match
+  the long-standing UX where a fresh install boots with the bottom
+  panel visible. WorkspaceState restores user-explicit closes.
+- A new `inspector` zone was added to Layout DEFAULTS (`{visible:true,
+  width:280}`) so `Rga.Resize`'s inspector-handle drag has a Layout
+  field to commit to.
+- `Rga.Resize` now writes drag-end sizes to Layout (`sidebar.width`,
+  `inspector.width`, `studioPanel.height`) and subscribes to Layout
+  to push values back into the corresponding CSS variables. Drag
+  mid-move still writes the CSS variable directly for live feel;
+  Layout (and therefore persistence) is committed only on drag-end.
+- `Rga.BottomPanel`'s scoped persistence helpers (`_STORAGE_KEY`,
+  `_readPersistedVisibility`, `_writePersistedVisibility`) were
+  deleted. BottomPanel.init() now only syncs the DOM from Layout
+  and subscribes for future changes.
+
+**Acceptance.** Close → reopen → state restored for all four
+zones (sidebar visibility + width + activePanel; studioPanel
+visibility + height + activeTab; inspector visibility + width;
+title bar + status bar visibility). Behavioural tests in
+`tests/unit/shell/ownership-stab-slice4.test.js` cover the round
+trip via two-session simulation.
 
 *(Renumbered from OI-2 after Slice 2 closed both Keyboard and Theme.)*
 

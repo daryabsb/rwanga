@@ -76,7 +76,7 @@ aren't yet broken but need watching.
 |---|---|
 | **SSOT** | `Rga.Shell.Layout.studioPanel.visible` (in-memory + persisted). `Rga.BottomPanel` is the public mutator API; the DOM class `bottom-collapsed` is a SIDE EFFECT applied by `Rga.BottomPanel._syncDomFromLayout` from a Layout subscriber. |
 | **Consumers** | • `Rga.BottomPanel.toggleCollapse()` / `Rga.BottomPanel.open()` / `Rga.BottomPanel.switchTo(tabName)` — the public mutator surface. Called by: close button (`#btn-close-bottom-panel`); Ctrl+J shortcut (registered in index.html boot); Cmd+\` shortcut (registered in `shell/index.js`); command palette "Toggle Bottom Panel"; engine plugins `annotations.js` + `revision-flags.js` (off-limits) call `switchTo('notes')` / `switchTo('flags')` after annotation/flag actions. |
-| **Persistence** | `localStorage['rga-shell-studio-panel-visible']` (`'0'` \| `'1'`). Read on `Rga.BottomPanel.init()`; written by the Layout subscriber on every change. Slice-4 workspace persistence will likely subsume this scoped key. |
+| **Persistence** | `Rga.WorkspaceState` (Slice 4 §A) — the workspace blob `rga-workspace-layout` includes `studioPanel.visible` (and now `studioPanel.height` via Resize). BottomPanel no longer owns a scoped key; its `_STORAGE_KEY` / `_readPersistedVisibility` / `_writePersistedVisibility` helpers were removed. |
 | **Event source** | • `Rga.Shell.Layout.subscribe(fn)` — single subscriber routes `next.studioPanel.visible` → `_syncDomFromLayout` + `_writePersistedVisibility`. |
 | **Open risks** | • `activeTab` is currently held only on the `Rga.BottomPanel` instance (`this.activeTab = 'scene'`). The ownership matrix says it should migrate to `Layout.studioPanel.activeTab` in Slice 3+ — not done yet. Until then, the active tab is lost across reload (only visibility persists).<br>• The G3 drift guard restricts the `bottom-collapsed` class writer to `app-shell.js` (BottomPanel) but doesn't enforce that nobody mutates `Layout.studioPanel` directly. The G2 guard does cover that direction. |
 
@@ -106,7 +106,7 @@ aren't yet broken but need watching.
 |---|---|
 | **SSOT** | `Rga.Shell.Layout` (`renderer/js/shell/layout.js`) — in-memory `_current` map with four zones (`sidebar`, `studioPanel`, `titleBar`, `statusBar`). Per-zone shallow merge on `set()`. |
 | **Consumers** | • Subscribers: `Rga.BottomPanel` (Layout → DOM class + localStorage persistence); future Slice 4 workspace persistence will add a single global subscriber that mirrors the full state.<br>• Readers: `Rga.Shell.StatusBar._renderViewMode` (currentView), `Rga.Shell.Sidebar.activate` (sets activePanel mirror), `Rga.Shell.init` (sets default-panel state).<br>• Writers: `Rga.BottomPanel.toggleCollapse/open` (studioPanel.visible), Cmd+B shortcut (sidebar.visible), Cmd+\` shortcut fallback (studioPanel.visible), rail click (sidebar.visible). G2 drift guard enforces the writer whitelist. |
-| **Persistence** | `toJSON()` / `fromJSON()` exist but are not wired to localStorage. Slice 4 will wire the full state to a single workspace blob. Today only `studioPanel.visible` is persisted (via the BottomPanel-scoped key). |
+| **Persistence** | `Rga.WorkspaceState` (Slice 4 §A) owns the single key `rga-workspace-layout`. On boot it reads + calls `Rga.Shell.Layout.fromJSON(blob)` to hydrate. It subscribes to Layout afterward and writes `Layout.toJSON()` on every change. No debouncing — Resize commits sizes on drag-end (not mid-drag) so writes are bounded by user actions. |
 | **Event source** | `Rga.Shell.Layout.subscribe(fn)` — fires on any `set()` that actually changes a value. Same-value `set()` is a no-op (no notify). This is why Slice 1 needed an explicit `_syncDomFromLayout(initialVisible)` call after init when persisted == default. |
 | **Open risks** | • Layout's no-op-on-same-value semantics is correct but caught Slice 1 by surprise. Any new subscriber whose DOM might drift from default should follow the same explicit-sync-on-init pattern.<br>• The fields list (`sidebar`/`studioPanel`/`titleBar`/`statusBar`) is fixed in DEFAULTS but `set()` accepts unknown zones for forward-compat. A typo (`'studio_panel'` vs `'studioPanel'`) won't error — it'll silently store on the wrong field. Slice-4 workspace persistence should add field validation. |
 
@@ -144,14 +144,18 @@ don't get duplicated on every row.
   Rga.Inspector.open + own document.keydown capture). Each is a
   documented exception in the relevant row above and is what keeps
   the corresponding shim alive.
-- **Slice 4 workspace persistence** will introduce a single
-  `Rga.Shell.Layout` → localStorage subscriber that subsumes:
-  - `rga-shell-studio-panel-visible` (BottomPanel-scoped today)
-  - sidebar.activePanel (currently not persisted)
-  - sidebar.width / inspector.width / bottom-panel-height (currently
-    written to CSS variables by `Rga.Resize` with no persistence)
-  - Possibly `rga-view-mode` (likely stays separate since it's a per-
-    app preference, not per-workspace).
+- **Slice 4 workspace persistence — DONE 2026-05-17 (Slice 4 §A).**
+  `Rga.WorkspaceState` is the single owner of `rga-workspace-layout`,
+  which now subsumes:
+  - `studioPanel.visible` (was `rga-shell-studio-panel-visible`,
+    migrated in one shot on first boot post-Slice-4)
+  - sidebar.{visible,width,activePanel}
+  - studioPanel.{height,activeTab}
+  - inspector.{visible,width} (new zone introduced by Slice 4)
+  - titleBar.{visible} / statusBar.{visible}
+  `rga-view-mode`, `rga-theme`, `rga-script-lang`, `rga-session-tabs`
+  intentionally stay separate (per-app preferences / per-app session
+  state, not per-workspace UI state).
 - **The G1–G4 drift guards** are the runtime safety net for this
   audit. If a future contributor violates an audit row's SSOT, the
   guards either fail at CI (G1/G3/G4) or emit a console warn at
