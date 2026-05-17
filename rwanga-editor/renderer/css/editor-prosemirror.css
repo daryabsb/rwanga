@@ -1845,7 +1845,20 @@ body.view-draft-active #scene-toolbox {
   display: block;
 }
 
-/* Scene heading chrome — the slug row (setting / time pickers + location text). */
+/* Scene heading chrome — the slug row (setting / time pickers + location text).
+ *
+ * Editor Recovery Phase 2 (C5): the dark-pink underline already
+ * existed pre-Phase-2; what was missing was screenplay identity
+ * presence. Phase 2 strengthens the treatment so each scene heading
+ * reads as an immediately-recognisable manuscript slug:
+ *   - thicker (3px) dark-pink underline — the brand identifier
+ *   - letter-spacing on the uppercase text (uppercase needs spacing
+ *     to read crisply at 12pt monospace)
+ *   - more breathing room above (1em margin-top) — scene break
+ *     separation from the previous block
+ *   - slightly more padding below the text before the underline so
+ *     the rule sits clear of the descenders
+ * No node-view / schema changes; no engine changes. */
 .rga-scene-heading-v3 {
   display: flex;
   align-items: center;
@@ -1854,9 +1867,10 @@ body.view-draft-active #scene-toolbox {
   font-size: 12pt;
   font-weight: 700;
   text-transform: uppercase;
-  border-bottom: 2px solid var(--accent-rwanga, #C2185B);
-  margin: 0 0 0.5em 0;
-  padding: 0 0 0.2em 0;
+  letter-spacing: 0.04em;
+  border-bottom: 3px solid var(--accent-rwanga, #C2185B);
+  margin: 1em 0 0.6em 0;
+  padding: 0 0 0.3em 0;
 }
 
 .rga-scene-heading-v3-setting,
@@ -1980,9 +1994,52 @@ body.view-draft-active #scene-toolbox {
 }
 
 body.view-draft-active .rga-page-marker,
-body.view-print-active .rga-page-marker,
 body.view-print-preview-active .rga-page-marker {
   display: none;
+}
+
+/* Print-view page identity (Editor Recovery Phase 2 — C2).
+ *
+ * Pre-Phase-2 Print HID the page marker entirely (no per-page identity
+ * indicator anywhere in Print). Phase 2 keeps the existing widget DOM
+ * but repurposes it as a right-aligned manuscript-style page number
+ * ("2." / "3." / …) at each page boundary — the standard Hollywood
+ * manuscript convention.
+ *
+ * The widget's existing textContent ("— Page N —") is hidden via
+ * font-size:0; a CSS ::after pseudo uses attr(data-page-number) to
+ * render just the number + period. No widget DOM modifications; no
+ * engine changes; no new pagination logic.
+ *
+ * Script title per page (the other half of C2's "page identity") is
+ * NOT implemented this slice — no existing DOM element carries the
+ * script title in a per-page-repeatable form. The forensic report's
+ * recommendation acknowledged that title-per-page requires either an
+ * engine change (data-attr on the page marker) or new shell wiring
+ * (set data-script-title on body). Both are out of scope for Phase 2
+ * (CSS-only). Tracked as deferred.
+ */
+body.view-print-active .rga-page-marker {
+  display: block;
+  margin: 6px 0 0 0;
+  padding: 0 0.5in 0 0;
+  text-align: right;
+  border: 0;
+  background: transparent;
+  /* Hide the existing centered "— Page N —" text so the pseudo's
+     manuscript-style "N." can show alone. */
+  font-size: 0;
+  color: transparent;
+  line-height: 0;
+}
+body.view-print-active .rga-page-marker::after {
+  content: attr(data-page-number) '.';
+  font-family: var(--font-editor, 'Courier Prime', 'Courier New', monospace);
+  font-size: 11pt;
+  font-weight: 500;
+  color: var(--text-primary, #333);
+  letter-spacing: 0.04em;
+  line-height: 1.2;
 }
 
 /* --------------------------------------------------------------

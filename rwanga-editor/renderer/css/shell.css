@@ -690,17 +690,42 @@
 }
 
 /* SEPARATION INVARIANT — current and selected MUST render distinctly.
-   current  = left-rule accent (matches editor cursor)
-   selected = filled background  (matches keyboard focus)
-   Both can coexist on the same row (rule + fill); they never collapse. */
+   current  = left-rule accent (matches editor cursor — "you are here")
+   selected = filled background  (matches keyboard focus — "about to jump")
+   Both can coexist on the same row (rule + fill); they never collapse.
+
+   Editor Recovery Phase 2 (C3): pre-Phase-2 both states used
+   --text-primary and bordered/filled with neutral chrome tokens,
+   making them visually too similar. Phase 2 distinguishes them by
+   purpose:
+     • current uses the Rwanga brand accent (dark pink) — strong
+       "you are here" location signal; only ONE row can be current at
+       a time, so a bold brand colour is appropriate.
+     • selected uses a softer overlay + a subtle outline ring —
+       reads as keyboard-focus / "about to jump" without competing
+       with the current marker.
+   When a row is BOTH current AND selected, the brand-pink left bar
+   sits on top of the focus-outline overlay — visually a stacked cue. */
 .rga-shell-scene-navigator-row-current {
-  border-left-color: var(--text-primary, #cccccc);
+  /* Brand-pink left bar. Width stays at 2px so the row's grid
+     layout doesn't shift. */
+  border-left-color: var(--accent-rwanga, #C2185B);
   color: var(--text-primary, #cccccc);
+  font-weight: 600;
+}
+.rga-shell-scene-navigator-row-current .rga-shell-scene-navigator-num {
+  color: var(--accent-rwanga, #C2185B);
 }
 .rga-shell-scene-navigator-row-selected {
-  background: var(--bg-active, #37373d);
+  /* Softer fill than the old --bg-active. Outline gives the
+     "keyboard focus ring" feel without competing with current's
+     brand-pink bar. */
+  background: var(--bg-hover, rgba(255, 255, 255, 0.04));
   color: var(--text-primary, #cccccc);
+  outline: 1px solid var(--border-secondary, rgba(255, 255, 255, 0.10));
+  outline-offset: -1px;
 }
 .rga-shell-scene-navigator-row-selected .rga-shell-scene-navigator-page {
+  /* Selected's page-badge bg follows the softer overlay tone. */
   background: var(--bg-quaternary, #333337);
 }
