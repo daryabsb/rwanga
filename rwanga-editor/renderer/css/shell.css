@@ -857,6 +857,48 @@
   opacity: 0.35;
   border-radius: 2px;
 }
+/* §D2 — Scene tools styling. Group separator between Text tools
+   and Scene tools; native <select> for block type (same Bundle 1 §A
+   viewMode-dropdown voice — native control + chrome-token palette);
+   text-label variant of the toolbar button for "+ Scene". */
+.rga-shell-toolbar-group-sep {
+  -webkit-app-region: no-drag;
+  width: 1px;
+  height: 22px;
+  align-self: center;
+  margin: 0 12px;
+  background: var(--border-subtle, rgba(128, 128, 128, 0.18));
+  opacity: 0.7;
+}
+.rga-shell-toolbar-blocktype {
+  -webkit-app-region: no-drag;
+  appearance: auto;
+  -webkit-appearance: auto;
+  background: transparent;
+  color: var(--text-secondary, #9a9a9a);
+  border: 0;
+  padding: 0 4px;
+  margin-right: 4px;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  outline: none;
+}
+.rga-shell-toolbar-blocktype:focus-visible {
+  outline: 1px solid var(--border-secondary, #444);
+  outline-offset: 1px;
+}
+.rga-shell-toolbar-blocktype option {
+  background: var(--bg-secondary, #2a2a2a);
+  color: var(--text-primary, #cccccc);
+}
+.rga-shell-toolbar-btn--text {
+  width: auto;
+  padding: 0 10px;
+  font-size: 12px;
+  letter-spacing: 0.02em;
+}
+
 /* Draft view hides the toolbar — Draft is distraction-free. Mirror
    pattern from the format-toolbar / scene-toolbox hide rule in
    editor-prosemirror.css. */

@@ -429,6 +429,34 @@
   // Init
   // ============================================================
 
+  // §D2 — shared block-type dispatcher. Both the Scene Toolbox
+  // dropdown (#format-block-type) AND the Row 3 toolbar dropdown
+  // (#rga-shell-toolbar-blocktype) call this single helper, so the
+  // PM.setBlockType invocation lives in one place. Mission rule:
+  // "no duplicate command logic".
+  function _dispatchBlockType(nodeTypeName) {
+    if (!nodeTypeName) return;
+    const view = _view();
+    const sp = window.Rga && window.Rga.DocTypes && window.Rga.DocTypes.screenplay;
+    const PM = _PM();
+    if (!view || !sp || !PM) return;
+    const nodeType = view.state.schema.nodes[nodeTypeName];
+    if (!nodeType || !PM.setBlockType) return;
+    PM.setBlockType(nodeType)(view.state, view.dispatch.bind(view));
+    view.focus();
+  }
+
+  // §D2 — Insert Scene command. Routes ONLY through the existing
+  // engine command (Rga.DocTypes.screenplay.v3Commands.insertSceneSmart).
+  // No engine modification. No new command logic.
+  function _dispatchInsertScene() {
+    const view = _view();
+    const sp = window.Rga && window.Rga.DocTypes && window.Rga.DocTypes.screenplay;
+    if (!view || !sp || !sp.v3Commands || typeof sp.v3Commands.insertSceneSmart !== 'function') return;
+    sp.v3Commands.insertSceneSmart(view.state, view.dispatch.bind(view));
+    view.focus();
+  }
+
   // §D1 — register the eight Text-tools commands via the §A4.1
   // command layer. KR is the single owner; the Row 3 toolbar invokes
   // via KR.invokeCommand. Bold/Italic carry displayAccelerator
@@ -463,6 +491,13 @@
       handler: openLinkDialog,                    source: 'D1 toolbar (text.link)' });
     KR.registerCommand({ command: 'text.clear',         label: 'Clear formatting',
       handler: clearAllFormatting,                source: 'D1 toolbar (text.clear)' });
+
+    // §D2 — Scene tools. scene.insert is invoked by the Row 3 "+ Scene"
+    // button. No keyboard accelerator (insertSceneSmart is the engine's
+    // canonical path; Tab cycles block type, Enter spawns scenes per
+    // v3-keymap.js — neither conflict with a toolbar button).
+    KR.registerCommand({ command: 'scene.insert', label: 'Insert Scene',
+      handler: _dispatchInsertScene, source: 'D2 toolbar (scene.insert)' });
   }
 
   function init() {
@@ -489,22 +524,39 @@
       });
     }
 
-    // Block-type dropdown (Scene toolbox surface, NOT touched by D1).
-    const blockTypeSelect = document.getElementById('format-block-type');
-    if (blockTypeSelect) {
-      blockTypeSelect.addEventListener('change', function() {
-        const newType = blockTypeSelect.value;
-        if (!newType) return;
-        const view = _view();
-        const sp = Rga.DocTypes && Rga.DocTypes.screenplay;
-        const PM = _PM();
-        if (!view || !sp || !PM) return;
-        const schema = view.state.schema;
-        const nodeType = schema.nodes[newType];
-        if (!nodeType || !PM.setBlockType) return;
-        PM.setBlockType(nodeType)(view.state, view.dispatch.bind(view));
-        view.focus();
+    // Block-type dropdown — Scene Toolbox surface. §D2 routes through
+    // the shared _dispatchBlockType helper (no duplicate command logic).
+    const sceneToolboxBlockType = document.getElementById('format-block-type');
+    if (sceneToolboxBlockType) {
+      sceneToolboxBlockType.addEventListener('change', function() {
+        _dispatchBlockType(sceneToolboxBlockType.value);
       });
+    }
+
+    // §D2 — Row 3 block-type dropdown. Same shared dispatcher.
+    // Selection-aware: subscribes to Rga.ScriptMetrics so the
+    // dropdown's value tracks the cursor's current block type.
+    const row3BlockType = document.getElementById('rga-shell-toolbar-blocktype');
+    if (row3BlockType) {
+      row3BlockType.addEventListener('change', function() {
+        _dispatchBlockType(row3BlockType.value);
+      });
+      if (window.Rga && window.Rga.ScriptMetrics &&
+          typeof window.Rga.ScriptMetrics.subscribe === 'function') {
+        const sync = function() {
+          const snap = window.Rga.ScriptMetrics.get && window.Rga.ScriptMetrics.get();
+          const bt = snap && snap.currentBlockType;
+          if (!bt) { row3BlockType.value = ''; return; }
+          // sceneHeading is held by a disabled+hidden option (lets
+          // .value carry it without showing in the dropdown list);
+          // any unknown block type falls back to '' (empty).
+          const exists = Array.prototype.some.call(row3BlockType.options,
+            function(o) { return o.value === bt; });
+          row3BlockType.value = exists ? bt : '';
+        };
+        window.Rga.ScriptMetrics.subscribe(sync);
+        sync();
+      }
     }
 
     // Scene toolbox surfaces — kept intact for D1 (D3 may move them

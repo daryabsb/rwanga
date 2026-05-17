@@ -124,6 +124,29 @@
         <div class="rga-shell-toolbar-sep" role="separator" aria-hidden="true"></div>
         <button class="rga-shell-toolbar-btn" data-command="text.clear"         type="button" title="Clear formatting">A<sub>×</sub></button>
       </div>
+      <!-- §D2 — Scene tools group. Block-type dropdown reflects
+           selection (subscribes to Rga.ScriptMetrics.currentBlockType).
+           +Scene routes through Rga.DocTypes.screenplay.v3Commands.
+           insertSceneSmart (existing engine command — no engine
+           modification). Insert Page Break is DEFERRED: v3-commands.js
+           does not currently expose a page-break command. -->
+      <div class="rga-shell-toolbar-group-sep" role="separator" aria-hidden="true"></div>
+      <div class="rga-shell-toolbar-group" data-group="scene">
+        <select class="rga-shell-toolbar-blocktype" id="rga-shell-toolbar-blocktype"
+                aria-label="Block type" title="Change block type">
+          <option value="">—</option>
+          <option value="action">Action</option>
+          <option value="character">Character</option>
+          <option value="dialogue">Dialogue</option>
+          <option value="parenthetical">Parenthetical</option>
+          <option value="shot">Shot</option>
+          <option value="transition">Transition</option>
+          <option value="sceneHeading" disabled hidden>Scene Heading</option>
+        </select>
+        <div class="rga-shell-toolbar-sep" role="separator" aria-hidden="true"></div>
+        <button class="rga-shell-toolbar-btn rga-shell-toolbar-btn--text"
+                data-command="scene.insert" type="button" title="Insert scene after current">+ Scene</button>
+      </div>
     </div>
   </div>
 
