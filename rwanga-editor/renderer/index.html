@@ -386,6 +386,12 @@
      Loaded BEFORE engine + panel modules so the registries exist when panel
      IIFEs run. Remaining slice-1 modules (ScriptSession, panels, status bar,
      title bar, index bootstrap) load in commits 5-12. -->
+<!-- Slice 8 §A extractions from app-shell.js (Stage 2). Each is
+     a self-contained IIFE that sets its Rga.* global. Load order
+     relative to other shell modules doesn't matter — these have
+     no shell-side dependencies. -->
+<script src="js/shell/toast.js"></script>
+<script src="js/shell/modal.js"></script>
 <script src="js/shell/layout.js"></script>
 <!-- WorkspaceState — Runtime Ownership Stab. Slice 4 §A single
      owner for layout persistence. Must load AFTER layout.js (depends

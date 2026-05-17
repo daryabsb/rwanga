@@ -451,25 +451,10 @@ Rga.CommandPalette = {
 /* ============================================================
    MODAL UTILITY
    ============================================================ */
-Rga.Modal = {
-  showUnsaved: function(filename) {
-    return new Promise(function(resolve) {
-      var el = document.getElementById('unsaved-modal');
-      if (!el) { resolve('discard'); return; }
-      var msgEl = document.getElementById('unsaved-modal-msg');
-      if (msgEl) msgEl.textContent = '"' + filename + '" has unsaved changes.';
-      el.hidden = false;
-      function onBtnClick(e) {
-        var btn = e.target.closest('[data-choice]');
-        if (!btn) return;
-        el.hidden = true;
-        el.removeEventListener('click', onBtnClick);
-        resolve(btn.dataset.choice);
-      }
-      el.addEventListener('click', onBtnClick);
-    });
-  }
-};
+/* Rga.Modal — EXTRACTED to renderer/js/shell/modal.js in
+   Runtime Ownership Stab. Slice 8 §A. The IIFE there sets the global
+   Rga.Modal so all existing consumers (Rga.TabManager) keep working.
+   See the legacy-extraction-roadmap. */
 
 /* ============================================================
    BOTTOM PANEL MANAGER
@@ -588,58 +573,10 @@ Rga.Inspector = {
   }
 };
 
-/* ============================================================
-   TOAST NOTIFICATIONS
-   ============================================================ */
-Rga.Toast = {
-  /**
-   * Show a toast notification.
-   * @param {string} message
-   * @param {string} type - 'success', 'error', 'warning', 'info'
-   * @param {number} duration - ms, default 3000
-   */
-  show: function(message, type, duration) {
-    type = type || 'info';
-    duration = duration || 3000;
-
-    var container = Rga.$('.toast-container');
-    if (!container) {
-      container = document.createElement('div');
-      container.className = 'toast-container';
-      document.body.appendChild(container);
-    }
-
-    var toast = document.createElement('div');
-    toast.className = 'toast';
-
-    var iconEl = document.createElement('span');
-    iconEl.className = 'toast-icon ' + type;
-    var iconMap = { success: 'check', error: 'close', warning: 'warning', info: 'info' };
-    iconEl.innerHTML = Rga.Icons[iconMap[type]] || '';
-    toast.appendChild(iconEl);
-
-    var msgEl = document.createElement('span');
-    msgEl.className = 'toast-message';
-    msgEl.textContent = message;
-    toast.appendChild(msgEl);
-
-    var closeEl = document.createElement('button');
-    closeEl.className = 'toast-close';
-    closeEl.innerHTML = Rga.Icons.close;
-    closeEl.addEventListener('click', function() { dismiss(); });
-    toast.appendChild(closeEl);
-
-    container.appendChild(toast);
-
-    var timer = setTimeout(dismiss, duration);
-
-    function dismiss() {
-      clearTimeout(timer);
-      toast.classList.add('leaving');
-      setTimeout(function() { toast.remove(); }, 200);
-    }
-  }
-};
+/* Rga.Toast — EXTRACTED to renderer/js/shell/toast.js in
+   Runtime Ownership Stab. Slice 8 §A. The IIFE there sets the global
+   Rga.Toast; the only in-shell consumer (Rga.Theme.toggle) keeps
+   working. See the legacy-extraction-roadmap. */
 
 /* ============================================================
    Rga.FileTree — DELETED in Runtime Ownership Stab. Slice 3 §A.
