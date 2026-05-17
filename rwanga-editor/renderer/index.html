@@ -388,6 +388,10 @@
      title bar, index bootstrap) load in commits 5-12. -->
 <script src="js/shell/layout.js"></script>
 <script src="js/shell/sidebar.js"></script>
+<!-- Keyboard Registry — Runtime Ownership Stab. Slice 2 SSOT.
+     Must load before every consumer (Rga.Keyboard shim, shell/index.js,
+     view-mode.js) so they can call .register() at boot. -->
+<script src="js/shell/keyboard-registry.js"></script>
 <!-- Lucide icon registry (Activity Rail Doctrine Rule 1). Must load
      before activity-rail.js so the rail can resolve glyph SVGs at
      first refresh. -->
