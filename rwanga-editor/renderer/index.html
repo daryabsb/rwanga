@@ -86,6 +86,23 @@
           <button id="tab-new" title="New Tab"></button>
         </div>
 
+        <!-- Breadcrumb (Recovery Bundle 2 §B) — writer-context location.
+             Three stacked lines: app + script · scene number · scene
+             heading text. Subscribes to Rga.ScriptSession; updates
+             live with selection. Hidden when no script open and in
+             Draft view. Populated by wireBreadcrumb() in the boot
+             script (existing pattern; no new shell module). -->
+        <nav id="rga-shell-breadcrumb" class="rga-shell-breadcrumb"
+             aria-label="Script location" hidden>
+          <div class="rga-shell-breadcrumb-script">
+            <span class="rga-shell-breadcrumb-app">Rwanga</span>
+            <span class="rga-shell-breadcrumb-sep" aria-hidden="true">•</span>
+            <span class="rga-shell-breadcrumb-script-name" id="rga-shell-breadcrumb-script-name"></span>
+          </div>
+          <div class="rga-shell-breadcrumb-scene" id="rga-shell-breadcrumb-scene"></div>
+          <div class="rga-shell-breadcrumb-heading" id="rga-shell-breadcrumb-heading"></div>
+        </nav>
+
         <!-- Format toolbar — APP-LEVEL text formatting only (hidden in Draft) -->
         <div id="format-toolbar" role="toolbar" aria-label="Text formatting">
           <button class="format-btn" id="format-btn-undo" title="Undo (Ctrl+Z)">↶</button>
@@ -729,6 +746,54 @@
     }
   }
 
+  /* ---- Breadcrumb (Recovery Bundle 2 §B) — writer-context location.
+     Three stacked lines: "Rwanga • {script}" / "Scene S{N}" /
+     "{HEADING}". Subscribes to Rga.ScriptSession only (existing
+     ownership chain — activeScript + currentScene). Hidden when no
+     script open. Hidden in Draft view (CSS rule, parallel to format-
+     toolbar / scene-toolbox). No new shell module — boot-script
+     wiring, same pattern as wireDraftFooter / wireViewMode. */
+  function wireBreadcrumb() {
+    var crumb       = Rga.$('#rga-shell-breadcrumb');
+    var scriptName  = Rga.$('#rga-shell-breadcrumb-script-name');
+    var sceneEl     = Rga.$('#rga-shell-breadcrumb-scene');
+    var headingEl   = Rga.$('#rga-shell-breadcrumb-heading');
+    if (!crumb || !scriptName || !sceneEl || !headingEl) return;
+
+    function render() {
+      if (!Rga.ScriptSession || typeof Rga.ScriptSession.get !== 'function') {
+        crumb.hidden = true;
+        return;
+      }
+      var snap = Rga.ScriptSession.get();
+      var script = snap && snap.activeScript;
+      if (!script) {
+        crumb.hidden = true;
+        return;
+      }
+      crumb.hidden = false;
+      scriptName.textContent = script.displayName || 'Untitled.rga';
+      var scene = snap.currentScene;
+      if (scene && scene.sceneNumber != null) {
+        sceneEl.textContent  = 'Scene S' + scene.sceneNumber;
+        headingEl.textContent = scene.headingDisplay || '';
+        // If headingDisplay is empty (a fresh scene with no slug
+        // text yet), collapse the heading row so the crumb doesn't
+        // show a hanging empty line.
+        headingEl.hidden = !scene.headingDisplay;
+        sceneEl.hidden = false;
+      } else {
+        sceneEl.hidden = true;
+        headingEl.hidden = true;
+      }
+    }
+
+    if (typeof Rga.ScriptSession.subscribe === 'function') {
+      Rga.ScriptSession.subscribe(render);
+    }
+    render();
+  }
+
   /* ---- Draft mode footer (Editor Recovery Phase 3 / C6) ----
      Populates the #draft-mode-footer surface with existing data only —
      ScriptSession.currentPage + ScriptMetrics.wordCount. Subscribers
@@ -828,6 +893,7 @@
     // Rga.Shell.StatusBar (commits 3 + 8) populates #status-bar now.
     wireViewMode();
     wireUnits();
+    wireBreadcrumb();     // Recovery Bundle 2 §B — writer-context breadcrumb
     wireDraftFooter();    // Editor Recovery Phase 3 / C6 — populates the draft footer
     Rga.FlowChrome && Rga.FlowChrome.init();
     Rga.FormatToolbar && Rga.FormatToolbar.init();
