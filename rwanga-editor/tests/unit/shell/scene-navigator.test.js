@@ -82,12 +82,17 @@ test('panel registers with Sidebar under id "sceneNavigator" + writer-facing lab
   assert.equal(c.shortcut, 'Cmd-Shift-S');
 });
 
-test('mount with no scenes renders the empty state', () => {
+test('mount with no scenes renders the empty state (Bundle 1 §B: unified .rga-shell-panel-empty class)', () => {
   const { Rga, host } = boot();
   Rga.Shell.Sidebar.activate('sceneNavigator');
-  const empty = host.querySelector('.rga-shell-scene-navigator-empty');
-  assert.ok(empty);
+  const empty = host.querySelector('.rga-shell-panel-empty');
+  assert.ok(empty, 'unified empty-state DOM rendered');
   assert.match(empty.textContent, /No scenes yet/);
+  // Bundle 1 §B: also check the title segment is present.
+  assert.ok(empty.querySelector('.rga-shell-panel-empty-title'),
+    'empty state includes a title segment');
+  assert.ok(empty.querySelector('.rga-shell-panel-empty-body'),
+    'empty state includes a body segment');
 });
 
 test('each row renders sceneNumber + headingDisplay + estimated page + indicators in documented order', () => {

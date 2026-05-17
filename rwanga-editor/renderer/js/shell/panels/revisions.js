@@ -1,5 +1,6 @@
 // Copyright (c) 2026 Rwanga. Licensed under Apache 2.0.
 // Revisions panel placeholder (slice-1 plan §3.7; writer-vocab plan §5.5).
+// Bundle 1 §B: unified empty-state pattern + writer-voice copy.
 'use strict';
 
 (function() {
@@ -13,11 +14,10 @@
     available: false,
     mount: function(container) {
       if (!container) return;
-      container.innerHTML = '';
-      const el = document.createElement('div');
-      el.className = 'rga-shell-panel-placeholder';
-      el.textContent = 'Version history is coming in 0.2. For now, your scripts are auto-saved every 30 seconds — see Storage in Settings for autosaves.';
-      container.appendChild(el);
+      Rga.Shell.Sidebar.renderEmpty(container, {
+        title: 'Revisions',
+        body: 'Revisions will let you see every change you made. Your work is auto-saved while we build this.'
+      });
     },
     unmount: function() {}
   });

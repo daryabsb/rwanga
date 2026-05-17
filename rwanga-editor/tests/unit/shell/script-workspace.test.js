@@ -102,23 +102,23 @@ test('_dirname extracts directory path from file path (handles / and \\)', () =>
 // Mount + render (async)
 // ----------------------------------------------------------------
 
-test('mount with no active script shows "Open or save a script" empty state', async () => {
+test('mount with no active script shows "Open or save a script" empty state (Bundle 1 §B: unified .rga-shell-panel-empty class)', async () => {
   const { Rga, host } = boot();
   Rga.Shell.Sidebar.activate('scriptWorkspace');
   await flush();
-  const empty = host.querySelector('.rga-shell-workspace-empty');
+  const empty = host.querySelector('.rga-shell-panel-empty');
   assert.ok(empty);
   assert.match(empty.textContent, /Open or save a script/);
 });
 
-test('mount with an empty workspace folder shows the empty-state copy mentioning audio', async () => {
+test('mount with an empty workspace folder shows the empty-state copy mentioning audio (Bundle 1 §B: unified pattern)', async () => {
   const { Rga, host } = boot({
     activeDoc: { handle: '/workspace/script.rga' },
     enumerated: []
   });
   Rga.Shell.Sidebar.activate('scriptWorkspace');
   await flush();
-  const empty = host.querySelector('.rga-shell-workspace-empty');
+  const empty = host.querySelector('.rga-shell-panel-empty');
   assert.ok(empty);
   assert.match(empty.textContent, /audio/i, 'empty-state mentions audio');
 });
@@ -249,14 +249,20 @@ test('editor.tabActivated invalidates the cache and re-enumerates', async () => 
 // Error handling
 // ----------------------------------------------------------------
 
-test('null IPC response renders the error state with retry', async () => {
+test('null IPC response renders the error state with retry (Bundle 1 §B: unified pattern + action button)', async () => {
   const { Rga, host } = boot({
     activeDoc: { handle: '/workspace/x.rga' },
     enumerated: null
   });
   Rga.Shell.Sidebar.activate('scriptWorkspace');
   await flush();
-  const err = host.querySelector('.rga-shell-workspace-error');
-  assert.ok(err);
-  assert.ok(host.querySelector('.rga-shell-workspace-retry'));
+  const err = host.querySelector('.rga-shell-panel-empty');
+  assert.ok(err, 'unified empty-state DOM rendered for error path');
+  assert.match(err.textContent, /Could not read/);
+  // Retry button now lives inside .rga-shell-panel-empty-actions
+  // (the unified action area), not as a free-floating .rga-shell-
+  // workspace-retry button.
+  const retry = err.querySelector('.rga-shell-panel-empty-action');
+  assert.ok(retry, 'Retry action button rendered inside unified actions area');
+  assert.match(retry.textContent, /Retry/);
 });

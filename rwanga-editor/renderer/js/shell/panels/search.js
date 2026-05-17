@@ -1,5 +1,6 @@
 // Copyright (c) 2026 Rwanga. Licensed under Apache 2.0.
 // Search panel placeholder (slice-1 plan §3.7).
+// Bundle 1 §B: unified empty-state pattern + writer-voice copy.
 'use strict';
 
 (function() {
@@ -13,11 +14,10 @@
     available: false,
     mount: function(container) {
       if (!container) return;
-      container.innerHTML = '';
-      const el = document.createElement('div');
-      el.className = 'rga-shell-panel-placeholder';
-      el.textContent = 'Cross-script search arrives in 0.2. For now, find-in-script is on the editor\'s right-click menu.';
-      container.appendChild(el);
+      Rga.Shell.Sidebar.renderEmpty(container, {
+        title: 'Search',
+        body: 'Search across your scripts will live here. Try right-click → Find in this script for now.'
+      });
     },
     unmount: function() {}
   });

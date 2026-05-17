@@ -98,11 +98,16 @@
     _container.appendChild(wrapper);
   }
 
+  // Bundle 1 §B: unified empty-state. The Sidebar's renderEmpty
+  // helper expects a container, but _render() builds a wrapper first;
+  // we return a one-off div that the Sidebar helper has populated.
   function _buildEmpty() {
-    const el = document.createElement('div');
-    el.className = 'rga-shell-scene-navigator-empty';
-    el.textContent = 'No scenes yet. Press Enter on the slug line to start one.';
-    return el;
+    const host = document.createElement('div');
+    Rga.Shell.Sidebar.renderEmpty(host, {
+      title: 'Scenes',
+      body: 'No scenes yet. Press Enter on the slug line to start one.'
+    });
+    return host;
   }
 
   function _buildRow(scene, idx, currentNodeId) {

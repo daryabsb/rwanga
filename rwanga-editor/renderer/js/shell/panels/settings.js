@@ -1,5 +1,6 @@
 // Copyright (c) 2026 Rwanga. Licensed under Apache 2.0.
 // Settings panel placeholder (slice-1 plan §3.7).
+// Bundle 1 §B: unified empty-state pattern + writer-voice copy.
 'use strict';
 
 (function() {
@@ -13,11 +14,10 @@
     available: false,
     mount: function(container) {
       if (!container) return;
-      container.innerHTML = '';
-      const el = document.createElement('div');
-      el.className = 'rga-shell-panel-placeholder';
-      el.textContent = 'Settings UI arrives in 0.2. Edit ~/.rwanga/settings.json directly to customize.';
-      container.appendChild(el);
+      Rga.Shell.Sidebar.renderEmpty(container, {
+        title: 'Settings',
+        body: 'Settings will live here. (Power users can edit the settings file directly today.)'
+      });
     },
     unmount: function() {}
   });

@@ -138,6 +138,56 @@
     });
   }
 
+  // Bundle 1 §B — unified empty-state DOM. One pattern, one class set,
+  // one structure used by every sidebar panel's empty / unavailable
+  // / errored render path. Panels are call sites; this is the owner
+  // of the shape.
+  //
+  //   container  — the panel's mount container (passed by Sidebar)
+  //   opts.title — short label (1-3 words; e.g. panel name)
+  //   opts.body  — single writer-voice sentence (no version numbers,
+  //                no internal cross-references, no "0.2" / "coming
+  //                soon" / debug wording — Bundle 1 §B copy rules)
+  //   opts.actions — optional [{ label, onClick }] for action buttons
+  //                  (Workspace's Retry on error is the only current
+  //                  consumer)
+  function renderEmpty(container, opts) {
+    if (!container) return;
+    opts = opts || {};
+    container.innerHTML = '';
+    const wrap = document.createElement('div');
+    wrap.className = 'rga-shell-panel-empty';
+    if (opts.title) {
+      const t = document.createElement('div');
+      t.className = 'rga-shell-panel-empty-title';
+      t.textContent = opts.title;
+      wrap.appendChild(t);
+    }
+    if (opts.body) {
+      const b = document.createElement('div');
+      b.className = 'rga-shell-panel-empty-body';
+      b.textContent = opts.body;
+      wrap.appendChild(b);
+    }
+    if (Array.isArray(opts.actions) && opts.actions.length > 0) {
+      const actions = document.createElement('div');
+      actions.className = 'rga-shell-panel-empty-actions';
+      opts.actions.forEach(function(a) {
+        if (!a || !a.label) return;
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'rga-shell-panel-empty-action';
+        btn.textContent = a.label;
+        if (typeof a.onClick === 'function') {
+          btn.addEventListener('click', a.onClick);
+        }
+        actions.appendChild(btn);
+      });
+      wrap.appendChild(actions);
+    }
+    container.appendChild(wrap);
+  }
+
   Rga.Shell.Sidebar.setHost        = setHost;
   Rga.Shell.Sidebar.getHost        = getHost;
   Rga.Shell.Sidebar.registerPanel  = registerPanel;
@@ -149,5 +199,6 @@
   Rga.Shell.Sidebar.registered     = registered;
   Rga.Shell.Sidebar.getController  = getController;
   Rga.Shell.Sidebar.onChange       = onChange;
+  Rga.Shell.Sidebar.renderEmpty    = renderEmpty;
   Rga.Shell.Sidebar._reset         = _reset;
 })();

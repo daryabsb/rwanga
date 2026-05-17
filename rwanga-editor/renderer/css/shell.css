@@ -652,12 +652,55 @@
   gap: 1px;
 }
 
-.rga-shell-scene-navigator-empty {
-  padding: 24px 12px;
-  color: var(--text-tertiary, #6e6e6e);
-  font-size: var(--font-size-sm, 11px);
+/* Bundle 1 §B — UNIFIED empty-state pattern. Used by every panel's
+   empty / unavailable / errored render path (search / characters /
+   revisions / settings / scene-navigator / workspace). One class set,
+   one shape, one rhythm. Built by Rga.Shell.Sidebar.renderEmpty.
+   No new tokens; reuses the existing --text-*, --font-size-*, and
+   --border-subtle scales. */
+.rga-shell-panel-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  padding: 24px 16px;
   text-align: center;
+  color: var(--text-tertiary, #6e6e6e);
+}
+.rga-shell-panel-empty-title {
+  font-size: var(--font-size-base, 13px);
+  font-weight: 600;
+  color: var(--text-secondary, #9e9e9e);
+  letter-spacing: 0.02em;
+}
+.rga-shell-panel-empty-body {
+  font-size: var(--font-size-sm, 11px);
   line-height: 1.5;
+  color: var(--text-tertiary, #6e6e6e);
+}
+.rga-shell-panel-empty-actions {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+.rga-shell-panel-empty-action {
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+  color: var(--text-secondary, #9e9e9e);
+  border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.06));
+  border-radius: 4px;
+  padding: 4px 12px;
+  font: inherit;
+  font-size: var(--font-size-sm, 11px);
+  cursor: pointer;
+  transition: background var(--transition-fast, 0.1s ease),
+              color var(--transition-fast, 0.1s ease);
+}
+.rga-shell-panel-empty-action:hover {
+  background: var(--bg-hover, rgba(255, 255, 255, 0.04));
+  color: var(--text-primary, #cccccc);
 }
 
 .rga-shell-scene-navigator-row {

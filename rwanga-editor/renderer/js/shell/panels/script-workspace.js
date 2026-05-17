@@ -122,24 +122,29 @@
     _container.appendChild(wrapper);
   }
 
+  // Bundle 1 §B: unified empty-state. Both no-doc and empty-folder
+  // paths go through the Sidebar helper; only the body text differs.
   function _emptyState(text) {
-    const el = document.createElement('div');
-    el.className = 'rga-shell-workspace-empty';
-    el.textContent = text;
-    return el;
+    const host = document.createElement('div');
+    Rga.Shell.Sidebar.renderEmpty(host, {
+      title: 'Script Workspace',
+      body: text
+    });
+    return host;
   }
 
+  // Error state shares the same empty-state shell + adds a Retry action.
   function _errorState() {
-    const el = document.createElement('div');
-    el.className = 'rga-shell-workspace-error';
-    el.textContent = 'Could not read this workspace.';
-    const retry = document.createElement('button');
-    retry.type = 'button';
-    retry.className = 'rga-shell-workspace-retry';
-    retry.textContent = 'Retry';
-    retry.addEventListener('click', function() { _lastListing = null; _lastDirPath = null; _render(); });
-    el.appendChild(retry);
-    return el;
+    const host = document.createElement('div');
+    Rga.Shell.Sidebar.renderEmpty(host, {
+      title: 'Script Workspace',
+      body: 'Could not read this workspace.',
+      actions: [{
+        label: 'Retry',
+        onClick: function() { _lastListing = null; _lastDirPath = null; _render(); }
+      }]
+    });
+    return host;
   }
 
   function _categorySection(cat, entries) {

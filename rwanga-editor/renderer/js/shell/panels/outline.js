@@ -133,9 +133,10 @@
 
       // Reserved-for-future placeholders. Render as em-dash; no fake data,
       // no AI judgment. See plan §3.3 "no fake progress" rule.
+      // Bundle 1 §B: divider text dropped — no version wording in user copy.
       const divider = document.createElement('div');
       divider.className = 'rga-shell-outline-progress-divider';
-      divider.textContent = '— reserved for v0.3+ —';
+      divider.textContent = '———';
       body.appendChild(divider);
 
       body.appendChild(_progressRow(
