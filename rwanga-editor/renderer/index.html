@@ -34,6 +34,13 @@
   <header id="rga-shell-titlebar" class="rga-shell-titlebar">
     <div class="rga-shell-titlebar-title" id="rga-shell-titlebar-title">Rwanga</div>
     <div class="rga-shell-titlebar-spacer"></div>
+    <!-- V1.1 fix 2: theme toggle. Keyboard path (Ctrl+Shift+T) is also
+         registered in app-shell.js; this is the visible affordance. -->
+    <button id="rga-shell-titlebar-theme"
+            class="rga-shell-titlebar-action"
+            type="button"
+            title="Toggle theme (Ctrl+Shift+T)"
+            aria-label="Toggle theme">◐</button>
     <div class="rga-shell-titlebar-avatar-placeholder" aria-hidden="true">👤</div>
   </header>
 
@@ -664,10 +671,23 @@
     paint();
   }
 
+  /* ---- Theme toggle button (titlebar action) ---- */
+  function wireThemeToggle() {
+    var btn = Rga.$('#rga-shell-titlebar-theme');
+    if (btn) {
+      btn.addEventListener('click', function() {
+        if (Rga.Theme && typeof Rga.Theme.toggle === 'function') {
+          Rga.Theme.toggle();
+        }
+      });
+    }
+  }
+
   /* ---- BOOT SEQUENCE ---- */
   function boot() {
     injectIcons();
     Rga.Theme.init();
+    wireThemeToggle();
     Rga.Resize.init();
     // Slice 2 entry #2 migration: Rga.Sidebar.init() no longer called.
     // Rga.Shell.Sidebar (Slice 1) owns the sidebar; Rga.Shell.Layout owns
