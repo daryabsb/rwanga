@@ -83,18 +83,36 @@
 #editor-container.view-flow .flow-line-gutter {
   display: block;
 }
-/* Flow view: subtler break — Flow has no paper-edge metaphor, just a
-   thin divider so the writer can see where pages roughly fall. v2
-   paginator uses the same DOM widget; this rule overrides the
-   print-view chrome to a quieter dashed line. */
+/* Flow view: manual page-break (the user-inserted `.rga-page-break`
+   PM node) gets the same page-boundary feel as the automatic
+   .rga-page-marker widget — minus the "Page N" label (this is a
+   structural node, not a numbered marker). Editor Recovery Phase 1
+   (C1(b)): visible gap + subtle desk-strip, so a manual break reads
+   as a real page boundary not a dashed hairline. */
 #editor-container.view-flow .rga-page-break {
-  height: 1px;
-  background: transparent;
-  border-top: 1px dashed var(--border-secondary, rgba(128, 128, 128, 0.3));
-  border-bottom: none;
+  display: block;
+  height: 14px;
+  margin: 32px -0.5in 28px;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.025) 0%,
+    rgba(0, 0, 0, 0.045) 50%,
+    rgba(0, 0, 0, 0.025) 100%
+  );
+  border-top:    1px solid var(--border-secondary, rgba(128, 128, 128, 0.30));
+  border-bottom: 1px solid var(--border-secondary, rgba(128, 128, 128, 0.30));
   box-shadow: none;
-  opacity: 0.55;
-  margin: 8px 0;
+  opacity: 1;
+}
+[data-theme="dark"] #editor-container.view-flow .rga-page-break {
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.020) 0%,
+    rgba(255, 255, 255, 0.035) 50%,
+    rgba(255, 255, 255, 0.020) 100%
+  );
+  border-top-color:    rgba(255, 255, 255, 0.10);
+  border-bottom-color: rgba(255, 255, 255, 0.10);
 }
 
 /* ---- Page row + line gutter (Flow only by default) ---- */
@@ -1891,6 +1909,12 @@ body.view-draft-active #scene-toolbox {
  * the last block on page N and the first block on page N+1.
  * Visible by default (Flow mode). Hidden in Draft view (no chrome)
  * and reserved hidden in Print view (Phase 7 owns its own rendering).
+ *
+ * Editor Recovery Phase 1 (C1(b)): the BASE rule below stays as a
+ * minimal, safe default; the FLOW-specific override further down
+ * promotes the marker to a real page-boundary indicator (visible
+ * gap + subtle desk-strip + readable PAGE N label). No widget DOM
+ * changes; no engine touch.
  * -------------------------------------------------------------- */
 .rga-page-marker {
   display: block;
@@ -1907,6 +1931,54 @@ body.view-draft-active #scene-toolbox {
   -webkit-user-select: none;
   pointer-events: none; /* clicks pass through to surrounding content */
 }
+
+/* Flow override — promote the marker to a real page-boundary
+   indicator. Reuses the same widget DOM the engine emits (no DOM
+   changes). Negative horizontal margin extends the desk-strip into
+   the page's 0.5in side padding so the boundary spans the full sheet
+   width — reads as crossing the bottom edge of one page and the top
+   edge of the next.
+
+   Editor Recovery Phase 1 acceptance: visible page gap + subtle page
+   boundary + readable existing-widget "Page N" label. No content
+   splitting; no fake DOM pages. */
+#editor-container.view-flow .rga-page-marker {
+  /* Page-gap breathing room — generous but not jarring. The 32px
+     above + 28px below creates a clear "between pages" zone. */
+  margin: 32px -0.5in 28px;
+  padding: 14px 0;
+
+  /* Two thin horizontal rules sandwich the label. Subtle gradient
+     suggests the "desk strip" gap between two paper sheets. */
+  border-top:    1px solid var(--border-secondary, rgba(128, 128, 128, 0.30));
+  border-bottom: 1px solid var(--border-secondary, rgba(128, 128, 128, 0.30));
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.025) 0%,
+    rgba(0, 0, 0, 0.045) 50%,
+    rgba(0, 0, 0, 0.025) 100%
+  );
+
+  /* Label — bigger, intentional, calm. The existing widget text
+     ("— Page N —") reads as a proper boundary marker. */
+  font-size: 0.8125rem;          /* 13px */
+  letter-spacing: 0.18em;
+  color: var(--text-tertiary, #888);
+  font-weight: 500;
+}
+/* Dark-theme desk-strip uses light overlays so the boundary is
+   visible against the dark editor background. */
+[data-theme="dark"] #editor-container.view-flow .rga-page-marker {
+  border-top-color:    rgba(255, 255, 255, 0.10);
+  border-bottom-color: rgba(255, 255, 255, 0.10);
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.020) 0%,
+    rgba(255, 255, 255, 0.035) 50%,
+    rgba(255, 255, 255, 0.020) 100%
+  );
+}
+
 body.view-draft-active .rga-page-marker,
 body.view-print-active .rga-page-marker,
 body.view-print-preview-active .rga-page-marker {
