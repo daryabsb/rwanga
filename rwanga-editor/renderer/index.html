@@ -192,7 +192,14 @@
           </button>
           <button class="bp-tab" data-bp-tab="breakdown">Breakdown</button>
           <span class="bp-tab-spacer"></span>
-          <button class="bp-tab-action" id="btn-close-bottom-panel" title="Close Panel"></button>
+          <!-- Studio Shell Recovery §E — minimize / close are TWO distinct
+               actions. Minimize collapses the body only (header stays).
+               Close hides the whole panel; recover via View → Studio
+               Panel, Cmd/Ctrl+J, Cmd/Ctrl+`, or the command palette. -->
+          <button class="bp-tab-action" id="btn-minimize-bottom-panel"
+                  title="Minimize Panel" aria-label="Minimize panel">_</button>
+          <button class="bp-tab-action" id="btn-close-bottom-panel"
+                  title="Close Panel" aria-label="Close panel"></button>
         </div>
         <div id="bottom-panel-content">
           <div class="bp-content active" data-bp-tab="scene">
@@ -912,6 +919,13 @@
           case 'view.flow':  if (Rga.ViewMode) Rga.ViewMode.set('flow');  break;
           case 'view.draft': if (Rga.ViewMode) Rga.ViewMode.set('draft'); break;
           case 'view.print': if (Rga.ViewMode) Rga.ViewMode.set('print'); break;
+          // Studio Shell Recovery §E — View → Studio Panel routes
+          // through Rga.Shell.StudioPanel.toggle (single owner).
+          case 'view.studioPanel':
+            if (Rga.Shell && Rga.Shell.StudioPanel && Rga.Shell.StudioPanel.toggle) {
+              Rga.Shell.StudioPanel.toggle();
+            }
+            break;
         }
       });
     }

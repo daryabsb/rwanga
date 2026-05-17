@@ -59,7 +59,7 @@
     // WorkspaceState hydrated it from rga-workspace-layout) and
     // reflect to DOM.
     const layoutSnap = Rga.Shell.Layout.get();
-    _syncVisibilityFromLayout(layoutSnap.studioPanel.visible);
+    _syncStateFromLayout(_resolveState(layoutSnap.studioPanel));
     // Restore the persisted active tab if Layout has one. Pre-Slice-9
     // the field was never written; post-Slice-9 it's the SSOT.
     if (layoutSnap.studioPanel.activeTab) {
@@ -68,8 +68,10 @@
     _unsubLayout = Rga.Shell.Layout.subscribe(function(next, prev) {
       if (!next || !next.studioPanel) return;
       if (prev && prev.studioPanel) {
-        if (prev.studioPanel.visible !== next.studioPanel.visible) {
-          _syncVisibilityFromLayout(next.studioPanel.visible);
+        const prevState = _resolveState(prev.studioPanel);
+        const nextState = _resolveState(next.studioPanel);
+        if (prevState !== nextState) {
+          _syncStateFromLayout(nextState);
         }
         if (prev.studioPanel.activeTab !== next.studioPanel.activeTab && next.studioPanel.activeTab) {
           _renderActiveTab(next.studioPanel.activeTab);
@@ -78,45 +80,97 @@
     });
   }
 
+  // Studio Shell Recovery §E: derive the canonical 3-state from a
+  // studioPanel zone snapshot. Tolerates pre-§E snapshots that only
+  // had .visible — same migration as the Layout fromJSON path.
+  function _resolveState(zone) {
+    if (!zone) return 'open';
+    if (zone.state === 'open' || zone.state === 'minimized' || zone.state === 'closed') {
+      return zone.state;
+    }
+    if (zone.visible === false) return 'closed';
+    return 'open';
+  }
+
   // ----------------------------------------------------------------
-  // Visibility (delegates to Layout.studioPanel.visible — single SSOT)
+  // Three-state model — Studio Shell Recovery §E
+  //   OPEN       full panel visible (header + body)
+  //   MINIMIZED  header/tab strip visible, body collapsed
+  //   CLOSED     panel fully hidden
+  //
+  // State lives in Layout.studioPanel.state (single SSOT). Backward-
+  // compat field .visible is auto-maintained by Layout.set; existing
+  // readers of `.visible` still see the right boolean.
   // ----------------------------------------------------------------
 
   function show() {
-    if (Rga.Shell && Rga.Shell.Layout) {
-      Rga.Shell.Layout.set({ studioPanel: { visible: true } });
-    } else {
-      _syncVisibilityFromLayout(true);  // early-boot fallback
-    }
+    _setState('open');
   }
 
   function hide() {
-    if (Rga.Shell && Rga.Shell.Layout) {
-      Rga.Shell.Layout.set({ studioPanel: { visible: false } });
-    } else {
-      _syncVisibilityFromLayout(false);
-    }
+    _setState('closed');
   }
 
+  function minimize() {
+    _setState('minimized');
+  }
+
+  function restore() {
+    _setState('open');
+  }
+
+  // Keyboard / close-button / View-menu toggle: closed ↔ open. Going
+  // OUT of minimized goes to open (not closed) — the minimized state
+  // is reached only via the explicit minimize button. This matches the
+  // long-standing UX where Ctrl+J = "show / hide the panel".
   function toggle() {
+    const cur = _currentState();
+    _setState(cur === 'closed' ? 'open' : 'closed');
+  }
+
+  function _currentState() {
     if (Rga.Shell && Rga.Shell.Layout) {
-      const cur = Rga.Shell.Layout.get().studioPanel.visible;
-      Rga.Shell.Layout.set({ studioPanel: { visible: !cur } });
+      return _resolveState(Rga.Shell.Layout.get().studioPanel);
+    }
+    return 'open';
+  }
+
+  function _setState(next) {
+    if (next !== 'open' && next !== 'minimized' && next !== 'closed') return;
+    if (Rga.Shell && Rga.Shell.Layout) {
+      Rga.Shell.Layout.set({ studioPanel: { state: next } });
     } else {
-      const col = _col();
-      if (col) col.classList.toggle('bottom-collapsed');
+      _syncStateFromLayout(next);  // early-boot fallback
     }
   }
 
-  function _syncVisibilityFromLayout(visible) {
+  function _syncStateFromLayout(state) {
     const col = _col();
     if (!col) return;
-    if (visible) col.classList.remove('bottom-collapsed');
-    else         col.classList.add('bottom-collapsed');
+    // The two CSS classes are mutually exclusive — at most one is set.
+    // CLOSED → bottom-collapsed (existing class; hides the whole panel)
+    // MINIMIZED → bottom-minimized (new class; hides only the body,
+    //                                keeps tab strip visible)
+    if (state === 'closed') {
+      col.classList.add('bottom-collapsed');
+      col.classList.remove('bottom-minimized');
+    } else if (state === 'minimized') {
+      col.classList.remove('bottom-collapsed');
+      col.classList.add('bottom-minimized');
+    } else {  // 'open'
+      col.classList.remove('bottom-collapsed');
+      col.classList.remove('bottom-minimized');
+    }
   }
 
   function _col() {
     return (Rga.$ ? Rga.$('#center-column') : document.getElementById('center-column'));
+  }
+
+  // Backward-compat shim — internal callers that still expect the old
+  // boolean-driven sync get correctly converted via _setState.
+  function _syncVisibilityFromLayout(visible) {
+    _syncStateFromLayout(visible ? 'open' : 'closed');
   }
 
   // ----------------------------------------------------------------
@@ -159,9 +213,38 @@
   }
 
   function _wireCloseButton() {
-    const btn = Rga.$ ? Rga.$('#btn-close-bottom-panel') : document.getElementById('btn-close-bottom-panel');
-    if (!btn) return;
-    btn.addEventListener('click', function() { toggle(); });
+    const closeBtn = Rga.$ ? Rga.$('#btn-close-bottom-panel') : document.getElementById('btn-close-bottom-panel');
+    if (closeBtn) {
+      // Studio Shell Recovery §E: close button now unambiguously CLOSES
+      // (not toggles). The toggle keyboard shortcut continues to flip
+      // closed ↔ open. Distinguishing the two affordances was the
+      // original §E pain point — "minimize ≠ close".
+      closeBtn.addEventListener('click', function() { hide(); });
+    }
+    const minBtn = Rga.$ ? Rga.$('#btn-minimize-bottom-panel') : document.getElementById('btn-minimize-bottom-panel');
+    if (minBtn) {
+      // Minimize button = minimize when open, restore when minimized.
+      minBtn.addEventListener('click', function() {
+        const cur = _currentState();
+        if (cur === 'minimized') restore();
+        else                     minimize();
+      });
+    }
+    // Studio Shell Recovery §E acceptance: "user can restore with one
+    // click" from minimized. Clicking anywhere on the tab strip
+    // (except on the buttons / tabs themselves) when minimized
+    // restores the panel.
+    const tabs = Rga.$ ? Rga.$('#bottom-panel-tabs') : document.getElementById('bottom-panel-tabs');
+    if (tabs) {
+      tabs.addEventListener('click', function(e) {
+        if (_currentState() !== 'minimized') return;
+        // If the click hit an interactive child (tab or action button),
+        // let that child's handler win — those handlers already call
+        // switchTo() which calls show() and restores the panel anyway.
+        if (e.target.closest('.bp-tab') || e.target.closest('.bp-tab-action')) return;
+        restore();
+      });
+    }
   }
 
   function _wireKeyboardShortcut() {
@@ -289,12 +372,18 @@
     show: show,
     hide: hide,
     toggle: toggle,
+    // Studio Shell Recovery §E — three-state model
+    minimize: minimize,
+    restore: restore,
+    state: _currentState,
     switchTo: switchTo,
     activeTab: activeTab,
     toggleInspector: toggleInspector,
     openInspector: openInspector,
     _reset: _reset,
     _syncVisibilityFromLayout: _syncVisibilityFromLayout,
+    _syncStateFromLayout: _syncStateFromLayout,
+    _resolveState: _resolveState,
     _renderActiveTab: _renderActiveTab
   };
 })();

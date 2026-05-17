@@ -61,6 +61,12 @@ function buildMenu(mainWindow) {
         { label: 'Print', type: 'radio', id: 'view.print', checked: false,
           click: () => sendMenuAction(mainWindow, 'view.print') },
         { type: 'separator' },
+        // Studio Shell Recovery §E — View → Studio Panel toggles
+        // closed ↔ open. Recovery path from "closed" so the user
+        // never loses the panel without a way back.
+        { label: 'Studio Panel', accelerator: 'CommandOrControl+J',
+          click: () => sendMenuAction(mainWindow, 'view.studioPanel') },
+        { type: 'separator' },
         { role: 'reload' }, { role: 'forceReload' }, { role: 'toggleDevTools' },
         { type: 'separator' },
         { role: 'resetZoom' }, { role: 'zoomIn' }, { role: 'zoomOut' },

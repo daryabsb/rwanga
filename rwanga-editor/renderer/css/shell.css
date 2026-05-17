@@ -237,6 +237,25 @@
   display: none;
 }
 
+/* Studio Shell Recovery §E — minimize state.
+   Panel HEADER stays visible (tab strip + minimize/close buttons);
+   panel BODY collapses to zero. Resize handle is hidden because
+   there's no body to resize. Clicking anywhere on the tab strip
+   restores (wired in studio-panel.js). */
+#center-column.bottom-minimized {
+  grid-template-rows: 1fr 0px 32px;  /* 32px matches #bottom-panel-tabs height */
+}
+#center-column.bottom-minimized .resize-handle[data-resize="bottom-panel"] {
+  display: none;
+}
+#center-column.bottom-minimized #bottom-panel-content {
+  display: none;
+}
+#center-column.bottom-minimized #bottom-panel-tabs {
+  /* Hint that the strip is itself the restore affordance. */
+  cursor: pointer;
+}
+
 /* ============================================================
    EDITOR AREA (tab bar + writing surface)
    ============================================================ */

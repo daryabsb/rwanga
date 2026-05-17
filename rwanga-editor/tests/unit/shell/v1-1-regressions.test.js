@@ -161,21 +161,27 @@ test('V1.1 fix 5: #editor-area is position: relative (anchor for the absolute to
 // V1.1 fix 6 — Bottom panel reopen via Layout
 // ----------------------------------------------------------------
 
-test('V1.1 fix 6: Rga.BottomPanel.toggleCollapse writes to Rga.Shell.Layout.studioPanel.visible', () => {
+test('V1.1 fix 6: Rga.BottomPanel.toggleCollapse writes to Rga.Shell.Layout.studioPanel (via state — Studio Shell Recovery §E)', () => {
   // Slice 9 §A: the implementation moved from app-shell.js into
   // renderer/js/shell/studio-panel.js (BottomPanel is now a thin
   // shim → StudioPanel). Source audit follows the move.
+  //
+  // Studio Shell Recovery §E: the SSOT field changed from
+  // studioPanel.visible (boolean) to studioPanel.state (enum). The
+  // V1.1 fix 6 contract — "toggle writes to Layout, not the DOM" — is
+  // preserved; only the field name is updated. The visible mirror is
+  // still maintained by Layout._normalizeStudioPanel so existing
+  // readers of .visible keep working.
   const studioPanelSrc = readText(path.join(REPO, 'renderer/js/shell/studio-panel.js'));
   assert.ok(
-    /Rga\.Shell\.Layout\.set\s*\(\s*\{\s*studioPanel\s*:\s*\{\s*visible/.test(studioPanelSrc),
-    'Rga.Shell.StudioPanel must call Rga.Shell.Layout.set({studioPanel: {visible: ...}}) — DOM-only toggle is the regression we fixed'
+    /Rga\.Shell\.Layout\.set\s*\(\s*\{\s*studioPanel\s*:\s*\{\s*state/.test(studioPanelSrc),
+    'Rga.Shell.StudioPanel must call Rga.Shell.Layout.set({studioPanel: {state: ...}}) — DOM-only toggle is the regression V1.1 fix 6 prevents'
   );
-  // A Layout subscriber must mirror visibility into the DOM (via
-  // _syncVisibilityFromLayout in StudioPanel post-Slice-9 §A).
+  // A Layout subscriber must mirror state into the DOM.
   assert.ok(
     /Rga\.Shell\.Layout\.subscribe\s*\(/.test(studioPanelSrc) &&
-    /_syncVisibilityFromLayout/.test(studioPanelSrc),
-    'StudioPanel.init must subscribe to Layout and sync the DOM class via _syncVisibilityFromLayout'
+    /_syncStateFromLayout/.test(studioPanelSrc),
+    'StudioPanel.init must subscribe to Layout and sync the DOM via _syncStateFromLayout (§E renamed from _syncVisibilityFromLayout)'
   );
 });
 

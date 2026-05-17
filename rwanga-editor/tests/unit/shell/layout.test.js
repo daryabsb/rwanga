@@ -126,7 +126,11 @@ test('Layout._reset() restores defaults', () => {
   Layout._reset();
   assert.deepEqual(Layout.get(), {
     sidebar:     { visible: true,  width: 280, activePanel: 'sceneNavigator' },
-    studioPanel: { visible: true,  height: 200, activeTab: null },
+    // Studio Shell Recovery §E: studioPanel gained a `state` field
+    // ('open' | 'minimized' | 'closed') as the new SSOT for the
+    // three-state model. `visible` is auto-derived (state !== 'closed')
+    // for backward compat.
+    studioPanel: { state: 'open', visible: true,  height: 200, activeTab: null },
     inspector:   { visible: true,  width: 280 },
     titleBar:    { visible: true },
     statusBar:   { visible: true }

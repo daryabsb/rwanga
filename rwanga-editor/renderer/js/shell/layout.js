@@ -29,7 +29,14 @@
     // Slice 4 §A: default changed from false → true to match the
     // long-standing UX where a fresh install boots with the bottom
     // panel visible. WorkspaceState restores user-explicit closes.
-    studioPanel: { visible: true,  height: 200, activeTab: null },
+    //
+    // Studio Shell Recovery §E: three-state model added (open /
+    // minimized / closed). `state` is now the SSOT for visibility;
+    // `visible` is kept as a derived mirror so existing readers keep
+    // working (visible === (state !== 'closed')). The fromJSON
+    // migration below converts pre-§E workspaces (which only stored
+    // `visible: bool`) into the three-state form.
+    studioPanel: { state: 'open',  visible: true,  height: 200, activeTab: null },
     // Slice 4 §A: inspector zone added so Resize has a Layout field to
     // commit `--inspector-width` to on drag end (was CSS-only before).
     inspector:   { visible: true,  width: 280 },
@@ -71,15 +78,48 @@
         // Unknown zone — accept it (forward-compat for future fields).
         _current[zone] = {};
       }
-      Object.keys(incoming).forEach(function(field) {
-        if (_current[zone][field] !== incoming[field]) {
-          _current[zone][field] = incoming[field];
+      // Studio Shell Recovery §E: studioPanel.state and studioPanel.
+      // visible are the SAME concept expressed two ways. Keep them in
+      // sync no matter which one the caller writes, so existing readers
+      // of `.visible` see the same truth as new readers of `.state`.
+      const normalized = (zone === 'studioPanel')
+        ? _normalizeStudioPanel(incoming, _current[zone])
+        : incoming;
+      Object.keys(normalized).forEach(function(field) {
+        if (_current[zone][field] !== normalized[field]) {
+          _current[zone][field] = normalized[field];
           changed = true;
         }
       });
     });
     if (!changed) return;
     _notify(get(), prev);
+  }
+
+  // Studio Shell Recovery §E: derive the missing half of the
+  // state/visible pair so the two fields are always consistent.
+  //   state SSOT: 'open' | 'minimized' | 'closed'
+  //   visible mirror: state !== 'closed'
+  function _normalizeStudioPanel(incoming, currentZone) {
+    const out = Object.assign({}, incoming);
+    const hasState   = Object.prototype.hasOwnProperty.call(out, 'state');
+    const hasVisible = Object.prototype.hasOwnProperty.call(out, 'visible');
+    if (hasState && !hasVisible) {
+      // Writer set state — derive visible.
+      out.visible = (out.state !== 'closed');
+    } else if (hasVisible && !hasState) {
+      // Writer set visible — derive state. Preserve current minimized
+      // when going visible=true and current state is 'minimized'.
+      if (out.visible === false) {
+        out.state = 'closed';
+      } else {
+        // visible=true → preserve minimized if currently minimized,
+        // else open. This matches the long-standing toggle UX where
+        // showing the panel after a hide goes to "open", not "minimized".
+        out.state = (currentZone.state === 'minimized') ? 'minimized' : 'open';
+      }
+    }
+    return out;
   }
 
   function subscribe(fn) {
@@ -132,9 +172,17 @@
       const incoming = snap[zone];
       if (!incoming || typeof incoming !== 'object') return;
       if (!_current[zone]) _current[zone] = {};
-      Object.keys(incoming).forEach(function(field) {
-        if (_current[zone][field] !== incoming[field]) {
-          _current[zone][field] = incoming[field];
+      // Studio Shell Recovery §E: migrate pre-§E workspace JSON
+      // that only carried `studioPanel.visible: bool` into the new
+      // three-state shape. The brief mandates:
+      //   visible=true  → state='open'
+      //   visible=false → state='closed'
+      const normalized = (zone === 'studioPanel')
+        ? _normalizeStudioPanel(incoming, _current[zone])
+        : incoming;
+      Object.keys(normalized).forEach(function(field) {
+        if (_current[zone][field] !== normalized[field]) {
+          _current[zone][field] = normalized[field];
           anyChanged = true;
         }
       });
