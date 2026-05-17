@@ -632,6 +632,13 @@ Rga.BottomPanel = {
       var domOpen = !(col && col.classList.contains('bottom-collapsed'));
       var initialVisible = persisted == null ? domOpen : persisted;
       Rga.Shell.Layout.set({ studioPanel: { visible: initialVisible } });
+      // Explicit DOM sync after init: Layout.set is a no-op (no
+      // subscriber notify) when the value matches Layout's default
+      // (false). When persisted=false and Layout's default is false,
+      // the subscriber would never fire and the DOM (which may have
+      // started open from the legacy HTML default) would be left
+      // out of sync. Force-sync once on init to bridge that gap.
+      self._syncDomFromLayout(initialVisible);
       Rga.Shell.Layout.subscribe(function(next, prev) {
         if (!next || !next.studioPanel) return;
         if (prev && prev.studioPanel && prev.studioPanel.visible === next.studioPanel.visible) return;
