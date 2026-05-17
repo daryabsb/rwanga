@@ -234,7 +234,7 @@ test('G3: no shell-state classes (bottom-collapsed, sidebar-collapsed, view-*-ac
 const STORAGE_OWNERS = {
   'rga-theme':              { writers: ['renderer/js/app-shell.js'],     restoreIn: ['renderer/js/app-shell.js']     },
   'rga-view-mode':          { writers: ['renderer/js/view-mode.js'],     restoreIn: ['renderer/js/view-mode.js']     },
-  'rga-script-lang':        { writers: ['renderer/js/app-shell.js'],     restoreIn: ['renderer/js/app-shell.js']     },
+  'rga-script-lang':        { writers: ['renderer/js/shell/script-language.js'], restoreIn: ['renderer/js/shell/script-language.js'] },
   'rga-session-tabs':       { writers: ['renderer/js/tab-manager.js'],   restoreIn: ['renderer/js/tab-manager.js']   },
   'rga-workspace-layout':   { writers: ['renderer/js/shell/workspace-state.js'], restoreIn: ['renderer/js/shell/workspace-state.js'] }
 };
