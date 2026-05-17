@@ -53,6 +53,7 @@
     if (_currentId === id) {
       _safeMount(next);
       _notify(id, id);
+      _syncLayoutMirror(id);
       return true;
     }
     const prevId = _currentId;
@@ -64,6 +65,7 @@
     _safeMount(next);
     _currentId = id;
     _notify(id, prevId);
+    _syncLayoutMirror(id);
     return true;
   }
 
@@ -75,6 +77,22 @@
     _clearHost();
     _currentId = null;
     _notify(null, prevId);
+    // Note: deactivate does NOT clear Layout.sidebar.activePanel.
+    // The "which panel is logically the user's choice" is preserved
+    // across a hide so reopen restores the same panel. Visibility
+    // is owned by Layout.sidebar.visible (a separate field).
+  }
+
+  // Slice 5 §B: sync the active panel id to Layout so
+  // WorkspaceState persists it. Pre-Slice-5, Sidebar.activate
+  // updated _currentId only; Layout.sidebar.activePanel was a stale
+  // mirror written once at boot and never updated — making the
+  // Slice-4 "active panel restored" acceptance technically broken
+  // in real usage (it passed in tests because the test wrote Layout
+  // directly).
+  function _syncLayoutMirror(id) {
+    if (!Rga.Shell.Layout || typeof Rga.Shell.Layout.set !== 'function') return;
+    Rga.Shell.Layout.set({ sidebar: { activePanel: id } });
   }
 
   function current() { return _currentId; }

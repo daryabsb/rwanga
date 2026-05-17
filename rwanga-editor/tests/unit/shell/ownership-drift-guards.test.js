@@ -152,7 +152,7 @@ test('G2: visibility-state setters list per concern stays singleton', () => {
 
   // Layout.set({ sidebar: { visible: ... } }) — allowed:
   //   - renderer/js/shell/layout.js
-  //   - renderer/js/shell/index.js (Cmd+B handler)
+  //   - renderer/js/shell/index.js (Cmd+B handler + boot restore)
   //   - renderer/js/shell/activity-rail.js (rail click toggles visibility)
   const sidebarVisWriters = findWriters(
     /Rga\.Shell\.Layout\.set\s*\(\s*\{\s*sidebar\s*:\s*\{\s*visible/,
@@ -163,6 +163,21 @@ test('G2: visibility-state setters list per concern stays singleton', () => {
   assert.deepEqual(sidebarVisWriters, [],
     'G2 — only Layout / shell/index.js / activity-rail.js may write Layout.sidebar.visible. ' +
     'Unexpected writers: ' + sidebarVisWriters.join(', '));
+
+  // Layout.set({ sidebar: { activePanel: ... } }) — allowed:
+  //   - renderer/js/shell/layout.js
+  //   - renderer/js/shell/sidebar.js (Slice 5 §B: _syncLayoutMirror keeps
+  //     Layout's mirror in sync with Sidebar's runtime SSOT so
+  //     WorkspaceState persists the user's actual choice, not the
+  //     boot default)
+  const sidebarActiveWriters = findWriters(
+    /Rga\.Shell\.Layout\.set\s*\(\s*\{\s*sidebar\s*:\s*\{\s*activePanel/,
+    ['renderer/js/shell/layout.js',
+     'renderer/js/shell/sidebar.js']
+  );
+  assert.deepEqual(sidebarActiveWriters, [],
+    'G2 — only Layout / sidebar.js may write Layout.sidebar.activePanel. ' +
+    'Unexpected writers: ' + sidebarActiveWriters.join(', '));
 });
 
 // ----------------------------------------------------------------

@@ -69,11 +69,38 @@
     // enter this handler.
     _wireKeyboardShortcuts();
 
-    // Activate the default panel + show the sidebar.
-    const defaultId = _resolveDefaultPanel();
-    if (defaultId) {
-      Rga.Shell.Sidebar.activate(defaultId);
-      Rga.Shell.Layout.set({ sidebar: { visible: true, activePanel: defaultId } });
+    // Activate the panel the user last had open. Order:
+    //   1. Layout.sidebar.activePanel — restored by WorkspaceState
+    //      from `rga-workspace-layout`. If the restored id is still
+    //      a registered panel, use it.
+    //   2. Otherwise fall back to DEFAULT_PANEL (sceneNavigator), or
+    //      the first registered panel if even that isn't present.
+    // Layout.sidebar.visible is similarly trusted from WorkspaceState
+    // (or DEFAULTS) — the boot no longer hard-codes `visible: true`.
+    // Slice 5 §B: Sidebar.activate now syncs its own activePanel
+    // mirror into Layout (see sidebar.js _syncLayoutMirror), so no
+    // explicit Layout.set is needed here.
+    const layoutSnap   = Rga.Shell.Layout.get();
+    const persistedId  = layoutSnap && layoutSnap.sidebar && layoutSnap.sidebar.activePanel;
+    const registeredIds = Rga.Shell.Sidebar.registered();
+    let panelToActivate = null;
+    if (persistedId && registeredIds.indexOf(persistedId) >= 0) {
+      panelToActivate = persistedId;
+    } else {
+      panelToActivate = _resolveDefaultPanel();
+    }
+    if (panelToActivate) {
+      Rga.Shell.Sidebar.activate(panelToActivate);
+      // Ensure visibility tracks Layout's restored value, defaulting
+      // to true on fresh boots (per Layout DEFAULTS).
+      if (layoutSnap.sidebar.visible !== true) {
+        // Honour persisted-hidden state: don't force visible if the
+        // user closed it last session.
+        // _syncLayoutMirror above already wrote activePanel; nothing
+        // more to do here.
+      } else {
+        Rga.Shell.Layout.set({ sidebar: { visible: true } });
+      }
     }
 
     _initialized = true;
