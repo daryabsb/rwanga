@@ -203,17 +203,23 @@ body.view-draft-active #scene-toolbox {
 }
 
 /* ============================================================
-   SCENE TOOLBOX — vertical palette to the right of the page.
-   Sticky so it stays visible while the page scrolls.
+   SCENE TOOLBOX — vertical palette anchored to the editor-container's
+   right edge. Visual Stabilization V1 (T4) moved it out of the
+   editor-container flex flow because the previous sticky-flex-item
+   layout extended past the container's right edge and got clipped
+   when the inspector + sidebar squeezed the workspace width.
+
+   Now: absolute-positioned to the container's top-right corner.
+   editor-container reserves right-side padding so the centred page
+   does not visually intersect the toolbox.
+
    Disabled (faded + non-interactive) when cursor is not inside a scene.
    ============================================================ */
 #scene-toolbox.scene-toolbox-vertical {
-  position: sticky;
-  top: 24px;
-  align-self: flex-start;
-  margin-left: 24px;
-  flex-shrink: 0;
-  width: 96px;
+  position: absolute;
+  top: 32px;
+  right: 16px;
+  width: 88px;
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -285,8 +291,8 @@ body.view-draft-active #scene-toolbox {
 }
 
 [dir="rtl"] #scene-toolbox.scene-toolbox-vertical {
-  margin-left: 0;
-  margin-right: 24px;
+  right: auto;
+  left: 16px;
 }
 
 .format-btn {
@@ -1782,3 +1788,252 @@ body.view-draft-active #scene-toolbox {
   color: var(--text-primary, #d4d4d4);
 }
 
+
+/* ============================================================
+   V3 SCENE CHROME (Phase 4)
+   scene + sceneHeading NodeViews. Block-level CSS (action,
+   character, dialogue, parenthetical, shot, transition) reuses
+   the existing .rga-block-* classes elsewhere in this file.
+   ============================================================ */
+
+.rga-scene-v3 {
+  position: relative;
+  display: block;
+  margin: 1.4em 0;
+  padding: 0;
+  border-left: 3px solid var(--accent-rwanga, #C2185B);
+  padding-left: 0.75in;
+}
+
+.rga-scene-v3-num {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-secondary, #9e9e9e);
+  margin: 0 0 0.5em 0;
+  user-select: none;
+}
+
+.rga-scene-v3-chrome-right {
+  /* Reserved slot for the deferred drag handle + remove button
+     (memory: project-scene-header-actions-deferred). Empty for now —
+     no visual presence until Phase 8+. */
+  display: none;
+}
+
+.rga-scene-v3-content {
+  display: block;
+}
+
+/* Scene heading chrome — the slug row (setting / time pickers + location text). */
+.rga-scene-heading-v3 {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  font-family: var(--font-editor, 'Courier Prime', 'Courier New', monospace);
+  font-size: 12pt;
+  font-weight: 700;
+  text-transform: uppercase;
+  border-bottom: 2px solid var(--accent-rwanga, #C2185B);
+  margin: 0 0 0.5em 0;
+  padding: 0 0 0.2em 0;
+}
+
+.rga-scene-heading-v3-setting,
+.rga-scene-heading-v3-time {
+  font: inherit;
+  font-weight: inherit;
+  text-transform: inherit;
+  background: transparent;
+  border: 0;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  outline: none;
+  cursor: pointer;
+  color: inherit;
+  padding: 0 4px;
+  border-radius: 2px;
+}
+.rga-scene-heading-v3-setting:hover,
+.rga-scene-heading-v3-time:hover {
+  background: var(--bg-hover, rgba(255,255,255,0.06));
+}
+.rga-scene-heading-v3-setting:focus,
+.rga-scene-heading-v3-time:focus {
+  background: var(--bg-hover, rgba(255,255,255,0.06));
+  box-shadow: inset 0 -2px 0 var(--accent-primary, #007acc);
+}
+
+.rga-scene-heading-v3-sep {
+  user-select: none;
+  opacity: 0.7;
+}
+
+.rga-scene-heading-v3-location {
+  font: inherit;
+  font-weight: inherit;
+  text-transform: inherit;
+  outline: none;
+  min-width: 4ch;
+}
+.rga-scene-heading-v3-location:empty::before {
+  content: 'Location';
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+/* --------------------------------------------------------------
+ * Phase 6 — Page-break markers (Flow view only).
+ * Emitted as widget Decorations by the nav-index plugin between
+ * the last block on page N and the first block on page N+1.
+ * Visible by default (Flow mode). Hidden in Draft view (no chrome)
+ * and reserved hidden in Print view (Phase 7 owns its own rendering).
+ * -------------------------------------------------------------- */
+.rga-page-marker {
+  display: block;
+  margin: 1.5em auto;
+  padding: 0;
+  text-align: center;
+  font-family: var(--font-mono, 'Courier New', Courier, monospace);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  color: var(--text-tertiary, #888);
+  border-top: 1px dashed var(--border-subtle, rgba(128,128,128,0.35));
+  padding-top: 0.5em;
+  user-select: none;
+  -webkit-user-select: none;
+  pointer-events: none; /* clicks pass through to surrounding content */
+}
+body.view-draft-active .rga-page-marker,
+body.view-print-active .rga-page-marker,
+body.view-print-preview-active .rga-page-marker {
+  display: none;
+}
+
+/* --------------------------------------------------------------
+ * Phase 7 — PrintPreview (read-only, fixed-height paper sheets).
+ *
+ * Source of truth: PM Doc → Normalizer → LayoutProfile → PageMap
+ * → RenderModel → PrintRenderer. Sheet dimensions are CSS-fixed;
+ * content distribution comes from PageMap alone — NEVER from DOM
+ * measurement. One .rga-page-sheet per PageMap page.
+ *
+ * Activated by setting body.view-print-preview-active; the controller
+ * (renderer/js/framework/print-preview.js) injects #rga-print-preview-root
+ * and the PrintRenderer paints the sheets inside it.
+ * -------------------------------------------------------------- */
+
+#rga-print-preview-root {
+  display: none;
+}
+body.view-print-preview-active #rga-print-preview-root {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5in;
+  padding: 0.5in 0;
+  position: fixed;
+  inset: 0;
+  background: #4a4a4a;
+  z-index: 9000;
+  overflow-y: auto;
+  overflow-x: auto;
+}
+/* While the preview is up, the editor + shell stay in the DOM (so we
+ * never tear them down) but are hidden — preview is the sole foreground. */
+body.view-print-preview-active #menu-bar,
+body.view-print-preview-active #activity-bar,
+body.view-print-preview-active #sidebar,
+body.view-print-preview-active #tab-bar,
+body.view-print-preview-active #bottom-panel,
+body.view-print-preview-active #inspector-panel,
+body.view-print-preview-active #status-bar,
+body.view-print-preview-active #workspace .resize-handle,
+body.view-print-preview-active #workspace {
+  display: none !important;
+}
+
+.rga-page-sheet {
+  /* Fixed dimensions — never recalculated from content (Rule 6). */
+  width:  8.5in;
+  height: 11in;
+  flex-shrink: 0;          /* keep height fixed inside flex column */
+  flex-grow: 0;
+  background: #ffffff;
+  color: #111;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+  padding: 1in 1in 1in 1.5in;   /* top right bottom left — left wider for binding */
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 12pt;
+  line-height: 1.0;
+  position: relative;
+  box-sizing: border-box;
+  overflow: hidden;       /* sheet height is fixed; overflow lives on the next sheet */
+}
+
+.rga-page-sheet-header {
+  position: absolute;
+  top: 0.5in;
+  right: 1in;
+  font-size: 12pt;
+  font-family: inherit;
+  color: #111;
+}
+
+.rga-page-sheet-content {
+  width: 100%;
+}
+
+/* Block layout — fixed widths/indents per Hollywood convention.
+ * All values are in inches relative to the sheet content area
+ * (left margin already provided by .rga-page-sheet padding-left). */
+.rga-print-block {
+  margin: 0;
+  padding: 0;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  white-space: pre-wrap;
+}
+.rga-print-block-sceneHeading {
+  margin-top: 1em;
+  text-transform: uppercase;
+  font-weight: bold;
+}
+.rga-print-block-action {
+  margin-top: 1em;
+}
+.rga-print-block-character {
+  margin-top: 1em;
+  padding-left: 2.0in;
+  text-transform: uppercase;
+}
+.rga-print-block-parenthetical {
+  padding-left: 1.5in;
+  max-width: 2.0in;
+}
+.rga-print-block-dialogue {
+  padding-left: 1.0in;
+  max-width: 3.5in;
+}
+.rga-print-block-shot {
+  margin-top: 1em;
+  text-transform: uppercase;
+}
+.rga-print-block-transition {
+  margin-top: 1em;
+  text-align: right;
+  text-transform: uppercase;
+}
+.rga-print-block-paragraph,
+.rga-print-block-heading {
+  margin-top: 1em;
+}
+/* First block on each sheet has no leading air — it sits at the top
+ * margin already. (PageMap engine treats first-on-page identically.) */
+.rga-print-block-first {
+  margin-top: 0 !important;
+}
