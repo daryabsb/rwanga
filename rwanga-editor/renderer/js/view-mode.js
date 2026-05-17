@@ -76,14 +76,19 @@
   }
 
   function _activate(mode) {
+    // Runtime Ownership Stab. Slice 6 §A: Rga.ViewManager is the sole
+    // owner of view-* body classes. The fallback that used to live
+    // here (direct body.classList toggle for test contexts without
+    // ViewManager) was removed in Slice 6 to enforce the G3 drift
+    // guard's "no shell-js writer for view-{draft,print,print-preview}-
+    // active" invariant. Any test harness that exercises view-mode
+    // must load renderer/js/framework/view-manager.js before
+    // view-mode.js — see the Slice 1 / Slice 5 test setup patterns.
     if (Rga.ViewManager && typeof Rga.ViewManager.activate === 'function') {
       Rga.ViewManager.activate(mode);
-    } else {
-      // Fallback for tests / contexts where ViewManager is absent.
-      _applyContainerClass(mode);
-      document.body.classList.toggle('view-draft-active', mode === 'draft');
-      document.body.classList.toggle('view-print-active', mode === 'print');
     }
+    // No fallback. If ViewManager is absent, the activate is a no-op;
+    // the call returns silently and the body class isn't applied.
   }
 
   function _notify() {

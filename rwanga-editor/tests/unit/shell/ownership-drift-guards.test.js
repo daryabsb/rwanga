@@ -187,16 +187,22 @@ test('G2: visibility-state setters list per concern stays singleton', () => {
 test('G3: no shell-state classes (bottom-collapsed, sidebar-collapsed, view-*-active) are toggled outside their owner', () => {
   const files = shellJsFiles();
   const checks = [
-    { cls: 'bottom-collapsed', owner: 'renderer/js/app-shell.js' /* Rga.BottomPanel._syncDomFromLayout */ },
-    { cls: 'sidebar-collapsed', owner: null /* CSS-driven only; no JS owner needed */ },
-    { cls: 'view-draft-active', owner: 'renderer/js/view-mode.js' /* via ViewManager controller bodyClass */ },
-    { cls: 'view-print-active', owner: 'renderer/js/view-mode.js' }
+    { cls: 'bottom-collapsed',          owner: 'renderer/js/app-shell.js' /* Rga.BottomPanel._syncDomFromLayout */ },
+    { cls: 'sidebar-collapsed',         owner: null /* CSS-driven only; no JS owner needed */ },
+    // Slice 6 §B: view-* body classes are owned EXCLUSIVELY by
+    // Rga.ViewManager (renderer/js/framework/view-manager.js), which
+    // sits in the framework/ off-limits scan path. No file in the
+    // audited shell-js paths may toggle them — owner: null means
+    // "any toggle outside the framework owner is a violation".
+    { cls: 'view-draft-active',         owner: null /* ViewManager only — framework-owned */ },
+    { cls: 'view-print-active',         owner: null /* ViewManager only — framework-owned */ },
+    { cls: 'view-print-preview-active', owner: null /* ViewManager only — framework-owned (Rga.PrintPreview controller) */ }
   ];
 
   checks.forEach(function(check) {
     const offenders = [];
     files.forEach(function(file) {
-      const src = readText(file);
+      const src = stripComments(readText(file));
       const re = new RegExp(
         "(?:classList\\.(?:add|remove|toggle)\\s*\\(\\s*['\"]" +
         check.cls + "['\"]|" +
@@ -208,9 +214,9 @@ test('G3: no shell-state classes (bottom-collapsed, sidebar-collapsed, view-*-ac
       offenders.push(rel);
     });
     assert.deepEqual(offenders, [],
-      'G3 — only ' + (check.owner || '(no JS owner — CSS only)') + ' may toggle the ' +
-      check.cls + ' class on the DOM. Unexpected toggles in: ' + offenders.join(', ') +
-      '. Route through the layer that owns this state.');
+      'G3 — only ' + (check.owner || '(framework owner only — no shell-js writer allowed)') +
+      ' may toggle the ' + check.cls + ' class on the DOM. Unexpected toggles in: ' +
+      offenders.join(', ') + '. Route through the layer that owns this state.');
   });
 });
 
