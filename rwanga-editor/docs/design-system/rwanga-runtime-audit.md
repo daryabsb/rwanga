@@ -229,12 +229,22 @@ don't get duplicated on every row.
   `rga-view-mode`, `rga-theme`, `rga-script-lang`, `rga-session-tabs`
   intentionally stay separate (per-app preferences / per-app session
   state, not per-workspace UI state).
-- **The G1–G4 drift guards** are the runtime safety net for this
+- **The G1–G11 drift guards** are the runtime safety net for this
   audit. If a future contributor violates an audit row's SSOT, the
-  guards either fail at CI (G1/G3/G4) or emit a console warn at
-  runtime (KeyboardRegistry duplicate detection). They cannot catch
-  all drift — semantic regressions (e.g. ViewMode.previous tracking
-  the wrong mode after printPreview) require regression tests.
+  guards either fail at CI (G1/G3/G4/G5/G6/G7/G8/G9/G10/G11) or emit
+  a console warn at runtime (KeyboardRegistry duplicate detection).
+  They cannot catch all drift — semantic regressions (e.g.
+  ViewMode.previous tracking the wrong mode after printPreview)
+  require regression tests.
+- **Slice 8 §A — app-shell.js extraction Stage 2.** Toast / Modal /
+  CommandPalette / Resize / ScriptLanguage all moved out of
+  `renderer/js/app-shell.js` into their own files under
+  `renderer/js/shell/`. None of these are audit-row owners (they're
+  UI primitives, not state-ownership concerns). The audit rows
+  themselves are unaffected, but the file-path references in §1
+  remain valid because none of the audit rows ever pointed at
+  app-shell.js for these five modules. G11 (Slice 8 §B) prevents
+  any of them moving back.
 
 ---
 

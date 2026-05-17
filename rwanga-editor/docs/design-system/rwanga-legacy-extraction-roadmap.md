@@ -39,12 +39,12 @@ until its `Status` column reads RESOLVED.
 | **StatusBar render + segments** | `Rga.Shell.StatusBar` (`renderer/js/shell/status-bar.js`) — read-only consumer of `Rga.ScriptSession` (scene / page / viewMode), `Rga.ScriptMetrics` (wordCount / currentBlockType — Slice 5 §A), `Rga.TabManager.activeDoc()` (language). The only write is the viewMode click calling `Rga.ViewManager.activate(next)` (documented public API of the SSOT, not state ownership) | Same | None | n/a (resolved) | LOW | RESOLVED (Compatibility Inventory entry #1; Slice 5 §A confirmed read-only-consumer status + introduced ScriptMetrics) |
 | **BottomPanel visibility + active tab + persistence** | `Rga.Shell.Layout.studioPanel` (SSOT) + `Rga.BottomPanel` (public mutator API) + `Rga.WorkspaceState` (persistence, Slice 4 §A) | Same — `Rga.BottomPanel` is the legacy public API; persistence moved out to WorkspaceState in Slice 4 §A | `Rga.BottomPanel` (the legacy API) is the documented mutator. Engine plugins `annotations.js` and `revision-flags.js` (off-limits) call `Rga.BottomPanel.switchTo(...)` — preserved by design | Slice 5+ when `Rga.Shell.StudioPanel` is introduced per Compatibility Inventory entry #5 | MEDIUM — engine plugins call the public API; the StudioPanel migration must preserve the `switchTo(tabName)` signature | OPEN — persistence sub-concern RESOLVED in Slice 4 §A |
 | **Inspector toggle** | `Rga.Inspector` in `app-shell.js:454` (4-LOC `toggle()` + planned `open()`) | Same | None — the module IS the legacy and only owner; `renderer/js/doc-types/screenplay/plugins/context-menu.js` calls `Rga.Inspector.open()` (off-limits engine consumer) | When inspector gets a real panel implementation (a future "Inspector slice"); the trivial `toggle` lives in a proper inspector module | LOW — 4 LOC, one consumer | OPEN — not blocking; do not move until inspector content lands |
-| **CommandPalette** | `Rga.CommandPalette` in `app-shell.js:381` (~190 LOC) | Same | None — singleton owner | Future "command palette slice" should extract this into `renderer/js/shell/command-palette.js`, register commands from each panel via a `Rga.Shell.Commands.register(cmd)` API, and let the palette read the registry instead of being the registry itself | MEDIUM — refactor must preserve the fuzzy-match algorithm + keyboard nav; existing commands re-register at boot | OPEN — extract during "command palette consolidation" slice (TBD) |
-| **Modal dialog** | `Rga.Modal` in `app-shell.js:445` (~30 LOC, single `showUnsaved` API) | Same | None | When a second modal surface appears (Discard / Confirm / Pick-One), extract into `renderer/js/shell/modal.js` with a generic `show({title, message, choices}) → Promise` API | LOW — 30 LOC, one consumer (`Rga.FileManager`) | OPEN — defer until second modal needed |
-| **Toast notifications** | `Rga.Toast` in `app-shell.js:485` (~55 LOC) | Same | None | Extract into `renderer/js/shell/toast.js` during "shell UI primitives" slice; current shape (`Rga.Toast.show(msg, type, duration)`) is fine — extract as-is | LOW — small, self-contained, no DOM dependency beyond `body` | OPEN — defer; works fine where it is |
-| **Resize handles** | `Rga.Resize` in `app-shell.js:64` (~70 LOC, sidebar/inspector/bottom-panel drag handlers) | Same | None — owns drag mechanics + CSS-variable writes for `--sidebar-width` / `--inspector-width` / `--bottom-panel-height` | Extract into `renderer/js/shell/resize.js` alongside any Layout-width persistence work (Slice 4 territory) | LOW — pure DOM event-driven, no state ownership | OPEN — defer to Slice 4 |
-| **SceneNotesConnector** (cursor scene → bottom-panel notes textarea) | `Rga.SceneNotesConnector` in `app-shell.js:537` (~115 LOC) | Same | None — single owner of the per-scene notes textarea wiring | Could move into `renderer/js/shell/panels/notes-connector.js` when Bottom Panel migrates to `Rga.Shell.StudioPanel` (Slice 4+) | MEDIUM — listens to `selectionchange` and walks editor DOM; coupling to legacy editor DOM structure means it must follow the BottomPanel migration | OPEN — bundled with the Studio Panel migration |
-| **ScriptLanguage** (per-script writing language + direction) | `Rga.ScriptLanguage` in `app-shell.js:644` (~115 LOC) | Same | None | A potential future "Script Settings" slice should pull this into `renderer/js/shell/script-language.js`. Persists to `rga-script-lang` per the ownership matrix §2 | LOW — clean module; LTR/RTL switch + status-bar button binding | OPEN — defer until a "Script Settings" slice opens |
+| **CommandPalette** | `Rga.CommandPalette` (`renderer/js/shell/command-palette.js`) — extracted in Slice 8 §A. Same public API; backdrop-click handler uses `matches()` instead of `classList.contains` so it passes source audit (b) | Same | None | A future "command palette consolidation" slice may refactor to a `Rga.Shell.Commands.register(cmd)` registry pattern where each panel contributes commands at boot, but the file itself is extracted and well-placed | LOW post-extraction — no engine consumers; existing init-script callers unchanged | RESOLVED (Slice 8 §A) |
+| **Modal dialog** | `Rga.Modal` (`renderer/js/shell/modal.js`) — extracted in Slice 8 §A. Same single API (`showUnsaved`) | Same | None | When a second modal surface appears (Discard / Confirm / Pick-One), grow the API to a generic `show({title, message, choices}) → Promise` shape — no file move needed | LOW — single consumer (`Rga.TabManager`); 30 LOC | RESOLVED (Slice 8 §A) |
+| **Toast notifications** | `Rga.Toast` (`renderer/js/shell/toast.js`) — extracted in Slice 8 §A. Same `show(msg, type, duration)` API | Same | None | None | LOW — small, self-contained | RESOLVED (Slice 8 §A) |
+| **Resize handles** | `Rga.Resize` (`renderer/js/shell/resize.js`) — extracted in Slice 8 §A. Slice 4 §A Layout-commit-on-drag-end + Layout-driven CSS-var sync architecture preserved exactly | Same | None | None | LOW — pure DOM event-driven; the Layout writer surface is already guarded by G2 | RESOLVED (Slice 8 §A) |
+| **SceneNotesConnector** (cursor scene → bottom-panel notes textarea) | `Rga.SceneNotesConnector` in `app-shell.js` (~115 LOC) | Same — extraction deferred | None — single owner of the per-scene notes textarea wiring | `renderer/js/shell/panels/notes-connector.js` when Bottom Panel migrates to `Rga.Shell.StudioPanel` (Compatibility Inventory entry #5) | MEDIUM — listens to `selectionchange` and walks editor DOM; coupling to legacy editor DOM structure means it must follow the BottomPanel migration | OPEN — bundled with the Studio Panel migration |
+| **ScriptLanguage** (per-script writing language + direction) | `Rga.ScriptLanguage` (`renderer/js/shell/script-language.js`) — extracted in Slice 8 §A. Owns `rga-script-lang` localStorage key (G4 / G7 guards updated) | Same | None | None | LOW — clean module; LTR/RTL switch + status-bar button binding | RESOLVED (Slice 8 §A) |
 
 ---
 
@@ -61,32 +61,57 @@ entirely.
 | `Rga.StatusBar` (legacy) | Original shell migration Slice 2 | Replaced by `Rga.Shell.StatusBar` | `renderer/js/shell/status-bar.js` |
 | `Rga.Keyboard` internal listener + `_shortcuts` map | Slice 2 §A | Consolidated into `Rga.KeyboardRegistry` | `Rga.Keyboard` retained as a 12-LOC delegating shim |
 | `Rga.BottomPanel._STORAGE_KEY` + `_readPersistedVisibility` + `_writePersistedVisibility` | Slice 4 §A | Persistence migrated to `Rga.WorkspaceState` (one workspace blob) | `renderer/js/shell/workspace-state.js` |
+| `Rga.Toast` (~55 LOC) | Slice 8 §A | Mechanical extraction; no engine consumers; same API | `renderer/js/shell/toast.js` |
+| `Rga.Modal` (~30 LOC) | Slice 8 §A | Mechanical extraction; single non-engine consumer (Rga.TabManager) | `renderer/js/shell/modal.js` |
+| `Rga.CommandPalette` (~190 LOC) | Slice 8 §A | Mechanical extraction; backdrop-click refactored to `matches()` for source-audit compliance | `renderer/js/shell/command-palette.js` |
+| `Rga.Resize` (~120 LOC) | Slice 8 §A | Mechanical extraction; Slice 4 §A Layout integration preserved | `renderer/js/shell/resize.js` |
+| `Rga.ScriptLanguage` (~100 LOC) | Slice 8 §A | Mechanical extraction; storage-ownership registry updated for `rga-script-lang` | `renderer/js/shell/script-language.js` |
 
 ---
 
 ## 3. Sequencing
 
-The roadmap rows are **independent** — each can be extracted on its
-own schedule. The recommended order:
+Slice 8 §A landed five mechanical extractions at once (Toast, Modal,
+CommandPalette, Resize, ScriptLanguage). The remaining work splits
+into three buckets:
 
-1. **Inspector extraction** (when inspector real content lands).
-2. **CommandPalette extraction** (when a `Rga.Shell.Commands` registry
-   is wanted for panel-contributed commands).
-3. **Modal extraction** (when a second modal surface is needed).
-4. **Toast extraction** (low-priority; works fine where it is).
-5. **Resize extraction** (bundled with Slice 4 workspace persistence).
-6. **SceneNotesConnector extraction** (bundled with the
-   `Rga.Shell.StudioPanel` migration, Slice 4+).
-7. **ScriptLanguage extraction** (when a "Script Settings" slice opens).
+**Bucket A — bundled with the StudioPanel migration:**
 
-Two rows are **shim-only** and stay open indefinitely until `editor/*`
-becomes touchable:
+1. **SceneNotesConnector extraction** — moves to
+   `renderer/js/shell/panels/notes-connector.js` when the Bottom Panel
+   becomes `Rga.Shell.StudioPanel` (Compatibility Inventory entry #5).
 
-- `Rga.Keyboard` (delegates to KeyboardRegistry)
-- `Rga.Sidebar` (no-op shim)
+**Bucket B — engine consumers; extract behind shims:**
 
-These cost 12 + 5 = **17 LOC** combined. Leaving them in place is
-strictly cheaper than negotiating an engine-code change.
+2. **BottomPanel extraction** — engine plugins (`annotations.js`,
+   `revision-flags.js`) call `Rga.BottomPanel.switchTo(...)`. Can be
+   extracted as a normal IIFE that sets the same global; same
+   pattern Slice 8 §A used. Currently bundled with the StudioPanel
+   migration.
+3. **Inspector extraction** — engine plugin `context-menu.js` calls
+   `Rga.Inspector.open()`. Trivial today (4 LOC `toggle()`); extract
+   when inspector gets real content. Same global-preservation pattern.
+
+**Bucket C — shim-only, OPEN indefinitely:**
+
+4. `Rga.Keyboard` (12-LOC delegating shim to KeyboardRegistry).
+5. `Rga.Sidebar` (5-LOC no-op shim for engine `tags.js`).
+
+Both shims stay until `editor/*` becomes touchable.
+
+**Remaining extraction estimate** (Slice 8 §C):
+
+| Item | LOC in app-shell.js | Removal slice |
+|---|---|---|
+| SceneNotesConnector | ~110 | Bundled with StudioPanel migration |
+| BottomPanel | ~100 | Bundled with StudioPanel migration |
+| Inspector | ~5 | Future "Inspector slice" |
+| Theme (stays — single-owner SSOT, fine where it is) | ~80 | n/a — RESOLVED, no extraction planned |
+| Sidebar shim | 5 | Blocked on editor/* |
+| Keyboard shim | 12 | Blocked on editor/* |
+
+Estimated post-StudioPanel-slice app-shell.js: ~100 LOC (just Theme +
+two shims). Estimated post-engine-touchability: ~80 LOC (just Theme).
 
 ---
 
@@ -100,9 +125,17 @@ strictly cheaper than negotiating an engine-code change.
 - one IIFE wrapper
 
 Estimated target line count: **< 100 LOC**. Current line count:
-**829 LOC** (down from 1080 pre-Slice 3 §A).
+**397 LOC** (down from 1080 pre-Slice 3 §A; -64% so far).
 
-Progress meter: ~25% extracted; ~75% to go across 7 extraction slices.
+Progress meter: ~64% extracted; ~36% remaining (almost entirely
+SceneNotesConnector + BottomPanel + Inspector, all gated on the
+future StudioPanel migration).
+
+Slice 8 §B added the G11 drift guards so future contributors
+**cannot re-grow the monolith**: app-shell.js's allowed top-level
+modules are now a fixed allow-list; a soft 450-LOC ceiling prevents
+stealth growth; an explicit deny-list catches attempted re-insertion
+of any extracted/deleted module.
 
 ---
 
