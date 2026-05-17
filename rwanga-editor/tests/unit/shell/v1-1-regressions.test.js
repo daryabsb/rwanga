@@ -162,17 +162,20 @@ test('V1.1 fix 5: #editor-area is position: relative (anchor for the absolute to
 // ----------------------------------------------------------------
 
 test('V1.1 fix 6: Rga.BottomPanel.toggleCollapse writes to Rga.Shell.Layout.studioPanel.visible', () => {
-  const src = readText(APP_SHELL_JS);
-  // toggleCollapse must reach Layout.set with a studioPanel.visible payload.
+  // Slice 9 §A: the implementation moved from app-shell.js into
+  // renderer/js/shell/studio-panel.js (BottomPanel is now a thin
+  // shim → StudioPanel). Source audit follows the move.
+  const studioPanelSrc = readText(path.join(REPO, 'renderer/js/shell/studio-panel.js'));
   assert.ok(
-    /Rga\.Shell\.Layout\.set\s*\(\s*\{\s*studioPanel\s*:\s*\{\s*visible/.test(src),
-    'Rga.BottomPanel must call Rga.Shell.Layout.set({studioPanel: {visible: ...}}) — DOM-only toggle is the regression we fixed'
+    /Rga\.Shell\.Layout\.set\s*\(\s*\{\s*studioPanel\s*:\s*\{\s*visible/.test(studioPanelSrc),
+    'Rga.Shell.StudioPanel must call Rga.Shell.Layout.set({studioPanel: {visible: ...}}) — DOM-only toggle is the regression we fixed'
   );
-  // A Layout subscriber must mirror visibility into the DOM.
+  // A Layout subscriber must mirror visibility into the DOM (via
+  // _syncVisibilityFromLayout in StudioPanel post-Slice-9 §A).
   assert.ok(
-    /Rga\.Shell\.Layout\.subscribe\s*\(/.test(src) &&
-    /_syncDomFromLayout/.test(src),
-    'BottomPanel.init must subscribe to Layout and sync the DOM class via _syncDomFromLayout'
+    /Rga\.Shell\.Layout\.subscribe\s*\(/.test(studioPanelSrc) &&
+    /_syncVisibilityFromLayout/.test(studioPanelSrc),
+    'StudioPanel.init must subscribe to Layout and sync the DOM class via _syncVisibilityFromLayout'
   );
 });
 
@@ -217,10 +220,12 @@ test('V1.1 fix 6: behavioural — close + reopen via Layout round-trips visibili
   global.window.Rga.Keyboard = { register: function() {} };
   global.window.Rga.Shell = global.window.Rga.Shell || {};
 
-  // Load Layout first, then BottomPanel.
+  // Load Layout first, then StudioPanel (Slice 9 §A: BottomPanel shim
+  // delegates here), then app-shell.js (provides the shim).
   delete require.cache[require.resolve('../../../renderer/js/shell/layout.js')];
   require('../../../renderer/js/shell/layout.js');
-  // app-shell.js defines many things we don't need; we just want BottomPanel.
+  delete require.cache[require.resolve('../../../renderer/js/shell/studio-panel.js')];
+  require('../../../renderer/js/shell/studio-panel.js');
   delete require.cache[require.resolve('../../../renderer/js/app-shell.js')];
   require('../../../renderer/js/app-shell.js');
   const Rga = global.window.Rga;

@@ -135,19 +135,24 @@ test('G2: visibility-state setters list per concern stays singleton', () => {
     return offenders;
   }
 
-  // Layout.set({ studioPanel: ... }) — allowed writers:
+  // Layout.set({ studioPanel: ... }) — allowed writers (post-Slice-9):
   //   - renderer/js/shell/layout.js (the SSOT module itself)
-  //   - renderer/js/app-shell.js (Rga.BottomPanel — the public mutator)
-  //   - renderer/js/shell/index.js (Cmd+` shortcut → BottomPanel.toggleCollapse
-  //     fallback — uses Layout.set when BottomPanel not yet booted)
+  //   - renderer/js/shell/studio-panel.js (the public mutator — Slice 9 §A)
+  //   - renderer/js/shell/index.js (Cmd+` shortcut → StudioPanel.toggle
+  //     fallback uses Layout.set when StudioPanel not yet booted)
+  //   - renderer/js/shell/workspace-state.js (legacy migration path
+  //     converts old scoped key into the workspace blob)
+  // (app-shell.js dropped off this list in Slice 9 §A — the BottomPanel
+  // shim delegates to StudioPanel which writes Layout.)
   const studioWriters = findWriters(
     /Rga\.Shell\.Layout\.set\s*\(\s*\{\s*studioPanel/,
     ['renderer/js/shell/layout.js',
-     'renderer/js/app-shell.js',
-     'renderer/js/shell/index.js']
+     'renderer/js/shell/studio-panel.js',
+     'renderer/js/shell/index.js',
+     'renderer/js/shell/workspace-state.js']
   );
   assert.deepEqual(studioWriters, [],
-    'G2 — only Layout / BottomPanel / shell/index.js may write Layout.studioPanel. ' +
+    'G2 — only Layout / StudioPanel / shell/index.js / WorkspaceState may write Layout.studioPanel. ' +
     'Unexpected writers: ' + studioWriters.join(', '));
 
   // Layout.set({ sidebar: { visible: ... } }) — allowed:
@@ -187,7 +192,7 @@ test('G2: visibility-state setters list per concern stays singleton', () => {
 test('G3: no shell-state classes (bottom-collapsed, sidebar-collapsed, view-*-active) are toggled outside their owner', () => {
   const files = shellJsFiles();
   const checks = [
-    { cls: 'bottom-collapsed',          owner: 'renderer/js/app-shell.js' /* Rga.BottomPanel._syncDomFromLayout */ },
+    { cls: 'bottom-collapsed',          owner: 'renderer/js/shell/studio-panel.js' /* Slice 9 §A: StudioPanel._syncVisibilityFromLayout */ },
     { cls: 'sidebar-collapsed',         owner: null /* CSS-driven only; no JS owner needed */ },
     // Slice 6 §B: view-* body classes are owned EXCLUSIVELY by
     // Rga.ViewManager (renderer/js/framework/view-manager.js), which
@@ -568,9 +573,12 @@ const APP_SHELL_ALLOWED_MODULES = [
   'Theme',                  // single-owner per Slice 2 §B
   'Sidebar',                // 5-LOC no-op shim for engine consumer tags.js:206
   'Keyboard',               // 12-LOC delegating shim → Rga.KeyboardRegistry
-  'BottomPanel',            // engine consumers annotations.js, revision-flags.js
-  'Inspector',              // engine consumer context-menu.js
-  'SceneNotesConnector'     // deferred to StudioPanel migration
+  'BottomPanel',            // post-Slice-9 §A: thin shim → Rga.Shell.StudioPanel
+                            //   (engine consumers annotations.js, revision-flags.js)
+  'Inspector'               // post-Slice-9 §A: thin shim → Rga.Shell.StudioPanel
+                            //   (engine consumer context-menu.js)
+  // SceneNotesConnector — DELETED in Slice 9 §A (zero callers; folded
+  // into Rga.Shell.StudioPanel's _wireSceneNotesConnector).
 ];
 
 test('G11: app-shell.js declares ONLY the allow-listed Rga.* modules', () => {
@@ -599,13 +607,14 @@ test('G11: extracted modules (Toast / Modal / CommandPalette / Resize / ScriptLa
   // and must never come back. Pairs with G11 above to give a clear
   // error message when a regression is attempted.
   const FORBIDDEN_IN_APP_SHELL = [
-    'Toast',          // extracted Slice 8 §A → shell/toast.js
-    'Modal',          // extracted Slice 8 §A → shell/modal.js
-    'CommandPalette', // extracted Slice 8 §A → shell/command-palette.js
-    'Resize',         // extracted Slice 8 §A → shell/resize.js
-    'ScriptLanguage', // extracted Slice 8 §A → shell/script-language.js
-    'FileTree',       // deleted Slice 3 §A (zero consumers; dead DOM target)
-    'Tabs'            // deleted Slice 3 §A (zero consumers; replaced by Rga.TabManager)
+    'Toast',               // extracted Slice 8 §A → shell/toast.js
+    'Modal',               // extracted Slice 8 §A → shell/modal.js
+    'CommandPalette',      // extracted Slice 8 §A → shell/command-palette.js
+    'Resize',              // extracted Slice 8 §A → shell/resize.js
+    'ScriptLanguage',      // extracted Slice 8 §A → shell/script-language.js
+    'SceneNotesConnector', // deleted Slice 9 §A (zero callers; folded into StudioPanel)
+    'FileTree',            // deleted Slice 3 §A (zero consumers; dead DOM target)
+    'Tabs'                 // deleted Slice 3 §A (zero consumers; replaced by Rga.TabManager)
   ];
   const code = stripComments(readText(path.join(REPO, 'renderer/js/app-shell.js')));
   const violations = [];

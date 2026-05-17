@@ -53,6 +53,7 @@ test('A: open → close → reopen all converge on Rga.Shell.Layout.studioPanel.
   fresh$Helpers();
   reloadModules([
     '../../../renderer/js/shell/layout.js',
+    '../../../renderer/js/shell/studio-panel.js',
     '../../../renderer/js/app-shell.js'
   ]);
   const Rga = global.window.Rga;
@@ -86,6 +87,7 @@ test('A: visibility persists across reload via the workspace blob (Slice 4 §A m
   reloadModules([
     '../../../renderer/js/shell/layout.js',
     '../../../renderer/js/shell/workspace-state.js',
+    '../../../renderer/js/shell/studio-panel.js',
     '../../../renderer/js/app-shell.js'
   ]);
   let Rga = global.window.Rga;
@@ -112,6 +114,7 @@ test('A: visibility persists across reload via the workspace blob (Slice 4 §A m
   reloadModules([
     '../../../renderer/js/shell/layout.js',
     '../../../renderer/js/shell/workspace-state.js',
+    '../../../renderer/js/shell/studio-panel.js',
     '../../../renderer/js/app-shell.js'
   ]);
   Rga = global.window.Rga;
@@ -138,6 +141,7 @@ test('A: switchTo(tabName) forces visible=true via the same single mutator surfa
   fresh$Helpers();
   reloadModules([
     '../../../renderer/js/shell/layout.js',
+    '../../../renderer/js/shell/studio-panel.js',
     '../../../renderer/js/app-shell.js'
   ]);
   const Rga = global.window.Rga;

@@ -153,245 +153,49 @@ Rga.Keyboard = {
    See the legacy-extraction-roadmap. */
 
 /* ============================================================
-   BOTTOM PANEL MANAGER
+   BOTTOM PANEL — shim → Rga.Shell.StudioPanel (Slice 9 §A)
+   The full implementation moved to renderer/js/shell/studio-panel.js.
+   This shim preserves the public API engine plugins depend on:
+     • annotations.js:117,154 → Rga.BottomPanel.switchTo('notes')
+     • revision-flags.js:227  → Rga.BottomPanel.switchTo('flags')
+   The shell-side callers (index.html init, shell/index.js Cmd+`) also
+   continue to work unchanged.
    ============================================================ */
-// V1.1 fix 6 (Bottom panel reopen): visibility state now lives in
-// Rga.Shell.Layout.studioPanel.visible. The DOM class is a SIDE EFFECT
-// of that state (applied by _syncDomFromLayout below) rather than the
-// source of truth. This means any caller — close button, keyboard
-// shortcut, future menu action, command palette, layout restore —
-// hits one entry point (Rga.Shell.Layout.set) and the DOM follows.
-// The earlier DOM-only classList.toggle was unreversible whenever the
-// keyboard shortcut never reached the handler (Electron/Chromium
-// shadowing Ctrl+J), leaving the panel stuck closed.
 Rga.BottomPanel = {
-  activeTab: 'scene',
-
   init: function() {
-    var self = this;
-
-    // Tab switching
-    Rga.$$('.bp-tab').forEach(function(tab) {
-      tab.addEventListener('click', function() {
-        self.switchTo(tab.dataset.bpTab);
-      });
-    });
-
-    // Close button — flips Layout, which then updates the DOM.
-    var closeBtn = Rga.$('#btn-close-bottom-panel');
-    if (closeBtn) {
-      closeBtn.addEventListener('click', function() {
-        self.toggleCollapse();
-      });
-    }
-
-    // Ctrl+J toggles the panel — registered ONCE by the init script
-    // in index.html (see registerShortcuts()). The Slice-2 keyboard
-    // consolidation removed the duplicate registration that used to
-    // live here. Cmd+` is registered separately by the shell keyboard
-    // wiring (shell/index.js) and routes through the same public
-    // API (Rga.BottomPanel.toggleCollapse), so all three entry points
-    // share one mutator + one keyboard SSOT.
-
-    // Initial Layout sync (Slice 4 §A — simplified).
-    //
-    // Persistence is now owned by Rga.WorkspaceState, which has
-    // already hydrated Layout from `rga-workspace-layout` before
-    // this init runs (boot order in index.html guarantees it).
-    // BottomPanel's only job here is to:
-    //   1. Sync the DOM class from Layout's current studioPanel.visible
-    //      (whatever WorkspaceState restored, or the default).
-    //   2. Subscribe so future toggle/open writes keep the DOM aligned.
-    // The earlier scoped-key (`rga-shell-studio-panel-visible`) and
-    // its read/write helpers were removed; WorkspaceState's legacy
-    // migration absorbed any pre-existing value on the first boot
-    // after this slice.
-    if (Rga.Shell && Rga.Shell.Layout) {
-      var initialVisible = Rga.Shell.Layout.get().studioPanel.visible;
-      self._syncDomFromLayout(initialVisible);
-      Rga.Shell.Layout.subscribe(function(next, prev) {
-        if (!next || !next.studioPanel) return;
-        if (prev && prev.studioPanel && prev.studioPanel.visible === next.studioPanel.visible) return;
-        self._syncDomFromLayout(next.studioPanel.visible);
-      });
-    }
+    if (Rga.Shell && Rga.Shell.StudioPanel) Rga.Shell.StudioPanel.init();
   },
-
   open: function() {
-    if (Rga.Shell && Rga.Shell.Layout) {
-      Rga.Shell.Layout.set({ studioPanel: { visible: true } });
-    } else {
-      this._syncDomFromLayout(true);
-    }
+    if (Rga.Shell && Rga.Shell.StudioPanel) Rga.Shell.StudioPanel.show();
   },
-
   switchTo: function(tabName) {
-    this.open();
-    this.activeTab = tabName;
-
-    Rga.$$('.bp-tab').forEach(function(tab) {
-      tab.classList.toggle('active', tab.dataset.bpTab === tabName);
-    });
-
-    Rga.$$('.bp-content').forEach(function(content) {
-      content.classList.toggle('active', content.dataset.bpTab === tabName);
-    });
+    if (Rga.Shell && Rga.Shell.StudioPanel) Rga.Shell.StudioPanel.switchTo(tabName);
   },
-
   toggleCollapse: function() {
-    if (Rga.Shell && Rga.Shell.Layout) {
-      var current = Rga.Shell.Layout.get().studioPanel.visible;
-      Rga.Shell.Layout.set({ studioPanel: { visible: !current } });
-    } else {
-      // Fallback (early-boot / test contexts where Layout absent).
-      var col = Rga.$('#center-column');
-      if (col) col.classList.toggle('bottom-collapsed');
-    }
-  },
-
-  _syncDomFromLayout: function(visible) {
-    var col = Rga.$('#center-column');
-    if (!col) return;
-    if (visible) col.classList.remove('bottom-collapsed');
-    else         col.classList.add('bottom-collapsed');
+    if (Rga.Shell && Rga.Shell.StudioPanel) Rga.Shell.StudioPanel.toggle();
   }
-  // _STORAGE_KEY / _readPersistedVisibility / _writePersistedVisibility
-  // removed in Runtime Ownership Stab. Slice 4 §A. Persistence is now
-  // owned by Rga.WorkspaceState (single owner of layout state).
 };
 
 /* ============================================================
-   INSPECTOR MANAGER
+   INSPECTOR — shim → Rga.Shell.StudioPanel (Slice 9 §A)
+   The inspector routing moved to renderer/js/shell/studio-panel.js.
+   Engine consumer context-menu.js calls Rga.Inspector.open(); pre-
+   Slice-9 the method didn't exist (defensively guarded). Slice 9
+   adds open() (and keeps toggle()) so the documented API works.
    ============================================================ */
 Rga.Inspector = {
   toggle: function() {
-    Rga.$('#workspace').classList.toggle('inspector-hidden');
+    if (Rga.Shell && Rga.Shell.StudioPanel) Rga.Shell.StudioPanel.toggleInspector();
+  },
+  open: function() {
+    if (Rga.Shell && Rga.Shell.StudioPanel) Rga.Shell.StudioPanel.openInspector();
   }
 };
 
-/* Rga.Toast — EXTRACTED to renderer/js/shell/toast.js in
-   Runtime Ownership Stab. Slice 8 §A. The IIFE there sets the global
-   Rga.Toast; the only in-shell consumer (Rga.Theme.toggle) keeps
-   working. See the legacy-extraction-roadmap. */
+/* Rga.SceneNotesConnector — DELETED in Runtime Ownership Stab. Slice
+   9 §A. The module had zero callers (init was never wired at boot).
+   Its scene-notes-routing behavior was folded into Rga.Shell.StudioPanel
+   where StudioPanel.init now wires the selectionchange listener +
+   per-scene notes textarea via _wireSceneNotesConnector. */
 
-/* ============================================================
-   Rga.FileTree — DELETED in Runtime Ownership Stab. Slice 3 §A.
-   The 85-line module targeted #file-tree, a legacy DOM element that
-   was removed when the Script Workspace panel (Slice 2) took over
-   workspace navigation. With the target gone, init() always early-
-   returned. Zero consumers in renderer/ or tests/.
-   ============================================================ */
-
-/* ============================================================
-   SCENE NOTES CONNECTOR
-   ============================================================ */
-Rga.SceneNotesConnector = {
-  _currentSceneId: null,
-  _notes: {}, // sceneId → note text
-
-  init: function() {
-    var self = this;
-
-    // Listen for cursor movement (selectionchange) to detect scene changes
-    document.addEventListener('selectionchange', Rga.debounce(function() {
-      self._detectCurrentScene();
-    }, 150));
-
-    // Save notes when textarea changes
-    var textarea = Rga.$('#notes-textarea');
-    if (textarea) {
-      textarea.addEventListener('input', Rga.debounce(function() {
-        if (self._currentSceneId) {
-          self._notes[self._currentSceneId] = textarea.value;
-          // Also update scene model if SceneManager has the scene
-          if (Rga.SceneManager && Rga.SceneManager.scenes) {
-            var scene = Rga.SceneManager.scenes.get(self._currentSceneId);
-            if (scene) scene.notes = textarea.value;
-          }
-        }
-      }, 300));
-    }
-  },
-
-  _detectCurrentScene: function() {
-    var editor = Rga.$('#editor');
-    if (!editor) return;
-
-    // Find the scene header above the current cursor position
-    var block = Rga.Cursor.getCurrentBlock();
-    if (!block) return;
-
-    var sceneId = null;
-    var sceneName = '';
-    var el = block;
-
-    // Walk backwards to find the scene header
-    while (el) {
-      if (el.dataset && el.dataset.blockType === 'scene-header' && el.dataset.sceneId) {
-        sceneId = el.dataset.sceneId;
-        var numEl = Rga.$('.sh-number', el);
-        var locEl = Rga.$('.sh-location', el);
-        sceneName = (numEl ? numEl.textContent : '') +
-          (locEl && locEl.value ? ' — ' + locEl.value : '');
-        break;
-      }
-      el = el.previousElementSibling;
-    }
-
-    // If scene changed, update the bottom panel
-    if (sceneId !== this._currentSceneId) {
-      this._currentSceneId = sceneId;
-      this._updateNotesPanel(sceneId, sceneName);
-      this._updateProblemsForScene(sceneId);
-
-      // Highlight in sidebar
-      Rga.$$('.scene-item').forEach(function(item) {
-        item.classList.toggle('active', item.dataset.sceneId === sceneId);
-      });
-    }
-  },
-
-  _updateNotesPanel: function(sceneId, sceneName) {
-    var label = Rga.$('#notes-scene-label');
-    var textarea = Rga.$('#notes-textarea');
-
-    if (label) {
-      label.textContent = sceneId
-        ? 'Notes — Scene ' + sceneName
-        : 'Notes — No scene selected';
-    }
-
-    if (textarea) {
-      if (sceneId) {
-        textarea.disabled = false;
-        textarea.value = this._notes[sceneId] || '';
-        textarea.placeholder = 'Add notes for Scene ' + sceneName + '...';
-      } else {
-        textarea.disabled = true;
-        textarea.value = '';
-        textarea.placeholder = 'Select a scene to add notes...';
-      }
-    }
-  },
-
-  _updateProblemsForScene: function(sceneId) {
-    // Highlight problems for the current scene
-    Rga.$$('.problem-item').forEach(function(item) {
-      // Subtle highlight — the Problems panel already works globally,
-      // this just adds emphasis to current-scene problems
-      item.style.opacity = '1';
-    });
-  },
-
-  /**
-   * Load notes from scene data (called when loading a file).
-   */
-  loadFromScenes: function() {
-    var self = this;
-    if (!Rga.SceneManager || !Rga.SceneManager.scenes) return;
-    Rga.SceneManager.scenes.forEach(function(scene, sceneId) {
-      if (scene.notes) self._notes[sceneId] = scene.notes;
-    });
-  }
-};
 
