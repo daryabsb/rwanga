@@ -80,15 +80,19 @@
 /* ============================================================
    ACTIVITY BAR (leftmost icon strip)
    ============================================================ */
+/* Activity Rail Doctrine Rule 3: the rail is NOT evenly distributed.
+   We use flex column with `justify-content: flex-start`, then the
+   bottom group pins itself with margin-top:auto. space-between /
+   space-around are explicitly forbidden by the doctrine. */
 #activity-bar {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  align-items: center;
+  justify-content: flex-start;
+  align-items: stretch;
   width: var(--activity-bar-width);
   background: var(--bg-secondary);
   border-right: 1px solid var(--border-secondary);
-  padding: 4px 0;
+  padding: 8px 0;
   user-select: none;
 }
 
@@ -449,7 +453,39 @@
   -webkit-app-region: no-drag;
 }
 
-/* --- Activity rail (slice 1: replaces hardcoded .activity-icon buttons) --- */
+/* ============================================================
+   ACTIVITY RAIL — implements the Activity Rail Doctrine
+   (docs/rwanga-activity-rail-doctrine.md) rules 2, 3, 4, 5.
+   ============================================================ */
+
+/* Rule 3 — three-group layout. Each group is a flex column;
+   the bottom group is pinned to the rail's bottom via margin-top:auto. */
+.rga-shell-rail-group {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+  gap: 2px;
+}
+/* Deliberate vertical space between Top and Middle (and Middle and
+   Bottom). 24px reads as a clear group break without feeling sparse. */
+.rga-shell-rail-group-middle {
+  margin-top: 24px;
+}
+.rga-shell-rail-group-bottom {
+  margin-top: auto;        /* Pin Settings to the bottom of the rail. */
+  padding-top: 24px;       /* Visual break above the bottom group. */
+}
+.rga-shell-rail-group-unassigned {
+  /* Misclassified panels — visible but visually demoted. The audit
+     guard catches drift; this is the safety net for runtime debug. */
+  margin-top: 24px;
+  opacity: 0.7;
+}
+
+/* Rule 2 — every rail icon is monochrome, calm, same stroke,
+   same visual size. The button itself is the click target; the
+   SVG inside is the visual. */
 .rga-shell-rail-item {
   display: flex;
   align-items: center;
@@ -459,29 +495,92 @@
   background: transparent;
   border: 0;
   cursor: pointer;
-  font-size: 18px;
-  color: var(--text-muted, #858585);
+  /* Idle colour — muted; the rail disappears into chrome. */
+  color: var(--text-tertiary, #6e6e6e);
   position: relative;
-  transition: color 120ms ease, background 120ms ease;
+  padding: 0;
+  /* Rule 5 — calm transitions only. 120ms is the doctrine ceiling. */
+  transition: color 120ms ease, background-color 120ms ease;
 }
-.rga-shell-rail-item:hover {
-  color: var(--text-primary, #d4d4d4);
-  background: var(--bg-hover, rgba(255,255,255,0.04));
+.rga-shell-rail-item > svg {
+  /* Rule 2 — same visual size everywhere; the registry already
+     guarantees identical viewBox + stroke-width. */
+  width: 20px;
+  height: 20px;
+  display: block;
+  flex-shrink: 0;
 }
-.rga-shell-rail-item-active {
-  color: var(--text-primary, #ffffff);
+
+/* Rule 4 — four states. Each is visually distinct.
+
+   Pattern: a pseudo-element ::before is the "background pill" that
+   intensifies through idle → hover → selected, and ::after carries
+   the left accent bar (only on selected / current). The button text
+   colour is the third independent dimension.
+
+   The pill is inset 4px from each side so it floats — paper / creative-
+   tool feel — instead of stretching edge-to-edge like Discord tiles. */
+.rga-shell-rail-item::before {
+  content: "";
+  position: absolute;
+  inset: 4px 6px;
+  border-radius: 6px;
+  background: transparent;
+  transition: background-color 120ms ease;
+  pointer-events: none;
 }
-.rga-shell-rail-item-active::before {
+.rga-shell-rail-item::after {
   content: "";
   position: absolute;
   inset-inline-start: 0;
-  top: 0;
-  bottom: 0;
+  top: 8px;
+  bottom: 8px;
   width: 2px;
-  background: var(--accent-primary, #007acc);
+  border-radius: 0 2px 2px 0;
+  background: transparent;
+  transition: background-color 120ms ease;
+  pointer-events: none;
 }
 
-/* --- Sidebar host (slice 1: panel mount target) --- */
+/* Hover state — subtle pill, brighter icon, no left bar. */
+.rga-shell-rail-item:hover {
+  color: var(--text-secondary, #9e9e9e);
+}
+.rga-shell-rail-item:hover::before {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* Selected state — fuller pill, primary text colour, left accent bar.
+   The accent bar uses --text-primary (calm) instead of --accent-primary
+   (the bright VS-Code-blue token) — doctrine Rule 5 explicitly rejects
+   the bright-accent treatment. */
+.rga-shell-rail-item-active {
+  color: var(--text-primary, #cccccc);
+}
+.rga-shell-rail-item-active::before {
+  background: rgba(255, 255, 255, 0.07);
+}
+.rga-shell-rail-item-active::after {
+  background: var(--text-primary, #cccccc);
+}
+
+/* Current state (reserved per Doctrine Rule 4) — strict superset of
+   selected. When a panel signals "you are here" beyond selection it
+   adds .rga-shell-rail-item-current; the bar deepens to a stronger
+   colour while the pill stays as selected's pill. No consumer wires
+   this yet; the rule exists so the class is reserved and predictable. */
+.rga-shell-rail-item-current::after {
+  background: var(--accent-rwanga, #C2185B);
+}
+
+[data-theme="light"] .rga-shell-rail-item:hover::before {
+  background: rgba(0, 0, 0, 0.04);
+}
+[data-theme="light"] .rga-shell-rail-item-active::before {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+/* --- Sidebar host (Slice 1: panel mount target) --- */
 .rga-shell-sidebar-host {
   width: 100%;
   height: 100%;
@@ -489,7 +588,9 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .rga-shell-rail-item { transition: none; }
+  .rga-shell-rail-item,
+  .rga-shell-rail-item::before,
+  .rga-shell-rail-item::after { transition: none; }
 }
 
 /* ============================================================
