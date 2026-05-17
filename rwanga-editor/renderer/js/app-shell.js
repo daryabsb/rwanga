@@ -10,34 +10,71 @@
 window.Rga = window.Rga || {};
 
 /* ============================================================
-   THEME MANAGER
+   THEME MANAGER — single SSOT per the Ownership Matrix (Runtime
+   Ownership Stab. Slice 2 §B). Owns: active theme + persistence +
+   theme-change events. The shell + future consumers subscribe via
+   Rga.Theme.onChange(fn) instead of polling data-theme or
+   localStorage.
    ============================================================ */
 Rga.Theme = {
   current: 'dark',
+  _listeners: [],
 
   init: function() {
-    var saved = localStorage.getItem('rga-theme') || 'dark';
-    this.apply(saved);
+    var saved = null;
+    try { saved = localStorage.getItem('rga-theme'); } catch (_) {}
+    this.apply(saved || 'dark');
   },
 
   apply: function(theme) {
+    if (theme !== 'dark' && theme !== 'light') return;
+    var prev = this.current;
     this.current = theme;
     document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('rga-theme', theme);
+    try { localStorage.setItem('rga-theme', theme); } catch (_) {}
 
-    // Force repaint of all themed elements
+    // Force repaint of all themed elements.
     document.body.style.display = 'none';
+    // eslint-disable-next-line no-unused-expressions
     document.body.offsetHeight; // trigger reflow
     document.body.style.display = '';
 
-    // Slice 2: Rga.StatusBar.update() removed — entry #1 resolution.
-    // Theme changes propagate visually via CSS; no status-bar update needed.
+    if (prev !== theme) this._notify(theme, prev);
   },
 
   toggle: function() {
     var next = this.current === 'dark' ? 'light' : 'dark';
     this.apply(next);
-    Rga.Toast.show('Switched to ' + next + ' theme', 'success', 1500);
+    if (Rga.Toast && typeof Rga.Toast.show === 'function') {
+      Rga.Toast.show('Switched to ' + next + ' theme', 'success', 1500);
+    }
+  },
+
+  // Subscribe to theme-change events. fn receives (newTheme, prevTheme).
+  // Returns an unsubscribe function. Idempotent for the same fn.
+  onChange: function(fn) {
+    if (typeof fn !== 'function') return function() {};
+    if (this._listeners.indexOf(fn) < 0) this._listeners.push(fn);
+    var self = this;
+    return function unsubscribe() {
+      var idx = self._listeners.indexOf(fn);
+      if (idx >= 0) self._listeners.splice(idx, 1);
+    };
+  },
+
+  _notify: function(next, prev) {
+    // Snapshot copy so a subscriber's unsubscribe during dispatch
+    // doesn't skip later subscribers in the same notification.
+    var snapshot = this._listeners.slice();
+    for (var i = 0; i < snapshot.length; i += 1) {
+      try { snapshot[i](next, prev); }
+      catch (err) { console.error('[Rga.Theme] onChange subscriber threw:', err); }
+    }
+  },
+
+  _reset: function() {
+    this._listeners = [];
+    this.current = 'dark';
   }
 };
 
