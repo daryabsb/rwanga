@@ -24,7 +24,43 @@
         if (_activeScriptChanged(next.activeScript, prev.activeScript)) refresh();
       });
     }
+    // Studio Shell Recovery — Workstream A3: wire owned window
+    // controls. Locality of behaviour: the buttons live in the
+    // title bar surface, so the title-bar module manages them.
+    // Idempotent — safe to call multiple times (handlers added once).
+    _wireWindowControls();
     return true;
+  }
+
+  function _wireWindowControls() {
+    if (typeof document === 'undefined') return;
+    const minBtn   = document.getElementById('rga-shell-window-min');
+    const maxBtn   = document.getElementById('rga-shell-window-max');
+    const closeBtn = document.getElementById('rga-shell-window-close');
+    // Inject vendored icons (Rga.Icons.{minimize, maximize, windowClose})
+    // — same pattern as toast.js + bottom-panel close.
+    const Icons = (typeof window !== 'undefined' && window.Rga && window.Rga.Icons) || {};
+    if (minBtn   && !minBtn.dataset.wired)   { minBtn.innerHTML   = Icons.minimize    || '−'; minBtn.dataset.wired   = '1'; minBtn.addEventListener('click',   _onWindowMinimize); }
+    if (maxBtn   && !maxBtn.dataset.wired)   { maxBtn.innerHTML   = Icons.maximize    || '□'; maxBtn.dataset.wired   = '1'; maxBtn.addEventListener('click',   _onWindowMaximize); }
+    if (closeBtn && !closeBtn.dataset.wired) { closeBtn.innerHTML = Icons.windowClose || '×'; closeBtn.dataset.wired = '1'; closeBtn.addEventListener('click', _onWindowClose); }
+  }
+  // Route through the existing preload IPC bridge (electron/preload.js
+  // exposes window.rwanga.window.{minimize,maximize,close}). Defensive
+  // guards mean these are no-ops in non-Electron contexts (tests, web).
+  function _onWindowMinimize() {
+    if (typeof window !== 'undefined' && window.rwanga && window.rwanga.window && typeof window.rwanga.window.minimize === 'function') {
+      window.rwanga.window.minimize();
+    }
+  }
+  function _onWindowMaximize() {
+    if (typeof window !== 'undefined' && window.rwanga && window.rwanga.window && typeof window.rwanga.window.maximize === 'function') {
+      window.rwanga.window.maximize();
+    }
+  }
+  function _onWindowClose() {
+    if (typeof window !== 'undefined' && window.rwanga && window.rwanga.window && typeof window.rwanga.window.close === 'function') {
+      window.rwanga.window.close();
+    }
   }
 
   function refresh() {

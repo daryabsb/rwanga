@@ -50,6 +50,28 @@
               title="Toggle theme (Ctrl+Shift+T)"
               aria-label="Toggle theme">◐</button>
       <div class="rga-shell-titlebar-avatar-placeholder" aria-hidden="true">👤</div>
+      <!-- Studio Shell Recovery — Workstream A3: owned window controls.
+           Each button routes to the existing window.rwanga.window.*
+           IPC bridge (electron/preload.js). Icons injected at boot
+           from Rga.Icons.{minimize, maximize, windowClose} (vendored
+           in renderer/js/icons.js). Close uses the --danger variant
+           for the red-hover convention. All three declare no-drag in
+           CSS so clicks reach them through the title-bar drag region. -->
+      <button id="rga-shell-window-min"
+              class="rga-shell-window-control"
+              type="button"
+              title="Minimize"
+              aria-label="Minimize"></button>
+      <button id="rga-shell-window-max"
+              class="rga-shell-window-control"
+              type="button"
+              title="Maximize"
+              aria-label="Maximize"></button>
+      <button id="rga-shell-window-close"
+              class="rga-shell-window-control rga-shell-window-control--danger"
+              type="button"
+              title="Close"
+              aria-label="Close window"></button>
     </div>
   </header>
 
