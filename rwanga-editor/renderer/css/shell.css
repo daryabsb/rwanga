@@ -279,22 +279,22 @@
 }
 
 /* ============================================================
-   STATUS BAR
+   STATUS BAR — calm grey chrome surface (Visual Stab. V1, T2).
+   The earlier saturated-blue fill came from #status-bar using
+   var(--accent-primary). Action-accent tokens are never surface
+   fills here any more; chrome tokens live in tokens.css under
+   "Chrome Surface Tokens".
    ============================================================ */
 #status-bar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   height: var(--status-bar-height);
-  background: var(--accent-primary);
+  background: var(--statusbar-bg);
   padding: 0 12px;
   font-size: var(--font-size-xs);
-  color: var(--text-inverse);
+  color: var(--statusbar-fg);
   user-select: none;
-}
-
-[data-theme="light"] #status-bar {
-  color: #ffffff;
+  border-top: 1px solid var(--border-subtle);
 }
 
 .status-left,
@@ -319,7 +319,43 @@
   transition: background var(--transition-fast);
 }
 .status-btn:hover {
-  background: rgba(255, 255, 255, 0.12);
+  background: var(--statusbar-segment-hover-bg);
+}
+
+/* ---- Slice 1 shell status-bar segments ----
+   Rga.Shell.StatusBar emits .rga-shell-statusbar on #status-bar, plus
+   .rga-shell-status-segment children. Visual Stabilization V1 (T2)
+   gives them deliberate spacing, a left-rule separator on the right
+   group (viewMode + language + offline), and a clear hover affordance
+   on the clickable viewMode segment. */
+#status-bar.rga-shell-statusbar {
+  gap: 0;
+  padding: 0 8px;
+}
+.rga-shell-status-segment {
+  display: inline-flex;
+  align-items: center;
+  height: var(--status-bar-height);
+  padding: 0 12px;
+  color: var(--statusbar-fg);
+  white-space: nowrap;
+}
+/* Right-side tool-context group: thin left-rule separator so writer-
+   context and tool-context read as two visual blocks, not seven loose
+   words. */
+.rga-shell-status-segment[data-segment="viewMode"],
+.rga-shell-status-segment[data-segment="language"],
+.rga-shell-status-segment[data-segment="offline"] {
+  border-left: 1px solid var(--border-subtle);
+}
+/* Clickable view-mode segment — make the affordance visible. */
+.rga-shell-status-segment[data-segment="viewMode"] {
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+.rga-shell-status-segment[data-segment="viewMode"]:hover {
+  background: var(--statusbar-segment-hover-bg);
+  color: var(--statusbar-fg-hover);
 }
 
 /* Sync indicator dot */
