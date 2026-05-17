@@ -203,18 +203,24 @@ test('B: status-bar-style cycle into Print and back leaves no orphan body classe
 
 test('B: Escape key exits Draft without reload (handler attached to document.keydown)', () => {
   freshJSDOM('<!DOCTYPE html><html><body><div id="editor-container"></div></body></html>');
+  // Slice 3 §B G1: ViewMode registers Escape via Rga.KeyboardRegistry
+  // only (no document.keydown fallback). Load the registry first so
+  // the registration lands.
   reloadModules([
+    '../../../renderer/js/shell/keyboard-registry.js',
     '../../../renderer/js/framework/view-manager.js',
     '../../../renderer/js/view-mode.js'
   ]);
   const Rga = global.window.Rga;
+  Rga.KeyboardRegistry._reset();
+  Rga.KeyboardRegistry.init();
   Rga.ViewManager._reset && Rga.ViewManager._reset();
   Rga.ViewMode.init();
   Rga.ViewManager.activate('draft');
   assert.equal(Rga.ViewMode.get(), 'draft');
 
-  // Dispatch a real Escape keydown — the handler ViewMode.init bound
-  // must fire and call exitDraft.
+  // Dispatch a real Escape keydown — the registry's handler must fire
+  // and call exitDraft via the `when` predicate.
   const ev = new window.KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true });
   document.dispatchEvent(ev);
   assert.equal(Rga.ViewMode.get(), 'flow', 'Escape exited Draft');
