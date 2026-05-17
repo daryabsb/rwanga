@@ -364,10 +364,41 @@
 .rga-shell-status-segment[data-segment="offline"] {
   border-left: 1px solid var(--border-subtle);
 }
-/* Clickable view-mode segment — make the affordance visible. */
+/* Bundle 1 §A — labelled View dropdown. Hosts a "View:" prefix + a
+   native <select>. Pre-Bundle-1 the segment was a click-cycle whose
+   text rotated through the three modes silently; the new dropdown
+   surfaces all three choices explicitly. Existing tokens only; no new
+   colors / icons. */
 .rga-shell-status-segment[data-segment="viewMode"] {
   cursor: pointer;
-  transition: background var(--transition-fast), color var(--transition-fast);
+  gap: 4px;
+}
+.rga-shell-status-viewmode-prefix {
+  color: var(--statusbar-fg);
+  opacity: 0.75;
+}
+.rga-shell-status-viewmode-select {
+  appearance: auto;
+  -webkit-appearance: auto;
+  -moz-appearance: auto;
+  background: transparent;
+  color: var(--statusbar-fg);
+  border: 0;
+  padding: 0 2px;
+  font: inherit;
+  cursor: pointer;
+  outline: none;
+}
+.rga-shell-status-viewmode-select:focus-visible {
+  outline: 1px solid var(--border-secondary);
+  outline-offset: 1px;
+}
+/* Drop the option backgrounds to the standard select panel — browsers
+   often render options with the system colour. Force them to inherit
+   the app palette for theme consistency. */
+.rga-shell-status-viewmode-select option {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
 }
 .rga-shell-status-segment[data-segment="viewMode"]:hover {
   background: var(--statusbar-segment-hover-bg);

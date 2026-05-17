@@ -56,6 +56,12 @@ contextBridge.exposeInMainWorld('rwanga', {
     close:    () => ipcRenderer.invoke('window.close'),
     setTitle: (title) => ipcRenderer.invoke('window.setTitle', title),
   },
+  menu: {
+    // Bundle 1 §A — push renderer-owned view-mode state to the native
+    // View menu so its radio reflects the current view. The renderer
+    // (Rga.ViewMode) is the source of truth; main is the consumer.
+    setViewMode: (mode) => ipcRenderer.invoke('menu.setViewMode', mode),
+  },
   on: {
     updateDownloaded: (callback) => {
       const handler = (_event, payload) => callback(payload);

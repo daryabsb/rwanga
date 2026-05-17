@@ -43,7 +43,7 @@
       { id: 'page',      cls: 'rga-shell-status-page',      initial: 'Page: —/—' },
       { id: 'blockType', cls: 'rga-shell-status-blocktype', initial: '—' },
       { id: 'wordCount', cls: 'rga-shell-status-wordcount', initial: '0 words' },
-      { id: 'viewMode',  cls: 'rga-shell-status-viewmode',  initial: 'Flow', click: _onViewModeClick },
+      { id: 'viewMode',  cls: 'rga-shell-status-viewmode',  build: _buildViewModeSegment },
       { id: 'language',  cls: 'rga-shell-status-language',  initial: '—' },
       { id: 'offline',   cls: 'rga-shell-status-offline',   initial: 'Local' }
     ];
@@ -52,14 +52,59 @@
       const sp = document.createElement('span');
       sp.className = 'rga-shell-status-segment ' + d.cls;
       sp.setAttribute('data-segment', d.id);
-      sp.textContent = d.initial;
-      if (d.click) {
-        sp.style.cursor = 'pointer';
-        sp.addEventListener('click', d.click);
-      }
+      if (d.build) d.build(sp);
+      else sp.textContent = d.initial;
       _container.appendChild(sp);
       _segments[d.id] = sp;
     });
+  }
+
+  // Bundle 1 §A — labelled View dropdown. Native <select> for native
+  // platform feel + a11y. Calls Rga.ViewMode.set(mode) on change. The
+  // hidden printPreview option holds .value when the user enters
+  // PrintPreview via the toolbar (a path outside the dropdown), so the
+  // displayed label still matches reality. Selecting any of the three
+  // live options exits PrintPreview via Rga.ViewMode.set.
+  function _buildViewModeSegment(spanEl) {
+    const prefix = document.createElement('span');
+    prefix.className = 'rga-shell-status-viewmode-prefix';
+    prefix.textContent = 'View:';
+    spanEl.appendChild(prefix);
+
+    const select = document.createElement('select');
+    select.className = 'rga-shell-status-viewmode-select';
+    select.setAttribute('aria-label', 'Switch view mode');
+    [['flow', 'Flow'], ['draft', 'Draft'], ['print', 'Print']].forEach(function(pair) {
+      const opt = document.createElement('option');
+      opt.value = pair[0];
+      opt.textContent = pair[1];
+      select.appendChild(opt);
+    });
+    // Hidden placeholder for printPreview — sole purpose is holding
+    // .value so the trigger shows "Print Preview" when user enters
+    // that mode via the toolbar. Disabled + hidden = not pickable.
+    const pp = document.createElement('option');
+    pp.value = 'printPreview';
+    pp.textContent = 'Print Preview';
+    pp.disabled = true;
+    pp.hidden = true;
+    select.appendChild(pp);
+
+    select.addEventListener('change', _onViewModeChange);
+    spanEl.appendChild(select);
+  }
+
+  // Route changes through the UX-layer owner (Rga.ViewMode.set), not
+  // directly to Rga.ViewManager.activate — per Bundle 1 §A "one owner
+  // only, no duplicate logic". ViewMode.set persists + cycles previous
+  // and ultimately invokes ViewManager. Skipping ViewMode would bypass
+  // persistence and previous-mode tracking that Esc-exits-Draft relies on.
+  function _onViewModeChange(e) {
+    const mode = e && e.target && e.target.value;
+    if (!mode) return;
+    if (Rga.ViewMode && typeof Rga.ViewMode.set === 'function') {
+      Rga.ViewMode.set(mode);
+    }
   }
 
   function refresh() {
@@ -138,16 +183,16 @@
 
   function _renderViewMode(snap) {
     if (!_segments.viewMode) return;
+    const select = _segments.viewMode.querySelector('select.rga-shell-status-viewmode-select');
+    if (!select) return;
     const v = snap && snap.currentView;
-    _segments.viewMode.textContent = _viewModeLabel(v);
-  }
-
-  function _viewModeLabel(v) {
-    if (v === 'draft') return 'Draft';
-    if (v === 'printPreview') return 'Print Preview';
-    if (v === 'flow') return 'Flow';
-    if (v == null) return '—';
-    return String(v);
+    if (v == null) return;
+    // Selecting an option that doesn't exist is a no-op in browsers
+    // (select.value remains unchanged). printPreview is held by the
+    // hidden disabled option; flow/draft/print map to the live options.
+    if (Array.prototype.some.call(select.options, function(o) { return o.value === v; })) {
+      select.value = v;
+    }
   }
 
   function _renderLanguage() {
@@ -155,16 +200,6 @@
     const doc = (Rga.TabManager && typeof Rga.TabManager.activeDoc === 'function') ? Rga.TabManager.activeDoc() : null;
     const lang = doc && doc.metadata && doc.metadata.screenplayProfile && doc.metadata.screenplayProfile.language;
     _segments.language.textContent = lang || '—';
-  }
-
-  // Click-to-cycle view mode (calls the OWNER of view-mode state).
-  const _VIEW_CYCLE = ['flow', 'draft', 'printPreview'];
-  function _onViewModeClick() {
-    if (!Rga.ViewManager || typeof Rga.ViewManager.activate !== 'function') return;
-    const cur = Rga.ViewManager.current();
-    const idx = _VIEW_CYCLE.indexOf(cur);
-    const next = _VIEW_CYCLE[(idx + 1) % _VIEW_CYCLE.length];
-    Rga.ViewManager.activate(next);
   }
 
   function _reset() {

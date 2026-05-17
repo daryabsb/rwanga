@@ -840,8 +840,27 @@
           case 'file.open': Rga.FileManager.openFromDialog(); break;
           case 'file.save': Rga.FileManager.save(); break;
           case 'file.saveAs': Rga.FileManager.saveAs(); break;
+          // Bundle 1 §A — View menu routes through the SSOT
+          // (Rga.ViewMode.set). Same owner as the status-bar dropdown
+          // — no duplicate logic.
+          case 'view.flow':  if (Rga.ViewMode) Rga.ViewMode.set('flow');  break;
+          case 'view.draft': if (Rga.ViewMode) Rga.ViewMode.set('draft'); break;
+          case 'view.print': if (Rga.ViewMode) Rga.ViewMode.set('print'); break;
         }
       });
+    }
+    // Bundle 1 §A — push view-mode changes to the native View menu
+    // so its radio stays synced when the user switches via the
+    // status-bar dropdown, Esc-exits-Draft, or any future surface.
+    if (Rga.ViewMode && typeof Rga.ViewMode.onChange === 'function' &&
+        window.rwanga && window.rwanga.menu && typeof window.rwanga.menu.setViewMode === 'function') {
+      Rga.ViewMode.onChange(function(mode) {
+        try { window.rwanga.menu.setViewMode(mode); } catch (_) {}
+      });
+      // Initial sync — the menu was built before the renderer booted,
+      // so its radio is checked on "flow" by default; push the persisted
+      // mode in case it differs.
+      try { window.rwanga.menu.setViewMode(Rga.ViewMode.get()); } catch (_) {}
     }
 
     console.log('[Rwanga] Script Editor initialized — Phase 0 (no editor mounted).');

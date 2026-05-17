@@ -36,6 +36,20 @@ function boot(opts) {
     onChange: function(fn) { stub.viewListeners.add(fn); return function() { stub.viewListeners.delete(fn); }; },
     activate: function(id) { stub.activatedTo = id; stub.viewMode = id; stub.viewListeners.forEach(function(fn) { fn(); }); }
   };
+  // Bundle 1 §A — the dropdown routes through Rga.ViewMode.set, NOT
+  // ViewManager.activate. This stub records the .set call and mirrors
+  // it to ViewManager so the existing onChange-based status-bar
+  // refresh still fires.
+  global.window.Rga.ViewMode = {
+    setCalledWith: null,
+    set: function(mode) {
+      this.setCalledWith = mode;
+      stub.activatedTo = mode;
+      stub.viewMode = mode;
+      stub.viewListeners.forEach(function(fn) { fn(); });
+    },
+    get: function() { return stub.viewMode; }
+  };
   global.window.Rga.Nav = {
     getIndex: function() { return stub.index; },
     getPageMap: function() { return stub.pageMap; },
@@ -76,7 +90,16 @@ test('init creates 7 segment elements (Slice 2 added blockType + wordCount); no-
   // No active view → wordCount is null → segment shows "— words"
   // (open-script-with-zero-words shows "0 words"; see separate test).
   assert.equal(status.querySelector('[data-segment="wordCount"]').textContent, '— words');
-  assert.equal(status.querySelector('[data-segment="viewMode"]').textContent, 'Flow');
+  // Bundle 1 §A: viewMode segment is now a labelled <select> dropdown,
+  // not a plain text node. Check select.value (semantic state) and the
+  // prefix span (the visible "View:" label), not the noisy textContent
+  // which concatenates every option.
+  const vmSegment = status.querySelector('[data-segment="viewMode"]');
+  assert.ok(vmSegment.querySelector('.rga-shell-status-viewmode-prefix'),
+    'viewMode segment must include the View: prefix label');
+  const vmSelect = vmSegment.querySelector('select.rga-shell-status-viewmode-select');
+  assert.ok(vmSelect, 'viewMode segment must include a <select>');
+  assert.equal(vmSelect.value, 'flow');
   assert.equal(status.querySelector('[data-segment="language"]').textContent, '—');
   assert.equal(status.querySelector('[data-segment="offline"]').textContent, 'Local');
 });
@@ -96,22 +119,51 @@ test('Slice 2: segment order matches plan §3.4 (scene · page · blockType · w
   assert.deepEqual(ids, ['scene', 'page', 'blockType', 'wordCount', 'viewMode', 'language', 'offline']);
 });
 
-test('viewMode segment text reflects Rga.ViewManager.current() via ScriptSession', () => {
+test('Bundle 1 §A: viewMode select reflects Rga.ViewManager.current() via ScriptSession', () => {
   const { status } = boot({ viewMode: 'draft' });
-  assert.equal(status.querySelector('[data-segment="viewMode"]').textContent, 'Draft');
+  const sel = status.querySelector('select.rga-shell-status-viewmode-select');
+  assert.equal(sel.value, 'draft');
 });
 
-test('viewMode segment updates when Rga.ViewManager.onChange fires (via ScriptSession)', () => {
+test('Bundle 1 §A: viewMode select updates when Rga.ViewManager.onChange fires (via ScriptSession)', () => {
   const { Rga, status } = boot();
-  assert.equal(status.querySelector('[data-segment="viewMode"]').textContent, 'Flow');
-  Rga.ViewManager.activate('printPreview');
-  assert.equal(status.querySelector('[data-segment="viewMode"]').textContent, 'Print Preview');
+  const sel = status.querySelector('select.rga-shell-status-viewmode-select');
+  assert.equal(sel.value, 'flow');
+  Rga.ViewManager.activate('print');
+  assert.equal(sel.value, 'print');
 });
 
-test('clicking the viewMode segment cycles to the next mode via Rga.ViewManager.activate', () => {
+test('Bundle 1 §A: when ViewManager reports printPreview, the hidden disabled option holds the value (display says "Print Preview")', () => {
+  const { Rga, status } = boot();
+  Rga.ViewManager.activate('printPreview');
+  const sel = status.querySelector('select.rga-shell-status-viewmode-select');
+  assert.equal(sel.value, 'printPreview', 'select.value must reflect printPreview (hidden disabled option holds it)');
+  const ppOption = Array.from(sel.options).find(function(o) { return o.value === 'printPreview'; });
+  assert.ok(ppOption, 'printPreview option must exist');
+  assert.equal(ppOption.disabled, true, 'printPreview option must be disabled (user cannot pick it from the dropdown)');
+  assert.equal(ppOption.hidden, true, 'printPreview option must be hidden from the open dropdown list');
+});
+
+test('Bundle 1 §A: changing the viewMode select calls Rga.ViewMode.set (NOT ViewManager.activate directly)', () => {
   const { Rga, status, stub } = boot();
-  status.querySelector('[data-segment="viewMode"]').click();
-  assert.equal(stub.activatedTo, 'draft');
+  const sel = status.querySelector('select.rga-shell-status-viewmode-select');
+  sel.value = 'draft';
+  sel.dispatchEvent(new global.window.Event('change'));
+  assert.equal(Rga.ViewMode.setCalledWith, 'draft',
+    'change event must route through Rga.ViewMode.set (the SSOT) — no direct ViewManager.activate');
+  // And the upstream effect is observable (mode flipped to draft).
+  assert.equal(stub.viewMode, 'draft');
+});
+
+test('Bundle 1 §A: dropdown exposes exactly the three live options Flow / Draft / Print', () => {
+  const { status } = boot();
+  const sel = status.querySelector('select.rga-shell-status-viewmode-select');
+  // Live = NOT hidden + NOT disabled. PrintPreview is a held-only option.
+  const live = Array.from(sel.options).filter(function(o) {
+    return !o.disabled && !o.hidden;
+  });
+  assert.deepEqual(live.map(function(o) { return o.value; }), ['flow', 'draft', 'print']);
+  assert.deepEqual(live.map(function(o) { return o.textContent; }), ['Flow', 'Draft', 'Print']);
 });
 
 test('scene segment renders "Scene: S{N}" where N is the current scene\'s sceneNumber', () => {

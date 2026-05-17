@@ -1,7 +1,7 @@
 // Copyright (c) 2026 Rwanga. Licensed under Apache 2.0.
 'use strict';
 
-const { Menu } = require('electron');
+const { Menu, ipcMain } = require('electron');
 
 function buildMenu(mainWindow) {
   const isMac = process.platform === 'darwin';
@@ -49,6 +49,18 @@ function buildMenu(mainWindow) {
     {
       label: 'View',
       submenu: [
+        // Bundle 1 §A — the three editor views are first-class menu entries
+        // alongside the status-bar dropdown. Both surfaces call
+        // Rga.ViewMode.set(mode) in the renderer; the menu sends a
+        // 'view.{flow,draft,print}' action over the existing menu.action
+        // IPC channel.
+        { label: 'Flow',  type: 'radio', id: 'view.flow',  checked: true,
+          click: () => sendMenuAction(mainWindow, 'view.flow') },
+        { label: 'Draft', type: 'radio', id: 'view.draft', checked: false,
+          click: () => sendMenuAction(mainWindow, 'view.draft') },
+        { label: 'Print', type: 'radio', id: 'view.print', checked: false,
+          click: () => sendMenuAction(mainWindow, 'view.print') },
+        { type: 'separator' },
         { role: 'reload' }, { role: 'forceReload' }, { role: 'toggleDevTools' },
         { type: 'separator' },
         { role: 'resetZoom' }, { role: 'zoomIn' }, { role: 'zoomOut' },
@@ -75,4 +87,29 @@ function sendMenuAction(window, action) {
   }
 }
 
-module.exports = { buildMenu };
+// Bundle 1 §A — keep the native View menu's radio state in sync with
+// the renderer's Rga.ViewMode. The renderer pushes its current mode
+// over this channel whenever it changes (boot, dropdown, Esc-exits-
+// Draft, future surfaces). Idempotent; safely no-ops if the menu
+// isn't built yet or the view items are missing.
+function setViewMenuRadio(mode) {
+  const menu = Menu.getApplicationMenu();
+  if (!menu) return;
+  const viewSub = menu.items.find(function(i) { return i.label === 'View'; });
+  if (!viewSub || !viewSub.submenu) return;
+  ['view.flow', 'view.draft', 'view.print'].forEach(function(id) {
+    const item = viewSub.submenu.items.find(function(i) { return i.id === id; });
+    if (item) item.checked = (id === 'view.' + mode);
+  });
+}
+
+let _ipcRegistered = false;
+function registerIpc() {
+  if (_ipcRegistered) return;
+  _ipcRegistered = true;
+  ipcMain.handle('menu.setViewMode', function(_event, mode) {
+    setViewMenuRadio(mode);
+  });
+}
+
+module.exports = { buildMenu, registerIpc, setViewMenuRadio };

@@ -7,7 +7,7 @@ const fs = require('fs');
 const { spawn } = require('child_process');
 const filesBridge = require('./bridge/files');
 const windowControls = require('./bridge/window-controls');
-const { buildMenu } = require('./menu');
+const { buildMenu, registerIpc: registerMenuIpc } = require('./menu');
 
 let mainWindow = null;
 const DEV = process.argv.includes('--dev');
@@ -55,6 +55,7 @@ if (!gotLock) {
   app.whenReady().then(() => {
     filesBridge.register();
     windowControls.register();
+    registerMenuIpc();
     createMainWindow();
     if (DEV) startDevLiveReload();
   });
