@@ -387,6 +387,13 @@
      IIFEs run. Remaining slice-1 modules (ScriptSession, panels, status bar,
      title bar, index bootstrap) load in commits 5-12. -->
 <script src="js/shell/layout.js"></script>
+<!-- WorkspaceState — Runtime Ownership Stab. Slice 4 §A single
+     owner for layout persistence. Must load AFTER layout.js (depends
+     on Rga.Shell.Layout) and BEFORE any Layout consumer that
+     subscribes for DOM sync (BottomPanel, Resize), so the hydration
+     paint matches the persisted state. WorkspaceState.init() is
+     called explicitly in the boot script. -->
+<script src="js/shell/workspace-state.js"></script>
 <script src="js/shell/sidebar.js"></script>
 <!-- Keyboard Registry — Runtime Ownership Stab. Slice 2 SSOT.
      Must load before every consumer (Rga.Keyboard shim, shell/index.js,
@@ -687,6 +694,14 @@
     injectIcons();
     Rga.Theme.init();
     wireThemeToggle();
+    // Slice 4 §A: hydrate Layout from the persisted workspace blob
+    // BEFORE any Layout consumer (BottomPanel, Resize CSS sync) reads
+    // or subscribes. After this line, Layout reflects the last
+    // session's state (or DEFAULTS on first boot). Rga.WorkspaceState
+    // then subscribes for auto-save on every Layout change.
+    if (Rga.WorkspaceState && typeof Rga.WorkspaceState.init === 'function') {
+      Rga.WorkspaceState.init();
+    }
     Rga.Resize.init();
     // Slice 2 entry #2 migration: Rga.Sidebar.init() no longer called.
     // Rga.Shell.Sidebar (Slice 1) owns the sidebar; Rga.Shell.Layout owns

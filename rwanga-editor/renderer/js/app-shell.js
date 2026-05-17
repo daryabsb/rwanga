@@ -81,14 +81,60 @@ Rga.Theme = {
 /* ============================================================
    RESIZE HANDLES
    Allows dragging dividers between panels.
+
+   Runtime Ownership Stab. Slice 4 §A: drag mid-move still writes
+   CSS variables directly (so the resize feels live), but on
+   drag-end the final size is COMMITTED to Rga.Shell.Layout.
+   WorkspaceState picks it up via its Layout subscriber and
+   persists. On boot, _applyLayoutToCss() pushes the persisted
+   Layout values back into the CSS variables before the user
+   sees the first paint.
+
+   Mapping (CSS var ↔ Layout path):
+     --sidebar-width        ↔ Layout.sidebar.width
+     --inspector-width      ↔ Layout.inspector.width
+     --bottom-panel-height  ↔ Layout.studioPanel.height
    ============================================================ */
 Rga.Resize = {
+  _SIZE_MAP: [
+    { target: 'sidebar',      cssVar: '--sidebar-width',       zone: 'sidebar',     field: 'width'  },
+    { target: 'inspector',    cssVar: '--inspector-width',     zone: 'inspector',   field: 'width'  },
+    { target: 'bottom-panel', cssVar: '--bottom-panel-height', zone: 'studioPanel', field: 'height' }
+  ],
+
   init: function() {
     var handles = Rga.$$('.resize-handle');
     handles.forEach(function(handle) {
       handle.addEventListener('mousedown', function(e) {
         Rga.Resize._startDrag(e, handle);
       });
+    });
+    // Slice 4 §A: hydrate CSS vars from Layout on init (covers the
+    // post-WorkspaceState-restore first paint). Then subscribe so
+    // any non-drag write to Layout (programmatic or via fromJSON)
+    // re-applies to CSS.
+    Rga.Resize._applyLayoutToCss();
+    if (Rga.Shell && Rga.Shell.Layout && typeof Rga.Shell.Layout.subscribe === 'function') {
+      Rga.Shell.Layout.subscribe(function() { Rga.Resize._applyLayoutToCss(); });
+    }
+  },
+
+  _findMapByTarget: function(target) {
+    for (var i = 0; i < Rga.Resize._SIZE_MAP.length; i += 1) {
+      if (Rga.Resize._SIZE_MAP[i].target === target) return Rga.Resize._SIZE_MAP[i];
+    }
+    return null;
+  },
+
+  _applyLayoutToCss: function() {
+    if (!Rga.Shell || !Rga.Shell.Layout) return;
+    var snap = Rga.Shell.Layout.get();
+    Rga.Resize._SIZE_MAP.forEach(function(m) {
+      var zone = snap[m.zone];
+      if (!zone) return;
+      var val = zone[m.field];
+      if (typeof val !== 'number') return;
+      document.documentElement.style.setProperty(m.cssVar, val + 'px');
     });
   },
 
@@ -99,13 +145,13 @@ Rga.Resize = {
     document.body.style.userSelect = 'none';
 
     var target = handle.dataset.resize;
+    var map = Rga.Resize._findMapByTarget(target);
+    var prop = map ? map.cssVar : '--sidebar-width';
     var isVertical = target === 'bottom-panel';
     var startPos = isVertical ? e.clientY : e.clientX;
-    var prop = target === 'sidebar' ? '--sidebar-width'
-             : target === 'inspector' ? '--inspector-width'
-             : '--bottom-panel-height';
 
     var startSize = parseInt(getComputedStyle(document.documentElement).getPropertyValue(prop)) || 0;
+    var lastSize = startSize;
 
     function onMove(e2) {
       var delta;
@@ -127,6 +173,7 @@ Rga.Resize = {
         newSize = Math.max(newSize, minSize);
       }
 
+      lastSize = newSize;
       document.documentElement.style.setProperty(prop, newSize + 'px');
     }
 
@@ -136,6 +183,16 @@ Rga.Resize = {
       document.body.style.userSelect = '';
       document.removeEventListener('mousemove', onMove);
       document.removeEventListener('mouseup', onUp);
+      // Slice 4 §A: commit the final size to Layout. Layout
+      // subscriber (WorkspaceState) persists. We deliberately
+      // commit only on drag-end, not on every mousemove tick, to
+      // avoid hammering localStorage during the drag.
+      if (map && Rga.Shell && Rga.Shell.Layout) {
+        var patch = {};
+        patch[map.zone] = {};
+        patch[map.zone][map.field] = lastSize;
+        Rga.Shell.Layout.set(patch);
+      }
     }
 
     document.addEventListener('mousemove', onMove);
@@ -455,35 +512,26 @@ Rga.BottomPanel = {
     // API (Rga.BottomPanel.toggleCollapse), so all three entry points
     // share one mutator + one keyboard SSOT.
 
-    // Initial Layout sync — order:
-    //   1. Read persisted visibility from localStorage (if set on a
-    //      prior session). Persistence is Runtime-Ownership-Slice-1
-    //      scope — full workspace persistence is Slice 4 territory.
-    //   2. If no persisted value, fall back to the DOM-as-shipped
-    //      state (legacy default: open) so reload behaviour is
-    //      unchanged for first-time users.
-    //   3. Write the resolved value to Layout (SSOT) and let the
-    //      subscriber paint the DOM.
-    // Save on every Layout.studioPanel.visible change so a reload
-    // restores the panel state the user last left.
+    // Initial Layout sync (Slice 4 §A — simplified).
+    //
+    // Persistence is now owned by Rga.WorkspaceState, which has
+    // already hydrated Layout from `rga-workspace-layout` before
+    // this init runs (boot order in index.html guarantees it).
+    // BottomPanel's only job here is to:
+    //   1. Sync the DOM class from Layout's current studioPanel.visible
+    //      (whatever WorkspaceState restored, or the default).
+    //   2. Subscribe so future toggle/open writes keep the DOM aligned.
+    // The earlier scoped-key (`rga-shell-studio-panel-visible`) and
+    // its read/write helpers were removed; WorkspaceState's legacy
+    // migration absorbed any pre-existing value on the first boot
+    // after this slice.
     if (Rga.Shell && Rga.Shell.Layout) {
-      var persisted = self._readPersistedVisibility();
-      var col = Rga.$('#center-column');
-      var domOpen = !(col && col.classList.contains('bottom-collapsed'));
-      var initialVisible = persisted == null ? domOpen : persisted;
-      Rga.Shell.Layout.set({ studioPanel: { visible: initialVisible } });
-      // Explicit DOM sync after init: Layout.set is a no-op (no
-      // subscriber notify) when the value matches Layout's default
-      // (false). When persisted=false and Layout's default is false,
-      // the subscriber would never fire and the DOM (which may have
-      // started open from the legacy HTML default) would be left
-      // out of sync. Force-sync once on init to bridge that gap.
+      var initialVisible = Rga.Shell.Layout.get().studioPanel.visible;
       self._syncDomFromLayout(initialVisible);
       Rga.Shell.Layout.subscribe(function(next, prev) {
         if (!next || !next.studioPanel) return;
         if (prev && prev.studioPanel && prev.studioPanel.visible === next.studioPanel.visible) return;
         self._syncDomFromLayout(next.studioPanel.visible);
-        self._writePersistedVisibility(next.studioPanel.visible);
       });
     }
   },
@@ -525,24 +573,10 @@ Rga.BottomPanel = {
     if (!col) return;
     if (visible) col.classList.remove('bottom-collapsed');
     else         col.classList.add('bottom-collapsed');
-  },
-
-  // Persistence — scoped to the studio panel only. Slice 4 will own
-  // full workspace persistence; this is the minimal slice needed for
-  // the user-facing reload-survives-state acceptance.
-  _STORAGE_KEY: 'rga-shell-studio-panel-visible',
-  _readPersistedVisibility: function() {
-    try {
-      var raw = localStorage.getItem(this._STORAGE_KEY);
-      if (raw === '0' || raw === 'false') return false;
-      if (raw === '1' || raw === 'true')  return true;
-      return null;
-    } catch (_) { return null; }
-  },
-  _writePersistedVisibility: function(visible) {
-    try { localStorage.setItem(this._STORAGE_KEY, visible ? '1' : '0'); }
-    catch (_) { /* private mode / quota — silent. */ }
   }
+  // _STORAGE_KEY / _readPersistedVisibility / _writePersistedVisibility
+  // removed in Runtime Ownership Stab. Slice 4 §A. Persistence is now
+  // owned by Rga.WorkspaceState (single owner of layout state).
 };
 
 /* ============================================================

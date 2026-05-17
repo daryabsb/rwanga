@@ -26,7 +26,13 @@
 
   const DEFAULTS = {
     sidebar:     { visible: true,  width: 280, activePanel: 'sceneNavigator' },
-    studioPanel: { visible: false, height: 200, activeTab: null },
+    // Slice 4 §A: default changed from false → true to match the
+    // long-standing UX where a fresh install boots with the bottom
+    // panel visible. WorkspaceState restores user-explicit closes.
+    studioPanel: { visible: true,  height: 200, activeTab: null },
+    // Slice 4 §A: inspector zone added so Resize has a Layout field to
+    // commit `--inspector-width` to on drag end (was CSS-only before).
+    inspector:   { visible: true,  width: 280 },
     titleBar:    { visible: true },
     statusBar:   { visible: true }
   };
@@ -38,18 +44,17 @@
     return {
       sidebar:     Object.assign({}, DEFAULTS.sidebar),
       studioPanel: Object.assign({}, DEFAULTS.studioPanel),
+      inspector:   Object.assign({}, DEFAULTS.inspector),
       titleBar:    Object.assign({}, DEFAULTS.titleBar),
       statusBar:   Object.assign({}, DEFAULTS.statusBar)
     };
   }
 
   function get() {
-    // Shallow per-zone copy. Returning the internal object would let
-    // consumers mutate state out from under subscribers; this is the
-    // same defensive pattern Rga.RuntimeProfile uses.
     return {
       sidebar:     Object.assign({}, _current.sidebar),
       studioPanel: Object.assign({}, _current.studioPanel),
+      inspector:   Object.assign({}, _current.inspector),
       titleBar:    Object.assign({}, _current.titleBar),
       statusBar:   Object.assign({}, _current.statusBar)
     };
@@ -112,7 +117,7 @@
     }
     // Validate: every zone present must be a plain object. Unknown zones
     // pass through (forward-compat).
-    const knownZones = ['sidebar', 'studioPanel', 'titleBar', 'statusBar'];
+    const knownZones = ['sidebar', 'studioPanel', 'inspector', 'titleBar', 'statusBar'];
     for (let i = 0; i < knownZones.length; i += 1) {
       const z = knownZones[i];
       if (snap[z] !== undefined && (snap[z] === null || typeof snap[z] !== 'object' || Array.isArray(snap[z]))) {

@@ -73,8 +73,10 @@ test('A: open → close → reopen all converge on Rga.Shell.Layout.studioPanel.
   assert.equal(document.getElementById('center-column').classList.contains('bottom-collapsed'), false, 'after reopen: DOM open');
 });
 
-test('A: visibility persists across reload via localStorage', () => {
-  // Session 1 — set to closed, then verify localStorage is set.
+test('A: visibility persists across reload via the workspace blob (Slice 4 §A migration)', () => {
+  // Session 1 — set to closed, then verify the workspace blob is
+  // written (replaces the pre-Slice-4 scoped key `rga-shell-studio-
+  // panel-visible`).
   freshJSDOM(
     '<!DOCTYPE html><html><body>' +
     '<div id="center-column"><div id="bottom-panel"></div></div>' +
@@ -83,35 +85,39 @@ test('A: visibility persists across reload via localStorage', () => {
   fresh$Helpers();
   reloadModules([
     '../../../renderer/js/shell/layout.js',
+    '../../../renderer/js/shell/workspace-state.js',
     '../../../renderer/js/app-shell.js'
   ]);
   let Rga = global.window.Rga;
+  Rga.WorkspaceState.init();
   Rga.BottomPanel.init();
-  Rga.BottomPanel.toggleCollapse();  // close
-  assert.equal(localStorage.getItem('rga-shell-studio-panel-visible'), '0',
-    'localStorage records the close');
+  Rga.BottomPanel.toggleCollapse();  // open → closed
+  const blob1 = JSON.parse(localStorage.getItem('rga-workspace-layout'));
+  assert.equal(blob1 && blob1.studioPanel && blob1.studioPanel.visible, false,
+    'workspace blob records studioPanel.visible = false after close');
+  // Scoped key from earlier slices must NOT appear under the new owner.
+  assert.equal(localStorage.getItem('rga-shell-studio-panel-visible'), null,
+    'legacy scoped key is not used as a primary writer after Slice 4');
 
-  // Capture the persisted state from session 1's localStorage so we
-  // can hand it to session 2 (each freshJSDOM creates its own
-  // localStorage and clearing it would defeat the test).
-  const persistedRaw = localStorage.getItem('rga-shell-studio-panel-visible');
+  const persistedRaw = localStorage.getItem('rga-workspace-layout');
 
-  // Session 2 — fresh DOM, fresh modules, but seed localStorage with
-  // the value session 1 left.
+  // Session 2 — fresh DOM, fresh modules, seeded workspace blob.
   freshJSDOM(
     '<!DOCTYPE html><html><body>' +
     '<div id="center-column"><div id="bottom-panel"></div></div>' +
     '</body></html>'
   );
   fresh$Helpers();
-  localStorage.setItem('rga-shell-studio-panel-visible', persistedRaw);
+  localStorage.setItem('rga-workspace-layout', persistedRaw);
   reloadModules([
     '../../../renderer/js/shell/layout.js',
+    '../../../renderer/js/shell/workspace-state.js',
     '../../../renderer/js/app-shell.js'
   ]);
   Rga = global.window.Rga;
+  Rga.WorkspaceState.init();
   Rga.BottomPanel.init();
-  // Session 2 must boot with the panel hidden (persisted state).
+  // Session 2 boots with the panel hidden (persisted state).
   assert.equal(Rga.Shell.Layout.get().studioPanel.visible, false,
     'session 2 boots with hidden panel because session 1 persisted closed state');
   assert.equal(document.getElementById('center-column').classList.contains('bottom-collapsed'), true,
@@ -135,9 +141,13 @@ test('A: switchTo(tabName) forces visible=true via the same single mutator surfa
     '../../../renderer/js/app-shell.js'
   ]);
   const Rga = global.window.Rga;
+  // Slice 4 §A: simulate WorkspaceState having restored a closed
+  // state. BottomPanel.init no longer reads the DOM as a fallback;
+  // Layout is the SSOT.
+  Rga.Shell.Layout.set({ studioPanel: { visible: false } });
   Rga.BottomPanel.init();
-  // Start: closed (DOM had bottom-collapsed pre-init).
-  assert.equal(Rga.Shell.Layout.get().studioPanel.visible, false);
+  assert.equal(Rga.Shell.Layout.get().studioPanel.visible, false,
+    'pre-condition: Layout (restored by WorkspaceState in real boot) says closed');
 
   // switchTo opens via this.open() → Layout.set → DOM follows.
   Rga.BottomPanel.switchTo('notes');

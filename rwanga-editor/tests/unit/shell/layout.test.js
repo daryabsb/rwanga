@@ -23,9 +23,15 @@ test('Layout.get() returns the default state on first read', () => {
   assert.equal(s.sidebar.visible, true);
   assert.equal(s.sidebar.width, 280);
   assert.equal(s.sidebar.activePanel, 'sceneNavigator');
-  assert.equal(s.studioPanel.visible, false);
+  // Slice 4 §A: studioPanel.visible default flipped false → true to
+  // match the long-standing UX where a fresh install boots with the
+  // bottom panel visible.
+  assert.equal(s.studioPanel.visible, true);
   assert.equal(s.studioPanel.height, 200);
   assert.equal(s.studioPanel.activeTab, null);
+  // Slice 4 §A: inspector zone added.
+  assert.equal(s.inspector.visible, true);
+  assert.equal(s.inspector.width, 280);
   assert.equal(s.titleBar.visible, true);
   assert.equal(s.statusBar.visible, true);
 });
@@ -54,7 +60,7 @@ test('Layout.set with deeply-merged path only touches specified leaves', () => {
   Layout.set({ studioPanel: { activeTab: 'notes' } });
   const s = Layout.get();
   assert.equal(s.studioPanel.activeTab, 'notes');
-  assert.equal(s.studioPanel.visible, false);
+  assert.equal(s.studioPanel.visible, true);   // Slice 4 §A default flip
   assert.equal(s.studioPanel.height, 200);
   // Other zones untouched.
   assert.equal(s.sidebar.visible, true);
@@ -120,7 +126,8 @@ test('Layout._reset() restores defaults', () => {
   Layout._reset();
   assert.deepEqual(Layout.get(), {
     sidebar:     { visible: true,  width: 280, activePanel: 'sceneNavigator' },
-    studioPanel: { visible: false, height: 200, activeTab: null },
+    studioPanel: { visible: true,  height: 200, activeTab: null },
+    inspector:   { visible: true,  width: 280 },
     titleBar:    { visible: true },
     statusBar:   { visible: true }
   });
