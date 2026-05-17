@@ -94,11 +94,23 @@ aren't yet broken but need watching.
 
 | Field | Value |
 |---|---|
-| **SSOT** | `Rga.ViewManager` (`renderer/js/framework/view-manager.js`) — owns active view id + body-class side-effect. **`Rga.ViewMode`** (`renderer/js/view-mode.js`) is a user-facing UX layer that **reacts** to ViewManager via `onChange` to keep its own `current`/`previous` in sync. |
-| **Consumers** | • `Rga.ViewMode.set(mode)` calls `Rga.ViewManager.activate(mode)` — the canonical write path.<br>• `Rga.Shell.StatusBar` viewMode segment click calls `Rga.ViewManager.activate(next)` directly — documented bypass (cycles into printPreview, which ViewMode doesn't own).<br>• `Rga.PrintPreview` registers its own controller with bodyClass `view-print-preview-active` (separate from `print`).<br>• Body classes `view-draft-active` / `view-print-active` consumed by CSS to hide chrome in Draft and adjust styles in Print. |
-| **Persistence** | `localStorage['rga-view-mode']` (one of `'flow'`/`'print'`/`'draft'`). Owned by `Rga.ViewMode._persist`. ViewManager itself doesn't persist (it has no concept of "previous session"). |
+| **SSOT** | `Rga.ViewManager` (`renderer/js/framework/view-manager.js`) — owns active view id AND the body-class side-effect. Body classes (`view-draft-active`, `view-print-active`, `view-print-preview-active`) are applied EXCLUSIVELY by `ViewManager.activate`/`deactivate` via the registered controller's `bodyClass` property. **Slice 6 §A** removed the last shell-side writer (the `view-mode.js _activate` fallback) and **§B** added G3 enforcement: any toggle of these classes from a shell-js file fails CI. **`Rga.ViewMode`** (`renderer/js/view-mode.js`) is a user-facing UX layer that **reacts** to ViewManager via `onChange` to keep its own `current`/`previous` in sync. |
+| **Consumers** | • `Rga.ViewMode.set(mode)` calls `Rga.ViewManager.activate(mode)` — the canonical write path.<br>• `Rga.Shell.StatusBar` viewMode segment click calls `Rga.ViewManager.activate(next)` directly — documented bypass (cycles into printPreview, which ViewMode doesn't own). Safe because ViewMode subscribes to ViewManager.onChange to stay in sync.<br>• `Rga.PrintPreview` registers its own controller with bodyClass `view-print-preview-active`.<br>• Body classes consumed by CSS to hide chrome in Draft and adjust styles in Print / PrintPreview. |
+| **Persistence** | `localStorage['rga-view-mode']` (one of `'flow'`/`'print'`/`'draft'`). Owned by `Rga.ViewMode._persist`. **`printPreview` is intentionally NOT persisted** — it's a transient render mode, not a writing mode; reload from printPreview reverts to the last persisted flow/print/draft (verified by Slice 6 behavioural test). ViewManager itself doesn't persist. |
 | **Event source** | • `Rga.ViewManager.onChange(fn)` — fires on activate/deactivate, payload `(newId, prevId)`.<br>• `Rga.ViewMode.onChange(fn)` — fires on `set` and on the registry sync. ViewMode listeners get the post-filter view id (only MODES values). |
-| **Open risks** | • The two onChange surfaces (ViewManager vs ViewMode) could fire out of order if a subscriber is registered with both. Current consumers subscribe to only one each — no incidents.<br>• The status-bar bypass means `Rga.ViewMode.previous` for an exit-from-printPreview tracks the LAST flow/draft/print value, not printPreview itself. exitDraft from printPreview would return to that older value rather than to flow. Documented in Slice 2 commit message; consumers don't currently hit this. |
+| **Open risks** | • The two onChange surfaces (ViewManager vs ViewMode) could fire out of order if a subscriber is registered with both. Current consumers subscribe to only one each — no incidents.<br>• The status-bar bypass means `Rga.ViewMode.previous` for an exit-from-printPreview tracks the LAST flow/draft/print value, not printPreview itself. exitDraft from printPreview would return to that older value rather than to flow. Documented in Slice 2 commit message; consumers don't currently hit this.<br>• **G3 drift guard enforcement (Slice 6 §B):** the three view-*-active body classes have `owner: null` — any shell-js toggle fails CI with "ViewManager is the only legitimate writer". Catches the historical fallback pattern at build time. |
+
+**Migration notes (Slice 6 §A — Runtime Ownership Stab.):**
+
+- `view-mode.js _activate()` previously had an `else` branch that
+  directly toggled `view-draft-active` / `view-print-active` on
+  document.body as a fallback when ViewManager was absent. The
+  fallback was a test-context convenience but it was also the one
+  shell-js path that wrote view body classes. Removed in Slice 6 §A;
+  if ViewManager is absent the activate is now a silent no-op.
+- Test harnesses that exercise view-mode behavior must load
+  `framework/view-manager.js` before `view-mode.js`. The Slice 1 +
+  Slice 5 + Slice 6 test boots all follow this pattern.
 
 ### 1.8 Layout
 
@@ -108,17 +120,35 @@ aren't yet broken but need watching.
 | **Consumers** | • Subscribers: `Rga.BottomPanel` (Layout → DOM class + localStorage persistence); future Slice 4 workspace persistence will add a single global subscriber that mirrors the full state.<br>• Readers: `Rga.Shell.StatusBar._renderViewMode` (currentView), `Rga.Shell.Sidebar.activate` (sets activePanel mirror), `Rga.Shell.init` (sets default-panel state).<br>• Writers: `Rga.BottomPanel.toggleCollapse/open` (studioPanel.visible), Cmd+B shortcut (sidebar.visible), Cmd+\` shortcut fallback (studioPanel.visible), rail click (sidebar.visible). G2 drift guard enforces the writer whitelist. |
 | **Persistence** | `Rga.WorkspaceState` (Slice 4 §A) owns the single key `rga-workspace-layout`. On boot it reads + calls `Rga.Shell.Layout.fromJSON(blob)` to hydrate. It subscribes to Layout afterward and writes `Layout.toJSON()` on every change. No debouncing — Resize commits sizes on drag-end (not mid-drag) so writes are bounded by user actions. |
 | **Event source** | `Rga.Shell.Layout.subscribe(fn)` — fires on any `set()` that actually changes a value. Same-value `set()` is a no-op (no notify). This is why Slice 1 needed an explicit `_syncDomFromLayout(initialVisible)` call after init when persisted == default. |
-| **Open risks** | • Layout's no-op-on-same-value semantics is correct but caught Slice 1 by surprise. Any new subscriber whose DOM might drift from default should follow the same explicit-sync-on-init pattern.<br>• The fields list (`sidebar`/`studioPanel`/`titleBar`/`statusBar`) is fixed in DEFAULTS but `set()` accepts unknown zones for forward-compat. A typo (`'studio_panel'` vs `'studioPanel'`) won't error — it'll silently store on the wrong field. Slice-4 workspace persistence should add field validation. |
+| **Open risks** | • Layout's no-op-on-same-value semantics is correct but caught Slice 1 by surprise. Any new subscriber whose DOM might drift from default should follow the same explicit-sync-on-init pattern.<br>• The fields list (`sidebar`/`studioPanel`/`inspector`/`titleBar`/`statusBar`) is fixed in DEFAULTS but `set()` accepts unknown zones for forward-compat. A typo (`'studio_panel'` vs `'studioPanel'`) won't error — it'll silently store on the wrong field. A future slice should add stricter field validation now that Layout is the single persistence surface.<br>• Layout has no `view` zone. View mode persistence stays on the separate `rga-view-mode` key (owned by Rga.ViewMode); not folded into the workspace blob because it's a per-app preference, not per-workspace UI state. Slice 6 confirmed this division. |
+
+**Migration notes (Slice 6 §A):**
+
+- `Layout` does NOT own view mode. View mode is owned by
+  `Rga.ViewManager` (runtime SSOT) + `Rga.ViewMode` (persistence
+  layer with its own scoped localStorage key). Adding a `view` zone
+  to Layout was considered and rejected — view mode is a per-app
+  preference (independent of which workspace/script is open), so
+  folding it into `rga-workspace-layout` would conflate two
+  lifetimes.
 
 ### 1.9 ScriptSession
 
 | Field | Value |
 |---|---|
 | **SSOT** | `Rga.ScriptSession` (`renderer/js/shell/script-session.js`) — purely derived from engine state (PM editor view + ViewManager + Sidebar); does not own primary state itself. The snapshot it produces is the user-facing summary of writer context. |
-| **Consumers** | • `Rga.Shell.StatusBar` (scene, page, blockType, wordCount, viewMode segments).<br>• `Rga.Shell.TitleBar` (script name + dirty).<br>• `Rga.Shell.SceneNavigator` (current-scene mark).<br>• `Rga.Shell.Outline` (Story Progress).<br>• Future: continuity panel, focus mode, AI context surfaces — all subscribe via the same `Rga.ScriptSession.subscribe(fn)`. |
+| **Consumers** | • `Rga.Shell.StatusBar` reads scene / page / viewMode from here; wordCount + blockType moved to `Rga.ScriptMetrics` in Slice 5 §A.<br>• `Rga.Shell.TitleBar` (script name + dirty).<br>• `Rga.Shell.SceneNavigator` (current-scene mark).<br>• `Rga.Shell.Outline` (Story Progress — still reads wordCount from ScriptSession directly; migration to ScriptMetrics is the remaining open work on Compatibility Inventory entry #6).<br>• Future: continuity panel, focus mode, AI context surfaces — all subscribe via the same `Rga.ScriptSession.subscribe(fn)`. |
 | **Persistence** | None — pure derivation. Recomputes on every relevant upstream event. |
 | **Event source** | Snapshots are recomputed on:<br>• `editor.tabActivated` document event<br>• `editor.docDirtyChanged` document event<br>• `document.selectionchange` (cursor moved)<br>• `Rga.ViewManager.onChange`<br>• `Rga.Shell.Sidebar.onChange`<br>Recompute is shallow-equality-filtered: identical snapshot → no notify. |
-| **Open risks** | • `wordCount` and `currentBlockType` are temporarily on this snapshot pending the post-Slice-2-architectural-correction migration to `Rga.ScriptMetrics` (Compatibility Inventory entry #6). Consumers reading those fields from ScriptSession will need to migrate.<br>• `selectionchange` fires very frequently; if a slow subscriber appears, it could perceptibly lag the cursor. Today all subscribers are cheap DOM updates. |
+| **Open risks** | • `wordCount` and `currentBlockType` are STILL on this snapshot (Compatibility Inventory entry #6 conditions (a) + (b) DONE in Slice 5 §A — StatusBar migrated; (c) + (d) + (e) still OPEN — Outline migration + field removal from this snapshot pending).<br>• `selectionchange` fires very frequently; if a slow subscriber appears, it could perceptibly lag the cursor. Today all subscribers are cheap DOM updates.<br>• `currentView` (one of the snapshot fields) is sourced from `Rga.ViewManager.current()`. After Slice 6 §A's strict body-class ownership, ScriptSession's `currentView` field will only reflect modes ViewManager actually broadcasts — including printPreview. Consumers that switch on `currentView` should handle the printPreview case (StatusBar's viewMode segment renders "Print Preview"; others may need similar fallback). |
+
+**Migration notes (Slice 6 §A — no code changes to ScriptSession):**
+
+- Slice 6 confirmed ScriptSession's role as a pure-derivation reader
+  of ViewManager (no direct ViewManager writes from here). The
+  `currentView` field stays a reflection, not a controller.
+- The audit explicitly disowns view-mode persistence from
+  ScriptSession — it belongs to `Rga.ViewMode._persist`, not here.
 
 ### 1.10 ScriptMetrics
 
