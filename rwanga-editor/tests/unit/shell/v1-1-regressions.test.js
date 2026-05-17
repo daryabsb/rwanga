@@ -178,14 +178,17 @@ test('V1.1 fix 6: Rga.BottomPanel.toggleCollapse writes to Rga.Shell.Layout.stud
 
 test('V1.1 fix 6: shell/index.js registers Cmd/Ctrl+` for the studio panel toggle', () => {
   const src = readText(SHELL_INDEX_JS);
+  // Slice 2 migrated this from an inline _onKeydown gate to a
+  // Rga.KeyboardRegistry.register('`', { ctrl: true }, ...) call.
   assert.ok(
-    /['"]cmd\+`['"]/.test(src),
-    'shell/index.js must register the cmd+` combo for the studio panel toggle'
+    /KR\.register\s*\(\s*['"]`['"]\s*,\s*\{\s*ctrl\s*:\s*true/.test(src),
+    'shell/index.js must register the backtick combo with ctrl: true via Rga.KeyboardRegistry'
   );
-  // Must flip Layout.studioPanel.visible.
+  // Must route through BottomPanel.toggleCollapse (single mutator) or
+  // fall back to Layout.studioPanel.visible. Both flip the SSOT.
   assert.ok(
-    /Rga\.Shell\.Layout\.set\s*\(\s*\{\s*studioPanel/.test(src),
-    'the cmd+` handler must flip Layout.studioPanel.visible (state owner) not DOM'
+    /Rga\.BottomPanel\.toggleCollapse|Rga\.Shell\.Layout\.set\s*\(\s*\{\s*studioPanel/.test(src),
+    'the backtick handler must route through BottomPanel.toggleCollapse or Layout.studioPanel.visible (SSOT)'
   );
 });
 

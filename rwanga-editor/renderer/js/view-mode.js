@@ -143,13 +143,28 @@
     _notify();
     _syncFromViewManager();
 
-    // Esc exits Draft globally
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape' && current === 'draft') {
-        e.preventDefault();
-        exitDraft();
-      }
-    });
+    // Esc exits Draft — migrated to Rga.KeyboardRegistry in Runtime
+    // Ownership Stab. Slice 2. The `when` predicate gates dispatch on
+    // current === 'draft' so Escape stays available to other consumers
+    // (context menus, palette, etc.) outside Draft mode.
+    if (Rga.KeyboardRegistry && typeof Rga.KeyboardRegistry.register === 'function') {
+      Rga.KeyboardRegistry.register(
+        'escape',
+        { when: function() { return current === 'draft'; } },
+        function() { exitDraft(); },
+        'Rga.ViewMode (Esc exits Draft)'
+      );
+    } else {
+      // Fallback for early-boot / test contexts without the registry.
+      // The registry is loaded by index.html before view-mode.js, so
+      // this branch is only hit in isolated test harnesses.
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && current === 'draft') {
+          e.preventDefault();
+          exitDraft();
+        }
+      });
+    }
   }
 
   Rga.ViewMode = {

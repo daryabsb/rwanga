@@ -553,11 +553,11 @@
     K.register('p', { ctrl: true, shift: true, alt: false }, function() {
       Rga.CommandPalette.open();
     });
-    K.register('b', { ctrl: true, shift: false, alt: false }, function() {
-      // Slice 2 entry #2 migration:
-      const cur = Rga.Shell && Rga.Shell.Layout ? Rga.Shell.Layout.get().sidebar.visible : true;
-      if (Rga.Shell && Rga.Shell.Layout) Rga.Shell.Layout.set({ sidebar: { visible: !cur } });
-    });
+    // Ctrl+B (sidebar toggle) is registered by the shell keyboard
+    // wiring (renderer/js/shell/index.js) as combo "cmd+b", routing
+    // through Layout.set. The duplicate registration that lived here
+    // was removed in Runtime Ownership Stab. Slice 2 — single SSOT
+    // (Rga.KeyboardRegistry) catches duplicates with a console warning.
     K.register('j', { ctrl: true, shift: false, alt: false }, function() {
       Rga.BottomPanel.toggleCollapse();
     });

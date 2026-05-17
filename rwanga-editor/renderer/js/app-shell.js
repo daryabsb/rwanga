@@ -308,48 +308,24 @@ Rga.Tabs = {
 };
 
 /* ============================================================
-   KEYBOARD SHORTCUT MANAGER
+   KEYBOARD SHORTCUT MANAGER (legacy API → KeyboardRegistry shim)
+   Runtime Ownership Stab. Slice 2: this used to own its own
+   document.keydown listener and its own _shortcuts map. Now it
+   delegates to Rga.KeyboardRegistry (the SSOT) so engine consumers
+   like renderer/js/editor/page-setup-dialog.js — which we must not
+   touch per slice rules — keep working unchanged. New code should
+   call Rga.KeyboardRegistry.register directly.
    ============================================================ */
 Rga.Keyboard = {
-  _shortcuts: {},
-
   init: function() {
-    var self = this;
-    document.addEventListener('keydown', function(e) {
-      self._handle(e);
-    });
-  },
-
-  /**
-   * Register a keyboard shortcut.
-   * @param {string} key - e.g. 'p', 's', 'b'
-   * @param {object} mods - { ctrl: bool, shift: bool, alt: bool }
-   * @param {Function} action
-   */
-  register: function(key, mods, action) {
-    var id = this._makeId(key, mods);
-    this._shortcuts[id] = action;
-  },
-
-  _makeId: function(key, mods) {
-    return (mods.ctrl ? 'C' : '') +
-           (mods.shift ? 'S' : '') +
-           (mods.alt ? 'A' : '') +
-           key.toUpperCase();
-  },
-
-  _handle: function(e) {
-    if (e.defaultPrevented) return;
-    var id = this._makeId(e.key, {
-      ctrl: e.ctrlKey || e.metaKey,
-      shift: e.shiftKey,
-      alt: e.altKey
-    });
-    var action = this._shortcuts[id];
-    if (action) {
-      e.preventDefault();
-      action();
+    // Ensure the registry's document listener is attached. Idempotent.
+    if (Rga.KeyboardRegistry && typeof Rga.KeyboardRegistry.init === 'function') {
+      Rga.KeyboardRegistry.init();
     }
+  },
+  register: function(key, mods, action) {
+    if (!Rga.KeyboardRegistry || typeof Rga.KeyboardRegistry.register !== 'function') return;
+    Rga.KeyboardRegistry.register(key, mods, action, 'Rga.Keyboard.register (legacy shim)');
   }
 };
 
@@ -607,13 +583,13 @@ Rga.BottomPanel = {
       });
     }
 
-    // Ctrl+J toggles the panel (keep for back-compat with VS Code
-    // muscle memory). Ctrl+` is registered separately by the shell
-    // keyboard wiring (shell/index.js) because Electron/Chromium can
-    // shadow Ctrl+J in some build configurations.
-    Rga.Keyboard.register('j', { ctrl: true, shift: false, alt: false }, function() {
-      self.toggleCollapse();
-    });
+    // Ctrl+J toggles the panel — registered ONCE by the init script
+    // in index.html (see registerShortcuts()). The Slice-2 keyboard
+    // consolidation removed the duplicate registration that used to
+    // live here. Cmd+` is registered separately by the shell keyboard
+    // wiring (shell/index.js) and routes through the same public
+    // API (Rga.BottomPanel.toggleCollapse), so all three entry points
+    // share one mutator + one keyboard SSOT.
 
     // Initial Layout sync — order:
     //   1. Read persisted visibility from localStorage (if set on a

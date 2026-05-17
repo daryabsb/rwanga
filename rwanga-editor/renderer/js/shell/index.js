@@ -82,75 +82,53 @@
 
   // ----------------------------------------------------------------
   // Keyboard shortcuts (plan §6.3, §11.4)
+  // Migrated to Rga.KeyboardRegistry in Runtime Ownership Stab. Slice
+  // 2 — this file no longer owns a document.keydown listener.
   // ----------------------------------------------------------------
-  // Bindings: panel id → key combo. The shell only listens for combos
-  // with Cmd/Ctrl + Shift modifiers — never bare keys. PM's keymap
-  // plugins handle Tab/Enter/Mod-Enter/Backspace inside the editor.
-  const _PANEL_SHORTCUTS = {
-    'cmd+shift+s': 'sceneNavigator',
-    'cmd+shift+e': 'scriptWorkspace',
-    'cmd+shift+o': 'outline',
-    'cmd+shift+c': 'characters',
-    'cmd+shift+f': 'search',
-    'cmd+shift+r': 'revisions',
-    'cmd+,':       'settings'
-  };
+  const _PANEL_SHORTCUTS = [
+    { key: 's', panel: 'sceneNavigator' },
+    { key: 'e', panel: 'scriptWorkspace' },
+    { key: 'o', panel: 'outline' },
+    { key: 'c', panel: 'characters' },
+    { key: 'f', panel: 'search' },
+    { key: 'r', panel: 'revisions' }
+  ];
 
   function _wireKeyboardShortcuts() {
-    document.addEventListener('keydown', _onKeydown);
-  }
+    if (!Rga.KeyboardRegistry || typeof Rga.KeyboardRegistry.register !== 'function') return;
+    const KR = Rga.KeyboardRegistry;
 
-  function _onKeydown(e) {
-    if (!e) return;
-    // Sidebar toggle: Cmd-B (no Shift) — toggles visibility without
-    // switching panel. Studio Panel toggle: Cmd-J (slice 1 minimal — the
-    // bottom panel wrapper is the existing #bottom-panel which we don't
-    // own; this is a placeholder for now).
-    const mod = e.metaKey || e.ctrlKey;
-    if (!mod) return;  // every shell shortcut needs a modifier
-    const combo = _comboString(e);
-    if (!combo) return;
-    // Panel toggles.
-    const panelId = _PANEL_SHORTCUTS[combo];
-    if (panelId) {
-      const registered = Rga.Shell.Sidebar.registered();
-      if (registered.indexOf(panelId) >= 0) {
-        e.preventDefault();
-        e.stopPropagation();
-        _togglePanel(panelId);
-      }
-      return;
-    }
-    // Sidebar visibility toggle.
-    if (combo === 'cmd+b') {
+    // Cmd-Shift-{S,E,O,C,F,R} → panel toggles.
+    _PANEL_SHORTCUTS.forEach(function(spec) {
+      KR.register(spec.key, { ctrl: true, shift: true }, function() {
+        if (Rga.Shell.Sidebar.registered().indexOf(spec.panel) < 0) return;
+        _togglePanel(spec.panel);
+      }, 'Rga.Shell (panel toggle: ' + spec.panel + ')');
+    });
+
+    // Cmd-, → Settings panel toggle.
+    KR.register(',', { ctrl: true }, function() {
+      if (Rga.Shell.Sidebar.registered().indexOf('settings') < 0) return;
+      _togglePanel('settings');
+    }, 'Rga.Shell (panel toggle: settings)');
+
+    // Cmd-B → Sidebar visibility toggle.
+    KR.register('b', { ctrl: true }, function() {
       const visible = Rga.Shell.Layout.get().sidebar.visible;
       Rga.Shell.Layout.set({ sidebar: { visible: !visible } });
-      e.preventDefault();
-      e.stopPropagation();
-      return;
-    }
-    // Studio Panel (bottom panel) visibility toggle. Cmd+` matches
-    // VS Code convention; Cmd+J stays via the legacy Rga.Keyboard
-    // registration in app-shell.js. Both routes converge on the SAME
-    // public API — Rga.BottomPanel.toggleCollapse — so the ownership
-    // matrix entry for BottomPanel has exactly one mutator surface.
-    // BottomPanel.toggleCollapse internally flips Layout (SSOT); the
-    // Layout subscriber updates the DOM. See
-    // docs/design-system/rwanga-ownership-matrix.md (Runtime
-    // Ownership Stabilization Slice 1).
-    if (combo === 'cmd+`') {
+    }, 'Rga.Shell (sidebar visibility toggle)');
+
+    // Cmd-` → Studio (bottom) Panel toggle. Routes through the same
+    // public mutator (Rga.BottomPanel.toggleCollapse) as Cmd+J + the
+    // close button + the command palette entry → single mutator surface.
+    KR.register('`', { ctrl: true }, function() {
       if (Rga.BottomPanel && typeof Rga.BottomPanel.toggleCollapse === 'function') {
         Rga.BottomPanel.toggleCollapse();
       } else if (Rga.Shell.Layout) {
-        // Fallback for early-boot / unloaded BottomPanel: still flip
-        // Layout so the state reaches the SSOT even without the public
-        // API. The DOM sync subscriber catches up.
         const sv = Rga.Shell.Layout.get().studioPanel.visible;
         Rga.Shell.Layout.set({ studioPanel: { visible: !sv } });
       }
-      e.preventDefault();
-      e.stopPropagation();
-    }
+    }, 'Rga.Shell (studio panel toggle)');
   }
 
   function _togglePanel(id) {
@@ -165,16 +143,8 @@
     }
   }
 
-  function _comboString(e) {
-    const parts = [];
-    if (e.metaKey || e.ctrlKey) parts.push('cmd');
-    if (e.shiftKey) parts.push('shift');
-    if (e.altKey)   parts.push('alt');
-    const key = (e.key || '').toLowerCase();
-    if (!key || key === 'meta' || key === 'control' || key === 'shift' || key === 'alt') return null;
-    parts.push(key);
-    return parts.join('+');
-  }
+  // _comboString lived here pre-Slice-2 to normalise events to combo
+  // strings. Rga.KeyboardRegistry owns the normaliser now.
 
   function _resolveDefaultPanel() {
     const registered = Rga.Shell.Sidebar.registered();
@@ -183,7 +153,9 @@
   }
 
   function _reset() {
-    document.removeEventListener('keydown', _onKeydown);
+    // Pre-Slice-2: removed our own document keydown listener. Now the
+    // registry owns the listener; tests that need to wipe bindings
+    // call Rga.KeyboardRegistry._reset() directly.
     _initialized = false;
   }
 

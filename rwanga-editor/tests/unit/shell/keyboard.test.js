@@ -27,6 +27,10 @@ function boot() {
 
   ['../../../renderer/js/shell/layout.js',
    '../../../renderer/js/shell/sidebar.js',
+   // Slice 2: KeyboardRegistry is the SSOT every shell shortcut
+   // registers against. Must load before shell/index.js so the
+   // registrations land.
+   '../../../renderer/js/shell/keyboard-registry.js',
    '../../../renderer/js/shell/activity-rail.js',
    '../../../renderer/js/shell/script-session.js',
    '../../../renderer/js/shell/panels/scene-navigator.js',
@@ -45,11 +49,13 @@ function boot() {
   Rga.Shell.ActivityRail._reset();
   Rga.ScriptSession._reset();
   Rga.Shell.SceneNavigator._reset();
+  Rga.KeyboardRegistry._reset();
   Rga.Shell._reset();
   ['scene-navigator', 'script-workspace', 'outline', 'characters', 'search', 'revisions', 'settings'].forEach(function(file) {
     delete require.cache[require.resolve('../../../renderer/js/shell/panels/' + file + '.js')];
     require('../../../renderer/js/shell/panels/' + file + '.js');
   });
+  Rga.KeyboardRegistry.init();
   Rga.Shell.init();
   return { Rga };
 }
