@@ -30,7 +30,8 @@ Rga.Theme = {
     document.body.offsetHeight; // trigger reflow
     document.body.style.display = '';
 
-    Rga.StatusBar.update();
+    // Slice 2: Rga.StatusBar.update() removed — entry #1 resolution.
+    // Theme changes propagate visually via CSS; no status-bar update needed.
   },
 
   toggle: function() {
@@ -106,59 +107,22 @@ Rga.Resize = {
 };
 
 /* ============================================================
-   SIDEBAR MANAGER
-   Switches panels based on Activity Bar selection.
+   SIDEBAR MANAGER — Slice 2 compatibility shim.
+   The legacy Rga.Sidebar was retired by Slice 2 (entries #2/#3 in the
+   shell compatibility inventory). Reduced here to a minimal no-op shim
+   so the engine plugin `tags.js:206` (which calls
+   `Rga.Sidebar.switchTo('tags')` after tagging) keeps working without
+   an engine change. Compatibility Inventory entry #2 is BLOCKED on
+   that engine dependency; full removal of this shim happens in Slice 3
+   when the Characters panel + Breakdown tab subsume the legacy tags
+   concept. The new shell's sidebar is owned by Rga.Shell.Sidebar +
+   Rga.Shell.Layout.
    ============================================================ */
 Rga.Sidebar = {
-  activePanel: 'explorer',
-
-  init: function() {
-    var self = this;
-    Rga.$$('.activity-icon[data-panel]').forEach(function(btn) {
-      btn.addEventListener('click', function() {
-        var panel = btn.dataset.panel;
-        if (panel === self.activePanel) {
-          // Double-click on same icon toggles sidebar
-          self.toggleCollapse();
-        } else {
-          self.switchTo(panel);
-          // Ensure sidebar is visible
-          Rga.$('#workspace').classList.remove('sidebar-collapsed');
-        }
-      });
-    });
-  },
-
-  switchTo: function(panelName) {
-    this.activePanel = panelName;
-
-    // Update activity bar icons
-    Rga.$$('.activity-icon[data-panel]').forEach(function(btn) {
-      btn.classList.toggle('active', btn.dataset.panel === panelName);
-    });
-
-    // Update sidebar panels
-    Rga.$$('.sidebar-panel').forEach(function(panel) {
-      panel.classList.toggle('active', panel.dataset.panel === panelName);
-    });
-
-    // Update sidebar header text
-    var header = Rga.$('#sidebar-header-text');
-    if (header) {
-      var labels = {
-        explorer: 'Explorer',
-        scenes: 'Scenes',
-        tags: 'Tags',
-        sync: 'Rwanga Sync',
-        extensions: 'Extensions'
-      };
-      header.textContent = labels[panelName] || panelName;
-    }
-  },
-
-  toggleCollapse: function() {
-    Rga.$('#workspace').classList.toggle('sidebar-collapsed');
-  }
+  activePanel: null,
+  init:           function() { /* no-op — Rga.Shell.init owns the sidebar now */ },
+  switchTo:       function(/* panelName */) { /* no-op shim for engine consumer; intentional */ },
+  toggleCollapse: function() { /* no-op shim — see Rga.Shell.Layout.set({sidebar:{visible:...}}) */ }
 };
 
 /* ============================================================
@@ -390,68 +354,11 @@ Rga.Keyboard = {
 };
 
 /* ============================================================
-   STATUS BAR
-   Reactive status bar updates.
+   STATUS BAR — removed in Slice 2.
+   Compatibility Inventory entry #1 RESOLVED. Rga.Shell.StatusBar
+   (renderer/js/shell/status-bar.js) populates #status-bar from
+   Rga.ScriptSession; segment list per slice-2 plan §3.4.
    ============================================================ */
-Rga.StatusBar = {
-  init: function() {
-    var themeBtn = Rga.$('#status-theme');
-    if (themeBtn) {
-      themeBtn.addEventListener('click', function() { Rga.Theme.toggle(); });
-    }
-    this.update();
-  },
-
-  update: function() {
-    var editor = Rga.$('#editor');
-    if (!editor) return;
-
-    // Word count
-    var words = Rga.getWordCount(editor);
-    var pages = Rga.estimatePageCount(words);
-    this._set('status-words', Rga.formatNumber(words) + ' words');
-    this._set('status-pages', pages + (pages === 1 ? ' page' : ' pages'));
-
-    // Scene count
-    var scenes = Rga.$$('.scene-header', editor);
-    var currentScene = this._findCurrentScene(editor, scenes);
-    this._set('status-scene', 'Scene ' + currentScene + '/' + scenes.length);
-
-    // Block type
-    var block = Rga.Cursor.getCurrentBlock();
-    if (block) {
-      this._set('status-block-type', Rga.formatBlockTypeName(block.dataset.blockType));
-    }
-
-    // Theme indicator
-    var themeEl = Rga.$('#status-theme');
-    if (themeEl) {
-      var isDark = Rga.Theme.current === 'dark';
-      themeEl.innerHTML = (isDark ? Rga.Icons.moon : Rga.Icons.sun) + ' ' + (isDark ? 'Dark' : 'Light');
-    }
-  },
-
-  _set: function(id, text) {
-    var el = Rga.$('#' + id);
-    if (el) el.textContent = text;
-  },
-
-  _findCurrentScene: function(editor, scenes) {
-    if (scenes.length === 0) return 0;
-    var block = Rga.Cursor.getCurrentBlock();
-    if (!block) return 1;
-
-    // Walk backwards from cursor block to find the scene header
-    var el = block;
-    while (el) {
-      if (el.classList && el.classList.contains('scene-header')) {
-        return Array.from(scenes).indexOf(el) + 1;
-      }
-      el = el.previousElementSibling;
-    }
-    return 1;
-  }
-};
 
 /* ============================================================
    COMMAND PALETTE
@@ -670,6 +577,15 @@ Rga.Modal = {
 /* ============================================================
    BOTTOM PANEL MANAGER
    ============================================================ */
+// V1.1 fix 6 (Bottom panel reopen): visibility state now lives in
+// Rga.Shell.Layout.studioPanel.visible. The DOM class is a SIDE EFFECT
+// of that state (applied by _syncDomFromLayout below) rather than the
+// source of truth. This means any caller — close button, keyboard
+// shortcut, future menu action, command palette, layout restore —
+// hits one entry point (Rga.Shell.Layout.set) and the DOM follows.
+// The earlier DOM-only classList.toggle was unreversible whenever the
+// keyboard shortcut never reached the handler (Electron/Chromium
+// shadowing Ctrl+J), leaving the panel stuck closed.
 Rga.BottomPanel = {
   activeTab: 'scene',
 
@@ -683,7 +599,7 @@ Rga.BottomPanel = {
       });
     });
 
-    // Close button
+    // Close button — flips Layout, which then updates the DOM.
     var closeBtn = Rga.$('#btn-close-bottom-panel');
     if (closeBtn) {
       closeBtn.addEventListener('click', function() {
@@ -691,14 +607,36 @@ Rga.BottomPanel = {
       });
     }
 
-    // Ctrl+J toggles the panel
+    // Ctrl+J toggles the panel (keep for back-compat with VS Code
+    // muscle memory). Ctrl+` is registered separately by the shell
+    // keyboard wiring (shell/index.js) because Electron/Chromium can
+    // shadow Ctrl+J in some build configurations.
     Rga.Keyboard.register('j', { ctrl: true, shift: false, alt: false }, function() {
       self.toggleCollapse();
     });
+
+    // Initial Layout sync: the bottom panel starts OPEN unless Layout
+    // says otherwise. Layout's default is studioPanel.visible = false
+    // but the legacy DOM starts open — preserve the legacy default
+    // by initialising Layout to match the DOM-as-shipped state.
+    if (Rga.Shell && Rga.Shell.Layout) {
+      var col = Rga.$('#center-column');
+      var isOpen = !(col && col.classList.contains('bottom-collapsed'));
+      Rga.Shell.Layout.set({ studioPanel: { visible: isOpen } });
+      Rga.Shell.Layout.subscribe(function(next, prev) {
+        if (!next || !next.studioPanel) return;
+        if (prev && prev.studioPanel && prev.studioPanel.visible === next.studioPanel.visible) return;
+        self._syncDomFromLayout(next.studioPanel.visible);
+      });
+    }
   },
 
   open: function() {
-    Rga.$('#center-column').classList.remove('bottom-collapsed');
+    if (Rga.Shell && Rga.Shell.Layout) {
+      Rga.Shell.Layout.set({ studioPanel: { visible: true } });
+    } else {
+      this._syncDomFromLayout(true);
+    }
   },
 
   switchTo: function(tabName) {
@@ -715,7 +653,21 @@ Rga.BottomPanel = {
   },
 
   toggleCollapse: function() {
-    Rga.$('#center-column').classList.toggle('bottom-collapsed');
+    if (Rga.Shell && Rga.Shell.Layout) {
+      var current = Rga.Shell.Layout.get().studioPanel.visible;
+      Rga.Shell.Layout.set({ studioPanel: { visible: !current } });
+    } else {
+      // Fallback (early-boot / test contexts where Layout absent).
+      var col = Rga.$('#center-column');
+      if (col) col.classList.toggle('bottom-collapsed');
+    }
+  },
+
+  _syncDomFromLayout: function(visible) {
+    var col = Rga.$('#center-column');
+    if (!col) return;
+    if (visible) col.classList.remove('bottom-collapsed');
+    else         col.classList.add('bottom-collapsed');
   }
 };
 
