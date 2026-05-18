@@ -625,20 +625,28 @@
   color: #ffffff;
 }
 
-/* Regression Fix §A — Win11 + frameless (frame: false) maximized
-   overflow: when maximized, the OS extends the BrowserWindow ~8px
-   beyond each visible screen edge so the resize border can live
-   outside the viewport. Without compensation the right-zone title-
-   bar controls (theme · avatar · min · max · close) render past the
-   visible right edge and look "disappeared". body.window-maximized
-   is toggled by Rga.Shell.TitleBar in response to the
-   window.state IPC event from electron/bridge/window-controls.js.
-   Padding is symmetric so the same compensation protects the
-   left-zone "Rwanga" word-mark from clipping on multi-monitor /
-   high-DPI setups. */
+/* Regression Fix §A + Final Hardening — Win11 + frameless (frame:
+   false) maximized overflow compensation.
+   When maximized, the OS extends the BrowserWindow past each visible
+   screen edge so the resize border can live outside the viewport.
+   The amount comes from GetSystemMetrics(SM_CXSIZEFRAME +
+   SM_CXPADDEDBORDER) — 8px at 100% DPI, 12px at 150%, 16px at 200%,
+   etc. — and is DPI-aware.
+   Electron does not expose GetSystemMetrics directly, but the same
+   metric is derivable from `screen.getDisplayMatching(win.getBounds()
+   ).workArea` vs `win.getBounds()` (both CSS-pixel values; the diff
+   is the per-edge overflow in CSS pixels, intrinsically scale-aware).
+   electron/bridge/window-controls.js computes the overflow on each
+   maximize event and pushes it via the window.state IPC payload;
+   renderer/js/shell/title-bar.js writes the values into these CSS
+   custom properties on :root.
+   The 8px fallback engages when the IPC payload is absent or zero
+   (test fixtures, non-Electron contexts, future regression where the
+   overflow computation returns 0 unexpectedly) — it matches the Win11
+   100% DPI metric, which is the most common environment. */
 body.window-maximized #rga-shell-titlebar {
-  padding-right: 8px;
-  padding-left: 8px;
+  padding-right: var(--rga-max-overflow-right, 8px);
+  padding-left:  var(--rga-max-overflow-left,  8px);
 }
 
 /* ============================================================

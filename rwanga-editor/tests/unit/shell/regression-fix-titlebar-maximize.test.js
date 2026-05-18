@@ -47,14 +47,19 @@ function ruleBody(css, selector) {
 // §A — Win11 frameless overflow compensation
 // ----------------------------------------------------------------
 
-test('Regression §A: body.window-maximized #rga-shell-titlebar applies right + left padding', () => {
+test('Regression §A: body.window-maximized #rga-shell-titlebar applies right + left padding (DPI-aware with 8px fallback)', () => {
   const css = read(SHELL_CSS);
   const body = ruleBody(css, /body\.window-maximized\s+#rga-shell-titlebar/);
   assert.ok(body, 'body.window-maximized #rga-shell-titlebar rule must exist (Win11 frameless overflow compensation)');
-  assert.ok(/padding-right\s*:\s*8px/.test(body),
-    'maximized titlebar must declare padding-right: 8px (Win11 frameless OS-extension compensation)');
-  assert.ok(/padding-left\s*:\s*8px/.test(body),
-    'maximized titlebar must declare padding-left: 8px (symmetric compensation)');
+  // Final Hardening — padding consumes a DPI-aware CSS custom
+  // property fed by IPC from electron/bridge/window-controls.js
+  // (screen.getDisplayMatching().workArea vs win.getBounds()). The
+  // 8px fallback matches the Win11 100% DPI metric and engages only
+  // when the IPC payload is absent.
+  assert.ok(/padding-right\s*:\s*var\(\s*--rga-max-overflow-right\s*,\s*8px\s*\)/.test(body),
+    'maximized titlebar must consume var(--rga-max-overflow-right, 8px) — DPI-aware metric with 100%-DPI fallback');
+  assert.ok(/padding-left\s*:\s*var\(\s*--rga-max-overflow-left\s*,\s*8px\s*\)/.test(body),
+    'maximized titlebar must consume var(--rga-max-overflow-left, 8px) — DPI-aware metric with 100%-DPI fallback');
 });
 
 test('Regression §A: title-bar.js toggles body.window-maximized in response to window.state events', () => {
@@ -150,6 +155,74 @@ test('Regression: electron/bridge/window-controls.js exports attach(win) that li
     'attach() must listen for the BrowserWindow unmaximize event');
   assert.ok(/webContents\.send\(\s*['"]window\.state['"]/.test(src),
     'attach() must push window.state events to the renderer via webContents.send');
+});
+
+// ----------------------------------------------------------------
+// Final Hardening — DPI-aware OS-extension overflow
+// ----------------------------------------------------------------
+
+test('Hardening: window-controls.js derives the OS-extension overflow via Electron screen API (not hardcoded)', () => {
+  const src = read(WINDOW_CTRL_JS);
+  assert.ok(/computeMaximizeOverflow/.test(src),
+    'window-controls.js must define computeMaximizeOverflow — the DPI-aware metric resolver');
+  // Destructuring puts `screen` before `require('electron')`, so check
+  // both names appear on the same import line in either order.
+  assert.ok(/const\s*\{[^}]*\bscreen\b[^}]*\}\s*=\s*require\(\s*['"]electron['"]\s*\)/.test(src),
+    'window-controls.js must import { screen } from electron (the DPI-aware Display API)');
+  assert.ok(/screen\.getDisplayMatching/.test(src),
+    'computeMaximizeOverflow must use screen.getDisplayMatching to find the active display');
+  assert.ok(/workArea/.test(src),
+    'computeMaximizeOverflow must read display.workArea (the visible usable area)');
+  assert.ok(/win\.getBounds/.test(src),
+    'computeMaximizeOverflow must read win.getBounds() to detect the OS-extended bounds');
+});
+
+test('Hardening: window.state IPC payload carries the overflow snapshot on every push', () => {
+  const src = read(WINDOW_CTRL_JS);
+  // The push() function must include overflow in the IPC payload so
+  // the renderer can apply DPI-aware padding for the current display
+  // (handles the case where the user dragged the window to a
+  // different-DPI monitor between maximize cycles).
+  const pushMatch = src.match(/webContents\.send\(\s*['"]window\.state['"][\s\S]{0,400}\}\s*\)/);
+  assert.ok(pushMatch, 'window.state send call must exist');
+  assert.ok(/overflow\s*:\s*computeMaximizeOverflow/.test(pushMatch[0]),
+    'every window.state push must include overflow: computeMaximizeOverflow(win)');
+});
+
+test('Hardening: window.getState response includes the overflow snapshot', () => {
+  const src = read(WINDOW_CTRL_JS);
+  const handlerMatch = src.match(/ipcMain\.handle\(\s*['"]window\.getState['"][\s\S]{0,400}\}\s*\)/);
+  assert.ok(handlerMatch, 'window.getState handler must exist');
+  assert.ok(/overflow/.test(handlerMatch[0]),
+    'window.getState response must include overflow so the renderer can apply correct padding on first boot');
+});
+
+test('Hardening: title-bar.js writes overflow values into :root CSS custom properties', () => {
+  const src = read(TITLE_BAR_JS);
+  assert.ok(/_applyMaximizeOverflow/.test(src),
+    'title-bar.js must define _applyMaximizeOverflow — the CSS-custom-property writer');
+  assert.ok(/setProperty\(\s*['"]--rga-max-overflow-left['"]/.test(src),
+    '_applyMaximizeOverflow must set --rga-max-overflow-left so the CSS rule consumes the DPI-aware value');
+  assert.ok(/setProperty\(\s*['"]--rga-max-overflow-right['"]/.test(src),
+    '_applyMaximizeOverflow must set --rga-max-overflow-right so the CSS rule consumes the DPI-aware value');
+  assert.ok(/removeProperty\(\s*['"]--rga-max-overflow-(left|right)['"]/.test(src),
+    '_applyMaximizeOverflow must removeProperty when unmaximized so the 8px fallback engages');
+});
+
+test('Hardening: title-bar.js forwards the overflow payload from windowState + getState into _applyMaximizeState', () => {
+  const src = read(TITLE_BAR_JS);
+  // Both call sites (the on.windowState subscription handler AND the
+  // window.getState initial query) must pass payload.overflow as the
+  // third argument so the CSS custom properties stay in sync with
+  // whichever IPC channel fires first.
+  const wsSubscription = src.match(/window\.rwanga\.on\.windowState\([\s\S]{0,500}\}\);/);
+  assert.ok(wsSubscription, 'on.windowState subscription must exist');
+  assert.ok(/payload\.overflow/.test(wsSubscription[0]),
+    'windowState handler must forward payload.overflow to _applyMaximizeState');
+  const getStateQuery = src.match(/window\.rwanga\.window\.getState[\s\S]{0,500}\}\);/);
+  assert.ok(getStateQuery, 'window.getState initial query must exist');
+  assert.ok(/state\.overflow/.test(getStateQuery[0]),
+    'getState handler must forward state.overflow to _applyMaximizeState');
 });
 
 test('Regression: electron/main.js wires windowControls.attach on window creation', () => {

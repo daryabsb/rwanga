@@ -87,10 +87,30 @@
 
   // Regression Fix §A + §B helpers ----------------------------------
 
-  function _applyMaximizeState(maxBtn, isMax) {
+  function _applyMaximizeOverflow(overflow) {
+    if (typeof document === 'undefined' || !document.documentElement) return;
+    const root = document.documentElement;
+    // Final Hardening — DPI-aware OS-extension overflow as CSS custom
+    // properties. Main computes these from screen.getDisplayMatching()
+    // vs win.getBounds() (both CSS-pixel values, scale-factor-aware).
+    // When unmaximized OR when the IPC payload is absent, the props
+    // are removed so the CSS rule's 8px fallback engages.
+    if (overflow && typeof overflow === 'object') {
+      root.style.setProperty('--rga-max-overflow-left',  (overflow.left  || 0) + 'px');
+      root.style.setProperty('--rga-max-overflow-right', (overflow.right || 0) + 'px');
+    } else {
+      root.style.removeProperty('--rga-max-overflow-left');
+      root.style.removeProperty('--rga-max-overflow-right');
+    }
+  }
+
+  function _applyMaximizeState(maxBtn, isMax, overflow) {
     if (typeof document !== 'undefined' && document.body) {
       document.body.classList.toggle('window-maximized', !!isMax);
     }
+    // Apply or clear the DPI-aware overflow custom properties.
+    if (isMax) _applyMaximizeOverflow(overflow);
+    else       _applyMaximizeOverflow(null);
     if (!maxBtn) return;
     const Icons = (typeof window !== 'undefined' && window.Rga && window.Rga.Icons) || {};
     if (isMax) {
@@ -109,14 +129,18 @@
     // Subscribe to push events from main.
     if (window.rwanga.on && typeof window.rwanga.on.windowState === 'function') {
       window.rwanga.on.windowState(function(payload) {
-        _applyMaximizeState(maxBtn, payload && payload.maximized);
+        _applyMaximizeState(maxBtn,
+          payload && payload.maximized,
+          payload && payload.overflow);
       });
     }
     // Query initial state so a window booted maximized gets the
     // correct icon + body class without waiting for a state change.
     if (window.rwanga.window && typeof window.rwanga.window.getState === 'function') {
       Promise.resolve(window.rwanga.window.getState()).then(function(state) {
-        _applyMaximizeState(maxBtn, state && state.maximized);
+        _applyMaximizeState(maxBtn,
+          state && state.maximized,
+          state && state.overflow);
       }).catch(function() { /* non-Electron / test harness — silent. */ });
     }
   }
