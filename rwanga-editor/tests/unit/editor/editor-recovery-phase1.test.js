@@ -58,26 +58,28 @@ test('Phase 1: #editor-container.view-flow .rga-page-marker has a visible-gap ma
     'communicate a real page gap. Got: ' + marginValue);
 });
 
-test('Phase 1: Flow .rga-page-marker has solid top + bottom boundaries (sandwiched label)', () => {
+test('Phase C: Flow .rga-page-marker has a solid top boundary (single dividing line)', () => {
   const css = readText(CSS_PATH);
   const body = ruleBody(css, '#editor-container.view-flow .rga-page-marker');
-  assert.ok(body);
-  // Single solid border-top + border-bottom (NOT dashed; NOT just
-  // one side). Old pre-recovery rule used dashed top only.
+  assert.ok(body, 'Flow override for .rga-page-marker must exist');
+  // Phase C design: a single solid border-top divides pages.
+  // The old sandwiched-label design (border-top + border-bottom) is replaced
+  // by a two-sided flex layout with a single top rule.
   assert.ok(/border-top\s*:\s*\d+px\s+solid/.test(body),
-    'Flow .rga-page-marker must have a solid border-top (not dashed) — boundary cue');
-  assert.ok(/border-bottom\s*:\s*\d+px\s+solid/.test(body),
-    'Flow .rga-page-marker must have a solid border-bottom — sandwich the label');
+    'Flow .rga-page-marker must have a solid border-top (the single dividing line)');
+  // border-bottom is now 0 (explicit) — verify it is NOT a gradient sandwich.
+  assert.ok(/border-bottom\s*:\s*0/.test(body),
+    'Phase C: Flow .rga-page-marker border-bottom must be 0 (single-line design, not a sandwich)');
 });
 
-test('Phase 1: Flow .rga-page-marker has a desk-strip background (not transparent)', () => {
+test('Phase C: Flow .rga-page-marker uses transparent background (Phase C removes gradient)', () => {
   const css = readText(CSS_PATH);
   const body = ruleBody(css, '#editor-container.view-flow .rga-page-marker');
-  assert.ok(body);
-  // The desk-strip is a subtle linear-gradient. Reject a transparent
-  // or absent background.
-  assert.ok(/background\s*:\s*linear-gradient/.test(body),
-    'Flow .rga-page-marker must use a linear-gradient background as the "desk strip" between pages');
+  assert.ok(body, 'Flow override for .rga-page-marker must still exist (Phase C kept the rule)');
+  // Phase C replaces the desk-strip gradient with a calm, transparent background.
+  // The dividing line is now a single border-top; no gradient needed.
+  assert.ok(/background\s*:\s*transparent/.test(body),
+    'Phase C: Flow .rga-page-marker must use a transparent background (gradient removed)');
 });
 
 test('Phase 1: Flow .rga-page-marker extends into the page padding (negative horizontal margin)', () => {
@@ -97,26 +99,17 @@ test('Phase 1: Flow .rga-page-marker extends into the page padding (negative hor
 // .rga-page-break (manual page-break PM node) — Flow override
 // ----------------------------------------------------------------
 
-test('Phase 1: Flow .rga-page-break gets the same boundary treatment as .rga-page-marker', () => {
+test('Phase C / SP-05: Flow .rga-page-break CSS rule is removed (v3 schema has no pageBreak node)', () => {
   const css = readText(CSS_PATH);
-  const body = ruleBody(css, '#editor-container.view-flow .rga-page-break');
-  assert.ok(body, 'Flow override for .rga-page-break must exist');
-  // Same recovery surface: real margin, solid borders (no dashed
-  // hairline), gradient background.
-  const marginMatch = body.match(/margin\s*:\s*([^;]+);/);
-  assert.ok(marginMatch, 'Flow .rga-page-break must declare a margin');
-  const pxMatches = (marginMatch[1].match(/(\d+(?:\.\d+)?)px/g) || [])
-    .map(function(s) { return parseFloat(s); });
-  const maxPx = pxMatches.length ? Math.max.apply(null, pxMatches) : 0;
-  assert.ok(maxPx >= 20,
-    'Flow .rga-page-break margin must include a vertical value ≥ 20px ' +
-    '(matches the page-marker treatment). Got: ' + marginMatch[1]);
-  assert.ok(/border-top\s*:\s*\d+px\s+solid/.test(body),
-    'Flow .rga-page-break must have a solid border-top (not dashed)');
-  assert.ok(/border-bottom\s*:\s*\d+px\s+solid/.test(body),
-    'Flow .rga-page-break must have a solid border-bottom');
-  assert.ok(/background\s*:\s*linear-gradient/.test(body),
-    'Flow .rga-page-break must use the same desk-strip gradient as the marker');
+  // SP-05 resolution: the .rga-page-break CSS is dead code; v3 schema has no
+  // pageBreak node. Phase C deleted both rule blocks and left a single comment.
+  // Verify: no selector rule body exists for the deleted selectors.
+  const flowBreakBody = ruleBody(css, '#editor-container.view-flow .rga-page-break');
+  assert.equal(flowBreakBody, null,
+    'SP-05: #editor-container.view-flow .rga-page-break rule must be absent (deleted in Phase C)');
+  // The deletion comment must be present so the removal is documented.
+  assert.ok(css.includes('.rga-page-break rules removed 2026-05-18'),
+    'SP-05: a deletion comment must document the removal of .rga-page-break rules');
 });
 
 // ----------------------------------------------------------------

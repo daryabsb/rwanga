@@ -373,12 +373,39 @@
   }
 
   function _buildPageMarkerWidget(pageNumber) {
+    // pageNumber is the page BEGINNING below this marker (p+2 at the call site).
+    // pageEnds   = the page that just finished above (pageNumber - 1).
+    // pageBegins = the page starting below (pageNumber).
+    const pageEnds   = pageNumber - 1;
+    const pageBegins = pageNumber;
+
     const el = document.createElement('div');
     el.className = 'rga-page-marker';
     el.contentEditable = 'false';
     el.setAttribute('aria-hidden', 'true');
-    el.dataset.pageNumber = String(pageNumber);
-    el.textContent = '— Page ' + pageNumber + ' —';
+    // data-page-number is preserved for Print view's CSS ::after rule
+    // which renders "N." right-aligned using attr(data-page-number).
+    el.dataset.pageNumber = String(pageBegins);
+    // New attributes carry both sides of the transition.
+    el.dataset.pageEnds   = String(pageEnds);
+    el.dataset.pageBegins = String(pageBegins);
+    el.setAttribute('aria-label',
+      'End of page ' + pageEnds + ' — page ' + pageBegins + ' begins');
+
+    const endSpan = document.createElement('span');
+    endSpan.className = 'rga-page-marker-end';
+    endSpan.textContent = 'Page ' + pageEnds;
+
+    const ruleSpan = document.createElement('span');
+    ruleSpan.className = 'rga-page-marker-rule';
+
+    const beginSpan = document.createElement('span');
+    beginSpan.className = 'rga-page-marker-begin';
+    beginSpan.textContent = 'Page ' + pageBegins;
+
+    el.appendChild(endSpan);
+    el.appendChild(ruleSpan);
+    el.appendChild(beginSpan);
     return el;
   }
 

@@ -50,18 +50,8 @@
    Title + page-N labels are deferred — reinstating them needs an
    explicit "top margin" reservation per page (otherwise the absolute-
    positioned labels overlap next-page content). Tracked as polish. */
-.rga-page-break {
-  display: block;
-  position: relative;
-  height: 16px;
-  margin: 0 -1in 0 -1.5in;
-  background: var(--editor-bg);
-  border-top: 1px solid rgba(0, 0, 0, 0.10);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.10);
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
-  pointer-events: none;
-  user-select: none;
-}
+/* .rga-page-break rules removed 2026-05-18 — v3 schema has no pageBreak node;
+   archived reference at renderer/js/doc-types/screenplay/archived/page-breaks-v1.js. */
 
 /* ---- FLOW view: comfortable text column, no paper edges ---- */
 #editor-container.view-flow {
@@ -83,38 +73,6 @@
 #editor-container.view-flow .flow-line-gutter {
   display: block;
 }
-/* Flow view: manual page-break (the user-inserted `.rga-page-break`
-   PM node) gets the same page-boundary feel as the automatic
-   .rga-page-marker widget — minus the "Page N" label (this is a
-   structural node, not a numbered marker). Editor Recovery Phase 1
-   (C1(b)): visible gap + subtle desk-strip, so a manual break reads
-   as a real page boundary not a dashed hairline. */
-#editor-container.view-flow .rga-page-break {
-  display: block;
-  height: 14px;
-  margin: 32px -0.5in 28px;
-  background: linear-gradient(
-    to bottom,
-    rgba(0, 0, 0, 0.025) 0%,
-    rgba(0, 0, 0, 0.045) 50%,
-    rgba(0, 0, 0, 0.025) 100%
-  );
-  border-top:    1px solid var(--border-secondary, rgba(128, 128, 128, 0.30));
-  border-bottom: 1px solid var(--border-secondary, rgba(128, 128, 128, 0.30));
-  box-shadow: none;
-  opacity: 1;
-}
-[data-theme="dark"] #editor-container.view-flow .rga-page-break {
-  background: linear-gradient(
-    to bottom,
-    rgba(255, 255, 255, 0.020) 0%,
-    rgba(255, 255, 255, 0.035) 50%,
-    rgba(255, 255, 255, 0.020) 100%
-  );
-  border-top-color:    rgba(255, 255, 255, 0.10);
-  border-bottom-color: rgba(255, 255, 255, 0.10);
-}
-
 /* ---- Page row + line gutter (Flow only by default) ---- */
 .rga-page-row {
   display: flex;
@@ -2017,51 +1975,70 @@ body.view-draft-active .rga-draft-footer {
   pointer-events: none; /* clicks pass through to surrounding content */
 }
 
-/* Flow override — promote the marker to a real page-boundary
-   indicator. Reuses the same widget DOM the engine emits (no DOM
-   changes). Negative horizontal margin extends the desk-strip into
-   the page's 0.5in side padding so the boundary spans the full sheet
-   width — reads as crossing the bottom edge of one page and the top
-   edge of the next.
+/* Flow override — Phase C two-side page-number band.
+   The band clearly labels both sides of the transition:
+   left/muted "Page N" (the page just ended) and right/stronger
+   "Page N+1" (the page now beginning). No gradient, no dashes,
+   no fake paper edges.
 
-   Editor Recovery Phase 1 acceptance: visible page gap + subtle page
-   boundary + readable existing-widget "Page N" label. No content
-   splitting; no fake DOM pages. */
+   Layout: negative horizontal margins extend the single dividing
+   rule to the full page-row width. Inner spans (.rga-page-marker-end,
+   .rga-page-marker-begin) are flexed so the end label sits at the
+   left and the begin label at the right, with a centered rule line. */
 #editor-container.view-flow .rga-page-marker {
-  /* Page-gap breathing room — generous but not jarring. The 32px
-     above + 28px below creates a clear "between pages" zone. */
-  margin: 32px -0.5in 28px;
-  padding: 14px 0;
+  /* Generous breathing room: 28px above, 24px below. The gap is
+     the "between pages" signal; the rule is the dividing line. */
+  margin: 28px -0.5in 24px;
+  padding: 0;
+  background: transparent;
 
-  /* Two thin horizontal rules sandwich the label. Subtle gradient
-     suggests the "desk strip" gap between two paper sheets. */
+  /* Single horizontal rule spanning the full band width. */
   border-top:    1px solid var(--border-secondary, rgba(128, 128, 128, 0.30));
-  border-bottom: 1px solid var(--border-secondary, rgba(128, 128, 128, 0.30));
-  background: linear-gradient(
-    to bottom,
-    rgba(0, 0, 0, 0.025) 0%,
-    rgba(0, 0, 0, 0.045) 50%,
-    rgba(0, 0, 0, 0.025) 100%
-  );
+  border-bottom: 0;
 
-  /* Label — bigger, intentional, calm. The existing widget text
-     ("— Page N —") reads as a proper boundary marker. */
-  font-size: 0.8125rem;          /* 13px */
-  letter-spacing: 0.18em;
-  color: var(--text-tertiary, #888);
-  font-weight: 500;
+  /* Flex: end label left, rule centre, begin label right. */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5em;
+
+  /* Base font — overridden per-span below. */
+  font-family: var(--font-mono, 'Courier New', Courier, monospace);
+  font-size: 0;          /* hide any stray text nodes; spans set their own */
+  letter-spacing: 0;
 }
-/* Dark-theme desk-strip uses light overlays so the boundary is
-   visible against the dark editor background. */
-[data-theme="dark"] #editor-container.view-flow .rga-page-marker {
-  border-top-color:    rgba(255, 255, 255, 0.10);
-  border-bottom-color: rgba(255, 255, 255, 0.10);
-  background: linear-gradient(
-    to bottom,
-    rgba(255, 255, 255, 0.020) 0%,
-    rgba(255, 255, 255, 0.035) 50%,
-    rgba(255, 255, 255, 0.020) 100%
-  );
+
+/* End label (left side) — muted; the page that just finished. */
+#editor-container.view-flow .rga-page-marker .rga-page-marker-end {
+  font-size: 0.6875rem;  /* 11px */
+  font-family: var(--font-mono, 'Courier New', Courier, monospace);
+  font-weight: 400;
+  color: var(--text-tertiary, #6e6e6e);
+  letter-spacing: 0.08em;
+  text-align: right;
+  padding: 4px 0.5em 4px 0;
+  flex-shrink: 0;
+}
+
+/* Rule spine — a zero-width flex child that grows to fill the centre.
+   The border-top on the parent already draws the line; this span is
+   present in the DOM for future CSS hooks but contributes no visual. */
+#editor-container.view-flow .rga-page-marker .rga-page-marker-rule {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 0;
+}
+
+/* Begin label (right side) — slightly stronger; the page now starting. */
+#editor-container.view-flow .rga-page-marker .rga-page-marker-begin {
+  font-size: 0.75rem;    /* 12px */
+  font-family: var(--font-mono, 'Courier New', Courier, monospace);
+  font-weight: 500;
+  color: var(--text-secondary, #9e9e9e);
+  letter-spacing: 0.08em;
+  text-align: left;
+  padding: 4px 0 4px 0.5em;
+  flex-shrink: 0;
 }
 
 body.view-draft-active .rga-page-marker,
@@ -2097,8 +2074,9 @@ body.view-print-active .rga-page-marker {
   text-align: right;
   border: 0;
   background: transparent;
-  /* Hide the existing centered "— Page N —" text so the pseudo's
-     manuscript-style "N." can show alone. */
+  /* Hide the widget's inner spans (Phase C replaces the old text with
+     .rga-page-marker-end / -rule / -begin spans) so the ::after
+     pseudo's manuscript-style "N." can show alone. */
   font-size: 0;
   color: transparent;
   line-height: 0;

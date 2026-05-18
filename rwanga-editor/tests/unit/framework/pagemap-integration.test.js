@@ -186,10 +186,32 @@ test('page-marker widgets appear in editor DOM when doc paginates beyond 1 page'
   const markers = editorEl.querySelectorAll('.rga-page-marker');
   const pageMap = Nav.getPageMap(view.state);
   assert.equal(markers.length, pageMap.length - 1);
-  // Marker text format check.
+  // Phase C widget DOM contract checks.
   if (markers.length > 0) {
-    assert.match(markers[0].textContent, /^— Page \d+ —$/);
-    assert.equal(markers[0].dataset.pageNumber, '2');
+    const m = markers[0];
+    // data-page-number preserved for Print view's CSS ::after rule.
+    assert.equal(m.dataset.pageNumber, '2',
+      'data-page-number must equal the page beginning below the marker (2 for the first boundary)');
+    // New Phase C attributes carry both sides of the transition.
+    assert.equal(m.dataset.pageEnds, '1',
+      'data-page-ends must equal the page that just ended (1 for the first boundary)');
+    assert.equal(m.dataset.pageBegins, '2',
+      'data-page-begins must equal the page that is beginning (2 for the first boundary)');
+    // Inner spans carry visible labels.
+    const endSpan   = m.querySelector('.rga-page-marker-end');
+    const beginSpan = m.querySelector('.rga-page-marker-begin');
+    assert.ok(endSpan,   '.rga-page-marker-end span must exist');
+    assert.ok(beginSpan, '.rga-page-marker-begin span must exist');
+    assert.equal(endSpan.textContent, 'Page 1',
+      '.rga-page-marker-end text must be "Page N" (the ending page)');
+    assert.equal(beginSpan.textContent, 'Page 2',
+      '.rga-page-marker-begin text must be "Page N+1" (the beginning page)');
+    // aria-label provides screen-reader clarity.
+    assert.ok(/End of page 1 — page 2 begins/.test(m.getAttribute('aria-label')),
+      'aria-label must name both page numbers');
+    // Old dashes format must NOT appear anywhere in the marker.
+    assert.ok(!/— Page \d+ —/.test(m.textContent),
+      'Phase C removes the old "— Page N —" dash format');
   }
   view.destroy();
 });
@@ -256,4 +278,108 @@ test('idx.pages[].lineCount equals pageMap[].usedLines (same number, different s
   for (let i = 0; i < idx.pages.length; i += 1) {
     assert.equal(idx.pages[i].lineCount, pageMap[i].usedLines, 'page ' + (i + 1));
   }
+});
+
+// ----------------------------------------------------------------
+// Phase C — page-marker widget DOM contract (two-side band)
+// ----------------------------------------------------------------
+
+test('Phase C: page-marker widget has data-page-ends and data-page-begins as consecutive integers', () => {
+  const { Nav, schema, PM } = boot();
+  const plugin = Nav.buildIndexPlugin();
+  const scenes = [];
+  for (let i = 0; i < 25; i += 1) scenes.push(scene(schema, 'sc-' + i, { action: 'x'.repeat(60 * 5) }));
+  const d = doc(schema, scenes);
+  const state = PM.EditorState.create({ schema: schema, doc: d, plugins: [plugin] });
+  const editorEl = document.getElementById('editor');
+  const view = new PM.EditorView(editorEl, { state: state });
+
+  const markers = editorEl.querySelectorAll('.rga-page-marker');
+  assert.ok(markers.length > 0, 'must have at least one marker for this fixture');
+  for (let i = 0; i < markers.length; i += 1) {
+    const m = markers[i];
+    const ends   = parseInt(m.dataset.pageEnds, 10);
+    const begins = parseInt(m.dataset.pageBegins, 10);
+    assert.ok(!isNaN(ends),   'marker[' + i + '] data-page-ends must be a number');
+    assert.ok(!isNaN(begins), 'marker[' + i + '] data-page-begins must be a number');
+    assert.equal(begins, ends + 1,
+      'marker[' + i + ']: data-page-begins must equal data-page-ends + 1 (consecutive pages)');
+  }
+  view.destroy();
+});
+
+test('Phase C: page-marker widget preserves data-page-number equal to data-page-begins (Print view compat)', () => {
+  const { Nav, schema, PM } = boot();
+  const plugin = Nav.buildIndexPlugin();
+  const scenes = [];
+  for (let i = 0; i < 25; i += 1) scenes.push(scene(schema, 'sc-' + i, { action: 'x'.repeat(60 * 5) }));
+  const d = doc(schema, scenes);
+  const state = PM.EditorState.create({ schema: schema, doc: d, plugins: [plugin] });
+  const editorEl = document.getElementById('editor');
+  const view = new PM.EditorView(editorEl, { state: state });
+
+  const markers = editorEl.querySelectorAll('.rga-page-marker');
+  assert.ok(markers.length > 0, 'must have at least one marker for this fixture');
+  for (let i = 0; i < markers.length; i += 1) {
+    const m = markers[i];
+    assert.equal(m.dataset.pageNumber, m.dataset.pageBegins,
+      'marker[' + i + ']: data-page-number must equal data-page-begins ' +
+      '(Print view CSS uses attr(data-page-number) — must stay in sync)');
+  }
+  view.destroy();
+});
+
+test('Phase C: page-marker inner spans carry "Page N" and "Page N+1" text for all boundaries', () => {
+  const { Nav, schema, PM } = boot();
+  const plugin = Nav.buildIndexPlugin();
+  const scenes = [];
+  for (let i = 0; i < 25; i += 1) scenes.push(scene(schema, 'sc-' + i, { action: 'x'.repeat(60 * 5) }));
+  const d = doc(schema, scenes);
+  const state = PM.EditorState.create({ schema: schema, doc: d, plugins: [plugin] });
+  const editorEl = document.getElementById('editor');
+  const view = new PM.EditorView(editorEl, { state: state });
+
+  const markers = editorEl.querySelectorAll('.rga-page-marker');
+  assert.ok(markers.length > 0, 'must have at least one marker for this fixture');
+  for (let i = 0; i < markers.length; i += 1) {
+    const m       = markers[i];
+    const endSpan   = m.querySelector('.rga-page-marker-end');
+    const ruleSpan  = m.querySelector('.rga-page-marker-rule');
+    const beginSpan = m.querySelector('.rga-page-marker-begin');
+    assert.ok(endSpan,   'marker[' + i + '] must contain .rga-page-marker-end span');
+    assert.ok(ruleSpan,  'marker[' + i + '] must contain .rga-page-marker-rule span');
+    assert.ok(beginSpan, 'marker[' + i + '] must contain .rga-page-marker-begin span');
+    const ends   = m.dataset.pageEnds;
+    const begins = m.dataset.pageBegins;
+    assert.equal(endSpan.textContent, 'Page ' + ends,
+      'marker[' + i + '] end span must say "Page ' + ends + '"');
+    assert.equal(beginSpan.textContent, 'Page ' + begins,
+      'marker[' + i + '] begin span must say "Page ' + begins + '"');
+  }
+  view.destroy();
+});
+
+test('Phase C: page-marker aria-label names both page numbers', () => {
+  const { Nav, schema, PM } = boot();
+  const plugin = Nav.buildIndexPlugin();
+  const scenes = [];
+  for (let i = 0; i < 25; i += 1) scenes.push(scene(schema, 'sc-' + i, { action: 'x'.repeat(60 * 5) }));
+  const d = doc(schema, scenes);
+  const state = PM.EditorState.create({ schema: schema, doc: d, plugins: [plugin] });
+  const editorEl = document.getElementById('editor');
+  const view = new PM.EditorView(editorEl, { state: state });
+
+  const markers = editorEl.querySelectorAll('.rga-page-marker');
+  assert.ok(markers.length > 0, 'must have at least one marker for this fixture');
+  for (let i = 0; i < markers.length; i += 1) {
+    const m     = markers[i];
+    const label = m.getAttribute('aria-label') || '';
+    const ends   = m.dataset.pageEnds;
+    const begins = m.dataset.pageBegins;
+    assert.ok(label.includes('page ' + ends),
+      'aria-label must reference the ending page number ' + ends);
+    assert.ok(label.includes('page ' + begins),
+      'aria-label must reference the beginning page number ' + begins);
+  }
+  view.destroy();
 });
