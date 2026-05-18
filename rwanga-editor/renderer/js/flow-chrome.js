@@ -62,6 +62,24 @@
   // Get the Y positions (relative to gutter origin) of each visual line of
   // an element. Empty elements still contribute one line (the block's top).
   function _lineTops(el, originY) {
+    // Slug headings (.rga-scene-heading-v3) are one conceptual visual row even
+    // though the v3 NodeView contains multiple inline children (setting picker,
+    // location text, time picker, dividers). Using range.getClientRects() on a
+    // slug returns 2+ rects with tops 1–3px apart that defeat the 1px dedup
+    // below, producing duplicate gutter line numbers. Treat the slug as a
+    // single bounding rect — one rect, one gutter number per slug, regardless
+    // of how many inline pickers the NodeView contains.
+    //
+    // Wrapped-slug note: if the location text is long enough to wrap to a
+    // second visual line, getBoundingClientRect().top is the TOP of the slug;
+    // the wrapped continuation receives no additional gutter number. This is
+    // intentional — a slug is one structural visual unit (industry convention),
+    // not a sequence of individual visual lines.
+    if (el && el.classList && el.classList.contains('rga-scene-heading-v3')) {
+      return [el.getBoundingClientRect().top - originY];
+    }
+
+    // Existing behavior for all other row types — unchanged.
     const range = document.createRange();
     range.selectNodeContents(el);
     const rects = range.getClientRects();
@@ -198,5 +216,5 @@
     setTimeout(refreshNow, 1500);
   }
 
-  Rga.FlowChrome = { init, refresh: refreshNow, _rebuildLineNumbers: rebuildLineNumbers, _tintCharacters: tintCharacters };
+  Rga.FlowChrome = { init, refresh: refreshNow, _rebuildLineNumbers: rebuildLineNumbers, _tintCharacters: tintCharacters, _lineTops: _lineTops };
 })();
