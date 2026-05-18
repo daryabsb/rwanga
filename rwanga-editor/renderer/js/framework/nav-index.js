@@ -372,12 +372,10 @@
     return PM.DecorationSet.create(doc, decos);
   }
 
-  function _buildPageMarkerWidget(pageNumber) {
-    // pageNumber is the page BEGINNING below this marker (p+2 at the call site).
-    // pageEnds   = the page that just finished above (pageNumber - 1).
-    // pageBegins = the page starting below (pageNumber).
-    const pageEnds   = pageNumber - 1;
-    const pageBegins = pageNumber;
+  function _buildPageMarkerWidget(pageBegins) {
+    // pageBegins is the page BEGINNING below this marker (p+2 at the call site).
+    // pageEnds   = the page that just finished above (pageBegins - 1).
+    const pageEnds = pageBegins - 1;
 
     const el = document.createElement('div');
     el.className = 'rga-page-marker';

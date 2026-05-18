@@ -39,17 +39,6 @@
   user-select: none;
 }
 
-/* Page-break visual in Print — v2 paginator (paginator-v2.js) inserts
-   these as flow-block widget decorations, so the 16px desk-strip TAKES
-   real vertical space and content below is genuinely pushed past it,
-   never masked (the v1 absolute-overlay bug Darya reported). Negative
-   left/right margins extend the strip across the full page width
-   (into the .rga-page's 1.5in/1in padding) so it reads as the gap
-   between two paper sheets, not a thin slice inside the column.
-
-   Title + page-N labels are deferred — reinstating them needs an
-   explicit "top margin" reservation per page (otherwise the absolute-
-   positioned labels overlap next-page content). Tracked as polish. */
 /* .rga-page-break rules removed 2026-05-18 — v3 schema has no pageBreak node;
    archived reference at renderer/js/doc-types/screenplay/archived/page-breaks-v1.js. */
 
@@ -2011,7 +2000,6 @@ body.view-draft-active .rga-draft-footer {
 /* End label (left side) — muted; the page that just finished. */
 #editor-container.view-flow .rga-page-marker .rga-page-marker-end {
   font-size: 0.6875rem;  /* 11px */
-  font-family: var(--font-mono, 'Courier New', Courier, monospace);
   font-weight: 400;
   color: var(--text-tertiary, #6e6e6e);
   letter-spacing: 0.08em;
@@ -2032,7 +2020,6 @@ body.view-draft-active .rga-draft-footer {
 /* Begin label (right side) — slightly stronger; the page now starting. */
 #editor-container.view-flow .rga-page-marker .rga-page-marker-begin {
   font-size: 0.75rem;    /* 12px */
-  font-family: var(--font-mono, 'Courier New', Courier, monospace);
   font-weight: 500;
   color: var(--text-secondary, #9e9e9e);
   letter-spacing: 0.08em;
