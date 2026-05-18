@@ -661,6 +661,15 @@
     var bpClose = Rga.$('#btn-close-bottom-panel');
     if (bpClose) bpClose.innerHTML = Rga.Icons.close;
 
+    // Minimize Contract Fix — inject the same vendored dash glyph
+    // the OS-window minimize button uses (Rga.Icons.minimize). The
+    // previous literal "_" character rendered as a low underscore
+    // glyph that visually got lost next to the close button's SVG;
+    // a real icon gives the minimize action equal visual weight so
+    // users can find and trust the minimize affordance.
+    var bpMin = Rga.$('#btn-minimize-bottom-panel');
+    if (bpMin) bpMin.innerHTML = Rga.Icons.minimize;
+
     // Slice 3 §A: legacy File-tree / tree-chevron / #sync-logo-icon
     // injections retired with the Rga.FileTree module. Their DOM
     // targets (.tree-icon, .tree-chevron, #sync-logo-icon) were

@@ -234,13 +234,20 @@
   display: none;
 }
 
-/* Studio Shell Recovery §E — minimize state.
+/* Studio Shell Recovery §E + Minimize Contract Fix — minimize state.
    Panel HEADER stays visible (tab strip + minimize/close buttons);
    panel BODY collapses to zero. Resize handle is hidden because
    there's no body to resize. Clicking anywhere on the tab strip
-   restores (wired in studio-panel.js). */
+   restores (wired in studio-panel.js).
+   Grid row sized to 34px (tab strip 32px + 1px border-top on
+   #bottom-panel + 1px border-bottom on #bottom-panel-tabs); the
+   previous 32px literal under-allocated the row by 2px because
+   global box-sizing: border-box swallows both borders inside the
+   tab strip's 32px height, so the strip's contents got clipped
+   into the chrome edge and the minimize/close controls visually
+   "disappeared". */
 #center-column.bottom-minimized {
-  grid-template-rows: 1fr 0px 32px;  /* 32px matches #bottom-panel-tabs height */
+  grid-template-rows: 1fr 0px 34px;
 }
 #center-column.bottom-minimized .resize-handle[data-resize="bottom-panel"] {
   display: none;
@@ -248,8 +255,16 @@
 #center-column.bottom-minimized #bottom-panel-content {
   display: none;
 }
+#center-column.bottom-minimized #bottom-panel,
 #center-column.bottom-minimized #bottom-panel-tabs {
-  /* Hint that the strip is itself the restore affordance. */
+  /* Defensive — pin both surfaces to their non-hidden display
+     mode so a future stylesheet (or browser default reset) can
+     never collapse them while the panel is minimized. The tab
+     strip is itself the restore affordance, so it gets pointer
+     cursor too. */
+  display: flex;
+}
+#center-column.bottom-minimized #bottom-panel-tabs {
   cursor: pointer;
 }
 
