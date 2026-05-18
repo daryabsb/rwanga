@@ -58,18 +58,26 @@ test('Phase 1: #editor-container.view-flow .rga-page-marker has a visible-gap ma
     'communicate a real page gap. Got: ' + marginValue);
 });
 
-test('Phase C: Flow .rga-page-marker has a solid top boundary (single dividing line)', () => {
+test('Phase C correction: Flow .rga-page-marker-rule carries the solid hairline (single dividing line)', () => {
   const css = readText(CSS_PATH);
   const body = ruleBody(css, '#editor-container.view-flow .rga-page-marker');
   assert.ok(body, 'Flow override for .rga-page-marker must exist');
-  // Phase C design: a single solid border-top divides pages.
-  // The old sandwiched-label design (border-top + border-bottom) is replaced
-  // by a two-sided flex layout with a single top rule.
-  assert.ok(/border-top\s*:\s*\d+px\s+solid/.test(body),
-    'Flow .rga-page-marker must have a solid border-top (the single dividing line)');
-  // border-bottom is now 0 (explicit) — verify it is NOT a gradient sandwich.
+  // Phase C correction: the hairline moved from the parent border-top to the
+  // .rga-page-marker-rule span (which renders as a block-level border-top).
+  // This allows the label to sit centered below the full-width hairline.
+  // The parent .rga-page-marker must NOT have a border-top (it's delegated
+  // to .rga-page-marker-rule). Verify parent has border-top: 0 or no border-top.
+  assert.ok(!/border-top\s*:\s*\d+px\s+solid/.test(body),
+    'Phase C correction: parent .rga-page-marker border-top must NOT be a solid line ' +
+    '(hairline is now on .rga-page-marker-rule)');
+  // border-bottom is 0 (explicit) — not a gradient sandwich.
   assert.ok(/border-bottom\s*:\s*0/.test(body),
     'Phase C: Flow .rga-page-marker border-bottom must be 0 (single-line design, not a sandwich)');
+  // The .rga-page-marker-rule child must carry the solid border-top hairline.
+  const ruleBody_ = ruleBody(css, '#editor-container.view-flow .rga-page-marker .rga-page-marker-rule');
+  assert.ok(ruleBody_, '.rga-page-marker-rule rule must exist in Flow override');
+  assert.ok(/border-top\s*:\s*\d+px\s+solid/.test(ruleBody_),
+    '.rga-page-marker-rule must carry the 1px solid border-top hairline');
 });
 
 test('Phase C: Flow .rga-page-marker uses transparent background (Phase C removes gradient)', () => {

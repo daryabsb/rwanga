@@ -1964,68 +1964,55 @@ body.view-draft-active .rga-draft-footer {
   pointer-events: none; /* clicks pass through to surrounding content */
 }
 
-/* Flow override — Phase C two-side page-number band.
-   The band clearly labels both sides of the transition:
-   left/muted "Page N" (the page just ended) and right/stronger
-   "Page N+1" (the page now beginning). No gradient, no dashes,
-   no fake paper edges.
+/* Flow override — Phase C correction: single centered page label.
+   Writer mental model: "I am now entering Page N+1". The previous
+   dual-label design (Page N left, Page N+1 right) added noise. The
+   corrected design is: hairline spans the full row, "Page N+1" is
+   centered below it. Clean and calm. No dual labels. No arrows.
 
-   Layout: negative horizontal margins extend the single dividing
-   rule to the full page-row width. Inner spans (.rga-page-marker-end,
-   .rga-page-marker-begin) are flexed so the end label sits at the
-   left and the begin label at the right, with a centered rule line. */
+   Layout: negative horizontal margins extend the hairline to the full
+   page-row width. .rga-page-marker-rule renders the 1px line across
+   the full width. .rga-page-marker-begin sits centered below it. */
 #editor-container.view-flow .rga-page-marker {
-  /* Generous breathing room: 28px above, 24px below. The gap is
-     the "between pages" signal; the rule is the dividing line. */
-  margin: 28px -0.5in 24px;
-  padding: 0;
+  /* 28px above hairline; 16px between hairline and label; 26px below
+     label so the next page's first block doesn't crowd it. */
+  margin: 28px -0.5in 0;
+  padding: 0 0 26px;
   background: transparent;
-
-  /* Single horizontal rule spanning the full band width. */
-  border-top:    1px solid var(--border-secondary, rgba(128, 128, 128, 0.30));
+  border-top: 0;
   border-bottom: 0;
 
-  /* Flex: end label left, rule centre, begin label right. */
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5em;
+  /* Block layout: rule on top, label centered below. */
+  display: block;
+  text-align: center;
 
   /* Base font — overridden per-span below. */
   font-family: var(--font-mono, 'Courier New', Courier, monospace);
-  font-size: 0;          /* hide any stray text nodes; spans set their own */
+  font-size: 0;     /* hide any stray text nodes; spans set their own */
   letter-spacing: 0;
 }
 
-/* End label (left side) — muted; the page that just finished. */
-#editor-container.view-flow .rga-page-marker .rga-page-marker-end {
-  font-size: 0.6875rem;  /* 11px */
-  font-weight: 400;
-  color: var(--text-tertiary, #6e6e6e);
-  letter-spacing: 0.08em;
-  text-align: right;
-  padding: 4px 0.5em 4px 0;
-  flex-shrink: 0;
-}
-
-/* Rule spine — a zero-width flex child that grows to fill the centre.
-   The border-top on the parent already draws the line; this span is
-   present in the DOM for future CSS hooks but contributes no visual. */
+/* Hairline rule — spans the full band width (inherits the negative
+   margin from the parent). Displayed as a block element so it occupies
+   its own row above the label. */
 #editor-container.view-flow .rga-page-marker .rga-page-marker-rule {
-  flex: 1 1 auto;
-  min-width: 0;
+  display: block;
+  width: 100%;
+  height: 0;
+  border-top: 1px solid var(--border-secondary, rgba(128, 128, 128, 0.30));
+  margin-bottom: 16px;
   font-size: 0;
 }
 
-/* Begin label (right side) — slightly stronger; the page now starting. */
+/* Begin label — centered below the hairline. Single calm typographic
+   label naming the page being entered. */
 #editor-container.view-flow .rga-page-marker .rga-page-marker-begin {
-  font-size: 0.75rem;    /* 12px */
+  display: inline-block;
+  font-size: 0.8125rem;  /* 13px */
   font-weight: 500;
   color: var(--text-secondary, #9e9e9e);
   letter-spacing: 0.08em;
-  text-align: left;
-  padding: 4px 0 4px 0.5em;
-  flex-shrink: 0;
+  text-align: center;
 }
 
 body.view-draft-active .rga-page-marker,
@@ -2061,9 +2048,8 @@ body.view-print-active .rga-page-marker {
   text-align: right;
   border: 0;
   background: transparent;
-  /* Hide the widget's inner spans (Phase C replaces the old text with
-     .rga-page-marker-end / -rule / -begin spans) so the ::after
-     pseudo's manuscript-style "N." can show alone. */
+  /* Hide the widget's inner spans (.rga-page-marker-rule / -begin) so
+     the ::after pseudo's manuscript-style "N." can show alone. */
   font-size: 0;
   color: transparent;
   line-height: 0;

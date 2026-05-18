@@ -30,10 +30,15 @@
   // Phase 9: v3 single-doc structure — scene chrome lives in
   // .rga-scene-v3 NodeViews (heading + per-block children) plus the
   // baseline outer body blocks (title strip, paragraphs, headings).
+  //
+  // NOTE: .rga-scene-v3-num is the scene-number badge chrome (e.g.
+  // "SCENE 2"). It is contentEditable=false / aria-hidden=true —
+  // not a writer-authored content line. Including it was causing a
+  // spurious +1 line number per scene (visible as a discrepancy near
+  // the scene boundary, e.g. lines 37/38 in the fixture). Removed.
   function _collectRowElements(root) {
     if (!root) return [];
     const selectors = [
-      '.rga-scene-v3-num',
       '.rga-scene-heading-v3',
       '.rga-scene-v3-content .rga-block-action',
       '.rga-scene-v3-content .rga-block-character',

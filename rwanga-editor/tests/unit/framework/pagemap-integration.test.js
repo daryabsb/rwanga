@@ -186,29 +186,28 @@ test('page-marker widgets appear in editor DOM when doc paginates beyond 1 page'
   const markers = editorEl.querySelectorAll('.rga-page-marker');
   const pageMap = Nav.getPageMap(view.state);
   assert.equal(markers.length, pageMap.length - 1);
-  // Phase C widget DOM contract checks.
+  // Phase C correction: single-label design contract checks.
   if (markers.length > 0) {
     const m = markers[0];
     // data-page-number preserved for Print view's CSS ::after rule.
     assert.equal(m.dataset.pageNumber, '2',
       'data-page-number must equal the page beginning below the marker (2 for the first boundary)');
-    // New Phase C attributes carry both sides of the transition.
+    // Phase C attributes carry both sides of the transition.
     assert.equal(m.dataset.pageEnds, '1',
       'data-page-ends must equal the page that just ended (1 for the first boundary)');
     assert.equal(m.dataset.pageBegins, '2',
       'data-page-begins must equal the page that is beginning (2 for the first boundary)');
-    // Inner spans carry visible labels.
+    // Single-label design: NO end-of-page span (Phase C correction).
     const endSpan   = m.querySelector('.rga-page-marker-end');
     const beginSpan = m.querySelector('.rga-page-marker-begin');
-    assert.ok(endSpan,   '.rga-page-marker-end span must exist');
+    assert.strictEqual(endSpan, null,
+      'no end-of-page label per corrected single-label design');
     assert.ok(beginSpan, '.rga-page-marker-begin span must exist');
-    assert.equal(endSpan.textContent, 'Page 1',
-      '.rga-page-marker-end text must be "Page N" (the ending page)');
     assert.equal(beginSpan.textContent, 'Page 2',
-      '.rga-page-marker-begin text must be "Page N+1" (the beginning page)');
-    // aria-label provides screen-reader clarity.
-    assert.ok(/End of page 1 — page 2 begins/.test(m.getAttribute('aria-label')),
-      'aria-label must name both page numbers');
+      '.rga-page-marker-begin text must be "Page N+1" (the page being entered)');
+    // aria-label uses the simpler "entering" form.
+    assert.ok(/Entering page 2/.test(m.getAttribute('aria-label')),
+      'aria-label must use the "Entering page N+1" form');
     // Old dashes format must NOT appear anywhere in the marker.
     assert.ok(!/— Page \d+ —/.test(m.textContent),
       'Phase C removes the old "— Page N —" dash format');
@@ -329,7 +328,7 @@ test('Phase C: page-marker widget preserves data-page-number equal to data-page-
   view.destroy();
 });
 
-test('Phase C: page-marker inner spans carry "Page N" and "Page N+1" text for all boundaries', () => {
+test('Phase C correction: page-marker has exactly rule + begin spans; NO end-of-page label (single-label design)', () => {
   const { Nav, schema, PM } = boot();
   const plugin = Nav.buildIndexPlugin();
   const scenes = [];
@@ -342,24 +341,23 @@ test('Phase C: page-marker inner spans carry "Page N" and "Page N+1" text for al
   const markers = editorEl.querySelectorAll('.rga-page-marker');
   assert.ok(markers.length > 0, 'must have at least one marker for this fixture');
   for (let i = 0; i < markers.length; i += 1) {
-    const m       = markers[i];
+    const m         = markers[i];
     const endSpan   = m.querySelector('.rga-page-marker-end');
     const ruleSpan  = m.querySelector('.rga-page-marker-rule');
     const beginSpan = m.querySelector('.rga-page-marker-begin');
-    assert.ok(endSpan,   'marker[' + i + '] must contain .rga-page-marker-end span');
-    assert.ok(ruleSpan,  'marker[' + i + '] must contain .rga-page-marker-rule span');
-    assert.ok(beginSpan, 'marker[' + i + '] must contain .rga-page-marker-begin span');
-    const ends   = m.dataset.pageEnds;
+    // The end-of-page span was removed in the Phase C correction.
+    assert.strictEqual(endSpan, null,
+      'marker[' + i + '] must NOT contain .rga-page-marker-end span (single-label design)');
+    assert.ok(ruleSpan,  'marker[' + i + '] must contain .rga-page-marker-rule span (hairline)');
+    assert.ok(beginSpan, 'marker[' + i + '] must contain .rga-page-marker-begin span (page label)');
     const begins = m.dataset.pageBegins;
-    assert.equal(endSpan.textContent, 'Page ' + ends,
-      'marker[' + i + '] end span must say "Page ' + ends + '"');
     assert.equal(beginSpan.textContent, 'Page ' + begins,
-      'marker[' + i + '] begin span must say "Page ' + begins + '"');
+      'marker[' + i + '] begin span must say "Page ' + begins + '" (the page being entered)');
   }
   view.destroy();
 });
 
-test('Phase C: page-marker aria-label names both page numbers', () => {
+test('Phase C correction: page-marker aria-label uses "Entering page N+1" form', () => {
   const { Nav, schema, PM } = boot();
   const plugin = Nav.buildIndexPlugin();
   const scenes = [];
@@ -372,14 +370,12 @@ test('Phase C: page-marker aria-label names both page numbers', () => {
   const markers = editorEl.querySelectorAll('.rga-page-marker');
   assert.ok(markers.length > 0, 'must have at least one marker for this fixture');
   for (let i = 0; i < markers.length; i += 1) {
-    const m     = markers[i];
-    const label = m.getAttribute('aria-label') || '';
-    const ends   = m.dataset.pageEnds;
+    const m      = markers[i];
+    const label  = m.getAttribute('aria-label') || '';
     const begins = m.dataset.pageBegins;
-    assert.ok(label.includes('page ' + ends),
-      'aria-label must reference the ending page number ' + ends);
-    assert.ok(label.includes('page ' + begins),
-      'aria-label must reference the beginning page number ' + begins);
+    // Corrected single-label design: aria-label names only the page being entered.
+    assert.ok(label.toLowerCase().includes('entering page ' + begins),
+      'aria-label must use "Entering page N+1" form for marker[' + i + ']; got: ' + label);
   }
   view.destroy();
 });
@@ -400,6 +396,37 @@ test('Phase C: page-marker does NOT set aria-hidden (otherwise aria-label is sil
     const marker = markers[i];
     assert.ok(!marker.hasAttribute('aria-hidden'),
       'page-marker must not set aria-hidden — would mask aria-label');
+  }
+  view.destroy();
+});
+
+// ----------------------------------------------------------------
+// Phase C correction — single-label design (no end-of-page span)
+// ----------------------------------------------------------------
+
+test('Correction: page-marker has NO end-of-page label (single-label design)', () => {
+  // Regression guard: after the Phase C correction, no marker in any
+  // paginated doc must contain a .rga-page-marker-end element.
+  // The end-of-page label was removed because it added noise to the
+  // writer's mental model. data-page-ends attribute is still set; only
+  // the rendered <span> is absent.
+  const { Nav, schema, PM } = boot();
+  const plugin = Nav.buildIndexPlugin();
+  const scenes = [];
+  for (let i = 0; i < 25; i += 1) scenes.push(scene(schema, 'sc-' + i, { action: 'x'.repeat(60 * 5) }));
+  const d = doc(schema, scenes);
+  const state = PM.EditorState.create({ schema: schema, doc: d, plugins: [plugin] });
+  const editorEl = document.getElementById('editor');
+  const view = new PM.EditorView(editorEl, { state: state });
+
+  const markers = editorEl.querySelectorAll('.rga-page-marker');
+  assert.ok(markers.length > 0, 'must have at least one marker for this fixture');
+  for (let i = 0; i < markers.length; i += 1) {
+    assert.strictEqual(
+      markers[i].querySelector('.rga-page-marker-end'),
+      null,
+      'no end-of-page label per corrected single-label design (marker[' + i + '])'
+    );
   }
   view.destroy();
 });

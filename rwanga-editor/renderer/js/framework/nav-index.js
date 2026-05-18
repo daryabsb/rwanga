@@ -375,6 +375,11 @@
   function _buildPageMarkerWidget(pageBegins) {
     // pageBegins is the page BEGINNING below this marker (p+2 at the call site).
     // pageEnds   = the page that just finished above (pageBegins - 1).
+    // Phase C correction: single-label design. The writer's mental model is
+    // "I am now entering Page N+1" — the end-of-page label adds noise.
+    // Only .rga-page-marker-rule (hairline) + .rga-page-marker-begin (label)
+    // are rendered. data-page-ends is preserved for accessibility consumers
+    // and Phase D print-preview parity — it carries no rendered text.
     const pageEnds = pageBegins - 1;
 
     const el = document.createElement('div');
@@ -383,15 +388,10 @@
     // data-page-number is preserved for Print view's CSS ::after rule
     // which renders "N." right-aligned using attr(data-page-number).
     el.dataset.pageNumber = String(pageBegins);
-    // New attributes carry both sides of the transition.
+    // data-page-ends kept for accessibility consumers; no rendered text.
     el.dataset.pageEnds   = String(pageEnds);
     el.dataset.pageBegins = String(pageBegins);
-    el.setAttribute('aria-label',
-      'End of page ' + pageEnds + ' — page ' + pageBegins + ' begins');
-
-    const endSpan = document.createElement('span');
-    endSpan.className = 'rga-page-marker-end';
-    endSpan.textContent = 'Page ' + pageEnds;
+    el.setAttribute('aria-label', 'Entering page ' + pageBegins);
 
     const ruleSpan = document.createElement('span');
     ruleSpan.className = 'rga-page-marker-rule';
@@ -400,7 +400,6 @@
     beginSpan.className = 'rga-page-marker-begin';
     beginSpan.textContent = 'Page ' + pageBegins;
 
-    el.appendChild(endSpan);
     el.appendChild(ruleSpan);
     el.appendChild(beginSpan);
     return el;
