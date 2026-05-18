@@ -37,10 +37,8 @@ function ruleBody(css, selector) {
 // Contract Fix §1 — minimized grid row has breathing room
 // ----------------------------------------------------------------
 
-test('Minimize Contract: bottom-minimized grid row ≥ 34px (room for tab strip + borders inside border-box)', () => {
+test('Minimize Contract v2: bottom-minimized grid row ≥ 40px (ample headroom for tab strip rendering)', () => {
   const css = read(SHELL_CSS);
-  // Match the bare rule `#center-column.bottom-minimized {` (not the
-  // descendant selectors). The rule body contains grid-template-rows.
   const bareRule = css.match(/#center-column\.bottom-minimized\s*\{([^}]*)\}/);
   assert.ok(bareRule, '#center-column.bottom-minimized rule must exist');
   const body = bareRule[1];
@@ -53,23 +51,51 @@ test('Minimize Contract: bottom-minimized grid row ≥ 34px (room for tab strip 
   const panelTrack = tracks[2];
   const panelPx = panelTrack.match(/^(\d+)px$/);
   assert.ok(panelPx, 'third track must be a literal px value');
-  assert.ok(parseInt(panelPx[1], 10) >= 34,
-    'panel grid row must be ≥ 34px so tabs (32px) + parent border-top (1px) + tab strip border-bottom (1px) all fit inside border-box. Got: ' + panelTrack);
+  assert.ok(parseInt(panelPx[1], 10) >= 40,
+    'panel grid row must be ≥ 40px (v2) — ample headroom so column-flex pressure inside #bottom-panel can never shrink the tab strip to invisibility. Got: ' + panelTrack);
+});
+
+test('Minimize Contract v2: #bottom-panel-tabs has explicit min-height + flex basis (cannot be shrunk by parent flex)', () => {
+  const css = read(SHELL_CSS);
+  // The tabs rule under .bottom-minimized must declare min-height
+  // and a flex basis ≥ 32px so column-flex on #bottom-panel never
+  // shrinks the strip below its natural rendered height.
+  const tabsRules = css.match(/#center-column\.bottom-minimized\s+#bottom-panel-tabs[^{]*\{[^}]*\}/g) || [];
+  assert.ok(tabsRules.length >= 1, 'at least one minimized #bottom-panel-tabs rule must exist');
+  const allDecls = tabsRules.join(' ');
+  assert.ok(/min-height\s*:\s*\d+px/.test(allDecls),
+    'minimized #bottom-panel-tabs must declare min-height so parent flex cannot shrink it');
+  assert.ok(/flex\s*:\s*0\s+0\s+\d+px/.test(allDecls),
+    'minimized #bottom-panel-tabs must declare flex: 0 0 Npx (basis ≥ 32px) so the strip holds its size');
+});
+
+test('Minimize Contract v2: #bottom-panel pins min-height to the row size (column flex can\'t squeeze children)', () => {
+  const css = read(SHELL_CSS);
+  const panelRule = css.match(/#center-column\.bottom-minimized\s+#bottom-panel\s*\{([^}]*)\}/);
+  assert.ok(panelRule, 'minimized #bottom-panel rule must exist');
+  assert.ok(/min-height\s*:\s*\d+px/.test(panelRule[1]),
+    'minimized #bottom-panel must declare min-height so column flex has guaranteed space for the tab strip');
 });
 
 // ----------------------------------------------------------------
 // Contract Fix §2 — defensive display rules for the minimized shell
 // ----------------------------------------------------------------
 
-test('Minimize Contract: #bottom-panel + #bottom-panel-tabs declare display: flex when minimized (defensive)', () => {
+test('Minimize Contract: #bottom-panel + #bottom-panel-tabs both declare display: flex when minimized (defensive)', () => {
   const css = read(SHELL_CSS);
-  // The two surfaces share a comma-separated rule that pins them to
-  // display: flex while the parent column carries .bottom-minimized.
-  const re = /#center-column\.bottom-minimized\s+#bottom-panel\s*,\s*#center-column\.bottom-minimized\s+#bottom-panel-tabs\s*\{([^}]*)\}/;
-  const m = css.match(re);
-  assert.ok(m, 'a combined rule for #bottom-panel + #bottom-panel-tabs must exist for the minimized state');
-  assert.ok(/display\s*:\s*flex/.test(m[1]),
-    'both surfaces must declare display: flex while minimized so nothing collapses the tab strip');
+  // After v2 the two surfaces have separate rule bodies (each
+  // carries its own min-height / flex-basis tuning). Each must
+  // still declare display: flex so neither can be collapsed by a
+  // future stylesheet while the panel is minimized.
+  const panelRule = css.match(/#center-column\.bottom-minimized\s+#bottom-panel\s*\{([^}]*)\}/);
+  assert.ok(panelRule, 'minimized #bottom-panel rule must exist');
+  assert.ok(/display\s*:\s*flex/.test(panelRule[1]),
+    '#bottom-panel must declare display: flex while minimized');
+  const tabsRules = css.match(/#center-column\.bottom-minimized\s+#bottom-panel-tabs[^{]*\{[^}]*\}/g) || [];
+  assert.ok(tabsRules.length >= 1, 'minimized #bottom-panel-tabs rule must exist');
+  const allTabsDecls = tabsRules.join(' ');
+  assert.ok(/display\s*:\s*flex/.test(allTabsDecls),
+    '#bottom-panel-tabs must declare display: flex while minimized');
 });
 
 test('Minimize Contract: minimized tab strip carries cursor: pointer (one-click restore affordance)', () => {

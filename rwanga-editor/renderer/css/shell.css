@@ -234,20 +234,32 @@
   display: none;
 }
 
-/* Studio Shell Recovery §E + Minimize Contract Fix — minimize state.
+/* Studio Shell Recovery §E + Minimize Contract Fix v2 — minimize state.
    Panel HEADER stays visible (tab strip + minimize/close buttons);
    panel BODY collapses to zero. Resize handle is hidden because
    there's no body to resize. Clicking anywhere on the tab strip
    restores (wired in studio-panel.js).
-   Grid row sized to 34px (tab strip 32px + 1px border-top on
-   #bottom-panel + 1px border-bottom on #bottom-panel-tabs); the
-   previous 32px literal under-allocated the row by 2px because
-   global box-sizing: border-box swallows both borders inside the
-   tab strip's 32px height, so the strip's contents got clipped
-   into the chrome edge and the minimize/close controls visually
-   "disappeared". */
+
+   The earlier 34px row still produced an empty strip in some
+   layouts: under box-sizing: border-box the column-direction flex
+   of #bottom-panel was choosing to shrink #bottom-panel-tabs to
+   the remaining content area (33px) which — combined with the
+   strip's own 32px height plus 1px border-bottom — left no usable
+   space for tab content and Chromium rendered the strip as empty
+   chrome.
+
+   Fix v2:
+   - Row bumped to 40px (ample headroom; no possibility of clipping
+     even if a future border/padding tweak adds a pixel).
+   - #bottom-panel min-height pinned to the row height so column
+     flex never tries to shrink children below their natural size.
+   - #bottom-panel-tabs gets explicit min-height + flex: 0 0 32px so
+     the strip is GUARANTEED to render at its full content height
+     regardless of parent flex pressure.
+   - display: flex declared on both surfaces (defensive against
+     any future reset that might collapse them). */
 #center-column.bottom-minimized {
-  grid-template-rows: 1fr 0px 34px;
+  grid-template-rows: 1fr 0px 40px;
 }
 #center-column.bottom-minimized .resize-handle[data-resize="bottom-panel"] {
   display: none;
@@ -255,16 +267,20 @@
 #center-column.bottom-minimized #bottom-panel-content {
   display: none;
 }
-#center-column.bottom-minimized #bottom-panel,
-#center-column.bottom-minimized #bottom-panel-tabs {
-  /* Defensive — pin both surfaces to their non-hidden display
-     mode so a future stylesheet (or browser default reset) can
-     never collapse them while the panel is minimized. The tab
-     strip is itself the restore affordance, so it gets pointer
-     cursor too. */
+#center-column.bottom-minimized #bottom-panel {
   display: flex;
+  min-height: 40px;
 }
 #center-column.bottom-minimized #bottom-panel-tabs {
+  /* Belt-and-suspenders: flex basis pins the strip's height so
+     parent flex pressure can never shrink it below 32px; min-height
+     reinforces the same invariant for any layout engine quirk that
+     respects min-height but not the flex basis. cursor: pointer
+     keeps the one-click-restore affordance the strip has owned
+     since §E. */
+  display: flex;
+  flex: 0 0 32px;
+  min-height: 32px;
   cursor: pointer;
 }
 

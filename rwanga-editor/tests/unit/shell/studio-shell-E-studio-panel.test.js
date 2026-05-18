@@ -117,15 +117,32 @@ test('§E: minimize and close are MUTUALLY EXCLUSIVE CSS classes (state cannot b
   assert.equal(col.classList.contains('bottom-minimized'), false);
 });
 
-test('§E: minimize ≠ close — toggle keyboard behaviour skips minimized (closed ↔ open)', () => {
+test('§E (revised): toggle from minimized RESTORES to open (one-keystroke restore from minimized)', () => {
   const { Rga } = boot();
   Rga.Shell.StudioPanel.minimize();
   Rga.Shell.StudioPanel.toggle();
-  // Toggle from minimized must go to CLOSED (treating minimized as
-  // "visible enough to hide"), preserving the long-standing Cmd+J
-  // "show/hide the panel" mental model. NOT to open.
+  // Studio Panel Toggle Contract Fix — the original §E mapping
+  // (minimized → closed) made the user press Ctrl+J twice to bring
+  // the panel back after minimizing. The fix treats minimized as a
+  // hidden-ish state for toggle purposes: one keystroke restores.
+  // Same UX as VS Code / Cursor.
+  assert.equal(Rga.Shell.StudioPanel.state(), 'open',
+    'toggle from minimized → open (one-keystroke restore — matches VS Code Ctrl+J behaviour)');
+});
+
+test('§E (revised): toggle from open hides → closed (unchanged)', () => {
+  const { Rga } = boot();
+  Rga.Shell.StudioPanel.toggle();
   assert.equal(Rga.Shell.StudioPanel.state(), 'closed',
-    'toggle from minimized → closed (Cmd+J = "hide this thing")');
+    'toggle from open hides to closed (the user explicitly wants the panel gone)');
+});
+
+test('§E (revised): toggle from closed restores → open (unchanged)', () => {
+  const { Rga } = boot();
+  Rga.Shell.StudioPanel.hide();
+  Rga.Shell.StudioPanel.toggle();
+  assert.equal(Rga.Shell.StudioPanel.state(), 'open',
+    'toggle from closed restores to open');
 });
 
 // ----------------------------------------------------------------

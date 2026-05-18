@@ -119,13 +119,26 @@
     _setState('open');
   }
 
-  // Keyboard / close-button / View-menu toggle: closed ↔ open. Going
-  // OUT of minimized goes to open (not closed) — the minimized state
-  // is reached only via the explicit minimize button. This matches the
-  // long-standing UX where Ctrl+J = "show / hide the panel".
+  // Keyboard / View-menu toggle (Ctrl+J / Ctrl+`):
+  //   open      → closed  (hide the panel)
+  //   minimized → open    (restore in one keystroke — the user
+  //                        already minimized the panel, the
+  //                        toggle now treats minimized as
+  //                        "needs restoring" instead of "needs
+  //                        further hiding")
+  //   closed    → open    (show the panel)
+  //
+  // Previous §E behaviour mapped minimized → closed, which forced
+  // users to press the shortcut TWICE to bring the panel back from
+  // a minimized state (minimized → closed → open). The user-
+  // reported regression was: "after minimize you have to open twice
+  // to see it again." The new mapping treats minimized as a hidden-
+  // ish state for toggle purposes — same UX as VS Code / Cursor
+  // where Ctrl+J always brings the panel back from any non-open
+  // state.
   function toggle() {
     const cur = _currentState();
-    _setState(cur === 'closed' ? 'open' : 'closed');
+    _setState(cur === 'open' ? 'closed' : 'open');
   }
 
   function _currentState() {
