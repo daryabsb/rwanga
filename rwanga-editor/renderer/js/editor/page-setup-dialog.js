@@ -99,6 +99,13 @@
         };
         if (Rga.Doc && Rga.Doc.markDirty) Rga.Doc.markDirty(doc);
         if (typeof onApply === 'function') onApply(ps);
+        // SP-03: Dispatch a zero-text-change transaction carrying rga.forceReindex
+        // so the nav-index plugin rebuilds the PageMap (and page-break bands update)
+        // without requiring the user to type. onApply(ps) runs first so visual
+        // surface updates and pagination updates happen in the same gesture.
+        var _view = Rga.TabManager && typeof Rga.TabManager._editorView === 'function'
+          ? Rga.TabManager._editorView() : null;
+        if (_view) _view.dispatch(_view.state.tr.setMeta('rga.forceReindex', true));
         close();
       }
     };

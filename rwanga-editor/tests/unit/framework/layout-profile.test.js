@@ -100,3 +100,40 @@ test('sceneHeading carries separator strings (setting↔location, location↔tim
   assert.equal(p.blocks.sceneHeading.separators.settingLocation, ' ');
   assert.equal(p.blocks.sceneHeading.separators.locationTime, ' — ');
 });
+
+// ----------------------------------------------------------------
+// SP-19 fix — paperSize is canonical; size accepted as legacy alias
+// ----------------------------------------------------------------
+
+test('SP-19: paperSize field resolves paper dimensions (canonical path)', () => {
+  // FAILS before fix: _resolvePageSize read ps.size, ignoring ps.paperSize.
+  // PASSES after fix: ps.paperSize is read first as the canonical field.
+  const { LP } = boot();
+  const p = LP.compose(null, { pageSetup: { paperSize: 'A4', margins: { top: 1, bottom: 1, left: 1.5, right: 1, unit: 'in' } } });
+  assert.ok(Math.abs(p.pageSize.w - 8.2677) < 0.01,
+    'A4 width via paperSize: expected ~8.2677, got ' + p.pageSize.w);
+  assert.ok(Math.abs(p.pageSize.h - 11.6929) < 0.01,
+    'A4 height via paperSize: expected ~11.6929, got ' + p.pageSize.h);
+});
+
+test('SP-19: legacy size field still resolves paper dimensions (backward compat for v2 docs)', () => {
+  // Regression guard: old v2 docs may still carry { size: 'A4' }.
+  // The fix adds ps.size as a fallback alias, so existing docs keep working.
+  const { LP } = boot();
+  const p = LP.compose(null, { pageSetup: { size: 'A4', margins: { top: 1, bottom: 1, left: 1.5, right: 1, unit: 'in' } } });
+  assert.ok(Math.abs(p.pageSize.w - 8.2677) < 0.01,
+    'A4 width via legacy size: expected ~8.2677, got ' + p.pageSize.w);
+  assert.ok(Math.abs(p.pageSize.h - 11.6929) < 0.01,
+    'A4 height via legacy size: expected ~11.6929, got ' + p.pageSize.h);
+});
+
+test('SP-19: paperSize takes precedence over legacy size when both present', () => {
+  // If a doc somehow has both fields, paperSize wins (it is canonical).
+  const { LP } = boot();
+  const p = LP.compose(null, { pageSetup: { paperSize: 'Letter', size: 'A4', margins: { top: 1, bottom: 1, left: 1.5, right: 1, unit: 'in' } } });
+  // Letter: 8.5 × 11.0
+  assert.ok(Math.abs(p.pageSize.w - 8.5) < 0.01,
+    'Letter width must win when paperSize=Letter overrides size=A4; got ' + p.pageSize.w);
+  assert.ok(Math.abs(p.pageSize.h - 11.0) < 0.01,
+    'Letter height must win when paperSize=Letter overrides size=A4; got ' + p.pageSize.h);
+});

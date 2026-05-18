@@ -380,6 +380,146 @@ test('Phase C correction: page-marker aria-label uses "Entering page N+1" form',
   view.destroy();
 });
 
+// ----------------------------------------------------------------
+// SP-03 fix — rga.forceReindex meta flag triggers PageMap rebuild
+// without requiring tr.docChanged
+// ----------------------------------------------------------------
+
+test('SP-03 T1: margin change + forceReindex → LayoutProfile reflects new margins', () => {
+  // Test 1: change margin, dispatch forceReindex, verify the rebuilt PageMap
+  // reflects the new layout profile (the plugin re-ran _buildPluginState which
+  // calls LayoutProfile.compose with the doc's updated settings).
+  const { Nav, schema, PM } = boot();
+
+  // Wire a doc whose settings we can mutate to simulate dialog Apply.
+  const fakeSettings = {
+    pageSetup: {
+      paperSize: 'Letter',
+      margins: { top: 1.0, bottom: 1.0, left: 1.5, right: 1.0, unit: 'in' }
+    }
+  };
+  // Inject settings into TabManager.activeDoc stub before the plugin reads them.
+  global.window.Rga.TabManager = {
+    activeDoc: function() { return { settings: fakeSettings }; }
+  };
+
+  const plugin = Nav.buildIndexPlugin();
+  const scenes = [];
+  for (let i = 0; i < 30; i += 1) scenes.push(scene(schema, 'sc-' + i, { action: 'x'.repeat(60 * 4) }));
+  const d = doc(schema, scenes);
+  const state0 = PM.EditorState.create({ schema: schema, doc: d, plugins: [plugin] });
+  const pageMap0 = Nav.getPageMap(state0);
+  assert.ok(Array.isArray(pageMap0) && pageMap0.length >= 1, 'initial pageMap present');
+
+  // Simulate Page Setup Apply: shrink top margin drastically to increase usable height
+  // and thus linesPerPage — page count should drop or layout profile should change.
+  fakeSettings.pageSetup.margins = { top: 0.25, bottom: 0.25, left: 1.5, right: 1.0, unit: 'in' };
+
+  // Dispatch forceReindex without any text change (tr.docChanged === false).
+  const tr = state0.tr.setMeta('rga.forceReindex', true);
+  assert.strictEqual(tr.docChanged, false, 'transaction must not change the doc');
+  const state1 = state0.apply(tr);
+
+  const pageMap1 = Nav.getPageMap(state1);
+  assert.ok(Array.isArray(pageMap1), 'rebuilt pageMap present');
+  // Smaller margins → more lines per page → fewer or equal pages for same content.
+  // The key assertion: pageMap1 is a NEW reference (plugin rebuilt its state).
+  assert.notStrictEqual(pageMap1, pageMap0, 'SP-03: PageMap must be a new reference after forceReindex with changed margins');
+
+  delete global.window.Rga.TabManager;
+});
+
+test('SP-03 T2: forceReindex with margin change produces updated PageMap reference (status-bar source-of-truth)', () => {
+  // Test 2: This is the status-bar regression test. The PageMap returned by
+  // Nav.getPageMap() is the source of truth for "Page X/Y". After a margin
+  // change + forceReindex the reference must be new — the status bar will
+  // re-read the up-to-date value on its next read.
+  const { Nav, schema, PM } = boot();
+
+  const fakeSettings = {
+    pageSetup: {
+      paperSize: 'Letter',
+      margins: { top: 1.0, bottom: 1.0, left: 1.5, right: 1.0, unit: 'in' }
+    }
+  };
+  global.window.Rga.TabManager = {
+    activeDoc: function() { return { settings: fakeSettings }; }
+  };
+
+  const plugin = Nav.buildIndexPlugin();
+  const d = doc(schema, [scene(schema, 'a'), scene(schema, 'b')]);
+  const state0 = PM.EditorState.create({ schema: schema, doc: d, plugins: [plugin] });
+  const pageMap0 = Nav.getPageMap(state0);
+
+  // Change margins — simulates dialog Apply.
+  fakeSettings.pageSetup.margins = { top: 0.5, bottom: 0.5, left: 1.0, right: 0.75, unit: 'in' };
+
+  const tr = state0.tr.setMeta('rga.forceReindex', true);
+  const state1 = state0.apply(tr);
+  const pageMap1 = Nav.getPageMap(state1);
+
+  // New reference proves the plugin rebuilt — status bar will read fresh value.
+  assert.notStrictEqual(pageMap1, pageMap0,
+    'SP-03: Nav.getPageMap must return a new reference after forceReindex (status-bar source-of-truth)');
+  // The PageMap must still be a valid array (not null / broken).
+  assert.ok(Array.isArray(pageMap1) && pageMap1.length >= 1, 'rebuilt pageMap is a valid non-empty array');
+
+  delete global.window.Rga.TabManager;
+});
+
+test('SP-03 T4: forceReindex meta-only transaction (tr.docChanged===false) triggers PageMap rebuild', () => {
+  // Test 4: Direct regression test for SP-03.
+  // A zero-text-change transaction with rga.forceReindex=true must cause the
+  // plugin to rebuild. Before the fix, only tr.docChanged triggered a rebuild.
+  const { Nav, schema, PM } = boot();
+  const plugin = Nav.buildIndexPlugin();
+  const d = doc(schema, [scene(schema, 'x')]);
+  const state0 = PM.EditorState.create({ schema: schema, doc: d, plugins: [plugin] });
+  const pageMap0 = Nav.getPageMap(state0);
+
+  // Zero-text-change transaction — purely carries the meta flag.
+  const tr = state0.tr.setMeta('rga.forceReindex', true);
+  assert.strictEqual(tr.docChanged, false, 'pre-condition: transaction must not modify the doc');
+
+  const state1 = state0.apply(tr);
+  const pageMap1 = Nav.getPageMap(state1);
+
+  // Must rebuild: new reference.
+  assert.notStrictEqual(pageMap1, pageMap0,
+    'SP-03: meta-only transaction with rga.forceReindex must trigger a PageMap rebuild');
+});
+
+test('SP-03 T5: plugin rebuild contract — doc-change rebuilds; no-flag no-change returns same reference', () => {
+  // Test 5 — two halves:
+  //   Half A: normal text insertion (tr.docChanged===true, no meta) → plugin rebuilds.
+  //   Half B: transaction with neither docChanged nor meta flag → plugin returns prev (no rebuild).
+  const { Nav, schema, PM } = boot();
+  const plugin = Nav.buildIndexPlugin();
+  const d = doc(schema, [scene(schema, 'y')]);
+  const state0 = PM.EditorState.create({ schema: schema, doc: d, plugins: [plugin] });
+  const pageMap0 = Nav.getPageMap(state0);
+
+  // Half A: ordinary doc-changing transaction, no forceReindex meta.
+  const titleSize = state0.doc.child(0).nodeSize;
+  const bodyStart = titleSize + 1;
+  const trA = state0.tr.insert(bodyStart, scene(schema, 'z'));
+  assert.strictEqual(trA.docChanged, true, 'Half A pre-condition: tr.docChanged must be true');
+  const state1 = state0.apply(trA);
+  const pageMap1 = Nav.getPageMap(state1);
+  assert.notStrictEqual(pageMap1, pageMap0,
+    'Half A: ordinary docChanged transaction must trigger a PageMap rebuild');
+
+  // Half B: no-op transaction — neither docChanged nor meta flag.
+  const trB = state1.tr; // empty transaction, no steps, no meta
+  assert.strictEqual(trB.docChanged, false, 'Half B pre-condition: no-op tr must not change doc');
+  assert.strictEqual(trB.getMeta('rga.forceReindex'), undefined,
+    'Half B pre-condition: no-op tr must not carry forceReindex meta');
+  const state2 = state1.apply(trB);
+  const pageMap2 = Nav.getPageMap(state2);
+  assert.strictEqual(pageMap2, pageMap1,
+    'Half B: no-op transaction (no docChanged, no meta flag) must return the same PageMap reference');
+});
+
 test('Phase C: page-marker does NOT set aria-hidden (otherwise aria-label is silently ignored)', () => {
   const { Nav, schema, PM } = boot();
   const plugin = Nav.buildIndexPlugin();

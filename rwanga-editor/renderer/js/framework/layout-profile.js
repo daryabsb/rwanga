@@ -159,7 +159,9 @@
     };
   }
 
-  // settings.pageSetup may be { sizeIn: { w, h } } or { size: 'Letter'|'A4' }
+  // settings.pageSetup may be { sizeIn: { w, h } } or { paperSize: 'Letter'|'A4'|'Legal' }.
+  // `paperSize` is the canonical field (written by page-setup-dialog.js and doc.js defaults).
+  // `size` is accepted as a legacy alias for v2 docs persisted before the rename.
   function _resolvePageSize(settings) {
     if (!settings) return null;
     const ps = settings.pageSetup;
@@ -167,10 +169,13 @@
     if (ps.sizeIn && typeof ps.sizeIn.w === 'number' && typeof ps.sizeIn.h === 'number') {
       return { w: ps.sizeIn.w, h: ps.sizeIn.h, unit: 'in' };
     }
-    if (typeof ps.size === 'string') {
-      if (ps.size === 'Letter') return { w: 8.5,    h: 11.0,    unit: 'in' };
-      if (ps.size === 'A4')     return { w: 8.2677, h: 11.6929, unit: 'in' }; // 210 × 297mm in inches
-      if (ps.size === 'Legal')  return { w: 8.5,    h: 14.0,    unit: 'in' };
+    // paperSize is canonical; size accepted as legacy alias for v2 docs.
+    const sizeName = (typeof ps.paperSize === 'string' ? ps.paperSize : null) ||
+                     (typeof ps.size      === 'string' ? ps.size      : null);
+    if (sizeName) {
+      if (sizeName === 'Letter') return { w: 8.5,    h: 11.0,    unit: 'in' };
+      if (sizeName === 'A4')     return { w: 8.2677, h: 11.6929, unit: 'in' }; // 210 × 297mm in inches
+      if (sizeName === 'Legal')  return { w: 8.5,    h: 14.0,    unit: 'in' };
     }
     return null;
   }

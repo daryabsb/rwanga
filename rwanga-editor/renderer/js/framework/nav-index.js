@@ -478,7 +478,7 @@
       state: {
         init: function(_config, editorState) { return _buildPluginState(editorState); },
         apply: function(tr, prev, _old, newState) {
-          if (!tr.docChanged) return prev;
+          if (!tr.docChanged && !tr.getMeta('rga.forceReindex')) return prev;
           return _buildPluginState(newState);
         }
       },
