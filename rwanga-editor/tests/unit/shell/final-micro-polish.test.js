@@ -132,3 +132,65 @@ test('Polish §B: .rga-shell-toolbar-inner manuscript alignment preserved', () =
   assert.ok(/grid-column\s*:\s*4/.test(body),
     '.rga-shell-toolbar-inner must still declare grid-column: 4 — manuscript alignment preserved');
 });
+
+// ----------------------------------------------------------------
+// Final Final Polish — content-aware sizing for three classes
+// ----------------------------------------------------------------
+
+test('Final Final Polish: text instruments get breathing-room padding (≥ 14px each side)', () => {
+  const css = read(SHELL_CSS);
+  const body = ruleBody(css, /\.rga-shell-toolbar-btn--text/);
+  assert.ok(body, '.rga-shell-toolbar-btn--text rule must exist');
+  const padding = body.match(/padding\s*:\s*0\s+(\d+)px/);
+  assert.ok(padding, '.rga-shell-toolbar-btn--text must declare padding shorthand "0 Npx"');
+  assert.ok(parseInt(padding[1], 10) >= 14,
+    'text instruments must have horizontal padding ≥ 14px so + Scene / Note / Flag / Undo / Redo / Screenplay / Text feel centred. Got: ' + padding[1] + 'px');
+});
+
+test('Final Final Polish: dropdown instruments promoted to --text-primary (color harmony with icons/text)', () => {
+  const css = read(SHELL_CSS);
+  ['rga-shell-toolbar-blocktype', 'rga-shell-toolbar-tag'].forEach(function(cls) {
+    const body = ruleBody(css, new RegExp('\\.' + cls + '(?![-\\w])'));
+    assert.ok(body, '.' + cls + ' rule must exist');
+    const colorDecl = body.match(/color\s*:\s*[^;]+;/);
+    assert.ok(colorDecl, '.' + cls + ' must declare a color');
+    assert.ok(/var\(\s*--text-primary\b/.test(colorDecl[0]),
+      '.' + cls + ' must rest at var(--text-primary) — visual harmony with icon + text instruments. Got: ' + colorDecl[0].trim());
+  });
+});
+
+test('Final Final Polish: dropdown instruments get content-aware padding (≥ 8px each side)', () => {
+  const css = read(SHELL_CSS);
+  ['rga-shell-toolbar-blocktype', 'rga-shell-toolbar-tag'].forEach(function(cls) {
+    const body = ruleBody(css, new RegExp('\\.' + cls + '(?![-\\w])'));
+    assert.ok(body);
+    const padding = body.match(/padding\s*:\s*0\s+(\d+)px/);
+    assert.ok(padding, '.' + cls + ' must declare padding shorthand "0 Npx"');
+    assert.ok(parseInt(padding[1], 10) >= 8,
+      '.' + cls + ' must have horizontal padding ≥ 8px — Block ▾ + Tag ▾ need room for their content + native chrome arrow. Got: ' + padding[1] + 'px');
+  });
+});
+
+test('Final Final Polish: dropdown font-size harmonised with text instruments (13px)', () => {
+  const css = read(SHELL_CSS);
+  ['rga-shell-toolbar-blocktype', 'rga-shell-toolbar-tag'].forEach(function(cls) {
+    const body = ruleBody(css, new RegExp('\\.' + cls + '(?![-\\w])'));
+    assert.ok(body);
+    const fontSize = body.match(/font-size\s*:\s*(\d+)px/);
+    assert.ok(fontSize, '.' + cls + ' must declare font-size');
+    assert.equal(parseInt(fontSize[1], 10), 13,
+      '.' + cls + ' must declare font-size: 13px — matches the text-variant buttons for visual harmony');
+  });
+});
+
+test('Final Final Polish: toolbar HEIGHT unchanged (36px) — no geometry regression', () => {
+  const css = read(SHELL_CSS);
+  const shellBody = ruleBody(css, /#rga-shell-toolbar\.rga-shell-toolbar/);
+  assert.ok(shellBody);
+  assert.ok(/height\s*:\s*36px/.test(shellBody),
+    '#rga-shell-toolbar must still declare height: 36px (no toolbar height regression after content-aware sizing)');
+  const btnBody = ruleBody(css, /\.rga-shell-toolbar-btn(?![-:\.\[])/);
+  assert.ok(btnBody);
+  assert.ok(/height\s*:\s*30px/.test(btnBody),
+    '.rga-shell-toolbar-btn must still declare height: 30px (only horizontal sizing varies between classes)');
+});

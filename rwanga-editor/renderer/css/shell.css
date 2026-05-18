@@ -933,12 +933,26 @@ body.window-maximized #rga-shell-titlebar {
   appearance: auto;
   -webkit-appearance: auto;
   background: transparent;
-  color: var(--text-secondary, #9a9a9a);
+  /* Final Final Polish — dropdown instrument resting color promoted
+     to --text-primary so it visually harmonises with the icon +
+     text instruments (which were promoted to --text-primary in the
+     Final Micro Polish). The dropdown was the one surface the
+     earlier promotion missed because it has its own selector. */
+  color: var(--text-primary, #cccccc);
   border: 0;
-  padding: 0 4px;
+  /* Final Final Polish — content-aware breathing room. The native
+     <select>'s arrow already eats ~16px on the right; this 8px L+R
+     padding plus the existing 4px margin-right keeps the
+     dropdown's text clear of both the chrome arrow and the
+     adjacent group separator. */
+  padding: 0 8px;
   margin-right: 4px;
   font: inherit;
-  font-size: 12px;
+  /* Final Final Polish — font-size 12 → 13 to match the text-variant
+     buttons (Note / Flag / + Scene / Screenplay / Text). Toolbar
+     height (36px) unaffected — line-height + align-items: center
+     keep the dropdown vertically centred regardless. */
+  font-size: 13px;
   cursor: pointer;
   outline: none;
 }
@@ -958,12 +972,16 @@ body.window-maximized #rga-shell-titlebar {
   appearance: auto;
   -webkit-appearance: auto;
   background: transparent;
-  color: var(--text-secondary, #9a9a9a);
+  /* Final Final Polish — same color + padding + font-size bumps as
+     .rga-shell-toolbar-blocktype above; see those comments for the
+     rationale. Keeping the two selectors in lock-step so the Block
+     and Tag dropdowns remain visually identical. */
+  color: var(--text-primary, #cccccc);
   border: 0;
-  padding: 0 4px;
+  padding: 0 8px;
   margin-right: 4px;
   font: inherit;
-  font-size: 12px;
+  font-size: 13px;
   cursor: pointer;
   outline: none;
 }
@@ -977,7 +995,15 @@ body.window-maximized #rga-shell-titlebar {
 }
 .rga-shell-toolbar-btn--text {
   width: auto;
-  padding: 0 10px;
+  /* Final Final Polish — text instruments need more horizontal
+     breathing than icon instruments because words ("+ Scene",
+     "Note", "Flag", "Undo", "Redo", "Screenplay", "Text") fill
+     more visual weight than single glyphs (B, I, U, S). Padding
+     bumped 10 → 14 so labels visually center inside their box
+     instead of feeling crammed against the rounded edge.
+     Toolbar height (36px) + button height (30px from the base
+     rule) are untouched — only horizontal padding changes. */
+  padding: 0 14px;
   /* §C Shell Final Polish — text-label variant bumped 12px → 13px to
      match the +1px glyph bump on icon buttons (Block ▾, + Scene, Note,
      Flag, Undo, Redo, Screenplay/Text). */
