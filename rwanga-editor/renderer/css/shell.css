@@ -843,12 +843,24 @@ body.window-maximized #rga-shell-titlebar {
   background: transparent;
   border: 0;
   border-radius: var(--radius-md, 4px);
-  color: var(--text-secondary, #9a9a9a);
+  /* Final Micro Polish §B — resting color promoted from
+     --text-secondary to --text-primary so glyphs (B I U S A ↗) and
+     text labels stop visually disappearing into the chrome
+     (--bg-secondary #2a2a2a). Hover delta still works via the
+     background lift below — the contrast bump just rests the
+     button at full readable contrast instead of the muted 60-ish
+     percent it was at. */
+  color: var(--text-primary, #cccccc);
   font-family: var(--font-ui, system-ui, sans-serif);
   /* §C Shell Final Polish — small visibility bump: 13px → 14px glyph,
      28×28 → 30×30 button. Toolbar height (36px) preserved — 30px
      buttons leave 3px breathing room top + bottom. */
   font-size: 14px;
+  /* Final Micro Polish §B — base weight 500 (medium) gives the
+     glyphs and text labels enough visual heft to read at-a-glance
+     without enlarging them. The text.bold-specific override below
+     (700) still wins for the B button. */
+  font-weight: 500;
   width: 30px;
   height: 30px;
   align-self: center;

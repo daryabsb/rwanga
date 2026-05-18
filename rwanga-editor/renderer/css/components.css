@@ -158,8 +158,18 @@
   align-items: center;
   gap: 6px;
   padding: 0 12px;
-  min-width: 120px;
-  max-width: 200px;
+  /* Final Micro Polish §A — preferred tab width bumped so normal
+     filenames ("Scene-3.rga", "the-last-light.rga") read without
+     early truncation. min-width grows from 120 → 160 (readable
+     baseline matches VSCode's ~150-200px convention); max-width
+     grows from 200 → 240 so longer names ellipsize at a more
+     natural breakpoint. Shrink behaviour under multi-tab pressure
+     unchanged — flex-shrink: 0 keeps tabs at min-width until the
+     row scrolls, and .tab-title's overflow: hidden +
+     text-overflow: ellipsis still handles truncation when content
+     exceeds the box. */
+  min-width: 160px;
+  max-width: 240px;
   font-size: var(--font-size-base);
   color: var(--text-secondary);
   background: var(--bg-tertiary);
