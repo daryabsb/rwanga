@@ -69,8 +69,8 @@ test('[manuscript-geometry] resolve(doc) calls through to LayoutProfile.compose 
   const fromCompose  = LP.compose(profile, settings);
 
   assert.deepEqual(
-    JSON.parse(JSON.stringify(fromResolve)),
-    JSON.parse(JSON.stringify(fromCompose)),
+    fromResolve,
+    fromCompose,
     'resolve(doc) must match compose(screenplayProfile, settings)'
   );
 });
@@ -91,8 +91,8 @@ test('[manuscript-geometry] resolveFrom(screenplayProfile, settings) delegates c
   const fromCompose     = LP.compose(profile, settings);
 
   assert.deepEqual(
-    JSON.parse(JSON.stringify(fromResolveFrom)),
-    JSON.parse(JSON.stringify(fromCompose)),
+    fromResolveFrom,
+    fromCompose,
     'resolveFrom must match compose with same inputs'
   );
 });
@@ -189,8 +189,8 @@ test('[manuscript-geometry] IDENTITY: resolveFrom deepEquals LayoutProfile.compo
     const fromMG = MG.resolveFrom(profile, settings);
     const fromLP = LP.compose(profile, settings);
     assert.deepEqual(
-      JSON.parse(JSON.stringify(fromMG)),
-      JSON.parse(JSON.stringify(fromLP)),
+      fromMG,
+      fromLP,
       'IDENTITY failed for combination ' + i + ': resolveFrom must equal compose'
     );
   });
@@ -238,6 +238,7 @@ test('[manuscript-geometry] applyPreset calls Rga.Doc.markDirty(doc) when Rga.Do
   const { MG, Rga } = boot();
   const doc = makeDoc({ top: 0, bottom: 0, left: 0, right: 0, unit: 'in' });
 
+  // boot() creates a fresh window.Rga each call, so the spy needs no teardown.
   // Install a spy.
   let spyCalled = false;
   let spyCalledWith = null;
