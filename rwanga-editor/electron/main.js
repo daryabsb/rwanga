@@ -59,6 +59,11 @@ function createMainWindow() {
   }
   mainWindow = new BrowserWindow(_windowOptions);
 
+  // Regression Fix §A + §B — wire window state event push so the
+  // renderer can flip the maximize-button icon and apply
+  // body.window-maximized for CSS chrome-edge compensation.
+  windowControls.attach(mainWindow);
+
   mainWindow.loadFile(path.join(__dirname, '..', 'renderer', 'index.html'));
   buildMenu(mainWindow);
 

@@ -110,6 +110,14 @@ Rga.Icons = {
     <rect x="3" y="3" width="8" height="8" rx="0.5"/>
   </svg>`,
 
+  // Regression Fix §B — restore-down glyph (two squares; front +
+  // offset back) used when the window is in the maximized state.
+  // Matches the Win11 / VSCode visual convention.
+  restore: `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.2">
+    <rect x="3" y="5" width="6" height="6" rx="0.5"/>
+    <path d="M5 5V3h6v6h-2"/>
+  </svg>`,
+
   windowClose: `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5">
     <path d="M4 4l6 6M10 4l-6 6"/>
   </svg>`,

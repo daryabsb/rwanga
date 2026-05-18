@@ -78,6 +78,47 @@
     if (minBtn   && !minBtn.dataset.wired)   { minBtn.innerHTML   = Icons.minimize    || '−'; minBtn.dataset.wired   = '1'; minBtn.addEventListener('click',   _onWindowMinimize); }
     if (maxBtn   && !maxBtn.dataset.wired)   { maxBtn.innerHTML   = Icons.maximize    || '□'; maxBtn.dataset.wired   = '1'; maxBtn.addEventListener('click',   _onWindowMaximize); }
     if (closeBtn && !closeBtn.dataset.wired) { closeBtn.innerHTML = Icons.windowClose || '×'; closeBtn.dataset.wired = '1'; closeBtn.addEventListener('click', _onWindowClose); }
+    // Regression Fix §A + §B — subscribe to window state events so
+    // the maximize button flips between □ (maximize) and ❐ (restore),
+    // and body.window-maximized is applied for CSS compensation of
+    // the Win11 frameless-overflow right-edge clip.
+    _wireWindowStateSync(maxBtn);
+  }
+
+  // Regression Fix §A + §B helpers ----------------------------------
+
+  function _applyMaximizeState(maxBtn, isMax) {
+    if (typeof document !== 'undefined' && document.body) {
+      document.body.classList.toggle('window-maximized', !!isMax);
+    }
+    if (!maxBtn) return;
+    const Icons = (typeof window !== 'undefined' && window.Rga && window.Rga.Icons) || {};
+    if (isMax) {
+      maxBtn.innerHTML = Icons.restore || '❐';
+      maxBtn.setAttribute('title',      'Restore');
+      maxBtn.setAttribute('aria-label', 'Restore');
+    } else {
+      maxBtn.innerHTML = Icons.maximize || '□';
+      maxBtn.setAttribute('title',      'Maximize');
+      maxBtn.setAttribute('aria-label', 'Maximize');
+    }
+  }
+
+  function _wireWindowStateSync(maxBtn) {
+    if (typeof window === 'undefined' || !window.rwanga) return;
+    // Subscribe to push events from main.
+    if (window.rwanga.on && typeof window.rwanga.on.windowState === 'function') {
+      window.rwanga.on.windowState(function(payload) {
+        _applyMaximizeState(maxBtn, payload && payload.maximized);
+      });
+    }
+    // Query initial state so a window booted maximized gets the
+    // correct icon + body class without waiting for a state change.
+    if (window.rwanga.window && typeof window.rwanga.window.getState === 'function') {
+      Promise.resolve(window.rwanga.window.getState()).then(function(state) {
+        _applyMaximizeState(maxBtn, state && state.maximized);
+      }).catch(function() { /* non-Electron / test harness — silent. */ });
+    }
   }
   // Route through the existing preload IPC bridge (electron/preload.js
   // exposes window.rwanga.window.{minimize,maximize,close}). Defensive

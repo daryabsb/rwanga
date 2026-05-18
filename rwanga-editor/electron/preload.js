@@ -55,6 +55,9 @@ contextBridge.exposeInMainWorld('rwanga', {
     maximize: () => ipcRenderer.invoke('window.maximize'),
     close:    () => ipcRenderer.invoke('window.close'),
     setTitle: (title) => ipcRenderer.invoke('window.setTitle', title),
+    // Regression Fix §B — initial state query for the maximize-button
+    // icon resolver in title-bar.js.
+    getState: () => ipcRenderer.invoke('window.getState'),
   },
   menu: {
     // Bundle 1 §A — push renderer-owned view-mode state to the native
@@ -77,6 +80,14 @@ contextBridge.exposeInMainWorld('rwanga', {
       const handler = (_event, payload) => callback(payload);
       ipcRenderer.on('files.openRequest', handler);
       return () => ipcRenderer.removeListener('files.openRequest', handler);
+    },
+    // Regression Fix §A + §B — main pushes `window.state` events on
+    // maximize / unmaximize so the renderer can flip the icon and
+    // apply body.window-maximized for the Win11 frameless overflow.
+    windowState: (callback) => {
+      const handler = (_event, payload) => callback(payload);
+      ipcRenderer.on('window.state', handler);
+      return () => ipcRenderer.removeListener('window.state', handler);
     },
   },
 });
