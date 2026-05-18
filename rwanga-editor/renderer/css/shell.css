@@ -858,6 +858,15 @@ body.window-maximized #rga-shell-titlebar {
   background: transparent;
   border: 0;
   border-radius: var(--radius-md, 4px);
+  /* Single-line guarantee — without this, default white-space:
+     normal lets two-word text labels ("+ Scene", potentially
+     "Add Note" in the future) wrap onto two lines inside the
+     30px button height. Wrapping makes the button shrink wider-
+     wise too, which collapses its breathing room. nowrap holds
+     every label on one line; if the label exceeds the available
+     width the button grows horizontally (width: auto on --text
+     variant). */
+  white-space: nowrap;
   /* Final Micro Polish §B — resting color promoted from
      --text-secondary to --text-primary so glyphs (B I U S A ↗) and
      text labels stop visually disappearing into the chrome
@@ -999,6 +1008,14 @@ body.window-maximized #rga-shell-titlebar {
   font-size: 13px;
   cursor: pointer;
   outline: none;
+  /* Width hygiene — native <select> intrinsic width sizes to the
+     WIDEST option ("Wardrobe" / "Character" ≈ 9ch ≈ 96px), which
+     left a ~60px visible gap between the short "Tag…" placeholder
+     and the native chrome arrow. An explicit width matches the
+     placeholder; the popup-list still expands to show full option
+     labels (Chromium auto-sizes the option list independently of
+     the select's display width). */
+  width: 80px;
 }
 .rga-shell-toolbar-tag:focus-visible {
   outline: 1px solid var(--border-secondary, #444);

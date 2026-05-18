@@ -183,6 +183,29 @@ test('Final Final Polish: dropdown font-size harmonised with text instruments (1
   });
 });
 
+test('Toolbar single-line: .rga-shell-toolbar-btn declares white-space: nowrap (prevents "+ Scene" two-line wrap)', () => {
+  const css = read(SHELL_CSS);
+  const body = ruleBody(css, /\.rga-shell-toolbar-btn(?![-:\.\[])/);
+  assert.ok(body, '.rga-shell-toolbar-btn base rule must exist');
+  assert.ok(/white-space\s*:\s*nowrap/.test(body),
+    '.rga-shell-toolbar-btn must declare white-space: nowrap so text labels stay on one line ("+ Scene" was wrapping inside the 30px button height)');
+});
+
+test('Toolbar Tag dropdown: constrained width closes the placeholder-to-arrow gap', () => {
+  const css = read(SHELL_CSS);
+  const body = ruleBody(css, /\.rga-shell-toolbar-tag(?![-\w])/);
+  assert.ok(body, '.rga-shell-toolbar-tag rule must exist');
+  // Native <select> auto-width = widest option (~96px for "Wardrobe");
+  // an explicit width caps the displayed select to placeholder size
+  // while the popup list still expands to natural option widths.
+  const widthDecl = body.match(/(?:^|[\s;])width\s*:\s*(\d+)px/);
+  assert.ok(widthDecl,
+    '.rga-shell-toolbar-tag must declare an explicit pixel width to constrain the native <select> from sizing to its widest option');
+  const w = parseInt(widthDecl[1], 10);
+  assert.ok(w >= 70 && w <= 100,
+    '.rga-shell-toolbar-tag width must be ~80px (room for "Tag…" placeholder + native arrow). Got: ' + w + 'px');
+});
+
 test('Final Final Polish: toolbar HEIGHT unchanged (36px) — no geometry regression', () => {
   const css = read(SHELL_CSS);
   const shellBody = ruleBody(css, /#rga-shell-toolbar\.rga-shell-toolbar/);
