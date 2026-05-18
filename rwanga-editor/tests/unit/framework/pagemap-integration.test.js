@@ -383,3 +383,23 @@ test('Phase C: page-marker aria-label names both page numbers', () => {
   }
   view.destroy();
 });
+
+test('Phase C: page-marker does NOT set aria-hidden (otherwise aria-label is silently ignored)', () => {
+  const { Nav, schema, PM } = boot();
+  const plugin = Nav.buildIndexPlugin();
+  const scenes = [];
+  for (let i = 0; i < 25; i += 1) scenes.push(scene(schema, 'sc-' + i, { action: 'x'.repeat(60 * 5) }));
+  const d = doc(schema, scenes);
+  const state = PM.EditorState.create({ schema: schema, doc: d, plugins: [plugin] });
+  const editorEl = document.getElementById('editor');
+  const view = new PM.EditorView(editorEl, { state: state });
+
+  const markers = editorEl.querySelectorAll('.rga-page-marker');
+  assert.ok(markers.length > 0, 'must have at least one marker for this fixture');
+  for (let i = 0; i < markers.length; i += 1) {
+    const marker = markers[i];
+    assert.ok(!marker.hasAttribute('aria-hidden'),
+      'page-marker must not set aria-hidden — would mask aria-label');
+  }
+  view.destroy();
+});

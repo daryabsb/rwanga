@@ -382,7 +382,6 @@
     const el = document.createElement('div');
     el.className = 'rga-page-marker';
     el.contentEditable = 'false';
-    el.setAttribute('aria-hidden', 'true');
     // data-page-number is preserved for Print view's CSS ::after rule
     // which renders "N." right-aligned using attr(data-page-number).
     el.dataset.pageNumber = String(pageBegins);
