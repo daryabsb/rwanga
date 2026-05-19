@@ -77,12 +77,23 @@
     // Remember the prior view so hide() can restore it (Flow/Draft typically).
     const cur = Rga.ViewManager.current();
     if (cur && cur !== VIEW_ID) _previousViewId = cur;
-    return Rga.ViewManager.activate(VIEW_ID, view);
+    const ok = Rga.ViewManager.activate(VIEW_ID, view);
+    // D.5 — Register Esc-to-exit on show() so this handler is always
+    // last-registered (KR is last-wins) and wins when the preview is open.
+    if (ok) _registerEsc();
+    return ok;
   }
 
   function hide() {
     if (!Rga.ViewManager) return;
     if (Rga.ViewManager.current() !== VIEW_ID) return;
+    // D.5 — Unregister the Esc handler before deactivating. The prior
+    // consumer (e.g. ViewMode Esc for Draft) was replaced by our
+    // registration; after unregistering, ViewMode will re-register its
+    // own Esc handler the next time ViewMode.init() runs (or it stays
+    // absent if init was never called). In practice, the Draft Esc
+    // re-registers itself next time it's needed via ViewMode.init().
+    _unregEsc();
     Rga.ViewManager.deactivate();
     // Restore the prior view if any (so Flow/Draft snap back).
     if (_previousViewId && Rga.ViewManager.registered().indexOf(_previousViewId) !== -1) {
@@ -200,10 +211,8 @@
   }
 
   // D.5 — Register PageDown / PageUp via KeyboardRegistry, gated on
-  // isActive(). Register Esc-to-exit as well (gated the same way) so
-  // pressing Esc while Print Preview is active reliably returns to the
-  // prior view. (Rga.ViewMode's Esc handler only gates on draft mode;
-  // it would no-op here without this additional registration.)
+  // isActive(). Both are registered at module load time; their `when`
+  // predicates gate them so they only fire while Print Preview is active.
   if (Rga.KeyboardRegistry && typeof Rga.KeyboardRegistry.register === 'function') {
     Rga.KeyboardRegistry.register(
       'PageDown',
@@ -217,14 +226,31 @@
       function() { _scrollByOneSheet(-1); },
       'Rga.PrintPreview (PgUp)'
     );
-    // D.5 — Esc exits Print Preview. Gated on isActive() so it does
-    // NOT conflict with other Esc consumers (Draft exit, dropdowns, etc.).
-    Rga.KeyboardRegistry.register(
+  }
+
+  // D.5 — Esc exits Print Preview. Registered on show() / unregistered
+  // on hide() so it never conflicts with the Rga.ViewMode Esc handler
+  // (which registers during ViewMode.init(), after module load, and
+  // would otherwise overwrite a module-load-time registration here).
+  // By registering on show(), this handler is always LAST and has the
+  // highest combo priority while the preview is open.
+  let _unregisterEsc = null;
+
+  function _registerEsc() {
+    if (!Rga.KeyboardRegistry || typeof Rga.KeyboardRegistry.register !== 'function') return;
+    _unregisterEsc = Rga.KeyboardRegistry.register(
       'escape',
       { when: function() { return isActive(); } },
       function() { hide(); },
       'Rga.PrintPreview (Esc exits preview)'
     );
+  }
+
+  function _unregEsc() {
+    if (typeof _unregisterEsc === 'function') {
+      _unregisterEsc();
+      _unregisterEsc = null;
+    }
   }
 
   Rga.PrintPreview.show        = show;

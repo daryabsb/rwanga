@@ -153,6 +153,7 @@ function bootPrintPreview(opts) {
   };
 
   [
+    path.join(RENDERER_ROOT, 'js/shell/keyboard-registry.js'),
     path.join(RENDERER_ROOT, 'js/framework/base-outer-marks.js'),
     path.join(RENDERER_ROOT, 'js/framework/screenplay-normalizer.js'),
     path.join(RENDERER_ROOT, 'js/framework/layout-profile.js'),
@@ -163,6 +164,9 @@ function bootPrintPreview(opts) {
     path.join(RENDERER_ROOT, 'js/framework/print-preview.js'),
     path.join(RENDERER_ROOT, 'js/doc-types/screenplay/schema-v3.js')
   ].forEach(function(p) { delete require.cache[require.resolve(p)]; require(p); });
+
+  const Rga2 = global.window.Rga;
+  Rga2.KeyboardRegistry && Rga2.KeyboardRegistry.init && Rga2.KeyboardRegistry.init();
 
   const Rga = global.window.Rga;
   const sp = Rga.DocTypes.screenplay;
@@ -482,23 +486,55 @@ test('D.5 PageUp: when() predicate is false when Print Preview is not active', (
     'PageUp when() must return false when Print Preview is not active');
 });
 
-test('D.5 Esc: KeyboardRegistry has an Escape binding for print-preview exit', () => {
-  const { Rga } = bootKeyboardPrintPreview();
+test('D.5 Esc: Esc binding is registered by show() and belongs to PrintPreview', () => {
+  // The Esc handler is registered on show() (not at module load time) to
+  // avoid overwriting the ViewMode Esc handler at load. Verify that after
+  // show(), the escape binding identifies PrintPreview.
+  const { Rga, schema, PM } = bootPrintPreview();
+  const view = buildSimpleView(schema, PM);
+  Rga.TabManager._view = view;
+  Rga.PrintPreview.open();
   const all = Rga.KeyboardRegistry._all();
-  assert.ok(all['escape'], 'KeyboardRegistry must have an "escape" binding');
-  // The last-registered Escape wins. Verify it belongs to PrintPreview.
+  assert.ok(all['escape'], 'KeyboardRegistry must have an "escape" binding after show()');
   assert.ok(all['escape'].source.includes('PrintPreview'),
-    'Escape binding source must identify Rga.PrintPreview (it is the last-registered Esc)');
+    'Escape binding source must identify Rga.PrintPreview');
+  Rga.PrintPreview.hide();
+  view.destroy();
 });
 
-test('D.5 Esc: when() predicate gates on isActive() — false when inactive', () => {
-  const { Rga } = bootKeyboardPrintPreview();
+test('D.5 Esc: hide() unregisters the Esc binding', () => {
+  const { Rga, schema, PM } = bootPrintPreview();
+  const view = buildSimpleView(schema, PM);
+  Rga.TabManager._view = view;
+  Rga.PrintPreview.open();
+  assert.ok(Rga.KeyboardRegistry._all()['escape'], 'escape must be registered after show()');
+  Rga.PrintPreview.hide();
+  // After hide, the escape binding should be gone (unregistered).
   const all = Rga.KeyboardRegistry._all();
-  const entry = all['escape'];
+  // The entry is fully removed from the map after unregister — not undefined-source,
+  // but absent entirely. Either absent, or if present it should not be PrintPreview's.
+  const isStillPrintPreviewEsc = all['escape'] && all['escape'].source.includes('PrintPreview');
+  assert.ok(!isStillPrintPreviewEsc,
+    'PrintPreview Esc binding must be removed from KR after hide()');
+  view.destroy();
+});
+
+test('D.5 Esc: when() predicate gates on isActive() — fires only when preview is active', () => {
+  const { Rga, schema, PM } = bootPrintPreview();
+  const view = buildSimpleView(schema, PM);
+  Rga.TabManager._view = view;
+  // Before show, no esc binding from PrintPreview.
+  assert.ok(!Rga.KeyboardRegistry._all()['escape'] ||
+            !Rga.KeyboardRegistry._all()['escape'].source.includes('PrintPreview'),
+    'Esc binding must not exist for PrintPreview before show()');
+  Rga.PrintPreview.open();
+  const entry = Rga.KeyboardRegistry._all()['escape'];
   assert.ok(entry && entry.opts && typeof entry.opts.when === 'function',
     'Esc binding must have a when predicate');
-  assert.equal(entry.opts.when(), false,
-    'Esc when() must return false when Print Preview is not active');
+  // isActive() returns true now.
+  assert.equal(entry.opts.when(), true, 'Esc when() must return true while preview is active');
+  Rga.PrintPreview.hide();
+  view.destroy();
 });
 
 // ================================================================
