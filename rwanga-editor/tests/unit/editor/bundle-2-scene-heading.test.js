@@ -94,3 +94,43 @@ test('Bundle 2 §A: NO new color, NO new background, NO new chrome element on th
   assert.equal(/^[^;]*outline\s*:/m.test(body), false,
     'Bundle 2 §A forbids outline on the root scene heading rule (would add visual noise)');
 });
+
+// ================================================================
+// P1 regression guard — scene-number badge must never have a narrow
+// width that forces "SCENE N" to wrap vertically.
+//
+// Regression introduced in f622cac4: `width: 1.5em` was intended to
+// constrain only the hairline underline, but it constrained the badge
+// element itself, forcing "SCENE 1" (~56px) into a ~19px column and
+// wrapping into character pairs. Fix: width removed from the element;
+// hairline moved to `.rga-scene-v3-num::after`.
+// ================================================================
+
+test('P1 no-wrap guard: .rga-scene-v3-num must NOT have a width declaration (no-wrap regression)', () => {
+  const css = read(EDITOR_CSS);
+  // Extract the .rga-scene-v3-num rule body (not ::after).
+  // We need the rule for the element itself, not the pseudo-element.
+  const m = css.match(/(?:^|\n)\s*\.rga-scene-v3-num\s*\{([^}]*)\}/);
+  assert.ok(m, '.rga-scene-v3-num rule must exist in editor-prosemirror.css');
+  // Strip CSS block comments before searching so that comment text
+  // (e.g. an explanation mentioning "width: 1.5em") cannot trigger
+  // a false positive.
+  const body = m[1].replace(/\/\*[\s\S]*?\*\//g, '');
+  // A width declaration on the badge element is the bug.  Any non-auto, non-100%
+  // fixed width narrower than the text causes wrapping.  The rule must be absent.
+  assert.equal(/\bwidth\s*:/.test(body), false,
+    '.rga-scene-v3-num must NOT have a width declaration — it forces "SCENE N" to wrap (regression f622cac4)');
+});
+
+test('P1 hairline guard: .rga-scene-v3-num::after provides the hairline underline', () => {
+  const css = read(EDITOR_CSS);
+  // The hairline was moved from the element to the ::after pseudo-element.
+  // Verify the ::after rule exists and carries a width + border-bottom.
+  const m = css.match(/(?:^|\n)\s*\.rga-scene-v3-num::after\s*\{([^}]*)\}/);
+  assert.ok(m, '.rga-scene-v3-num::after rule must exist (hairline moved to pseudo-element)');
+  const body = m[1];
+  assert.ok(/\bwidth\s*:\s*1\.5em/.test(body),
+    '.rga-scene-v3-num::after must carry width: 1.5em for the short hairline');
+  assert.ok(/\bborder-bottom\s*:/.test(body),
+    '.rga-scene-v3-num::after must carry a border-bottom to produce the hairline');
+});

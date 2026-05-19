@@ -633,3 +633,63 @@ test('D.2 layout-profile: compose() with no screenplayProfile defaults to direct
   const profile = LP.compose(null, null);
   assert.equal(profile.direction, 'ltr', 'compose() must default to direction="ltr"');
 });
+
+// ================================================================
+// P0 regression guards — top-margin padding correctness
+// Each sheet (all pages) must receive the correct inline padding-top
+// derived from layoutProfile.margins.top. Regression from §C bundle.
+// ================================================================
+
+test('P0 guard: Hollywood default margins (top:1) → inline padding-top "1in" on every sheet', () => {
+  const { PR } = bootRenderer();
+  const container = document.createElement('div');
+  const lp = {
+    margins: { top: 1, right: 1, bottom: 1, left: 1.5 },
+    pageSize: { w: 8.5, h: 11.0 },
+    direction: 'ltr'
+  };
+  PR.render(fakeModel([{ pageNumber: 1, blocks: [] }, { pageNumber: 2, blocks: [] }], lp), container);
+  const sheets = container.querySelectorAll('.rga-page-sheet');
+  assert.equal(sheets.length, 2, 'must have 2 sheets');
+  // Full shorthand: "1in 1in 1in 1.5in" (T R B L).
+  sheets.forEach(function(sheet, i) {
+    assert.equal(sheet.style.padding, '1in 1in 1in 1.5in',
+      'sheet ' + (i + 1) + ' inline padding must reflect Hollywood default margins');
+  });
+});
+
+test('P0 guard: non-default margins (top:0.5) → inline padding-top "0.5in" on every sheet', () => {
+  const { PR } = bootRenderer();
+  const container = document.createElement('div');
+  const lp = {
+    margins: { top: 0.5, right: 0.75, bottom: 0.75, left: 1.25 },
+    pageSize: { w: 8.5, h: 11.0 },
+    direction: 'ltr'
+  };
+  PR.render(fakeModel([{ pageNumber: 1, blocks: [] }, { pageNumber: 2, blocks: [] }], lp), container);
+  const sheets = container.querySelectorAll('.rga-page-sheet');
+  // Full shorthand: "0.5in 0.75in 0.75in 1.25in" (T R B L).
+  sheets.forEach(function(sheet, i) {
+    assert.equal(sheet.style.padding, '0.5in 0.75in 0.75in 1.25in',
+      'sheet ' + (i + 1) + ' inline padding must reflect non-default margins top=0.5in');
+  });
+});
+
+test('P0 guard: .rga-page-sheet-content has no margin or padding override (does not crowd header)', () => {
+  // The content div must not carry any top margin/padding that would collapse
+  // the breathing space between the page-number header (at 0.5in) and the
+  // body content (which begins at padding-top from the sheet = 1in).
+  const { PR } = bootRenderer();
+  const container = document.createElement('div');
+  const lp = {
+    margins: { top: 1, right: 1, bottom: 1, left: 1.5 },
+    pageSize: { w: 8.5, h: 11.0 },
+    direction: 'ltr'
+  };
+  PR.render(fakeModel([{ pageNumber: 1, blocks: [] }], lp), container);
+  const content = container.querySelector('.rga-page-sheet-content');
+  assert.ok(content, '.rga-page-sheet-content must exist');
+  // The renderer must not write any inline top margin or padding on the content div.
+  assert.equal(content.style.marginTop,  '', 'content div must have no inline margin-top');
+  assert.equal(content.style.paddingTop, '', 'content div must have no inline padding-top');
+});

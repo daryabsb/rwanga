@@ -1841,10 +1841,18 @@ body.view-draft-active .rga-draft-footer {
   text-transform: uppercase;
   color: var(--text-secondary, #9e9e9e);
   margin: 0 0 0.45em 0;
-  padding-bottom: 0.3em;
-  border-bottom: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.06));
-  width: 1.5em;
+  /* No width constraint — text must never wrap (regression fix: f622cac4
+   * set width: 1.5em intending a short hairline underline, but it forced
+   * "SCENE 1" to wrap into character pairs). Hairline moved to ::after. */
   user-select: none;
+}
+.rga-scene-v3-num::after {
+  content: '';
+  display: block;
+  width: 1.5em;
+  height: 0;
+  border-bottom: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.06));
+  margin-top: 0.3em;
 }
 
 .rga-scene-v3-chrome-right {
