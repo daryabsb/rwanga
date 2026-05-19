@@ -461,11 +461,12 @@
   }
 
   // §D4 — Mode toggle helpers. Source of truth: Rga.Shell.Layout.
-  // toolbar.mode ('screenplay' | 'text'). DOM mirror: #rga-shell-
-  // toolbar[data-mode] + aria-checked on the segmented buttons.
-  // Persistence rides the existing WorkspaceState pipeline — no new
-  // storage key, no new module.
-  const TOOLBAR_MODES = ['screenplay', 'text'];
+  // toolbar.mode. Screenplay is the only mode with a visible button;
+  // the Text button was removed (Manuscript Visual Maturity Bundle §D).
+  // The SSOT and persistence pipeline are unchanged. Any persisted
+  // 'text' value from a prior session is treated as 'screenplay'
+  // because 'text' is no longer in the TOOLBAR_MODES whitelist.
+  const TOOLBAR_MODES = ['screenplay'];
 
   function _readToolbarMode() {
     if (!window.Rga || !window.Rga.Shell || !window.Rga.Shell.Layout) return 'screenplay';

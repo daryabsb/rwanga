@@ -66,7 +66,7 @@ test('§D4: a group separator sits between Writing-tools and Mode', () => {
     'at least 3 .rga-shell-toolbar-group-sep elements expected (Text|Scene + Scene|Writing + Writing|Mode); got ' + seps);
 });
 
-test('§D4: Mode group uses role="radiogroup" with two role="radio" buttons (a11y per G-OC-8)', () => {
+test('§D4: Mode group uses role="radiogroup" with the Screenplay role="radio" button (a11y per G-OC-8)', () => {
   const html = read(INDEX_HTML);
   const groupMatch = html.match(/<div[^>]*data-group="mode"[^>]*>[\s\S]*?<\/div>/);
   assert.ok(groupMatch, 'Mode group element must exist');
@@ -75,24 +75,29 @@ test('§D4: Mode group uses role="radiogroup" with two role="radio" buttons (a11
     'Mode group must declare role="radiogroup"');
   assert.ok(/aria-label\s*=\s*["'][^"']+["']/.test(group),
     'Mode group must declare aria-label');
-  // Both Screenplay and Text buttons present, each role="radio".
-  ['screenplay', 'text'].forEach(function(m) {
-    const re = new RegExp('<button[^>]*data-toolbar-mode="' + m + '"[^>]*role="radio"[^>]*>');
-    assert.ok(re.test(group),
-      'Mode button [data-toolbar-mode="' + m + '"] must declare role="radio"');
-  });
+  // Screenplay button present as role="radio".
+  // Text button removed (Manuscript Visual Maturity Bundle §D).
+  const re = new RegExp('<button[^>]*data-toolbar-mode="screenplay"[^>]*role="radio"[^>]*>');
+  assert.ok(re.test(group),
+    'Mode button [data-toolbar-mode="screenplay"] must declare role="radio"');
+  // Guard: Text button must NOT be present.
+  assert.equal(
+    /<button[^>]*data-toolbar-mode="text"[^>]*>/.test(group),
+    false,
+    'Text mode button must NOT exist in the Mode group (removed in Visual Maturity Bundle §D)'
+  );
 });
 
-test('§D4: Screenplay is the default checked radio (aria-checked="true"); Text is unchecked', () => {
+test('§D4: Screenplay is the default checked radio (aria-checked="true"); Text button is absent', () => {
   const html = read(INDEX_HTML);
   const screenplayBtn = html.match(/<button[^>]*data-toolbar-mode="screenplay"[^>]*>/);
-  const textBtn       = html.match(/<button[^>]*data-toolbar-mode="text"[^>]*>/);
   assert.ok(screenplayBtn, 'Screenplay mode button must exist');
-  assert.ok(textBtn,       'Text mode button must exist');
   assert.ok(/aria-checked="true"/.test(screenplayBtn[0]),
     'Screenplay button must declare aria-checked="true" by default (Screenplay is the default mode)');
-  assert.ok(/aria-checked="false"/.test(textBtn[0]),
-    'Text button must declare aria-checked="false" by default');
+  // Guard: Text button removed in Manuscript Visual Maturity Bundle §D.
+  const textBtn = html.match(/<button[^>]*data-toolbar-mode="text"[^>]*>/);
+  assert.equal(textBtn, null,
+    'Text mode button must NOT exist (removed in Visual Maturity Bundle §D — no behavior, no button)');
 });
 
 // ----------------------------------------------------------------
@@ -277,15 +282,16 @@ test('§D4: D1.1 alignment + D2 scene tools + D3 writing tools all intact', () =
 // 6. Mode-toggle group geometry uses existing ownership only
 // ----------------------------------------------------------------
 
-test('§D4: Mode buttons reuse the existing .rga-shell-toolbar-btn--text style (no visual invention)', () => {
+test('§D4: Screenplay mode button reuses the existing .rga-shell-toolbar-btn--text style (no visual invention)', () => {
   const html = read(INDEX_HTML);
   const screenplayBtn = html.match(/<button[^>]*data-toolbar-mode="screenplay"[^>]*>/);
-  const textBtn       = html.match(/<button[^>]*data-toolbar-mode="text"[^>]*>/);
-  assert.ok(screenplayBtn && textBtn);
-  // Both must carry the existing text-button class (--text variant
+  assert.ok(screenplayBtn, 'Screenplay mode button must exist');
+  // Must carry the existing text-button class (--text variant
   // already used by D2/D3 — no new sizing/typography invented).
   assert.ok(/rga-shell-toolbar-btn--text/.test(screenplayBtn[0]),
     'Screenplay button must reuse the existing .rga-shell-toolbar-btn--text style');
-  assert.ok(/rga-shell-toolbar-btn--text/.test(textBtn[0]),
-    'Text button must reuse the existing .rga-shell-toolbar-btn--text style');
+  // Guard: Text button removed — assert not present.
+  const textBtn = html.match(/<button[^>]*data-toolbar-mode="text"[^>]*>/);
+  assert.equal(textBtn, null,
+    'Text mode button must NOT exist (removed in Visual Maturity Bundle §D)');
 });
