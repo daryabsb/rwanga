@@ -946,6 +946,9 @@
       { label: 'Save',        command: 'file.save' },
       { label: 'Save As…',    command: 'file.saveAs' },
       { type: 'separator' },
+      // D.1 — Print Preview entry in renderer-owned File menu.
+      { label: 'Print Preview', command: 'view.printPreview' },
+      { type: 'separator' },
       { label: 'Open Recent…',    disabled: true },
       { label: 'Manage Storage…', disabled: true },
       { type: 'separator' },
@@ -964,6 +967,8 @@
       { label: 'Flow',  command: 'view.flow'  },
       { label: 'Draft', command: 'view.draft' },
       { label: 'Print', command: 'view.print' },
+      // D.1 / SP-15 — Print Preview in renderer View menu.
+      { label: 'Print Preview', command: 'view.printPreview' },
       { type: 'separator' },
       { label: 'Studio Panel', command: 'view.studioPanel' },
       // Toolbox stays disabled until Workstream C lands its SSOT.
@@ -1057,6 +1062,12 @@
       handler: function() { if (Rga.ViewMode) Rga.ViewMode.set('draft'); }, source: 'A4.1 menu (View → Draft)' });
     KR.registerCommand({ command: 'view.print', label: 'Print',
       handler: function() { if (Rga.ViewMode) Rga.ViewMode.set('print'); }, source: 'A4.1 menu (View → Print)' });
+    // D.1 — Print Preview command. Routes through Rga.PrintPreview.open()
+    // (the canonical entry that resolves the editor view via TabManager).
+    // No keyboard accelerator — Ctrl+Shift+P is reserved per SP-17.
+    KR.registerCommand({ command: 'view.printPreview', label: 'Print Preview',
+      handler: function() { if (Rga.PrintPreview && Rga.PrintPreview.open) Rga.PrintPreview.open(); },
+      source: 'A4.1 menu (View → Print Preview)' });
 
     // Tools. Command Palette + Toggle Theme — owned by their modules;
     // the menu wraps them under tools.* commands with the same

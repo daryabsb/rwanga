@@ -2108,15 +2108,21 @@ body.view-print-preview-active #workspace {
 }
 
 .rga-page-sheet {
-  /* Fixed dimensions — never recalculated from content (Rule 6). */
-  width:  8.5in;
+  /* Fixed dimensions — never recalculated from content (Rule 6).
+   * D.2: width and padding are overridden inline by the renderer when
+   * layoutProfile is available (margins + pageSize from doc.settings.pageSetup).
+   * These CSS values are fallbacks for the empty / initial render only.
+   * D.2: height is kept as a CSS-only fallback; the renderer intentionally
+   * does NOT write inline height so sheet dimensions feel CSS-natural. */
+  width:  8.5in;           /* fallback; inline override from layoutProfile.pageSize.w */
   height: 11in;
   flex-shrink: 0;          /* keep height fixed inside flex column */
   flex-grow: 0;
   background: #ffffff;
   color: #111;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
-  padding: 1in 1in 1in 1.5in;   /* top right bottom left — left wider for binding */
+  padding: 1in 1in 1in 1.5in;   /* fallback (T R B L, left wider for binding);
+                                  * inline override from layoutProfile.margins */
   font-family: 'Courier New', Courier, monospace;
   font-size: 12pt;
   line-height: 1.0;
@@ -2132,6 +2138,36 @@ body.view-print-preview-active #workspace {
   font-size: 12pt;
   font-family: inherit;
   color: #111;
+}
+
+/* D.3 — optional bottom-center page number (opt-in via
+ * Rga.PrintPreview.setOptions({ footerStyle: 'bottom-center' })).
+ * Default behavior (top-right N. only) is preserved when this
+ * element is absent. */
+.rga-page-sheet-footer {
+  position: absolute;
+  bottom: 0.5in;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 12pt;
+  font-family: inherit;
+  color: #111;
+}
+
+/* D.4 — optional running header: script title top-left in muted type
+ * (opt-in via Rga.PrintPreview.setOptions({ headerStyle: 'running' })).
+ * Default behavior is off; this element is absent when not opted in. */
+.rga-page-sheet-running-header {
+  position: absolute;
+  top: 0.5in;
+  left: 1.5in;
+  font-size: 10pt;
+  font-family: inherit;
+  color: #444;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  pointer-events: none;
 }
 
 .rga-page-sheet-content {

@@ -31,6 +31,10 @@ function buildMenu(mainWindow) {
         { label: 'Save', accelerator: 'CommandOrControl+S', click: () => sendMenuAction(mainWindow, 'file.save') },
         { label: 'Save As…', accelerator: 'CommandOrControl+Shift+S', click: () => sendMenuAction(mainWindow, 'file.saveAs') },
         { type: 'separator' },
+        // D.1 — Print Preview entry in File menu (no accelerator; Ctrl+Shift+P
+        // is reserved for Command Palette per SP-17).
+        { label: 'Print Preview', click: () => sendMenuAction(mainWindow, 'view.printPreview') },
+        { type: 'separator' },
         { label: 'Export to PDF…', accelerator: 'CommandOrControl+Shift+E', click: () => sendMenuAction(mainWindow, 'file.exportPdf') },
         { type: 'separator' },
         { label: 'Manage Storage…', click: () => sendMenuAction(mainWindow, 'file.manageStorage') },
@@ -60,6 +64,9 @@ function buildMenu(mainWindow) {
           click: () => sendMenuAction(mainWindow, 'view.draft') },
         { label: 'Print', type: 'radio', id: 'view.print', checked: false,
           click: () => sendMenuAction(mainWindow, 'view.print') },
+        // D.1 / SP-15 — Print Preview in View menu (not a radio; Print Preview
+        // is modal — Esc returns to the prior view rather than cycling modes).
+        { label: 'Print Preview', click: () => sendMenuAction(mainWindow, 'view.printPreview') },
         { type: 'separator' },
         // Studio Shell Recovery §E — View → Studio Panel toggles
         // closed ↔ open. Recovery path from "closed" so the user

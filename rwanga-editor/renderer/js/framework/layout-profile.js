@@ -150,12 +150,18 @@
       locationTime:    ' — '
     };
 
+    // D.2 — carry direction through so PrintRenderer can apply RTL
+    // margin mirror (wider binding side is right for Arabic/Kurdish).
+    // screenplayProfile.direction is the canonical source; default 'ltr'.
+    const direction = (_profile.direction === 'rtl') ? 'rtl' : 'ltr';
+
     return {
       linesPerPage: linesPerPage,
       pageSize:     pageSize,
       margins:      margins,
       font:         font,
-      blocks:       blocks
+      blocks:       blocks,
+      direction:    direction
     };
   }
 

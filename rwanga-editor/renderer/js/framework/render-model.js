@@ -50,7 +50,11 @@
     const out = {
       totalPages:    0,
       pages:         [],
-      layoutProfile: layoutProfile || null
+      layoutProfile: layoutProfile || null,
+      // D.4 — script title for optional running header in PrintRenderer.
+      // Sourced from doc.metadata.title; empty string when absent.
+      title:         (doc && doc.metadata && typeof doc.metadata.title === 'string')
+                       ? doc.metadata.title : ''
     };
     if (!doc || !Array.isArray(pageMap) || !Array.isArray(normalizedBlocks)) return out;
 

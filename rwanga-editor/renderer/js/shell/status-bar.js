@@ -124,11 +124,11 @@
   }
 
   // Bundle 1 §A — labelled View dropdown. Native <select> for native
-  // platform feel + a11y. Calls Rga.ViewMode.set(mode) on change. The
-  // hidden printPreview option holds .value when the user enters
-  // PrintPreview via the toolbar (a path outside the dropdown), so the
-  // displayed label still matches reality. Selecting any of the three
-  // live options exits PrintPreview via Rga.ViewMode.set.
+  // platform feel + a11y. Calls Rga.ViewMode.set(mode) on change for
+  // Flow / Draft / Print. Print Preview is routed to
+  // Rga.PrintPreview.open() because printPreview is NOT a ViewMode
+  // mode (it is a separate ViewManager view; ViewMode.set would no-op).
+  // The printPreview option is now a live, pickable option (D.1 / SP-07).
   function _buildViewModeSegment(spanEl) {
     const prefix = document.createElement('span');
     prefix.className = 'rga-shell-status-viewmode-prefix';
@@ -144,28 +144,34 @@
       opt.textContent = pair[1];
       select.appendChild(opt);
     });
-    // Hidden placeholder for printPreview — sole purpose is holding
-    // .value so the trigger shows "Print Preview" when user enters
-    // that mode via the toolbar. Disabled + hidden = not pickable.
+    // D.1 / SP-07 — Print Preview is now a live, pickable option.
+    // The option value is still 'printPreview' so _renderViewMode can
+    // set select.value = 'printPreview' when the preview is active and
+    // the label reads "Print Preview" in the dropdown.
     const pp = document.createElement('option');
     pp.value = 'printPreview';
     pp.textContent = 'Print Preview';
-    pp.disabled = true;
-    pp.hidden = true;
     select.appendChild(pp);
 
     select.addEventListener('change', _onViewModeChange);
     spanEl.appendChild(select);
   }
 
-  // Route changes through the UX-layer owner (Rga.ViewMode.set), not
-  // directly to Rga.ViewManager.activate — per Bundle 1 §A "one owner
-  // only, no duplicate logic". ViewMode.set persists + cycles previous
-  // and ultimately invokes ViewManager. Skipping ViewMode would bypass
-  // persistence and previous-mode tracking that Esc-exits-Draft relies on.
+  // Route changes through the appropriate SSOT:
+  //   - Flow / Draft / Print → Rga.ViewMode.set (persistence + Esc-exit)
+  //   - printPreview → Rga.PrintPreview.open() (separate ViewManager view;
+  //     ViewMode.set('printPreview') would no-op because printPreview
+  //     is not in MODES). After open() succeeds, the existing
+  //     ViewManager.onChange subscription will refresh the select.value.
   function _onViewModeChange(e) {
     const mode = e && e.target && e.target.value;
     if (!mode) return;
+    if (mode === 'printPreview') {
+      if (Rga.PrintPreview && typeof Rga.PrintPreview.open === 'function') {
+        Rga.PrintPreview.open();
+      }
+      return;
+    }
     if (Rga.ViewMode && typeof Rga.ViewMode.set === 'function') {
       Rga.ViewMode.set(mode);
     }

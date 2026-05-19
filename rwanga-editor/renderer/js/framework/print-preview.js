@@ -18,11 +18,14 @@
 // the previous id; hide() restores it (so closing the preview returns
 // the user to Flow or Draft seamlessly).
 //
-// Public API (unchanged):
-//   Rga.PrintPreview.show(view)      → boolean   (true if mounted)
-//   Rga.PrintPreview.hide()          → void
-//   Rga.PrintPreview.isActive()      → boolean
-//   Rga.PrintPreview.buildModel(view)→ RenderModel | null   (testing convenience)
+// Public API:
+//   Rga.PrintPreview.show(view)          → boolean   (true if mounted)
+//   Rga.PrintPreview.hide()              → void
+//   Rga.PrintPreview.isActive()          → boolean
+//   Rga.PrintPreview.buildModel(view)    → RenderModel | null   (testing convenience)
+//   Rga.PrintPreview.open()              → boolean   (D.1 — entry-point helper)
+//   Rga.PrintPreview.setOptions(opts)    → void      (D.3/D.4 options API)
+//   Rga.PrintPreview.getOptions()        → opts      (D.3/D.4 options API)
 'use strict';
 
 (function() {
@@ -36,6 +39,10 @@
   let _root = null;
   let _previousViewId = null;
 
+  // D.3/D.4 — options for optional footer/header rendering.
+  // Defaults: both off (preserves existing top-right "N." header only).
+  let _opts = { footerStyle: 'none', headerStyle: 'none' };
+
   // ----------------------------------------------------------------
   // Controller — registered with ViewManager. ViewManager handles
   // body-class side effect; controller only does the rendering work.
@@ -48,7 +55,9 @@
       if (!model) return false;
       _ensureRoot();
       if (Rga.PrintRenderer && typeof Rga.PrintRenderer.render === 'function') {
-        Rga.PrintRenderer.render(model, _root);
+        // D.3/D.4 — pass current options to the renderer so optional
+        // footer/header slots are populated when the user has opted in.
+        Rga.PrintRenderer.render(model, _root, _opts);
       }
       return true;
     },
@@ -125,10 +134,106 @@
     document.body.appendChild(_root);
   }
 
-  Rga.PrintPreview.show       = show;
-  Rga.PrintPreview.hide       = hide;
-  Rga.PrintPreview.isActive   = isActive;
-  Rga.PrintPreview.buildModel = buildModel;
+  // ----------------------------------------------------------------
+  // D.1 — open() — canonical entry point for all UI surfaces.
+  //   Resolves the active editor view via TabManager._editorView()
+  //   and calls show(view). Returns false if no view is available.
+  //   No try/catch — errors surface to the caller.
+  // ----------------------------------------------------------------
+  function open() {
+    if (!Rga.TabManager || typeof Rga.TabManager._editorView !== 'function') return false;
+    const view = Rga.TabManager._editorView();
+    if (!view) return false;
+    return show(view);
+  }
+
+  // ----------------------------------------------------------------
+  // D.3/D.4 — options API for optional footer + running header.
+  //   Default: { footerStyle: 'none', headerStyle: 'none' }.
+  //   footerStyle: 'bottom-center' | 'none'
+  //   headerStyle: 'running' | 'none'
+  // ----------------------------------------------------------------
+  function setOptions(opts) {
+    if (!opts || typeof opts !== 'object') return;
+    _opts = Object.assign({}, _opts, opts);
+  }
+
+  function getOptions() {
+    return Object.assign({}, _opts);
+  }
+
+  // ----------------------------------------------------------------
+  // D.5 — PageUp/PageDown scroll helper.
+  //   Scrolls to the previous/next sheet in the stack. Uses
+  //   scrollIntoView so the target sheet snaps to the top of the
+  //   scroll viewport regardless of exact sheet height.
+  //   direction: +1 → forward (PageDown), -1 → backward (PageUp).
+  // ----------------------------------------------------------------
+  function _scrollByOneSheet(direction) {
+    if (!_root || !_root.isConnected) return;
+    const sheets = _root.querySelectorAll('.rga-page-sheet');
+    if (sheets.length === 0) return;
+
+    // Determine which sheet is currently closest to the top of the
+    // viewport. Walk the sheets and find the one whose top attribute
+    // (dataset.pageNumber, 1-based) corresponds to the currently
+    // visible page. We use scrollTop to find the current position
+    // without calling getBoundingClientRect (banned per Phase 7 rule).
+    const currentScrollTop = _root.scrollTop;
+    let currentIdx = 0;
+    // Find the sheet currently at or above the scroll position.
+    // Since we can't use getBoundingClientRect, we use offsetTop
+    // (a layout-engine property, but valid for scroll math here —
+    // it does not trigger forced reflow when used after the browser
+    // has already laid out the element).
+    for (let i = 0; i < sheets.length; i += 1) {
+      if (sheets[i].offsetTop <= currentScrollTop + 1) {
+        currentIdx = i;
+      } else {
+        break;
+      }
+    }
+    const targetIdx = Math.max(0, Math.min(sheets.length - 1, currentIdx + direction));
+    if (sheets[targetIdx]) {
+      sheets[targetIdx].scrollIntoView({ block: 'start', behavior: 'smooth' });
+    }
+  }
+
+  // D.5 — Register PageDown / PageUp via KeyboardRegistry, gated on
+  // isActive(). Register Esc-to-exit as well (gated the same way) so
+  // pressing Esc while Print Preview is active reliably returns to the
+  // prior view. (Rga.ViewMode's Esc handler only gates on draft mode;
+  // it would no-op here without this additional registration.)
+  if (Rga.KeyboardRegistry && typeof Rga.KeyboardRegistry.register === 'function') {
+    Rga.KeyboardRegistry.register(
+      'PageDown',
+      { when: function() { return isActive(); } },
+      function() { _scrollByOneSheet(1); },
+      'Rga.PrintPreview (PgDn)'
+    );
+    Rga.KeyboardRegistry.register(
+      'PageUp',
+      { when: function() { return isActive(); } },
+      function() { _scrollByOneSheet(-1); },
+      'Rga.PrintPreview (PgUp)'
+    );
+    // D.5 — Esc exits Print Preview. Gated on isActive() so it does
+    // NOT conflict with other Esc consumers (Draft exit, dropdowns, etc.).
+    Rga.KeyboardRegistry.register(
+      'escape',
+      { when: function() { return isActive(); } },
+      function() { hide(); },
+      'Rga.PrintPreview (Esc exits preview)'
+    );
+  }
+
+  Rga.PrintPreview.show        = show;
+  Rga.PrintPreview.hide        = hide;
+  Rga.PrintPreview.isActive    = isActive;
+  Rga.PrintPreview.buildModel  = buildModel;
+  Rga.PrintPreview.open        = open;
+  Rga.PrintPreview.setOptions  = setOptions;
+  Rga.PrintPreview.getOptions  = getOptions;
   Rga.PrintPreview._BODY_CLASS = BODY_CLASS;
   Rga.PrintPreview._ROOT_ID    = ROOT_ID;
   Rga.PrintPreview._VIEW_ID    = VIEW_ID;

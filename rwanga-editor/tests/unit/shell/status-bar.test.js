@@ -172,15 +172,16 @@ test('Bundle 1 §A: viewMode select updates when Rga.ViewManager.onChange fires 
   assert.equal(sel.value, 'print');
 });
 
-test('Bundle 1 §A: when ViewManager reports printPreview, the hidden disabled option holds the value (display says "Print Preview")', () => {
+test('D.1/SP-07: when ViewManager reports printPreview, the live option holds the value (display says "Print Preview")', () => {
   const { Rga, status } = boot();
   Rga.ViewManager.activate('printPreview');
   const sel = status.querySelector('select.rga-shell-status-viewmode-select');
-  assert.equal(sel.value, 'printPreview', 'select.value must reflect printPreview (hidden disabled option holds it)');
+  assert.equal(sel.value, 'printPreview', 'select.value must reflect printPreview');
   const ppOption = Array.from(sel.options).find(function(o) { return o.value === 'printPreview'; });
   assert.ok(ppOption, 'printPreview option must exist');
-  assert.equal(ppOption.disabled, true, 'printPreview option must be disabled (user cannot pick it from the dropdown)');
-  assert.equal(ppOption.hidden, true, 'printPreview option must be hidden from the open dropdown list');
+  // D.1 — printPreview is now a live, pickable option (not disabled/hidden).
+  assert.equal(ppOption.disabled, false, 'printPreview option must not be disabled (D.1 makes it a live option)');
+  assert.equal(ppOption.hidden, false, 'printPreview option must not be hidden (D.1 makes it a live option)');
 });
 
 test('Bundle 1 §A: changing the viewMode select calls Rga.ViewMode.set (NOT ViewManager.activate directly)', () => {
@@ -194,15 +195,15 @@ test('Bundle 1 §A: changing the viewMode select calls Rga.ViewMode.set (NOT Vie
   assert.equal(stub.viewMode, 'draft');
 });
 
-test('Bundle 1 §A: dropdown exposes exactly the three live options Flow / Draft / Print', () => {
+test('D.1/SP-07: dropdown exposes four live options: Flow / Draft / Print / Print Preview', () => {
   const { status } = boot();
   const sel = status.querySelector('select.rga-shell-status-viewmode-select');
-  // Live = NOT hidden + NOT disabled. PrintPreview is a held-only option.
+  // D.1 — printPreview is now a live option (not disabled/hidden).
   const live = Array.from(sel.options).filter(function(o) {
     return !o.disabled && !o.hidden;
   });
-  assert.deepEqual(live.map(function(o) { return o.value; }), ['flow', 'draft', 'print']);
-  assert.deepEqual(live.map(function(o) { return o.textContent; }), ['Flow', 'Draft', 'Print']);
+  assert.deepEqual(live.map(function(o) { return o.value; }), ['flow', 'draft', 'print', 'printPreview']);
+  assert.deepEqual(live.map(function(o) { return o.textContent; }), ['Flow', 'Draft', 'Print', 'Print Preview']);
 });
 
 test('scene segment renders "Scene: S{N}" where N is the current scene\'s sceneNumber', () => {

@@ -31,26 +31,34 @@
 // belongs in the renderer.
 //
 // Public API:
-//   Rga.PrintRenderer.render(renderModel, container) → void
+//   Rga.PrintRenderer.render(renderModel, container, opts?) → void
 //   Rga.PrintRenderer.sheetCount(container) → number  (count of mounted sheets)
+//
+// opts shape (all optional, defaults to 'none'):
+//   { footerStyle: 'none' | 'bottom-center',
+//     headerStyle: 'none' | 'running',
+//     title:       string }
 'use strict';
 
 (function() {
   const Rga = window.Rga = window.Rga || {};
   Rga.PrintRenderer = Rga.PrintRenderer || {};
 
-  function render(renderModel, container) {
+  function render(renderModel, container, opts) {
     if (!container) return;
+    opts = opts || {};
     // Idempotent clear — host may re-render on doc change.
     container.innerHTML = '';
     container.classList.add('rga-print-preview-root');
+    const lp = (renderModel && renderModel.layoutProfile) ? renderModel.layoutProfile : null;
+    const title = (renderModel && renderModel.title) ? renderModel.title : (opts.title || '');
     if (!renderModel || !Array.isArray(renderModel.pages) || renderModel.pages.length === 0) {
       // Empty doc → render a single blank sheet so the writer sees the page.
-      container.appendChild(_buildPageSheet({ pageNumber: 1, blocks: [] }, 1));
+      container.appendChild(_buildPageSheet({ pageNumber: 1, blocks: [] }, 1, lp, opts, title));
       return;
     }
     for (let p = 0; p < renderModel.pages.length; p += 1) {
-      container.appendChild(_buildPageSheet(renderModel.pages[p], renderModel.totalPages));
+      container.appendChild(_buildPageSheet(renderModel.pages[p], renderModel.totalPages, lp, opts, title));
     }
   }
 
@@ -63,18 +71,51 @@
   // Sheet builders
   // ----------------------------------------------------------------
 
-  function _buildPageSheet(page, totalPages) {
+  function _buildPageSheet(page, totalPages, layoutProfile, opts, title) {
+    opts = opts || {};
     const sheet = document.createElement('div');
     sheet.className = 'rga-page-sheet';
     sheet.setAttribute('data-page-number', String(page.pageNumber));
     sheet.setAttribute('role', 'document');
     sheet.setAttribute('aria-label', 'Page ' + page.pageNumber + ' of ' + totalPages);
 
+    // D.2 — sheet dimensions from layoutProfile.pageSize (inline style
+    // overrides CSS fallback for non-Letter paper sizes, e.g. A4).
+    // NOTE: only width is written inline; height is intentionally omitted
+    // — existing tests assert that no inline height is ever set on sheets.
+    if (layoutProfile && layoutProfile.pageSize) {
+      sheet.style.width = layoutProfile.pageSize.w + 'in';
+    }
+
+    // D.2 — sheet padding from layoutProfile.margins. Overrides the CSS
+    // fallback (padding: 1in 1in 1in 1.5in) which is kept in the CSS file
+    // as a safe fallback for the empty/initial render before JS runs.
+    // RTL mirror: for Arabic/Kurdish the binding side is the right margin,
+    // so left/right padding values are swapped when direction === 'rtl'.
+    if (layoutProfile && layoutProfile.margins) {
+      const m = layoutProfile.margins;
+      const isRtl = (layoutProfile.direction === 'rtl');
+      const paddingLeft  = isRtl ? m.right : m.left;
+      const paddingRight = isRtl ? m.left  : m.right;
+      sheet.style.padding = m.top + 'in ' + paddingRight + 'in ' + m.bottom + 'in ' + paddingLeft + 'in';
+    }
+
     // Page header — top-right, traditional screenplay convention "N."
     const header = document.createElement('div');
     header.className = 'rga-page-sheet-header';
     header.textContent = page.pageNumber + '.';
     sheet.appendChild(header);
+
+    // D.4 — optional running header (opt-in only; default off).
+    // When opts.headerStyle === 'running', renders the script title
+    // top-left in muted type. Source: renderModel.title (from
+    // doc.metadata.title). Empty title → empty element (no error).
+    if (opts.headerStyle === 'running') {
+      const runningHeader = document.createElement('div');
+      runningHeader.className = 'rga-page-sheet-running-header';
+      runningHeader.textContent = title || '';
+      sheet.appendChild(runningHeader);
+    }
 
     const content = document.createElement('div');
     content.className = 'rga-page-sheet-content';
@@ -84,6 +125,18 @@
       }
     }
     sheet.appendChild(content);
+
+    // D.3 — optional bottom-center page number (opt-in only; default off).
+    // When opts.footerStyle === 'bottom-center', renders page number
+    // centered at the sheet bottom. The default top-right "N." header
+    // is always rendered (unchanged); this is an additional mode only.
+    if (opts.footerStyle === 'bottom-center') {
+      const footer = document.createElement('div');
+      footer.className = 'rga-page-sheet-footer';
+      footer.textContent = String(page.pageNumber);
+      sheet.appendChild(footer);
+    }
+
     return sheet;
   }
 
@@ -191,6 +244,6 @@
     }
   }
 
-  Rga.PrintRenderer.render     = render;
-  Rga.PrintRenderer.sheetCount = sheetCount;
+  Rga.PrintRenderer.render      = render;
+  Rga.PrintRenderer.sheetCount  = sheetCount;
 })();
