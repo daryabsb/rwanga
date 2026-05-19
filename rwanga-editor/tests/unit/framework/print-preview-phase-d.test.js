@@ -286,7 +286,12 @@ test('D.2 sheet dimensions: renders inline width from layoutProfile.pageSize (A4
     'sheet width must reflect A4 pageSize.w from layoutProfile');
 });
 
-test('D.2 sheet dimensions: sheet never gets an inline height override', () => {
+test('D.2 sheet dimensions: inline height comes from layoutProfile.pageSize.h', () => {
+  // UPDATED 2026-05-19: Contract changed — P0 dual-ownership collapse.
+  // The previous contract was "no inline height" (CSS-fixed only). The new
+  // contract is: print-renderer.js writes sheet.style.height from
+  // layoutProfile.pageSize.h so layout profile is the single owner of
+  // sheet geometry. CSS fallback (11in) remains for empty-doc path.
   const { PR } = bootRenderer();
   const container = document.createElement('div');
   const lp = {
@@ -296,8 +301,8 @@ test('D.2 sheet dimensions: sheet never gets an inline height override', () => {
   };
   PR.render(fakeModel([{ blocks: [] }, { blocks: [] }], lp), container);
   container.querySelectorAll('.rga-page-sheet').forEach(function(s) {
-    assert.equal(s.style.height, '',
-      'sheet must never carry an inline height — CSS-fixed only');
+    assert.equal(s.style.height, '11in',
+      'sheet inline height must be layoutProfile.pageSize.h (single owner)');
   });
 });
 
@@ -692,4 +697,145 @@ test('P0 guard: .rga-page-sheet-content has no margin or padding override (does 
   // The renderer must not write any inline top margin or padding on the content div.
   assert.equal(content.style.marginTop,  '', 'content div must have no inline margin-top');
   assert.equal(content.style.paddingTop, '', 'content div must have no inline padding-top');
+});
+
+// ================================================================
+// P0 — New tests: sheet inline height from layoutProfile.pageSize.h
+// (Tests 1 + 5 from P0 brief; covers Letter / A4 / Legal geometry)
+// ================================================================
+
+test('P0.1 sheet height: Letter (8.5×11) → inline height "11in"', () => {
+  const { PR } = bootRenderer();
+  const container = document.createElement('div');
+  const lp = {
+    margins: { top: 1.0, right: 1.0, bottom: 1.0, left: 1.5 },
+    pageSize: { w: 8.5, h: 11.0 },
+    direction: 'ltr'
+  };
+  PR.render(fakeModel([{ blocks: [] }], lp), container);
+  const sheet = container.querySelector('.rga-page-sheet');
+  assert.ok(sheet, 'sheet must exist');
+  assert.equal(sheet.style.height, '11in',
+    'Letter sheet inline height must be "11in" from layoutProfile.pageSize.h');
+});
+
+test('P0.1 sheet height: A4 (8.2677×11.6929) → inline height "11.6929in"', () => {
+  const { PR } = bootRenderer();
+  const container = document.createElement('div');
+  const lp = {
+    margins: { top: 1.0, right: 1.0, bottom: 1.0, left: 1.5 },
+    pageSize: { w: 8.2677, h: 11.6929 },
+    direction: 'ltr'
+  };
+  PR.render(fakeModel([{ blocks: [] }], lp), container);
+  const sheet = container.querySelector('.rga-page-sheet');
+  assert.ok(sheet, 'sheet must exist');
+  assert.equal(sheet.style.height, '11.6929in',
+    'A4 sheet inline height must be "11.6929in" from layoutProfile.pageSize.h (not "11in")');
+});
+
+test('P0.1 sheet height: Legal (8.5×14) → inline height "14in"', () => {
+  const { PR } = bootRenderer();
+  const container = document.createElement('div');
+  const lp = {
+    margins: { top: 1.0, right: 1.0, bottom: 1.0, left: 1.5 },
+    pageSize: { w: 8.5, h: 14.0 },
+    direction: 'ltr'
+  };
+  PR.render(fakeModel([{ blocks: [] }], lp), container);
+  const sheet = container.querySelector('.rga-page-sheet');
+  assert.ok(sheet, 'sheet must exist');
+  assert.equal(sheet.style.height, '14in',
+    'Legal sheet inline height must be "14in" from layoutProfile.pageSize.h');
+});
+
+test('P0.5 A4 sheet height: inline height is "11.6929in" not "11in" (explicit regression guard)', () => {
+  // Test 5 from P0 brief — listed separately for prominence.
+  // Before the dual-ownership collapse, the CSS fallback height: 11in would
+  // be used even for A4, making A4 sheets appear as Letter height in the browser.
+  const { PR } = bootRenderer();
+  const container = document.createElement('div');
+  const lp = {
+    margins: { top: 1.0, right: 1.0, bottom: 1.0, left: 1.5 },
+    pageSize: { w: 8.2677, h: 11.6929 },
+    direction: 'ltr'
+  };
+  PR.render(fakeModel([{ blocks: [] }], lp), container);
+  const sheet = container.querySelector('.rga-page-sheet');
+  assert.ok(sheet, 'sheet must exist');
+  assert.notEqual(sheet.style.height, '11in',
+    'A4 sheet must NOT use Letter height "11in" (regression: dual-ownership collapsed)');
+  assert.equal(sheet.style.height, '11.6929in',
+    'A4 sheet must use "11.6929in" from layoutProfile.pageSize.h');
+});
+
+// ================================================================
+// P0 — New tests: header position from layoutProfile.margins (Test 2)
+// ================================================================
+
+test('P0.2 header position: Hollywood margins (top:1, right:1) → top "0.5in", right "1in"', () => {
+  const { PR } = bootRenderer();
+  const container = document.createElement('div');
+  const lp = {
+    margins: { top: 1.0, right: 1.0, bottom: 1.0, left: 1.5 },
+    pageSize: { w: 8.5, h: 11.0 },
+    direction: 'ltr'
+  };
+  PR.render(fakeModel([{ blocks: [] }], lp), container);
+  const header = container.querySelector('.rga-page-sheet-header');
+  assert.ok(header, '.rga-page-sheet-header must exist');
+  assert.equal(header.style.top, '0.5in',
+    'header top must be margins.top * 0.5 = 0.5in for top:1in');
+  assert.equal(header.style.right, '1in',
+    'header right must be margins.right = 1in');
+});
+
+test('P0.2 header position: compact margins (top:0.5, right:0.5) → top "0.25in", right "0.5in"', () => {
+  const { PR } = bootRenderer();
+  const container = document.createElement('div');
+  const lp = {
+    margins: { top: 0.5, right: 0.5, bottom: 0.5, left: 1.0 },
+    pageSize: { w: 8.5, h: 11.0 },
+    direction: 'ltr'
+  };
+  PR.render(fakeModel([{ blocks: [] }], lp), container);
+  const header = container.querySelector('.rga-page-sheet-header');
+  assert.ok(header, '.rga-page-sheet-header must exist');
+  assert.equal(header.style.top, '0.25in',
+    'header top must be margins.top * 0.5 = 0.25in for top:0.5in');
+  assert.equal(header.style.right, '0.5in',
+    'header right must be margins.right = 0.5in for compact margins');
+});
+
+test('P0.2 header position RTL: right swaps to margins.left for binding side', () => {
+  // RTL: page number should sit on the binding side (left margin) not the right.
+  // Formula: header.style.right = (isRtl ? m.left : m.right) + 'in'.
+  // With margins {left:1.5, right:1.0} and direction='rtl': right = m.left = 1.5in.
+  const { PR } = bootRenderer();
+  const container = document.createElement('div');
+  const lp = {
+    margins: { top: 1.0, right: 1.0, bottom: 1.0, left: 1.5 },
+    pageSize: { w: 8.5, h: 11.0 },
+    direction: 'rtl'
+  };
+  PR.render(fakeModel([{ blocks: [] }], lp), container);
+  const header = container.querySelector('.rga-page-sheet-header');
+  assert.ok(header, '.rga-page-sheet-header must exist');
+  assert.equal(header.style.top, '0.5in',
+    'RTL header top must still be margins.top * 0.5');
+  assert.equal(header.style.right, '1.5in',
+    'RTL header right must be margins.left (binding side) = 1.5in');
+});
+
+test('P0 fallback: no layoutProfile → header has no inline top/right', () => {
+  // Without a layoutProfile the renderer cannot write inline positions.
+  // The CSS fallback (top: 0.5in; right: 1in) must be in effect — verified
+  // by asserting the inline style is empty (CSS fallback takes over).
+  const { PR } = bootRenderer();
+  const container = document.createElement('div');
+  PR.render(fakeModel([{ blocks: [] }], null), container);
+  const header = container.querySelector('.rga-page-sheet-header');
+  assert.ok(header, '.rga-page-sheet-header must exist even without layoutProfile');
+  assert.equal(header.style.top, '', 'without layoutProfile, no inline top on header');
+  assert.equal(header.style.right, '', 'without layoutProfile, no inline right on header');
 });

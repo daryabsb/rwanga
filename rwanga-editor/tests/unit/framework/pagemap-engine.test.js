@@ -124,7 +124,11 @@ test('measureBlock: long sceneHeading wraps using profile cpl=60', () => {
 // build — one-page / overflow / stability
 // ----------------------------------------------------------------
 
-test('exact ONE-PAGE fixture: 30 single-line actions fit on page 1', () => {
+test('exact ONE-PAGE fixture: 27 single-line actions fit on page 1 within safety budget', () => {
+  // UPDATED 2026-05-19: linesPerPage is now 53 (was 54) after the P0 safety
+  // reserve change. availableLines reflects the new budget.
+  // 1 + 2*N <= 53 → N <= 26 → 27 total → usedLines = 1 + 26*2 = 53.
+  // Exactly fills the budget (53 usedLines, 53 available). Still one page.
   const { LP, Engine } = boot();
   const p = LP.compose(null, null);
   const blocks = [];
@@ -132,13 +136,13 @@ test('exact ONE-PAGE fixture: 30 single-line actions fit on page 1', () => {
     blocks.push(block({ nodeType: 'action', text: 'short' }));
   }
   // Costs: 1st block = 1 line (first on page), next 29 = 2 lines each = 58. Total 59 → overflows.
-  // Use fewer: pick a count that fits within 54.
-  // 1 + 2*N <= 54 → N <= 26.5 → 26 more blocks → 27 total → cost = 1 + 26*2 = 53 lines.
+  // Use fewer: pick a count that fits within 53 (new linesPerPage after safety reserve).
+  // 1 + 2*N <= 53 → N <= 26 → 26 more blocks → 27 total → cost = 1 + 26*2 = 53 lines.
   blocks.length = 27;
   const pages = Engine.build(blocks, p);
   assert.equal(pages.length, 1);
   assert.equal(pages[0].pageNumber, 1);
-  assert.equal(pages[0].availableLines, 54);
+  assert.equal(pages[0].availableLines, 53);   // UPDATED from 54 → 53
   assert.equal(pages[0].usedLines, 53);
   assert.equal(pages[0].blocks.length, 27);
 });
@@ -211,10 +215,10 @@ test('insertion updates pages: adding a block at the start shifts pagination', (
 test('keep-with-next: sceneHeading at page bottom moves WITH its action to next page', () => {
   const { LP, Engine } = boot();
   const p = LP.compose(null, null);
-  // Pack 26 short actions = 53 lines (just under full). Then push a
+  // Pack 26 short actions = 53 lines (= full linesPerPage after safety reserve). Then push a
   // sceneHeading + action chain. The heading alone (1 leading + 1 content = 2)
   // could fit, but with action (1 + 1 = 2 more) the chain is 4. The remaining
-  // page space is 54 - 53 = 1, so chain doesn't fit → BOTH go to next page.
+  // page space is 53 - 53 = 0, so chain doesn't fit → BOTH go to next page.
   const blocks = [];
   for (let i = 0; i < 26; i += 1) blocks.push(block({ nodeType: 'action', text: 'fill' }));
   // Verify pre-state: 26 actions cost 1 + 25*2 = 51 lines → still 3 lines left.
@@ -255,7 +259,7 @@ test('keep-with-next: character cue travels with following dialogue', () => {
 test('V1 no-split: an oversized single block on an empty page IS placed (oversize page)', () => {
   const { LP, Engine } = boot();
   const p = LP.compose(null, null);
-  // Build an action with 60 chars × 100 → 100 wrapped lines. Way over 54.
+  // Build an action with 60 chars × 100 → 100 wrapped lines. Way over 53 (linesPerPage).
   const blocks = [ block({ nodeType: 'action', text: 'a'.repeat(60 * 100) }) ];
   const pages = Engine.build(blocks, p);
   // V1 places the block on page 1 as an oversize page (no split available).
@@ -272,6 +276,46 @@ test('empty block array still returns a single empty page', () => {
   assert.equal(pages[0].pageNumber, 1);
   assert.equal(pages[0].blocks.length, 0);
   assert.equal(pages[0].usedLines, 0);
+});
+
+// ----------------------------------------------------------------
+// P0 — Test 4: safety reserve is the budget gap (usedLines <= linesPerPage,
+//   never equal to theoreticalLinesPerPage on normal pages)
+// ----------------------------------------------------------------
+
+test('P0.4 safety reserve: no page usedLines ever equals theoreticalLinesPerPage', () => {
+  // Build enough blocks to fill multiple pages. Assert that the packer
+  // respects linesPerPage (= theoretical - 1) so no page carries content
+  // that reaches the theoretical ceiling. The safety reserve is the gap.
+  const { LP, Engine } = boot();
+  const p = LP.compose(null, null);
+  assert.ok(p.theoreticalLinesPerPage > p.linesPerPage,
+    'theoreticalLinesPerPage must be > linesPerPage (safety reserve applied)');
+  assert.equal(p.theoreticalLinesPerPage - p.linesPerPage, p.safetyLines,
+    'the gap between theoretical and actual must equal safetyLines');
+
+  // Fill 3 pages worth of blocks (each page holds 27 action blocks = 53 used lines).
+  const blocks = [];
+  for (let i = 0; i < 81; i += 1) {
+    blocks.push(block({ nodeType: 'action', text: 'short line' }));
+  }
+  const pages = Engine.build(blocks, p);
+  assert.ok(pages.length >= 3, 'fixture must produce at least 3 pages, got ' + pages.length);
+
+  for (let i = 0; i < pages.length - 1; i += 1) {
+    // For all fully-packed pages (not the last, which may be partial):
+    // usedLines must not exceed linesPerPage (the safe budget).
+    assert.ok(pages[i].usedLines <= p.linesPerPage,
+      'page ' + (i + 1) + ' usedLines (' + pages[i].usedLines +
+      ') must not exceed linesPerPage (' + p.linesPerPage + ')');
+    // The safety reserve IS the gap: usedLines must not reach theoreticalLinesPerPage
+    // on any normally-packed page (only an oversize/unsplittable block could exceed it).
+    assert.ok(pages[i].usedLines < p.theoreticalLinesPerPage ||
+              pages[i].blocks.length === 1,
+      'page ' + (i + 1) + ' usedLines (' + pages[i].usedLines +
+      ') must not equal theoreticalLinesPerPage (' + p.theoreticalLinesPerPage +
+      ') unless it is a single-block oversize page');
+  }
 });
 
 // ----------------------------------------------------------------

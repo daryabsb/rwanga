@@ -90,6 +90,14 @@
     }
   };
 
+  // Safety reserve: subtract this many lines from the theoretical linesPerPage.
+  // Absorbs browser rendering drift that makes actual lines slightly taller than
+  // the pure-math value. One line (at Courier 12pt ≈ 0.167in) gives a small
+  // cushion without meaningfully changing page count for normal scripts.
+  // Explicit constant here so tests can assert the reserve is applied and
+  // future callers can inspect it on the returned profile.
+  const SAFETY_LINES = 1;
+
   // Per-pt → lines-per-inch table for monospace at single leading.
   // For Courier the on-paper line height = sizePt * leading / 72 (in inches).
   function _linesPerInch(sizePt, leading) {
@@ -125,7 +133,12 @@
 
     const usableH  = Math.max(0, pageSize.h - margins.top - margins.bottom);
     const usableW  = Math.max(0, pageSize.w - margins.left - margins.right);
-    const linesPerPage = _round(usableH * _linesPerInch(font.sizePt, font.leading));
+    // theoreticalLinesPerPage: pure-math budget before the safety reserve is applied.
+    // linesPerPage: actual budget consumed by PageMap — SAFETY_LINES fewer than
+    // theoretical, absorbing browser rendering drift so content never bleeds through
+    // the bottom margin. Both values are surfaced on the profile for transparency.
+    const theoreticalLinesPerPage = _round(usableH * _linesPerInch(font.sizePt, font.leading));
+    const linesPerPage = Math.max(1, theoreticalLinesPerPage - SAFETY_LINES);
     const cpi = _charsPerInch(font.sizePt);
 
     const blocks = {};
@@ -156,12 +169,14 @@
     const direction = (_profile.direction === 'rtl') ? 'rtl' : 'ltr';
 
     return {
-      linesPerPage: linesPerPage,
-      pageSize:     pageSize,
-      margins:      margins,
-      font:         font,
-      blocks:       blocks,
-      direction:    direction
+      linesPerPage:            linesPerPage,
+      theoreticalLinesPerPage: theoreticalLinesPerPage,  // pre-reserve; diagnostic + testability
+      safetyLines:             SAFETY_LINES,              // applied reserve; explicit not magic
+      pageSize:                pageSize,
+      margins:                 margins,
+      font:                    font,
+      blocks:                  blocks,
+      direction:               direction
     };
   }
 

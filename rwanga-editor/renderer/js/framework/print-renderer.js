@@ -80,11 +80,13 @@
     sheet.setAttribute('aria-label', 'Page ' + page.pageNumber + ' of ' + totalPages);
 
     // D.2 — sheet dimensions from layoutProfile.pageSize (inline style
-    // overrides CSS fallback for non-Letter paper sizes, e.g. A4).
-    // NOTE: only width is written inline; height is intentionally omitted
-    // — existing tests assert that no inline height is ever set on sheets.
+    // overrides CSS fallbacks for non-Letter paper sizes, e.g. A4 / Legal).
+    // Both width and height are written inline so a single owner (layoutProfile)
+    // controls the sheet geometry. CSS fallbacks (8.5in / 11in) remain valid
+    // for the empty-doc / preload render path before JS has run.
     if (layoutProfile && layoutProfile.pageSize) {
-      sheet.style.width = layoutProfile.pageSize.w + 'in';
+      sheet.style.width  = layoutProfile.pageSize.w + 'in';
+      sheet.style.height = layoutProfile.pageSize.h + 'in';
     }
 
     // D.2 — sheet padding from layoutProfile.margins. Overrides the CSS
@@ -101,19 +103,44 @@
     }
 
     // Page header — top-right, traditional screenplay convention "N."
+    // Position is written inline from layoutProfile.margins so any paper
+    // size / margin setting produces a correctly placed page number.
+    //   top:   margins.top * 0.5  — page number sits at half the top margin
+    //          from the sheet top edge (Hollywood: 1in → 0.5in; compact
+    //          0.5in top → 0.25in — always inside the top-margin band).
+    //   right: margins.right      — aligned with the right content edge
+    //          (RTL mirror: use margins.left so the number sits on the
+    //          binding side correctly for Arabic / Kurdish).
+    // CSS fallback values (top: 0.5in; right: 1in) remain for the
+    // empty-doc / preload render path before layoutProfile is available.
     const header = document.createElement('div');
     header.className = 'rga-page-sheet-header';
     header.textContent = page.pageNumber + '.';
+    if (layoutProfile && layoutProfile.margins) {
+      const m = layoutProfile.margins;
+      const isRtl = (layoutProfile.direction === 'rtl');
+      header.style.top   = (m.top * 0.5) + 'in';
+      header.style.right = (isRtl ? m.left : m.right) + 'in';
+    }
     sheet.appendChild(header);
 
     // D.4 — optional running header (opt-in only; default off).
     // When opts.headerStyle === 'running', renders the script title
     // top-left in muted type. Source: renderModel.title (from
     // doc.metadata.title). Empty title → empty element (no error).
+    // top + left positions written inline from margins (same ownership
+    // collapse as the page-number header). CSS fallback values remain for
+    // empty-doc / preload path.
     if (opts.headerStyle === 'running') {
       const runningHeader = document.createElement('div');
       runningHeader.className = 'rga-page-sheet-running-header';
       runningHeader.textContent = title || '';
+      if (layoutProfile && layoutProfile.margins) {
+        const m = layoutProfile.margins;
+        const isRtl = (layoutProfile.direction === 'rtl');
+        runningHeader.style.top  = (m.top * 0.5) + 'in';
+        runningHeader.style.left = (isRtl ? m.right : m.left) + 'in';
+      }
       sheet.appendChild(runningHeader);
     }
 
@@ -130,10 +157,16 @@
     // When opts.footerStyle === 'bottom-center', renders page number
     // centered at the sheet bottom. The default top-right "N." header
     // is always rendered (unchanged); this is an additional mode only.
+    // bottom position written inline from margins (same ownership collapse as
+    // the page-number header). CSS fallback (bottom: 0.5in) remains for
+    // empty-doc / preload path.
     if (opts.footerStyle === 'bottom-center') {
       const footer = document.createElement('div');
       footer.className = 'rga-page-sheet-footer';
       footer.textContent = String(page.pageNumber);
+      if (layoutProfile && layoutProfile.margins) {
+        footer.style.bottom = (layoutProfile.margins.bottom * 0.5) + 'in';
+      }
       sheet.appendChild(footer);
     }
 

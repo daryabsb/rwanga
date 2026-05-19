@@ -2120,13 +2120,14 @@ body.view-print-preview-active #workspace {
 
 .rga-page-sheet {
   /* Fixed dimensions — never recalculated from content (Rule 6).
-   * D.2: width and padding are overridden inline by the renderer when
-   * layoutProfile is available (margins + pageSize from doc.settings.pageSetup).
-   * These CSS values are fallbacks for the empty / initial render only.
-   * D.2: height is kept as a CSS-only fallback; the renderer intentionally
-   * does NOT write inline height so sheet dimensions feel CSS-natural. */
-  width:  8.5in;           /* fallback; inline override from layoutProfile.pageSize.w */
-  height: 11in;
+   * D.2: width, height, and padding are all overridden inline by the
+   * renderer when layoutProfile is available (margins + pageSize from
+   * doc.settings.pageSetup). These CSS values are FALLBACKS ONLY for
+   * the empty-doc / preload render path before JS has run. Do NOT
+   * remove them — the fallback path depends on them.
+   * Single owner for sheet geometry: layoutProfile via print-renderer.js. */
+  width:  8.5in;           /* FALLBACK only; inline override from layoutProfile.pageSize.w */
+  height: 11in;            /* FALLBACK only; inline override from layoutProfile.pageSize.h */
   flex-shrink: 0;          /* keep height fixed inside flex column */
   flex-grow: 0;
   background: #ffffff;
@@ -2143,9 +2144,13 @@ body.view-print-preview-active #workspace {
 }
 
 .rga-page-sheet-header {
+  /* FALLBACK positions only — inline override from layoutProfile.margins
+   * (top = margins.top * 0.5; right = margins.right, or margins.left for RTL).
+   * These literal values apply only during the empty-doc / preload path
+   * before JS has written the inline style. Do NOT remove. */
   position: absolute;
-  top: 0.5in;
-  right: 1in;
+  top: 0.5in;    /* FALLBACK; inline override: margins.top * 0.5 */
+  right: 1in;    /* FALLBACK; inline override: margins.right (or margins.left for RTL) */
   font-size: 12pt;
   font-family: inherit;
   color: #111;
@@ -2154,10 +2159,12 @@ body.view-print-preview-active #workspace {
 /* D.3 — optional bottom-center page number (opt-in via
  * Rga.PrintPreview.setOptions({ footerStyle: 'bottom-center' })).
  * Default behavior (top-right N. only) is preserved when this
- * element is absent. */
+ * element is absent.
+ * FALLBACK position only — inline override from layoutProfile.margins
+ * (bottom = margins.bottom * 0.5). */
 .rga-page-sheet-footer {
   position: absolute;
-  bottom: 0.5in;
+  bottom: 0.5in;   /* FALLBACK; inline override: margins.bottom * 0.5 */
   left: 0;
   right: 0;
   text-align: center;
@@ -2168,11 +2175,13 @@ body.view-print-preview-active #workspace {
 
 /* D.4 — optional running header: script title top-left in muted type
  * (opt-in via Rga.PrintPreview.setOptions({ headerStyle: 'running' })).
- * Default behavior is off; this element is absent when not opted in. */
+ * Default behavior is off; this element is absent when not opted in.
+ * FALLBACK positions only — inline override from layoutProfile.margins
+ * (top = margins.top * 0.5; left = margins.left, or margins.right for RTL). */
 .rga-page-sheet-running-header {
   position: absolute;
-  top: 0.5in;
-  left: 1.5in;
+  top: 0.5in;    /* FALLBACK; inline override: margins.top * 0.5 */
+  left: 1.5in;   /* FALLBACK; inline override: margins.left (or margins.right for RTL) */
   font-size: 10pt;
   font-family: inherit;
   color: #444;

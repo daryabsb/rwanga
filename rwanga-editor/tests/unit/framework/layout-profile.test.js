@@ -17,10 +17,15 @@ function boot() {
   return { LP: global.window.Rga.LayoutProfile };
 }
 
-test('default Hollywood/Letter/Courier 12pt gives 54 lines per page', () => {
+test('default Hollywood/Letter/Courier 12pt: linesPerPage=53, theoreticalLinesPerPage=54, safetyLines=1', () => {
+  // UPDATED 2026-05-19: linesPerPage was 54 before the P0 bottom-safety-reserve
+  // change. compose() now subtracts SAFETY_LINES (1) from the theoretical budget,
+  // giving 53. Both values are surfaced on the profile for transparency.
   const { LP } = boot();
   const p = LP.compose({ language: 'en', screenplayConvention: 'hollywood' }, null);
-  assert.equal(p.linesPerPage, 54);
+  assert.equal(p.linesPerPage, 53,                  'linesPerPage must be 53 (theoretical 54 - safety 1)');
+  assert.equal(p.theoreticalLinesPerPage, 54,        'theoreticalLinesPerPage must be 54 (pure-math budget)');
+  assert.equal(p.safetyLines, 1,                     'safetyLines must be 1 (the reserve constant)');
   assert.equal(p.pageSize.w, 8.5);
   assert.equal(p.pageSize.h, 11.0);
   assert.equal(p.font.family, 'Courier');
@@ -73,7 +78,7 @@ test('A4 paper composes correctly (action cpl clamped by narrower usable width)'
   // (Letter would give 60.) Either way the value reflects actual paper, not DOM measure.
   assert.ok(p.blocks.action.cpl < 60);
   assert.ok(p.blocks.action.cpl > 50);
-  // A4 is slightly taller → ≥54 lines.
+  // A4 is slightly taller → theoretical=58, after safety reserve actual=57 ≥ 54.
   assert.ok(p.linesPerPage >= 54);
 });
 
@@ -82,7 +87,7 @@ test('larger font size shrinks cpl + linesPerPage proportionally', () => {
   const p = LP.compose(null, { font_size: 14 });
   // 14pt: cpi = 10 * 12/14 ≈ 8.57; 6in × 8.57 = ~51 → floor = 51
   assert.ok(p.blocks.action.cpl < 60);
-  // Lines per page: lpi = 72/14 ≈ 5.14; 9in × 5.14 ≈ 46
+  // Lines per page: lpi = 72/14 ≈ 5.14; 9in × 5.14 ≈ 46 theoretical, minus safety → 45 < 53.
   assert.ok(p.linesPerPage < 54);
 });
 
@@ -136,4 +141,36 @@ test('SP-19: paperSize takes precedence over legacy size when both present', () 
     'Letter width must win when paperSize=Letter overrides size=A4; got ' + p.pageSize.w);
   assert.ok(Math.abs(p.pageSize.h - 11.0) < 0.01,
     'Letter height must win when paperSize=Letter overrides size=A4; got ' + p.pageSize.h);
+});
+
+// ================================================================
+// P0 — Safety reserve: compose() subtracts SAFETY_LINES (Test 3)
+// ================================================================
+
+test('P0.3 safety reserve: Letter Hollywood → linesPerPage=53, theoreticalLinesPerPage=54, safetyLines=1', () => {
+  // Explicit per-paper-size assertions from the P0 brief.
+  // Letter: usable = 11 - 1 - 1 = 9in; 9in × 6lpi = 54 theoretical → 53 after reserve.
+  const { LP } = boot();
+  const p = LP.compose({ language: 'en' }, { pageSetup: { paperSize: 'Letter', margins: { top: 1, right: 1, bottom: 1, left: 1.5 } } });
+  assert.equal(p.linesPerPage, 53,                   'Letter linesPerPage must be 53');
+  assert.equal(p.theoreticalLinesPerPage, 54,         'Letter theoreticalLinesPerPage must be 54');
+  assert.equal(p.safetyLines, 1,                      'safetyLines must be 1');
+});
+
+test('P0.3 safety reserve: A4 Hollywood → linesPerPage=57, theoreticalLinesPerPage=58, safetyLines=1', () => {
+  // A4: usable = 11.6929 - 1 - 1 = 9.6929in; 9.6929in × 6lpi = 58.157 → floor = 58 → minus 1 = 57.
+  const { LP } = boot();
+  const p = LP.compose({ language: 'en' }, { pageSetup: { paperSize: 'A4', margins: { top: 1, right: 1, bottom: 1, left: 1.5 } } });
+  assert.equal(p.linesPerPage, 57,                    'A4 linesPerPage must be 57');
+  assert.equal(p.theoreticalLinesPerPage, 58,          'A4 theoreticalLinesPerPage must be 58');
+  assert.equal(p.safetyLines, 1,                       'safetyLines must be 1');
+});
+
+test('P0.3 safety reserve: Legal Hollywood → linesPerPage=71, theoreticalLinesPerPage=72, safetyLines=1', () => {
+  // Legal: usable = 14 - 1 - 1 = 12in; 12in × 6lpi = 72 theoretical → 71 after reserve.
+  const { LP } = boot();
+  const p = LP.compose({ language: 'en' }, { pageSetup: { paperSize: 'Legal', margins: { top: 1, right: 1, bottom: 1, left: 1.5 } } });
+  assert.equal(p.linesPerPage, 71,                    'Legal linesPerPage must be 71');
+  assert.equal(p.theoreticalLinesPerPage, 72,          'Legal theoreticalLinesPerPage must be 72');
+  assert.equal(p.safetyLines, 1,                       'safetyLines must be 1');
 });

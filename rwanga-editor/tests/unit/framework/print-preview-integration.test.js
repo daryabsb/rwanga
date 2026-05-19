@@ -203,7 +203,11 @@ test('100-scene fixture → many sheets, count matches PageMap', () => {
 // "Sheet heights are fixed" — content change shifts distribution, not size
 // ----------------------------------------------------------------
 
-test('content insertion changes sheet COUNT, not sheet style.height', () => {
+test('content insertion changes sheet COUNT; sheet height stays uniform (from layoutProfile)', () => {
+  // UPDATED 2026-05-19: Contract changed — P0 dual-ownership collapse.
+  // Sheet height is now written INLINE from layoutProfile.pageSize.h (not CSS-only).
+  // All sheets must carry the SAME inline height (uniform paper size); content
+  // changes the number of sheets, not the individual sheet height.
   const { Rga, schema, PM } = boot();
   const scenes = [];
   for (let i = 0; i < 10; i += 1) scenes.push(scene(schema, 'sc-' + i, { action: 'x'.repeat(60 * 3) }));
@@ -212,9 +216,13 @@ test('content insertion changes sheet COUNT, not sheet style.height', () => {
   const root = document.getElementById('rga-print-preview-root');
   const sheetsBefore = root.querySelectorAll('.rga-page-sheet');
   const countBefore = sheetsBefore.length;
-  // Every sheet element has class — no inline style.height, no auto-stretch.
+  // Every sheet must carry a non-empty inline height from layoutProfile (single owner).
+  // All sheets on the same render pass must have the SAME inline height.
+  let heightBefore = null;
   sheetsBefore.forEach(function(s) {
-    assert.equal(s.style.height, '', 'sheets never carry inline height — they\'re CSS-fixed');
+    assert.ok(s.style.height !== '', 'sheet must carry inline height from layoutProfile.pageSize.h');
+    if (heightBefore === null) { heightBefore = s.style.height; }
+    assert.equal(s.style.height, heightBefore, 'all sheets must have uniform inline height');
   });
 
   // Insert 10 more scenes via PM transaction; re-show preview.
@@ -226,9 +234,11 @@ test('content insertion changes sheet COUNT, not sheet style.height', () => {
   }
   Rga.PrintPreview.show(view);
   const sheetsAfter = root.querySelectorAll('.rga-page-sheet');
-  // More content → more (or same) sheets, but each sheet still has no inline height.
+  // More content → more (or same) sheets; each sheet still has the same uniform height.
   assert.ok(sheetsAfter.length >= countBefore, 'sheet count grows or stays — does not shrink unexpectedly');
-  sheetsAfter.forEach(function(s) { assert.equal(s.style.height, '', 'fixed CSS height; no JS override'); });
+  sheetsAfter.forEach(function(s) {
+    assert.equal(s.style.height, heightBefore, 'sheet height unchanged after content insertion (same layoutProfile)');
+  });
   Rga.PrintPreview.hide();
   view.destroy();
 });
