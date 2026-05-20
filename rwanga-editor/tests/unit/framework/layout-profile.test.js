@@ -174,3 +174,44 @@ test('P0.3 safety reserve: Legal Hollywood → linesPerPage=71, theoreticalLines
   assert.equal(p.theoreticalLinesPerPage, 72,          'Legal theoreticalLinesPerPage must be 72');
   assert.equal(p.safetyLines, 1,                       'safetyLines must be 1');
 });
+
+// ================================================================
+// Recovery Step 1 — Constants.PAPER_SIZES and LayoutProfile must
+// agree on paper dimensions. Before Step 1 constants.js declared A4
+// as 8.27 × 11.69 (2dp) while LayoutProfile used 8.2677 × 11.6929;
+// PageSurface read the former, PageMap the latter, so the visual
+// page and the paginated content disagreed about A4 by ~0.06mm.
+// ================================================================
+
+function bootWithConstants() {
+  const dom = new JSDOM('<!DOCTYPE html><html><body></body></html>');
+  global.window = dom.window;
+  global.document = dom.window.document;
+  global.window.Rga = {};
+  const cPath  = '../../../renderer/js/constants.js';
+  const lpPath = '../../../renderer/js/framework/layout-profile.js';
+  delete require.cache[require.resolve(cPath)];
+  delete require.cache[require.resolve(lpPath)];
+  require(cPath);
+  require(lpPath);
+  return { Constants: global.window.Rga.Constants, LP: global.window.Rga.LayoutProfile };
+}
+
+test('Recovery Step 1: Constants.PAPER_SIZES agrees with LayoutProfile pageSize for every paper', () => {
+  const { Constants, LP } = bootWithConstants();
+  ['Letter', 'A4', 'Legal'].forEach(function(name) {
+    const c = Constants.PAPER_SIZES[name];
+    const p = LP.compose(null, { pageSetup: { paperSize: name, margins: { top: 1, bottom: 1, left: 1.5, right: 1, unit: 'in' } } });
+    assert.equal(p.pageSize.w, c.width,  name + ' width: Constants (' + c.width + ') must equal LayoutProfile (' + p.pageSize.w + ')');
+    assert.equal(p.pageSize.h, c.height, name + ' height: Constants (' + c.height + ') must equal LayoutProfile (' + p.pageSize.h + ')');
+  });
+});
+
+test('Recovery Step 1: A4 in Constants.PAPER_SIZES matches ISO 216 (210mm × 297mm)', () => {
+  const { Constants } = bootWithConstants();
+  const A4 = Constants.PAPER_SIZES.A4;
+  assert.equal(A4.width,  8.2677,  'A4 width must be 210/25.4 to 4dp = 8.2677');
+  assert.equal(A4.height, 11.6929, 'A4 height must be 297/25.4 to 4dp = 11.6929');
+  assert.ok(Math.abs(A4.width  - 210 / 25.4) < 0.0001, 'A4 width within 0.0001in of 210mm');
+  assert.ok(Math.abs(A4.height - 297 / 25.4) < 0.0001, 'A4 height within 0.0001in of 297mm');
+});

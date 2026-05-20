@@ -29,11 +29,14 @@
 
     DEFAULT_SCRIPT_LANGUAGE: 'en',
 
-    // Paper dimensions in inches { width, height }
+    // Paper dimensions in inches { width, height }.
+    // A4 is ISO 216 (210mm x 297mm); the inch values are 210/25.4 and
+    // 297/25.4 to 4 decimal places — kept precise so this table agrees
+    // exactly with LayoutProfile's paper resolution (Recovery Step 1).
     PAPER_SIZES: {
-      Letter: { width: 8.5,  height: 11 },
-      A4:     { width: 8.27, height: 11.69 },
-      Legal:  { width: 8.5,  height: 14 }
+      Letter: { width: 8.5,    height: 11 },
+      A4:     { width: 8.2677, height: 11.6929 },
+      Legal:  { width: 8.5,    height: 14 }
     },
 
     DEFAULT_VOCABULARY: {
