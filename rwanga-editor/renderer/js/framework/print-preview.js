@@ -112,10 +112,10 @@
   function buildModel(view) {
     if (!view || !view.state || !view.state.doc) return null;
     const Normalizer = Rga.Normalizer;
-    const LayoutProfile = Rga.LayoutProfile;
+    const Geometry = Rga.ManuscriptGeometry;
     const Engine = Rga.PageMap;
     const RM = Rga.RenderModel;
-    if (!Normalizer || !LayoutProfile || !Engine || !RM) return null;
+    if (!Normalizer || !Geometry || !Engine || !RM) return null;
 
     const profile = _resolveLayoutProfile();
     const normalizedBlocks = Normalizer.normalize(view.state.doc);
@@ -123,17 +123,16 @@
     return RM.build(view.state.doc, pageMap, normalizedBlocks, profile);
   }
 
+  // Recovery Step 5: resolve through the ManuscriptGeometry façade.
+  // ManuscriptGeometry.resolve(doc) does the doc → (screenplayProfile,
+  // settings) extraction and delegates to LayoutProfile; resolve(null)
+  // safely yields the default profile. One named resolver for every
+  // geometry consumer.
   function _resolveLayoutProfile() {
-    let screenplayProfile = null;
-    let settings = null;
-    if (Rga.TabManager && typeof Rga.TabManager.activeDoc === 'function') {
-      const d = Rga.TabManager.activeDoc();
-      if (d) {
-        if (d.metadata && d.metadata.screenplayProfile) screenplayProfile = d.metadata.screenplayProfile;
-        if (d.settings) settings = d.settings;
-      }
-    }
-    return Rga.LayoutProfile.compose(screenplayProfile, settings);
+    const d = (Rga.TabManager && typeof Rga.TabManager.activeDoc === 'function')
+      ? Rga.TabManager.activeDoc()
+      : null;
+    return Rga.ManuscriptGeometry.resolve(d);
   }
 
   function _ensureRoot() {

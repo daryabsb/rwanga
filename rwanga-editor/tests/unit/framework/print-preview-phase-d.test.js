@@ -157,6 +157,8 @@ function bootPrintPreview(opts) {
     path.join(RENDERER_ROOT, 'js/framework/base-outer-marks.js'),
     path.join(RENDERER_ROOT, 'js/framework/screenplay-normalizer.js'),
     path.join(RENDERER_ROOT, 'js/framework/layout-profile.js'),
+    // Recovery Step 5: print-preview.js resolves geometry via ManuscriptGeometry.
+    path.join(RENDERER_ROOT, 'js/framework/manuscript-geometry.js'),
     path.join(RENDERER_ROOT, 'js/framework/pagemap-engine.js'),
     path.join(RENDERER_ROOT, 'js/framework/view-manager.js'),
     path.join(RENDERER_ROOT, 'js/framework/render-model.js'),

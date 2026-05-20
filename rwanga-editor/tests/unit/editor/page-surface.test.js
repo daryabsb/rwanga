@@ -18,11 +18,13 @@ function boot() {
   global.window = dom.window;
   global.document = dom.window.document;
   global.window.Rga = {};
-  // page-surface.js calls LayoutProfile.compose, which reads
-  // Constants.PAPER_SIZES — load the full chain.
+  // page-surface.js resolves geometry through ManuscriptGeometry, which
+  // delegates to LayoutProfile, which reads Constants.PAPER_SIZES —
+  // load the full chain (Recovery Step 5).
   const paths = [
     '../../../renderer/js/constants.js',
     '../../../renderer/js/framework/layout-profile.js',
+    '../../../renderer/js/framework/manuscript-geometry.js',
     '../../../renderer/js/editor/page-surface.js'
   ];
   paths.forEach(function(p) { delete require.cache[require.resolve(p)]; require(p); });

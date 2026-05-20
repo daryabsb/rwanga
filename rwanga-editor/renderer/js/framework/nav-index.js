@@ -426,8 +426,11 @@
     if (window.Rga && Rga.Normalizer && typeof Rga.Normalizer.normalize === 'function') {
       normalizedBlocks = Rga.Normalizer.normalize(editorState.doc);
     }
-    const layoutProfile = (window.Rga && Rga.LayoutProfile && typeof Rga.LayoutProfile.compose === 'function')
-      ? Rga.LayoutProfile.compose(opts.screenplayProfile || null, opts.settings || null)
+    // Recovery Step 5: resolve via the ManuscriptGeometry façade, not
+    // LayoutProfile.compose directly. resolveFrom is a thin pass-through
+    // to compose — identical output, single named resolver.
+    const layoutProfile = (window.Rga && Rga.ManuscriptGeometry && typeof Rga.ManuscriptGeometry.resolveFrom === 'function')
+      ? Rga.ManuscriptGeometry.resolveFrom(opts.screenplayProfile || null, opts.settings || null)
       : null;
     if (normalizedBlocks && layoutProfile && Rga.PageMap && typeof Rga.PageMap.build === 'function') {
       pageMap = Rga.PageMap.build(normalizedBlocks, layoutProfile);

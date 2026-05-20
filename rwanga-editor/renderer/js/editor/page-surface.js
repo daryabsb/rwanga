@@ -1,22 +1,24 @@
 // Copyright (c) 2026 Rwanga. Licensed under Apache 2.0.
 // Applies a doc's page geometry to the live .rga-page element.
 //
-// Recovery Step 4: PageSurface no longer resolves paper size or margins
-// itself. It routes pageSetup through Rga.LayoutProfile.compose — the same
-// arithmetic path PageMap and Print Preview use — and consumes the resolved
-// layoutProfile.pageSize + layoutProfile.margins. One geometry source.
+// Recovery Step 5: PageSurface resolves geometry through the single named
+// resolver Rga.ManuscriptGeometry — the same façade PageMap and Print
+// Preview use. ManuscriptGeometry delegates the arithmetic to LayoutProfile
+// (which reads Constants.PAPER_SIZES). PageSurface consumes the resolved
+// layoutProfile.pageSize + layoutProfile.margins; it owns no geometry math.
 'use strict';
 
 (function() {
   const Rga = window.Rga = window.Rga || {};
 
-  // Resolve a pageSetup into a layoutProfile via LayoutProfile.compose.
-  // compose() reads Constants.PAPER_SIZES (Recovery Step 3), so the Flow
-  // visual page, PageMap, and Print Preview all derive geometry from the
-  // single Constants paper-size table.
+  // Resolve a pageSetup into a layoutProfile via the ManuscriptGeometry
+  // façade. resolveFrom(screenplayProfile, settings) is the "I have the
+  // pieces, not a whole doc" entry point — PageSurface's callers pass a
+  // pageSetup, so screenplayProfile is null here (the Flow visual page
+  // does not need direction/RTL; that stays current behaviour).
   function _resolveProfile(pageSetup) {
-    if (Rga.LayoutProfile && typeof Rga.LayoutProfile.compose === 'function') {
-      return Rga.LayoutProfile.compose(null, { pageSetup: pageSetup });
+    if (Rga.ManuscriptGeometry && typeof Rga.ManuscriptGeometry.resolveFrom === 'function') {
+      return Rga.ManuscriptGeometry.resolveFrom(null, { pageSetup: pageSetup });
     }
     return null;
   }

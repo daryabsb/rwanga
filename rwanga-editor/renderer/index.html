@@ -503,11 +503,14 @@
      Phase 6: ScreenplayNormalizer + LayoutProfile + PageMap engine feed
      NavigationIndex.pages + DocumentOutline.statistics.pages, and emit
      widget Decorations as Flow-view page-break markers.
-     Load order matters: normalizer + layout-profile + pagemap-engine +
-     document-outline ALL load BEFORE nav-index so the plugin's state.init
-     can call them. -->
+     Load order matters: normalizer + layout-profile + manuscript-geometry
+     + pagemap-engine + document-outline ALL load BEFORE nav-index so the
+     plugin's state.init can call them. manuscript-geometry.js is the
+     single named geometry resolver (Recovery Step 5); it delegates to
+     layout-profile.js, so it loads after it. -->
 <script src="js/framework/screenplay-normalizer.js"></script>
 <script src="js/framework/layout-profile.js"></script>
+<script src="js/framework/manuscript-geometry.js"></script>
 <script src="js/framework/pagemap-engine.js"></script>
 <script src="js/framework/document-outline.js"></script>
 <script src="js/framework/nav-index.js"></script>
