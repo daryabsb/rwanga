@@ -11,10 +11,15 @@ function boot() {
   global.window = dom.window;
   global.document = dom.window.document;
   global.window.Rga = {};
-  const path = '../../../renderer/js/framework/layout-profile.js';
-  delete require.cache[require.resolve(path)];
-  require(path);
-  return { LP: global.window.Rga.LayoutProfile };
+  // Recovery Step 3: layout-profile.js's _resolvePageSize reads
+  // Rga.Constants.PAPER_SIZES, so constants.js must load first.
+  const cPath  = '../../../renderer/js/constants.js';
+  const lpPath = '../../../renderer/js/framework/layout-profile.js';
+  delete require.cache[require.resolve(cPath)];
+  delete require.cache[require.resolve(lpPath)];
+  require(cPath);
+  require(lpPath);
+  return { LP: global.window.Rga.LayoutProfile, Constants: global.window.Rga.Constants };
 }
 
 test('default Hollywood/Letter/Courier 12pt: linesPerPage=53, theoreticalLinesPerPage=54, safetyLines=1', () => {
@@ -181,24 +186,12 @@ test('P0.3 safety reserve: Legal Hollywood → linesPerPage=71, theoreticalLines
 // as 8.27 × 11.69 (2dp) while LayoutProfile used 8.2677 × 11.6929;
 // PageSurface read the former, PageMap the latter, so the visual
 // page and the paginated content disagreed about A4 by ~0.06mm.
+// (After Step 3 the agreement is structural — LayoutProfile reads
+// the Constants table directly — but this stays as a regression guard.)
 // ================================================================
 
-function bootWithConstants() {
-  const dom = new JSDOM('<!DOCTYPE html><html><body></body></html>');
-  global.window = dom.window;
-  global.document = dom.window.document;
-  global.window.Rga = {};
-  const cPath  = '../../../renderer/js/constants.js';
-  const lpPath = '../../../renderer/js/framework/layout-profile.js';
-  delete require.cache[require.resolve(cPath)];
-  delete require.cache[require.resolve(lpPath)];
-  require(cPath);
-  require(lpPath);
-  return { Constants: global.window.Rga.Constants, LP: global.window.Rga.LayoutProfile };
-}
-
 test('Recovery Step 1: Constants.PAPER_SIZES agrees with LayoutProfile pageSize for every paper', () => {
-  const { Constants, LP } = bootWithConstants();
+  const { Constants, LP } = boot();
   ['Letter', 'A4', 'Legal'].forEach(function(name) {
     const c = Constants.PAPER_SIZES[name];
     const p = LP.compose(null, { pageSetup: { paperSize: name, margins: { top: 1, bottom: 1, left: 1.5, right: 1, unit: 'in' } } });
@@ -208,10 +201,51 @@ test('Recovery Step 1: Constants.PAPER_SIZES agrees with LayoutProfile pageSize 
 });
 
 test('Recovery Step 1: A4 in Constants.PAPER_SIZES matches ISO 216 (210mm × 297mm)', () => {
-  const { Constants } = bootWithConstants();
+  const { Constants } = boot();
   const A4 = Constants.PAPER_SIZES.A4;
   assert.equal(A4.width,  8.2677,  'A4 width must be 210/25.4 to 4dp = 8.2677');
   assert.equal(A4.height, 11.6929, 'A4 height must be 297/25.4 to 4dp = 11.6929');
   assert.ok(Math.abs(A4.width  - 210 / 25.4) < 0.0001, 'A4 width within 0.0001in of 210mm');
   assert.ok(Math.abs(A4.height - 297 / 25.4) < 0.0001, 'A4 height within 0.0001in of 297mm');
+});
+
+// ================================================================
+// Recovery Step 3 — _resolvePageSize reads from Constants.PAPER_SIZES.
+// LayoutProfile no longer carries its own Letter/A4/Legal table;
+// Constants.PAPER_SIZES is the single paper-size source.
+// ================================================================
+
+test('Recovery Step 3: LayoutProfile pageSize is sourced from Constants.PAPER_SIZES for Letter/A4/Legal', () => {
+  const { LP, Constants } = boot();
+  ['Letter', 'A4', 'Legal'].forEach(function(name) {
+    const c = Constants.PAPER_SIZES[name];
+    const p = LP.compose(null, { pageSetup: { paperSize: name, margins: { top: 1, bottom: 1, left: 1.5, right: 1 } } });
+    assert.equal(p.pageSize.w, c.width,  name + ' width must come from Constants.PAPER_SIZES');
+    assert.equal(p.pageSize.h, c.height, name + ' height must come from Constants.PAPER_SIZES');
+    assert.equal(p.pageSize.unit, 'in');
+  });
+});
+
+test('Recovery Step 3: paperSize remains the canonical field (wins over legacy size)', () => {
+  const { LP, Constants } = boot();
+  const p = LP.compose(null, { pageSetup: { paperSize: 'Letter', size: 'A4', margins: { top: 1, bottom: 1, left: 1.5, right: 1 } } });
+  assert.equal(p.pageSize.w, Constants.PAPER_SIZES.Letter.width,  'paperSize=Letter must win over size=A4');
+  assert.equal(p.pageSize.h, Constants.PAPER_SIZES.Letter.height);
+});
+
+test('Recovery Step 3: legacy `size` field still resolves via Constants.PAPER_SIZES', () => {
+  const { LP, Constants } = boot();
+  const p = LP.compose(null, { pageSetup: { size: 'A4', margins: { top: 1, bottom: 1, left: 1.5, right: 1 } } });
+  assert.equal(p.pageSize.w, Constants.PAPER_SIZES.A4.width,  'legacy size=A4 must still resolve');
+  assert.equal(p.pageSize.h, Constants.PAPER_SIZES.A4.height);
+});
+
+test('Recovery Step 3: unknown paper size falls back to the Hollywood default page size', () => {
+  const { LP } = boot();
+  const def = LP._HOLLYWOOD_DEFAULTS.pageSize;
+  // 'Tabloid' is not a key in Constants.PAPER_SIZES → _resolvePageSize returns
+  // null → compose() uses HOLLYWOOD_DEFAULTS.pageSize, exactly as before.
+  const p = LP.compose(null, { pageSetup: { paperSize: 'Tabloid', margins: { top: 1, bottom: 1, left: 1.5, right: 1 } } });
+  assert.equal(p.pageSize.w, def.w, 'unknown paper width falls back to Hollywood default');
+  assert.equal(p.pageSize.h, def.h, 'unknown paper height falls back to Hollywood default');
 });

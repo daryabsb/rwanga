@@ -180,7 +180,8 @@
     };
   }
 
-  // settings.pageSetup may be { sizeIn: { w, h } } or { paperSize: 'Letter'|'A4'|'Legal' }.
+  // settings.pageSetup may be { sizeIn: { w, h } } or { paperSize: <name> }
+  // where <name> is a key in Rga.Constants.PAPER_SIZES (Letter / A4 / Legal / …).
   // `paperSize` is the canonical field (written by page-setup-dialog.js and doc.js defaults).
   // `size` is accepted as a legacy alias for v2 docs persisted before the rename.
   function _resolvePageSize(settings) {
@@ -194,9 +195,16 @@
     const sizeName = (typeof ps.paperSize === 'string' ? ps.paperSize : null) ||
                      (typeof ps.size      === 'string' ? ps.size      : null);
     if (sizeName) {
-      if (sizeName === 'Letter') return { w: 8.5,    h: 11.0,    unit: 'in' };
-      if (sizeName === 'A4')     return { w: 8.2677, h: 11.6929, unit: 'in' }; // 210 × 297mm in inches
-      if (sizeName === 'Legal')  return { w: 8.5,    h: 14.0,    unit: 'in' };
+      // Recovery Step 3: paper dimensions come from Constants.PAPER_SIZES —
+      // the single paper-size table. LayoutProfile no longer keeps its own
+      // Letter/A4/Legal copy. An unrecognised name (or a missing Constants
+      // module) yields null here, and compose() falls back to
+      // HOLLYWOOD_DEFAULTS.pageSize exactly as it did before.
+      const table = (Rga.Constants && Rga.Constants.PAPER_SIZES) || null;
+      const entry = table && table[sizeName];
+      if (entry && typeof entry.width === 'number' && typeof entry.height === 'number') {
+        return { w: entry.width, h: entry.height, unit: 'in' };
+      }
     }
     return null;
   }

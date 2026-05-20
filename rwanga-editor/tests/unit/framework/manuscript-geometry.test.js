@@ -19,12 +19,17 @@ function boot() {
   global.document = dom.window.document;
   global.window.Rga = {};
 
+  // Recovery Step 3: layout-profile.js's _resolvePageSize reads
+  // Rga.Constants.PAPER_SIZES, so constants.js must load first.
+  const cPath  = '../../../renderer/js/constants.js';
   const lpPath = '../../../renderer/js/framework/layout-profile.js';
   const mgPath = '../../../renderer/js/framework/manuscript-geometry.js';
 
+  delete require.cache[require.resolve(cPath)];
   delete require.cache[require.resolve(lpPath)];
   delete require.cache[require.resolve(mgPath)];
 
+  require(cPath);
   require(lpPath);
   require(mgPath);
 
