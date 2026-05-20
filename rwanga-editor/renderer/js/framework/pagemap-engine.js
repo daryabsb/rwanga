@@ -141,10 +141,31 @@
   }
 
   // ----------------------------------------------------------------
+  // Resolve the per-page line budget. Normal path: the caller's
+  // layoutProfile.linesPerPage. No profile (isolated test / pathological
+  // boot): fall back to LayoutProfile's named default — which already
+  // carries the SAFETY_LINES reserve — NEVER a raw literal. If even the
+  // LayoutProfile module is absent, fail loud rather than silently
+  // resurrect the old hardcoded 54-line budget.
+  // ----------------------------------------------------------------
+  function _resolveLinesPerPage(layoutProfile) {
+    if (layoutProfile && typeof layoutProfile.linesPerPage === 'number') {
+      return layoutProfile.linesPerPage;
+    }
+    const def = Rga.LayoutProfile && Rga.LayoutProfile.DEFAULT_HOLLYWOOD_LETTER_COURIER_12;
+    if (def && typeof def.linesPerPage === 'number') {
+      return def.linesPerPage;
+    }
+    throw new Error('PageMap.build: no layoutProfile.linesPerPage and ' +
+      'Rga.LayoutProfile.DEFAULT_HOLLYWOOD_LETTER_COURIER_12 is unavailable — ' +
+      'refusing to resurrect a hardcoded line budget.');
+  }
+
+  // ----------------------------------------------------------------
   // build — main entry. Greedy pack chains onto pages.
   // ----------------------------------------------------------------
   function build(blocks, layoutProfile) {
-    const lpp = (layoutProfile && layoutProfile.linesPerPage) || 54;
+    const lpp = _resolveLinesPerPage(layoutProfile);
     const pages = [];
     let cur = _newPage(1, lpp);
 

@@ -354,3 +354,39 @@ test('pagesToIndexEntries dedupes sceneIds within a page', () => {
   const entries = Engine.pagesToIndexEntries(pages, blocks);
   assert.deepEqual(entries[0].sceneIds, ['s1']);
 });
+
+// ----------------------------------------------------------------
+// Recovery Step 2 — PageMap no longer carries a hardcoded 54-line
+// fallback budget. With no profile it falls back to LayoutProfile's
+// named, reserve-aware default (53); it never resurrects raw 54.
+// ----------------------------------------------------------------
+
+test('Recovery Step 2: build() without a layoutProfile uses the reserve-aware default (53), never raw 54', () => {
+  // Pre-Step-2: build() used `(layoutProfile && layoutProfile.linesPerPage) || 54`,
+  // a hardcoded budget that bypassed the SAFETY_LINES reserve.
+  const { Engine } = boot();
+  const pages = Engine.build([block({ nodeType: 'action', text: 'x' })], undefined);
+  assert.equal(pages[0].availableLines, 53,
+    'no-profile build must use LayoutProfile default budget (53)');
+  assert.notEqual(pages[0].availableLines, 54,
+    'the raw 54-line budget must never be resurrected');
+});
+
+test('Recovery Step 2: build() with a layoutProfile uses that profile linesPerPage (reserved budget)', () => {
+  const { LP, Engine } = boot();
+  const p = LP.compose(null, null);
+  const pages = Engine.build([block({ nodeType: 'action', text: 'x' })], p);
+  assert.equal(pages[0].availableLines, p.linesPerPage,
+    'with a profile, the budget must be the profile linesPerPage');
+  assert.equal(pages[0].availableLines, 53, 'Letter Hollywood reserved budget is 53');
+});
+
+test('Recovery Step 2: the no-profile fallback budget respects the safety reserve', () => {
+  const { LP, Engine } = boot();
+  const def = LP.DEFAULT_HOLLYWOOD_LETTER_COURIER_12;
+  assert.equal(def.linesPerPage, def.theoreticalLinesPerPage - def.safetyLines,
+    'LayoutProfile default linesPerPage must be theoretical minus the safety reserve');
+  const pages = Engine.build([block({ nodeType: 'action', text: 'x' })], null);
+  assert.equal(pages[0].availableLines, def.linesPerPage,
+    'no-profile build budget must equal the reserve-aware default, not a literal');
+});
