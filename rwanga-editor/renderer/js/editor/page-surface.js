@@ -57,6 +57,16 @@
     page.style.paddingLeft = v.paddingLeft;
     const pm = page.querySelector('.ProseMirror');
     if (pm) pm.style.minHeight = v.contentMinHeight;
+
+    // Recovery Step 6: publish the resolved page width to the --page-width
+    // CSS token. The Flow view rule is
+    //   #editor-container.view-flow .rga-page { width: var(--page-width) !important }
+    // — its `!important` overrides the inline width set above, so the Flow
+    // page width is driven entirely by the token. The Row-3 toolbar's
+    // centered band also reads var(--page-width). Setting the token on
+    // documentElement (the :root scope tokens.css defines it on) is what
+    // makes a paper-size change reach the Flow page and the toolbar.
+    document.documentElement.style.setProperty('--page-width', v.width);
   }
 
   Rga.PageSurface = {

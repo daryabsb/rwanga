@@ -115,3 +115,51 @@ test('Recovery Step 4: apply() unknown paper size falls back to Letter dimension
   assert.equal(page.style.width,     '8.5in');
   assert.equal(page.style.minHeight, '11in');
 });
+
+// ----------------------------------------------------------------
+// Recovery Step 6 — apply() publishes the resolved page width to the
+// --page-width CSS token, so paper-size changes reach the Flow view
+// (whose .rga-page width is var(--page-width) !important) and the
+// Row-3 toolbar band.
+// ----------------------------------------------------------------
+
+test('Recovery Step 6: apply() Letter -> A4 updates the --page-width token', () => {
+  const { PageSurface, doc } = boot();
+  PageSurface.apply({ paperSize: 'Letter', margins: { top: 1, right: 1, bottom: 1, left: 1.5 } });
+  assert.equal(doc.documentElement.style.getPropertyValue('--page-width'), '8.5in',
+    'Letter sets --page-width to 8.5in');
+  PageSurface.apply({ paperSize: 'A4', margins: { top: 1, right: 1, bottom: 1, left: 1.5 } });
+  assert.equal(doc.documentElement.style.getPropertyValue('--page-width'), '8.2677in',
+    'switching to A4 updates --page-width to 8.2677in');
+});
+
+test('Recovery Step 6: apply() A4 -> Legal updates the --page-width token', () => {
+  const { PageSurface, doc } = boot();
+  PageSurface.apply({ paperSize: 'A4', margins: { top: 1, right: 1, bottom: 1, left: 1.5 } });
+  assert.equal(doc.documentElement.style.getPropertyValue('--page-width'), '8.2677in',
+    'A4 sets --page-width to 8.2677in');
+  PageSurface.apply({ paperSize: 'Legal', margins: { top: 1, right: 1, bottom: 1, left: 1.5 } });
+  assert.equal(doc.documentElement.style.getPropertyValue('--page-width'), '8.5in',
+    'switching to Legal updates --page-width to 8.5in');
+});
+
+test('Recovery Step 6: --page-width token derives from resolved geometry, not a literal', () => {
+  const { PageSurface, LP, doc } = boot();
+  const pageSetup = { paperSize: 'A4', margins: { top: 1, right: 1, bottom: 1, left: 1.5 } };
+  PageSurface.apply(pageSetup);
+  const profile = LP.compose(null, { pageSetup: pageSetup });
+  assert.equal(doc.documentElement.style.getPropertyValue('--page-width'),
+    profile.pageSize.w + 'in',
+    '--page-width must equal the resolved layoutProfile.pageSize.w, not a hardcoded value');
+});
+
+test('Recovery Step 6: --page-width is published on documentElement — the scope Flow .rga-page resolves from', () => {
+  // Flow's `#editor-container.view-flow .rga-page { width: var(--page-width)
+  // !important }` resolves the token from the :root scope, i.e.
+  // documentElement. Publishing it there is what makes the Flow page width
+  // reflect a geometry change.
+  const { PageSurface, doc } = boot();
+  PageSurface.apply({ paperSize: 'A4', margins: { top: 1, right: 1, bottom: 1, left: 1.5 } });
+  assert.equal(doc.documentElement.style.getPropertyValue('--page-width'), '8.2677in',
+    'token is set on documentElement so var(--page-width) in the Flow rule resolves to it');
+});
