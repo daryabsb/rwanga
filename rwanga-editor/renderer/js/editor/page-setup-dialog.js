@@ -106,6 +106,15 @@
         var _view = Rga.TabManager && typeof Rga.TabManager._editorView === 'function'
           ? Rga.TabManager._editorView() : null;
         if (_view) _view.dispatch(_view.state.tr.setMeta('rga.forceReindex', true));
+        // Recovery Step 7: the forceReindex dispatch above rebuilds the
+        // PageMap, but ScriptSession recomputes only on selection / tab /
+        // view / sidebar events — not on a meta-only transaction. Ask
+        // ScriptSession to recompute now (after the dispatch, so it reads
+        // the rebuilt PageMap) — the status-bar Page X/Y then reflects the
+        // new geometry on this same Apply gesture, with no cursor move.
+        if (Rga.ScriptSession && typeof Rga.ScriptSession.recompute === 'function') {
+          Rga.ScriptSession.recompute();
+        }
         close();
       }
     };

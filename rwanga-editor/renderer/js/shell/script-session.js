@@ -258,5 +258,13 @@
   Rga.ScriptSession.subscribe = subscribe;
   Rga.ScriptSession.init      = init;
   Rga.ScriptSession._reset    = _reset;
-  Rga.ScriptSession._recompute = _recompute;  // test helper for forced refresh
+  // Public forced-refresh entry point (Recovery Step 7). ScriptSession
+  // recomputes on its own upstream events (tab / selection / view /
+  // sidebar); recompute() lets a caller force a refresh after an upstream
+  // change those events do NOT cover — e.g. Page Setup Apply, which
+  // rebuilds the PageMap via a meta-only PM transaction that fires no
+  // selectionchange. recompute() is calm: it short-circuits when the
+  // snapshot is unchanged, so a redundant call notifies no one.
+  Rga.ScriptSession.recompute  = _recompute;
+  Rga.ScriptSession._recompute = _recompute;  // retained alias — existing test callers
 })();

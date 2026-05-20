@@ -196,10 +196,14 @@ test('init is idempotent — calling twice does not double-wire listeners', () =
   assert.equal(count, 1, 'subscriber fired exactly once');
 });
 
-test('ScriptSession exposes no setters — get / subscribe / init / _reset only', () => {
+test('ScriptSession exposes get / init / recompute / subscribe — no setters', () => {
   const { Session } = boot();
   const surface = Object.keys(Session).filter(function(k) { return k.charAt(0) !== '_'; });
-  assert.deepEqual(surface.sort(), ['get', 'init', 'subscribe']);
+  // recompute() (Recovery Step 7) is a forced-refresh command, NOT a
+  // setter — it re-derives writer-context from upstream truth; it does
+  // not let a consumer mutate writer-context. The "no setters" boundary
+  // discipline still holds.
+  assert.deepEqual(surface.sort(), ['get', 'init', 'recompute', 'subscribe']);
 });
 
 // ----------------------------------------------------------------
@@ -218,4 +222,78 @@ test('Slice 7 §A: ScriptSession snapshot shape is locked to the 7 writer-contex
   ], 'snapshot must contain ONLY the 7 writer-context fields — no analytics leakage');
   assert.equal('wordCount'        in snap, false, 'wordCount must not be on ScriptSession snapshot');
   assert.equal('currentBlockType' in snap, false, 'currentBlockType must not be on ScriptSession snapshot');
+});
+
+// ================================================================
+// Recovery Step 7 — Page Setup Apply triggers a ScriptSession
+// recompute. Apply rebuilds the PageMap via a meta-only PM
+// transaction that fires no selectionchange; ScriptSession.recompute()
+// is the public forced-refresh entry the Apply path calls so the
+// status-bar Page X/Y updates on the same gesture.
+// ================================================================
+
+test('Recovery Step 7: recompute() is public and refreshes the status-bar source without cursor movement', () => {
+  const { Session, stub } = boot();
+  assert.equal(typeof Session.recompute, 'function', 'recompute() must be a public method');
+  stub.activeView = makeFakeView(0);
+  stub.index = { scenes: [], pages: [] };
+  stub.pageMap = [{}, {}];          // 2 pages
+  Session.init();
+  assert.equal(Session.get().currentPage.total, 2, 'initial total reflects the 2-page PageMap');
+
+  // Simulate a Page Setup margin change: PageMap rebuilt to 3 pages.
+  // No selectionchange, no cursor move — only a forced recompute().
+  stub.pageMap = [{}, {}, {}];
+  Session.recompute();
+  assert.equal(Session.get().currentPage.total, 3,
+    'recompute() must refresh currentPage.total — the status-bar source — with no cursor movement');
+});
+
+test('Recovery Step 7: page-setup-dialog Apply path calls Rga.ScriptSession.recompute()', () => {
+  // Source-level wiring guard: the Apply branch must ask ScriptSession to
+  // recompute after the forceReindex dispatch.
+  const fs = require('node:fs');
+  const path = require('node:path');
+  const src = fs.readFileSync(
+    path.join(__dirname, '..', '..', '..', 'renderer', 'js', 'editor', 'page-setup-dialog.js'),
+    'utf8'
+  );
+  assert.ok(/ScriptSession\.recompute\s*\(/.test(src),
+    'page-setup-dialog.js Apply path must call Rga.ScriptSession.recompute()');
+});
+
+test('Recovery Step 7: existing selectionchange recompute path still works', () => {
+  const { Session, stub } = boot();
+  stub.activeView = makeFakeView(0);
+  stub.index = { scenes: [], pages: [] };
+  stub.pageMap = [{}];             // 1 page
+  Session.init();
+  assert.equal(Session.get().currentPage.total, 1);
+
+  // A selectionchange must still trigger a recompute (Step 7 adds a path,
+  // it must not break the existing one).
+  stub.pageMap = [{}, {}];
+  document.dispatchEvent(new Event('selectionchange'));
+  assert.equal(Session.get().currentPage.total, 2,
+    'selectionchange must still drive a recompute');
+});
+
+test('Recovery Step 7: recompute() does not cause a duplicate / looping notification', () => {
+  const { Session, stub } = boot();
+  stub.activeView = makeFakeView(0);
+  stub.index = { scenes: [], pages: [] };
+  stub.pageMap = [{}];
+  Session.init();
+
+  let notifications = 0;
+  Session.subscribe(function() { notifications += 1; });
+
+  // One real change → exactly one notification.
+  stub.pageMap = [{}, {}];
+  Session.recompute();
+  assert.equal(notifications, 1, 'one real change yields exactly one notification — no loop');
+
+  // recompute() with no change → calm, zero further notifications.
+  Session.recompute();
+  assert.equal(notifications, 1, 'a no-op recompute() notifies no one (snapshot-equality short-circuit)');
 });
