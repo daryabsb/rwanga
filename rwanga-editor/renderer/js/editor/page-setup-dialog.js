@@ -115,6 +115,14 @@
         if (Rga.ScriptSession && typeof Rga.ScriptSession.recompute === 'function') {
           Rga.ScriptSession.recompute();
         }
+        // Recovery Step 8: if Print Preview is currently active, re-render
+        // it so its sheets reflect the new geometry on this same gesture.
+        // refresh() is a no-op when the preview is closed (no wasted
+        // render) and re-renders into the existing preview surface when
+        // open — it does not create a second render path.
+        if (Rga.PrintPreview && typeof Rga.PrintPreview.refresh === 'function') {
+          Rga.PrintPreview.refresh();
+        }
         close();
       }
     };

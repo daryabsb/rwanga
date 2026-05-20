@@ -841,3 +841,109 @@ test('P0 fallback: no layoutProfile → header has no inline top/right', () => {
   assert.equal(header.style.top, '', 'without layoutProfile, no inline top on header');
   assert.equal(header.style.right, '', 'without layoutProfile, no inline right on header');
 });
+
+// ================================================================
+// Recovery Step 8 — PrintPreview.refresh() re-renders an open preview
+// when Page Setup Apply changes the geometry. Closed preview → no-op.
+// ================================================================
+
+function buildLongView(schema, PM, actionCount) {
+  const heading = schema.nodes.sceneHeading.create(
+    { setting: 'INT.', time: 'DAY', headingStyle: null },
+    schema.text('ROOM')
+  );
+  const children = [heading];
+  for (let i = 0; i < actionCount; i += 1) {
+    children.push(schema.nodes.action.create(null, schema.text('Action line number ' + i + '.')));
+  }
+  const scene = schema.nodes.scene.create(
+    { id: 'sc1', notes: '', revisionFlag: null, metadata: { linkedScenes: [], references: [], production: {} } },
+    children
+  );
+  const body = schema.nodes.body.create(null, [scene]);
+  const title = schema.nodes.titleStrip.create({ removable: true });
+  const doc = schema.nodes.doc.create(null, [title, body]);
+  const state = PM.EditorState.create({ schema, doc, plugins: [] });
+  return new PM.EditorView(document.getElementById('editor'), { state });
+}
+
+test('Step 8: refresh() when Print Preview is CLOSED → returns false, no render', () => {
+  const { Rga } = bootPrintPreview();
+  assert.equal(Rga.PrintPreview.isActive(), false, 'preview starts closed');
+  const result = Rga.PrintPreview.refresh();
+  assert.equal(result, false, 'refresh() returns false when preview is closed');
+  assert.equal(document.querySelectorAll('.rga-page-sheet').length, 0, 'no sheets rendered');
+  assert.equal(document.querySelectorAll('#rga-print-preview-root').length, 0, 'no preview root created');
+});
+
+test('Step 8: refresh() when Print Preview is OPEN → re-renders, stays active', () => {
+  const { Rga, schema, PM } = bootPrintPreview();
+  const view = buildSimpleView(schema, PM);
+  Rga.TabManager._view = view;
+  Rga.PrintPreview.open();
+  assert.equal(Rga.PrintPreview.isActive(), true, 'preview open after open()');
+  assert.ok(document.querySelectorAll('.rga-page-sheet').length >= 1, 'preview rendered sheets');
+  const result = Rga.PrintPreview.refresh();
+  assert.equal(result, true, 'refresh() returns true when preview is open');
+  assert.equal(Rga.PrintPreview.isActive(), true, 'preview still active after refresh');
+  assert.ok(document.querySelectorAll('.rga-page-sheet').length >= 1, 'preview still has sheets');
+  Rga.PrintPreview.hide();
+  view.destroy();
+});
+
+test('Step 8: a geometry change before refresh() propagates — sheet count matches the new PageMap', () => {
+  const activeDoc = {
+    metadata: {},
+    settings: { pageSetup: { paperSize: 'Letter', margins: { top: 1, bottom: 1, left: 1.5, right: 1 } } }
+  };
+  const { Rga, schema, PM } = bootPrintPreview({ activeDoc: activeDoc });
+  const view = buildLongView(schema, PM, 50);
+  Rga.TabManager._view = view;
+  Rga.PrintPreview.open();
+  const before = document.querySelectorAll('.rga-page-sheet').length;
+  assert.ok(before >= 2, 'long fixture spans multiple pages at normal margins; got ' + before);
+
+  // Page Setup Apply shrinks the content area — far larger top/bottom
+  // margins → fewer lines per page → more pages.
+  activeDoc.settings.pageSetup.margins = { top: 4, bottom: 4, left: 1.5, right: 1 };
+  Rga.PrintPreview.refresh();
+  const after = document.querySelectorAll('.rga-page-sheet').length;
+  assert.ok(after > before, 'page count increased after the margin change: ' + before + ' → ' + after);
+
+  // The preview sheet count must equal what PageMap computes for the new
+  // geometry — preview and engine agree (one source of truth).
+  const profile = Rga.ManuscriptGeometry.resolve(activeDoc);
+  const expected = Rga.PageMap.build(Rga.Normalizer.normalize(view.state.doc), profile).length;
+  assert.equal(after, expected, 'preview sheet count matches PageMap for the new geometry');
+  Rga.PrintPreview.hide();
+  view.destroy();
+});
+
+test('Step 8: refresh() triggers exactly one render — no render loop', () => {
+  const { Rga, schema, PM } = bootPrintPreview();
+  const view = buildSimpleView(schema, PM);
+  Rga.TabManager._view = view;
+  Rga.PrintPreview.open();
+  // Spy on PrintRenderer.render — count calls during a single refresh().
+  let renderCalls = 0;
+  const origRender = Rga.PrintRenderer.render;
+  Rga.PrintRenderer.render = function(m, c) { renderCalls += 1; return origRender(m, c); };
+  Rga.PrintPreview.refresh();
+  Rga.PrintRenderer.render = origRender;
+  assert.equal(renderCalls, 1, 'one refresh() → exactly one PrintRenderer.render call');
+  Rga.PrintPreview.hide();
+  view.destroy();
+});
+
+test('Step 8: refresh() does not create a duplicate preview root', () => {
+  const { Rga, schema, PM } = bootPrintPreview();
+  const view = buildSimpleView(schema, PM);
+  Rga.TabManager._view = view;
+  Rga.PrintPreview.open();
+  Rga.PrintPreview.refresh();
+  Rga.PrintPreview.refresh();
+  assert.equal(document.querySelectorAll('#rga-print-preview-root').length, 1,
+    'exactly one preview root after open() + repeated refresh()');
+  Rga.PrintPreview.hide();
+  view.destroy();
+});

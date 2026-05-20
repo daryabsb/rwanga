@@ -24,6 +24,7 @@
 //   Rga.PrintPreview.isActive()          → boolean
 //   Rga.PrintPreview.buildModel(view)    → RenderModel | null   (testing convenience)
 //   Rga.PrintPreview.open()              → boolean   (D.1 — entry-point helper)
+//   Rga.PrintPreview.refresh()           → boolean   (Step 8 — re-render if active)
 //   Rga.PrintPreview.setOptions(opts)    → void      (D.3/D.4 options API)
 //   Rga.PrintPreview.getOptions()        → opts      (D.3/D.4 options API)
 'use strict';
@@ -157,6 +158,22 @@
     return show(view);
   }
 
+  // Recovery Step 8 — re-render the preview IF it is currently active.
+  // Used by Page Setup Apply so a geometry change reaches an open
+  // preview on the same gesture. When the preview is closed this is a
+  // no-op (returns false) — no unnecessary render.
+  //
+  // refresh() does NOT introduce a render path: it delegates to open(),
+  // which calls show() → ViewManager.activate(VIEW_ID, view). Because
+  // the preview is already the current view, ViewManager re-runs the
+  // controller's activate() WITHOUT deactivating — buildModel() runs
+  // fresh and PrintRenderer.render() repaints into the SAME _root. The
+  // preview surface is preserved; only its sheet contents are rebuilt.
+  function refresh() {
+    if (!isActive()) return false;
+    return open();
+  }
+
   // ----------------------------------------------------------------
   // D.3/D.4 — options API for optional footer + running header.
   //   Default: { footerStyle: 'none', headerStyle: 'none' }.
@@ -257,6 +274,7 @@
   Rga.PrintPreview.isActive    = isActive;
   Rga.PrintPreview.buildModel  = buildModel;
   Rga.PrintPreview.open        = open;
+  Rga.PrintPreview.refresh     = refresh;
   Rga.PrintPreview.setOptions  = setOptions;
   Rga.PrintPreview.getOptions  = getOptions;
   Rga.PrintPreview._BODY_CLASS = BODY_CLASS;
