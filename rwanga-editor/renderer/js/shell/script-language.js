@@ -6,8 +6,11 @@
 // ownership registry). Single consumer outside its own definition:
 // renderer/index.html init script (calls init()). No engine consumers.
 //
-// Separate from UI i18n — this controls the EDITOR surface direction
-// + font, not the application menus.
+// Separate from UI i18n. As of RTL Recovery Slice A this no longer owns
+// the editor surface direction or font — those are document-owned
+// (screenplayProfile.direction → TabManager.applyDocumentDirection; the
+// dir=rtl CSS owns the RTL font). ScriptLanguage now carries only the
+// UI writing-language label (the `lang` attribute + status-bar button).
 //
 // Storage-ownership note: the G4 drift guard now expects this file as
 // the owner of `rga-script-lang` writes; the guard's STORAGE_OWNERS
@@ -41,10 +44,13 @@
       this.current = langKey;
       try { localStorage.setItem('rga-script-lang', langKey); } catch (_) {}
 
+      // RTL Recovery Slice A — #editor direction and the RTL font are owned
+      // by the DOCUMENT (TabManager.applyDocumentDirection reads
+      // screenplayProfile.direction; the dir=rtl CSS resolves the font).
+      // ScriptLanguage keeps only the UI-language concerns: the `lang`
+      // attribute and the status-bar language button.
       var editor = Rga.$('#editor');
       if (editor) {
-        editor.setAttribute('dir', lang.dir);
-        editor.style.fontFamily = lang.font;
         editor.setAttribute('lang', langKey);
       }
       var container = Rga.$('#editor-container');

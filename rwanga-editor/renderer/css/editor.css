@@ -48,7 +48,11 @@
 
 /* ============================================================
    RTL SUPPORT — font override when dir="rtl"
+   #editor itself carries the dir attribute (Rga.ScriptLanguage),
+   so the compound selector is the one that actually matches; the
+   descendant form is kept for a future wrapper-level dir.
    ============================================================ */
-[dir="rtl"] #editor {
+[dir="rtl"] #editor,
+#editor[dir="rtl"] {
   font-family: var(--font-editor-rtl);
 }

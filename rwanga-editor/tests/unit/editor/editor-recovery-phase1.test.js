@@ -40,22 +40,18 @@ function ruleBody(css, selectorLiteral) {
 // .rga-page-marker (auto-page-break widget) — Flow override
 // ----------------------------------------------------------------
 
-test('Phase 1: #editor-container.view-flow .rga-page-marker has a visible-gap margin', () => {
+// SUPERSEDED by RTL Recovery Slice B. The Phase-1 design gave the Flow
+// page-marker a visible-gap margin (~28px) — but that gap was un-budgeted
+// by PageMap and inflated the rendered Flow page toward A2. Slice B makes
+// the marker a zero-geometry overlay; this guard now locks that.
+test('RTL Slice B: Flow page-marker is a zero-geometry overlay (no in-flow gap)', () => {
   const css = readText(CSS_PATH);
   const body = ruleBody(css, '#editor-container.view-flow .rga-page-marker');
   assert.ok(body, 'Flow override for .rga-page-marker must exist');
-  // Margin must include a vertical value of >= 20px (was 1.5em ≈ 24px
-  // pre-Phase-1; recovery target ≈ 28–32px). Reject anything that's
-  // a hairline-only margin (e.g. < 16px).
-  const marginMatch = body.match(/margin\s*:\s*([^;]+);/);
-  assert.ok(marginMatch, 'Flow .rga-page-marker must declare a margin');
-  const marginValue = marginMatch[1];
-  const pxMatches = (marginValue.match(/(\d+(?:\.\d+)?)px/g) || [])
-    .map(function(s) { return parseFloat(s); });
-  const maxPx = pxMatches.length ? Math.max.apply(null, pxMatches) : 0;
-  assert.ok(maxPx >= 20,
-    'Flow .rga-page-marker margin must include a vertical value ≥ 20px to ' +
-    'communicate a real page gap. Got: ' + marginValue);
+  assert.ok(/height\s*:\s*0\b/.test(body),
+    'Flow .rga-page-marker must be height:0 — visualization only, zero layout influence');
+  assert.ok(/margin\s*:\s*0\b/.test(body),
+    'Flow .rga-page-marker must have no margin — the old visible-gap margin inflated the page');
 });
 
 test('Phase C correction: Flow .rga-page-marker-rule carries the solid hairline (single dividing line)', () => {
@@ -90,17 +86,16 @@ test('Phase C: Flow .rga-page-marker uses transparent background (Phase C remove
     'Phase C: Flow .rga-page-marker must use a transparent background (gradient removed)');
 });
 
-test('Phase 1: Flow .rga-page-marker extends into the page padding (negative horizontal margin)', () => {
+test('RTL Slice B: Flow page-marker hairline still spans the full sheet width', () => {
   const css = readText(CSS_PATH);
-  const body = ruleBody(css, '#editor-container.view-flow .rga-page-marker');
-  assert.ok(body);
-  // Margin must include a negative horizontal value so the boundary
-  // spans the full page-sheet width (extends into .rga-page's 0.5in
-  // padding). This is what makes it read as a true sheet-edge.
-  const marginMatch = body.match(/margin\s*:\s*([^;]+);/);
-  assert.ok(/-0\.5in|-(?:\d+)px/.test(marginMatch[1]),
-    'Flow .rga-page-marker margin must include a negative horizontal value ' +
-    '(e.g. -0.5in) so the boundary spans full sheet width. Got: ' + marginMatch[1]);
+  // RTL Slice B: the marker is now a zero-geometry overlay, so the
+  // full-width extension moved from the parent's negative margin onto the
+  // absolutely-positioned hairline (.rga-page-marker-rule left/right).
+  const ruleBody_ = ruleBody(css, '#editor-container.view-flow .rga-page-marker .rga-page-marker-rule');
+  assert.ok(ruleBody_, '.rga-page-marker-rule rule must exist in Flow override');
+  assert.ok(/left\s*:\s*-0\.5in/.test(ruleBody_) && /right\s*:\s*-0\.5in/.test(ruleBody_),
+    'the hairline must extend -0.5in into the page padding on both sides ' +
+    'so the boundary spans the full sheet width');
 });
 
 // ----------------------------------------------------------------

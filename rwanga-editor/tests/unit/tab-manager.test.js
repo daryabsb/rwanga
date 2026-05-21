@@ -69,3 +69,64 @@ test('TabManager switching activates correct doc', () => {
   TM.activate(t1.id);
   assert.equal(TM.activeDoc(), doc1);
 });
+
+// ============================================================
+// RTL Recovery Slice A — text direction is a DOCUMENT property.
+// screenplayProfile.direction must drive #editor's dir attribute on every
+// open / tab activation, with no manual language toggle.
+// ============================================================
+
+function docWithDirection(dir) {
+  return {
+    docId: 'd-' + dir, displayName: dir + '.rga', dirty: false,
+    metadata: { screenplayProfile: { direction: dir } }
+  };
+}
+
+test('RTL Slice A — opening an rtl document sets #editor dir=rtl', () => {
+  bootDom();
+  const TM = loadTabManager();
+  TM.init();
+  TM.openDocument(docWithDirection('rtl'));
+  assert.equal(document.getElementById('editor').getAttribute('dir'), 'rtl');
+});
+
+test('RTL Slice A — opening an ltr document sets #editor dir=ltr', () => {
+  bootDom();
+  const TM = loadTabManager();
+  TM.init();
+  TM.openDocument(docWithDirection('ltr'));
+  assert.equal(document.getElementById('editor').getAttribute('dir'), 'ltr');
+});
+
+test('RTL Slice A — a document with no screenplayProfile defaults to ltr', () => {
+  bootDom();
+  const TM = loadTabManager();
+  TM.init();
+  TM.openDocument({ docId: 'd1', displayName: 'plain.rga', dirty: false });
+  assert.equal(document.getElementById('editor').getAttribute('dir'), 'ltr');
+});
+
+test('RTL Slice A — switching tabs re-applies each document direction', () => {
+  bootDom();
+  const TM = loadTabManager();
+  TM.init();
+  const rtl = TM.openDocument(docWithDirection('rtl'));
+  const ltr = TM.openDocument(docWithDirection('ltr'));
+  assert.equal(document.getElementById('editor').getAttribute('dir'), 'ltr');
+  TM.activate(rtl.id);
+  assert.equal(document.getElementById('editor').getAttribute('dir'), 'rtl');
+  TM.activate(ltr.id);
+  assert.equal(document.getElementById('editor').getAttribute('dir'), 'ltr');
+});
+
+test('RTL Slice A — ScriptLanguage no longer owns #editor direction or font', () => {
+  const fs = require('node:fs');
+  const path = require('node:path');
+  const src = fs.readFileSync(
+    path.resolve(__dirname, '../../renderer/js/shell/script-language.js'), 'utf8');
+  assert.equal(/setAttribute\(\s*['"]dir['"]/.test(src), false,
+    'script-language.js must not set a dir attribute — direction is document-owned');
+  assert.equal(/\.style\.fontFamily/.test(src), false,
+    'script-language.js must not set an inline font — the dir=rtl CSS owns the RTL font');
+});

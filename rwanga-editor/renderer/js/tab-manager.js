@@ -81,6 +81,19 @@
     if (isEmpty) renderRecentFiles();
   }
 
+  // RTL Recovery Slice A — text direction is a DOCUMENT property. The active
+  // document's screenplayProfile.direction drives #editor's dir attribute on
+  // every open / tab activation; every block inherits it (and the dir=rtl CSS
+  // resolves the RTL font + start/end alignment). Direction is no longer
+  // owned by localStorage / ScriptLanguage.
+  function applyDocumentDirection(doc) {
+    const editorEl = document.getElementById('editor');
+    if (!editorEl) return;
+    const profile = doc && doc.metadata && doc.metadata.screenplayProfile;
+    const dir = (profile && profile.direction === 'rtl') ? 'rtl' : 'ltr';
+    editorEl.setAttribute('dir', dir);
+  }
+
   function activate(tabId) {
     snapshotActive();
     const tab = tabs.find(function(t) { return t.id === tabId; });
@@ -95,6 +108,7 @@
     if (Rga.PageSurface && tab.doc && tab.doc.settings) {
       Rga.PageSurface.apply(tab.doc.settings.pageSetup);
     }
+    applyDocumentDirection(tab.doc);
     if (Rga.FileManager && Rga.FileManager.setActive) Rga.FileManager.setActive(tab.doc);
     document.dispatchEvent(new CustomEvent('editor.tabActivated', { detail: { tabId } }));
     if (typeof _saveSession === 'function') _saveSession();
@@ -156,6 +170,7 @@
           editorView.updateState(emptyState);
           editorView.setProps({ editable: function() { return false; } });
         }
+        applyDocumentDirection(null);
         // Last tab closed — fire editor.tabActivated so the panels
         // (Notes, Flags, Breakdown) refresh against the now-empty doc
         // and clear their orphan cards from the just-closed file.

@@ -289,3 +289,29 @@ test('print-renderer.js source has no DOM measurement call sites', () => {
       assert.equal(calledAsFn || accessedAsProp, false, 'print-renderer.js uses banned API: ' + banned);
     });
 });
+
+// ----------------------------------------------------------------
+// RTL Recovery Slice 1 — document direction on the page sheet
+// ----------------------------------------------------------------
+
+test('RTL Slice1 — page sheet carries dir="rtl" for an rtl document', () => {
+  const { PR } = boot();
+  const container = document.createElement('div');
+  const model = fakeModel([{ blocks: [textBlock('action', 'سڵاو')] }]);
+  model.layoutProfile = { direction: 'rtl' };
+  PR.render(model, container, {});
+  const sheet = container.querySelector('.rga-page-sheet');
+  assert.equal(sheet.getAttribute('dir'), 'rtl',
+    'an rtl document must paint the page sheet with dir="rtl" so the RTL font chain reaches print');
+});
+
+test('RTL Slice1 — page sheet has no rtl direction for an ltr document', () => {
+  const { PR } = boot();
+  const container = document.createElement('div');
+  const model = fakeModel([{ blocks: [textBlock('action', 'hello')] }]);
+  model.layoutProfile = { direction: 'ltr' };
+  PR.render(model, container, {});
+  const sheet = container.querySelector('.rga-page-sheet');
+  assert.notEqual(sheet.getAttribute('dir'), 'rtl',
+    'an ltr document must not get dir="rtl" on the page sheet');
+});

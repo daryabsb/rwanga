@@ -789,8 +789,11 @@ body.view-draft-active .rga-draft-footer {
    based paginator's styling lives near the top of this file; archived
    reference engine at archived/page-breaks-v1.js.) */
 
-/* RTL support */
-[dir="rtl"] .ProseMirror {
+/* RTL support — #editor carries dir="rtl" (Rga.ScriptLanguage sets it on
+   the element itself), so the compound selector is the one that matches;
+   the descendant form covers a future wrapper-level dir. */
+[dir="rtl"] .ProseMirror,
+.ProseMirror[dir="rtl"] {
   font-family: var(--font-editor-rtl);
 }
 
@@ -1902,6 +1905,12 @@ body.view-draft-active .rga-draft-footer {
   padding: 0 0 0.4em 0;
 }
 
+/* The scene heading sets its own font-family above, so the editor-surface
+   RTL rule does not cascade into it — it needs an explicit RTL override. */
+[dir="rtl"] .rga-scene-heading-v3 {
+  font-family: var(--font-editor-rtl);
+}
+
 .rga-scene-heading-v3-setting,
 .rga-scene-heading-v3-time {
   font: inherit;
@@ -1975,55 +1984,53 @@ body.view-draft-active .rga-draft-footer {
   pointer-events: none; /* clicks pass through to surrounding content */
 }
 
-/* Flow override — Phase C correction: single centered page label.
-   Writer mental model: "I am now entering Page N+1". The previous
-   dual-label design (Page N left, Page N+1 right) added noise. The
-   corrected design is: hairline spans the full row, "Page N+1" is
-   centered below it. Clean and calm. No dual labels. No arrows.
-
-   Layout: negative horizontal margins extend the hairline to the full
-   page-row width. .rga-page-marker-rule renders the 1px line across
-   the full width. .rga-page-marker-begin sits centered below it. */
+/* Flow override — RTL Recovery Slice B: the page marker is VISUALIZATION
+   ONLY. It must contribute ZERO layout height (budget cost 0, layout
+   influence 0) — its old in-flow 28px margin + 26px padding (~87px) was
+   un-budgeted by PageMap and inflated the rendered Flow page toward A2.
+   The marker is now a zero-height overlay: the hairline + "Page N" label
+   are absolutely positioned and add no flow geometry. PageMap page
+   boundaries (print-derived) stay exactly where the engine placed them. */
 #editor-container.view-flow .rga-page-marker {
-  /* 28px above hairline; 16px between hairline and label; 26px below
-     label so the next page's first block doesn't crowd it. */
-  margin: 28px -0.5in 0;
-  padding: 0 0 26px;
+  display: block;
+  position: relative;
+  height: 0;
+  margin: 0;
+  padding: 0;
   background: transparent;
   border-top: 0;
   border-bottom: 0;
-
-  /* Block layout: rule on top, label centered below. */
-  display: block;
-  text-align: center;
-
-  /* Base font — overridden per-span below. */
-  font-family: var(--font-mono, 'Courier New', Courier, monospace);
-  font-size: 0;     /* hide any stray text nodes; spans set their own */
-  letter-spacing: 0;
+  font-size: 0;
+  pointer-events: none;   /* clicks pass through to the manuscript */
 }
 
-/* Hairline rule — spans the full band width (inherits the negative
-   margin from the parent). Displayed as a block element so it occupies
-   its own row above the label. */
+/* Hairline rule — absolute overlay sitting exactly on the page boundary.
+   Negative left/right extend it across the full page-row width. Zero
+   flow height. */
 #editor-container.view-flow .rga-page-marker .rga-page-marker-rule {
-  display: block;
-  width: 100%;
+  position: absolute;
+  top: 0;
+  left: -0.5in;
+  right: -0.5in;
   height: 0;
   border-top: 1px solid var(--border-secondary, rgba(128, 128, 128, 0.30));
-  margin-bottom: 16px;
-  font-size: 0;
 }
 
-/* Begin label — centered below the hairline. Single calm typographic
-   label naming the page being entered. */
+/* Begin label — absolute overlay, a small pill straddling the hairline.
+   The editor-bg background masks the thin strip it covers; zero flow
+   height. */
 #editor-container.view-flow .rga-page-marker .rga-page-marker-begin {
-  display: inline-block;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--editor-bg);
+  padding: 1px 8px;
   font-size: 0.8125rem;  /* 13px */
   font-weight: 500;
   color: var(--text-secondary, #9e9e9e);
   letter-spacing: 0.08em;
-  text-align: center;
+  white-space: nowrap;
 }
 
 body.view-draft-active .rga-page-marker,
@@ -2141,6 +2148,13 @@ body.view-print-preview-active #workspace {
   position: relative;
   box-sizing: border-box;
   overflow: hidden;       /* sheet height is fixed; overflow lives on the next sheet */
+}
+
+/* RTL print sheets — PrintRenderer sets dir="rtl" on the sheet when the
+ * document direction is rtl, so the RTL font chain reaches Print Preview
+ * and resolves the same font as the Flow editor. */
+.rga-page-sheet[dir="rtl"] {
+  font-family: var(--font-editor-rtl);
 }
 
 .rga-page-sheet-header {

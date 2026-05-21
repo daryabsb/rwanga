@@ -79,6 +79,13 @@
     sheet.setAttribute('role', 'document');
     sheet.setAttribute('aria-label', 'Page ' + page.pageNumber + ' of ' + totalPages);
 
+    // RTL — carry the document direction onto the sheet so the RTL font
+    // chain (.rga-page-sheet[dir="rtl"]) reaches Print Preview and the text
+    // flows right-to-left, consistent with the Flow editor.
+    if (layoutProfile && layoutProfile.direction === 'rtl') {
+      sheet.setAttribute('dir', 'rtl');
+    }
+
     // D.2 — sheet dimensions from layoutProfile.pageSize (inline style
     // overrides CSS fallbacks for non-Letter paper sizes, e.g. A4 / Legal).
     // Both width and height are written inline so a single owner (layoutProfile)
