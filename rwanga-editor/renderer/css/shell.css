@@ -656,6 +656,15 @@
   color: #ffffff;
 }
 
+/* Visual Comfort Slice 2 — Fix A. Breathing separation: the min/max/
+   close trio stays tight together (Windows convention) but is set off
+   from the app-actions (theme toggle + avatar) by a clear gap, so the
+   window controls read as a deliberate group rather than crammed into
+   the corner. */
+#rga-shell-window-min {
+  margin-inline-start: 10px;
+}
+
 /* Regression Fix §A + Final Hardening — Win11 + frameless (frame:
    false) maximized overflow compensation.
    When maximized, the OS extends the BrowserWindow past each visible
@@ -675,9 +684,22 @@
    (test fixtures, non-Electron contexts, future regression where the
    overflow computation returns 0 unexpectedly) — it matches the Win11
    100% DPI metric, which is the most common environment. */
+/* Visual Comfort Slice 2 — Fix A. The compensation is now ADDITIVE and
+   covers the TOP edge:
+   • padding-left / -right = base 12px + the OS overflow. The old rule
+     REPLACED the 12px base, so maximizing shifted every titlebar zone
+     12px relative to the visible screen edge. Adding to the base keeps
+     content at the SAME distance from the visible edge in both states
+     — the placement is identical to the eye, normal or maximized.
+   • The window also overflows the TOP edge when maximized; the bar
+     grows by that amount and pads its content down so the window
+     controls are never clipped at the top (border-box → the visible
+     band stays exactly 28px). */
 body.window-maximized #rga-shell-titlebar {
-  padding-right: var(--rga-max-overflow-right, 8px);
-  padding-left:  var(--rga-max-overflow-left,  8px);
+  padding-left:  calc(12px + var(--rga-max-overflow-left,  8px));
+  padding-right: calc(12px + var(--rga-max-overflow-right, 8px));
+  padding-top:   var(--rga-max-overflow-top, 8px);
+  height:        calc(28px + var(--rga-max-overflow-top, 8px));
 }
 
 /* ============================================================

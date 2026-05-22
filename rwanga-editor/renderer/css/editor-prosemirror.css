@@ -94,8 +94,29 @@
   white-space: nowrap;
   line-height: 1;
 }
-[dir="rtl"] #editor-container.view-flow .rga-page-row {
+/* Visual Comfort Slice 2 — Fix B (RTL line-number gutter ownership).
+ * The document direction is set on #editor itself (TabManager.
+ * applyDocumentDirection); #editor is a DESCENDANT of .rga-page-row,
+ * so the old ancestor [dir="rtl"] selector never matched. `:has()`
+ * lets the page-row react to its own #editor's dir (the pattern
+ * shell.css already uses for #app:has(#workspace…)).
+ *   - row-reverse → the gutter sits on the RIGHT of the page in RTL.
+ *   - width:0 + overflow:visible → the gutter consumes NO manuscript
+ *     width. #editor stays the sole width-bearing flex child and
+ *     stays centred — the manuscript is no longer displaced inward,
+ *     and there is no empty canyon between the page and the gutter.
+ *     The line numbers render in the margin just past the page's
+ *     editor-facing edge.
+ *   - direction:rtl flips .flow-line-num (inset-inline-end /
+ *     text-align:end) so the numbers hug that editor-facing edge.
+ * LTR (#editor[dir="ltr"]) does not match :has() → fully unchanged. */
+#editor-container.view-flow .rga-page-row:has(> #editor[dir="rtl"]) {
   flex-direction: row-reverse;
+}
+#editor-container.view-flow .rga-page-row:has(> #editor[dir="rtl"]) .flow-line-gutter {
+  width: 0;
+  overflow: visible;
+  direction: rtl;
 }
 
 /* ---- DRAFT view: hide all global chrome, focus on text ---- */
@@ -1813,10 +1834,20 @@ body.view-draft-active .rga-draft-footer {
 .rga-scene-v3 {
   position: relative;
   display: block;
-  margin: 1.4em 0;
+  /* Visual Comfort Slice 2 — Fix D. More air around each scene block
+     so it reads as a distinct unit, clearly separated from the
+     page-transition chrome above it (Flow-view spacing only — no
+     PageMap / density effect; the truth surface is .rga-print-*). */
+  margin: 2.2em 0;
   padding: 0;
-  border-left: 3px solid var(--accent-rwanga, #C2185B);
-  padding-left: 0.75in;
+  /* Visual Comfort Slice — Fix B (pink scene guide rail).
+     Logical inline-start so the brand guide rail follows text
+     direction: left in LTR, right in RTL. Was physical border-left /
+     padding-left — stuck on the left in RTL. #editor[dir="rtl"]
+     cascades direction into .rga-scene-v3, so inline-start resolves
+     correctly. In LTR, inline-start === left → unchanged. */
+  border-inline-start: 3px solid var(--accent-rwanga, #C2185B);
+  padding-inline-start: 0.75in;
 }
 
 .rga-scene-v3-num {
@@ -1884,7 +1915,11 @@ body.view-draft-active .rga-draft-footer {
   text-transform: uppercase;
   letter-spacing: 0.04em;
   border-bottom: 3px solid var(--accent-rwanga, #C2185B);
-  margin: 1.6em 0 0.9em 0;
+  /* Visual Comfort Slice 2 — Fix D. Wider gap below the slug so the
+     scene heading is clearly separated from the action body — the
+     transition / divider / heading / body now read as a hierarchy
+     instead of one crowded block. (Margin-top unchanged.) */
+  margin: 1.6em 0 1.3em 0;
   padding: 0 0 0.4em 0;
 }
 
@@ -1987,6 +2022,27 @@ body.view-draft-active .rga-draft-footer {
   pointer-events: none;   /* clicks pass through to the manuscript */
 }
 
+/* Visual Comfort Slice 2 — Fix C. Page-transition breathing region.
+   The marker stays zero-height (Slice B — zero PageMap budget); the
+   breathing room is created VISUALLY by a page-colour mask band,
+   absolutely positioned (zero layout cost) and centred on the page
+   boundary. It clears a calm strip so the divider and the "Page N"
+   label no longer visually collide with the manuscript — or with a
+   scene heading sitting directly below the transition. The hairline
+   and the "Page N" pill are real children, painted on top of this
+   ::before band. */
+#editor-container.view-flow .rga-page-marker::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -0.5in;
+  right: -0.5in;
+  height: 2.2em;
+  transform: translateY(-50%);
+  background: var(--editor-page-bg, var(--editor-bg));
+  pointer-events: none;
+}
+
 /* Hairline rule — absolute overlay sitting exactly on the page boundary.
    Negative left/right extend it across the full page-row width. Zero
    flow height. */
@@ -2007,8 +2063,15 @@ body.view-draft-active .rga-draft-footer {
   top: 0;
   left: 50%;
   transform: translate(-50%, -50%);
-  background: var(--editor-bg);
-  padding: 1px 8px;
+  /* Visual Comfort Slice — Fix C. The pill is a zero-height overlay
+     straddling the page boundary; its background masks the hairline
+     (and the sliver of manuscript behind it) so "Page N" stays
+     legible. It must mask with the PAGE colour — the Flow surface is
+     painted --editor-page-bg, not the --editor-bg desk. The old
+     desk-colour mask punched a mismatched box into the page, which
+     read as the page number colliding with the manuscript. */
+  background: var(--editor-page-bg, var(--editor-bg));
+  padding: 2px 10px;
   font-size: 0.8125rem;  /* 13px */
   font-weight: 500;
   color: var(--text-secondary, #9e9e9e);

@@ -47,19 +47,24 @@ function ruleBody(css, selector) {
 // §A — Win11 frameless overflow compensation
 // ----------------------------------------------------------------
 
-test('Regression §A: body.window-maximized #rga-shell-titlebar applies right + left padding (DPI-aware with 8px fallback)', () => {
+test('Regression §A: body.window-maximized #rga-shell-titlebar compensates overflow ADDITIVELY (base + overflow) on all of left / right / top', () => {
   const css = read(SHELL_CSS);
   const body = ruleBody(css, /body\.window-maximized\s+#rga-shell-titlebar/);
   assert.ok(body, 'body.window-maximized #rga-shell-titlebar rule must exist (Win11 frameless overflow compensation)');
-  // Final Hardening — padding consumes a DPI-aware CSS custom
-  // property fed by IPC from electron/bridge/window-controls.js
-  // (screen.getDisplayMatching().workArea vs win.getBounds()). The
-  // 8px fallback matches the Win11 100% DPI metric and engages only
-  // when the IPC payload is absent.
-  assert.ok(/padding-right\s*:\s*var\(\s*--rga-max-overflow-right\s*,\s*8px\s*\)/.test(body),
-    'maximized titlebar must consume var(--rga-max-overflow-right, 8px) — DPI-aware metric with 100%-DPI fallback');
-  assert.ok(/padding-left\s*:\s*var\(\s*--rga-max-overflow-left\s*,\s*8px\s*\)/.test(body),
-    'maximized titlebar must consume var(--rga-max-overflow-left, 8px) — DPI-aware metric with 100%-DPI fallback');
+  // Visual Comfort Slice 2 — the compensation is ADDITIVE: it adds the
+  // DPI-aware OS overflow to the 12px base padding (the old rule
+  // REPLACED the base, so content jumped 12px between normal and
+  // maximized). It also covers the TOP edge so the window controls
+  // are never clipped at the top. The 8px fallback is the Win11
+  // 100%-DPI metric for when the IPC payload is absent.
+  assert.ok(/padding-right\s*:\s*calc\(\s*12px\s*\+\s*var\(\s*--rga-max-overflow-right\s*,\s*8px\s*\)\s*\)/.test(body),
+    'maximized titlebar padding-right must be calc(12px + var(--rga-max-overflow-right, 8px)) — additive, not a replacement');
+  assert.ok(/padding-left\s*:\s*calc\(\s*12px\s*\+\s*var\(\s*--rga-max-overflow-left\s*,\s*8px\s*\)\s*\)/.test(body),
+    'maximized titlebar padding-left must be calc(12px + var(--rga-max-overflow-left, 8px)) — additive, not a replacement');
+  assert.ok(/padding-top\s*:\s*var\(\s*--rga-max-overflow-top\s*,\s*8px\s*\)/.test(body),
+    'maximized titlebar must compensate the TOP overflow (padding-top) so the window controls are not clipped at the top edge');
+  assert.ok(/height\s*:\s*calc\(\s*28px\s*\+\s*var\(\s*--rga-max-overflow-top\s*,\s*8px\s*\)\s*\)/.test(body),
+    'maximized titlebar must grow its height by the top overflow so the visible band stays a full 28px');
 });
 
 test('Regression §A: title-bar.js toggles body.window-maximized in response to window.state events', () => {

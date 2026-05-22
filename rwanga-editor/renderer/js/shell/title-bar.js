@@ -87,20 +87,51 @@
 
   // Regression Fix §A + §B helpers ----------------------------------
 
+  // Visual Comfort Slice — Fix A. The real Win11 frameless maximized
+  // overflow is `8px × devicePixelRatio` in CSS pixels (8 @100%, 12
+  // @150%, 16 @200%). This is the floor below which the compensation
+  // MUST NOT fall, or the maximized window clips the right-zone window
+  // controls (min / max / close) off-screen.
+  function _safeOverflowFloor() {
+    const dpr = (typeof window !== 'undefined' && window.devicePixelRatio) || 1;
+    return Math.round(8 * dpr);
+  }
+
   function _applyMaximizeOverflow(overflow) {
     if (typeof document === 'undefined' || !document.documentElement) return;
     const root = document.documentElement;
     // Final Hardening — DPI-aware OS-extension overflow as CSS custom
     // properties. Main computes these from screen.getDisplayMatching()
     // vs win.getBounds() (both CSS-pixel values, scale-factor-aware).
-    // When unmaximized OR when the IPC payload is absent, the props
-    // are removed so the CSS rule's 8px fallback engages.
+    //
+    // Visual Comfort Slice — Fix A. `win.getBounds()` on a maximized
+    // frameless window does not always report the OS-extended rect, so
+    // computeMaximizeOverflow can come back 0. Writing `0px` into the
+    // custom property then DEFEATS the CSS `8px` fallback (the property
+    // IS set, so var()'s fallback never engages) and the controls clip.
+    // Guard: while maximized, clamp each edge UP to the DPI-aware floor
+    // — use whichever is larger, the measured value or the floor.
+    // Over-compensating only insets the controls a few px from the
+    // visible edge (reads as intentional); under-compensating clips.
+    // When unmaximized (overflow == null) the props are removed so the
+    // CSS rule's 8px fallback engages.
+    // Visual Comfort Slice 2 — all four edges. The frameless window
+    // overflows the TOP edge when maximized too, so the title-bar (and
+    // its window controls) can clip at the top, not just the right.
     if (overflow && typeof overflow === 'object') {
-      root.style.setProperty('--rga-max-overflow-left',  (overflow.left  || 0) + 'px');
-      root.style.setProperty('--rga-max-overflow-right', (overflow.right || 0) + 'px');
+      const floor = _safeOverflowFloor();
+      const clamp = function(v) {
+        return Math.max(floor, (typeof v === 'number' ? v : 0));
+      };
+      root.style.setProperty('--rga-max-overflow-top',    clamp(overflow.top)    + 'px');
+      root.style.setProperty('--rga-max-overflow-right',  clamp(overflow.right)  + 'px');
+      root.style.setProperty('--rga-max-overflow-bottom', clamp(overflow.bottom) + 'px');
+      root.style.setProperty('--rga-max-overflow-left',   clamp(overflow.left)   + 'px');
     } else {
-      root.style.removeProperty('--rga-max-overflow-left');
+      root.style.removeProperty('--rga-max-overflow-top');
       root.style.removeProperty('--rga-max-overflow-right');
+      root.style.removeProperty('--rga-max-overflow-bottom');
+      root.style.removeProperty('--rga-max-overflow-left');
     }
   }
 
