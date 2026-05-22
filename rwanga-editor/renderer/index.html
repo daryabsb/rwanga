@@ -272,9 +272,11 @@
           <!-- Page row holds the line-gutter (Flow view) and the page itself -->
           <div class="rga-page-row" id="rga-page-row">
             <div class="flow-line-gutter" id="flow-line-gutter" aria-hidden="true"></div>
-            <!-- ProseMirror mounts into #editor; .rga-page styles it as paper -->
-            <div id="editor" class="rga-page"></div>
+            <!-- ProseMirror mounts into #editor — the Flow / Draft editing surface -->
+            <div id="editor"></div>
           </div>
+          <!-- Fork A — Paper view: the read-only PageMap render mounts here -->
+          <div id="rga-paper-view-root" style="display:none"></div>
         </div>
 
         <!-- §A Shell Final Polish — Scene Toolbox retired. Every
@@ -530,6 +532,7 @@
 <script src="js/framework/render-model.js"></script>
 <script src="js/framework/print-renderer.js"></script>
 <script src="js/framework/print-preview.js"></script>
+<script src="js/framework/paper-view.js"></script>
 <!-- Slice 1 shell — Layout (state truth), Sidebar (panel host), ActivityRail.
      Loaded BEFORE engine + panel modules so the registries exist when panel
      IIFEs run. Remaining slice-1 modules (ScriptSession, panels, status bar,

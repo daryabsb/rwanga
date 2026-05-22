@@ -1,21 +1,24 @@
 // Copyright (c) 2026 Rwanga. Licensed under Apache 2.0.
-// Applies a doc's page geometry to the live .rga-page element.
+// PageSurface — publishes the resolved page width to the --page-width CSS
+// token (consumed by the Flow editor column and the Row-3 toolbar band).
 //
-// Recovery Step 5: PageSurface resolves geometry through the single named
-// resolver Rga.ManuscriptGeometry — the same façade PageMap and Print
-// Preview use. ManuscriptGeometry delegates the arithmetic to LayoutProfile
-// (which reads Constants.PAPER_SIZES). PageSurface consumes the resolved
-// layoutProfile.pageSize + layoutProfile.margins; it owns no geometry math.
+// Fork A (Brick 4+5): RETIRED from geometry application. #editor is no
+// longer "paper" — the Paper view (PrintRenderer leaves) owns all page
+// geometry. PageSurface no longer finds #editor, writes no inline width /
+// padding / min-height on any element, and imposes no growth model. Its
+// only remaining job is to keep --page-width in sync with Page Setup so a
+// paper-size change still reaches the Flow column.
+//
+// Resolution still flows through the single named resolver
+// Rga.ManuscriptGeometry -> Rga.LayoutProfile (which reads
+// Constants.PAPER_SIZES).
 'use strict';
 
 (function() {
   const Rga = window.Rga = window.Rga || {};
 
   // Resolve a pageSetup into a layoutProfile via the ManuscriptGeometry
-  // façade. resolveFrom(screenplayProfile, settings) is the "I have the
-  // pieces, not a whole doc" entry point — PageSurface's callers pass a
-  // pageSetup, so screenplayProfile is null here (the Flow visual page
-  // does not need direction/RTL; that stays current behaviour).
+  // facade. screenplayProfile is null — only pageSize.w is needed here.
   function _resolveProfile(pageSetup) {
     if (Rga.ManuscriptGeometry && typeof Rga.ManuscriptGeometry.resolveFrom === 'function') {
       return Rga.ManuscriptGeometry.resolveFrom(null, { pageSetup: pageSetup });
@@ -23,55 +26,19 @@
     return null;
   }
 
-  // Pure: a resolved layoutProfile -> { width, minHeight, contentMinHeight,
-  // paddingTop/Right/Bottom/Left } in CSS inch units. Consumes only
-  // layoutProfile.pageSize + layoutProfile.margins — no paper-size or
-  // margin resolution of its own.
-  function cssVarsForProfile(layoutProfile) {
-    const ps = layoutProfile.pageSize;
-    const m  = layoutProfile.margins;
-    return {
-      width:            ps.w + 'in',
-      minHeight:        ps.h + 'in',
-      contentMinHeight: (ps.h - m.top - m.bottom) + 'in',
-      paddingTop:       m.top + 'in',
-      paddingRight:     m.right + 'in',
-      paddingBottom:    m.bottom + 'in',
-      paddingLeft:      m.left + 'in'
-    };
-  }
-
-  // Apply to the live .rga-page element.
-  // Also sets .ProseMirror min-height so the full content area is clickable when empty.
+  // apply(pageSetup) — publish the resolved paper width to the --page-width
+  // token on documentElement (the :root scope the token resolves from).
+  // Publishes nothing else; touches no editor DOM. Called on doc open
+  // (tab-manager) and on Page Setup Apply (page-setup-dialog).
   function apply(pageSetup) {
-    const page = document.querySelector('.rga-page');
-    if (!page || !pageSetup || !pageSetup.margins) return;
+    if (!pageSetup) return;
     const profile = _resolveProfile(pageSetup);
-    if (!profile || !profile.pageSize || !profile.margins) return;
-    const v = cssVarsForProfile(profile);
-    page.style.width = v.width;
-    page.style.minHeight = v.minHeight;
-    page.style.paddingTop = v.paddingTop;
-    page.style.paddingRight = v.paddingRight;
-    page.style.paddingBottom = v.paddingBottom;
-    page.style.paddingLeft = v.paddingLeft;
-    const pm = page.querySelector('.ProseMirror');
-    if (pm) pm.style.minHeight = v.contentMinHeight;
-
-    // Recovery Step 6: publish the resolved page width to the --page-width
-    // CSS token. The Flow view rule is
-    //   #editor-container.view-flow .rga-page { width: var(--page-width) !important }
-    // — its `!important` overrides the inline width set above, so the Flow
-    // page width is driven entirely by the token. The Row-3 toolbar's
-    // centered band also reads var(--page-width). Setting the token on
-    // documentElement (the :root scope tokens.css defines it on) is what
-    // makes a paper-size change reach the Flow page and the toolbar.
-    document.documentElement.style.setProperty('--page-width', v.width);
+    if (!profile || !profile.pageSize || typeof profile.pageSize.w !== 'number') return;
+    document.documentElement.style.setProperty('--page-width', profile.pageSize.w + 'in');
   }
 
   Rga.PageSurface = {
-    apply: apply,
-    _cssVarsForProfile: cssVarsForProfile,
+    apply:           apply,
     _resolveProfile: _resolveProfile
   };
 })();

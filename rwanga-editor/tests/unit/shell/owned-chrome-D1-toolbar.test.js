@@ -225,15 +225,15 @@ test('§D1.1: --page-width token is the single source of manuscript geometry', (
     'tokens.css must define --page-width: 8.5in');
 });
 
-test('§D1.1: .rga-page consumes --page-width (no hardcoded 8.5in literal)', () => {
+test('§D1.1: #editor consumes --page-width (no hardcoded 8.5in literal)', () => {
   const EDITOR_CSS = path.join(REPO, 'renderer/css/editor-prosemirror.css');
   const css = read(EDITOR_CSS);
-  // The base .rga-page rule must reference var(--page-width).
-  // Use the same line-anchored ruleBody helper pattern other tests use.
-  const baseRule = css.match(/(?:^|\n)\s*\.rga-page\s*\{[^}]*\}/);
-  assert.ok(baseRule, '.rga-page rule must exist');
+  // Fork A (Brick 4+5): #editor (no longer the `.rga-page` paper class) is
+  // the manuscript column; its width must still come from var(--page-width).
+  const baseRule = css.match(/(?:^|\n)\s*#editor\s*\{[^}]*\}/);
+  assert.ok(baseRule, '#editor rule must exist');
   assert.ok(/width\s*:\s*var\(\s*--page-width/.test(baseRule[0]),
-    '.rga-page must consume var(--page-width) instead of a hardcoded literal');
+    '#editor must consume var(--page-width) instead of a hardcoded literal');
 });
 
 test('§D1.1: toolbar inner band exists and consumes --page-width', () => {

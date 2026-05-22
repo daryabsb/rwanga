@@ -1,8 +1,11 @@
 // Copyright (c) 2026 Rwanga. Licensed under Apache 2.0.
-// Recovery Step 4 — PageSurface derives geometry from LayoutProfile.compose
-// (which reads Constants.PAPER_SIZES) instead of resolving paper size +
-// margins itself. The Flow visual page now shares one geometry source with
-// PageMap and Print Preview.
+// Fork A (Brick 4+5) — PageSurface retired to a pure --page-width publisher.
+//
+// PageSurface no longer applies paper geometry to #editor. #editor is no
+// longer "paper"; the Paper view (PrintRenderer leaves) owns page geometry.
+// PageSurface's sole remaining job: publish the resolved paper width to the
+// --page-width CSS token so a Page Setup paper-size change still reaches the
+// Flow editor column + the Row-3 toolbar band.
 'use strict';
 
 const { test } = require('node:test');
@@ -12,15 +15,14 @@ const { JSDOM } = require('jsdom');
 function boot() {
   const dom = new JSDOM(
     '<!DOCTYPE html><html><body>' +
-    '<div class="rga-page"><div class="ProseMirror"></div></div>' +
+    // A legacy .rga-page element is present ON PURPOSE — PageSurface must
+    // no longer touch it.
+    '<div id="editor" class="rga-page"><div class="ProseMirror"></div></div>' +
     '</body></html>'
   );
   global.window = dom.window;
   global.document = dom.window.document;
   global.window.Rga = {};
-  // page-surface.js resolves geometry through ManuscriptGeometry, which
-  // delegates to LayoutProfile, which reads Constants.PAPER_SIZES —
-  // load the full chain (Recovery Step 5).
   const paths = [
     '../../../renderer/js/constants.js',
     '../../../renderer/js/framework/layout-profile.js',
@@ -28,138 +30,75 @@ function boot() {
     '../../../renderer/js/editor/page-surface.js'
   ];
   paths.forEach(function(p) { delete require.cache[require.resolve(p)]; require(p); });
-  return {
-    PageSurface: global.window.Rga.PageSurface,
-    LP:          global.window.Rga.LayoutProfile,
-    Constants:   global.window.Rga.Constants,
-    doc:         global.document
-  };
+  return { PageSurface: global.window.Rga.PageSurface, LP: global.window.Rga.LayoutProfile, doc: global.document };
 }
 
-// ----------------------------------------------------------------
-// cssVarsForProfile — consumes a resolved layoutProfile
-// ----------------------------------------------------------------
+// --- surviving behaviour: --page-width still updates after Page Setup ---
 
-test('Recovery Step 4: PageSurface uses layoutProfile.pageSize for width + minHeight', () => {
-  const { PageSurface } = boot();
-  const profile = {
-    pageSize: { w: 8.5, h: 11, unit: 'in' },
-    margins:  { top: 1, right: 1, bottom: 1, left: 1.5, unit: 'in' }
-  };
-  const v = PageSurface._cssVarsForProfile(profile);
-  assert.equal(v.width, '8.5in',  'width comes from layoutProfile.pageSize.w');
-  assert.equal(v.minHeight, '11in', 'minHeight comes from layoutProfile.pageSize.h');
-});
-
-test('Recovery Step 4: PageSurface uses layoutProfile.margins for padding + content height', () => {
-  const { PageSurface } = boot();
-  const profile = {
-    pageSize: { w: 8.5, h: 11, unit: 'in' },
-    margins:  { top: 1, right: 1, bottom: 1, left: 1.5, unit: 'in' }
-  };
-  const v = PageSurface._cssVarsForProfile(profile);
-  assert.equal(v.paddingTop,    '1in');
-  assert.equal(v.paddingRight,  '1in');
-  assert.equal(v.paddingBottom, '1in');
-  assert.equal(v.paddingLeft,   '1.5in');
-  assert.equal(v.contentMinHeight, '9in', 'content height = pageH - top - bottom');
-});
-
-// ----------------------------------------------------------------
-// apply — end-to-end resolution through LayoutProfile.compose
-// ----------------------------------------------------------------
-
-test('Recovery Step 4: apply() A4 page dimensions match LayoutProfile.compose', () => {
-  const { PageSurface, LP, doc } = boot();
-  const pageSetup = { paperSize: 'A4', margins: { top: 1, right: 1, bottom: 1, left: 1.5 } };
-  PageSurface.apply(pageSetup);
-  const profile = LP.compose(null, { pageSetup: pageSetup });
-  const page = doc.querySelector('.rga-page');
-  assert.equal(page.style.width,     profile.pageSize.w + 'in', 'A4 width matches LayoutProfile');
-  assert.equal(page.style.minHeight, profile.pageSize.h + 'in', 'A4 height matches LayoutProfile');
-  // A4 ISO 216 values, sourced from Constants.PAPER_SIZES via LayoutProfile.
-  assert.equal(page.style.width,     '8.2677in');
-  assert.equal(page.style.minHeight, '11.6929in');
-});
-
-test('Recovery Step 4: apply() Letter behavior unchanged (8.5 x 11, 1in/1.5in padding)', () => {
+test('apply() publishes --page-width from the resolved paper width (Letter)', () => {
   const { PageSurface, doc } = boot();
   PageSurface.apply({ paperSize: 'Letter', margins: { top: 1, right: 1, bottom: 1, left: 1.5 } });
-  const page = doc.querySelector('.rga-page');
-  assert.equal(page.style.width,         '8.5in');
-  assert.equal(page.style.minHeight,     '11in');
-  assert.equal(page.style.paddingTop,    '1in');
-  assert.equal(page.style.paddingRight,  '1in');
-  assert.equal(page.style.paddingBottom, '1in');
-  assert.equal(page.style.paddingLeft,   '1.5in');
+  assert.equal(doc.documentElement.style.getPropertyValue('--page-width'), '8.5in');
 });
 
-test('Recovery Step 4: apply() writes correct inline styles to .rga-page and .ProseMirror', () => {
+test('apply() Letter -> A4 updates --page-width (Page Setup change reaches the token)', () => {
   const { PageSurface, doc } = boot();
   PageSurface.apply({ paperSize: 'Letter', margins: { top: 1, right: 1, bottom: 1, left: 1.5 } });
-  const page = doc.querySelector('.rga-page');
-  const pm   = page.querySelector('.ProseMirror');
-  // .rga-page receives width + minHeight + four paddings.
-  assert.ok(page.style.width && page.style.minHeight, 'page has width + minHeight');
-  assert.ok(page.style.paddingTop && page.style.paddingLeft, 'page has padding');
-  // .ProseMirror receives the content min-height = pageH - top - bottom = 9in.
-  assert.equal(pm.style.minHeight, '9in', 'ProseMirror gets content min-height');
-});
-
-test('Recovery Step 4: apply() unknown paper size falls back to Letter dimensions', () => {
-  const { PageSurface, doc } = boot();
-  // Unknown name → LayoutProfile._resolvePageSize returns null →
-  // compose() uses HOLLYWOOD_DEFAULTS.pageSize (Letter 8.5 x 11).
-  PageSurface.apply({ paperSize: 'NotAPaper', margins: { top: 1, right: 1, bottom: 1, left: 1 } });
-  const page = doc.querySelector('.rga-page');
-  assert.equal(page.style.width,     '8.5in');
-  assert.equal(page.style.minHeight, '11in');
-});
-
-// ----------------------------------------------------------------
-// Recovery Step 6 — apply() publishes the resolved page width to the
-// --page-width CSS token, so paper-size changes reach the Flow view
-// (whose .rga-page width is var(--page-width) !important) and the
-// Row-3 toolbar band.
-// ----------------------------------------------------------------
-
-test('Recovery Step 6: apply() Letter -> A4 updates the --page-width token', () => {
-  const { PageSurface, doc } = boot();
-  PageSurface.apply({ paperSize: 'Letter', margins: { top: 1, right: 1, bottom: 1, left: 1.5 } });
-  assert.equal(doc.documentElement.style.getPropertyValue('--page-width'), '8.5in',
-    'Letter sets --page-width to 8.5in');
+  assert.equal(doc.documentElement.style.getPropertyValue('--page-width'), '8.5in');
   PageSurface.apply({ paperSize: 'A4', margins: { top: 1, right: 1, bottom: 1, left: 1.5 } });
-  assert.equal(doc.documentElement.style.getPropertyValue('--page-width'), '8.2677in',
-    'switching to A4 updates --page-width to 8.2677in');
+  assert.equal(doc.documentElement.style.getPropertyValue('--page-width'), '8.2677in');
 });
 
-test('Recovery Step 6: apply() A4 -> Legal updates the --page-width token', () => {
+test('apply() A4 -> Legal updates --page-width', () => {
   const { PageSurface, doc } = boot();
   PageSurface.apply({ paperSize: 'A4', margins: { top: 1, right: 1, bottom: 1, left: 1.5 } });
-  assert.equal(doc.documentElement.style.getPropertyValue('--page-width'), '8.2677in',
-    'A4 sets --page-width to 8.2677in');
+  assert.equal(doc.documentElement.style.getPropertyValue('--page-width'), '8.2677in');
   PageSurface.apply({ paperSize: 'Legal', margins: { top: 1, right: 1, bottom: 1, left: 1.5 } });
-  assert.equal(doc.documentElement.style.getPropertyValue('--page-width'), '8.5in',
-    'switching to Legal updates --page-width to 8.5in');
+  assert.equal(doc.documentElement.style.getPropertyValue('--page-width'), '8.5in');
 });
 
-test('Recovery Step 6: --page-width token derives from resolved geometry, not a literal', () => {
+test('--page-width derives from the resolved geometry, not a literal', () => {
   const { PageSurface, LP, doc } = boot();
   const pageSetup = { paperSize: 'A4', margins: { top: 1, right: 1, bottom: 1, left: 1.5 } };
   PageSurface.apply(pageSetup);
   const profile = LP.compose(null, { pageSetup: pageSetup });
-  assert.equal(doc.documentElement.style.getPropertyValue('--page-width'),
-    profile.pageSize.w + 'in',
-    '--page-width must equal the resolved layoutProfile.pageSize.w, not a hardcoded value');
+  assert.equal(doc.documentElement.style.getPropertyValue('--page-width'), profile.pageSize.w + 'in');
 });
 
-test('Recovery Step 6: --page-width is published on documentElement — the scope Flow .rga-page resolves from', () => {
-  // Flow's `#editor-container.view-flow .rga-page { width: var(--page-width)
-  // !important }` resolves the token from the :root scope, i.e.
-  // documentElement. Publishing it there is what makes the Flow page width
-  // reflect a geometry change.
+test('--page-width is published on documentElement (the :root scope the token resolves from)', () => {
   const { PageSurface, doc } = boot();
   PageSurface.apply({ paperSize: 'A4', margins: { top: 1, right: 1, bottom: 1, left: 1.5 } });
-  assert.equal(doc.documentElement.style.getPropertyValue('--page-width'), '8.2677in',
-    'token is set on documentElement so var(--page-width) in the Flow rule resolves to it');
+  assert.equal(doc.documentElement.style.getPropertyValue('--page-width'), '8.2677in');
+});
+
+// --- retirement: PageSurface no longer applies geometry to the editor ---
+
+test('apply() does NOT write inline geometry onto the editor element', () => {
+  const { PageSurface, doc } = boot();
+  PageSurface.apply({ paperSize: 'Letter', margins: { top: 1, right: 1, bottom: 1, left: 1.5 } });
+  const el = doc.getElementById('editor');
+  assert.equal(el.style.width, '', 'no inline width');
+  assert.equal(el.style.minHeight, '', 'no inline min-height — the growth model is gone');
+  assert.equal(el.style.paddingTop, '', 'no inline padding');
+});
+
+test('apply() does NOT set min-height on the .ProseMirror content element', () => {
+  const { PageSurface, doc } = boot();
+  PageSurface.apply({ paperSize: 'Letter', margins: { top: 1, right: 1, bottom: 1, left: 1.5 } });
+  assert.equal(doc.querySelector('.ProseMirror').style.minHeight, '');
+});
+
+test('apply() with a missing pageSetup does not throw', () => {
+  const { PageSurface } = boot();
+  assert.doesNotThrow(function() { PageSurface.apply(null); });
+  assert.doesNotThrow(function() { PageSurface.apply(undefined); });
+});
+
+test('page-surface.js source no longer applies paper geometry (retired)', () => {
+  const fs = require('fs'); const path = require('path');
+  const src = fs.readFileSync(path.resolve(__dirname, '../../../renderer/js/editor/page-surface.js'), 'utf8');
+  const code = src.split('\n').map(function(l){ const i = l.indexOf('//'); return i >= 0 ? l.slice(0, i) : l; }).join('\n');
+  assert.equal(/minHeight|min-height/.test(code), false, 'no min-height application — the growth model is retired');
+  assert.equal(/querySelector|getElementById/.test(code), false, 'PageSurface no longer reaches into the editor DOM');
+  assert.equal(/\.rga-page\b/.test(code), false, 'PageSurface no longer depends on the .rga-page class');
 });

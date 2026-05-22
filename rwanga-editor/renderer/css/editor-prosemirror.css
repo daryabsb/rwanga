@@ -17,27 +17,10 @@
   /* set per-doc by Rga.FlowChrome.setDocTitleVar(); pseudo-elements consume it */
   --doc-title: "";
 }
-#editor-container.view-print .rga-page {
-  /* No !important on width / min-height / padding here — page-surface.js
-     writes those inline from doc.settings.pageSetup (so Page Setup works).
-     The base .rga-page rule already supplies background + shadow + position. */
-  border-radius: 2px;
-}
-
-/* Page 1 header — title top-left, NO page number (industry convention) */
-#editor-container.view-print .rga-page::before {
-  content: var(--doc-title);
-  position: absolute;
-  top: 0.4in;
-  left: 1.5in;
-  font-family: var(--font-editor, 'Courier Prime', 'Courier New', monospace);
-  font-size: 10pt;
-  color: var(--text-tertiary, #888);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  pointer-events: none;
-  user-select: none;
-}
+/* Fork A (Brick 4+5): the in-editor Print view is now a read-only Paper
+   render (PrintRenderer leaves) and #editor is hidden in Print. The old
+   view-print paper restyle of #editor + its page-1 title pseudo-element
+   were removed — dead code once #editor stopped being paper. */
 
 /* .rga-page-break rules removed 2026-05-18 — v3 schema has no pageBreak node;
    archived reference at renderer/js/doc-types/screenplay/archived/page-breaks-v1.js. */
@@ -50,13 +33,17 @@
 #editor-container.view-flow .rga-page-row {
   align-items: flex-start;
 }
-#editor-container.view-flow .rga-page {
-  background: transparent !important;
-  box-shadow: none !important;
-  width: var(--page-width) !important;
-  min-height: auto !important;
-  height: auto !important;
-  padding: 0 0.5in !important;
+#editor-container.view-flow #editor {
+  /* Visual Inspection Unblockers — Fix 2: paint the Flow writing surface with
+   * the dedicated page colour (--editor-page-bg) so it reads as "paper",
+   * distinct from the muted desk (--editor-bg). Colour only — no geometry, no
+   * growth model, no paper shell (Fork A invariants intact). */
+  background: var(--editor-page-bg);
+  box-shadow: none;
+  width: var(--page-width);
+  min-height: auto;
+  height: auto;
+  padding: 0 0.5in;
   border-radius: 0;
 }
 #editor-container.view-flow .flow-line-gutter {
@@ -133,12 +120,12 @@ body.view-draft-active #editor-area {
   padding: 64px 0;
   height: 100vh;
 }
-#editor-container.view-draft .rga-page {
-  background: transparent !important;
-  box-shadow: none !important;
-  width: 8.5in !important;
-  min-height: auto !important;
-  padding: 0 0.5in !important;
+#editor-container.view-draft #editor {
+  background: transparent;
+  box-shadow: none;
+  width: 8.5in;
+  min-height: auto;
+  padding: 0 0.5in;
   border-radius: 0;
 }
 
@@ -769,19 +756,15 @@ body.view-draft-active .rga-draft-footer {
   background: transparent;
 }
 
-/* ----- THE PAGE (the paper) -----
-   width / min-height / margin-padding are set inline by page-surface.js
-   from doc.settings.pageSetup. These are fallbacks for before that runs. */
-.rga-page {
+/* ----- #editor — the live editing surface (Flow / Draft) -----
+   Fork A (Brick 4+5): #editor is no longer "paper" — no background, no
+   shadow, no min-height growth model. It is a flex item in .rga-page-row
+   sized to the manuscript column; the Paper view owns page geometry.
+   width: the --page-width token (tokens.css default, kept in sync with
+   Page Setup by page-surface.js). */
+#editor {
   flex-shrink: 0;
-  background: var(--editor-page-bg);
-  box-shadow: var(--editor-page-shadow);
-  /* §D1.1: width sourced from --page-width token (defined in
-     tokens.css). The same token drives the Row 3 toolbar's inner
-     band so the toolbar visually aligns with the manuscript column. */
   width: var(--page-width);
-  min-height: 11in;
-  padding: 1in 1in 1in 1.5in;
   position: relative;
 }
 
@@ -2233,8 +2216,14 @@ body.view-print-preview-active #workspace {
   text-transform: uppercase;
 }
 .rga-print-block-parenthetical {
+  /* Density Slice 6: box-sizing is border-box (reset.css), so max-width caps
+   * the WHOLE box and the text column = max-width − padding-left. The ratified
+   * Kurdish/RTL profile intends a 2.0in parenthetical text column
+   * (layout-profile.js blockWidthsIn.parenthetical); with the 1.5in indent the
+   * box must be 3.5in. The previous 2.0in left only 0.5in of text — a render
+   * defect that desynced the Paper surface from PageMap. */
   padding-left: 1.5in;
-  max-width: 2.0in;
+  max-width: 3.5in;
 }
 .rga-print-block-dialogue {
   padding-left: 1.0in;

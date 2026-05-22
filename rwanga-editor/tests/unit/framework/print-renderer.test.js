@@ -190,6 +190,48 @@ test('block carries data-block-type + data-scene-id + data-scene-number attribut
 });
 
 // ----------------------------------------------------------------
+// Fork A — click-to-edit anchors: every rendered block carries its
+// PM document position so the read-only Paper view can return the
+// caret to Flow. Source: RenderModel block pmFrom / pmTo.
+// ----------------------------------------------------------------
+
+test('block carries data-pm-from / data-pm-to from the RenderModel block pm positions', () => {
+  const { PR } = boot();
+  const container = document.createElement('div');
+  const b = textBlock('action', 'hello');
+  b.pmFrom = 12;
+  b.pmTo = 19;
+  PR.render(fakeModel([{ blocks: [b] }]), container);
+  const el = container.querySelector('.rga-print-block-action');
+  assert.equal(el.dataset.pmFrom, '12');
+  assert.equal(el.dataset.pmTo, '19');
+});
+
+test('data-pm-from is stamped even when pmFrom is 0 (0 is a valid document position)', () => {
+  const { PR } = boot();
+  const container = document.createElement('div');
+  const b = textBlock('action', 'top');
+  b.pmFrom = 0;
+  b.pmTo = 5;
+  PR.render(fakeModel([{ blocks: [b] }]), container);
+  const el = container.querySelector('.rga-print-block-action');
+  assert.equal(el.dataset.pmFrom, '0');
+  assert.equal(el.dataset.pmTo, '5');
+});
+
+test('sceneHeading block also carries data-pm-from / data-pm-to', () => {
+  const { PR } = boot();
+  const container = document.createElement('div');
+  const h = headingBlock('INT.', 'ROOM', 'DAY');
+  h.pmFrom = 30;
+  h.pmTo = 44;
+  PR.render(fakeModel([{ blocks: [h] }]), container);
+  const el = container.querySelector('.rga-print-block-sceneHeading');
+  assert.equal(el.dataset.pmFrom, '30');
+  assert.equal(el.dataset.pmTo, '44');
+});
+
+// ----------------------------------------------------------------
 // Inline mark rendering — fidelity gates
 // ----------------------------------------------------------------
 

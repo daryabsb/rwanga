@@ -52,12 +52,13 @@
   //   * Lines per page:     9.0" × 6 lpi = 54
   //   * Courier 12pt monospace: 10 chars per horizontal inch (CPI)
   //
-  // Per-block column widths (inches), traditional Hollywood layout:
-  //   * Action / sceneHeading: 6.0" (uses full body width, 60 cpl)
-  //   * Character cue:         occupies ~3.5" centered around the 4.2" mark
-  //   * Dialogue:              3.5" body width (35 cpl)
-  //   * Parenthetical:         2.0" body width (20 cpl)
-  //   * Transition:            right-aligned, logical width 6.0" but conventionally short
+  // Per-block column widths (inches). Density Slice 7: these MUST match the
+  // Paper truth surface (`.rga-print-block-*` in editor-prosemirror.css) —
+  // cpl = width × cpi, and cpi is direction-aware (see _charsPerInch).
+  //   * Action / sceneHeading / transition: full body width (6.0" clamp)
+  //   * Character cue:         3.5" placeholder — character never wraps
+  //   * Dialogue:              2.5" text column (CSS max-width 3.5" − pad 1.0")
+  //   * Parenthetical:         2.0" text column (CSS max-width 3.5" − pad 1.5")
   // ----------------------------------------------------------------
 
   const HOLLYWOOD_DEFAULTS = {
@@ -69,7 +70,7 @@
       action:        6.0,
       character:     3.5,
       parenthetical: 2.0,
-      dialogue:      3.5,
+      dialogue:      2.5,
       shot:          6.0,
       transition:    6.0,
       paragraph:     6.0,
@@ -105,12 +106,20 @@
     return 72 / (sizePt * (leading || 1));
   }
 
-  // Courier chars-per-inch at the given point size. Standard 10 cpi at 12pt;
-  // larger sizes shrink cpl proportionally. (Monospace fonts scale linearly.)
-  function _charsPerInch(sizePt) {
-    // Courier 10 cpi is anchored at 12pt; cpi scales inversely with size.
-    if (!sizePt || sizePt <= 0) return 10;
-    return 10 * (12 / sizePt);
+  // Chars-per-inch at the given point size and text direction (Density Slice 7).
+  //   * LTR (Hollywood): Courier monospace — exactly 10 cpi at 12pt.
+  //   * RTL (ratified Kurdish/RTL profile, Rule 10): the Paper truth surface
+  //     renders Noto Naskh Arabic, whose measured line capacity is ≈ 14.5 cpi
+  //     at 12pt — the median of the per-type capacities measured by the
+  //     paper-truth probe (action 14.1 / parenthetical 14.5 / dialogue 15.5;
+  //     Density Slice 4/7 line-capacity forensic). This is a FONT metric, not
+  //     a per-fixture constant. `direction` is the discriminator because the
+  //     RTL truth surface forces Noto Naskh via CSS regardless of font.family.
+  // cpi scales inversely with point size for both (linear glyph scaling).
+  function _charsPerInch(sizePt, direction) {
+    const baseCpi = (direction === 'rtl') ? 14.5 : 10;
+    if (!sizePt || sizePt <= 0) return baseCpi;
+    return baseCpi * (12 / sizePt);
   }
 
   function _round(n) { return Math.max(1, Math.floor(n)); }
@@ -139,7 +148,12 @@
     // the bottom margin. Both values are surfaced on the profile for transparency.
     const theoreticalLinesPerPage = _round(usableH * _linesPerInch(font.sizePt, font.leading));
     const linesPerPage = Math.max(1, theoreticalLinesPerPage - SAFETY_LINES);
-    const cpi = _charsPerInch(font.sizePt);
+    // Text direction — RTL (Kurdish/Arabic) or LTR (Hollywood). Resolved here
+    // because it drives the font-aware cpi: the RTL Paper truth surface renders
+    // Noto Naskh, the LTR surface Courier. screenplayProfile.direction is the
+    // canonical source; default 'ltr'.
+    const direction = (_profile.direction === 'rtl') ? 'rtl' : 'ltr';
+    const cpi = _charsPerInch(font.sizePt, direction);
 
     const blocks = {};
     Object.keys(HOLLYWOOD_DEFAULTS.blockWidthsIn).forEach(function(typeName) {
@@ -163,10 +177,9 @@
       locationTime:    ' — '
     };
 
-    // D.2 — carry direction through so PrintRenderer can apply RTL
-    // margin mirror (wider binding side is right for Arabic/Kurdish).
-    // screenplayProfile.direction is the canonical source; default 'ltr'.
-    const direction = (_profile.direction === 'rtl') ? 'rtl' : 'ltr';
+    // D.2 — `direction` (resolved above, next to the cpi it drives) is carried
+    // through so PrintRenderer can apply the RTL margin mirror (the wider
+    // binding side is the right margin for Arabic/Kurdish).
 
     return {
       linesPerPage:            linesPerPage,

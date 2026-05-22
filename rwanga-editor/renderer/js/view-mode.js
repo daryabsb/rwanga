@@ -52,19 +52,76 @@
     MODES.forEach(function(m) { target.classList.remove('view-' + m); });
   }
 
+  // ----------------------------------------------------------------
+  // Fork A — Paper view. Print mode renders the read-only Paper truth
+  // surface (Rga.PaperView) into a dedicated container and hides the
+  // live #editor; Flow and Draft clear it and restore #editor.
+  //
+  // Rule 9: the hidden #editor is state-preservation only. view-mode
+  // toggles its visibility and re-focuses it on return — it never
+  // destroys the EditorView and never reads its DOM geometry.
+  // ----------------------------------------------------------------
+  const PAPER_ROOT_ID = 'rga-paper-view-root';
+
+  function _activeEditorView() {
+    return (Rga.TabManager && typeof Rga.TabManager._editorView === 'function')
+      ? Rga.TabManager._editorView()
+      : null;
+  }
+
+  // Create the Paper render container exactly once; reuse it thereafter.
+  function _ensurePaperContainer() {
+    let root = document.getElementById(PAPER_ROOT_ID);
+    if (root) return root;
+    const editor = document.getElementById('editor');
+    const host = document.getElementById('editor-container') || (editor && editor.parentNode);
+    if (!host) return null;
+    root = document.createElement('div');
+    root.id = PAPER_ROOT_ID;
+    root.style.display = 'none';
+    host.appendChild(root);
+    return root;
+  }
+
+  function _enterPaperView() {
+    const root = _ensurePaperContainer();
+    if (!root) return;
+    const editor = document.getElementById('editor');
+    if (editor) editor.style.display = 'none';
+    root.style.display = '';
+    if (Rga.PaperView && typeof Rga.PaperView.render === 'function') {
+      Rga.PaperView.render(_activeEditorView(), root);
+    }
+  }
+
+  function _exitPaperView() {
+    const root = document.getElementById(PAPER_ROOT_ID);
+    if (root) {
+      if (Rga.PaperView && typeof Rga.PaperView.clear === 'function') {
+        Rga.PaperView.clear(root);
+      }
+      root.style.display = 'none';
+    }
+    const editor = document.getElementById('editor');
+    if (editor) editor.style.display = '';
+    // Re-focus so the preserved Flow selection becomes a visible caret.
+    const view = _activeEditorView();
+    if (view && typeof view.focus === 'function') view.focus();
+  }
+
   const _flowController = {
     bodyClass: null,                              // flow = default; no body class
-    activate: function() { _applyContainerClass('flow'); },
+    activate: function() { _applyContainerClass('flow'); _exitPaperView(); },
     deactivate: function() { /* next activate overwrites the class */ }
   };
   const _printController = {
     bodyClass: 'view-print-active',
-    activate: function() { _applyContainerClass('print'); },
-    deactivate: function() {}
+    activate: function() { _applyContainerClass('print'); _enterPaperView(); },
+    deactivate: function() { _exitPaperView(); }
   };
   const _draftController = {
     bodyClass: 'view-draft-active',
-    activate: function() { _applyContainerClass('draft'); },
+    activate: function() { _applyContainerClass('draft'); _exitPaperView(); },
     deactivate: function() {}
   };
 

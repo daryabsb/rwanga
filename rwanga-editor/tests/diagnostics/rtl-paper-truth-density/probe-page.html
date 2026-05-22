@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>RTL Paper-Truth Density Probe — measurement surface</title>
+<link rel="stylesheet" href="../../../renderer/css/tokens.css">
+<link rel="stylesheet" href="../../../renderer/css/reset.css">
+<link rel="stylesheet" href="../../../renderer/css/shell.css">
+<link rel="stylesheet" href="../../../renderer/css/editor.css">
+<link rel="stylesheet" href="../../../renderer/css/editor-prosemirror.css">
+<link rel="stylesheet" href="../../../renderer/css/components.css">
+<link rel="stylesheet" href="../../../renderer/css/overlays.css">
+</head>
+<body>
+<div id="paper-host"></div>
+<script src="../../../renderer/js/framework/print-renderer.js"></script>
+<script>
+'use strict';
+// RTL Paper-Truth measurement surface (Density Slice 1).
+//
+// Renders the Mysterious Guest RenderModel through the REAL PrintRenderer —
+// the Fork A Paper/Print TRUTH surface (.rga-page-sheet leaves) — and reports
+// each sheet's consumed content height + overflow.
+//
+// There is NO editor here: no #editor, no Flow DOM, no ProseMirror. Nothing
+// reads a hidden editor's geometry (Rule 9). Only the rendered Paper sheets
+// are measured. Read-only — production code/CSS untouched.
+window.__measure = async function (renderModel, predicted) {
+  try {
+    await document.fonts.load('400 16px "Noto Naskh Arabic"');
+    await document.fonts.load('700 16px "Noto Naskh Arabic"');
+  } catch (e) {}
+  await document.fonts.ready;
+
+  var host = document.getElementById('paper-host');
+  window.Rga.PrintRenderer.render(renderModel, host, {});
+  await new Promise(function (r) { requestAnimationFrame(function () { r(); }); });
+
+  var sheets = host.querySelectorAll('.rga-page-sheet');
+  var perSheet = [];
+  for (var i = 0; i < sheets.length; i++) {
+    var sheet = sheets[i];
+    var content = sheet.querySelector('.rga-page-sheet-content');
+    var sRect = sheet.getBoundingClientRect();
+    var cRect = content ? content.getBoundingClientRect() : null;
+    perSheet.push({
+      pageNumber:            sheet.getAttribute('data-page-number'),
+      dir:                   sheet.getAttribute('dir') || 'ltr',
+      sheetHeightPx:         sRect.height,
+      contentHeightPx:       cRect ? cRect.height : 0,
+      contentScrollHeightPx: content ? content.scrollHeight : 0,
+      printBlockCount:       content ? content.querySelectorAll('.rga-print-block').length : 0
+    });
+  }
+
+  // ---- Density Slice 3 + 4 — per-block forensic on the truth surface -----
+  // One pass over every rendered `.rga-print-block`. Per block it captures:
+  //   Slice 3 — leading air: CSS `margin-top` + painted collapsed gap
+  //             (`thisBlock.top - prevBlock.bottom`), non-first blocks only.
+  //   Slice 4 — content-line wrapping: rendered height in line units, text
+  //             length, and the real text-box width, for EVERY block.
+  // `predicted[gi]` carries PageMap's predicted CONTENT lines for the same
+  // block (computed in Node via `PageMap.measureBlock`, isFirstOnPage=true so
+  // no leading blank is included — Slice 3 measures the leading model). `gi`
+  // advances for EVERY dom block so it stays index-aligned with `predicted`;
+  // a type cross-check (`predicted[gi].type` vs `data-block-type`) flags drift.
+  // Nothing reads the Flow editor — Rule 9 holds (there is no editor here).
+  predicted = predicted || [];
+  var TYPES = ['sceneHeading','action','character','parenthetical',
+               'dialogue','shot','transition','paragraph','heading'];
+  var byType = {};          // Slice 3 — leading margin
+  var byTypeContent = {};   // Slice 4 — content-line wrapping
+  TYPES.forEach(function (t) {
+    byType[t] = { samples: 0, marginTopPxSum: 0, geomGapPxSum: 0, geomGapSamples: 0 };
+    byTypeContent[t] = {
+      count: 0, renderedSum: 0, predictedSum: 0, textLenSum: 0, widthPxSum: 0,
+      wrapCount: 0, wrapTextLenSum: 0, wrapRenderedSum: 0, wrapWidthPxSum: 0,
+      emptyRendered: 0, typeMismatch: 0, buckets: {}
+    };
+  });
+  var lineHeightPx = null, fontSizePx = null, fontFamily = null, sheetDir = null;
+  var gi = 0, domBlockCount = 0;
+  for (var s = 0; s < sheets.length; s++) {
+    var c = sheets[s].querySelector('.rga-page-sheet-content');
+    if (!c) continue;
+    var blocks = c.querySelectorAll('.rga-print-block');
+    for (var b = 0; b < blocks.length; b++) {
+      var el = blocks[b];
+      var type = el.getAttribute('data-block-type');
+      var cs = getComputedStyle(el);
+      domBlockCount += 1;
+      if (lineHeightPx === null) {
+        lineHeightPx = parseFloat(cs.lineHeight);
+        fontSizePx   = parseFloat(cs.fontSize);
+        fontFamily   = cs.fontFamily;
+        sheetDir     = sheets[s].getAttribute('dir') || 'ltr';
+      }
+      // ---- Slice 4 — content-line wrapping (EVERY block) ----
+      var tc = byTypeContent[type];
+      if (tc) {
+        var rectH = el.getBoundingClientRect().height;
+        var renderedLines = lineHeightPx ? (rectH / lineHeightPx) : 0;
+        var textLen = (el.textContent || '').length;
+        var boxW = el.clientWidth - (parseFloat(cs.paddingLeft) || 0)
+                                  - (parseFloat(cs.paddingRight) || 0);
+        var pred = predicted[gi];
+        tc.count += 1;
+        tc.renderedSum += renderedLines;
+        if (pred && typeof pred.lines === 'number') tc.predictedSum += pred.lines;
+        tc.textLenSum += textLen;
+        tc.widthPxSum += boxW;
+        if (renderedLines < 0.5) tc.emptyRendered += 1;
+        if (pred && pred.type !== type) tc.typeMismatch += 1;
+        if (renderedLines >= 1.5) {      // a wrapped block — reveals real cpl
+          tc.wrapCount += 1;
+          tc.wrapTextLenSum += textLen;
+          tc.wrapRenderedSum += renderedLines;
+          tc.wrapWidthPxSum += boxW;
+        }
+        // Per-rendered-line bucket. `textLenMax` in bucket R is the longest
+        // text that fit in exactly R painted lines → `textLenMax / R` is a
+        // tight, direct estimate of per-line CAPACITY (unlike Σchars/Σlines,
+        // which is dragged down by every block's partial last line).
+        var R = Math.round(renderedLines);
+        if (!tc.buckets[R]) {
+          tc.buckets[R] = { count: 0, textLenSum: 0, textLenMax: 0, predictedSum: 0 };
+        }
+        var bb = tc.buckets[R];
+        bb.count += 1;
+        bb.textLenSum += textLen;
+        if (textLen > bb.textLenMax) bb.textLenMax = textLen;
+        bb.predictedSum += (pred && typeof pred.lines === 'number') ? pred.lines : 0;
+      }
+      gi += 1;
+      // ---- Slice 3 — leading margin (non-first blocks only) ----
+      if (!byType[type]) continue;
+      if (el.classList.contains('rga-print-block-first')) continue;
+      byType[type].samples += 1;
+      byType[type].marginTopPxSum += parseFloat(cs.marginTop) || 0;
+      if (b > 0) {
+        var gap = el.getBoundingClientRect().top -
+                  blocks[b - 1].getBoundingClientRect().bottom;
+        byType[type].geomGapPxSum += gap;
+        byType[type].geomGapSamples += 1;
+      }
+    }
+  }
+
+  return {
+    sheetCount:     sheets.length,
+    perSheet:       perSheet,
+    byType:         byType,
+    byTypeContent:  byTypeContent,
+    lineHeightPx:   lineHeightPx,
+    fontSizePx:     fontSizePx,
+    fontFamily:     fontFamily,
+    sheetDir:       sheetDir,
+    domBlockCount:  domBlockCount,
+    predictedCount: predicted.length
+  };
+};
+</script>
+</body>
+</html>

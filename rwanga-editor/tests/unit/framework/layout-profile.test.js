@@ -45,10 +45,13 @@ test('action / sceneHeading / shot / paragraph / heading have cpl=60 (6.0in × 1
   });
 });
 
-test('dialogue cpl=35; character cpl=35; parenthetical cpl=20', () => {
+test('dialogue cpl=25; character cpl=35; parenthetical cpl=20', () => {
+  // Density Slice 7: blockWidthsIn.dialogue 3.5→2.5in (the truth-surface CSS
+  // column), so LTR dialogue cpl = 2.5in × 10cpi = 25 (was 35). character and
+  // parenthetical widths are unchanged.
   const { LP } = boot();
   const p = LP.compose(null, null);
-  assert.equal(p.blocks.dialogue.cpl, 35);
+  assert.equal(p.blocks.dialogue.cpl, 25);
   assert.equal(p.blocks.character.cpl, 35);
   assert.equal(p.blocks.parenthetical.cpl, 20);
 });

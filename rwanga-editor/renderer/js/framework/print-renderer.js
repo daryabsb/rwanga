@@ -187,6 +187,11 @@
     el.setAttribute('data-block-type', block.type);
     if (block.sceneNodeId)  el.setAttribute('data-scene-id', block.sceneNodeId);
     if (block.sceneNumber)  el.setAttribute('data-scene-number', String(block.sceneNumber));
+    // Fork A — click-to-edit anchor: carry the block's PM document range so
+    // the read-only Paper view can return the caret to Flow. Tested with
+    // `typeof === 'number'` because pmFrom 0 is a valid document position.
+    if (typeof block.pmFrom === 'number') el.setAttribute('data-pm-from', String(block.pmFrom));
+    if (typeof block.pmTo   === 'number') el.setAttribute('data-pm-to',   String(block.pmTo));
 
     if (block.type === 'sceneHeading') {
       _appendHeadingDisplay(el, block.heading);
