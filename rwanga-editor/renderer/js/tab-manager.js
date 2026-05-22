@@ -139,17 +139,12 @@
     const idx = tabs.findIndex(function(t) { return t.id === tabId; });
     if (idx < 0) return;
     const tab = tabs[idx];
-    if (tab.doc.dirty) {
-      const choice = (Rga.Modal && Rga.Modal.showUnsaved)
-        ? await Rga.Modal.showUnsaved(tab.doc.displayName)
-        : (confirm('"' + tab.doc.displayName + '" has unsaved changes. Discard?') ? 'discard' : 'cancel');
-      if (choice === 'cancel') return;
-      if (choice === 'save') {
-        if (activeTabId !== tabId) activate(tabId);
-        const saved = await Rga.FileManager.save();
-        if (!saved) return;
-      }
-    }
+    // Persistence Safety Contract §6.2 — the unsaved-changes prompt is owned
+    // solely by Rga.CloseGuard; closeTab no longer has its own prompt logic.
+    const verdict = (Rga.CloseGuard && typeof Rga.CloseGuard.confirmClose === 'function')
+      ? await Rga.CloseGuard.confirmClose(tab)
+      : 'proceed';
+    if (verdict === 'cancel') return;
     // Re-find in case tabs shifted during async save
     const currentIdx = tabs.findIndex(function(t) { return t.id === tabId; });
     if (currentIdx < 0) return;
@@ -273,6 +268,12 @@
     }
 
     const reads = saved.tabs.map(function(t) {
+      // Brick 4 — session restore MERGES with crash recovery. If this file is
+      // already open as a recovered (dirty) tab, the recovered version wins —
+      // skip the session reopen so there is no duplicate tab.
+      if (tabs.some(function(x) { return x.doc && x.doc.handle === t.handle; })) {
+        return Promise.resolve();
+      }
       return window.rwanga.files.read(t.handle).then(function(result) {
         if (result && result.content && Rga.FileManager && Rga.FileManager.openFromContent) {
           Rga.FileManager.openFromContent(t.handle, result.content);

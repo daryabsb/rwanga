@@ -4,6 +4,7 @@
 const { ipcMain, dialog, BrowserWindow } = require('electron');
 const fs = require('node:fs/promises');
 const path = require('node:path');
+const { writeFileAtomic } = require('../lib/atomic-write');
 
 function senderWindow(event) {
   return BrowserWindow.fromWebContents(event.sender);
@@ -42,9 +43,13 @@ function register() {
   });
 
   ipcMain.handle('files.save', async (_event, handle, content) => {
-    await fs.writeFile(handle, content, 'utf8');
+    const writeResult = await writeFileAtomic(handle, content, { backup: true });
+    if (writeResult.backupError) {
+      // Diagnostics-log entry (Contract §3, Amendment 1) — non-fatal.
+      console.error('[files.save] previous-version backup failed for', handle, '-', writeResult.backupError.message);
+    }
     const stat = await fs.stat(handle);
-    return { handle, savedAt: stat.mtimeMs };
+    return { handle, savedAt: stat.mtimeMs, backupFailed: !!writeResult.backupError };
   });
 
   ipcMain.handle('files.pickSaveAs', async (event, suggestedName, content) => {
@@ -57,9 +62,12 @@ function register() {
     if (result.canceled || !result.filePath) return null;
     let target = result.filePath;
     if (!target.toLowerCase().endsWith('.rga')) target = target + '.rga';
-    await fs.writeFile(target, content, 'utf8');
+    const writeResult = await writeFileAtomic(target, content, { backup: true });
+    if (writeResult.backupError) {
+      console.error('[files.pickSaveAs] previous-version backup failed for', target, '-', writeResult.backupError.message);
+    }
     const stat = await fs.stat(target);
-    return { handle: target, displayName: path.basename(target), savedAt: stat.mtimeMs };
+    return { handle: target, displayName: path.basename(target), savedAt: stat.mtimeMs, backupFailed: !!writeResult.backupError };
   });
 
   ipcMain.handle('files.stat', async (_event, handle) => {

@@ -2,19 +2,7 @@
 'use strict';
 
 const fs = require('node:fs/promises');
-const path = require('node:path');
-
-async function ensureDir(filePath) {
-  await fs.mkdir(path.dirname(filePath), { recursive: true });
-}
-
-async function writeJsonAtomic(filePath, value) {
-  await ensureDir(filePath);
-  const tmp = filePath + '.tmp';
-  const content = JSON.stringify(value, null, 2);
-  await fs.writeFile(tmp, content, 'utf8');
-  await fs.rename(tmp, filePath);
-}
+const { writeFileAtomic } = require('./atomic-write');
 
 function timestampSuffix() {
   const d = new Date();
@@ -27,6 +15,10 @@ function timestampSuffix() {
     pad(d.getUTCMinutes()) +
     pad(d.getUTCSeconds()) + 'Z'
   );
+}
+
+async function writeJsonAtomic(filePath, value) {
+  await writeFileAtomic(filePath, JSON.stringify(value, null, 2));
 }
 
 async function readJsonOrSeed(filePath, seed) {

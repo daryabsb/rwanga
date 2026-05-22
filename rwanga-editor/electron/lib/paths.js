@@ -20,13 +20,9 @@ function autosaveDir() {
   return path.join(userData(), 'autosave');
 }
 
-function autosaveManifestPath() {
-  return path.join(autosaveDir(), 'manifest.json');
-}
-
 function autosaveEntryPath(docId) {
   const safe = String(docId).replace(/[^a-zA-Z0-9_-]/g, '_');
-  return path.join(autosaveDir(), safe + '.bak');
+  return path.join(autosaveDir(), safe + '.autosave.json');
 }
 
 function logDir() {
@@ -42,7 +38,6 @@ module.exports = {
   workspacePath,
   prefsPath,
   autosaveDir,
-  autosaveManifestPath,
   autosaveEntryPath,
   logDir,
   logPath,

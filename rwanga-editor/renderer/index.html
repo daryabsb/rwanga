@@ -491,6 +491,9 @@
     <script src="js/doc.js"></script>
     <script src="js/file-manager.js"></script>
     <script src="js/tab-manager.js"></script>
+    <script src="js/close-guard.js"></script>
+    <script src="js/autosave.js"></script>
+    <script src="js/recovery.js"></script>
 <script src="js/icons.js"></script>
 <script src="js/utils.js"></script>
 <script src="js/app-shell.js"></script>
@@ -1275,13 +1278,24 @@
     Rga.TabManager.init();  // mounts ProseMirror EditorView internally
     // Try to restore the previous session's open tabs; fall back to a fresh
     // Untitled doc if nothing was saved or every file was unreadable.
-    const sessionPromise = (Rga.TabManager && Rga.TabManager.bootSession)
-      ? Rga.TabManager.bootSession()
-      : Promise.resolve(false);
-    sessionPromise.then(function(restored) {
-      if (!restored && Rga.FileManager && Rga.FileManager.newScript) {
-        Rga.FileManager.newScript();
-      }
+    // Persistence Safety Contract §5 — crash recovery runs FIRST (opens the
+    // orphan/dirty tabs), then session restore ALWAYS runs and MERGES with it
+    // (bootSession dedupes any file already open as a recovered tab). Fall back
+    // to a fresh document only if nothing at all is open.
+    const recoveryPromise = (Rga.Recovery && Rga.Recovery.run)
+      ? Rga.Recovery.run()
+      : Promise.resolve({ restoredCount: 0 });
+    recoveryPromise.then(function() {
+      const sessionPromise = (Rga.TabManager && Rga.TabManager.bootSession)
+        ? Rga.TabManager.bootSession()
+        : Promise.resolve(false);
+      return sessionPromise.then(function() {
+        const open = (Rga.TabManager && Rga.TabManager.tabs)
+          ? Rga.TabManager.tabs().length : 0;
+        if (open === 0 && Rga.FileManager && Rga.FileManager.newScript) {
+          Rga.FileManager.newScript();
+        }
+      });
     });
     registerCommands();
     registerShortcuts();
@@ -1335,6 +1349,21 @@
       // so its radio is checked on "flow" by default; push the persisted
       // mode in case it differs.
       try { window.rwanga.menu.setViewMode(Rga.ViewMode.get()); } catch (_) {}
+    }
+
+    // Persistence Safety Contract §6.1 — main asks before the app closes;
+    // Rga.CloseGuard runs the sequential per-document prompt and replies.
+    if (window.rwanga && window.rwanga.lifecycle
+        && typeof window.rwanga.lifecycle.onCloseRequested === 'function') {
+      window.rwanga.lifecycle.onCloseRequested(function() {
+        Promise.resolve(
+          (Rga.CloseGuard && Rga.CloseGuard.confirmAppClose)
+            ? Rga.CloseGuard.confirmAppClose()
+            : true
+        ).then(function(allow) {
+          window.rwanga.lifecycle.respondClose(allow);
+        });
+      });
     }
 
     console.log('[Rwanga] Script Editor initialized — Phase 0 (no editor mounted).');

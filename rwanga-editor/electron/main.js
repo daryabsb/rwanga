@@ -1,16 +1,25 @@
 // Copyright (c) 2026 Rwanga. Licensed under Apache 2.0.
 'use strict';
 
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const { spawn } = require('child_process');
 const filesBridge = require('./bridge/files');
 const windowControls = require('./bridge/window-controls');
+const autosaveBridge = require('./bridge/autosave');
 const { buildMenu, registerIpc: registerMenuIpc } = require('./menu');
 
 let mainWindow = null;
 const DEV = process.argv.includes('--dev');
+
+// Persistence Safety Contract §6 — app-close dirty guard.
+// The window 'close' is intercepted and the renderer is asked for a verdict.
+// CLOSE_RESPONSE_TIMEOUT_MS bounds the wait; on timeout the close is ABORTED
+// (Brick 2 amendment — proceeding is unsafe until Autosave / Brick 3 exists).
+let _closeApproved = false;
+let _closeTimer = null;
+const CLOSE_RESPONSE_TIMEOUT_MS = 10000;
 
 // Studio Shell Recovery — Workstream A1: frameless window transport.
 //
@@ -71,6 +80,26 @@ function createMainWindow() {
     mainWindow.show();
   });
 
+  // Persistence Safety Contract §6.1 — intercept the close, ask the renderer.
+  mainWindow.on('close', (event) => {
+    if (_closeApproved) return;   // verdict already given — let it close
+    const wc = mainWindow ? mainWindow.webContents : null;
+    if (!wc || wc.isDestroyed()) return;   // renderer gone — nothing to ask
+    event.preventDefault();
+    if (_closeTimer) return;   // a close request is already in flight
+    wc.send('app.closeRequested');
+    _closeTimer = setTimeout(() => {
+      _closeTimer = null;
+      // Brick 2 amendment — until Autosave (Brick 3) exists, a renderer that
+      // never replies must NOT be force-closed: proceeding would silently lose
+      // unsaved work. Abort the close (the window stays open — the original
+      // 'close' was already prevented) and log the timeout. The Contract §6.1
+      // "proceed on timeout" end state is revisited once Brick 3 lands.
+      console.error('[app-close] renderer did not respond within '
+        + CLOSE_RESPONSE_TIMEOUT_MS + 'ms — close aborted, window kept open.');
+    }, CLOSE_RESPONSE_TIMEOUT_MS);
+  });
+
   mainWindow.on('closed', () => {
     mainWindow = null;
   });
@@ -91,6 +120,16 @@ if (!gotLock) {
     filesBridge.register();
     windowControls.register();
     registerMenuIpc();
+    autosaveBridge.register();
+    // Persistence Safety Contract §6.1 — the renderer's close verdict.
+    ipcMain.handle('app.closeResponse', (_event, allow) => {
+      if (_closeTimer) { clearTimeout(_closeTimer); _closeTimer = null; }
+      if (allow) {
+        _closeApproved = true;
+        if (mainWindow && !mainWindow.isDestroyed()) mainWindow.close();
+      }
+      // allow === false → abort: the timer is cleared, the window stays open.
+    });
     createMainWindow();
     if (DEV) startDevLiveReload();
   });

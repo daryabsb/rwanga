@@ -59,6 +59,16 @@ contextBridge.exposeInMainWorld('rwanga', {
     // icon resolver in title-bar.js.
     getState: () => ipcRenderer.invoke('window.getState'),
   },
+  lifecycle: {
+    // Persistence Safety Contract §6 — the app-close handshake. main sends
+    // `app.closeRequested`; the renderer replies with respondClose(allow).
+    onCloseRequested: (callback) => {
+      const handler = () => callback();
+      ipcRenderer.on('app.closeRequested', handler);
+      return () => ipcRenderer.removeListener('app.closeRequested', handler);
+    },
+    respondClose: (allow) => ipcRenderer.invoke('app.closeResponse', allow),
+  },
   menu: {
     // Bundle 1 §A — push renderer-owned view-mode state to the native
     // View menu so its radio reflects the current view. The renderer

@@ -334,11 +334,19 @@
     if (doc.metadata) {
       doc.metadata.modified = new Date().toISOString();
     }
+    // Persistence Safety Contract §4 — autosave is triggered by every edit.
+    if (Rga.Autosave && typeof Rga.Autosave.notifyChange === 'function') {
+      Rga.Autosave.notifyChange(doc);
+    }
   }
 
   function clearDirty(doc, savedAt) {
     doc.dirty = false;
     doc.lastSavedAt = savedAt || Date.now();
+    // Persistence Safety Contract §4 — a manual save discards the snapshot.
+    if (Rga.Autosave && typeof Rga.Autosave.notifyClean === 'function') {
+      Rga.Autosave.notifyClean(doc);
+    }
   }
 
   function rebindHandle(doc, handle) {

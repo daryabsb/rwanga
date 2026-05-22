@@ -130,3 +130,51 @@ test('RTL Slice A — ScriptLanguage no longer owns #editor direction or font', 
   assert.equal(/\.style\.fontFamily/.test(src), false,
     'script-language.js must not set an inline font — the dir=rtl CSS owns the RTL font');
 });
+
+test('closeTab honors a CloseGuard cancel verdict — the tab is kept', async () => {
+  bootDom();
+  const TM = loadTabManager();
+  TM.init();
+  // CloseGuard is a renderer peer module; stub it to veto the close.
+  global.window.Rga.CloseGuard = { confirmClose: async () => 'cancel' };
+  const doc = { docId: 'd1', displayName: 'one.rga', dirty: true };
+  const tab = TM.openDocument(doc);
+  await TM.closeTab(tab.id);
+  assert.equal(TM.tabs().length, 1, 'a cancelled close must keep the tab');
+});
+
+test('bootSession merges with recovery — skips a file already open, opens the rest, no duplicates', async () => {
+  bootDom();
+  const TM = loadTabManager();
+  TM.init();
+  global.localStorage = (function() {
+    const store = new Map();
+    return {
+      getItem: function(k) { return store.has(k) ? store.get(k) : null; },
+      setItem: function(k, v) { store.set(k, String(v)); },
+      removeItem: function(k) { store.delete(k); }
+    };
+  })();
+  // A recovered (dirty) tab for a.rga is already open (crash recovery ran first).
+  TM.openDocument({ docId: 'rec-a', displayName: 'a.rga', handle: '/x/a.rga', dirty: true });
+  // The previous session referenced a.rga (collision) AND b.rga (clean, new).
+  global.localStorage.setItem('rga-session-tabs', JSON.stringify({
+    tabs: [{ handle: '/x/a.rga', displayName: 'a.rga' },
+           { handle: '/x/b.rga', displayName: 'b.rga' }],
+    activeIndex: 0
+  }));
+  const reads = [];
+  global.window.rwanga = { files: { read: async (h) => { reads.push(h); return { content: 'STUB' }; } } };
+  global.window.Rga.FileManager = {
+    openFromContent: (handle) => TM.openDocument(
+      { docId: 'sess-' + handle, displayName: handle, handle: handle, dirty: false })
+  };
+  await TM.bootSession();
+  const handles = TM.tabs().map(function(t) { return t.doc.handle; }).sort();
+  assert.deepEqual(handles, ['/x/a.rga', '/x/b.rga'],
+    'a.rga is not duplicated (recovered tab wins); b.rga (clean) still appears');
+  assert.deepEqual(reads, ['/x/b.rga'], 'only the not-already-open file was read');
+  delete global.localStorage;
+  delete global.window.rwanga;
+  delete global.window.Rga.FileManager;
+});

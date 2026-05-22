@@ -181,3 +181,18 @@ test('Doc.deserialize backfills vocabulary on old file', () => {
 // Phase 9: the legacy scene → sceneFrame + sceneLine-location migrations
 // were deleted alongside the v2 schema. v1.x → v3 lift is covered by the
 // migration chain (tests/unit/doc-types/screenplay/migrations/).
+
+test('markDirty notifies Rga.Autosave.notifyChange; clearDirty notifies notifyClean', () => {
+  const changes = [];
+  const cleans = [];
+  global.window.Rga.Autosave = {
+    notifyChange: (d) => changes.push(d),
+    notifyClean: (d) => cleans.push(d)
+  };
+  const doc = Doc.create();
+  Doc.markDirty(doc);
+  assert.deepEqual(changes, [doc]);
+  Doc.clearDirty(doc, Date.now());
+  assert.deepEqual(cleans, [doc]);
+  delete global.window.Rga.Autosave;
+});

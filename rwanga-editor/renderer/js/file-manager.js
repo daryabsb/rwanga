@@ -24,6 +24,15 @@
     }
   }
 
+  // Persistence Safety Contract §3 / Amendment 1 — a failed previous-version
+  // backup is non-fatal: the save succeeded and the document is CLEAN. Surface
+  // it only as a non-blocking status notification (no warning, no modal).
+  function notifyBackupFailed() {
+    if (Rga.Toast && typeof Rga.Toast.show === 'function') {
+      Rga.Toast.show('Saved. (Previous-version backup could not be written.)', 'info', 4000);
+    }
+  }
+
   async function newScript(seedDefaults) {
     const doc = Doc.create({ seedDefaults });
     Rga.TabManager.openDocument(doc);
@@ -71,6 +80,7 @@
       Doc.clearDirty(activeDoc, res.savedAt);
       notifyTitle();
       if (Rga.TabManager && Rga.TabManager.renderTabBar) Rga.TabManager.renderTabBar();
+      if (res && res.backupFailed) notifyBackupFailed();
       console.info('[Rga.FileManager.save] OK', res);
       return res;
     } catch (err) {
@@ -92,6 +102,7 @@
       Doc.clearDirty(activeDoc, res.savedAt);
       notifyTitle();
       if (Rga.TabManager && Rga.TabManager.renderTabBar) Rga.TabManager.renderTabBar();
+      if (res.backupFailed) notifyBackupFailed();
       return res;
     } catch (err) {
       alert(`Save As failed:\n${err.message}`);
