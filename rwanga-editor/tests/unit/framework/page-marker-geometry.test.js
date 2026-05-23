@@ -34,13 +34,18 @@ test('RTL Slice B — Flow page-marker contributes zero layout height', () => {
     'Flow page-marker must have no padding — un-budgeted padding inflated the page');
 });
 
-test('RTL Slice B — Flow page-marker hairline + label are absolute overlays', () => {
-  const rule = ruleBodyContaining(EDITOR_PM_CSS,
+test('Flow page-marker label is an absolute overlay (Option A close-out 2026-05-23 — hairline retired, label remains)', () => {
+  // RTL Slice B originally required both hairline + label to be
+  // absolute overlays (zero flow height contract). Option A close-out
+  // retired the hairline entirely — Flow has no page seam. Only the
+  // quiet page-number label remains, still as an absolute overlay so
+  // the marker's zero-flow-height contract holds.
+  const ruleStillGone = ruleBodyContaining(EDITOR_PM_CSS,
     '#editor-container.view-flow .rga-page-marker .rga-page-marker-rule');
-  assert.ok(rule && /position:\s*absolute/.test(rule),
-    'the hairline must be position:absolute so it adds no flow height');
+  assert.equal(ruleStillGone, null,
+    'Option A: Flow .rga-page-marker-rule (hairline) must not exist');
   const label = ruleBodyContaining(EDITOR_PM_CSS,
     '#editor-container.view-flow .rga-page-marker .rga-page-marker-begin');
   assert.ok(label && /position:\s*absolute/.test(label),
-    'the "Page N" label must be position:absolute so it adds no flow height');
+    'the "Page N" label must remain position:absolute so it adds no flow height');
 });

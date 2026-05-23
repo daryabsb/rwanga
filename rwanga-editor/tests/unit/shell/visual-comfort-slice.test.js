@@ -1,19 +1,15 @@
 // Copyright (c) 2026 Rwanga. Licensed under Apache 2.0.
-// Visual Comfort Slice — inspection-blocker fixes (A / B / C / D).
+// Visual Comfort Slice — inspection-blocker fixes (A / B / C / D), Pass 3.
 //
-// Source-level guards — the repo idiom for CSS + chrome verification
-// (see flow-chrome.test.js and regression-fix-titlebar-maximize.test.js).
-// They lock in the second-pass fixes:
-//   A — the title-bar maximize compensation is additive (base + OS
-//       overflow) and covers the top edge — window controls sit
-//       identically placed normal vs maximized, DPI-safe, never
-//       clipped; plus a breathing gap before the control trio.
-//   B — the RTL line-number gutter consumes zero manuscript width
-//       (no canyon, no inward displacement); LTR is provably untouched.
-//   C — a zero-layout-cost page-colour mask band creates a breathing
-//       region around the page-transition chrome.
-//   D — the scene heading has hierarchy separation from the transition
-//       region above and the action body below.
+// Source-level guards (the repo idiom for CSS + chrome verification).
+// Pass 3 re-targets the four root causes the forensic identified:
+//   A — windowed root-zone composition (wider controls + a real gap),
+//       not only the maximize-overflow path.
+//   B — one direction owner; the RTL gutter is absolutely positioned
+//       (no flex-direction → no double reversal), zero manuscript-width.
+//   C — the page-transition mask band uses a PX height (the marker's
+//       font-size:0 collapsed the previous em height to 0).
+//   D — non-collapsing separation via PADDING (margins were absorbed).
 'use strict';
 
 const { test } = require('node:test');
@@ -29,7 +25,8 @@ const EDITOR_PM_CSS = path.join(REPO, 'renderer/css/editor-prosemirror.css');
 function read(p) { return fs.readFileSync(p, 'utf8'); }
 
 // Extract the declaration block of a CSS rule given its selector as a
-// literal string. Returns the text between { and }.
+// literal string. `\s*\{` anchors to the rule, so e.g. ".rga-scene-v3"
+// matches ".rga-scene-v3 {" but not ".rga-scene-v3-content {".
 function ruleBody(css, selectorLiteral) {
   const esc = selectorLiteral.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const m = css.match(new RegExp(esc + '\\s*\\{([^}]*)\\}'));
@@ -37,118 +34,139 @@ function ruleBody(css, selectorLiteral) {
 }
 
 // ================================================================
-// A — window controls: intentional placement, DPI-safe, never clipped
+// A — window controls: windowed composition + maximize safety
 // ================================================================
 
-test('A: title-bar.js defines a devicePixelRatio-aware overflow floor', () => {
+test('A: title-bar.js keeps the DPI-aware overflow floor on all four edges', () => {
   const src = read(TITLE_BAR_JS);
-  assert.ok(/_safeOverflowFloor/.test(src),
-    'title-bar.js must define _safeOverflowFloor (the DPI-aware minimum)');
-  assert.ok(/devicePixelRatio/.test(src),
-    '_safeOverflowFloor must scale by window.devicePixelRatio (8px @100%, 12 @150%, 16 @200%)');
-});
-
-test('A: _applyMaximizeOverflow clamps every edge to the floor and covers all four edges', () => {
-  const src = read(TITLE_BAR_JS);
+  assert.ok(/_safeOverflowFloor/.test(src) && /devicePixelRatio/.test(src),
+    '_safeOverflowFloor must scale by window.devicePixelRatio');
   const fn = src.match(/function _applyMaximizeOverflow[\s\S]*?\n  \}/);
-  assert.ok(fn, '_applyMaximizeOverflow must exist');
-  assert.ok(/Math\.max\(/.test(fn[0]) && /_safeOverflowFloor\(\)/.test(fn[0]),
-    'every edge must be Math.max-clamped to _safeOverflowFloor() so a 0 measurement cannot pin a property to 0px');
+  assert.ok(fn && /Math\.max\(/.test(fn[0]) && /_safeOverflowFloor\(\)/.test(fn[0]),
+    '_applyMaximizeOverflow must clamp each edge to the floor');
   assert.ok(/setProperty\(\s*['"]--rga-max-overflow-top['"]/.test(fn[0]),
-    '_applyMaximizeOverflow must set --rga-max-overflow-top (the top edge clips too on Win11 frameless-maximized)');
-  assert.ok(/removeProperty\(\s*['"]--rga-max-overflow-top['"]/.test(fn[0]),
-    'the unmaximized branch must remove --rga-max-overflow-top so the CSS fallback engages');
+    '_applyMaximizeOverflow must cover the top edge');
 });
 
-test('A: the maximized titlebar compensation is ADDITIVE (base + overflow) and covers the top edge', () => {
+test('A: the maximized titlebar compensation is additive (base + overflow) + top', () => {
   const css = read(SHELL_CSS);
   const body = ruleBody(css, 'body.window-maximized #rga-shell-titlebar');
   assert.ok(body, 'body.window-maximized #rga-shell-titlebar rule must exist');
   assert.ok(/padding-right\s*:\s*calc\(\s*12px\s*\+\s*var\(\s*--rga-max-overflow-right/.test(body),
-    'padding-right must ADD the overflow to the 12px base — calc(12px + var(--rga-max-overflow-right…)) — identical placement normal vs maximized');
-  assert.ok(/padding-left\s*:\s*calc\(\s*12px\s*\+\s*var\(\s*--rga-max-overflow-left/.test(body),
-    'padding-left must ADD the overflow to the 12px base');
+    'padding-right must be additive — calc(12px + var(--rga-max-overflow-right…))');
   assert.ok(/padding-top\s*:\s*var\(\s*--rga-max-overflow-top/.test(body),
-    'the maximized titlebar must compensate the top overflow (padding-top)');
-  assert.ok(/height\s*:\s*calc\(\s*28px\s*\+\s*var\(\s*--rga-max-overflow-top/.test(body),
-    'the maximized titlebar must grow its height by the top overflow so the visible band stays 28px');
+    'the maximized titlebar must compensate the top overflow');
 });
 
-test('A: the window-control trio has a breathing gap from the app-actions', () => {
+test('A: window controls are widened to the Windows-standard width (windowed-visible)', () => {
+  const css = read(SHELL_CSS);
+  const body = ruleBody(css, '.rga-shell-window-control');
+  assert.ok(body, '.rga-shell-window-control rule must exist');
+  assert.ok(/width\s*:\s*46px/.test(body),
+    'window controls must be 46px wide (38px read as cramped) — always-on, not maximize-dependent');
+});
+
+test('A: the window-control trio is set off from the app-actions by a clear gap', () => {
   const css = read(SHELL_CSS);
   const body = ruleBody(css, '#rga-shell-window-min');
-  assert.ok(body, '#rga-shell-window-min rule must exist');
-  assert.ok(/margin-inline-start\s*:/.test(body),
-    '#rga-shell-window-min must declare a margin-inline-start so the window controls are set off from the theme/avatar');
+  assert.ok(body && /margin-inline-start\s*:\s*16px/.test(body),
+    '#rga-shell-window-min must declare margin-inline-start: 16px (clear separation from theme/avatar)');
 });
 
 // ================================================================
-// B — RTL line-number gutter: zero-width, no canyon, no displacement
+// B — RTL gutter: one owner, absolute, no double reversal
 // ================================================================
 
-test('B: the RTL gutter rule keys off #editor[dir="rtl"] via :has() (not a dead ancestor selector)', () => {
+test('B: the RTL gutter rule keys off #editor[dir="rtl"] via :has() — no dead ancestor selector', () => {
   const css = read(EDITOR_PM_CSS);
   assert.ok(/\.rga-page-row:has\(\s*>\s*#editor\[dir="rtl"\]\s*\)/.test(css),
-    '.rga-page-row must use :has(> #editor[dir="rtl"]) — #editor is a descendant, so an ancestor [dir=rtl] selector never matches');
+    '.rga-page-row must use :has(> #editor[dir="rtl"]) — the single document-owned direction signal');
   assert.ok(!/\[dir="rtl"\]\s+#editor-container\.view-flow\s+\.rga-page-row\s*\{/.test(css),
-    'the dead ancestor selector [dir="rtl"] #editor-container.view-flow .rga-page-row must be removed');
+    'the dead ancestor [dir="rtl"] selector must not be present');
 });
 
-test('B: the RTL gutter is width:0 (zero manuscript-width cost) and direction:rtl, page-row reverses', () => {
+test('B: the RTL gutter is absolutely positioned — no flex-direction, no double reversal', () => {
   const css = read(EDITOR_PM_CSS);
-  const rowRule = css.match(/\.rga-page-row:has\([^)]*\)\s*\{([^}]*)\}/);
-  assert.ok(rowRule && /flex-direction\s*:\s*row-reverse/.test(rowRule[1]),
-    'RTL page-row must flex-direction: row-reverse (gutter on the right)');
-  const gutterRule = css.match(/:has\(\s*>\s*#editor\[dir="rtl"\]\s*\)\s+\.flow-line-gutter\s*\{([^}]*)\}/);
-  assert.ok(gutterRule, 'the RTL .flow-line-gutter rule must exist');
-  assert.ok(/width\s*:\s*0\b/.test(gutterRule[1]),
-    'the RTL gutter must be width:0 so it consumes no manuscript width — no canyon, no inward displacement');
-  assert.ok(/direction\s*:\s*rtl/.test(gutterRule[1]),
-    'the RTL gutter must be direction:rtl so .flow-line-num hugs the editor-facing edge');
+  const gutter = css.match(/:has\(\s*>\s*#editor\[dir="rtl"\]\s*\)\s+\.flow-line-gutter\s*\{([^}]*)\}/);
+  assert.ok(gutter, 'the RTL .flow-line-gutter rule must exist');
+  assert.ok(/position\s*:\s*absolute/.test(gutter[1]),
+    'the RTL gutter must be position:absolute (taken out of the flex row — zero manuscript-width cost)');
+  assert.ok(/left\s*:\s*calc\(/.test(gutter[1]),
+    'the RTL gutter must be placed by a physical `left` calc (direction-immune — no double reversal)');
+  assert.ok(/direction\s*:\s*rtl/.test(gutter[1]),
+    'the RTL gutter must be direction:rtl so the numbers hug the editor-facing edge');
+  assert.ok(!/flex-direction/.test(gutter[1]),
+    'the RTL gutter rule must NOT use flex-direction (that caused the row-reverse double reversal)');
+  // The page-row rule under :has() must only establish a positioning
+  // context — no flex-direction reversal.
+  const row = css.match(/\.rga-page-row:has\([^)]*\)\s*\{([^}]*)\}/);
+  assert.ok(row && /position\s*:\s*relative/.test(row[1]) && !/flex-direction/.test(row[1]),
+    'the RTL .rga-page-row rule must set position:relative and NOT flex-direction');
 });
 
-test('B: the pink scene guide rail (.rga-scene-v3) uses logical inline-start, not physical left', () => {
+test('B: Slice 4 — vertical scene rail retired; .rga-scene-v3 declares no inline-start border or rail padding', () => {
   const css = read(EDITOR_PM_CSS);
   const body = ruleBody(css, '.rga-scene-v3');
   assert.ok(body, '.rga-scene-v3 rule must exist');
-  assert.ok(/border-inline-start\s*:/.test(body) && /padding-inline-start\s*:/.test(body),
-    '.rga-scene-v3 must use border-inline-start / padding-inline-start (follows RTL/LTR direction)');
-  assert.ok(!/border-left\s*:/.test(body) && !/padding-left\s*:/.test(body),
-    '.rga-scene-v3 must NOT use physical border-left / padding-left (the RTL bug)');
+  assert.ok(!/border-inline-start\s*:/.test(body) && !/border-left\s*:/.test(body),
+    '.rga-scene-v3 must declare no vertical scene rail (Slice 4 retirement — no border-inline-start, no border-left)');
+  assert.ok(!/padding-inline-start\s*:/.test(body) && !/padding-left\s*:/.test(body),
+    '.rga-scene-v3 must declare no rail-specific inline-start padding (Slice 4 — manuscript text sits directly inside #editor padding)');
 });
 
 // ================================================================
-// C — page-transition breathing region (zero-layout-cost mask band)
+// C — page-transition mask band: PX height (font-size:0 safe)
 // ================================================================
 
-test('C: the Flow page-number pill masks with --editor-page-bg, not the --editor-bg desk', () => {
-  const css = read(EDITOR_PM_CSS);
-  const body = ruleBody(css, '#editor-container.view-flow .rga-page-marker .rga-page-marker-begin');
-  assert.ok(body, '.rga-page-marker-begin flow rule must exist');
-  assert.ok(/background\s*:\s*var\(\s*--editor-page-bg/.test(body),
-    'the page-number pill must mask with --editor-page-bg (the Flow surface colour)');
-});
-
-test('C: a zero-layout-cost page-colour mask band creates the transition breathing region', () => {
+test('C: Slice 4 — page-transition mask band RETIRED; no ::before rule on the Flow page marker', () => {
   const css = read(EDITOR_PM_CSS);
   const body = ruleBody(css, '#editor-container.view-flow .rga-page-marker::before');
-  assert.ok(body, '.rga-page-marker::before mask band must exist');
-  assert.ok(/position\s*:\s*absolute/.test(body),
-    'the mask band must be position:absolute (zero layout cost — the marker stays zero-height)');
-  assert.ok(/background\s*:\s*var\(\s*--editor-page-bg/.test(body),
-    'the mask band must be page-coloured so it clears a calm strip around the transition chrome');
+  assert.equal(body, null,
+    'the Flow .rga-page-marker::before mask rule must be removed — it was painting page-colour over manuscript text adjacent to each page break');
+});
+
+test('C: Visual Comfort CLOSED (Option A) — the "Page N" label sits as a quiet hint in the page inline-end chrome, NOT as a deliberate break marker', () => {
+  const css = read(EDITOR_PM_CSS);
+  const body = ruleBody(css, '#editor-container.view-flow .rga-page-marker .rga-page-marker-begin');
+  assert.ok(body, 'the Flow .rga-page-marker-begin rule must exist');
+  // Placement: still in the chrome zone, opposite the line gutter.
+  assert.ok(/inset-inline-end\s*:\s*-0\.5in/.test(body),
+    'the label must be tucked into the page inline-end chrome via inset-inline-end');
+  assert.ok(/inset-inline-start\s*:\s*auto/.test(body),
+    'the label must override the base rule\'s `left: 50%`');
+  assert.ok(/translateY\s*\(\s*-50%\s*\)/.test(body),
+    'the label must translateY(-50%) — vertically aligned on the boundary');
+  // Hint, not chrome: no capsule signals.
+  assert.ok(/background\s*:\s*transparent/.test(body),
+    'the label must be transparent — no background fill (capsule retired per Option A doctrine)');
+  assert.ok(!/border\s*:\s*\d+px/.test(body),
+    'the label must declare no border (capsule retired per Option A doctrine)');
+  assert.ok(!/border-radius\s*:/.test(body),
+    'the label must declare no border-radius (capsule retired per Option A doctrine)');
+  assert.ok(!/text-transform\s*:\s*uppercase/.test(body),
+    'the label must NOT be uppercase (uppercase reads as chrome assertion — Option A demands hint voice)');
+  // No editor-page-bg mask (the Slice 3 rule that hid text).
+  assert.ok(!/background\s*:\s*var\(\s*--editor-page-bg/.test(body),
+    'the label must NOT paint with --editor-page-bg (that was the Slice 3 mask colour that hid manuscript text)');
+});
+
+test('C: Visual Comfort CLOSED (Option A) — no horizontal hairline crosses the manuscript in Flow', () => {
+  const css = read(EDITOR_PM_CSS);
+  const body = ruleBody(css, '#editor-container.view-flow .rga-page-marker .rga-page-marker-rule');
+  assert.equal(body, null,
+    'the Flow .rga-page-marker-rule rule must be removed — a 1px line crossing the manuscript reads as a page seam, which contradicts Option A (Flow is a continuous drafting surface; page truth lives in Print Preview)');
 });
 
 // ================================================================
-// D — scene heading hierarchy separation
+// D — scene hierarchy: non-collapsing padding separation
 // ================================================================
 
-test('D: the scene block and scene heading carry the widened separation margins', () => {
+test('D: scene separation uses non-collapsing padding (px), not collapse-prone margins', () => {
   const css = read(EDITOR_PM_CSS);
   const scene = ruleBody(css, '.rga-scene-v3');
-  assert.ok(scene && /margin\s*:\s*2\.2em\s+0/.test(scene),
-    '.rga-scene-v3 must use margin: 2.2em 0 — more air separating each scene from the transition region above');
-  const heading = ruleBody(css, '.rga-scene-heading-v3');
-  assert.ok(heading && /margin\s*:\s*1\.6em\s+0\s+1\.3em\s+0/.test(heading),
-    '.rga-scene-heading-v3 must use margin: 1.6em 0 1.3em 0 — a wider gap below the slug separates it from the action body');
+  assert.ok(scene && /padding\s*:\s*18px\s+0/.test(scene),
+    '.rga-scene-v3 must use padding: 18px 0 — guaranteed, non-collapsing separation');
+  const content = ruleBody(css, '.rga-scene-v3-content');
+  assert.ok(content && /padding-top\s*:\s*\d+px/.test(content),
+    '.rga-scene-v3-content must use a px padding-top — non-collapsing gap below the scene heading');
 });

@@ -39,15 +39,25 @@ test('Bundle 2 §A: scene heading font-size bumped to ≥13pt (one type-notch ab
     'Scene heading font-size must be ≥ 13pt (Bundle 2 §A: one type-notch above 12pt body). Got: ' + sizeDecl[1]);
 });
 
-test('Bundle 2 §A: scene heading margin-top bumped to ≥1.5em (stronger scene-boundary breathing room)', () => {
+test('scene heading margin-top kept tight against the scene-num chrome (replaces Bundle 2 §A ≥1.5em rule, retired 2026-05-23)', () => {
+  // Bundle 2 §A originally required margin-top ≥ 1.5em to create
+  // "scene-boundary breathing room" between the scene-num chrome and
+  // the slug. In practice this combined with .rga-scene-v3-content
+  // padding-top to produce a ~27px gap that the user explicitly
+  // complained read as a chasm (especially in RTL). 2026-05-23
+  // tightening reduced margin-top to 0.4em AND retired the
+  // .rga-scene-v3-content padding-top so margins can collapse cleanly.
+  // New invariant: margin-top must be SMALL (< 1em) — the original
+  // intent (visible separation) is satisfied by the much-smaller
+  // collapsed gap.
   const css = read(EDITOR_CSS);
   const body = ruleBody(css, '.rga-scene-heading-v3');
   const marginDecl = body.match(/margin\s*:\s*([^;]+);/);
   assert.ok(marginDecl, 'scene heading must declare margin shorthand');
   const tokens = marginDecl[1].trim().split(/\s+/);
   const topEm = parseLengthEm(tokens[0]);
-  assert.ok(topEm != null && topEm >= 1.5,
-    'Scene heading margin-top must be ≥ 1.5em (Bundle 2 §A negative-space hierarchy). Got: ' + tokens[0]);
+  assert.ok(topEm != null && topEm < 1.0,
+    'Scene heading margin-top must be small (< 1em) — the historic 1.5em+ produced a visible chasm. Got: ' + tokens[0]);
 });
 
 test('Bundle 2 §A: scene heading margin-bottom bumped to ≥0.8em (slug-to-action gap)', () => {

@@ -54,26 +54,22 @@ test('RTL Slice B: Flow page-marker is a zero-geometry overlay (no in-flow gap)'
     'Flow .rga-page-marker must have no margin — the old visible-gap margin inflated the page');
 });
 
-test('Phase C correction: Flow .rga-page-marker-rule carries the solid hairline (single dividing line)', () => {
+test('Flow page marker: parent has no border-top hairline (Phase C invariant preserved under Option A close-out 2026-05-23)', () => {
   const css = readText(CSS_PATH);
   const body = ruleBody(css, '#editor-container.view-flow .rga-page-marker');
   assert.ok(body, 'Flow override for .rga-page-marker must exist');
-  // Phase C correction: the hairline moved from the parent border-top to the
-  // .rga-page-marker-rule span (which renders as a block-level border-top).
-  // This allows the label to sit centered below the full-width hairline.
-  // The parent .rga-page-marker must NOT have a border-top (it's delegated
-  // to .rga-page-marker-rule). Verify parent has border-top: 0 or no border-top.
+  // Phase C said: hairline NOT on parent. Option A close-out went
+  // further: hairline retired entirely — Flow is a continuous drafting
+  // surface, no page-seam, only a quiet page-number label hint.
+  // The parent border-top:0 invariant survives.
   assert.ok(!/border-top\s*:\s*\d+px\s+solid/.test(body),
-    'Phase C correction: parent .rga-page-marker border-top must NOT be a solid line ' +
-    '(hairline is now on .rga-page-marker-rule)');
-  // border-bottom is 0 (explicit) — not a gradient sandwich.
+    'parent .rga-page-marker border-top must NOT be a solid line');
   assert.ok(/border-bottom\s*:\s*0/.test(body),
-    'Phase C: Flow .rga-page-marker border-bottom must be 0 (single-line design, not a sandwich)');
-  // The .rga-page-marker-rule child must carry the solid border-top hairline.
+    'Flow .rga-page-marker border-bottom must be 0');
+  // .rga-page-marker-rule Flow override is GONE (Option A — no hairline).
   const ruleBody_ = ruleBody(css, '#editor-container.view-flow .rga-page-marker .rga-page-marker-rule');
-  assert.ok(ruleBody_, '.rga-page-marker-rule rule must exist in Flow override');
-  assert.ok(/border-top\s*:\s*\d+px\s+solid/.test(ruleBody_),
-    '.rga-page-marker-rule must carry the 1px solid border-top hairline');
+  assert.equal(ruleBody_, null,
+    'Option A close-out: Flow .rga-page-marker-rule rule retired — page boundary has no hairline');
 });
 
 test('Phase C: Flow .rga-page-marker uses transparent background (Phase C removes gradient)', () => {
@@ -86,16 +82,17 @@ test('Phase C: Flow .rga-page-marker uses transparent background (Phase C remove
     'Phase C: Flow .rga-page-marker must use a transparent background (gradient removed)');
 });
 
-test('RTL Slice B: Flow page-marker hairline still spans the full sheet width', () => {
+test('Option A close-out (2026-05-23): no hairline at all — Flow boundary is label-only', () => {
+  // Original test asserted that the hairline spans the full sheet
+  // width via -0.5in negative offsets. Option A retired the hairline
+  // entirely — Flow is a continuous drafting surface, no page seam.
+  // Marker geometry contract (height:0, zero PageMap budget) is
+  // unchanged; only the visible chrome is reduced to the quiet
+  // page-number label.
   const css = readText(CSS_PATH);
-  // RTL Slice B: the marker is now a zero-geometry overlay, so the
-  // full-width extension moved from the parent's negative margin onto the
-  // absolutely-positioned hairline (.rga-page-marker-rule left/right).
   const ruleBody_ = ruleBody(css, '#editor-container.view-flow .rga-page-marker .rga-page-marker-rule');
-  assert.ok(ruleBody_, '.rga-page-marker-rule rule must exist in Flow override');
-  assert.ok(/left\s*:\s*-0\.5in/.test(ruleBody_) && /right\s*:\s*-0\.5in/.test(ruleBody_),
-    'the hairline must extend -0.5in into the page padding on both sides ' +
-    'so the boundary spans the full sheet width');
+  assert.equal(ruleBody_, null,
+    'Option A: Flow .rga-page-marker-rule rule must not exist (no hairline crossing the manuscript)');
 });
 
 // ----------------------------------------------------------------
