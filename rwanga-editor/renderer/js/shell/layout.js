@@ -25,7 +25,13 @@
   Rga.Shell.Layout = Rga.Shell.Layout || {};
 
   const DEFAULTS = {
-    sidebar:     { visible: true,  width: 280, activePanel: 'sceneNavigator' },
+    // Responsive Shell: userOverride flag — set true when the user
+    // manually toggles this zone (Cmd-B, activity-rail click, etc.).
+    // Rga.Shell.Responsive reads it and skips auto-collapse for any
+    // zone the user has explicitly chosen. Session-scoped — not
+    // persisted across app restarts so a fresh boot returns to the
+    // window-driven defaults.
+    sidebar:     { visible: true,  width: 280, activePanel: 'sceneNavigator', userOverride: false },
     // Slice 4 §A: default changed from false → true to match the
     // long-standing UX where a fresh install boots with the bottom
     // panel visible. WorkspaceState restores user-explicit closes.
@@ -39,6 +45,11 @@
     studioPanel: { state: 'open',  visible: true,  height: 200, activeTab: null },
     // Slice 4 §A: inspector zone added so Resize has a Layout field to
     // commit `--inspector-width` to on drag end (was CSS-only before).
+    // Inspector is first-class: no userOverride field — the responsive
+    // engine always applies its mode decision on screen-size change so
+    // the editor never gets blocked by a sticky "user wants it open"
+    // preference. Full-close is forbidden via resize-clamp + recovery
+    // (see resize.js, studio-panel.js _ensureExpandedWidth).
     inspector:   { visible: true,  width: 280 },
     titleBar:    { visible: true },
     statusBar:   { visible: true },

@@ -158,23 +158,23 @@ test('§A: Rga.Inspector.open opens the inspector (NEW API — pre-Slice-9 was a
   const Rga = bootStudioStack();
   const ws = document.getElementById('workspace');
   // Start hidden so we can verify open clears the class.
-  ws.classList.add('inspector-hidden');
-  assert.equal(ws.classList.contains('inspector-hidden'), true);
+  ws.classList.add('inspector-collapsed');
+  assert.equal(ws.classList.contains('inspector-collapsed'), true);
 
   Rga.Inspector.open();
-  assert.equal(ws.classList.contains('inspector-hidden'), false,
-    'Rga.Inspector.open must remove inspector-hidden (engine consumer context-menu.js calls this)');
+  assert.equal(ws.classList.contains('inspector-collapsed'), false,
+    'Rga.Inspector.open must remove inspector-collapsed (engine consumer context-menu.js calls this)');
 });
 
 test('§A: Rga.Inspector.toggle still toggles', () => {
   const Rga = bootStudioStack();
   const ws = document.getElementById('workspace');
-  // Initial: visible (no .inspector-hidden).
-  assert.equal(ws.classList.contains('inspector-hidden'), false);
+  // Initial: visible (no .inspector-collapsed).
+  assert.equal(ws.classList.contains('inspector-collapsed'), false);
   Rga.Inspector.toggle();
-  assert.equal(ws.classList.contains('inspector-hidden'), true);
+  assert.equal(ws.classList.contains('inspector-collapsed'), true);
   Rga.Inspector.toggle();
-  assert.equal(ws.classList.contains('inspector-hidden'), false);
+  assert.equal(ws.classList.contains('inspector-collapsed'), false);
 });
 
 // ================================================================
@@ -213,8 +213,8 @@ test('§A: engine-plugin call shape preserved — Rga.Inspector.open() works (de
   assert.equal(typeof Rga.Inspector.open, 'function',
     'Rga.Inspector.open is a function (defensive guard satisfied)');
   const ws = document.getElementById('workspace');
-  ws.classList.add('inspector-hidden');
+  ws.classList.add('inspector-collapsed');
   Rga.Inspector.open();
-  assert.equal(ws.classList.contains('inspector-hidden'), false,
+  assert.equal(ws.classList.contains('inspector-collapsed'), false,
     'Rga.Inspector.open opens the inspector');
 });

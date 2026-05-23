@@ -125,12 +125,18 @@ test('Layout._reset() restores defaults', () => {
   Layout.set({ studioPanel: { visible: true, height: 400 } });
   Layout._reset();
   assert.deepEqual(Layout.get(), {
-    sidebar:     { visible: true,  width: 280, activePanel: 'sceneNavigator' },
+    // Responsive Shell: sidebar gained userOverride (session-scoped
+    // — true when the user has manually toggled the sidebar via
+    // Cmd-B or activity-rail click; engine respects it).
+    sidebar:     { visible: true,  width: 280, activePanel: 'sceneNavigator', userOverride: false },
     // Studio Shell Recovery §E: studioPanel gained a `state` field
     // ('open' | 'minimized' | 'closed') as the new SSOT for the
     // three-state model. `visible` is auto-derived (state !== 'closed')
     // for backward compat.
     studioPanel: { state: 'open', visible: true,  height: 200, activeTab: null },
+    // Inspector is first-class: no userOverride field — the
+    // responsive engine always applies its mode decision on screen-
+    // size change so the editor never gets blocked.
     inspector:   { visible: true,  width: 280 },
     titleBar:    { visible: true },
     statusBar:   { visible: true },

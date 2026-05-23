@@ -160,13 +160,16 @@
     });
 
     // Cmd-B → Sidebar visibility toggle.
+    // Responsive Shell: also flag userOverride so the responsive engine
+    // stops auto-toggling the sidebar based on window width once the
+    // user has expressed an explicit preference.
     KR.registerCommand({
       command: 'view.toggleSidebar',
       label: 'Toggle Sidebar',
       key: 'b', mods: { ctrl: true },
       handler: function() {
         const visible = Rga.Shell.Layout.get().sidebar.visible;
-        Rga.Shell.Layout.set({ sidebar: { visible: !visible } });
+        Rga.Shell.Layout.set({ sidebar: { visible: !visible, userOverride: true } });
       },
       source: 'Rga.Shell (sidebar visibility toggle)'
     });

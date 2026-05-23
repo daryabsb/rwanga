@@ -279,7 +279,9 @@ test('§D1.1: collapsed-state mirrors keep the toolbar synced with workspace via
   // Sidebar-collapsed mirror.
   assert.ok(/#app:has\(#workspace\.sidebar-collapsed\)\s+#rga-shell-toolbar/.test(css),
     'CSS must mirror #workspace.sidebar-collapsed onto #rga-shell-toolbar via :has()');
-  // Inspector-hidden mirror.
-  assert.ok(/#app:has\(#workspace\.inspector-hidden\)\s+#rga-shell-toolbar/.test(css),
-    'CSS must mirror #workspace.inspector-hidden onto #rga-shell-toolbar via :has()');
+  // Inspector-collapsed mirror (Responsive Shell Phase 2 renamed
+  // inspector-hidden → inspector-collapsed; the toolbar's grid column
+  // for the inspector becomes 32px instead of 0px to match the rail).
+  assert.ok(/#app:has\(#workspace\.inspector-collapsed\)\s+#rga-shell-toolbar/.test(css),
+    'CSS must mirror #workspace.inspector-collapsed onto #rga-shell-toolbar via :has()');
 });

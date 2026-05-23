@@ -321,15 +321,24 @@ test('§E: Rga.Shell.StudioPanel exposes minimize / restore / state on its publi
   });
 });
 
-test('§E: no new shell module file (StudioPanel is and remains the single owner)', () => {
+test('§E: no new shell module file (StudioPanel is and remains the single owner of bottom + inspector)', () => {
   // Phase 3 / Bundle 2 §B ownership guard — re-locked here so §E
-  // can't accidentally spawn a sibling.
+  // can't accidentally spawn a sibling. New modules with their own
+  // distinct ownership (e.g. Responsive Shell engine) are added to
+  // EXPECTED explicitly with a documented owner — the guard catches
+  // unauthorised additions, not authorised ones.
   const shellDir = path.join(REPO, 'renderer/js/shell');
   const files = fs.readdirSync(shellDir).filter(function(f) { return f.endsWith('.js'); });
   const EXPECTED = [
     'activity-rail.js', 'command-palette.js', 'icons-lucide.js',
     'index.js', 'keyboard-registry.js', 'layout.js', 'modal.js',
-    'resize.js', 'script-language.js', 'script-metrics.js',
+    'resize.js',
+    // 'responsive.js' — Responsive Shell engine. Distinct owner: window
+    // resize → mode classes on #app. Does NOT touch StudioPanel's
+    // ownership of the inspector-collapsed class (engine routes
+    // through StudioPanel's public API).
+    'responsive.js',
+    'script-language.js', 'script-metrics.js',
     'script-session.js', 'session-boundary.js', 'sidebar.js',
     'status-bar.js', 'studio-panel.js', 'title-bar.js', 'toast.js',
     'workspace-state.js'

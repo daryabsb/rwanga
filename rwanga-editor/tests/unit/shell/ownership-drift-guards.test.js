@@ -159,14 +159,17 @@ test('G2: visibility-state setters list per concern stays singleton', () => {
   //   - renderer/js/shell/layout.js
   //   - renderer/js/shell/index.js (Cmd+B handler + boot restore)
   //   - renderer/js/shell/activity-rail.js (rail click toggles visibility)
+  //   - renderer/js/shell/responsive.js (auto-collapse on narrow window;
+  //     engine-initiated path bypasses userOverride)
   const sidebarVisWriters = findWriters(
     /Rga\.Shell\.Layout\.set\s*\(\s*\{\s*sidebar\s*:\s*\{\s*visible/,
     ['renderer/js/shell/layout.js',
      'renderer/js/shell/index.js',
-     'renderer/js/shell/activity-rail.js']
+     'renderer/js/shell/activity-rail.js',
+     'renderer/js/shell/responsive.js']
   );
   assert.deepEqual(sidebarVisWriters, [],
-    'G2 — only Layout / shell/index.js / activity-rail.js may write Layout.sidebar.visible. ' +
+    'G2 — only Layout / shell/index.js / activity-rail.js / responsive.js may write Layout.sidebar.visible. ' +
     'Unexpected writers: ' + sidebarVisWriters.join(', '));
 
   // Layout.set({ sidebar: { activePanel: ... } }) — allowed:
@@ -193,7 +196,7 @@ test('G3: no shell-state classes (bottom-collapsed, sidebar-collapsed, view-*-ac
   const files = shellJsFiles();
   const checks = [
     { cls: 'bottom-collapsed',          owner: 'renderer/js/shell/studio-panel.js' /* Slice 9 §A: StudioPanel._syncVisibilityFromLayout */ },
-    { cls: 'sidebar-collapsed',         owner: null /* CSS-driven only; no JS owner needed */ },
+    { cls: 'sidebar-collapsed',         owner: 'renderer/js/shell/responsive.js' /* Responsive Shell: Layout.sidebar.visible → DOM class via subscriber. Previously CSS-driven only (Cmd-B was a no-op visually); Responsive Shell now makes Cmd-B + activity-rail click + auto-collapse all converge through one writer. */ },
     // Slice 6 §B: view-* body classes are owned EXCLUSIVELY by
     // Rga.ViewManager (renderer/js/framework/view-manager.js), which
     // sits in the framework/ off-limits scan path. No file in the
@@ -697,7 +700,9 @@ test('G11: every ownership-matrix module-path reference points at an existing fi
 //   • Inspector implementation cannot move back.
 //   • SceneNotesConnector cannot return (was deleted).
 //   • StudioPanel stays the sole owner of bottom-collapsed +
-//     inspector-hidden DOM classes.
+//     inspector-collapsed DOM classes (Responsive Shell Phase 2
+//     renamed inspector-hidden → inspector-collapsed; the panel is
+//     now first-class and never silently disappears).
 
 test('G12: Rga.BottomPanel in app-shell.js is a thin shim (delegates to StudioPanel; not an owner)', () => {
   const src = stripComments(readText(path.join(REPO, 'renderer/js/app-shell.js')));
@@ -728,9 +733,10 @@ test('G12: Rga.Inspector in app-shell.js is a thin shim (delegates to StudioPane
     'Rga.Inspector shim must delegate to Rga.Shell.StudioPanel — found only ' +
     delegates + ' delegate call(s). Both methods (toggle / open) must route through StudioPanel.');
   // Forbidden: directly touching the #workspace classList inside the
-  // shim — that's StudioPanel's job.
-  assert.equal(/classList\.(add|remove|toggle)\s*\(\s*['"]inspector-hidden['"]/.test(body), false,
-    'Rga.Inspector shim must NOT toggle the inspector-hidden class directly — delegate to StudioPanel.');
+  // shim — that's StudioPanel's job. (Responsive Shell Phase 2: the
+  // class was renamed inspector-hidden → inspector-collapsed.)
+  assert.equal(/classList\.(add|remove|toggle)\s*\(\s*['"]inspector-collapsed['"]/.test(body), false,
+    'Rga.Inspector shim must NOT toggle the inspector-collapsed class directly — delegate to StudioPanel.');
 });
 
 test('G12: Rga.SceneNotesConnector cannot return to app-shell.js (deleted Slice 9 §A)', () => {
@@ -742,20 +748,21 @@ test('G12: Rga.SceneNotesConnector cannot return to app-shell.js (deleted Slice 
     'behavior lives in Rga.Shell.StudioPanel now. Do not re-introduce.');
 });
 
-test('G12: Rga.Shell.StudioPanel is the SOLE writer of inspector-hidden class', () => {
-  // Walk shell-js. Only studio-panel.js (and inspector-hidden CSS
+test('G12: Rga.Shell.StudioPanel is the SOLE writer of inspector-collapsed class', () => {
+  // Walk shell-js. Only studio-panel.js (and inspector-collapsed CSS
   // rules, which don't appear in JS) may toggle / add / remove it.
+  // Responsive Shell Phase 2 renamed inspector-hidden → inspector-collapsed.
   const files = shellJsFiles();
   const offenders = [];
   files.forEach(function(file) {
     const src = stripComments(readText(file));
-    if (/classList\.(?:add|remove|toggle)\s*\(\s*['"]inspector-hidden['"]/.test(src)) {
+    if (/classList\.(?:add|remove|toggle)\s*\(\s*['"]inspector-collapsed['"]/.test(src)) {
       const rel = relativeFromRepo(file);
       if (rel !== 'renderer/js/shell/studio-panel.js') offenders.push(rel);
     }
   });
   assert.deepEqual(offenders, [],
-    'G12 — only Rga.Shell.StudioPanel may toggle the inspector-hidden class. ' +
+    'G12 — only Rga.Shell.StudioPanel may toggle the inspector-collapsed class. ' +
     'Unexpected writers: ' + offenders.join(', ') + '. Route through ' +
     'StudioPanel.toggleInspector / StudioPanel.openInspector.');
 });

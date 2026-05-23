@@ -22,6 +22,14 @@
 (function() {
   const Rga = window.Rga = window.Rga || {};
 
+  // Responsive Shell first-class inspector contract: drag clamps at
+  // MIN_INSPECTOR_EXPANDED — never width:0, never silent close. To
+  // collapse, use the explicit toggle (menu / reopen button / engine).
+  const MIN_INSPECTOR_EXPANDED       = 240;
+  const MIN_HORIZONTAL               = 180;
+  const MIN_VERTICAL                 = 100;
+  const HORIZONTAL_COLLAPSE_THRESHOLD = 60;
+
   Rga.Resize = {
     _SIZE_MAP: [
       { target: 'sidebar',      cssVar: '--sidebar-width',       zone: 'sidebar',     field: 'width'  },
@@ -71,6 +79,7 @@
       var map = Rga.Resize._findMapByTarget(target);
       var prop = map ? map.cssVar : '--sidebar-width';
       var isVertical = target === 'bottom-panel';
+      var isInspector = target === 'inspector';
       var startPos = isVertical ? e.clientY : e.clientX;
 
       var startSize = parseInt(getComputedStyle(document.documentElement).getPropertyValue(prop)) || 0;
@@ -80,20 +89,27 @@
         var delta;
         if (isVertical) {
           delta = startPos - e2.clientY;
-        } else if (target === 'inspector') {
+        } else if (isInspector) {
           delta = startPos - e2.clientX;
         } else {
           delta = e2.clientX - startPos;
         }
 
         var newSize = startSize + delta;
-        var minSize = isVertical ? 100 : 180;
-        var collapseThreshold = 60;
 
-        if (newSize < collapseThreshold) {
+        // Inspector is FIRST-CLASS: drag is RESIZE-ONLY. Never close, never
+        // hide, never width:0. Drag clamps at MIN_INSPECTOR_EXPANDED so a
+        // hard left-drag cannot accidentally collapse the panel — that's
+        // what locked the user out before. To COLLAPSE the inspector,
+        // route through the explicit toggle (View → Toggle Inspector,
+        // Rga.Inspector.toggle, the reopen button, or the responsive
+        // engine in compact/narrow modes). No drag-to-collapse.
+        if (isInspector) {
+          newSize = Math.max(newSize, MIN_INSPECTOR_EXPANDED);
+        } else if (newSize < HORIZONTAL_COLLAPSE_THRESHOLD) {
           newSize = 0;
         } else {
-          newSize = Math.max(newSize, minSize);
+          newSize = Math.max(newSize, isVertical ? MIN_VERTICAL : MIN_HORIZONTAL);
         }
 
         lastSize = newSize;

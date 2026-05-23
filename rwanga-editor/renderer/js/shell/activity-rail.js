@@ -139,14 +139,17 @@
     if (!Rga.Shell.Sidebar || !Rga.Shell.Layout) return;
     const isCurrent = Rga.Shell.Sidebar.current() === id;
     const sidebarVisible = Rga.Shell.Layout.get().sidebar.visible;
+    // Responsive Shell: every rail click is an explicit user choice —
+    // flag userOverride so the responsive engine stops auto-toggling
+    // the sidebar based on window width.
     if (isCurrent && sidebarVisible) {
       // Toggle off — deactivate AND hide the sidebar.
       Rga.Shell.Sidebar.deactivate();
-      Rga.Shell.Layout.set({ sidebar: { visible: false } });
+      Rga.Shell.Layout.set({ sidebar: { visible: false, userOverride: true } });
     } else {
       // Activate and ensure the sidebar is visible.
       Rga.Shell.Sidebar.activate(id);
-      Rga.Shell.Layout.set({ sidebar: { visible: true } });
+      Rga.Shell.Layout.set({ sidebar: { visible: true, userOverride: true } });
     }
   }
 

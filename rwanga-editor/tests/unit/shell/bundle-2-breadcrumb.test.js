@@ -103,7 +103,11 @@ test('Bundle 2 §B: no new shell module file (boot-script wiring only — preser
   const EXPECTED = [
     'activity-rail.js', 'command-palette.js', 'icons-lucide.js',
     'index.js', 'keyboard-registry.js', 'layout.js', 'modal.js',
-    'resize.js', 'script-language.js', 'script-metrics.js',
+    'resize.js',
+    // Responsive Shell engine (added 2026-05-23 — distinct owner of
+    // window-resize → mode classes; not Bundle 2 ownership creep).
+    'responsive.js',
+    'script-language.js', 'script-metrics.js',
     'script-session.js', 'session-boundary.js', 'sidebar.js',
     'status-bar.js', 'studio-panel.js', 'title-bar.js', 'toast.js',
     'workspace-state.js'

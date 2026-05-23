@@ -25,6 +25,7 @@
 //   Rga.BottomPanel.open()                             →  StudioPanel.show
 //   Rga.BottomPanel.init()                             →  StudioPanel.init
 //   Rga.Inspector.toggle()                             →  StudioPanel.toggleInspector
+//   #inspector-reopen click (Responsive Shell Phase 2) →  StudioPanel.openInspector
 //   Rga.Inspector.open()                               →  StudioPanel.openInspector  (new — was undocumented no-op pre-Slice-9)
 'use strict';
 
@@ -50,6 +51,7 @@
     _wireCloseButton();
     _wireKeyboardShortcut();
     _wireSceneNotesConnector();
+    _wireInspectorToggle();
     _initLayoutSync();
   }
 
@@ -281,9 +283,30 @@
   // Inspector routing (right-rail panel)
   // ----------------------------------------------------------------
 
-  function toggleInspector() {
+  // Responsive Shell: the controlling class is `inspector-collapsed`.
+  // Inspector is FIRST-CLASS — collapsed = 32px rail with a reopen
+  // button, never `display: none`, never width:0. StudioPanel is the
+  // SOLE writer of the class (G12 guard).
+  //
+  // The opts.userInitiated parameter is retained for API symmetry but
+  // no longer drives an override flag: the responsive engine always
+  // applies its mode-based decision on screen-size change. Rationale:
+  // in compact / narrow modes the editor needs the space, and a stuck
+  // "user wants it open" preference would block the manuscript. The
+  // user's manual toggles still hold WITHIN a mode (the engine only
+  // fires on resize → mode change). Full-close remains forbidden:
+  // resize.js clamps inspector drag at 240, and _ensureExpandedWidth
+  // restores any stuck width:0.
+  function toggleInspector(/* opts */) {
     const ws = Rga.$ ? Rga.$('#workspace') : document.getElementById('workspace');
-    if (ws) ws.classList.toggle('inspector-hidden');
+    if (!ws) return;
+    // Ensure width is sane before EITHER direction of toggle. The helper
+    // is idempotent — only writes when width < 240 (the historic
+    // stuck-state recovery), no-op otherwise. Called unconditionally so
+    // shell-side code never has to read classList as a source of truth
+    // (source-audit rule b).
+    _ensureExpandedWidth();
+    ws.classList.toggle('inspector-collapsed');
   }
 
   // Slice 9 §A: openInspector implements the API surface engine plugin
@@ -292,9 +315,38 @@
   // `if (Rga.Inspector && Rga.Inspector.open) Rga.Inspector.open();` —
   // so the right-click-to-inspect path was a silent no-op. Adding the
   // method restores the documented behavior; it's not a new feature.
-  function openInspector() {
+  function openInspector(/* opts */) {
     const ws = Rga.$ ? Rga.$('#workspace') : document.getElementById('workspace');
-    if (ws) ws.classList.remove('inspector-hidden');
+    if (!ws) return;
+    _ensureExpandedWidth();
+    ws.classList.remove('inspector-collapsed');
+  }
+
+  // Responsive Shell first-class recovery: if the persisted inspector
+  // width is below the expanded minimum (240px) — typically because
+  // an earlier session drag-closed it to 0 before the first-class drag
+  // clamp was added in resize.js — reset to the default 280 before
+  // un-collapsing so the panel actually shows. Single owner: Layout.
+  function _ensureExpandedWidth() {
+    if (!Rga.Shell || !Rga.Shell.Layout) return;
+    const cur = Rga.Shell.Layout.get();
+    if (!cur || !cur.inspector) return;
+    const w = cur.inspector.width;
+    if (typeof w !== 'number' || w < 240) {
+      Rga.Shell.Layout.set({ inspector: { width: 280 } });
+    }
+  }
+
+  // Responsive Shell — wire the #inspector-toggle button.
+  // Click routes through toggleInspector so StudioPanel stays the SOLE
+  // writer of inspector-collapsed (G12 invariant unchanged). Button is
+  // visible in BOTH states (expanded → click collapses; collapsed →
+  // click expands), so the user has an explicit collapse path without
+  // needing the menu.
+  function _wireInspectorToggle() {
+    const btn = document.getElementById('inspector-toggle');
+    if (!btn) return;
+    btn.addEventListener('click', function() { toggleInspector(); });
   }
 
   // ----------------------------------------------------------------

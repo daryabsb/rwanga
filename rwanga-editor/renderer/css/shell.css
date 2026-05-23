@@ -61,17 +61,113 @@
   display: none;
 }
 
-#workspace.inspector-hidden {
+/* Responsive Shell Phase 2 — inspector-collapsed (was: inspector-hidden).
+   The inspector is FIRST-CLASS: it must never silently disappear. The
+   collapsed state replaces the previous `display: none` "hidden" behaviour
+   with a 32px rail that keeps the panel DOM mounted (scroll position +
+   any open inspector content preserved) and surfaces the reopen
+   affordance (#inspector-reopen). The resize handle is hidden because
+   you cannot drag a 32px rail; clicking the reopen button restores the
+   previous user width. */
+#workspace.inspector-collapsed {
   grid-template-columns:
     var(--activity-bar-width)
     var(--sidebar-width)
     4px
     1fr
-    0px 0px;
+    0px
+    32px;
 }
-#workspace.inspector-hidden #inspector-panel,
-#workspace.inspector-hidden .resize-handle[data-resize="inspector"] {
+/* Responsive Shell — combined narrow state. Both sidebar-collapsed and
+   inspector-collapsed are present in mode-narrow. Without this combined
+   rule, source-order CSS picks one of the two single-class templates
+   and the other zone stays at its full reserved width — leaving the
+   editor with only a sliver. This rule overrides both with the
+   genuinely-collapsed layout. */
+#workspace.sidebar-collapsed.inspector-collapsed {
+  grid-template-columns:
+    var(--activity-bar-width)
+    0px
+    0px
+    1fr
+    0px
+    32px;
+}
+
+/* Responsive Shell — explicit grid-column placement for every workspace
+   child. CSS Grid auto-placement SKIPS display:none items, so when any
+   collapse class hides a track's child (sidebar, sidebar handle, or
+   inspector handle), the remaining children slide LEFT into the wrong
+   tracks. Found via Playwright diagnostic 2026-05-23: with inspector-
+   collapsed alone, the inspector panel was being placed in track 5
+   (0px) instead of track 6 (32px) because the inspector resize handle
+   above it was display:none. Explicit grid-column pins each child to
+   its intended track regardless of sibling visibility — the layout
+   stays correct under any combination of collapse classes. */
+#workspace > #activity-bar                         { grid-column: 1; }
+#workspace > #sidebar                              { grid-column: 2; }
+#workspace > .resize-handle[data-resize="sidebar"] { grid-column: 3; }
+#workspace > #center-column                        { grid-column: 4; }
+#workspace > .resize-handle[data-resize="inspector"] { grid-column: 5; }
+#workspace > #inspector-panel                      { grid-column: 6; }
+#workspace.inspector-collapsed .resize-handle[data-resize="inspector"] {
   display: none;
+}
+#workspace.inspector-collapsed #inspector-panel .inspector-header,
+#workspace.inspector-collapsed #inspector-panel .inspector-body {
+  display: none;
+}
+#workspace.inspector-collapsed #inspector-panel {
+  padding: 0;
+}
+/* #inspector-panel anchors the absolutely-positioned toggle button. */
+#inspector-panel {
+  position: relative;
+}
+/* Inspector toggle — visible in BOTH states so the user can
+   explicitly collapse OR expand without going through the menu.
+   Anchored at the panel's top-inline-end corner: in expanded state
+   it sits in the header's right corner (LTR) / left corner (RTL),
+   out of the way of header text. In collapsed state the panel is
+   32px wide so the button (24px) fills the rail naturally.
+   The chevron is provided via ::before and flips with the
+   collapsed state — clicking always toggles. */
+.inspector-toggle {
+  position: absolute;
+  top: 6px;
+  inset-inline-end: 4px;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 1px solid var(--border-secondary, rgba(128, 128, 128, 0.35));
+  border-radius: 4px;
+  background: var(--bg-tertiary, #2d2d30);
+  color: var(--text-primary, #d4d4d4);
+  font-family: var(--font-ui, system-ui, sans-serif);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  transition: background var(--transition-fast, 0.1s ease),
+              color var(--transition-fast, 0.1s ease);
+}
+.inspector-toggle::before {
+  content: '\203A';  /* › — expanded → click to collapse outward */
+}
+#workspace.inspector-collapsed .inspector-toggle::before {
+  content: '\2039';  /* ‹ — collapsed → click to expand inward */
+}
+.inspector-toggle:hover {
+  background: var(--bg-hover, rgba(255, 255, 255, 0.06));
+  color: var(--text-primary, #d4d4d4);
+}
+.inspector-toggle:focus-visible {
+  outline: 1px solid var(--accent-primary, #569cd6);
+  outline-offset: -2px;
 }
 
 /* ============================================================
@@ -306,15 +402,16 @@
   overflow-y: auto;
   overflow-x: auto;
   background: var(--editor-bg);
-  /* V1.1 fix 5: padding-right reserves visual space for the scene
-     toolbox, which now lives in #editor-area (one level up, outside
-     this scrolling container) and floats over this padded right
-     edge. RTL mirrors to the left. */
-  padding: 32px 120px 32px 32px;
+  /* Responsive Shell — Phase 1 (2026-05-23): the lateral 120px padding
+     was reserved for the Scene Toolbox (V1.1 fix 5). That surface was
+     retired (§A Shell Final Polish — see index.html note + the markup
+     deletion). The reserved padding remained — burning up to 120px of
+     editor width at every viewport. Uniform 32px restores that width
+     to the manuscript column; symmetric in LTR and RTL (the asymmetric
+     RTL override is gone — there is no longer anything asymmetric to
+     mirror). */
+  padding: 32px;
   position: relative;
-}
-[dir="rtl"] #editor-container {
-  padding: 32px 32px 32px 120px;
 }
 
 /* ============================================================
@@ -628,7 +725,10 @@
    region. Icons are injected at boot from Rga.Icons by title-bar.js. */
 .rga-shell-window-control {
   -webkit-app-region: no-drag;
-  width: 38px;
+  /* Visual Comfort Slice 3 — Fix A. 46px is the Windows-standard
+     window-control width; 38px read as cramped. Always-on (windowed
+     and maximized) — not dependent on maximize-overflow compensation. */
+  width: 46px;
   height: 28px;
   display: inline-flex;
   align-items: center;
@@ -656,13 +756,13 @@
   color: #ffffff;
 }
 
-/* Visual Comfort Slice 2 — Fix A. Breathing separation: the min/max/
+/* Visual Comfort Slice 3 — Fix A. Breathing separation: the min/max/
    close trio stays tight together (Windows convention) but is set off
-   from the app-actions (theme toggle + avatar) by a clear gap, so the
-   window controls read as a deliberate group rather than crammed into
-   the corner. */
+   from the app-actions (theme toggle + avatar) by a clear 16px gap, so
+   the window controls read as a deliberate group, not crammed against
+   the avatar. Always-on — visible in the windowed state. */
 #rga-shell-window-min {
-  margin-inline-start: 10px;
+  margin-inline-start: 16px;
 }
 
 /* Regression Fix §A + Final Hardening — Win11 + frameless (frame:
@@ -827,7 +927,7 @@ body.window-maximized #rga-shell-titlebar {
    manuscript instead of to the app frame.
    The toolbar uses CSS grid with the SAME column template as
    #workspace; :has() mirrors the workspace's sidebar-collapsed /
-   inspector-hidden state classes so the toolbar's column geometry
+   inspector-collapsed state classes so the toolbar's column geometry
    stays synchronised when those panels collapse. */
 #rga-shell-toolbar.rga-shell-toolbar {
   display: grid;
@@ -855,13 +955,25 @@ body.window-maximized #rga-shell-titlebar {
     4px
     var(--inspector-width, 0px);
 }
-#app:has(#workspace.inspector-hidden) #rga-shell-toolbar.rga-shell-toolbar {
+#app:has(#workspace.inspector-collapsed) #rga-shell-toolbar.rga-shell-toolbar {
   grid-template-columns:
     var(--activity-bar-width)
     var(--sidebar-width)
     4px
     1fr
-    0px 0px;
+    0px
+    32px;
+}
+/* Combined narrow mirror — matches the workspace combined rule above so
+   the toolbar's inner band stays anchored to the editor column. */
+#app:has(#workspace.sidebar-collapsed.inspector-collapsed) #rga-shell-toolbar.rga-shell-toolbar {
+  grid-template-columns:
+    var(--activity-bar-width)
+    0px
+    0px
+    1fr
+    0px
+    32px;
 }
 
 .rga-shell-toolbar-inner {
@@ -1705,4 +1817,50 @@ body.view-print-preview-active #rga-shell-toolbar { display: none; }
   background: var(--bg-hover, rgba(255, 255, 255, 0.04));
   color: var(--text-primary, #cccccc);
   outline: none;
+}
+
+/* ============================================================
+   RESPONSIVE SHELL — mode-driven compaction
+   Owner: Rga.Shell.Responsive (engine declares the mode by adding
+   one of .mode-wide / .mode-compact / .mode-narrow to #app). Every
+   rule below opts INTO compaction by keying off those classes.
+   No JS reaches into individual elements; the engine never knows
+   the toolbar or the menubar exist.
+   ============================================================ */
+
+/* ---- Compact mode — laptop / smaller desktop ----
+   Inspector auto-collapses (handled via StudioPanel routing — no
+   CSS needed; the .inspector-collapsed class on #workspace does its
+   own work).
+   Toolbar: Writing and Mode groups collapse (Scene + Text remain).
+   Menubar: trailing items (Tags, Tools, Export, Help) hide. */
+#app.mode-compact .rga-shell-toolbar-group[data-group="writing"],
+#app.mode-compact .rga-shell-toolbar-group[data-group="mode"] {
+  display: none;
+}
+#app.mode-compact .rga-shell-menubar-item[data-menu="tags"],
+#app.mode-compact .rga-shell-menubar-item[data-menu="tools"],
+#app.mode-compact .rga-shell-menubar-item[data-menu="export"],
+#app.mode-compact .rga-shell-menubar-item[data-menu="help"] {
+  display: none;
+}
+
+/* ---- Narrow mode — small laptops, sidebar pulled out, half-screen
+   snap layouts, future tablet web build.
+   Sidebar auto-collapses (via Layout.sidebar.visible→false handled
+   by the engine's subscriber; .sidebar-collapsed CSS already exists).
+   Toolbar: only Text-tools group remains.
+   Menubar: only File / Edit / View remain. */
+#app.mode-narrow .rga-shell-toolbar-group:not([data-group="text"]) {
+  display: none;
+}
+#app.mode-narrow .rga-shell-menubar-item:not([data-menu="file"]):not([data-menu="edit"]):not([data-menu="view"]) {
+  display: none;
+}
+
+/* Group separators are visual sugar — in compact + narrow they're
+   always hidden so the toolbar reads as a single calm row. */
+#app.mode-compact .rga-shell-toolbar-group-sep,
+#app.mode-narrow  .rga-shell-toolbar-group-sep {
+  display: none;
 }

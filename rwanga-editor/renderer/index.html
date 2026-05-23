@@ -360,8 +360,23 @@
     <!-- INSPECTOR PANEL — Visual Stabilization V1 (T5): calmer
          empty state. Header is title-case. Body uses .inspector-empty
          classes (see components.css) so future content can replace
-         the empty block without touching the wrapper. -->
+         the empty block without touching the wrapper.
+
+         Responsive Shell: the inspector is first-class — it collapses
+         to a 32px rail rather than disappearing silently. The toggle
+         (#inspector-toggle) is visible in BOTH states so the user can
+         explicitly collapse when expanded AND expand when collapsed.
+         Wired in studio-panel.js init(); routes through
+         StudioPanel.toggleInspector(), the SOLE owner of the
+         inspector-collapsed class. The chevron direction in the
+         button is provided by CSS ::before (flips with the collapsed
+         state so the user can read the action). -->
     <aside id="inspector-panel" aria-label="Inspector">
+      <button id="inspector-toggle"
+              class="inspector-toggle"
+              type="button"
+              title="Toggle Inspector"
+              aria-label="Toggle inspector"></button>
       <div class="inspector-header">Inspector</div>
       <div class="inspector-body" aria-live="polite">
         <div class="inspector-empty">
@@ -561,6 +576,11 @@
      paint matches the persisted state. WorkspaceState.init() is
      called explicitly in the boot script. -->
 <script src="js/shell/workspace-state.js"></script>
+<!-- Responsive Shell — single owner of automatic shell mode transitions.
+     Loads AFTER Layout + WorkspaceState (subscribes to Layout, reads
+     hydrated state) and BEFORE any consumer that would race the
+     first-paint mode decision. init() is called in the boot script. -->
+<script src="js/shell/responsive.js"></script>
 <script src="js/shell/sidebar.js"></script>
 <!-- Keyboard Registry — Runtime Ownership Stab. Slice 2 SSOT.
      Must load before every consumer (Rga.Keyboard shim, shell/index.js,
@@ -1259,6 +1279,13 @@
       Rga.WorkspaceState.init();
     }
     Rga.Resize.init();
+    // Responsive Shell: window-resize listener + first-paint mode
+    // decision. Must run AFTER Resize.init so the CSS vars Resize
+    // hydrates from Layout are in place when Responsive reads them
+    // to derive its mode thresholds.
+    if (Rga.Shell && Rga.Shell.Responsive && typeof Rga.Shell.Responsive.init === 'function') {
+      Rga.Shell.Responsive.init();
+    }
     // Slice 2 entry #2 migration: Rga.Sidebar.init() no longer called.
     // Rga.Shell.Sidebar (Slice 1) owns the sidebar; Rga.Shell.Layout owns
     // visibility. The legacy module remains as a minimal no-op shim only
