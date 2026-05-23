@@ -1,22 +1,11 @@
 {
   "rga_version": "3.0",
   "document_type": "screenplay",
-  "_conversion_notes": {
-    "source": "SCREENPLAY-FINAL-V4.docx (Mysterious Guest)",
-    "converted": "2026-05-20",
-    "purpose": "Manuscript inspection fixture — RTL Kurdish screenplay; visual truth source.",
-    "known_limitations": [
-      "Continuation scene markers (بەردەوامی دیمەنی …) became separate Rwanga scenes, so the scene count and badge numbers differ from the author's numbering; each scene's heading still carries the author's exact label text.",
-      "Inline marks (bold/italic runs inside paragraphs) were not preserved — plain text only.",
-      "Scene-heading slug fields were not parsed into structured setting/location/time; the slug line is kept verbatim as the first action block.",
-      "RTL display depends partly on the app — switch the status-bar script language to Kurdish (KU) for full RTL block alignment."
-    ]
-  },
   "metadata": {
     "title": "میوانی نادیار",
     "author": "سەروەر محێدین",
     "created": "2026-05-20T00:00:00.000Z",
-    "modified": "2026-05-20T00:00:00.000Z",
+    "modified": "2026-05-22T09:15:16.059Z",
     "version": 1,
     "revision_notes": "",
     "screenplayProfile": {
@@ -63,29 +52,6 @@
     },
     "sceneHeadingStyle": "twoLine",
     "units": "in"
-  },
-  "tag_registry": {
-    "characters": [],
-    "props": [],
-    "wardrobe": [],
-    "locations": [],
-    "sfx": [],
-    "vfx": [],
-    "vehicles": [],
-    "animals": [],
-    "custom": []
-  },
-  "flag_log": [],
-  "export_settings": {
-    "branding": "rwanga",
-    "letterhead_url": null,
-    "include_scene_numbers": true,
-    "include_revision_marks": false
-  },
-  "runtime": {
-    "last_cursor": null,
-    "active_scene_id": "scene-001",
-    "ui_state": {}
   },
   "body": {
     "type": "doc",
@@ -184,23 +150,14 @@
               {
                 "type": "sceneHeading",
                 "attrs": {
-                  "setting": "",
-                  "time": "",
+                  "setting": "ناوەوە",
+                  "time": "رۆژ",
                   "headingStyle": null
                 },
                 "content": [
                   {
                     "type": "text",
-                    "text": "دیمەنی یەکەم"
-                  }
-                ]
-              },
-              {
-                "type": "action",
-                "content": [
-                  {
-                    "type": "text",
-                    "text": "رۆژ . ناوەوە . ژووری نالی"
+                    "text": "ژووری نالی"
                   }
                 ]
               },
@@ -248,6 +205,9 @@
                     "text": "دیمەنی باخێک لە دوورەوە. کامێرا وردە وردە بەرەو ناو ماڵەکە دەچێت."
                   }
                 ]
+              },
+              {
+                "type": "action"
               },
               {
                 "type": "action",
@@ -513,23 +473,14 @@
               {
                 "type": "sceneHeading",
                 "attrs": {
-                  "setting": "",
-                  "time": "",
+                  "setting": "دەرەوە",
+                  "time": "رۆژ",
                   "headingStyle": null
                 },
                 "content": [
                   {
                     "type": "text",
-                    "text": "دیمەنی دووەم"
-                  }
-                ]
-              },
-              {
-                "type": "action",
-                "content": [
-                  {
-                    "type": "text",
-                    "text": "رۆژ . زەردەپەڕ . دەرەوە . باخ"
+                    "text": "زەردەپەڕ . باخ"
                   }
                 ]
               },
@@ -770,23 +721,14 @@
               {
                 "type": "sceneHeading",
                 "attrs": {
-                  "setting": "",
-                  "time": "",
+                  "setting": "ناوەوە",
+                  "time": "ئێوارە",
                   "headingStyle": null
                 },
                 "content": [
                   {
                     "type": "text",
-                    "text": "دیمەنی سێیەم"
-                  }
-                ]
-              },
-              {
-                "type": "action",
-                "content": [
-                  {
-                    "type": "text",
-                    "text": "ئێوارە . ناوەوە . باخەکە"
+                    "text": "باخەکە"
                   }
                 ]
               },
@@ -1312,23 +1254,14 @@
               {
                 "type": "sceneHeading",
                 "attrs": {
-                  "setting": "",
-                  "time": "",
+                  "setting": "دەرەوە",
+                  "time": "رۆژ",
                   "headingStyle": null
                 },
                 "content": [
                   {
                     "type": "text",
-                    "text": "دیمەنی چوارەم"
-                  }
-                ]
-              },
-              {
-                "type": "action",
-                "content": [
-                  {
-                    "type": "text",
-                    "text": "رۆژ . دەرەوە . شەقام . ناو سەیارەی نالی"
+                    "text": "شەقام . ناو سەیارەی نالی"
                   }
                 ]
               },
@@ -1380,23 +1313,14 @@
               {
                 "type": "sceneHeading",
                 "attrs": {
-                  "setting": "",
-                  "time": "",
+                  "setting": "دەرەوە",
+                  "time": "رۆژ",
                   "headingStyle": null
                 },
                 "content": [
                   {
                     "type": "text",
-                    "text": "دیمەنی پێنجەم"
-                  }
-                ]
-              },
-              {
-                "type": "action",
-                "content": [
-                  {
-                    "type": "text",
-                    "text": "رۆژ . دەرەوە . شەقام . خاڵی پشکنین"
+                    "text": "شەقام . خاڵی پشکنین"
                   }
                 ]
               },
@@ -1475,23 +1399,14 @@
               {
                 "type": "sceneHeading",
                 "attrs": {
-                  "setting": "",
+                  "setting": "دەرەوە",
                   "time": "",
                   "headingStyle": null
                 },
                 "content": [
                   {
                     "type": "text",
-                    "text": "دیمەنی شەشەم"
-                  }
-                ]
-              },
-              {
-                "type": "action",
-                "content": [
-                  {
-                    "type": "text",
-                    "text": "ڕۆژ . دەرەوە . شەقامی شار، سلێمانی"
+                    "text": "ڕۆژ . شەقامی شار، سلێمانی"
                   }
                 ]
               },
@@ -1543,23 +1458,14 @@
               {
                 "type": "sceneHeading",
                 "attrs": {
-                  "setting": "",
-                  "time": "",
+                  "setting": "دەرەوە",
+                  "time": "رۆژ",
                   "headingStyle": null
                 },
                 "content": [
                   {
                     "type": "text",
-                    "text": "دیمەنی حەوتەم"
-                  }
-                ]
-              },
-              {
-                "type": "action",
-                "content": [
-                  {
-                    "type": "text",
-                    "text": "رۆژ . دەرەوە . ناو سەیارەکەی نالی . ناوشار"
+                    "text": "ناو سەیارەکەی نالی . ناوشار"
                   }
                 ]
               },
@@ -1944,23 +1850,14 @@
               {
                 "type": "sceneHeading",
                 "attrs": {
-                  "setting": "",
-                  "time": "",
+                  "setting": "دەرەوە",
+                  "time": "رۆژ",
                   "headingStyle": null
                 },
                 "content": [
                   {
                     "type": "text",
-                    "text": "دیمەنی هەشتەم"
-                  }
-                ]
-              },
-              {
-                "type": "action",
-                "content": [
-                  {
-                    "type": "text",
-                    "text": "رۆژ . دەرەوە . سەرجادە . دەرەوەی شار"
+                    "text": "سەرجادە . دەرەوەی شار"
                   }
                 ]
               },
@@ -2543,23 +2440,14 @@
               {
                 "type": "sceneHeading",
                 "attrs": {
-                  "setting": "",
-                  "time": "",
+                  "setting": "دەرەوە",
+                  "time": "رۆژ",
                   "headingStyle": null
                 },
                 "content": [
                   {
                     "type": "text",
-                    "text": "دیمەنی نۆیەم"
-                  }
-                ]
-              },
-              {
-                "type": "action",
-                "content": [
-                  {
-                    "type": "text",
-                    "text": "رۆژ . دەرەوە . خاڵی پشکنین"
+                    "text": "خاڵی پشکنین"
                   }
                 ]
               },
@@ -2818,23 +2706,14 @@
               {
                 "type": "sceneHeading",
                 "attrs": {
-                  "setting": "",
-                  "time": "",
+                  "setting": "دەرەوە",
+                  "time": "رۆژ",
                   "headingStyle": null
                 },
                 "content": [
                   {
                     "type": "text",
-                    "text": "دیمەنی دەیەم"
-                  }
-                ]
-              },
-              {
-                "type": "action",
-                "content": [
-                  {
-                    "type": "text",
-                    "text": "رۆژ . دەرەوە . ناو سەیارەکە . جادەی سیتەک نزیک باخەکە"
+                    "text": "ناو سەیارەکە . جادەی سیتەک نزیک باخەکە"
                   }
                 ]
               },
@@ -3174,23 +3053,14 @@
               {
                 "type": "sceneHeading",
                 "attrs": {
-                  "setting": "",
-                  "time": "",
+                  "setting": "دەرەوە",
+                  "time": "رۆژ",
                   "headingStyle": null
                 },
                 "content": [
                   {
                     "type": "text",
-                    "text": "دیمەنی یانزەیەم"
-                  }
-                ]
-              },
-              {
-                "type": "action",
-                "content": [
-                  {
-                    "type": "text",
-                    "text": "رۆژ . دەرەوە . زەردەپەڕ . ناو باخ"
+                    "text": "زەردەپەڕ . ناو باخ"
                   }
                 ]
               },
@@ -3431,23 +3301,14 @@
               {
                 "type": "sceneHeading",
                 "attrs": {
-                  "setting": "",
-                  "time": "",
+                  "setting": "ناوەوە",
+                  "time": "رۆژ",
                   "headingStyle": null
                 },
                 "content": [
                   {
                     "type": "text",
-                    "text": "دیمەنی دوانزەیەم"
-                  }
-                ]
-              },
-              {
-                "type": "action",
-                "content": [
-                  {
-                    "type": "text",
-                    "text": "رۆژ . ناوەوە . دەمەوئێوارە . باخەکە"
+                    "text": "دەمەوئێوارە . باخەکە"
                   }
                 ]
               },
@@ -4021,23 +3882,14 @@
               {
                 "type": "sceneHeading",
                 "attrs": {
-                  "setting": "",
-                  "time": "",
+                  "setting": "دەرەوە",
+                  "time": "ئێوارە",
                   "headingStyle": null
                 },
                 "content": [
                   {
                     "type": "text",
-                    "text": "دیمەنی سیانزەیەم"
-                  }
-                ]
-              },
-              {
-                "type": "action",
-                "content": [
-                  {
-                    "type": "text",
-                    "text": "ئێوارە . دەرەوە . باخەکە"
+                    "text": "باخەکە"
                   }
                 ]
               },
@@ -4332,23 +4184,14 @@
               {
                 "type": "sceneHeading",
                 "attrs": {
-                  "setting": "",
-                  "time": "",
+                  "setting": "ناوەوە",
+                  "time": "ئێوارە",
                   "headingStyle": null
                 },
                 "content": [
                   {
                     "type": "text",
-                    "text": "دیمەنی چواردەیەم"
-                  }
-                ]
-              },
-              {
-                "type": "action",
-                "content": [
-                  {
-                    "type": "text",
-                    "text": "ئێوارە . ناوەوە . باخەکە"
+                    "text": "باخەکە"
                   }
                 ]
               },
@@ -5075,23 +4918,14 @@
               {
                 "type": "sceneHeading",
                 "attrs": {
-                  "setting": "",
-                  "time": "",
+                  "setting": "ناوەوە",
+                  "time": "شەو",
                   "headingStyle": null
                 },
                 "content": [
                   {
                     "type": "text",
-                    "text": "دیمەنی شانزەیەم"
-                  }
-                ]
-              },
-              {
-                "type": "action",
-                "content": [
-                  {
-                    "type": "text",
-                    "text": "شەو . ناوەوە . باخەکە"
+                    "text": "باخەکە"
                   }
                 ]
               },
@@ -5845,23 +5679,14 @@
               {
                 "type": "sceneHeading",
                 "attrs": {
-                  "setting": "",
-                  "time": "",
+                  "setting": "دەرەوە",
+                  "time": "شەو",
                   "headingStyle": null
                 },
                 "content": [
                   {
                     "type": "text",
-                    "text": "دیمەنی هەڤدەیەم"
-                  }
-                ]
-              },
-              {
-                "type": "action",
-                "content": [
-                  {
-                    "type": "text",
-                    "text": "شەو . دەرەوە . ناو حەوشەی باخەکە"
+                    "text": "ناو حەوشەی باخەکە"
                   }
                 ]
               },
@@ -6093,14 +5918,14 @@
               {
                 "type": "sceneHeading",
                 "attrs": {
-                  "setting": "",
-                  "time": "",
+                  "setting": "دەرەوە",
+                  "time": "شەو",
                   "headingStyle": null
                 },
                 "content": [
                   {
                     "type": "text",
-                    "text": "بەردەوامی دیمەنی هەڤدەیەم"
+                    "text": "ناو حەوشەی باخەکە (بەردەوامی دیمەنی هەڤدەیەم)"
                   }
                 ]
               },
@@ -6323,23 +6148,14 @@
               {
                 "type": "sceneHeading",
                 "attrs": {
-                  "setting": "",
-                  "time": "",
+                  "setting": "دەرەوە",
+                  "time": "شەو",
                   "headingStyle": null
                 },
                 "content": [
                   {
                     "type": "text",
-                    "text": "دیمەنی هەژدەیەم"
-                  }
-                ]
-              },
-              {
-                "type": "action",
-                "content": [
-                  {
-                    "type": "text",
-                    "text": "شەو . دەرەوە . حەوشەی باخەکە"
+                    "text": "حەوشەی باخەکە"
                   }
                 ]
               },
@@ -6379,14 +6195,14 @@
               {
                 "type": "sceneHeading",
                 "attrs": {
-                  "setting": "",
-                  "time": "",
+                  "setting": "دەرەوە",
+                  "time": "شەو",
                   "headingStyle": null
                 },
                 "content": [
                   {
                     "type": "text",
-                    "text": "بەردەوامی دیمەنی شانزەیەم"
+                    "text": "حەوشەی باخەکە (بەردەوامی دیمەنی شانزەیەم)"
                   }
                 ]
               },
@@ -6456,23 +6272,14 @@
               {
                 "type": "sceneHeading",
                 "attrs": {
-                  "setting": "",
-                  "time": "",
+                  "setting": "دەرەوە",
+                  "time": "شەو",
                   "headingStyle": null
                 },
                 "content": [
                   {
                     "type": "text",
-                    "text": "بەردەوامی دیمەنی هەژدەیەم"
-                  }
-                ]
-              },
-              {
-                "type": "action",
-                "content": [
-                  {
-                    "type": "text",
-                    "text": "شەو . دەرەوە . باخەکە"
+                    "text": "باخەکە (بەردەوامی دیمەنی هەژدەیەم)"
                   }
                 ]
               },
@@ -6561,22 +6368,13 @@
                 "type": "sceneHeading",
                 "attrs": {
                   "setting": "",
-                  "time": "",
+                  "time": "شەو",
                   "headingStyle": null
                 },
                 "content": [
                   {
                     "type": "text",
-                    "text": "بەردەوامی دیمەنی هەژدەیەم"
-                  }
-                ]
-              },
-              {
-                "type": "action",
-                "content": [
-                  {
-                    "type": "text",
-                    "text": "شەو . ژوورەوە . باخەکە"
+                    "text": "ژوورەوە . باخەکە (بەردەوامی دیمەنی هەژدەیەم)"
                   }
                 ]
               },
@@ -8140,23 +7938,14 @@
               {
                 "type": "sceneHeading",
                 "attrs": {
-                  "setting": "",
+                  "setting": "ناوەوە",
                   "time": "",
                   "headingStyle": null
                 },
                 "content": [
                   {
                     "type": "text",
-                    "text": "دیمەنی نۆزدەیەم، بەردەوامی دیمەنی یەکەم"
-                  }
-                ]
-              },
-              {
-                "type": "action",
-                "content": [
-                  {
-                    "type": "text",
-                    "text": "ڕۆژ . ناوەوە . ژووری نالی / هۆڵی باخەکە"
+                    "text": "ڕۆژ . ژووری نالی / هۆڵی باخەکە"
                   }
                 ]
               },
@@ -9072,23 +8861,14 @@
               {
                 "type": "sceneHeading",
                 "attrs": {
-                  "setting": "",
+                  "setting": "دەرەوە",
                   "time": "",
                   "headingStyle": null
                 },
                 "content": [
                   {
                     "type": "text",
-                    "text": "دیمەنی بیستەم"
-                  }
-                ]
-              },
-              {
-                "type": "action",
-                "content": [
-                  {
-                    "type": "text",
-                    "text": "ڕۆژ . دەرەوە . حەوشەی باخەکە"
+                    "text": "ڕۆژ . حەوشەی باخەکە"
                   }
                 ]
               },
@@ -9279,15 +9059,6 @@
                   "time": "",
                   "headingStyle": null
                 },
-                "content": [
-                  {
-                    "type": "text",
-                    "text": "دیمەنی بیست و یەکەم"
-                  }
-                ]
-              },
-              {
-                "type": "action",
                 "content": [
                   {
                     "type": "text",
@@ -10250,15 +10021,6 @@
                 "content": [
                   {
                     "type": "text",
-                    "text": "دیمەنی بیست و دووەم"
-                  }
-                ]
-              },
-              {
-                "type": "action",
-                "content": [
-                  {
-                    "type": "text",
                     "text": "ئێوارە بەرەو شەو . ناوەوە/دەرەوە . باخەکە"
                   }
                 ]
@@ -10392,23 +10154,14 @@
               {
                 "type": "sceneHeading",
                 "attrs": {
-                  "setting": "",
-                  "time": "",
+                  "setting": "ناوەوە",
+                  "time": "شەو",
                   "headingStyle": null
                 },
                 "content": [
                   {
                     "type": "text",
-                    "text": "دیمەنی بیست و سێیەم"
-                  }
-                ]
-              },
-              {
-                "type": "action",
-                "content": [
-                  {
-                    "type": "text",
-                    "text": "شەو . ناوەوە . باخەکە"
+                    "text": "باخەکە"
                   }
                 ]
               },
@@ -11099,23 +10852,14 @@
               {
                 "type": "sceneHeading",
                 "attrs": {
-                  "setting": "",
-                  "time": "",
+                  "setting": "دەرەوە",
+                  "time": "شەو",
                   "headingStyle": null
                 },
                 "content": [
                   {
                     "type": "text",
-                    "text": "دیمەنی بیست و چوارەم"
-                  }
-                ]
-              },
-              {
-                "type": "action",
-                "content": [
-                  {
-                    "type": "text",
-                    "text": "شەو . دەرەوە . ناوحەوشەی باخەکە"
+                    "text": "ناوحەوشەی باخەکە"
                   }
                 ]
               },
@@ -11680,23 +11424,14 @@
               {
                 "type": "sceneHeading",
                 "attrs": {
-                  "setting": "",
-                  "time": "",
+                  "setting": "ناوەوە",
+                  "time": "شەو",
                   "headingStyle": null
                 },
                 "content": [
                   {
                     "type": "text",
-                    "text": "دیمەنی بیست و پێنجەم"
-                  }
-                ]
-              },
-              {
-                "type": "action",
-                "content": [
-                  {
-                    "type": "text",
-                    "text": "شەو . ناوەوە . باخەکە"
+                    "text": "باخەکە"
                   }
                 ]
               },
@@ -12000,23 +11735,14 @@
               {
                 "type": "sceneHeading",
                 "attrs": {
-                  "setting": "",
-                  "time": "",
+                  "setting": "دەرەوە",
+                  "time": "شەو",
                   "headingStyle": null
                 },
                 "content": [
                   {
                     "type": "text",
-                    "text": "دیمەنی بیست و شەشەم"
-                  }
-                ]
-              },
-              {
-                "type": "action",
-                "content": [
-                  {
-                    "type": "text",
-                    "text": "شەو . دەرەوە . حەوشەی باخەکە"
+                    "text": "حەوشەی باخەکە"
                   }
                 ]
               },
@@ -12056,14 +11782,14 @@
               {
                 "type": "sceneHeading",
                 "attrs": {
-                  "setting": "",
-                  "time": "",
+                  "setting": "دەرەوە",
+                  "time": "شەو",
                   "headingStyle": null
                 },
                 "content": [
                   {
                     "type": "text",
-                    "text": "بەردەوامی دیمەنی بیست و پێنج"
+                    "text": "حەوشەی باخەکە (بەردەوامی دیمەنی بیست و پێنج)"
                   }
                 ]
               },
@@ -12682,23 +12408,14 @@
               {
                 "type": "sceneHeading",
                 "attrs": {
-                  "setting": "",
-                  "time": "",
+                  "setting": "دەرەوە",
+                  "time": "شەو",
                   "headingStyle": null
                 },
                 "content": [
                   {
                     "type": "text",
-                    "text": "دیمەنی بیست و حەوتەم"
-                  }
-                ]
-              },
-              {
-                "type": "action",
-                "content": [
-                  {
-                    "type": "text",
-                    "text": "شەو . دەرەوە . حەوشەی باخەکە"
+                    "text": "حەوشەی باخەکە"
                   }
                 ]
               },
@@ -12921,23 +12638,14 @@
               {
                 "type": "sceneHeading",
                 "attrs": {
-                  "setting": "",
-                  "time": "",
+                  "setting": "ناوەوە",
+                  "time": "شەو",
                   "headingStyle": null
                 },
                 "content": [
                   {
                     "type": "text",
-                    "text": "دیمەنی بیست و هەشتەم"
-                  }
-                ]
-              },
-              {
-                "type": "action",
-                "content": [
-                  {
-                    "type": "text",
-                    "text": "شەو . ناوەوە . هۆڵی باخەکە"
+                    "text": "هۆڵی باخەکە"
                   }
                 ]
               },
@@ -13313,23 +13021,14 @@
               {
                 "type": "sceneHeading",
                 "attrs": {
-                  "setting": "",
-                  "time": "",
+                  "setting": "ناوەوە",
+                  "time": "بەیانی",
                   "headingStyle": null
                 },
                 "content": [
                   {
                     "type": "text",
-                    "text": "دیمەنی بیست و نۆیەم"
-                  }
-                ]
-              },
-              {
-                "type": "action",
-                "content": [
-                  {
-                    "type": "text",
-                    "text": "ڕۆژ . ناوەوە . بەیانی . باخەکە"
+                    "text": "ڕۆژ . باخەکە"
                   }
                 ]
               },
@@ -13696,23 +13395,14 @@
               {
                 "type": "sceneHeading",
                 "attrs": {
-                  "setting": "",
-                  "time": "",
+                  "setting": "دەرەوە",
+                  "time": "رۆژ",
                   "headingStyle": null
                 },
                 "content": [
                   {
                     "type": "text",
-                    "text": "دیمەنی سییەم"
-                  }
-                ]
-              },
-              {
-                "type": "action",
-                "content": [
-                  {
-                    "type": "text",
-                    "text": "رۆژ . دەرەوە . ناو سەیارەی ئەدیب . سەرجادە"
+                    "text": "ناو سەیارەی ئەدیب . سەرجادە"
                   }
                 ]
               },
@@ -13800,23 +13490,14 @@
               {
                 "type": "sceneHeading",
                 "attrs": {
-                  "setting": "",
-                  "time": "",
+                  "setting": "دەرەوە",
+                  "time": "رۆژ",
                   "headingStyle": null
                 },
                 "content": [
                   {
                     "type": "text",
-                    "text": "دیمەنی سی و یەکەم"
-                  }
-                ]
-              },
-              {
-                "type": "action",
-                "content": [
-                  {
-                    "type": "text",
-                    "text": "رۆژ . دەرەوە . ناوبەینی دوو گرد"
+                    "text": "ناوبەینی دوو گرد"
                   }
                 ]
               },
@@ -13913,23 +13594,14 @@
               {
                 "type": "sceneHeading",
                 "attrs": {
-                  "setting": "",
-                  "time": "",
+                  "setting": "ناوەوە",
+                  "time": "رۆژ",
                   "headingStyle": null
                 },
                 "content": [
                   {
                     "type": "text",
-                    "text": "دیمەنی سی و دووەم"
-                  }
-                ]
-              },
-              {
-                "type": "action",
-                "content": [
-                  {
-                    "type": "text",
-                    "text": "رۆژ . ناوەوە . باخەکە"
+                    "text": "باخەکە"
                   }
                 ]
               },
@@ -14152,23 +13824,14 @@
               {
                 "type": "sceneHeading",
                 "attrs": {
-                  "setting": "",
-                  "time": "",
+                  "setting": "دەرەوە",
+                  "time": "رۆژ",
                   "headingStyle": null
                 },
                 "content": [
                   {
                     "type": "text",
-                    "text": "دیمەنی سی و سێیەم"
-                  }
-                ]
-              },
-              {
-                "type": "action",
-                "content": [
-                  {
-                    "type": "text",
-                    "text": "رۆژ . دەرەوە . ناو سەیارەکەی نالی . سەرجادە"
+                    "text": "ناو سەیارەکەی نالی . سەرجادە"
                   }
                 ]
               },
@@ -14220,23 +13883,14 @@
               {
                 "type": "sceneHeading",
                 "attrs": {
-                  "setting": "",
-                  "time": "",
+                  "setting": "دەرەوە",
+                  "time": "رۆژ",
                   "headingStyle": null
                 },
                 "content": [
                   {
                     "type": "text",
-                    "text": "دیمەنی سی و چوارەم"
-                  }
-                ]
-              },
-              {
-                "type": "action",
-                "content": [
-                  {
-                    "type": "text",
-                    "text": "رۆژ . دەرەوە . دەشتێکی تەخت . لای چەند تەنکەرەیەکی وەرگەڕاو"
+                    "text": "دەشتێکی تەخت . لای چەند تەنکەرەیەکی وەرگەڕاو"
                   }
                 ]
               },
@@ -14603,23 +14257,14 @@
               {
                 "type": "sceneHeading",
                 "attrs": {
-                  "setting": "",
-                  "time": "",
+                  "setting": "دەرەوە",
+                  "time": "شەو",
                   "headingStyle": null
                 },
                 "content": [
                   {
                     "type": "text",
-                    "text": "دیمەنی سی و نۆیەم"
-                  }
-                ]
-              },
-              {
-                "type": "action",
-                "content": [
-                  {
-                    "type": "text",
-                    "text": "شەو . دەرەوە . دەشتێکی وشک"
+                    "text": "دەشتێکی وشک"
                   }
                 ]
               },
@@ -14950,23 +14595,14 @@
               {
                 "type": "sceneHeading",
                 "attrs": {
-                  "setting": "",
-                  "time": "",
+                  "setting": "دەرەوە",
+                  "time": "شەو",
                   "headingStyle": null
                 },
                 "content": [
                   {
                     "type": "text",
-                    "text": "دیمەنی سی و پێنجەم"
-                  }
-                ]
-              },
-              {
-                "type": "action",
-                "content": [
-                  {
-                    "type": "text",
-                    "text": "شەو . دەرەوە . بەردەم دوکانێکی مۆبایل"
+                    "text": "بەردەم دوکانێکی مۆبایل"
                   }
                 ]
               },
@@ -15036,23 +14672,14 @@
               {
                 "type": "sceneHeading",
                 "attrs": {
-                  "setting": "",
-                  "time": "",
+                  "setting": "دەرەوە",
+                  "time": "شەو",
                   "headingStyle": null
                 },
                 "content": [
                   {
                     "type": "text",
-                    "text": "دیمەنی سی و شەشەم"
-                  }
-                ]
-              },
-              {
-                "type": "action",
-                "content": [
-                  {
-                    "type": "text",
-                    "text": "شەو . دەرەوە . ناو سەیارەکەی نالی . قەراخ شار"
+                    "text": "ناو سەیارەکەی نالی . قەراخ شار"
                   }
                 ]
               },
@@ -15266,23 +14893,14 @@
               {
                 "type": "sceneHeading",
                 "attrs": {
-                  "setting": "",
-                  "time": "",
+                  "setting": "دەرەوە",
+                  "time": "شەو",
                   "headingStyle": null
                 },
                 "content": [
                   {
                     "type": "text",
-                    "text": "دیمەنی سی و حەوتەم"
-                  }
-                ]
-              },
-              {
-                "type": "action",
-                "content": [
-                  {
-                    "type": "text",
-                    "text": "شەو . دەرەوە . قەراخ شار"
+                    "text": "قەراخ شار"
                   }
                 ]
               },
@@ -15370,23 +14988,14 @@
               {
                 "type": "sceneHeading",
                 "attrs": {
-                  "setting": "",
-                  "time": "",
+                  "setting": "ناوەوە",
+                  "time": "رۆژ",
                   "headingStyle": null
                 },
                 "content": [
                   {
                     "type": "text",
-                    "text": "دیمەنی چل و سێ (a)"
-                  }
-                ]
-              },
-              {
-                "type": "action",
-                "content": [
-                  {
-                    "type": "text",
-                    "text": "رۆژ . ناوەوە . هۆڵی شانۆ"
+                    "text": "هۆڵی شانۆ"
                   }
                 ]
               },
@@ -15564,23 +15173,14 @@
               {
                 "type": "sceneHeading",
                 "attrs": {
-                  "setting": "",
-                  "time": "",
+                  "setting": "ناوەوە",
+                  "time": "رۆژ",
                   "headingStyle": null
                 },
                 "content": [
                   {
                     "type": "text",
-                    "text": "دیمەنی سی و نۆ (b)"
-                  }
-                ]
-              },
-              {
-                "type": "action",
-                "content": [
-                  {
-                    "type": "text",
-                    "text": "رۆژ . ناوەوە . بنکەی پۆلیس"
+                    "text": "بنکەی پۆلیس"
                   }
                 ]
               },
@@ -16100,23 +15700,14 @@
               {
                 "type": "sceneHeading",
                 "attrs": {
-                  "setting": "",
-                  "time": "",
+                  "setting": "دەرەوە",
+                  "time": "رۆژ",
                   "headingStyle": null
                 },
                 "content": [
                   {
                     "type": "text",
-                    "text": "دیمەنی چلەم"
-                  }
-                ]
-              },
-              {
-                "type": "action",
-                "content": [
-                  {
-                    "type": "text",
-                    "text": "رۆژ . دەرەوە . سەیارەکەی نالی لە قەراخ شار"
+                    "text": "سەیارەکەی نالی لە قەراخ شار"
                   }
                 ]
               },
@@ -16321,23 +15912,14 @@
               {
                 "type": "sceneHeading",
                 "attrs": {
-                  "setting": "",
-                  "time": "",
+                  "setting": "ناوەوە",
+                  "time": "شەو",
                   "headingStyle": null
                 },
                 "content": [
                   {
                     "type": "text",
-                    "text": "دیمەنی چل و دووەم"
-                  }
-                ]
-              },
-              {
-                "type": "action",
-                "content": [
-                  {
-                    "type": "text",
-                    "text": "شەو . ناوەوە . باخەکەی نالی، دیمەنێکی سوریالی"
+                    "text": "باخەکەی نالی، دیمەنێکی سوریالی"
                   }
                 ]
               },
@@ -16470,23 +16052,14 @@
               {
                 "type": "sceneHeading",
                 "attrs": {
-                  "setting": "",
-                  "time": "",
+                  "setting": "دەرەوە",
+                  "time": "رۆژ",
                   "headingStyle": null
                 },
                 "content": [
                   {
                     "type": "text",
-                    "text": "دیمەنی چل و سێیەم، گەڕانەوە بۆ دیمەنی دووەم"
-                  }
-                ]
-              },
-              {
-                "type": "action",
-                "content": [
-                  {
-                    "type": "text",
-                    "text": "رۆژ . دەرەوە . باخەکە"
+                    "text": "باخەکە"
                   }
                 ]
               },
@@ -16741,5 +16314,28 @@
         ]
       }
     ]
+  },
+  "tag_registry": {
+    "characters": [],
+    "props": [],
+    "wardrobe": [],
+    "locations": [],
+    "sfx": [],
+    "vfx": [],
+    "vehicles": [],
+    "animals": [],
+    "custom": []
+  },
+  "flag_log": [],
+  "export_settings": {
+    "branding": "rwanga",
+    "letterhead_url": null,
+    "include_scene_numbers": true,
+    "include_revision_marks": false
+  },
+  "runtime": {
+    "last_cursor": null,
+    "active_scene_id": "scene-001",
+    "ui_state": {}
   }
 }
