@@ -257,7 +257,13 @@
 
 
 
-        <!-- Editor Container — the "desk"; #editor is the "page" -->
+        <!-- Editor Container — the "desk".
+             Shell Doctrine §4 — #tab-content-host is the SINGLE renderer
+             host. Every tab kind (document, workspace, future) mounts a
+             subtree here with data-renderer="…"; TabManager toggles
+             visibility so only the active renderer is shown. No
+             proliferation of per-kind top-level IDs (#workspace-mount /
+             #timeline / etc.). -->
         <div id="editor-container" class="no-doc">
           <!-- Empty state — shown when no tab is open -->
           <div id="editor-empty-state" class="editor-empty-state">
@@ -269,14 +275,22 @@
             </div>
             <div id="empty-state-recent" class="editor-empty-state-recent"></div>
           </div>
-          <!-- Page row holds the line-gutter (Flow view) and the page itself -->
-          <div class="rga-page-row" id="rga-page-row">
-            <div class="flow-line-gutter" id="flow-line-gutter" aria-hidden="true"></div>
-            <!-- ProseMirror mounts into #editor — the Flow / Draft editing surface -->
-            <div id="editor"></div>
+          <div id="tab-content-host">
+            <!-- Document renderer subtree. data-renderer="document" lets
+                 TabManager._applyRendererVisibility reveal it when a
+                 document tab is active and hide it for workspace tabs. -->
+            <div class="rga-page-row" id="rga-page-row" data-renderer="document">
+              <div class="flow-line-gutter" id="flow-line-gutter" aria-hidden="true"></div>
+              <!-- ProseMirror mounts into #editor — the Flow / Draft editing surface -->
+              <div id="editor"></div>
+            </div>
+            <!-- Fork A — Paper view: the read-only PageMap render mounts here -->
+            <div id="rga-paper-view-root" style="display:none"></div>
+            <!-- Workspace renderer subtrees are appended here at runtime
+                 by TabManager.openWorkspace(kind), one per active
+                 workspace tab. They carry data-renderer="workspace" +
+                 data-workspace-kind="…". -->
           </div>
-          <!-- Fork A — Paper view: the read-only PageMap render mounts here -->
-          <div id="rga-paper-view-root" style="display:none"></div>
         </div>
 
         <!-- §A Shell Final Polish — Scene Toolbox retired. Every
@@ -505,6 +519,9 @@
     <script src="js/constants.js"></script>
     <script src="js/doc.js"></script>
     <script src="js/file-manager.js"></script>
+    <!-- Workspaces registry — must load BEFORE tab-manager.js so
+         TabManager.openWorkspace can resolve Rga.Workspaces.get(kind). -->
+    <script src="js/shell/workspaces.js"></script>
     <script src="js/tab-manager.js"></script>
     <script src="js/close-guard.js"></script>
     <script src="js/autosave.js"></script>
@@ -612,6 +629,11 @@
 <script src="js/shell/panels/search.js"></script>
 <script src="js/shell/panels/revisions.js"></script>
 <script src="js/shell/panels/settings.js"></script>
+<!-- Slice 1 wiring proof — hello-world workspace. Triggered from
+     devtools (Rga.TabManager.openWorkspace('hello-world')). Will be
+     removed or kept as a debug aid once Settings ships as the first
+     real workspace tab. -->
+<script src="js/shell/workspaces/hello-world.js"></script>
 <script src="js/shell/status-bar.js"></script>
 <script src="js/shell/title-bar.js"></script>
 <script src="js/shell/index.js"></script>

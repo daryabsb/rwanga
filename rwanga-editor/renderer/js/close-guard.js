@@ -8,10 +8,15 @@
   const Rga = window.Rga = window.Rga || {};
 
   // Confirm closing ONE tab's document.
-  //   tab = { id, doc }
-  // Returns 'proceed' (clean, discarded, or successfully saved) or 'cancel'.
+  //   tab = { id, kind, doc }
+  // Workspace tabs (Shell Doctrine — kind !== 'document') have no
+  // unsaved state to guard; close immediately. Returns 'proceed' for
+  // them. For documents: 'proceed' (clean, discarded, or successfully
+  // saved) or 'cancel'.
   async function confirmClose(tab) {
-    if (!tab || !tab.doc || !tab.doc.dirty) return 'proceed';
+    if (!tab) return 'proceed';
+    if (tab.kind && tab.kind !== 'document') return 'proceed';
+    if (!tab.doc || !tab.doc.dirty) return 'proceed';
 
     const name = tab.doc.displayName;
     const choice = (Rga.Modal && typeof Rga.Modal.showUnsaved === 'function')
@@ -48,7 +53,10 @@
       : [];
     for (let i = 0; i < tabs.length; i += 1) {
       const tab = tabs[i];
-      if (!tab || !tab.doc || !tab.doc.dirty) continue;
+      // Skip workspace tabs (no dirty state) and clean document tabs.
+      if (!tab) continue;
+      if (tab.kind && tab.kind !== 'document') continue;
+      if (!tab.doc || !tab.doc.dirty) continue;
       const verdict = await confirmClose(tab);
       if (verdict === 'cancel') return false;
     }

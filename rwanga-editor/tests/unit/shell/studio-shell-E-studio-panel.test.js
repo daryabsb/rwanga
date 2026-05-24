@@ -341,6 +341,11 @@ test('§E: no new shell module file (StudioPanel is and remains the single owner
     'script-language.js', 'script-metrics.js',
     'script-session.js', 'session-boundary.js', 'sidebar.js',
     'status-bar.js', 'studio-panel.js', 'title-bar.js', 'toast.js',
+    // 'workspaces.js' — Shell Doctrine §4 workspace-tab registry.
+    // Distinct owner: registration map of workspace-kind tabs
+    // (Settings, Welcome, …). TabManager.openWorkspace queries it.
+    // No overlap with StudioPanel (which owns bottom-panel + inspector).
+    'workspaces.js',
     'workspace-state.js'
   ];
   const unexpected = files.filter(function(f) { return EXPECTED.indexOf(f) < 0; });

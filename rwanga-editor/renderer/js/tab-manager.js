@@ -23,9 +23,16 @@
     bar.innerHTML = '';
     tabs.forEach(function(t) {
       const el = document.createElement('button');
-      el.className = 'tab' + (t.id === activeTabId ? ' active' : '') + (t.doc.dirty ? ' dirty' : '');
+      const isDoc = t.kind === 'document';
+      const dirty = isDoc && t.doc && t.doc.dirty;
+      const title = isDoc ? (t.doc && t.doc.displayName) : (t.title || t.workspaceKind || 'Tab');
+      el.className = 'tab' +
+        (t.id === activeTabId ? ' active' : '') +
+        (dirty ? ' dirty' : '') +
+        (isDoc ? '' : ' tab-workspace');
       el.dataset.tabId = t.id;
-      el.textContent = (t.doc.dirty ? '● ' : '') + t.doc.displayName;
+      if (!isDoc) el.dataset.workspaceKind = t.workspaceKind || '';
+      el.textContent = (dirty ? '● ' : '') + (title || '');
       el.addEventListener('click', function() { activate(t.id); });
       const close = document.createElement('span');
       close.className = 'tab-close';
@@ -43,6 +50,10 @@
   function snapshotActive() {
     const active = tabs.find(function(t) { return t.id === activeTabId; });
     if (!active || !editorView) return;
+    // Only document tabs hold a PM editor state; workspace tabs have no
+    // editorState reference and must not capture the singleton view's
+    // state (which belongs to whichever document tab last held focus).
+    if (active.kind !== 'document') return;
     active.editorState = editorView.state;
   }
 
@@ -95,28 +106,69 @@
   }
 
   function activate(tabId) {
+    // Snapshot the previously active DOCUMENT tab's PM state before switch.
+    // Workspace tabs hold no PM state; their snapshot is a no-op handled
+    // inside snapshotActive() (it short-circuits when the active tab has
+    // no editorState reference).
     snapshotActive();
     const tab = tabs.find(function(t) { return t.id === tabId; });
     if (!tab) return;
     activeTabId = tabId;
     setNoDocState(false);
     renderTabBar();
-    if (editorView && tab.editorState) {
-      editorView.updateState(tab.editorState);
-      editorView.focus();
+
+    // Per Shell Doctrine — toggle visibility of the renderer subtree.
+    // Document tabs reveal [data-renderer="document"]; workspace tabs
+    // reveal their own [data-renderer="workspace"][data-workspace-kind=…].
+    _applyRendererVisibility(tab);
+
+    if (tab.kind === 'document') {
+      if (editorView && tab.editorState) {
+        editorView.updateState(tab.editorState);
+        editorView.focus();
+      }
+      if (Rga.PageSurface && tab.doc && tab.doc.settings) {
+        Rga.PageSurface.apply(tab.doc.settings.pageSetup);
+      }
+      applyDocumentDirection(tab.doc);
+      if (Rga.FileManager && Rga.FileManager.setActive) Rga.FileManager.setActive(tab.doc);
     }
-    if (Rga.PageSurface && tab.doc && tab.doc.settings) {
-      Rga.PageSurface.apply(tab.doc.settings.pageSetup);
-    }
-    applyDocumentDirection(tab.doc);
-    if (Rga.FileManager && Rga.FileManager.setActive) Rga.FileManager.setActive(tab.doc);
+    // For workspace tabs: do NOT touch editorView (its state belongs
+    // to whichever document tab last held focus), do NOT call PageSurface
+    // (no doc.settings to apply), do NOT call FileManager.setActive
+    // (activeDoc() will correctly return null while this workspace is active).
+
     document.dispatchEvent(new CustomEvent('editor.tabActivated', { detail: { tabId } }));
     if (typeof _saveSession === 'function') _saveSession();
+  }
+
+  // Walk children of #tab-content-host and reveal only the active
+  // renderer's subtree. Document renderers carry data-renderer="document";
+  // workspace renderers carry data-renderer="workspace" + data-workspace-kind.
+  // Renderers outside #tab-content-host (none in v01) are ignored.
+  function _applyRendererVisibility(tab) {
+    const host = document.getElementById('tab-content-host');
+    if (!host) return;
+    const isDoc = tab.kind === 'document';
+    const children = host.children;
+    for (let i = 0; i < children.length; i += 1) {
+      const child = children[i];
+      const kind = child.getAttribute('data-renderer');
+      if (!kind) continue;
+      let show = false;
+      if (isDoc && kind === 'document') show = true;
+      if (!isDoc && kind === 'workspace' &&
+          child.getAttribute('data-workspace-kind') === tab.workspaceKind) {
+        show = true;
+      }
+      child.style.display = show ? '' : 'none';
+    }
   }
 
   function openDocument(doc) {
     const tab = {
       id: nextTabId(),
+      kind: 'document',
       doc: doc,
       editorState: null
     };
@@ -135,16 +187,83 @@
     return tab;
   }
 
+  // openWorkspace(workspaceKind) — open or focus a workspace tab.
+  // Workspace tabs are singletons per kind: opening the same kind twice
+  // focuses the existing tab. Returns the tab, or null if the kind is
+  // not registered with Rga.Workspaces.
+  function openWorkspace(workspaceKind) {
+    const registration = (Rga.Workspaces && typeof Rga.Workspaces.get === 'function')
+      ? Rga.Workspaces.get(workspaceKind)
+      : null;
+    if (!registration) {
+      console.warn('[Rga.TabManager.openWorkspace] unknown workspace kind:', workspaceKind);
+      return null;
+    }
+    // Singleton: focus the existing instance if already open.
+    const existing = tabs.find(function(t) {
+      return t.kind === 'workspace' && t.workspaceKind === workspaceKind;
+    });
+    if (existing) {
+      activate(existing.id);
+      return existing;
+    }
+    // Create the mount element inside #tab-content-host. Each workspace
+    // renderer is a sibling div marked with data-renderer="workspace" so
+    // the activate-time visibility toggle can target it.
+    const host = document.getElementById('tab-content-host');
+    let mountEl = null;
+    if (host) {
+      mountEl = document.createElement('div');
+      mountEl.setAttribute('data-renderer', 'workspace');
+      mountEl.setAttribute('data-workspace-kind', workspaceKind);
+      mountEl.style.display = 'none';  // activate() reveals it
+      host.appendChild(mountEl);
+      try { registration.mount(mountEl); }
+      catch (err) {
+        console.error('[Rga.TabManager.openWorkspace] mount failed for', workspaceKind, err);
+      }
+    }
+    const tab = {
+      id: nextTabId(),
+      kind: 'workspace',
+      workspaceKind: workspaceKind,
+      title: registration.title,
+      mountEl: mountEl,
+      _registration: registration
+    };
+    tabs.push(tab);
+    activate(tab.id);
+    if (typeof _saveSession === 'function') _saveSession();
+    return tab;
+  }
+
   async function closeTab(tabId) {
     const idx = tabs.findIndex(function(t) { return t.id === tabId; });
     if (idx < 0) return;
     const tab = tabs[idx];
-    // Persistence Safety Contract §6.2 — the unsaved-changes prompt is owned
-    // solely by Rga.CloseGuard; closeTab no longer has its own prompt logic.
-    const verdict = (Rga.CloseGuard && typeof Rga.CloseGuard.confirmClose === 'function')
-      ? await Rga.CloseGuard.confirmClose(tab)
-      : 'proceed';
-    if (verdict === 'cancel') return;
+    // Shell Doctrine — only DOCUMENT tabs go through CloseGuard (there is
+    // no unsaved state to guard on a workspace; per-workspace UI state is
+    // either persisted on change or intentionally transient).
+    if (tab.kind === 'document') {
+      // Persistence Safety Contract §6.2 — the unsaved-changes prompt is
+      // owned solely by Rga.CloseGuard; closeTab has no prompt logic.
+      const verdict = (Rga.CloseGuard && typeof Rga.CloseGuard.confirmClose === 'function')
+        ? await Rga.CloseGuard.confirmClose(tab)
+        : 'proceed';
+      if (verdict === 'cancel') return;
+    } else if (tab.kind === 'workspace') {
+      // Run the workspace's optional unmount before removing its DOM.
+      try {
+        if (tab._registration && typeof tab._registration.unmount === 'function' && tab.mountEl) {
+          tab._registration.unmount(tab.mountEl);
+        }
+      } catch (err) {
+        console.warn('[Rga.TabManager.closeTab] workspace unmount threw', err);
+      }
+      if (tab.mountEl && tab.mountEl.parentNode) {
+        tab.mountEl.parentNode.removeChild(tab.mountEl);
+      }
+    }
     // Re-find in case tabs shifted during async save
     const currentIdx = tabs.findIndex(function(t) { return t.id === tabId; });
     if (currentIdx < 0) return;
@@ -182,7 +301,11 @@
   }
   function activeDoc() {
     const t = activeTab();
-    return t ? t.doc : null;
+    // Workspace tabs have no doc; normalize to null so callers across
+    // the codebase get a consistent "no document active" signal regardless
+    // of whether zero tabs are open or a workspace tab is currently active.
+    if (!t || t.kind !== 'document') return null;
+    return t.doc || null;
   }
   function getTabs() { return tabs.slice(); }
 
@@ -232,18 +355,24 @@
   const SESSION_KEY = 'rga-session-tabs';
 
   function _saveSession() {
+    // Only DOCUMENT tabs with file handles are persisted. Workspace tabs
+    // are excluded — they don't restore by handle. Future workspace
+    // session-restore will be opt-in per workspace kind (Shell Doctrine
+    // §2 restoreOnSession); for v01, no workspace opts in.
+    const isPersistableDoc = function(t) {
+      return t && t.kind === 'document' && t.doc && t.doc.handle;
+    };
     const payload = {
-      tabs: tabs.filter(function(t) { return t.doc && t.doc.handle; })
-                .map(function(t) {
-                  return { handle: t.doc.handle, displayName: t.doc.displayName };
-                }),
+      tabs: tabs.filter(isPersistableDoc).map(function(t) {
+        return { handle: t.doc.handle, displayName: t.doc.displayName };
+      }),
       activeIndex: (function() {
         const idx = tabs.findIndex(function(t) { return t.id === activeTabId; });
-        // Translate to index within the SAVED (with-handle) list
+        // Translate to index within the SAVED (document-with-handle) list
         let savedIdx = 0;
         for (let i = 0; i <= idx; i += 1) {
           if (i === idx) return savedIdx;
-          if (tabs[i] && tabs[i].doc && tabs[i].doc.handle) savedIdx += 1;
+          if (isPersistableDoc(tabs[i])) savedIdx += 1;
         }
         return 0;
       })()
@@ -297,6 +426,7 @@
   Rga.TabManager = {
     init,
     openDocument,
+    openWorkspace,
     closeTab,
     activate,
     activeTab,

@@ -188,6 +188,10 @@ test('Phase 3: no new ownership introduced — no new shell module file', () => 
     'script-language.js', 'script-metrics.js',
     'script-session.js', 'session-boundary.js', 'sidebar.js',
     'status-bar.js', 'studio-panel.js', 'title-bar.js', 'toast.js',
+    // Shell Doctrine §4 workspace-tab registry (added Slice 1 —
+    // distinct owner of the workspace-kind registration map; consumed
+    // by TabManager.openWorkspace; not Phase 3 ownership creep).
+    'workspaces.js',
     'workspace-state.js'
   ];
   const unexpected = files.filter(function(f) { return EXPECTED.indexOf(f) < 0; });

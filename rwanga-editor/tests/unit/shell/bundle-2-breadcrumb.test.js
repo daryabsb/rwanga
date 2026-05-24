@@ -110,6 +110,10 @@ test('Bundle 2 §B: no new shell module file (boot-script wiring only — preser
     'script-language.js', 'script-metrics.js',
     'script-session.js', 'session-boundary.js', 'sidebar.js',
     'status-bar.js', 'studio-panel.js', 'title-bar.js', 'toast.js',
+    // Shell Doctrine §4 workspace-tab registry (added Slice 1 —
+    // distinct owner of workspace registration map; consumed by
+    // TabManager.openWorkspace; not Bundle 2 ownership creep).
+    'workspaces.js',
     'workspace-state.js'
   ];
   const unexpected = files.filter(function(f) { return EXPECTED.indexOf(f) < 0; });
