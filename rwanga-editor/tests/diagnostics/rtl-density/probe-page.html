@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>RTL Density Probe — measurement surface</title>
+<link rel="stylesheet" href="../../../renderer/css/tokens.css">
+<link rel="stylesheet" href="../../../renderer/css/reset.css">
+<link rel="stylesheet" href="../../../renderer/css/shell.css">
+<link rel="stylesheet" href="../../../renderer/css/editor.css">
+<link rel="stylesheet" href="../../../renderer/css/editor-prosemirror.css">
+<link rel="stylesheet" href="../../../renderer/css/components.css">
+<link rel="stylesheet" href="../../../renderer/css/overlays.css">
+<style>
+  /* Word-equivalent surface: Arial 11pt single spacing, A4 text column. */
+  #word-flow { width: 6.79in; font-family: Arial; font-size: 11pt; line-height: normal; direction: rtl; }
+  #word-flow .w-para { margin: 0.0556in 0; }   /* w:before/after ≈ 80 twips each */
+</style>
+</head>
+<body>
+<div id="probe-host"></div>
+<div id="word-host"></div>
+<script>
+'use strict';
+// RTL density probe surface. Renders the Mysterious Guest block sequence
+// twice — once in the real Rwanga editor CSS (RTL state), once as a
+// Word-equivalent Arial 11pt flow — and reports cumulative rendered
+// height per block. Read-only; production code/CSS untouched.
+
+function kuSpan(t) { var s = document.createElement('span'); s.textContent = t; return s; }
+
+function sceneHeadingEl(text) {
+  var h = document.createElement('div');
+  h.className = 'rga-scene-heading-v3';
+  function sel() { var s = document.createElement('select'); s.appendChild(document.createElement('option')); return s; }
+  var s1 = sel(); s1.className = 'rga-scene-heading-v3-setting'; h.appendChild(s1);
+  var d = document.createElement('span'); d.className = 'rga-scene-heading-v3-sep'; d.textContent = ' — '; h.appendChild(d);
+  var s2 = sel(); s2.className = 'rga-scene-heading-v3-time'; h.appendChild(s2);
+  var sl = document.createElement('span'); sl.className = 'rga-scene-heading-v3-sep'; sl.textContent = ' / '; h.appendChild(sl);
+  var loc = document.createElement('span'); loc.className = 'rga-scene-heading-v3-location'; loc.textContent = text;
+  h.appendChild(loc);
+  return h;
+}
+
+window.__measure = async function (data) {
+  document.documentElement.style.setProperty('--page-width', data.pageWidthIn + 'in');
+  try {
+    await document.fonts.load('400 16px "Noto Naskh Arabic"');
+    await document.fonts.load('700 16px "Noto Naskh Arabic"');
+    await document.fonts.load('11pt Arial');
+  } catch (e) {}
+  await document.fonts.ready;
+
+  // ---- Rwanga editor (RTL state, as Rga.ScriptLanguage configures it) ----
+  var host = document.getElementById('probe-host');
+  var container = document.createElement('div');
+  container.id = 'editor-container'; container.className = 'view-flow';
+  var row = document.createElement('div'); row.id = 'rga-page-row'; row.className = 'rga-page-row';
+  var editor = document.createElement('div');
+  editor.id = 'editor'; editor.className = 'rga-page ProseMirror';
+  editor.setAttribute('dir', 'rtl');
+  editor.style.fontFamily = 'var(--font-editor-rtl)';
+  var body = document.createElement('div'); body.className = 'rga-body';
+  editor.appendChild(body); row.appendChild(editor); container.appendChild(row); host.appendChild(container);
+
+  var rwangaEls = [];
+  var curScene = null, curContent = null;
+  data.blocks.forEach(function (b) {
+    if (b.sceneNumber != null && b.sceneNumber !== curScene) {
+      curScene = b.sceneNumber;
+      var sc = document.createElement('div'); sc.className = 'rga-scene-v3';
+      var num = document.createElement('div'); num.className = 'rga-scene-v3-num';
+      num.textContent = 'دیمەنی ' + b.sceneNumber;
+      curContent = document.createElement('div'); curContent.className = 'rga-scene-v3-content';
+      sc.appendChild(num); sc.appendChild(curContent); body.appendChild(sc);
+    }
+    var parent = (b.sceneNumber != null) ? curContent : body;
+    var el;
+    if (b.type === 'sceneHeading') {
+      el = sceneHeadingEl(b.text || 'ئا');
+    } else if (b.type === 'paragraph' || b.type === 'heading') {
+      el = document.createElement(b.type === 'heading' ? 'h2' : 'p');
+      el.textContent = b.text || 'ئا';
+    } else {
+      el = document.createElement('div');
+      el.className = 'rga-block-' + b.type;
+      el.textContent = b.text || 'ئا';
+    }
+    parent.appendChild(el);
+    rwangaEls.push(el);
+  });
+
+  // ---- Word-equivalent flow (Arial 11pt single) ----
+  var wordHost = document.getElementById('word-host');
+  var wordFlow = document.createElement('div'); wordFlow.id = 'word-flow';
+  wordHost.appendChild(wordFlow);
+  var wordEls = [];
+  data.blocks.forEach(function (b) {
+    var p = document.createElement('div'); p.className = 'w-para';
+    p.textContent = b.text || 'ئا';
+    wordFlow.appendChild(p);
+    wordEls.push(p);
+  });
+
+  await new Promise(function (r) { requestAnimationFrame(function () { r(); }); });
+
+  var rTop = editor.getBoundingClientRect().top;
+  var wTop = wordFlow.getBoundingClientRect().top;
+  var out = [];
+  for (var i = 0; i < data.blocks.length; i++) {
+    var rr = rwangaEls[i].getBoundingClientRect();
+    var wr = wordEls[i].getBoundingClientRect();
+    out.push({
+      index: data.blocks[i].index,
+      type: data.blocks[i].type,
+      sceneNumber: data.blocks[i].sceneNumber,
+      rwangaTop: rr.top - rTop,
+      rwangaBottom: rr.bottom - rTop,
+      wordTop: wr.top - wTop,
+      wordBottom: wr.bottom - wTop
+    });
+  }
+  return {
+    perBlock: out,
+    rwangaTotalPx: editor.getBoundingClientRect().height,
+    wordTotalPx: wordFlow.getBoundingClientRect().height
+  };
+};
+</script>
+</body>
+</html>

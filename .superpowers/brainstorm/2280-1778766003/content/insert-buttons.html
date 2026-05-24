@@ -1,0 +1,83 @@
+<h2>Inserting things — the "+" affordances</h2>
+<p class="subtitle">This editor has two grammars: <strong>structured screenplay</strong> (scenes) and <strong>free rich text</strong> (paragraphs, headings, notes). You described two round "+" buttons on opposite sides. Here's that idea on the actual paper page, plus two alternatives. In all three, the full block catalogue (heading, quote, list, page break, title…) is reached by typing <code>/</code> on an empty line — the "+" is only for the common moves.</p>
+
+<div class="cards">
+
+  <div class="card" data-choice="two-margins" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#141414;padding:20px 8px;min-height:230px;">
+      <div style="position:relative;width:280px;margin:0 auto;">
+        <!-- left + -->
+        <div style="position:absolute;left:-4px;top:96px;width:18px;height:18px;border-radius:50%;background:#2f6fb3;color:#fff;font-size:12px;line-height:18px;text-align:center;box-shadow:0 2px 6px rgba(0,0,0,.6);">+</div>
+        <!-- right + -->
+        <div style="position:absolute;right:-4px;top:96px;width:18px;height:18px;border-radius:50%;background:#3a3a3a;border:1px solid #6a6a6a;color:#cfcfcf;font-size:12px;line-height:17px;text-align:center;box-shadow:0 2px 6px rgba(0,0,0,.6);">+</div>
+        <div style="background:#262626;font-family:'Courier New',monospace;font-size:8px;color:#dcdcdc;padding:14px 20px;box-shadow:0 6px 18px rgba(0,0,0,.6);">
+          <div style="color:#9ecbff;font-size:6px;letter-spacing:.12em;">SCENE 1</div>
+          <div style="border-bottom:1px solid #666;padding-bottom:2px;">INT. CAFÉ - NIGHT</div>
+          <div style="margin-top:6px;">A dimly lit café. Rain on the windows.</div>
+          <div style="margin-top:2px;background:rgba(126,180,255,.12);">SARAH sits alone, an empty cup before her.<span style="border-left:1.5px solid #9ecbff;">&nbsp;</span></div>
+          <div style="margin-top:6px;text-align:center;margin-left:40px;">SARAH</div>
+          <div style="margin:0 26px;">You're late.</div>
+        </div>
+      </div>
+      <div style="color:#777;font-size:8px;margin-top:12px;font-family:sans-serif;">Both circles ride the cursor's line. <span style="color:#9ecbff;">Left (blue) = new Scene</span> — inserts a scene after this one, cursor lands in the Setting zone. <span style="color:#cfcfcf;">Right (grey) = Free text</span> — inside a scene inserts inline free-text; outside a scene inserts a paragraph.</div>
+    </div>
+    <div class="card-body">
+      <h3>A. Two circles, opposite margins</h3>
+      <p>Exactly what you described. The two grammars get one button each, on the two page margins, both tracking the cursor line. Direct actions — no menus hang off them. <code>/</code> handles everything else.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="one-popup" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#141414;padding:20px 8px;min-height:230px;">
+      <div style="position:relative;width:280px;margin:0 auto;">
+        <div style="position:absolute;left:-4px;top:96px;width:18px;height:18px;border-radius:50%;background:#2f6fb3;color:#fff;font-size:12px;line-height:18px;text-align:center;box-shadow:0 2px 6px rgba(0,0,0,.6);">+</div>
+        <div style="position:absolute;left:18px;top:90px;background:#2d2d30;border:1px solid #4a4a4a;font-family:sans-serif;font-size:7px;box-shadow:0 6px 14px rgba(0,0,0,.6);">
+          <div style="padding:3px 8px;background:#094771;color:#fff;">＋ New scene</div>
+          <div style="padding:3px 8px;color:#ccc;">＋ Free text</div>
+        </div>
+        <div style="background:#262626;font-family:'Courier New',monospace;font-size:8px;color:#dcdcdc;padding:14px 20px;box-shadow:0 6px 18px rgba(0,0,0,.6);">
+          <div style="color:#9ecbff;font-size:6px;letter-spacing:.12em;">SCENE 1</div>
+          <div style="border-bottom:1px solid #666;padding-bottom:2px;">INT. CAFÉ - NIGHT</div>
+          <div style="margin-top:6px;">A dimly lit café. Rain on the windows.</div>
+          <div style="margin-top:2px;background:rgba(126,180,255,.12);">SARAH sits alone, an empty cup before her.<span style="border-left:1.5px solid #9ecbff;">&nbsp;</span></div>
+          <div style="margin-top:6px;text-align:center;margin-left:40px;">SARAH</div>
+          <div style="margin:0 26px;">You're late.</div>
+        </div>
+      </div>
+      <div style="color:#777;font-size:8px;margin-top:12px;font-family:sans-serif;">One circle in the left margin on the cursor line. Click → a tiny 2-item popup: New scene / Free text. One click to open, one to choose.</div>
+    </div>
+    <div class="card-body">
+      <h3>B. One circle, 2-item popup</h3>
+      <p>Same two actions, but one button and a minimal popup. Keeps the right margin clear, no mousing across the page — but it's one extra click and a small menu, which you've disliked before.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="slash-only" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#141414;padding:20px 8px;min-height:230px;">
+      <div style="position:relative;width:280px;margin:0 auto;">
+        <div style="background:#262626;font-family:'Courier New',monospace;font-size:8px;color:#dcdcdc;padding:14px 20px;box-shadow:0 6px 18px rgba(0,0,0,.6);">
+          <div style="color:#9ecbff;font-size:6px;letter-spacing:.12em;">SCENE 1</div>
+          <div style="border-bottom:1px solid #666;padding-bottom:2px;">INT. CAFÉ - NIGHT</div>
+          <div style="margin-top:6px;">A dimly lit café. Rain on the windows.</div>
+          <div style="margin-top:6px;text-align:center;margin-left:40px;">SARAH</div>
+          <div style="margin:0 26px;">You're late.</div>
+          <div style="margin-top:6px;color:#888;">/<span style="border-left:1.5px solid #9ecbff;">&nbsp;</span></div>
+          <div style="background:#2d2d30;border:1px solid #4a4a4a;font-family:sans-serif;font-size:7px;margin-top:1px;width:120px;">
+            <div style="padding:2px 8px;background:#094771;color:#fff;">Scene</div>
+            <div style="padding:2px 8px;color:#ccc;">Free text</div>
+            <div style="padding:2px 8px;color:#ccc;">Heading</div>
+            <div style="padding:2px 8px;color:#ccc;">Quote · List · Page break…</div>
+          </div>
+        </div>
+      </div>
+      <div style="color:#777;font-size:8px;margin-top:12px;font-family:sans-serif;">No "+" buttons at all. Everything — scene, free text, heading, list — comes from typing <code>/</code> on an empty line. Plus Ctrl+Enter for a new scene.</div>
+    </div>
+    <div class="card-body">
+      <h3>C. Slash only, no buttons</h3>
+      <p>The cleanest page — nothing floats in the margins. But it's the least discoverable for a new writer, and you specifically asked for the visible "+" affordance.</p>
+    </div>
+  </div>
+
+</div>
+
+<p class="subtitle" style="margin-top:22px;">My recommendation: <strong>A — two circles, opposite margins</strong>. It's what you designed, it maps the two grammars to two buttons cleanly, and with a real page the two margins are natural homes for them. <code>/</code> and Ctrl+Enter still exist for power users. One caveat to confirm: on a narrow window the right margin can get tight — I'd have the right "+" tuck just inside the page edge rather than off in the desk. Pick one.</p>

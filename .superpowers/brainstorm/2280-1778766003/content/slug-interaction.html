@@ -1,0 +1,64 @@
+<h2>How you type the slug line</h2>
+<p class="subtitle">The <code>SCENE 1</code> line is auto-generated. The line below it — <code>INT. CAFÉ - NIGHT</code> — is the slug, and it has three logical parts: <strong>setting</strong> (INT/EXT, from your configurable vocabulary), <strong>location</strong> (free text), <strong>time</strong> (DAY/NIGHT/…). It went from a rigid field-box (you rejected it) to pure free text (you rejected that too). These are the three middle-ground models. All keep the box gone — the slug always <em>looks</em> like one plain uppercase line.</p>
+
+<div class="cards">
+
+  <div class="card" data-choice="zones" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#141414;padding:22px 16px;min-height:210px;">
+      <div style="background:#262626;font-family:'Courier New',monospace;font-size:9px;color:#dcdcdc;padding:14px 16px;box-shadow:0 6px 18px rgba(0,0,0,.6);">
+        <div style="color:#9ecbff;font-size:7px;letter-spacing:.12em;">SCENE 1</div>
+        <div style="border-bottom:1px solid #666;padding-bottom:3px;margin-top:3px;">
+          <span style="background:rgba(126,180,255,.22);outline:1px solid #5a8fd0;padding:0 2px;">INT.</span><span> CAFÉ </span><span style="color:#888;">- </span><span>NIGHT</span><span style="border-left:1.5px solid #9ecbff;animation:none;">&nbsp;</span>
+        </div>
+      </div>
+      <!-- on-focus picker -->
+      <div style="background:#2d2d30;border:1px solid #444;width:120px;margin-top:4px;font-family:sans-serif;font-size:8px;box-shadow:0 6px 14px rgba(0,0,0,.5);">
+        <div style="padding:3px 8px;background:#094771;color:#fff;">INT.</div>
+        <div style="padding:3px 8px;color:#ccc;">EXT.</div>
+        <div style="padding:3px 8px;color:#ccc;">INT./EXT.</div>
+        <div style="padding:3px 8px;color:#ccc;">ژوورەوە</div>
+        <div style="padding:3px 8px;color:#888;border-top:1px solid #444;">+ Edit list…</div>
+      </div>
+      <div style="color:#777;font-size:8px;margin-top:8px;font-family:sans-serif;">↹ Tab jumps Setting → Location → Time. Focusing Setting or Time opens a small pick-list from your vocabulary. Location is free text (autocompletes from locations you've used).</div>
+    </div>
+    <div class="card-body">
+      <h3>A. Segmented zones</h3>
+      <p>One plain uppercase line, but internally three zones. Tab moves between them; Setting &amp; Time are constrained to your lists; Location is free. <strong>Cannot become gibberish — each zone has rules.</strong> No box, no chip — the structure is in the cursor's behavior.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="guided" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#141414;padding:22px 16px;min-height:210px;">
+      <div style="background:#262626;font-family:'Courier New',monospace;font-size:9px;color:#dcdcdc;padding:14px 16px;box-shadow:0 6px 18px rgba(0,0,0,.6);">
+        <div style="color:#9ecbff;font-size:7px;letter-spacing:.12em;">SCENE 1</div>
+        <div style="border-bottom:1px solid #666;padding-bottom:3px;margin-top:3px;">INT. CAFÉ - NIGHT</div>
+        <div style="color:#9ecbff;font-size:7px;letter-spacing:.12em;margin-top:8px;">SCENE 2</div>
+        <div style="border-bottom:1px solid #666;padding-bottom:3px;margin-top:3px;">DUDAPADACHI BLAH <span style="color:#e0a030;">⚠</span></div>
+      </div>
+      <div style="color:#777;font-size:8px;margin-top:8px;font-family:sans-serif;">You type the whole line as text. Auto-uppercased. The setting word autocompletes from your vocab. A parser reads it live into setting/location/time. If it doesn't match a valid pattern → amber ⚠ marker + "unrecognised scene heading" in Problems.</div>
+    </div>
+    <div class="card-body">
+      <h3>B. Guided free text + validation</h3>
+      <p>Closest to a normal text line. Freedom to type, but auto-caps, setting autocomplete, live parsing, and a visible warning when the format is wrong. <strong>Gibberish is still typable — it's just flagged</strong>, not prevented.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="pill" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#141414;padding:22px 16px;min-height:210px;">
+      <div style="background:#262626;font-family:'Courier New',monospace;font-size:9px;color:#dcdcdc;padding:14px 16px;box-shadow:0 6px 18px rgba(0,0,0,.6);">
+        <div style="color:#9ecbff;font-size:7px;letter-spacing:.12em;">SCENE 1</div>
+        <div style="border-bottom:1px solid #666;padding-bottom:3px;margin-top:3px;">
+          <span style="background:#37404d;border:1px solid #5a6b80;border-radius:3px;padding:1px 5px;font-family:sans-serif;font-size:8px;color:#cfe3ff;">INT. ▾</span><span>&nbsp;CAFÉ </span><span style="color:#888;">- </span><span style="background:#37404d;border:1px solid #5a6b80;border-radius:3px;padding:1px 5px;font-family:sans-serif;font-size:8px;color:#cfe3ff;">NIGHT ▾</span>
+        </div>
+      </div>
+      <div style="color:#777;font-size:8px;margin-top:8px;font-family:sans-serif;">Setting and Time are small pickers (pills) showing your configurable vocabulary — click to choose INT/EXT/ژوورەوە/custom. The middle (location) is plain guided text. The pills are inline, not a box, but they ARE visible UI.</div>
+    </div>
+    <div class="card-body">
+      <h3>C. Pickers + free middle</h3>
+      <p>Setting &amp; Time are explicit inline pickers; Location is free text between them. Most discoverable — the choices are visible. But it reintroduces small chips of UI into the line, which is closest to what you called "the box."</p>
+    </div>
+  </div>
+
+</div>
+
+<p class="subtitle" style="margin-top:22px;">My recommendation: <strong>A — segmented zones</strong>. It's the only one that's <em>truly</em> structured (gibberish is impossible, not just flagged) while still rendering as one clean uppercase line with no box and no chips — which is what you've asked for every time. The "choose INT/EXT or ژوورەوە" need is met by the on-focus pick-list. B is too loose (you've already rejected "type anything"). C works but you'll likely feel the pills are box-creep. Pick one — and tell me: is the setting/time vocabulary a <strong>per-document</strong> list (tied to script language) or a <strong>global preference</strong>?</p>

@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>RTL Font-Chain Verification — measurement surface</title>
+<!-- Real editor CSS, same order as renderer/index.html — read-only. -->
+<link rel="stylesheet" href="../../../renderer/css/tokens.css">
+<link rel="stylesheet" href="../../../renderer/css/reset.css">
+<link rel="stylesheet" href="../../../renderer/css/shell.css">
+<link rel="stylesheet" href="../../../renderer/css/editor.css">
+<link rel="stylesheet" href="../../../renderer/css/editor-prosemirror.css">
+<link rel="stylesheet" href="../../../renderer/css/components.css">
+<link rel="stylesheet" href="../../../renderer/css/overlays.css">
+</head>
+<body>
+<div id="probe-host"></div>
+<script>
+'use strict';
+// RTL font-chain verification surface. Driven by verify.js (Electron main)
+// via window.__verify(). Replicates the editor's Flow hierarchy and a
+// PrintRenderer page sheet, then reports which font each surface resolves.
+// Reads production CSS only; changes nothing.
+
+var KU = 'سڵاو، ئەمە دەقێکی نموونەیی کوردییە بۆ پشکنینی فۆنتەکان';
+
+function kuSpan() { var s = document.createElement('span'); s.textContent = KU; return s; }
+
+// Flow editor, configured exactly as Rga.ScriptLanguage.apply() does:
+// dir + an inline font-family on #editor itself.
+function buildEditor(dir, inlineFont) {
+  var container = document.createElement('div');
+  container.id = 'editor-container';
+  container.className = 'view-flow';
+  var row = document.createElement('div');
+  row.id = 'rga-page-row';
+  row.className = 'rga-page-row';
+  var editor = document.createElement('div');
+  editor.id = 'editor';
+  editor.className = 'rga-page ProseMirror';
+  editor.setAttribute('dir', dir);
+  editor.style.fontFamily = inlineFont;          // exactly what ScriptLanguage sets
+  var body = document.createElement('div');
+  body.className = 'rga-body';
+  var scene = document.createElement('div');
+  scene.className = 'rga-scene-v3';
+  var num = document.createElement('div');
+  num.className = 'rga-scene-v3-num';
+  num.textContent = 'دیمەنی 1';
+  var content = document.createElement('div');
+  content.className = 'rga-scene-v3-content';
+  var heading = document.createElement('div');
+  heading.className = 'rga-scene-heading-v3';
+  var loc = document.createElement('span');
+  loc.className = 'rga-scene-heading-v3-location';
+  loc.appendChild(kuSpan());
+  heading.appendChild(loc);
+  var action = document.createElement('div');
+  action.className = 'rga-block-action';
+  action.appendChild(kuSpan());
+  content.appendChild(heading);
+  content.appendChild(action);
+  scene.appendChild(num);
+  scene.appendChild(content);
+  body.appendChild(scene);
+  editor.appendChild(body);
+  row.appendChild(editor);
+  container.appendChild(row);
+  return { container: container, headingSpan: loc.firstChild, actionSpan: action.firstChild };
+}
+
+// Print sheet, exactly as PrintRenderer paints it (.rga-page-sheet >
+// .rga-page-sheet-content > .rga-print-block-*). `dir` is set when the
+// document direction is rtl (the behaviour PrintRenderer is being given).
+function buildSheet(dir) {
+  var sheet = document.createElement('div');
+  sheet.className = 'rga-page-sheet';
+  if (dir) sheet.setAttribute('dir', dir);
+  var content = document.createElement('div');
+  content.className = 'rga-page-sheet-content';
+  var block = document.createElement('div');
+  block.className = 'rga-print-block rga-print-block-action';
+  block.appendChild(kuSpan());
+  var heading = document.createElement('div');
+  heading.className = 'rga-print-block rga-print-block-sceneHeading';
+  heading.appendChild(kuSpan());
+  content.appendChild(block);
+  content.appendChild(heading);
+  sheet.appendChild(content);
+  return { sheet: sheet, blockSpan: block.firstChild, headingSpan: heading.firstChild };
+}
+
+window.__verify = async function () {
+  try {
+    await document.fonts.load('400 16px "Noto Naskh Arabic"');
+    await document.fonts.load('700 16px "Noto Naskh Arabic"');
+    await document.fonts.load('400 16px "Courier Prime"');
+  } catch (e) { /* fonts.ready below still waits */ }
+  await document.fonts.ready;
+
+  var host = document.getElementById('probe-host');
+  var ku = buildEditor('rtl', 'var(--font-editor-rtl)');
+  var en = buildEditor('ltr', 'var(--font-editor)');
+  var printRtl = buildSheet('rtl');
+  var printLtr = buildSheet('');
+  host.appendChild(ku.container);
+  host.appendChild(en.container);
+  host.appendChild(printRtl.sheet);
+  host.appendChild(printLtr.sheet);
+
+  await new Promise(function (r) { requestAnimationFrame(function () { r(); }); });
+
+  // Detect the actually-rendered font: compare the target's text width
+  // against width with a forced-Naskh and a forced-Courier reference.
+  function detect(targetSpan) {
+    var cs = getComputedStyle(targetSpan);
+    function refWidth(family) {
+      var s = document.createElement('span');
+      s.textContent = KU;
+      s.style.fontFamily = family;
+      s.style.fontSize = cs.fontSize;
+      s.style.fontWeight = cs.fontWeight;
+      s.style.position = 'absolute';
+      s.style.whiteSpace = 'nowrap';
+      s.style.visibility = 'hidden';
+      host.appendChild(s);
+      return s.getBoundingClientRect().width;
+    }
+    var wTarget = targetSpan.getBoundingClientRect().width;
+    var wNaskh = refWidth('"Noto Naskh Arabic"');
+    var wCourier = refWidth('"Courier Prime"');
+    var isNaskhStack = /naskh/i.test(cs.fontFamily);
+    var widthSaysNaskh = Math.abs(wTarget - wNaskh) <= Math.abs(wTarget - wCourier);
+    return {
+      computedFamily: cs.fontFamily,
+      fontSize: cs.fontSize,
+      resolved: (isNaskhStack && widthSaysNaskh)
+        ? 'Noto Naskh Arabic'
+        : (isNaskhStack ? 'Naskh stack (width inconclusive)' : 'Courier stack → system fallback for Kurdish'),
+      wTarget: Math.round(wTarget),
+      wNaskh: Math.round(wNaskh),
+      wCourier: Math.round(wCourier)
+    };
+  }
+
+  return {
+    'flow-ku-block':     detect(ku.actionSpan),
+    'flow-ku-heading':   detect(ku.headingSpan),
+    'flow-en-block':     detect(en.actionSpan),
+    'print-rtl-block':   detect(printRtl.blockSpan),
+    'print-rtl-heading': detect(printRtl.headingSpan),
+    'print-ltr-block':   detect(printLtr.blockSpan)
+  };
+};
+</script>
+</body>
+</html>

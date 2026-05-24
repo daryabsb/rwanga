@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>RTL Calibration Probe — measurement surface</title>
+<!-- Real editor CSS, loaded in the same order as renderer/index.html so the
+     measured geometry is byte-faithful to the running editor. The probe
+     reads only; it never writes to renderer/. -->
+<link rel="stylesheet" href="../../../renderer/css/tokens.css">
+<link rel="stylesheet" href="../../../renderer/css/reset.css">
+<link rel="stylesheet" href="../../../renderer/css/shell.css">
+<link rel="stylesheet" href="../../../renderer/css/editor.css">
+<link rel="stylesheet" href="../../../renderer/css/editor-prosemirror.css">
+<link rel="stylesheet" href="../../../renderer/css/components.css">
+<link rel="stylesheet" href="../../../renderer/css/overlays.css">
+</head>
+<body>
+<div id="probe-host"></div>
+<script>
+'use strict';
+// Measurement surface for the RTL calibration probe. Driven by probe.js
+// (Electron main) via window.__run(...). Builds a faithful replica of the
+// editor's Flow-view block hierarchy and reports getBoundingClientRect
+// geometry per block. No production code is loaded or modified here.
+
+const TYPES = ['action', 'dialogue', 'character', 'parenthetical', 'sceneHeading', 'transition'];
+
+// Replicate the DOM ProseMirror + the v3 NodeViews produce.
+function makeBlock(type, text) {
+  if (type === 'sceneHeading') {
+    // SceneHeadingNodeView: flex row — setting select / em-dash / time select
+    // / slash / location span. (renderer/js/doc-types/screenplay/v3-node-views.js)
+    const h = document.createElement('div');
+    h.className = 'rga-scene-heading-v3';
+    const sel = (cls) => {
+      const s = document.createElement('select');
+      s.className = cls;
+      const o = document.createElement('option'); o.textContent = '';
+      s.appendChild(o);
+      return s;
+    };
+    h.appendChild(sel('rga-scene-heading-v3-setting'));
+    const sepA = document.createElement('span');
+    sepA.className = 'rga-scene-heading-v3-sep'; sepA.textContent = ' — ';
+    h.appendChild(sepA);
+    h.appendChild(sel('rga-scene-heading-v3-time'));
+    const sepB = document.createElement('span');
+    sepB.className = 'rga-scene-heading-v3-sep'; sepB.textContent = ' / ';
+    h.appendChild(sepB);
+    const loc = document.createElement('span');
+    loc.className = 'rga-scene-heading-v3-location';
+    loc.textContent = text;
+    h.appendChild(loc);
+    return h;
+  }
+  // action / dialogue / character / parenthetical / transition / shot —
+  // schema toDOM: <div class="rga-block-<type>">text</div>
+  const d = document.createElement('div');
+  d.className = 'rga-block-' + type;
+  d.textContent = text;
+  return d;
+}
+
+// Build the editor's Flow-view nesting:
+//   #editor-container.view-flow > .rga-page-row
+//     > #editor.rga-page.ProseMirror[dir=rtl]
+//       > .rga-body > .rga-scene-v3 > .rga-scene-v3-num + .rga-scene-v3-content
+// wrapperDir: when true, dir=rtl is ALSO set on #editor-container — this is
+// what makes the `[dir="rtl"] .ProseMirror` font rule actually match (the app
+// only sets dir on #editor itself, so the probe measures both states).
+function buildEditor(wrapperDir) {
+  const host = document.getElementById('probe-host');
+  host.innerHTML = '';
+  const container = document.createElement('div');
+  container.id = 'editor-container';
+  container.className = 'view-flow';
+  if (wrapperDir) container.setAttribute('dir', 'rtl');
+  const row = document.createElement('div');
+  row.id = 'rga-page-row';
+  row.className = 'rga-page-row';
+  const editor = document.createElement('div');
+  editor.id = 'editor';
+  editor.className = 'rga-page ProseMirror';
+  editor.setAttribute('dir', 'rtl');          // exactly what Rga.ScriptLanguage does
+  const body = document.createElement('div');
+  body.className = 'rga-body';
+  const scene = document.createElement('div');
+  scene.className = 'rga-scene-v3';
+  const num = document.createElement('div');
+  num.className = 'rga-scene-v3-num';
+  num.textContent = 'دیمەنی 1';
+  const content = document.createElement('div');
+  content.className = 'rga-scene-v3-content';
+  scene.appendChild(num);
+  scene.appendChild(content);
+  body.appendChild(scene);
+  editor.appendChild(body);
+  row.appendChild(editor);
+  container.appendChild(row);
+  host.appendChild(container);
+  return { content: content, scene: scene, num: num };
+}
+
+window.__run = async function(data) {
+  document.documentElement.style.setProperty('--page-width', data.pageWidthIn + 'in');
+
+  // Make sure the bundled @font-face faces are resolved before measuring.
+  try {
+    await document.fonts.load('400 16px "Noto Naskh Arabic"');
+    await document.fonts.load('700 16px "Noto Naskh Arabic"');
+    await document.fonts.load('400 16px "Courier Prime"');
+  } catch (e) { /* fall through; fonts.ready below still waits */ }
+  await document.fonts.ready;
+
+  const scenarios = [
+    { id: 'app-current',  desc: 'dir=rtl on #editor only (exactly as Rga.ScriptLanguage sets it)', wrapperDir: false },
+    { id: 'naskh-forced', desc: 'dir=rtl also on #editor-container (forces the [dir=rtl] .ProseMirror font rule to match)', wrapperDir: true }
+  ];
+
+  const out = { pageWidthIn: data.pageWidthIn, scenarios: [] };
+
+  for (const sc of scenarios) {
+    const built = buildEditor(sc.wrapperDir);
+    const content = built.content;
+
+    // One single-glyph reference per type → the 1-line box height.
+    const refEls = {};
+    for (const t of TYPES) {
+      const e = makeBlock(t, 'ئا');
+      content.appendChild(e);
+      refEls[t] = e;
+    }
+    // Append every sample block of the six measured types.
+    const live = [];
+    for (const s of data.samples) {
+      if (TYPES.indexOf(s.type) === -1) continue;
+      const e = makeBlock(s.type, (s.text && s.text.length) ? s.text : 'ئا');
+      content.appendChild(e);
+      live.push({ s: s, e: e });
+    }
+    await new Promise(function(r){ requestAnimationFrame(function(){ r(); }); });
+
+    const refH = {};
+    for (const t of TYPES) refH[t] = refEls[t].getBoundingClientRect().height;
+
+    const perBlock = [];
+    for (let i = 0; i < live.length; i++) {
+      const s = live[i].s, e = live[i].e;
+      const rect = e.getBoundingClientRect();
+      const cs = getComputedStyle(e);
+      const lineBox = refH[s.type] || rect.height || 1;
+      perBlock.push({
+        index: s.index,
+        type: s.type,
+        chars: (s.text || '').length,
+        heightPx: rect.height,
+        widthPx: rect.width,
+        lineBoxPx: lineBox,
+        actualLines: Math.max(1, Math.round(rect.height / lineBox)),
+        marginTopPx: parseFloat(cs.marginTop) || 0,
+        fontFamily: cs.fontFamily,
+        fontSizePx: cs.fontSize,
+        lineHeightCss: cs.lineHeight
+      });
+    }
+
+    // Per-scene chrome PageMap never models: the scene-number badge + the
+    // .rga-scene-v3 vertical margin.
+    const numRect = built.num.getBoundingClientRect();
+    const sceneCs = getComputedStyle(built.scene);
+    out.scenarios.push({
+      id: sc.id,
+      desc: sc.desc,
+      refH: refH,
+      sceneChrome: {
+        numBadgeHeightPx: numRect.height,
+        sceneMarginTopPx: parseFloat(sceneCs.marginTop) || 0,
+        sceneMarginBottomPx: parseFloat(sceneCs.marginBottom) || 0
+      },
+      perBlock: perBlock
+    });
+  }
+  return out;
+};
+</script>
+</body>
+</html>

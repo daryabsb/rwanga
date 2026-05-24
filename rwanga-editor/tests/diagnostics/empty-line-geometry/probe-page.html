@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Empty-Line Geometry Probe</title>
+<link rel="stylesheet" href="../../../renderer/css/tokens.css">
+<link rel="stylesheet" href="../../../renderer/css/reset.css">
+<link rel="stylesheet" href="../../../renderer/css/shell.css">
+<link rel="stylesheet" href="../../../renderer/css/editor.css">
+<link rel="stylesheet" href="../../../renderer/css/editor-prosemirror.css">
+<link rel="stylesheet" href="../../../renderer/css/components.css">
+<link rel="stylesheet" href="../../../renderer/css/overlays.css">
+</head>
+<body>
+<div id="probe-host-rtl"></div>
+<div id="probe-host-ltr"></div>
+<div id="print-host"></div>
+<script>
+'use strict';
+// Measures the rendered height of: a text paragraph, an empty paragraph
+// (as ProseMirror renders one), and a Flow page-break marker — in the real
+// editor CSS. Answers what the "tall empty line" near a page boundary is.
+
+function textP(t) { var p = document.createElement('p'); p.textContent = t; return p; }
+function emptyP() {
+  // ProseMirror renders an empty textblock with a trailing <br>.
+  var p = document.createElement('p');
+  var br = document.createElement('br');
+  br.className = 'ProseMirror-trailingBreak';
+  p.appendChild(br);
+  return p;
+}
+function pageMarker(n) {
+  // Built exactly as nav-index._buildPageMarkerWidget().
+  var el = document.createElement('div');
+  el.className = 'rga-page-marker';
+  el.contentEditable = 'false';
+  el.dataset.pageNumber = String(n);
+  var rule = document.createElement('span'); rule.className = 'rga-page-marker-rule';
+  var begin = document.createElement('span'); begin.className = 'rga-page-marker-begin';
+  begin.textContent = 'Page ' + n;
+  el.appendChild(rule); el.appendChild(begin);
+  return el;
+}
+
+function buildFlowEditor(dir) {
+  var host = document.getElementById('probe-host-' + dir);
+  host.innerHTML = '';
+  var container = document.createElement('div');
+  container.id = 'editor-container'; container.className = 'view-flow';
+  var row = document.createElement('div'); row.id = 'rga-page-row'; row.className = 'rga-page-row';
+  var editor = document.createElement('div');
+  editor.id = 'editor'; editor.className = 'rga-page ProseMirror';
+  editor.setAttribute('dir', dir);
+  var body = document.createElement('div'); body.className = 'rga-body';
+  editor.appendChild(body); row.appendChild(editor); container.appendChild(row); host.appendChild(container);
+  return { editor: editor, body: body };
+}
+
+window.__measure = async function (data) {
+  document.documentElement.style.setProperty('--page-width', '8.2677in');
+  try { await document.fonts.load('400 16px "Noto Naskh Arabic"'); } catch (e) {}
+  await document.fonts.ready;
+
+  var result = {};
+
+  ['rtl', 'ltr'].forEach(function (dir) {
+    var built = buildFlowEditor(dir);
+    var body = built.body;
+    // Sequence: text · text · empty · empty · empty · marker · empty · empty
+    var els = {
+      text1: textP(dir === 'rtl' ? 'دێڕی نموونە یەک' : 'sample line one'),
+      text2: textP(dir === 'rtl' ? 'دێڕی نموونە دوو' : 'sample line two'),
+      empty1: emptyP(), empty2: emptyP(), empty3: emptyP(),
+      marker: pageMarker(2),
+      empty4: emptyP(), empty5: emptyP()
+    };
+    ['text1', 'text2', 'empty1', 'empty2', 'empty3', 'marker', 'empty4', 'empty5']
+      .forEach(function (k) { body.appendChild(els[k]); });
+
+    // measured below after layout
+    result[dir] = { _els: els };
+  });
+
+  await new Promise(function (r) { requestAnimationFrame(function () { r(); }); });
+
+  ['rtl', 'ltr'].forEach(function (dir) {
+    var els = result[dir]._els;
+    var out = {};
+    Object.keys(els).forEach(function (k) {
+      var r = els[k].getBoundingClientRect();
+      out[k] = { heightPx: Math.round(r.height * 10) / 10, topPx: Math.round(r.top * 10) / 10 };
+    });
+    // gap = top-of-next minus top-of-this (what the gutter shows between numbers)
+    var order = ['text1', 'text2', 'empty1', 'empty2', 'empty3', 'marker', 'empty4', 'empty5'];
+    for (var i = 0; i < order.length - 1; i++) {
+      out[order[i]].gapToNext = Math.round((out[order[i + 1]].topPx - out[order[i]].topPx) * 10) / 10;
+    }
+    delete result[dir]._els;
+    result[dir] = out;
+  });
+
+  // Print sheet — empty vs text print block.
+  var ph = document.getElementById('print-host');
+  var sheet = document.createElement('div'); sheet.className = 'rga-page-sheet'; sheet.setAttribute('dir', 'rtl');
+  var sc = document.createElement('div'); sc.className = 'rga-page-sheet-content';
+  var pTxt = document.createElement('div'); pTxt.className = 'rga-print-block rga-print-block-action';
+  pTxt.textContent = 'دێڕی چالاکی';
+  var pEmpty = document.createElement('div'); pEmpty.className = 'rga-print-block rga-print-block-action';
+  sc.appendChild(pTxt); sc.appendChild(pEmpty); sheet.appendChild(sc); ph.appendChild(sheet);
+  await new Promise(function (r) { requestAnimationFrame(function () { r(); }); });
+  result.print = {
+    textBlock: Math.round(pTxt.getBoundingClientRect().height * 10) / 10,
+    emptyBlock: Math.round(pEmpty.getBoundingClientRect().height * 10) / 10
+  };
+
+  return result;
+};
+</script>
+</body>
+</html>

@@ -1,0 +1,72 @@
+<h2>The toolbar — does it stay?</h2>
+<p class="subtitle">A screenplay is mostly plain Courier. Bold/italic are rare; block types (action/character/dialogue) are handled by Tab/Enter, not buttons; annotate/tag/flag already live on right-click. So the question is honest: how much persistent chrome does this page actually need? You've valued a clean page and "not invading" — here's how that applies to the toolbar.</p>
+
+<div class="cards">
+
+  <div class="card" data-choice="persistent" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#141414;padding:18px 14px;min-height:210px;">
+      <div style="background:#2d2d30;border-bottom:1px solid #444;padding:5px 8px;font-family:sans-serif;font-size:8px;color:#bbb;display:flex;gap:8px;align-items:center;">
+        <b>B</b> <i>I</i> <u>U</u> <span style="color:#666;">|</span> <span>A▾</span> <span>▦</span> <span style="color:#666;">|</span> <span style="border:1px solid #555;padding:0 4px;">Paragraph ▾</span> <span style="margin-left:auto;color:#888;">✎ ⌗ ⚑ ↶ ↷</span>
+      </div>
+      <div style="background:#262626;font-family:'Courier New',monospace;font-size:8px;color:#dcdcdc;padding:12px 18px;box-shadow:0 6px 16px rgba(0,0,0,.5);">
+        <div style="color:#9ecbff;font-size:6px;letter-spacing:.12em;">SCENE 1</div>
+        <div style="border-bottom:1px solid #666;">INT. CAFÉ - NIGHT</div>
+        <div style="margin-top:6px;">A dimly lit café. Rain on the windows.</div>
+        <div style="margin-top:6px;text-align:center;margin-left:40px;">SARAH</div>
+        <div style="margin:0 26px;">You're late.</div>
+      </div>
+      <div style="color:#777;font-size:8px;margin-top:10px;font-family:sans-serif;">A bar always sits above the page. Buttons grey out when not applicable. This is what the implementer already built.</div>
+    </div>
+    <div class="card-body">
+      <h3>A. Persistent top toolbar</h3>
+      <p>Always visible. Most discoverable. But it's a permanent strip of chrome for tools used rarely in a screenplay — and it eats vertical space above every page.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="floating" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#141414;padding:18px 14px;min-height:210px;">
+      <div style="position:relative;">
+        <div style="background:#262626;font-family:'Courier New',monospace;font-size:8px;color:#dcdcdc;padding:12px 18px;box-shadow:0 6px 16px rgba(0,0,0,.5);margin-top:24px;">
+          <div style="color:#9ecbff;font-size:6px;letter-spacing:.12em;">SCENE 1</div>
+          <div style="border-bottom:1px solid #666;">INT. CAFÉ - NIGHT</div>
+          <div style="margin-top:6px;">A dimly lit café. <span style="background:#3a5a8a;">Rain on the windows.</span></div>
+          <div style="margin-top:6px;text-align:center;margin-left:40px;">SARAH</div>
+          <div style="margin:0 26px;">You're late.</div>
+        </div>
+        <!-- floating bar above selection -->
+        <div style="position:absolute;left:60px;top:30px;background:#2d2d30;border:1px solid #555;border-radius:4px;padding:3px 6px;font-family:sans-serif;font-size:8px;color:#ddd;display:flex;gap:7px;box-shadow:0 4px 12px rgba(0,0,0,.7);"><b>B</b><i>I</i><u>U</u><span style="color:#666;">|</span><span>A▾</span><span>▦</span><span style="color:#666;">|</span><span>✎</span><span>⌗</span><span>⚑</span></div>
+      </div>
+      <div style="color:#777;font-size:8px;margin-top:10px;font-family:sans-serif;">Nothing above the page. Select text → a compact bar pops up over the selection with formatting + annotate/tag/flag. Disappears when you deselect.</div>
+    </div>
+    <div class="card-body">
+      <h3>B. Floating selection toolbar only</h3>
+      <p>Zero persistent chrome — the page is pure. Tools appear exactly when relevant (text selected), where you're looking. Medium / Notion pattern. Block context still shows in the status bar.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="hybrid" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#141414;padding:18px 14px;min-height:210px;">
+      <div style="position:relative;">
+        <div style="background:#252526;border-bottom:1px solid #3a3a3a;padding:4px 8px;font-family:sans-serif;font-size:8px;color:#999;display:flex;gap:8px;">
+          <span style="border:1px solid #4a4a4a;padding:0 5px;border-radius:3px;">Action ▾</span>
+          <span style="margin-left:auto;">↶ ↷</span>
+        </div>
+        <div style="background:#262626;font-family:'Courier New',monospace;font-size:8px;color:#dcdcdc;padding:12px 18px;box-shadow:0 6px 16px rgba(0,0,0,.5);">
+          <div style="color:#9ecbff;font-size:6px;letter-spacing:.12em;">SCENE 1</div>
+          <div style="border-bottom:1px solid #666;">INT. CAFÉ - NIGHT</div>
+          <div style="margin-top:6px;">A dimly lit café. <span style="background:#3a5a8a;">Rain.</span></div>
+          <div style="margin-top:6px;text-align:center;margin-left:40px;">SARAH</div>
+        </div>
+        <div style="position:absolute;left:70px;top:46px;background:#2d2d30;border:1px solid #555;border-radius:4px;padding:3px 6px;font-family:sans-serif;font-size:8px;color:#ddd;display:flex;gap:7px;box-shadow:0 4px 12px rgba(0,0,0,.7);"><b>B</b><i>I</i><u>U</u><span>✎</span><span>⌗</span><span>⚑</span></div>
+      </div>
+      <div style="color:#777;font-size:8px;margin-top:10px;font-family:sans-serif;">A slim persistent strip with only context controls (current block type, undo/redo). All formatting + writer actions move to the floating selection bar.</div>
+    </div>
+    <div class="card-body">
+      <h3>C. Hybrid — slim context strip + floating bar</h3>
+      <p>A minimal always-on strip for the two things that benefit from being persistent (block type, undo/redo), with formatting on the floating bar. Compromise between discoverability and a clean page.</p>
+    </div>
+  </div>
+
+</div>
+
+<p class="subtitle" style="margin-top:22px;">My recommendation: <strong>B — floating selection toolbar only</strong>. It's the toolbar equivalent of "don't invade" — no permanent chrome, the page is the page, tools appear only when you've selected something to act on. The status bar already carries block type and active scene, so the persistent strip in A/C is mostly redundant. If you find yourself wanting block type always visible while writing, C is the fallback. Pick one — and that's the last interaction question; after this I'll lay out the full design for your approval.</p>

@@ -1,0 +1,83 @@
+<h2>Section 2 — Four-Phase Trajectory</h2>
+<p class="subtitle">Months are <strong>post v01-launch</strong>. Numbers are order-of-magnitude estimates to calibrate decisions, not commitments. They get refined as Phase 1 actuals come in.</p>
+
+<style>
+  .phase-grid { display: grid; grid-template-columns: 1fr; gap: 1rem; margin: 1.5rem 0; }
+  @media (min-width: 900px) { .phase-grid { grid-template-columns: 1fr 1fr; } }
+  .phase { border: 1px solid var(--border, #d0d0d0); border-radius: 8px; padding: 1rem 1.25rem; background: var(--card-bg, #fff); }
+  .phase-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.75rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border, #d0d0d0); }
+  .phase-name { font-weight: 700; font-size: 1.1rem; }
+  .phase-window { font-size: 0.85rem; opacity: 0.7; }
+  .phase-row { display: flex; gap: 0.5rem; padding: 0.4rem 0; font-size: 0.9rem; align-items: baseline; }
+  .phase-row .label { flex: 0 0 90px; opacity: 0.7; }
+  .phase-row .val { flex: 1; }
+  .trigger { background: rgba(100, 150, 255, 0.08); padding: 0.5rem 0.75rem; border-radius: 4px; margin-top: 0.75rem; font-size: 0.88rem; }
+  .trigger strong { color: #4477cc; }
+</style>
+
+<div class="phase-grid">
+  <div class="phase">
+    <div class="phase-header">
+      <span class="phase-name">Phase 1 — Zero State</span>
+      <span class="phase-window">Months 0-3</span>
+    </div>
+    <div class="phase-row"><span class="label">Ships</span><span class="val">v01 IDE (free + Pro entitlement, branded PDF / DOCX); Platform with hard signup gate, email confirm, project mgmt basics, light AI touchpoints (title suggestions, smart search) via Ollama/Gemma free + Claude Pro</span></div>
+    <div class="phase-row"><span class="label">Infra</span><span class="val">1 platform server (Django + DB) + 1 small VPS for Ollama + Claude API key</span></div>
+    <div class="phase-row"><span class="label">Team</span><span class="val">You, evenings/weekends</span></div>
+    <div class="phase-row"><span class="label">Monthly cost</span><span class="val">~$60-230 (infra $30-80, Claude $10-50, ads $20-100)</span></div>
+    <div class="phase-row"><span class="label">Monthly rev</span><span class="val">$0-200 (a few Pro trickle in)</span></div>
+    <div class="phase-row"><span class="label">Marketing</span><span class="val">Personal Kurdish/ME film community outreach, first YouTube/Medium tutorials, $20-100 experimental IG/TikTok ads</span></div>
+    <div class="trigger"><strong>Trigger to Phase 2:</strong> ~50-100 confirmed accounts + steady IDE downloads + no critical production bugs</div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-header">
+      <span class="phase-name">Phase 2 — Adoption</span>
+      <span class="phase-window">Months 3-9</span>
+    </div>
+    <div class="phase-row"><span class="label">Ships</span><span class="val">IDE iteration on user feedback, Platform UX polish, content cadence (YouTube weekly, blog), localized landing pages (Kurdish/Arabic), maybe additional Pro perks (templates library, project archives)</span></div>
+    <div class="phase-row"><span class="label">Infra</span><span class="val">Same shape, slight DB/storage growth as user uploads accumulate</span></div>
+    <div class="phase-row"><span class="label">Team</span><span class="val">You, evenings/weekends; possibly a Kurdish community part-timer for translation/outreach (gig-rate)</span></div>
+    <div class="phase-row"><span class="label">Monthly cost</span><span class="val">~$230-750 (infra $80-200, Claude $50-150, ads $100-400)</span></div>
+    <div class="phase-row"><span class="label">Monthly rev</span><span class="val">$300-1500 MRR target</span></div>
+    <div class="phase-row"><span class="label">Marketing</span><span class="val">Email-list activation (the asset you've been building from day 1), scaled paid ads to top-performing personas, partnership feelers with Kurdish/ME film schools</span></div>
+    <div class="trigger"><strong>Trigger to Phase 3:</strong> MRR consistently &gt; (infra + Claude) → profitable; ~500-1000 active accounts; email list of 1500+</div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-header">
+      <span class="phase-name">Phase 3 — Monetization Maturity</span>
+      <span class="phase-window">Months 9-18</span>
+    </div>
+    <div class="phase-row"><span class="label">Ships</span><span class="val">v2 AI launch pair: <strong>cross-language collab</strong> (the headline) + <strong>script breakdown</strong>. Credit pack billing. 100MB free cloud sync tier. Platform binding (push from IDE to Project).</span></div>
+    <div class="phase-row"><span class="label">Infra</span><span class="val">Scale platform server (more RAM or 2nd instance), DB scale, AI inference via hosted APIs (Anthropic/Google/Together) — variable cost from here on</span></div>
+    <div class="phase-row"><span class="label">Team</span><span class="val">First hire: support + community ops (part-time → full-time as MRR allows). You still product/engineering.</span></div>
+    <div class="phase-row"><span class="label">Monthly cost</span><span class="val">~$800-2900 (infra $200-600, AI $300-1500, marketing $300-800)</span></div>
+    <div class="phase-row"><span class="label">Monthly rev</span><span class="val">$2000-6000 MRR (Pro subs + credit packs)</span></div>
+    <div class="phase-row"><span class="label">Marketing</span><span class="val">"Cross-language collab" demo as headline content; the Swedish↔Saudi pitch video; conference / festival presence</span></div>
+    <div class="trigger"><strong>Trigger to Phase 4:</strong> MRR &gt; your day-job income reliably for 2-3 months → you go full-time on Rwanga</div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-header">
+      <span class="phase-name">Phase 4 — Reinvestment Scaling</span>
+      <span class="phase-window">Months 18+</span>
+    </div>
+    <div class="phase-row"><span class="label">Ships</span><span class="val">Full v2 AI rollout. v2.5 chatbot (right-inspector). More language anchors (Arabic, Persian). MCP/CLI delivery surfaces. Advanced Platform Pro features. Dataset pipeline + fine-tune prep.</span></div>
+    <div class="phase-row"><span class="label">Infra</span><span class="val">Multi-region or cloud-native scaling. Dedicated AI inference budget. Phase-2 fine-tune deploy via Together/Fireworks if dataset ready.</span></div>
+    <div class="phase-row"><span class="label">Team</span><span class="val">2-4 people: you (full-time, product+eng), ops/community hire (now full-time), maybe 1 engineer, contractor curators per language</span></div>
+    <div class="phase-row"><span class="label">Monthly cost</span><span class="val">~$8.5K-26K (infra $1K-3K, AI $1.5K-5K, marketing $1K-3K, team $5K-15K)</span></div>
+    <div class="phase-row"><span class="label">Monthly rev</span><span class="val">$15K-40K MRR target</span></div>
+    <div class="phase-row"><span class="label">Marketing</span><span class="val">Cross-cultural collaboration as category narrative. Conference circuit. Strategic partnerships (Slemani University Cinema Dept, festivals)</span></div>
+    <div class="trigger"><strong>Phase exit:</strong> Stable team, sustainable margins, conscious decision point: stay indie at scale, raise to accelerate, or hold steady</div>
+  </div>
+</div>
+
+<div class="section" style="margin-top: 1.5rem;">
+  <span class="label">Three things worth pointing out</span>
+  <p><strong>1. Phase 1 cost ceiling is low enough that your day job covers any shortfall comfortably.</strong> Even worst-case ($230/mo costs, $0 revenue), that's well under a typical month's restaurant budget. Risk is low; learning per dollar is high.</p>
+  <p><strong>2. Phase 3 is where the v2 AI brainstorm actually executes.</strong> Don't ship v2 AI in Phase 1 or 2 — the dataset isn't there, the user base isn't there, and the cost ramp would crater unit economics. The Phase 2 free-tier accumulation IS the dataset for Phase 3's fine-tune.</p>
+  <p><strong>3. The Phase 3→4 trigger (MRR &gt; day job) is the most important business milestone</strong> — it converts a side project into a company. Plan the support hire (Phase 3) to happen <em>before</em> you go full-time, so you're never simultaneously hiring and leaving stability.</p>
+</div>
+
+<p class="subtitle" style="margin-top: 1.5rem;">Does this 4-phase shape match your intent? Respond in terminal — approve, push back on numbers, or ask to revise specific phases.</p>
