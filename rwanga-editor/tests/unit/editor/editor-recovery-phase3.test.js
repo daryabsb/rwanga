@@ -188,6 +188,10 @@ test('Phase 3: no new ownership introduced — no new shell module file', () => 
     'script-language.js', 'script-metrics.js',
     'script-session.js', 'session-boundary.js', 'sidebar.js',
     'status-bar.js', 'studio-panel.js', 'title-bar.js', 'toast.js',
+    // Settings Architecture Doctrine substrate (added Slice 2 — distinct
+    // owner of the tier-resolved settings store; consumers subscribe via
+    // its public API; not Phase 3 ownership creep).
+    'settings-store.js',
     // Shell Doctrine §4 workspace-tab registry (added Slice 1 —
     // distinct owner of the workspace-kind registration map; consumed
     // by TabManager.openWorkspace; not Phase 3 ownership creep).

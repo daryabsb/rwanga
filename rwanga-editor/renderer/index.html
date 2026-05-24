@@ -522,6 +522,10 @@
     <!-- Workspaces registry — must load BEFORE tab-manager.js so
          TabManager.openWorkspace can resolve Rga.Workspaces.get(kind). -->
     <script src="js/shell/workspaces.js"></script>
+    <!-- Settings Store substrate (Slice 2). Loads BEFORE consumers
+         (the applicator below + future settings UI). init() is async
+         and idempotent; consumers can call it freely and await. -->
+    <script src="js/shell/settings-store.js"></script>
     <script src="js/tab-manager.js"></script>
     <script src="js/close-guard.js"></script>
     <script src="js/autosave.js"></script>
@@ -663,6 +667,10 @@
 <script src="js/editor/mount.js"></script>
 <script src="js/editor/page-surface.js"></script>
 <script src="js/editor/page-setup-dialog.js"></script>
+<!-- Settings applicator (Slice 2 proof). Subscribes to
+     editor.highlightCurrentLine and toggles a class on #editor.
+     Loaded AFTER mount.js so #editor exists when init() runs. -->
+<script src="js/editor/highlight-current-line.js"></script>
 <script src="js/editor/shortcuts.js"></script>
 <script src="js/view-mode.js"></script>
 <script src="js/units.js"></script>
@@ -1349,6 +1357,12 @@
     registerCommands();
     registerShortcuts();
     Rga.EditorShortcuts && Rga.EditorShortcuts.registerShortcuts();
+    // Settings Store init + applicators (Slice 2). Store.init() is
+    // idempotent; applicators await it internally so order here is
+    // not load-bearing. Fire-and-forget — boot continues synchronously.
+    if (Rga.Editor && Rga.Editor.initHighlightCurrentLine) {
+      Rga.Editor.initHighlightCurrentLine();
+    }
     Rga.ScriptLanguage.init();
     // Slice 2 entry #1 resolution: Rga.StatusBar.init() removed.
     // Rga.Shell.StatusBar (commits 3 + 8) populates #status-bar now.

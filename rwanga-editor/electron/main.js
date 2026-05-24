@@ -8,6 +8,7 @@ const { spawn } = require('child_process');
 const filesBridge = require('./bridge/files');
 const windowControls = require('./bridge/window-controls');
 const autosaveBridge = require('./bridge/autosave');
+const prefsBridge = require('./bridge/prefs');
 const { buildMenu, registerIpc: registerMenuIpc } = require('./menu');
 
 let mainWindow = null;
@@ -121,6 +122,7 @@ if (!gotLock) {
     windowControls.register();
     registerMenuIpc();
     autosaveBridge.register();
+    prefsBridge.register();
     // Persistence Safety Contract §6.1 — the renderer's close verdict.
     ipcMain.handle('app.closeResponse', (_event, allow) => {
       if (_closeTimer) { clearTimeout(_closeTimer); _closeTimer = null; }
