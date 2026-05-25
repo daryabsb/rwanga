@@ -8,6 +8,15 @@
 .rga-settings-workspace {
   display: grid;
   grid-template-columns: 240px 1fr;
+  /* Pin the single grid row to fill the workspace height. Without
+     this the row would auto-size to its content's max-content
+     height, growing the workspace beyond its parent and forcing
+     #editor-container to scroll the ENTIRE workspace (rail and
+     content together). With 1fr + the per-column min-height:0
+     overrides below, .rga-settings-nav and .rga-settings-content
+     each become independent scroll containers and overflow-y:auto
+     actually engages. */
+  grid-template-rows: 1fr;
   width: 100%;
   height: 100%;
   background: var(--editor-bg);
@@ -21,6 +30,11 @@
   border-right: 1px solid var(--border-subtle);
   padding: 16px 0;
   overflow-y: auto;
+  /* CSS Grid items default to min-height:auto which won't shrink
+     below content's intrinsic size. Setting min-height:0 lets the
+     grid honor the 1fr track size, which in turn lets overflow-y:
+     auto engage when the nav list is taller than the column. */
+  min-height: 0;
 }
 
 .rga-settings-nav-item {
@@ -50,8 +64,17 @@
 }
 
 .rga-settings-content {
-  padding: 32px 40px;
+  /* No top padding here — moved inside the sticky header below so
+     when the header pins it sits at the very top of the scroll
+     viewport with no exposed strip above it. Side + bottom padding
+     stay so rows have their original column inset. */
+  padding: 0 40px 32px;
   overflow-y: auto;
+  /* Same min-height:0 reason as .rga-settings-nav above — lets the
+     1fr grid track honor the workspace's height so overflow-y:auto
+     creates a real scroll container instead of the whole workspace
+     overflowing into #editor-container. */
+  min-height: 0;
 }
 
 .rga-settings-content-title {
@@ -80,20 +103,33 @@
    ============================================================ */
 
 .rga-settings-content-header {
-  margin-bottom: 24px;
-  /* Sticky header so search stays pinned to the top of the content
-     column as rows scroll. Background is opaque-ish (uses the editor
-     desk token, same as the workspace root) so rows that scroll
-     beneath the search are masked instead of bleeding through. */
+  /* Sticky header — pins to the top of .rga-settings-content's scroll
+     viewport so search + section title stay visible as rows scroll.
+
+     The parent (.rga-settings-content) had its padding-top moved into
+     this header (padding-top:32px below). When pinned at top:0 the
+     header naturally sits at the very top of the scroll viewport with
+     no exposed strip above it where rows could bleed through.
+
+     Coverage rules:
+       1. background:var(--editor-bg) is a fully-opaque hex in both
+          themes (#141414 / #d6d6d6). Rows scrolling behind the band
+          are fully masked.
+       2. The parent's L/R padding (40px each) is intact, so the band
+          reaches edge-to-edge inside the column's content-box; rows
+          (also inset by that same 40px) cannot bleed past the band
+          on the left or right.
+       3. z-index:10 keeps the band above any future row decoration
+          that introduces its own stacking context.
+       4. border-bottom gives a subtle separator so the user perceives
+          where sticky ends and scrollable content begins. */
   position: sticky;
   top: 0;
-  z-index: 2;
+  z-index: 10;
   background: var(--editor-bg);
-  /* Tighten the original 24px bottom margin into padding so the
-     sticky band has the spacing built in (margin on a sticky element
-     leaves a visible gap above when scrolled). */
-  margin-bottom: 0;
-  padding-bottom: 24px;
+  margin: 0 0 24px 0;
+  padding: 32px 0 16px;
+  border-bottom: 1px solid var(--border-subtle);
 }
 
 .rga-settings-search-input {

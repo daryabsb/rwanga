@@ -1945,31 +1945,40 @@ body.view-print-preview-active #rga-shell-toolbar { display: none; }
    inspector rail when the active surface isn't an editor).
    ============================================================ */
 
-/* (1) Per-element hide. Bare class for unforeseen targets; enumerated
-   id+class for the canonical surfaces so id-display rules elsewhere
-   in the file don't beat us on specificity.
-   Toolbar is intentionally excluded from the display:none list — see
-   the freeze rule directly below. */
-.rga-hidden-by-workspace-policy,
+/* (1) Per-element hide. Surfaces that collapse via display:none —
+   their grid track is freed in (2) below. The id+class selectors
+   raise specificity to (1,1,0) so id-display rules elsewhere in the
+   file don't beat us. */
 #bottom-panel.rga-hidden-by-workspace-policy,
 #inspector-panel.rga-hidden-by-workspace-policy { display: none; }
 
 /* Toolbar geometry freeze — when policy hides the toolbar, the row
-   it occupies on #app must STAY at its full height so the tab bar
+   it occupies on #app must STAY at its natural height so the tab bar
    (immediately below) does not jump vertically when switching to a
-   workspace tab. visibility:hidden keeps the element's layout box
-   (the row stays); pointer-events:none makes it inert. Per WAI-ARIA,
-   visibility:hidden also removes the subtree from the accessibility
-   tree, so screen readers skip it without an explicit aria-hidden.
-   The explicit display:grid re-establishes the toolbar's normal
-   inner grid layout — the toolbar id+class selector is excluded from
-   the display:none enumeration above, but display:grid here is a
-   safety net so any future re-ordering can't silently collapse the
-   row. */
+   workspace tab.
+
+   IMPORTANT — no hardcoded height, no display override, no fixed-px
+   reservation. The toolbar keeps its existing #rga-shell-toolbar.rga-
+   shell-toolbar layout (display:grid, height:36px declared elsewhere
+   in this file ~line 950) verbatim. We only flip visibility (which
+   preserves the layout box) and disable pointer-events (so the inert
+   chrome can't capture clicks). Per WAI-ARIA, visibility:hidden also
+   removes the subtree from the accessibility tree, so screen readers
+   skip it without an explicit aria-hidden. */
 #rga-shell-toolbar.rga-hidden-by-workspace-policy {
-  display: grid;
   visibility: hidden;
   pointer-events: none;
+}
+
+/* Fallback for any future surface added to _CHROME_TARGETS without
+   its own enumerated rule above. :where() carries zero specificity,
+   and :not(#rga-shell-toolbar) explicitly opts the toolbar out of
+   the default display:none. The bare class (0,1,0) loses to the
+   id+class rules above (1,1,0), so this fallback is only the active
+   rule for unforeseen targets — the enumerated rules win for the
+   canonical surfaces. */
+:where(.rga-hidden-by-workspace-policy):not(#rga-shell-toolbar) {
+  display: none;
 }
 
 /* (2) Per-container grid-track collapse — recovers the space the
