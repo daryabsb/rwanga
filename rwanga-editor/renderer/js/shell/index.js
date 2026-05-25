@@ -147,17 +147,12 @@
       });
     });
 
-    // Cmd-, → Settings panel toggle.
-    KR.registerCommand({
-      command: 'panel.settings',
-      label: 'Settings',
-      key: ',', mods: { ctrl: true },
-      handler: function() {
-        if (Rga.Shell.Sidebar.registered().indexOf('settings') < 0) return;
-        _togglePanel('settings');
-      },
-      source: 'Rga.Shell (panel toggle: settings)'
-    });
+    // Cmd-, ownership moved to Slice 5A's settings-workspace.js. The
+    // prior 'panel.settings' command toggled a sidebar panel that was
+    // never registered (the handler short-circuited on the guard), so
+    // the binding was effectively dead. view.openSettings now owns the
+    // accelerator and opens the Settings workspace tab via
+    // TabManager.openWorkspace('settings').
 
     // Cmd-B → Sidebar visibility toggle.
     // Responsive Shell: also flag userOverride so the responsive engine

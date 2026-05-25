@@ -17,6 +17,8 @@
   <link rel="stylesheet" href="css/editor-prosemirror.css">
   <link rel="stylesheet" href="css/components.css">
   <link rel="stylesheet" href="css/overlays.css">
+  <!-- Slice 5A — Settings workspace skeleton (rail + content area). -->
+  <link rel="stylesheet" href="css/settings-workspace.css">
 </head>
 <body>
 
@@ -665,6 +667,11 @@
      removed or kept as a debug aid once Settings ships as the first
      real workspace tab. -->
 <script src="js/shell/workspaces/hello-world.js"></script>
+<!-- Slice 5A — Settings workspace skeleton. Loads AFTER settings-
+     layout.js (already loaded earlier in the substrate chain) and
+     workspaces.js so Rga.Workspaces.register + Rga.Settings.Layout
+     resolve at register time. Binds Ctrl+, via KeyboardRegistry. -->
+<script src="js/shell/workspaces/settings-workspace.js"></script>
 <script src="js/shell/status-bar.js"></script>
 <script src="js/shell/title-bar.js"></script>
 <script src="js/shell/index.js"></script>
