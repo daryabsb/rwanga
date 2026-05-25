@@ -549,6 +549,10 @@
          any applicator-module file so register() resolves. The boot
          path calls Store.init() then Applicators.applyAll() once. -->
     <script src="js/shell/settings-applicators.js"></script>
+    <!-- Shell / appearance settings applicators (Slice 4B) — registers
+         appearance.editorDeskColor (CSS var on documentElement) and
+         appearance.statusBar (rga-no-status-bar class on body). -->
+    <script src="js/shell/shell-applicators.js"></script>
     <script src="js/tab-manager.js"></script>
     <script src="js/close-guard.js"></script>
     <script src="js/autosave.js"></script>

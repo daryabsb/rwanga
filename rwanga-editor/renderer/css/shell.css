@@ -457,6 +457,13 @@
   border-top: 1px solid var(--border-subtle);
 }
 
+/* Slice 4B — appearance.statusBar=false. Zeros the grid-row token
+   so the row collapses, then hides the element itself. The class is
+   absent in the default visible state, so the standing layout is
+   untouched. */
+body.rga-no-status-bar { --status-bar-height: 0; }
+body.rga-no-status-bar #status-bar { display: none; }
+
 .status-left,
 .status-right {
   display: flex;

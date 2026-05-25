@@ -371,6 +371,11 @@ test('§E: no new shell module file (StudioPanel is and remains the single owner
     // bridges Store ↔ surface handlers. Each applicator module is
     // one register() call. No overlap with StudioPanel.
     'settings-applicators.js',
+    // 'shell-applicators.js' — Shell / appearance applicators
+    // (Slice 4B). Distinct owner: appearance.editorDeskColor
+    // (--editor-bg on documentElement) + appearance.statusBar
+    // (rga-no-status-bar class on body). No overlap with StudioPanel.
+    'shell-applicators.js',
     // 'workspaces.js' — Shell Doctrine §4 workspace-tab registry.
     // Distinct owner: registration map of workspace-kind tabs
     // (Settings, Welcome, …). TabManager.openWorkspace queries it.

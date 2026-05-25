@@ -211,6 +211,10 @@ test('Phase 3: no new ownership introduced — no new shell module file', () => 
     // register / apply / applyAll registry that bridges Store ↔
     // surface handlers; not Phase 3 ownership creep).
     'settings-applicators.js',
+    // Shell / appearance applicators (added Slice 4B — distinct
+    // owner of appearance.editorDeskColor + appearance.statusBar
+    // wiring; not Phase 3 ownership creep).
+    'shell-applicators.js',
     // Shell Doctrine §4 workspace-tab registry (added Slice 1 —
     // distinct owner of the workspace-kind registration map; consumed
     // by TabManager.openWorkspace; not Phase 3 ownership creep).
