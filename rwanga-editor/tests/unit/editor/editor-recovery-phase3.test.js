@@ -192,6 +192,10 @@ test('Phase 3: no new ownership introduced — no new shell module file', () => 
     // owner of the tier-resolved settings store; consumers subscribe via
     // its public API; not Phase 3 ownership creep).
     'settings-store.js',
+    // Settings Registry (added Slice 3A — distinct owner of the
+    // declarative settings inventory; the store reads built-in
+    // defaults from it; not Phase 3 ownership creep).
+    'settings-registry.js',
     // Shell Doctrine §4 workspace-tab registry (added Slice 1 —
     // distinct owner of the workspace-kind registration map; consumed
     // by TabManager.openWorkspace; not Phase 3 ownership creep).

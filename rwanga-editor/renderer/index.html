@@ -522,9 +522,13 @@
     <!-- Workspaces registry — must load BEFORE tab-manager.js so
          TabManager.openWorkspace can resolve Rga.Workspaces.get(kind). -->
     <script src="js/shell/workspaces.js"></script>
-    <!-- Settings Store substrate (Slice 2). Loads BEFORE consumers
-         (the applicator below + future settings UI). init() is async
-         and idempotent; consumers can call it freely and await. -->
+    <!-- Settings Registry (Slice 3A) — declarative truth for every
+         setting in the product. Must load BEFORE settings-store so
+         the store can read built-in defaults from it. -->
+    <script src="js/shell/settings-registry.js"></script>
+    <!-- Settings Store substrate. Loads BEFORE consumers (applicators
+         + future settings UI). init() is async and idempotent;
+         consumers can call it freely and await. -->
     <script src="js/shell/settings-store.js"></script>
     <script src="js/tab-manager.js"></script>
     <script src="js/close-guard.js"></script>

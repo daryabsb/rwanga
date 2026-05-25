@@ -114,6 +114,10 @@ test('Bundle 2 §B: no new shell module file (boot-script wiring only — preser
     // distinct owner of the tier-resolved settings store; consumers
     // subscribe via its public API; not Bundle 2 ownership creep).
     'settings-store.js',
+    // Settings Registry (added Slice 3A — distinct owner of the
+    // declarative settings inventory; the store reads built-in
+    // defaults from it; not Bundle 2 ownership creep).
+    'settings-registry.js',
     // Shell Doctrine §4 workspace-tab registry (added Slice 1 —
     // distinct owner of workspace registration map; consumed by
     // TabManager.openWorkspace; not Bundle 2 ownership creep).

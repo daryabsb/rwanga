@@ -347,6 +347,11 @@ test('§E: no new shell module file (StudioPanel is and remains the single owner
     // API. No overlap with StudioPanel (which owns bottom-panel +
     // inspector).
     'settings-store.js',
+    // 'settings-registry.js' — Settings Registry (Slice 3A).
+    // Distinct owner: declarative inventory of every setting in the
+    // product (62 entries, 16-field shape). The store reads built-in
+    // defaults from it. No overlap with StudioPanel.
+    'settings-registry.js',
     // 'workspaces.js' — Shell Doctrine §4 workspace-tab registry.
     // Distinct owner: registration map of workspace-kind tabs
     // (Settings, Welcome, …). TabManager.openWorkspace queries it.

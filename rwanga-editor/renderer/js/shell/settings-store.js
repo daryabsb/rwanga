@@ -1,5 +1,5 @@
 // Copyright (c) 2026 Rwanga. Licensed under Apache 2.0.
-// Settings Architecture Doctrine — substrate (Slice 2).
+// Settings Architecture Doctrine — substrate.
 //
 // Single source of truth for setting values across the renderer.
 // Tier cascade (top wins):
@@ -8,16 +8,22 @@
 //   Script   → doc.settings on the active document (travels with .rga)
 //   Project  → STUB (always undefined; live in a later slice)
 //   User     → window.rwanga.prefs (per-user, persisted to disk)
-//   Built-in → BUILTINS table below
+//   Built-in → Rga.Settings.Registry.getDefault(id)
 //
-// Slice 2 ships:
+// Built-in defaults come from the Settings Registry (Slice 3A). The
+// store does not enumerate defaults itself — it just consults the
+// registry at read time. The registry is loaded as a sibling shell
+// module and may be absent in early-boot or unit-test scaffolding;
+// _getBuiltin() returns undefined in that case (same behavior as
+// an unknown id).
+//
+// Substrate ships:
 //   - the cascade resolver (effective)
 //   - per-tier read/write (get / set)
 //   - subscribe / unsubscribe with change-only emission
 //   - re-emit on `editor.tabActivated` for script-tier effective changes
 //
-// Slice 2 explicitly does NOT ship:
-//   - a settings registry (BUILTINS is a tiny inline map here)
+// Substrate explicitly does NOT ship:
 //   - validators, migration, undo, restart-required handling
 //   - any UI or applicator wiring (applicators are independent consumers
 //     that subscribe to ids they care about)
@@ -26,12 +32,6 @@
 (function() {
   const Rga = window.Rga = window.Rga || {};
   Rga.Settings = Rga.Settings || {};
-
-  // Built-in defaults. Slice 2 ships ONE proof setting only — later
-  // slices replace this map with a registry-driven defaults table.
-  const BUILTINS = {
-    'editor.highlightCurrentLine': true
-  };
 
   // ----------------------------------------------------------------
   // Per-tier state
@@ -59,7 +59,9 @@
   // ----------------------------------------------------------------
 
   function _getBuiltin(id) {
-    return Object.prototype.hasOwnProperty.call(BUILTINS, id) ? BUILTINS[id] : undefined;
+    const reg = Rga.Settings && Rga.Settings.Registry;
+    if (!reg || typeof reg.getDefault !== 'function') return undefined;
+    return reg.getDefault(id);
   }
 
   function _activeDoc() {
@@ -277,7 +279,6 @@
     effective:   effective,
     subscribe:   subscribe,
     unsubscribe: unsubscribe,
-    _reset:      _reset,
-    _BUILTINS:   BUILTINS
+    _reset:      _reset
   };
 })();

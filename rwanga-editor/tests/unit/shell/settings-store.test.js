@@ -49,7 +49,12 @@ function bootDom(opts) {
 }
 
 function loadStore() {
+  // Registry loads BEFORE the store — the store reads built-in
+  // defaults via Rga.Settings.Registry.getDefault(id). Same load
+  // order as renderer/index.html.
+  delete require.cache[require.resolve('../../../renderer/js/shell/settings-registry.js')];
   delete require.cache[require.resolve('../../../renderer/js/shell/settings-store.js')];
+  require('../../../renderer/js/shell/settings-registry.js');
   require('../../../renderer/js/shell/settings-store.js');
   return global.window.Rga.Settings.Store;
 }
