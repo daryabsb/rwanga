@@ -73,3 +73,105 @@
   font-size: 12px;
   font-style: italic;
 }
+
+/* ============================================================
+   Slice 5B — content header (search), rows, and empty state.
+   Rows are READ-ONLY in 5B; editable controls land in 5C+.
+   ============================================================ */
+
+.rga-settings-content-header {
+  margin-bottom: 24px;
+}
+
+.rga-settings-search-input {
+  display: block;
+  width: 100%;
+  max-width: 480px;
+  margin-bottom: 20px;
+  padding: 8px 12px;
+  background: var(--surface-secondary, rgba(255, 255, 255, 0.04));
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 13px;
+  outline: none;
+}
+
+.rga-settings-search-input:focus {
+  border-color: var(--accent-primary, #007acc);
+}
+
+.rga-settings-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.rga-settings-row {
+  padding: 14px 16px;
+  background: var(--surface-secondary, rgba(255, 255, 255, 0.03));
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+}
+
+.rga-settings-row.is-pro {
+  border-left: 2px solid var(--accent-gold, #c9a227);
+}
+
+.rga-settings-row-header {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.rga-settings-row-label {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.rga-settings-row-type-chip,
+.rga-settings-row-pro-marker {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: var(--surface-tertiary, rgba(255, 255, 255, 0.06));
+  color: var(--text-tertiary, #999);
+}
+
+.rga-settings-row-pro-marker {
+  color: var(--accent-gold, #c9a227);
+  background: rgba(201, 162, 39, 0.12);
+}
+
+.rga-settings-row-description {
+  margin: 0 0 6px 0;
+  color: var(--text-secondary, #cfcfcf);
+  font-size: 12px;
+  max-width: 60ch;
+}
+
+.rga-settings-row-value {
+  margin: 0;
+  font-family: var(--font-mono, ui-monospace, Menlo, Consolas, monospace);
+  font-size: 12px;
+  color: var(--text-primary);
+}
+
+.rga-settings-empty {
+  padding: 32px 0;
+  text-align: center;
+  color: var(--text-tertiary, #999);
+  font-size: 13px;
+}
+
+.rga-settings-empty-message {
+  margin: 0;
+}
