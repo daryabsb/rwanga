@@ -122,6 +122,11 @@
     // reveal their own [data-renderer="workspace"][data-workspace-kind=…].
     _applyRendererVisibility(tab);
 
+    // Workspace chrome ownership — apply the active tab's editor-chrome
+    // policy. Document tabs always get the full editor chrome; workspaces
+    // get whatever they declared via Rga.Workspaces.register({ chrome }).
+    _applyChromePolicy(tab);
+
     if (tab.kind === 'document') {
       if (editorView && tab.editorState) {
         editorView.updateState(tab.editorState);
@@ -140,6 +145,50 @@
 
     document.dispatchEvent(new CustomEvent('editor.tabActivated', { detail: { tabId } }));
     if (typeof _saveSession === 'function') _saveSession();
+  }
+
+  // Editor-only shell chrome that workspaces opt in/out of via
+  // Rga.Workspaces.register({ chrome }). Document tabs always get the
+  // full set; workspaces get whatever they declared (defaults to all
+  // true via _normalizeChrome in workspaces.js). The targets are
+  // resolved by selector at apply time so the policy survives any
+  // future re-id of the surfaces.
+  const _CHROME_TARGETS = {
+    toolbar:     '#rga-shell-toolbar',
+    bottomPanel: '#bottom-panel',
+    inspector:   '#inspector-panel'
+  };
+
+  function _resolveChromePolicy(tab) {
+    // Document tab, or no tab at all (empty state): full editor chrome.
+    if (!tab || tab.kind !== 'workspace') {
+      return (Rga.Workspaces && Rga.Workspaces._CHROME_DEFAULTS) ||
+             { toolbar: true, bottomPanel: true, inspector: true };
+    }
+    // Workspace tab: read from the cached registration. _normalizeChrome
+    // at registration time already merged defaults, so policy carries
+    // all three keys as booleans.
+    if (tab._registration && tab._registration.chrome) {
+      return tab._registration.chrome;
+    }
+    return (Rga.Workspaces && Rga.Workspaces._CHROME_DEFAULTS) ||
+           { toolbar: true, bottomPanel: true, inspector: true };
+  }
+
+  function _applyChromePolicy(tab) {
+    const policy = _resolveChromePolicy(tab);
+    Object.keys(_CHROME_TARGETS).forEach(function(key) {
+      const el = document.querySelector(_CHROME_TARGETS[key]);
+      if (!el) return;
+      if (policy[key]) {
+        // Clear inline display so any other system that manages this
+        // element's visibility (StudioPanel collapse, inspector-collapsed
+        // class on #workspace, format-toolbar mode CSS) resumes ownership.
+        el.style.display = '';
+      } else {
+        el.style.display = 'none';
+      }
+    });
   }
 
   // Walk children of #tab-content-host and reveal only the active
@@ -275,6 +324,9 @@
         activeTabId = null;
         setNoDocState(true);
         renderTabBar();
+        // No tab is active — restore the default editor chrome so the
+        // empty state does not inherit a closed workspace's hidden bars.
+        _applyChromePolicy(null);
         if (editorView) {
           const emptyState = window.RgaProseMirror.EditorState.create({
             schema: editorView.state.schema,
@@ -435,6 +487,9 @@
     renderTabBar,
     bootSession: bootSession,
     _saveSession: _saveSession,
-    _editorView: function() { return editorView; }
+    _editorView: function() { return editorView; },
+    // Test hook — exercise the chrome policy with a synthetic tab
+    // without booting the full TabManager / editor stack.
+    _applyChromePolicy: _applyChromePolicy
   };
 })();

@@ -522,6 +522,14 @@
     title: 'Settings',
     icon: 'settings',
     restoreOnSession: false,
+    // Editor-only shell chrome is suppressed while Settings is active —
+    // Settings is its own surface, not "the editor with Settings on it."
+    // TabManager.activate() reads this policy and hides the targets.
+    chrome: {
+      toolbar:     false,
+      bottomPanel: false,
+      inspector:   false
+    },
     mount: function(el) {
       _buildSkeleton(el);
     },
