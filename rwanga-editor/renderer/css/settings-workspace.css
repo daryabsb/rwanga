@@ -160,9 +160,109 @@
 
 .rga-settings-row-value {
   margin: 0;
-  font-family: var(--font-mono, ui-monospace, Menlo, Consolas, monospace);
   font-size: 12px;
   color: var(--text-primary);
+}
+
+/* Read-only fallback for unsupported types — keeps the 5B look. */
+.rga-settings-row-value.is-readonly {
+  font-family: var(--font-mono, ui-monospace, Menlo, Consolas, monospace);
+}
+
+/* ============================================================
+   Slice 5C — editable controls.
+   Scoped strictly inside .rga-settings-row-value (workspace local).
+   No global var / class changes.
+   ============================================================ */
+
+.rga-settings-row-restart-marker {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: rgba(255, 196, 64, 0.12);
+  color: #d6a800;
+}
+
+.rga-settings-control-toggle {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: var(--accent-primary, #007acc);
+}
+
+.rga-settings-control-toggle:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.rga-settings-control-select,
+.rga-settings-control-text,
+.rga-settings-control-number {
+  display: inline-block;
+  min-width: 180px;
+  padding: 6px 10px;
+  background: var(--surface-tertiary, rgba(255, 255, 255, 0.06));
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 12px;
+  outline: none;
+}
+
+.rga-settings-control-number {
+  min-width: 100px;
+  width: 100px;
+}
+
+.rga-settings-control-text {
+  min-width: 280px;
+  width: 100%;
+  max-width: 480px;
+}
+
+.rga-settings-control-select:focus,
+.rga-settings-control-text:focus,
+.rga-settings-control-number:focus {
+  border-color: var(--accent-primary, #007acc);
+}
+
+.rga-settings-control-select:disabled,
+.rga-settings-control-text:disabled,
+.rga-settings-control-number:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.rga-settings-control-radio {
+  display: inline-flex;
+  gap: 12px;
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+
+.rga-settings-control-radio-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.rga-settings-control-radio-option input[type="radio"] {
+  cursor: pointer;
+  accent-color: var(--accent-primary, #007acc);
+}
+
+.rga-settings-control-radio-option input[type="radio"]:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
 }
 
 .rga-settings-empty {

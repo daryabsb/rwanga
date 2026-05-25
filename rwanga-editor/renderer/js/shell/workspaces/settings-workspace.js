@@ -1,9 +1,12 @@
 // Copyright (c) 2026 Rwanga. Licensed under Apache 2.0.
-// Settings workspace — Slices 5A + 5B.
+// Settings workspace — Slices 5A + 5B + 5C.
 //
 // 5A: workspace tab skeleton (left nav rail + content area).
 // 5B: read-only rows for the active section + search box that
 //     filters across every registered setting.
+// 5C: editable controls for safe registry types.
+//     Safe types this slice: toggle, select, radio, number, text.
+//     Other types stay read-only and are listed in the slice report.
 //
 // Mode model:
 //   - section mode (default): rows belong to the currently selected
@@ -12,20 +15,31 @@
 //     across ALL registered settings. The empty-state element
 //     appears when no entry matches.
 //
-// Renderer scope (intentionally narrow for Slice 5B):
-//   - one row per visible setting: label, description, current
-//     effective value (as text), type chip
-//   - requiresPro entries carry an .is-pro class + a marker element
-//   - NO editable controls inside rows (those land with Slice 5C+)
-//   - NO tier badges, advanced toggle, reset buttons, restart banner
+// Control contract (5C):
+//   - Every editable control writes through Rga.Settings.Store.set.
+//   - Store.set returns boolean. On false the prior effective value
+//     is restored on the control (no visual commit of an invalid
+//     value) and no UI error is surfaced this slice.
+//   - requiresPro rows render a disabled control. No writes are
+//     attempted on them.
+//   - restartRequired rows are editable plus a small marker chip.
+//     No restart banner / restart-action UI in this slice.
+//   - A per-row Store subscription keeps the control in sync if the
+//     value changes externally (e.g. a tab switch flips the script-
+//     tier effective value).
+//   - Unsupported types (slider / color / shortcut / margins) fall
+//     back to the 5B read-only paragraph.
 'use strict';
 
 (function() {
   const Rga = window.Rga = window.Rga || {};
   if (!Rga.Workspaces || typeof Rga.Workspaces.register !== 'function') return;
 
+  // Types this slice renders as editable controls.
+  const EDITABLE_TYPES = new Set(['toggle', 'select', 'radio', 'number', 'text']);
+
   // --------------------------------------------------------------
-  // Value formatting
+  // Value formatting (read-only fallback for unsupported types)
   // --------------------------------------------------------------
 
   function _formatValue(entry, value) {
@@ -54,13 +68,155 @@
   }
 
   // --------------------------------------------------------------
+  // Editable-control factory
+  //
+  // Returns { element, sync(value), wire(row) }:
+  //   - element: the input / select / fieldset to mount in the row
+  //   - sync(v): updates the control's visible value to v (used by
+  //     the Store subscriber and by revert-on-reject)
+  //   - wire(row): attaches change handler that calls Store.set and
+  //     registers a Store subscription. Returns an unsubscribe fn.
+  //
+  // Disabled handling: if entry.requiresPro the control is rendered
+  // with the disabled attribute and wire() registers no change
+  // handler (no writes are possible).
+  // --------------------------------------------------------------
+
+  function _makeControl(entry) {
+    switch (entry.type) {
+      case 'toggle': return _makeToggle(entry);
+      case 'select': return _makeSelect(entry);
+      case 'radio':  return _makeRadio(entry);
+      case 'number': return _makeNumber(entry);
+      case 'text':   return _makeText(entry);
+      default:       return null;
+    }
+  }
+
+  function _makeToggle(entry) {
+    const input = document.createElement('input');
+    input.type = 'checkbox';
+    input.className = 'rga-settings-control-toggle';
+    input.setAttribute('data-control-for', entry.id);
+    input.checked = !!_currentValue(entry);
+    if (entry.requiresPro) input.disabled = true;
+
+    function sync(value) { input.checked = !!value; }
+    function readValue() { return input.checked; }
+    return { element: input, sync: sync, readValue: readValue };
+  }
+
+  function _makeSelect(entry) {
+    const select = document.createElement('select');
+    select.className = 'rga-settings-control-select';
+    select.setAttribute('data-control-for', entry.id);
+    if (entry.requiresPro) select.disabled = true;
+    (entry.options || []).forEach(function(opt) {
+      const o = document.createElement('option');
+      o.value = String(opt);
+      o.textContent = String(opt);
+      select.appendChild(o);
+    });
+    const cur = _currentValue(entry);
+    if (cur !== undefined && cur !== null) select.value = String(cur);
+
+    function sync(value) {
+      if (value === undefined || value === null) return;
+      select.value = String(value);
+    }
+    function readValue() { return select.value; }
+    return { element: select, sync: sync, readValue: readValue };
+  }
+
+  function _makeRadio(entry) {
+    const group = document.createElement('fieldset');
+    group.className = 'rga-settings-control-radio';
+    group.setAttribute('role', 'radiogroup');
+    group.setAttribute('data-control-for', entry.id);
+
+    const cur = _currentValue(entry);
+    const inputs = [];
+    (entry.options || []).forEach(function(opt) {
+      const label = document.createElement('label');
+      label.className = 'rga-settings-control-radio-option';
+      const input = document.createElement('input');
+      input.type = 'radio';
+      input.name = 'rga-setting-' + entry.id;
+      input.value = String(opt);
+      input.checked = String(cur) === String(opt);
+      if (entry.requiresPro) input.disabled = true;
+      const span = document.createElement('span');
+      span.textContent = String(opt);
+      label.appendChild(input);
+      label.appendChild(span);
+      group.appendChild(label);
+      inputs.push(input);
+    });
+
+    function sync(value) {
+      const s = (value === undefined || value === null) ? '' : String(value);
+      inputs.forEach(function(i) { i.checked = i.value === s; });
+    }
+    function readValue() {
+      const sel = inputs.find(function(i) { return i.checked; });
+      return sel ? sel.value : undefined;
+    }
+    return { element: group, sync: sync, readValue: readValue, _inputs: inputs };
+  }
+
+  function _makeNumber(entry) {
+    const input = document.createElement('input');
+    input.type = 'number';
+    input.className = 'rga-settings-control-number';
+    input.setAttribute('data-control-for', entry.id);
+    if (entry.requiresPro) input.disabled = true;
+    const cur = _currentValue(entry);
+    if (typeof cur === 'number' && Number.isFinite(cur)) {
+      input.value = String(cur);
+    }
+
+    function sync(value) {
+      if (typeof value === 'number' && Number.isFinite(value)) {
+        input.value = String(value);
+      } else if (value === undefined || value === null) {
+        input.value = '';
+      } else {
+        input.value = String(value);
+      }
+    }
+    function readValue() {
+      const raw = input.value;
+      if (raw === '' || raw === null || raw === undefined) return NaN;
+      return Number(raw);
+    }
+    return { element: input, sync: sync, readValue: readValue };
+  }
+
+  function _makeText(entry) {
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'rga-settings-control-text';
+    input.setAttribute('data-control-for', entry.id);
+    if (entry.requiresPro) input.disabled = true;
+    const cur = _currentValue(entry);
+    input.value = (cur === undefined || cur === null) ? '' : String(cur);
+
+    function sync(value) {
+      input.value = (value === undefined || value === null) ? '' : String(value);
+    }
+    function readValue() { return input.value; }
+    return { element: input, sync: sync, readValue: readValue };
+  }
+
+  // --------------------------------------------------------------
   // Row rendering
   // --------------------------------------------------------------
 
-  function _buildRow(entry) {
+  function _buildRow(entry, subs) {
     const row = document.createElement('article');
     row.className = 'rga-settings-row';
     if (entry.requiresPro) row.classList.add('is-pro');
+    if (entry.restartRequired) row.classList.add('is-restart-required');
     row.setAttribute('data-setting-id', entry.id);
 
     const header = document.createElement('header');
@@ -85,6 +241,13 @@
       header.appendChild(pro);
     }
 
+    if (entry.restartRequired) {
+      const restart = document.createElement('span');
+      restart.className = 'rga-settings-row-restart-marker';
+      restart.textContent = 'Restart required';
+      header.appendChild(restart);
+    }
+
     row.appendChild(header);
 
     const desc = document.createElement('p');
@@ -92,12 +255,67 @@
     desc.textContent = entry.description || '';
     row.appendChild(desc);
 
-    const value = document.createElement('p');
-    value.className = 'rga-settings-row-value';
-    value.textContent = _formatValue(entry, _currentValue(entry));
-    row.appendChild(value);
+    const valueSlot = document.createElement('div');
+    valueSlot.className = 'rga-settings-row-value';
+    row.appendChild(valueSlot);
 
+    if (EDITABLE_TYPES.has(entry.type)) {
+      const ctrl = _makeControl(entry);
+      if (ctrl) {
+        valueSlot.appendChild(ctrl.element);
+        _wireControl(entry, ctrl, subs);
+        return row;
+      }
+    }
+
+    // Read-only fallback (unsupported types + safety net).
+    valueSlot.classList.add('is-readonly');
+    valueSlot.textContent = _formatValue(entry, _currentValue(entry));
     return row;
+  }
+
+  function _wireControl(entry, ctrl, subs) {
+    const Store = Rga.Settings && Rga.Settings.Store;
+    if (!Store) return;
+
+    if (entry.requiresPro) {
+      // No change handler, no subscription — just ensure visual state
+      // reflects current effective value if it changes elsewhere.
+      const unsub = Store.subscribe(entry.id, function(newVal) {
+        ctrl.sync(newVal);
+      });
+      subs.push(unsub);
+      return;
+    }
+
+    let priorValue = _currentValue(entry);
+    let suppressNext = false;
+
+    function onChange() {
+      const newValue = ctrl.readValue();
+      // Reject NaN on number inputs without touching the store.
+      if (entry.type === 'number' && (typeof newValue !== 'number' || !Number.isFinite(newValue))) {
+        suppressNext = true;
+        ctrl.sync(priorValue);
+        return;
+      }
+      const ok = Store.set(entry.id, newValue);
+      if (!ok) {
+        suppressNext = true;
+        ctrl.sync(priorValue);
+        return;
+      }
+      priorValue = newValue;
+    }
+
+    ctrl.element.addEventListener('change', onChange);
+
+    const unsub = Store.subscribe(entry.id, function(newVal) {
+      if (suppressNext) { suppressNext = false; return; }
+      priorValue = newVal;
+      ctrl.sync(newVal);
+    });
+    subs.push(unsub);
   }
 
   // Public-ish helper exposed via _workspaceInternals — lets unit
@@ -105,10 +323,33 @@
   // up the full layout.
   function renderRowsInto(host, entries) {
     if (!host) return;
+    _clearSubs(host);
     host.innerHTML = '';
+    const subs = _subsFor(host);
     entries.forEach(function(entry) {
-      host.appendChild(_buildRow(entry));
+      host.appendChild(_buildRow(entry, subs));
     });
+  }
+
+  // --------------------------------------------------------------
+  // Per-host subscription registry
+  //
+  // Keeps unsubscribers alive for the lifetime of a row-set so they
+  // can be cleanly torn down on re-render or unmount.
+  // --------------------------------------------------------------
+
+  function _subsFor(host) {
+    if (!host._rgaSettingsSubs) host._rgaSettingsSubs = [];
+    return host._rgaSettingsSubs;
+  }
+
+  function _clearSubs(host) {
+    if (!host || !host._rgaSettingsSubs) return;
+    host._rgaSettingsSubs.forEach(function(unsub) {
+      try { if (typeof unsub === 'function') unsub(); }
+      catch (err) { console.warn('[settings-workspace] unsubscribe threw:', err); }
+    });
+    host._rgaSettingsSubs = [];
   }
 
   // --------------------------------------------------------------
@@ -285,6 +526,8 @@
       _buildSkeleton(el);
     },
     unmount: function(el) {
+      const rowsHost = el.querySelector('.rga-settings-rows');
+      if (rowsHost) _clearSubs(rowsHost);
       el.innerHTML = '';
       el.removeAttribute('data-active-section-id');
       el.classList.remove('rga-settings-workspace');
@@ -314,6 +557,8 @@
   Rga.Settings = Rga.Settings || {};
   Rga.Settings._workspaceInternals = {
     renderRowsInto: renderRowsInto,
-    _formatValue:   _formatValue
+    _formatValue:   _formatValue,
+    _editableTypes: Array.from(EDITABLE_TYPES),
+    _makeControl:   _makeControl
   };
 })();

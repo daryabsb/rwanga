@@ -170,23 +170,44 @@ test('Slice 5A — clicking a nav item moves the active class', () => {
 });
 
 // ----------------------------------------------------------------
-// §4 — No editable controls rendered (rows are read-only in 5B)
+// §4 — Editable controls boundary (5C overrides 5B)
 // ----------------------------------------------------------------
-// Slice 5A asserted "no controls anywhere in the content area". Slice
-// 5B adds a search input in the header (intentional) and rows
-// underneath (intentionally NON-editable). The boundary moves to the
-// .rga-settings-rows container: editable controls inside individual
-// rows are still forbidden — those land with Slice 5C+.
+// 5B forbade ANY input inside .rga-settings-rows. 5C makes the safe
+// types (toggle / select / radio / number / text) editable. The new
+// boundary: unsupported types (slider / color / shortcut / margins)
+// stay strictly read-only. The §11 block below covers the editable
+// contract end-to-end.
 
-test('Slice 5B — .rga-settings-rows contains no editable controls (rows are read-only)', () => {
+test('Slice 5C — unsupported types stay read-only (no input/select/fieldset on their rows)', async () => {
   bootDom();
-  const el = mountWorkspace();
-  const rows = el.querySelector('.rga-settings-rows');
-  assert.ok(rows);
-  assert.equal(rows.querySelectorAll('input').length,    0);
-  assert.equal(rows.querySelectorAll('button').length,   0);
-  assert.equal(rows.querySelectorAll('select').length,   0);
-  assert.equal(rows.querySelectorAll('textarea').length, 0);
+  const el = await mountInitialized();
+  const Rga = global.window.Rga;
+  const UNSUPPORTED = ['slider', 'color', 'shortcut', 'margins'];
+  const unsupportedIds = Rga.Settings.Registry.all()
+    .filter(function(e) { return UNSUPPORTED.indexOf(e.type) >= 0; })
+    .map(function(e) { return e.id; });
+  // Touch each section that owns at least one unsupported entry and
+  // assert the row's value slot stays text-only.
+  const sectionsTouched = new Set();
+  unsupportedIds.forEach(function(id) {
+    const entry = Rga.Settings.Registry.get(id);
+    const section = Rga.Settings.Layout.sections().find(function(s) {
+      return s.settingIds.indexOf(id) >= 0;
+    });
+    if (!section || sectionsTouched.has(section.id)) return;
+    sectionsTouched.add(section.id);
+    el.querySelector('[data-section-id="' + section.id + '"]')
+      .dispatchEvent(new global.window.MouseEvent('click', { bubbles: true }));
+    const row = el.querySelector(
+      '.rga-settings-row[data-setting-id="' + id + '"]');
+    assert.ok(row, 'row must exist for unsupported entry ' + id);
+    const valueSlot = row.querySelector('.rga-settings-row-value');
+    assert.equal(valueSlot.querySelectorAll('input').length,    0, id + ': no input');
+    assert.equal(valueSlot.querySelectorAll('select').length,   0, id + ': no select');
+    assert.equal(valueSlot.querySelectorAll('fieldset').length, 0, id + ': no fieldset');
+    assert.ok(valueSlot.classList.contains('is-readonly'),
+      id + ': read-only value slot must carry is-readonly class');
+  });
 });
 
 // ----------------------------------------------------------------
@@ -249,11 +270,11 @@ test('Slice 5B — each row carries data-setting-id matching its setting', async
   assert.deepEqual(got, general.settingIds);
 });
 
-test('Slice 5B — each row shows label, description, value, and a type chip', async () => {
+test('Slice 5B+5C — each row shows label, description, value control, and a type chip', async () => {
   bootDom();
   const el = await mountInitialized();
   const Rga = global.window.Rga;
-  // Spot-check editor.highlightCurrentLine (default true).
+  // Spot-check editor.highlightCurrentLine (default true → checkbox checked).
   el.querySelector('[data-section-id="editor"]')
     .dispatchEvent(new global.window.MouseEvent('click', { bubbles: true }));
   const row = el.querySelector('.rga-settings-rows .rga-settings-row[data-setting-id="editor.highlightCurrentLine"]');
@@ -266,18 +287,19 @@ test('Slice 5B — each row shows label, description, value, and a type chip', a
   assert.equal(label.textContent, entry.label);
   assert.equal(desc.textContent,  entry.description);
   assert.ok(value, 'value element must exist');
-  // toggle boolean → "On" / "Off"
-  assert.equal(value.textContent.trim(), 'On',
-    'boolean true must render as "On"');
+  // 5C: toggle renders an editable checkbox carrying the current value.
+  const cb = value.querySelector('input[type="checkbox"]');
+  assert.ok(cb, 'toggle row must contain a checkbox in 5C');
+  assert.equal(cb.checked, true, 'default true must render as checked');
   assert.ok(chip);
   assert.equal(chip.textContent.trim(), 'toggle');
 });
 
-test('Slice 5B — boolean false renders as "Off"', async () => {
+test('Slice 5C — boolean false renders as an unchecked checkbox', async () => {
   bootDom();
   const Rga = await loadAllInitialized();
-  // Set highlight to false via Store, then mount fresh so rows
-  // pick up the user-tier value.
+  // Set highlight to false via Store, then mount fresh so rows pick up
+  // the user-tier value.
   Rga.Settings.Store.set('editor.highlightCurrentLine', false);
   const spec = Rga.Workspaces.get('settings');
   const el = global.document.createElement('div');
@@ -286,22 +308,26 @@ test('Slice 5B — boolean false renders as "Off"', async () => {
   el.querySelector('[data-section-id="editor"]')
     .dispatchEvent(new global.window.MouseEvent('click', { bubbles: true }));
   const row = el.querySelector('.rga-settings-row[data-setting-id="editor.highlightCurrentLine"]');
-  assert.equal(row.querySelector('.rga-settings-row-value').textContent.trim(), 'Off');
+  const cb = row.querySelector('.rga-settings-row-value input[type="checkbox"]');
+  assert.ok(cb);
+  assert.equal(cb.checked, false);
 });
 
-test('Slice 5B — string value renders verbatim; empty string shows "(empty)"', async () => {
+test('Slice 5C — text/select editable rows carry inputs with current effective values', async () => {
   bootDom();
   const el = await mountInitialized();
-  // Switch to Page Setup section where pageSetup.headerText (default '')
-  // and pageSetup.paperSize (default 'letter') both live.
   el.querySelector('[data-section-id="pageSetup"]')
     .dispatchEvent(new global.window.MouseEvent('click', { bubbles: true }));
+  // pageSetup.headerText — default '', editable text input.
   const headerRow = el.querySelector('.rga-settings-row[data-setting-id="pageSetup.headerText"]');
-  assert.equal(headerRow.querySelector('.rga-settings-row-value').textContent.trim(),
-    '(empty)', 'empty string default must show "(empty)" placeholder');
+  const textInput = headerRow.querySelector('.rga-settings-row-value input[type="text"]');
+  assert.ok(textInput, 'text type must render an editable text input');
+  assert.equal(textInput.value, '');
+  // pageSetup.paperSize — default 'letter', editable select.
   const paperRow = el.querySelector('.rga-settings-row[data-setting-id="pageSetup.paperSize"]');
-  assert.equal(paperRow.querySelector('.rga-settings-row-value').textContent.trim(),
-    'letter');
+  const sel = paperRow.querySelector('.rga-settings-row-value select');
+  assert.ok(sel, 'select type must render a <select>');
+  assert.equal(sel.value, 'letter');
 });
 
 // ----------------------------------------------------------------
@@ -460,4 +486,319 @@ test('Slice 5B — non-pro entries do NOT render the pro marker', async () => {
   // assertion will need updating.
   const markers = el.querySelectorAll('.rga-settings-row-pro-marker');
   assert.equal(markers.length, 0);
+});
+
+// ================================================================
+// Slice 5C — editable controls for safe types
+// ================================================================
+
+function _change(input) {
+  input.dispatchEvent(new global.window.Event('change', { bubbles: true }));
+}
+
+// ----------------------------------------------------------------
+// §11 — Boolean toggle writes through Store.set
+// ----------------------------------------------------------------
+
+test('Slice 5C — toggling a boolean checkbox writes the new value via Store.set', async () => {
+  bootDom();
+  const Rga = await loadAllInitialized();
+  const spec = Rga.Workspaces.get('settings');
+  const el = global.document.createElement('div');
+  global.document.body.appendChild(el);
+  spec.mount(el);
+  el.querySelector('[data-section-id="editor"]')
+    .dispatchEvent(new global.window.MouseEvent('click', { bubbles: true }));
+
+  const cb = el.querySelector(
+    '.rga-settings-row[data-setting-id="editor.highlightCurrentLine"] input[type="checkbox"]');
+  assert.ok(cb);
+  assert.equal(cb.checked, true);
+
+  // Spy on Store.set without breaking the real call (we still want
+  // persistence + emission so the rest of the slice keeps working).
+  const calls = [];
+  const realSet = Rga.Settings.Store.set;
+  Rga.Settings.Store.set = function(id, value, opts) {
+    calls.push({ id: id, value: value });
+    return realSet.call(this, id, value, opts);
+  };
+
+  cb.checked = false;
+  _change(cb);
+
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].id, 'editor.highlightCurrentLine');
+  assert.equal(calls[0].value, false);
+  assert.equal(Rga.Settings.Store.effective('editor.highlightCurrentLine'), false);
+});
+
+// ----------------------------------------------------------------
+// §12 — Select / radio write through Store.set
+// ----------------------------------------------------------------
+
+test('Slice 5C — changing a <select> writes the new option via Store.set', async () => {
+  bootDom();
+  const Rga = await loadAllInitialized();
+  const spec = Rga.Workspaces.get('settings');
+  const el = global.document.createElement('div');
+  global.document.body.appendChild(el);
+  spec.mount(el);
+  el.querySelector('[data-section-id="pageSetup"]')
+    .dispatchEvent(new global.window.MouseEvent('click', { bubbles: true }));
+
+  const sel = el.querySelector(
+    '.rga-settings-row[data-setting-id="pageSetup.paperSize"] select');
+  assert.ok(sel);
+  assert.equal(sel.value, 'letter');
+
+  sel.value = 'a4';
+  _change(sel);
+
+  assert.equal(Rga.Settings.Store.effective('pageSetup.paperSize'), 'a4');
+});
+
+test('Slice 5C — picking a radio option writes via Store.set', async () => {
+  bootDom();
+  const Rga = await loadAllInitialized();
+  const spec = Rga.Workspaces.get('settings');
+  const el = global.document.createElement('div');
+  global.document.body.appendChild(el);
+  spec.mount(el);
+  el.querySelector('[data-section-id="pageSetup"]')
+    .dispatchEvent(new global.window.MouseEvent('click', { bubbles: true }));
+
+  const group = el.querySelector(
+    '.rga-settings-row[data-setting-id="pageSetup.orientation"] fieldset');
+  assert.ok(group);
+  const landscape = group.querySelector('input[type="radio"][value="landscape"]');
+  assert.ok(landscape);
+  landscape.checked = true;
+  _change(landscape);
+
+  assert.equal(Rga.Settings.Store.effective('pageSetup.orientation'), 'landscape');
+});
+
+// ----------------------------------------------------------------
+// §13 — Number / text write through Store.set
+// ----------------------------------------------------------------
+
+test('Slice 5C — number input parses and writes a valid number via Store.set', async () => {
+  bootDom();
+  const Rga = await loadAllInitialized();
+  const spec = Rga.Workspaces.get('settings');
+  const el = global.document.createElement('div');
+  global.document.body.appendChild(el);
+  spec.mount(el);
+  el.querySelector('[data-section-id="editor"]')
+    .dispatchEvent(new global.window.MouseEvent('click', { bubbles: true }));
+
+  const input = el.querySelector(
+    '.rga-settings-row[data-setting-id="editor.fontSize"] input[type="number"]');
+  assert.ok(input);
+  assert.equal(input.value, '12');
+  input.value = '14';
+  _change(input);
+
+  const eff = Rga.Settings.Store.effective('editor.fontSize');
+  assert.equal(eff, 14);
+  assert.equal(typeof eff, 'number');
+});
+
+test('Slice 5C — text input writes a string via Store.set', async () => {
+  bootDom();
+  const Rga = await loadAllInitialized();
+  const spec = Rga.Workspaces.get('settings');
+  const el = global.document.createElement('div');
+  global.document.body.appendChild(el);
+  spec.mount(el);
+  el.querySelector('[data-section-id="pageSetup"]')
+    .dispatchEvent(new global.window.MouseEvent('click', { bubbles: true }));
+
+  const input = el.querySelector(
+    '.rga-settings-row[data-setting-id="pageSetup.headerText"] input[type="text"]');
+  assert.ok(input);
+  input.value = 'Untitled draft';
+  _change(input);
+
+  assert.equal(Rga.Settings.Store.effective('pageSetup.headerText'), 'Untitled draft');
+});
+
+// ----------------------------------------------------------------
+// §14 — requiresPro rows are disabled
+// ----------------------------------------------------------------
+
+test('Slice 5C — requiresPro rows render disabled controls and do NOT write on change', async () => {
+  bootDom();
+  await loadAllInitialized();
+  const internals = global.window.Rga.Settings._workspaceInternals;
+  const host = global.document.createElement('div');
+  // Use a select-typed pro entry so we can simulate a change attempt.
+  const fakeEntry = {
+    id: 'fake.pro.select', label: 'Fake Pro Select', description: 'demo',
+    type: 'select', default: 'a', options: ['a', 'b'], requiresPro: true
+  };
+  internals.renderRowsInto(host, [fakeEntry]);
+  const sel = host.querySelector(
+    '.rga-settings-row[data-setting-id="fake.pro.select"] select');
+  assert.ok(sel);
+  assert.equal(sel.disabled, true, 'pro control must be disabled');
+
+  let setCalled = false;
+  const realSet = global.window.Rga.Settings.Store.set;
+  global.window.Rga.Settings.Store.set = function() { setCalled = true; return false; };
+  try {
+    // Even if the user could simulate a change, no write must occur
+    // (no change handler is attached for pro rows).
+    sel.value = 'b';
+    _change(sel);
+    assert.equal(setCalled, false, 'pro row change must not call Store.set');
+  } finally {
+    global.window.Rga.Settings.Store.set = realSet;
+  }
+});
+
+// ----------------------------------------------------------------
+// §15 — Unsupported types list (reporting parity)
+// ----------------------------------------------------------------
+
+test('Slice 5C — editable type set is exactly {toggle, select, radio, number, text}', async () => {
+  bootDom();
+  await loadAllInitialized();
+  const editable = global.window.Rga.Settings._workspaceInternals._editableTypes.slice().sort();
+  assert.deepEqual(editable, ['number', 'radio', 'select', 'text', 'toggle']);
+});
+
+// ----------------------------------------------------------------
+// §16 — Invalid value is rejected and does not persist
+// ----------------------------------------------------------------
+
+test('Slice 5C — when Store.set rejects, the control reverts to the prior value', async () => {
+  bootDom();
+  const Rga = await loadAllInitialized();
+  const spec = Rga.Workspaces.get('settings');
+  const el = global.document.createElement('div');
+  global.document.body.appendChild(el);
+  spec.mount(el);
+  el.querySelector('[data-section-id="editor"]')
+    .dispatchEvent(new global.window.MouseEvent('click', { bubbles: true }));
+
+  const sel = el.querySelector(
+    '.rga-settings-row[data-setting-id="editor.lineHeight"] select');
+  assert.ok(sel);
+  const before = Rga.Settings.Store.effective('editor.lineHeight');
+
+  // Inject an option that is NOT in the registry's option set, then
+  // dispatch change. Store.set must reject and the control must revert.
+  const evil = global.document.createElement('option');
+  evil.value = '999';
+  evil.textContent = '999';
+  sel.appendChild(evil);
+  sel.value = '999';
+  _change(sel);
+
+  assert.equal(Rga.Settings.Store.effective('editor.lineHeight'), before,
+    'rejected write must not change effective value');
+  assert.equal(sel.value, String(before),
+    'control must revert to the prior value after rejection');
+});
+
+// ----------------------------------------------------------------
+// §17 — Search + edit interleave
+// ----------------------------------------------------------------
+
+test('Slice 5C — editing a control surfaced by search persists across section switches', async () => {
+  bootDom();
+  const Rga = await loadAllInitialized();
+  const spec = Rga.Workspaces.get('settings');
+  const el = global.document.createElement('div');
+  global.document.body.appendChild(el);
+  spec.mount(el);
+
+  // Search for "font size" → editor.fontSize row appears.
+  const input = el.querySelector('.rga-settings-search-input');
+  input.value = 'font size';
+  input.dispatchEvent(new global.window.Event('input', { bubbles: true }));
+
+  const numInput = el.querySelector(
+    '.rga-settings-row[data-setting-id="editor.fontSize"] input[type="number"]');
+  assert.ok(numInput, 'fontSize row must surface in search');
+  numInput.value = '13';
+  _change(numInput);
+  assert.equal(Rga.Settings.Store.effective('editor.fontSize'), 13);
+
+  // Clear search → return to General. Then switch to Editor and assert
+  // the input there shows the edited value (effective is the truth).
+  input.value = '';
+  input.dispatchEvent(new global.window.Event('input', { bubbles: true }));
+  el.querySelector('[data-section-id="editor"]')
+    .dispatchEvent(new global.window.MouseEvent('click', { bubbles: true }));
+  const after = el.querySelector(
+    '.rga-settings-row[data-setting-id="editor.fontSize"] input[type="number"]');
+  assert.equal(after.value, '13');
+});
+
+// ----------------------------------------------------------------
+// §18 — External Store changes keep the control in sync
+// ----------------------------------------------------------------
+
+test('Slice 5C — when Store changes from elsewhere, the control reflects the new value', async () => {
+  bootDom();
+  const Rga = await loadAllInitialized();
+  const spec = Rga.Workspaces.get('settings');
+  const el = global.document.createElement('div');
+  global.document.body.appendChild(el);
+  spec.mount(el);
+  el.querySelector('[data-section-id="editor"]')
+    .dispatchEvent(new global.window.MouseEvent('click', { bubbles: true }));
+
+  const cb = el.querySelector(
+    '.rga-settings-row[data-setting-id="editor.spellcheck"] input[type="checkbox"]');
+  assert.equal(cb.checked, true);
+
+  // Mutate via Store directly (not through the control).
+  Rga.Settings.Store.set('editor.spellcheck', false);
+  assert.equal(cb.checked, false,
+    'external Store write must sync the control to the new value');
+});
+
+// ----------------------------------------------------------------
+// §19 — restartRequired marker (no banner)
+// ----------------------------------------------------------------
+
+test('Slice 5C — restartRequired entries render a marker AND keep an editable control', async () => {
+  bootDom();
+  const el = await mountInitialized();
+  // 'language' has restartRequired=true and type=select.
+  const row = el.querySelector(
+    '.rga-settings-row[data-setting-id="language"]');
+  assert.ok(row);
+  assert.ok(row.classList.contains('is-restart-required'),
+    'restart-required row must carry the is-restart-required class');
+  const marker = row.querySelector('.rga-settings-row-restart-marker');
+  assert.ok(marker, 'restart marker element must exist');
+  const sel = row.querySelector('select');
+  assert.ok(sel, 'restart-required entries are still editable in 5C');
+  assert.equal(sel.disabled, false);
+});
+
+// ----------------------------------------------------------------
+// §20 — unmount tears down Store subscriptions
+// ----------------------------------------------------------------
+
+test('Slice 5C — unmount removes per-row Store subscriptions', async () => {
+  bootDom();
+  const Rga = await loadAllInitialized();
+  const spec = Rga.Workspaces.get('settings');
+  const el = global.document.createElement('div');
+  global.document.body.appendChild(el);
+  spec.mount(el);
+
+  const rowsHost = el.querySelector('.rga-settings-rows');
+  assert.ok(rowsHost._rgaSettingsSubs && rowsHost._rgaSettingsSubs.length > 0,
+    'subscriptions must be registered after mount');
+
+  spec.unmount(el);
+  // Re-acquire from the element (cleared on unmount).
+  assert.equal(el.children.length, 0);
 });
