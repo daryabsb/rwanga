@@ -118,6 +118,13 @@ test('Bundle 2 §B: no new shell module file (boot-script wiring only — preser
     // declarative settings inventory; the store reads built-in
     // defaults from it; not Bundle 2 ownership creep).
     'settings-registry.js',
+    // Settings Layout (added Slice 3B — distinct owner of the
+    // section + ordered-id presentation map; validates against the
+    // registry at load time; not Bundle 2 ownership creep).
+    'settings-layout.js',
+    // Settings Search (added Slice 3B — distinct owner of the pure
+    // search functions over registry entries; not Bundle 2 creep).
+    'settings-search.js',
     // Shell Doctrine §4 workspace-tab registry (added Slice 1 —
     // distinct owner of workspace registration map; consumed by
     // TabManager.openWorkspace; not Bundle 2 ownership creep).

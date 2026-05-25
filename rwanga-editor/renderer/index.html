@@ -526,6 +526,14 @@
          setting in the product. Must load BEFORE settings-store so
          the store can read built-in defaults from it. -->
     <script src="js/shell/settings-registry.js"></script>
+    <!-- Settings Layout (Slice 3B) — presentation map (sections +
+         ordered ids). Validates against the registry at load time;
+         must load AFTER settings-registry. -->
+    <script src="js/shell/settings-layout.js"></script>
+    <!-- Settings Search (Slice 3B) — pure search functions over the
+         registry. Independent of layout; load order vs layout is
+         flexible but kept here for grouping. -->
+    <script src="js/shell/settings-search.js"></script>
     <!-- Settings Store substrate. Loads BEFORE consumers (applicators
          + future settings UI). init() is async and idempotent;
          consumers can call it freely and await. -->

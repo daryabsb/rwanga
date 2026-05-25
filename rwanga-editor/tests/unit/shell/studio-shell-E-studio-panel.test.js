@@ -352,6 +352,15 @@ test('§E: no new shell module file (StudioPanel is and remains the single owner
     // product (62 entries, 16-field shape). The store reads built-in
     // defaults from it. No overlap with StudioPanel.
     'settings-registry.js',
+    // 'settings-layout.js' — Settings Layout (Slice 3B).
+    // Distinct owner: section + ordered-id presentation map for the
+    // (future) Settings UI. Validates against the registry at load
+    // time. No overlap with StudioPanel.
+    'settings-layout.js',
+    // 'settings-search.js' — Settings Search (Slice 3B).
+    // Distinct owner: pure searchSettings(query, entries?) over
+    // registry entries. No overlap with StudioPanel.
+    'settings-search.js',
     // 'workspaces.js' — Shell Doctrine §4 workspace-tab registry.
     // Distinct owner: registration map of workspace-kind tabs
     // (Settings, Welcome, …). TabManager.openWorkspace queries it.
