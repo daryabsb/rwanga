@@ -136,6 +136,17 @@
   }
 
   function _onClick(id) {
+    // Settings is a workspace tab, not a sidebar panel. Short-circuit
+    // through the canonical opener so the rail click never goes into
+    // the sidebar.activate pathway (which would mount the legacy
+    // empty-state stub). All Settings entry points route through this
+    // single opener.
+    if (id === 'settings' &&
+        Rga.SettingsWorkspace &&
+        typeof Rga.SettingsWorkspace.open === 'function') {
+      Rga.SettingsWorkspace.open();
+      return;
+    }
     if (!Rga.Shell.Sidebar || !Rga.Shell.Layout) return;
     const isCurrent = Rga.Shell.Sidebar.current() === id;
     const sidebarVisible = Rga.Shell.Layout.get().sidebar.visible;

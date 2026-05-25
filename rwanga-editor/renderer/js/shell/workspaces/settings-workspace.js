@@ -535,20 +535,36 @@
     }
   });
 
-  // Ctrl+, opens the workspace.
+  // ---------------------------------------------------------------
+  // Reachability — canonical opener.
+  //
+  // Every Settings entry point (rail bottom button, Tools → Settings
+  // menu, macOS Preferences, Ctrl+, , command palette, future
+  // surfaces) MUST call Rga.SettingsWorkspace.open(). One public
+  // entry point, no duplicate routing logic.
+  //
+  // Singleton behavior is owned by TabManager.openWorkspace: opening
+  // the same kind twice focuses the existing tab.
+  // ---------------------------------------------------------------
+  Rga.SettingsWorkspace = {
+    open: function() {
+      if (Rga.TabManager && typeof Rga.TabManager.openWorkspace === 'function') {
+        return Rga.TabManager.openWorkspace('settings');
+      }
+      return null;
+    }
+  };
+
+  // Ctrl+, opens the workspace via the canonical opener.
   const KR = Rga.KeyboardRegistry;
   if (KR && typeof KR.registerCommand === 'function') {
     KR.registerCommand({
       command: 'view.openSettings',
-      label:   'Open Settings',
+      label:   'Settings',
       key:     ',',
       mods:    { ctrl: true },
-      handler: function() {
-        if (Rga.TabManager && typeof Rga.TabManager.openWorkspace === 'function') {
-          Rga.TabManager.openWorkspace('settings');
-        }
-      },
-      source:  'Slice 5A settings workspace'
+      handler: function() { Rga.SettingsWorkspace.open(); },
+      source:  'Settings workspace (Ctrl+,)'
     });
   }
 

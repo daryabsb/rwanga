@@ -12,6 +12,12 @@ function buildMenu(mainWindow) {
       submenu: [
         { role: 'about' },
         { type: 'separator' },
+        // macOS HIG — Preferences lives in the app menu. Routes through
+        // the existing menu.action IPC; the renderer's handler invokes
+        // the registered command (Rga.SettingsWorkspace.open()).
+        { label: 'Preferences…', accelerator: 'Cmd+,',
+          click: () => sendMenuAction(mainWindow, 'view.openSettings') },
+        { type: 'separator' },
         { role: 'services' },
         { type: 'separator' },
         { role: 'hide' },
