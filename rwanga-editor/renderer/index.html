@@ -543,6 +543,12 @@
          + future settings UI). init() is async and idempotent;
          consumers can call it freely and await. -->
     <script src="js/shell/settings-store.js"></script>
+    <!-- Settings Applicators (Slice 3D) — generic register / apply /
+         applyAll registry. Each applicator module is one register()
+         call; the registry owns its Store.subscribe. Loads BEFORE
+         any applicator-module file so register() resolves. The boot
+         path calls Store.init() then Applicators.applyAll() once. -->
+    <script src="js/shell/settings-applicators.js"></script>
     <script src="js/tab-manager.js"></script>
     <script src="js/close-guard.js"></script>
     <script src="js/autosave.js"></script>
@@ -1374,11 +1380,17 @@
     registerCommands();
     registerShortcuts();
     Rga.EditorShortcuts && Rga.EditorShortcuts.registerShortcuts();
-    // Settings Store init + applicators (Slice 2). Store.init() is
-    // idempotent; applicators await it internally so order here is
-    // not load-bearing. Fire-and-forget — boot continues synchronously.
-    if (Rga.Editor && Rga.Editor.initHighlightCurrentLine) {
-      Rga.Editor.initHighlightCurrentLine();
+    // Settings Store init + applicator fanout (Slice 3D). Store.init()
+    // is async + idempotent. Each applicator module registers itself at
+    // load time; once the Store is hydrated we call applyAll() to push
+    // every effective value to its handler. Fire-and-forget — boot
+    // continues synchronously while the Promise resolves.
+    if (Rga.Settings && Rga.Settings.Store) {
+      Rga.Settings.Store.init().then(function() {
+        if (Rga.Settings.Applicators) {
+          Rga.Settings.Applicators.applyAll();
+        }
+      });
     }
     Rga.ScriptLanguage.init();
     // Slice 2 entry #1 resolution: Rga.StatusBar.init() removed.

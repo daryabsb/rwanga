@@ -366,6 +366,11 @@ test('§E: no new shell module file (StudioPanel is and remains the single owner
     // the registry at load and the store at set(). No overlap
     // with StudioPanel.
     'settings-validators.js',
+    // 'settings-applicators.js' — Settings Applicators (Slice 3D).
+    // Distinct owner: register / apply / applyAll registry that
+    // bridges Store ↔ surface handlers. Each applicator module is
+    // one register() call. No overlap with StudioPanel.
+    'settings-applicators.js',
     // 'workspaces.js' — Shell Doctrine §4 workspace-tab registry.
     // Distinct owner: registration map of workspace-kind tabs
     // (Settings, Welcome, …). TabManager.openWorkspace queries it.
