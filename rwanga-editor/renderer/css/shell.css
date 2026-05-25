@@ -414,6 +414,23 @@
   position: relative;
 }
 
+/* Shell Doctrine §4 — #tab-content-host is the renderer host. It must
+   fill the flex track of #editor-container so workspace renderers (which
+   declare width:100%) have a defined width to bind against. Without
+   flex:1, tab-content-host shrinks to the intrinsic width of whichever
+   renderer subtree is currently visible — the Settings workspace then
+   only takes the slice it can derive from its grid template, leaving a
+   wide dead band of editor-container background around it. min-width:0
+   keeps the host from refusing to shrink below its content's intrinsic
+   width on narrow viewports. The document renderer's .rga-page-row
+   self-centers #editor at var(--page-width) inside its width:100%, so
+   stretching the host is visually invariant for document tabs. */
+#tab-content-host {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: 100%;
+}
+
 /* ============================================================
    BOTTOM PANEL
    ============================================================ */
@@ -464,14 +481,11 @@
 body.rga-no-status-bar { --status-bar-height: 0; }
 body.rga-no-status-bar #status-bar { display: none; }
 
-/* Workspace chrome ownership — toggled by TabManager._applyChromePolicy
-   to express "this surface is hidden by the active workspace's policy."
-   Class-based (not inline display) so user-collapse, minimized state,
-   inspector-collapsed class, format-toolbar mode CSS, and future
-   animations can each own their own visibility lever without colliding
-   with workspace policy. The class is absent for document tabs and
-   any workspace that opts in to a given surface. */
-.rga-hidden-by-workspace-policy { display: none; }
+/* Workspace policy rules used to live here; moved to the END of this
+   file so they win source-order against the per-element display rules
+   that come later in the file (notably #rga-shell-toolbar.rga-shell-
+   toolbar { display: grid } at line ~948 and #bottom-panel { display:
+   flex } at line ~420). See the block at the bottom of this file. */
 
 .status-left,
 .status-right {
@@ -1879,4 +1893,64 @@ body.view-print-preview-active #rga-shell-toolbar { display: none; }
 #app.mode-compact .rga-shell-toolbar-group-sep,
 #app.mode-narrow  .rga-shell-toolbar-group-sep {
   display: none;
+}
+
+/* ============================================================
+   WORKSPACE CHROME OWNERSHIP — TabManager._applyChromePolicy
+   ============================================================
+   Toggled by TabManager._applyChromePolicy to express:
+     "this surface is hidden by the active workspace's policy."
+   Two pairs of rules:
+
+   1. Per-element class — hides the surface itself.
+   2. Per-container class — collapses the fixed-size grid track
+      the surface lives in, so the renderer that owns the active
+      workspace gets the freed space.
+
+   Placement note — these rules live at the BOTTOM of this file so
+   they win source-order against any earlier per-element display
+   rule (notably #rga-shell-toolbar.rga-shell-toolbar { display:
+   grid } and #bottom-panel { display: flex }). The enumerated
+   id+class selectors below also raise specificity to (1,1,0) so
+   the inspector / future surfaces with id-display rules of their
+   own don't quietly shadow this policy.
+
+   Coexistence with user-collapse (StudioPanel minimize/close,
+   #workspace.inspector-collapsed, etc.):
+     - #workspace.inspector-collapsed              keeps a 32px rail.
+     - #workspace.rga-workspace-hides-inspector    collapses to 0.
+   When both classes are present, the workspace-policy rule below
+   wins — which is correct precedence (no reason to show a 32px
+   inspector rail when the active surface isn't an editor).
+   ============================================================ */
+
+/* (1) Per-element hide. Bare class for unforeseen targets; enumerated
+   id+class for the canonical surfaces so id-display rules elsewhere
+   in the file don't beat us on specificity. */
+.rga-hidden-by-workspace-policy,
+#rga-shell-toolbar.rga-hidden-by-workspace-policy,
+#bottom-panel.rga-hidden-by-workspace-policy,
+#inspector-panel.rga-hidden-by-workspace-policy { display: none; }
+
+/* (2) Per-container grid-track collapse — recovers the space the
+   hidden surface used to occupy. */
+#workspace.rga-workspace-hides-inspector {
+  grid-template-columns:
+    var(--activity-bar-width)
+    var(--sidebar-width)
+    4px
+    1fr
+    0px
+    0px;
+}
+#workspace.sidebar-collapsed.rga-workspace-hides-inspector {
+  grid-template-columns:
+    var(--activity-bar-width)
+    0px 0px
+    1fr
+    0px
+    0px;
+}
+#center-column.rga-workspace-hides-bottom-panel {
+  grid-template-rows: 1fr 0px 0px;
 }

@@ -184,8 +184,28 @@
   // backs this class lives in renderer/css/shell.css.
   const HIDDEN_CLASS = 'rga-hidden-by-workspace-policy';
 
+  // Hiding a child via the per-element class is necessary but not
+  // sufficient: when the child sits in a FIXED-SIZE grid track, that
+  // track keeps reserving its width/height even with the child gone.
+  // The inspector sits in #workspace column 6 (var(--inspector-width));
+  // the bottom panel sits in #center-column row 3
+  // (var(--bottom-panel-height)). The toolbar's auto-sized row on #app
+  // collapses naturally when its child is display:none, so no layout
+  // class is needed there.
+  //
+  // For each policy key whose surface lives in a fixed track, we
+  // toggle a layout class on the PARENT grid container, and CSS rules
+  // in shell.css collapse the relevant track to 0. Together the two
+  // classes give the workspace renderer the freed space.
+  const _LAYOUT_TARGETS = {
+    inspector:   { container: '#workspace',     className: 'rga-workspace-hides-inspector' },
+    bottomPanel: { container: '#center-column', className: 'rga-workspace-hides-bottom-panel' }
+    // toolbar — no layout target; its grid row is auto-sized.
+  };
+
   function _applyChromePolicy(tab) {
     const policy = _resolveChromePolicy(tab);
+    // 1. Per-element visibility marker.
     Object.keys(_CHROME_TARGETS).forEach(function(key) {
       const el = document.querySelector(_CHROME_TARGETS[key]);
       if (!el) return;
@@ -194,6 +214,13 @@
       // visibility systems (collapse / minimize / mode) remain in
       // charge of their own classes; this one is exclusively ours.
       el.classList.toggle(HIDDEN_CLASS, !policy[key]);
+    });
+    // 2. Parent-grid track collapse for surfaces in fixed-size tracks.
+    Object.keys(_LAYOUT_TARGETS).forEach(function(key) {
+      const target = _LAYOUT_TARGETS[key];
+      const container = document.querySelector(target.container);
+      if (!container) return;
+      container.classList.toggle(target.className, !policy[key]);
     });
   }
 

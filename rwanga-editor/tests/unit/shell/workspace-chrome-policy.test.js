@@ -30,12 +30,19 @@ function bootDom() {
   const dom = new JSDOM(
     '<!DOCTYPE html><html><body>' +
       '<div id="rga-shell-toolbar"></div>' +
-      '<div id="bottom-panel"></div>' +
-      '<div id="inspector-panel"></div>' +
-      '<div id="tab-content-host"></div>' +
+      // Layout containers — TabManager._applyChromePolicy also toggles
+      // grid-track-collapse classes on these (rga-workspace-hides-*).
+      '<div id="workspace">' +
+        '<div id="center-column">' +
+          '<div id="editor-container">' +
+            '<div id="tab-content-host"></div>' +
+            '<div id="editor"></div>' +
+          '</div>' +
+          '<div id="bottom-panel"></div>' +
+        '</div>' +
+        '<div id="inspector-panel"></div>' +
+      '</div>' +
       '<div id="tab-bar"></div>' +
-      '<div id="editor"></div>' +
-      '<div id="editor-container"></div>' +
     '</body></html>',
     { runScripts: 'outside-only', url: 'http://localhost/' });
   global.window = dom.window;
@@ -325,4 +332,104 @@ test('chrome policy — missing target elements do not throw', () => {
   assert.doesNotThrow(function() {
     Rga.TabManager._applyChromePolicy({ kind: 'workspace', _registration: reg });
   });
+});
+
+// ----------------------------------------------------------------
+// §6 — Layout-track collapse classes on parent grid containers
+// ----------------------------------------------------------------
+// The per-element class hides the surface; the per-container classes
+// collapse the fixed-size grid track that surface lives in, so the
+// workspace renderer can grow into the freed space. Inspector lives
+// in #workspace col 6 (var(--inspector-width)); bottom panel lives in
+// #center-column row 3 (var(--bottom-panel-height)). Toolbar lives in
+// an auto-sized row on #app and collapses naturally — no layout class.
+
+const HIDES_INSPECTOR_CLASS    = 'rga-workspace-hides-inspector';
+const HIDES_BOTTOM_PANEL_CLASS = 'rga-workspace-hides-bottom-panel';
+
+test('layout policy — hide-all workspace adds both grid-collapse classes', () => {
+  bootDom();
+  const Rga = loadStack();
+  Rga.Workspaces.register({
+    kind: 'collapse-all', title: 'Collapse', mount: function() {},
+    chrome: { toolbar: false, bottomPanel: false, inspector: false }
+  });
+  const reg = Rga.Workspaces.get('collapse-all');
+  Rga.TabManager._applyChromePolicy({ kind: 'workspace', _registration: reg });
+
+  const workspace    = document.getElementById('workspace');
+  const centerColumn = document.getElementById('center-column');
+  assert.equal(workspace.classList.contains(HIDES_INSPECTOR_CLASS),       true,
+    '#workspace must carry rga-workspace-hides-inspector when inspector is hidden by policy');
+  assert.equal(centerColumn.classList.contains(HIDES_BOTTOM_PANEL_CLASS), true,
+    '#center-column must carry rga-workspace-hides-bottom-panel when bottomPanel is hidden by policy');
+});
+
+test('layout policy — document tab removes both grid-collapse classes', () => {
+  bootDom();
+  const Rga = loadStack();
+  // Pre-seed the classes (simulating a prior workspace activation).
+  document.getElementById('workspace').classList.add(HIDES_INSPECTOR_CLASS);
+  document.getElementById('center-column').classList.add(HIDES_BOTTOM_PANEL_CLASS);
+  Rga.TabManager._applyChromePolicy({ kind: 'document' });
+  assert.equal(document.getElementById('workspace').classList.contains(HIDES_INSPECTOR_CLASS),       false);
+  assert.equal(document.getElementById('center-column').classList.contains(HIDES_BOTTOM_PANEL_CLASS), false);
+});
+
+test('layout policy — mixed workspace policy toggles only the matching layout class', () => {
+  bootDom();
+  const Rga = loadStack();
+  Rga.Workspaces.register({
+    kind: 'mixed-layout', title: 'Mixed', mount: function() {},
+    chrome: { toolbar: false, bottomPanel: true, inspector: false }
+  });
+  const reg = Rga.Workspaces.get('mixed-layout');
+  Rga.TabManager._applyChromePolicy({ kind: 'workspace', _registration: reg });
+  // inspector:false → collapse inspector column
+  assert.equal(document.getElementById('workspace').classList.contains(HIDES_INSPECTOR_CLASS),       true);
+  // bottomPanel:true → do NOT collapse the bottom row
+  assert.equal(document.getElementById('center-column').classList.contains(HIDES_BOTTOM_PANEL_CLASS), false);
+});
+
+test('layout policy — toolbar has no parent layout class (auto-row collapses naturally)', () => {
+  bootDom();
+  const Rga = loadStack();
+  // Hide only the toolbar.
+  Rga.Workspaces.register({
+    kind: 'toolbar-only', title: 'Toolbar Only', mount: function() {},
+    chrome: { toolbar: false, bottomPanel: true, inspector: true }
+  });
+  const reg = Rga.Workspaces.get('toolbar-only');
+  Rga.TabManager._applyChromePolicy({ kind: 'workspace', _registration: reg });
+  // Per-element class on the toolbar — present.
+  assert.equal(document.getElementById('rga-shell-toolbar').classList.contains(HIDDEN_CLASS), true);
+  // No grid-collapse class on #app or anywhere else — the auto-sized
+  // toolbar row on #app collapses to 0 once the toolbar is display:none.
+  const app = document.getElementById('app');
+  if (app) {
+    assert.equal(app.className.indexOf('rga-workspace-hides') < 0, true,
+      'no rga-workspace-hides-* class should land on #app');
+  }
+});
+
+test('layout policy — switch back from collapse-all to document fully restores both layouts', () => {
+  bootDom();
+  const Rga = loadStack();
+  Rga.Workspaces.register({
+    kind: 'roundtrip', title: 'Roundtrip', mount: function() {},
+    chrome: { toolbar: false, bottomPanel: false, inspector: false }
+  });
+  const reg = Rga.Workspaces.get('roundtrip');
+  // Activate workspace.
+  Rga.TabManager._applyChromePolicy({ kind: 'workspace', _registration: reg });
+  assert.equal(document.getElementById('workspace').classList.contains(HIDES_INSPECTOR_CLASS),       true);
+  assert.equal(document.getElementById('center-column').classList.contains(HIDES_BOTTOM_PANEL_CLASS), true);
+  // Activate document.
+  Rga.TabManager._applyChromePolicy({ kind: 'document' });
+  assert.equal(document.getElementById('workspace').classList.contains(HIDES_INSPECTOR_CLASS),       false);
+  assert.equal(document.getElementById('center-column').classList.contains(HIDES_BOTTOM_PANEL_CLASS), false);
+  // Per-element classes also cleared.
+  assert.equal(document.getElementById('rga-shell-toolbar').classList.contains(HIDDEN_CLASS), false);
+  assert.equal(document.getElementById('bottom-panel').classList.contains(HIDDEN_CLASS),      false);
+  assert.equal(document.getElementById('inspector-panel').classList.contains(HIDDEN_CLASS),   false);
 });

@@ -49,14 +49,26 @@ async function chromeVisibility(page) {
     function read(id) {
       const el = document.getElementById(id);
       return {
-        hiddenByPolicy: el.classList.contains(cls),
-        computedDisplay: getComputedStyle(el).display
+        hiddenByPolicy:  el.classList.contains(cls),
+        computedDisplay: getComputedStyle(el).display,
+        width:           Math.round(el.getBoundingClientRect().width)
       };
+    }
+    function readGrid(id, axis) {
+      const el = document.getElementById(id);
+      return getComputedStyle(el)
+        .getPropertyValue('grid-template-' + axis).trim();
     }
     return {
       toolbar:     read('rga-shell-toolbar'),
       bottomPanel: read('bottom-panel'),
-      inspector:   read('inspector-panel')
+      inspector:   read('inspector-panel'),
+      // Layout-collapse signals: when the workspace policy hides the
+      // inspector/bottom-panel, the grid track collapses to 0px. The
+      // settings workspace width should grow.
+      workspaceCols:    readGrid('workspace',     'columns'),
+      centerColumnRows: readGrid('center-column', 'rows'),
+      tabContentHost:   { width: Math.round(document.getElementById('tab-content-host').getBoundingClientRect().width) }
     };
   }, HIDDEN_CLASS);
 }
@@ -127,6 +139,31 @@ test('chrome — switching back to the document tab restores all three', async (
     expect(after.toolbar.hiddenByPolicy).toBe(false);
     expect(after.bottomPanel.hiddenByPolicy).toBe(false);
     expect(after.inspector.hiddenByPolicy).toBe(false);
+  } finally {
+    await app.close();
+    try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
+  }
+});
+
+test('chrome (layout) — tab-content-host grows when Settings hides the inspector + bottom-panel tracks', async () => {
+  const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'rwanga-chrome-grow-'));
+  const { app, page } = await launch(userDataDir);
+  try {
+    const docState = await chromeVisibility(page);
+
+    await page.keyboard.press('Control+Comma');
+    await page.waitForSelector(WS_SEL + ' .rga-settings-rows .rga-settings-row');
+    const settingsState = await chromeVisibility(page);
+
+    // 1. Inspector column collapsed: last value in #workspace
+    //    grid-template-columns ends with '0px' (was var(--inspector-width)
+    //    ~ 280px).
+    expect(/\b0px(\s+0px)?\s*$/.test(settingsState.workspaceCols)).toBe(true);
+    // 2. Bottom-panel row collapsed: #center-column rows end with '0px 0px'.
+    expect(/\b0px\s+0px\s*$/.test(settingsState.centerColumnRows)).toBe(true);
+    // 3. tab-content-host grew (it now fills its flex parent, which itself
+    //    grew because the inspector column collapsed).
+    expect(settingsState.tabContentHost.width).toBeGreaterThan(docState.tabContentHost.width);
   } finally {
     await app.close();
     try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
