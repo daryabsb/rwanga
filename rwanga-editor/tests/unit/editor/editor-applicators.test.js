@@ -114,11 +114,14 @@ test('Slice 4A — editor.fontSize sets --editor-font-size on #editor (with pt u
   assert.equal(v, '14pt', '--editor-font-size must carry the pt unit');
 });
 
-test('Slice 4A — editor.lineHeight sets --editor-line-height on #editor (unitless)', async () => {
+test('Slice 4A — editor.lineHeight sets --editor-line-height on #editor (unitless) when user has chosen a value', async () => {
   const dom = bootDom();
   const S = loadAll();
   await S.Store.init();
-  S.Applicators.apply('editor.lineHeight', '1.5');
+  // Route via Store so the user-tier override exists; the post-5B
+  // drift gate only pushes the inline value when a non-builtin tier
+  // carries a value.
+  S.Store.set('editor.lineHeight', '1.5');
   const v = dom.window.document.getElementById('editor').style.getPropertyValue('--editor-line-height');
   assert.equal(v, '1.5');
 });
@@ -202,22 +205,50 @@ test('Slice 4A — invalid editor.fontFamily (not in options) is rejected and th
 });
 
 // ----------------------------------------------------------------
-// §5 — applyAll() at boot pushes registry defaults to the surface
+// §5 — applyAll() at boot pushes defaults (drift-aware)
 // ----------------------------------------------------------------
 
-test('Slice 4A — applyAll() at boot pushes registry defaults onto #editor', async () => {
+test('Slice 4A — applyAll() at boot pushes class/attribute defaults onto #editor', async () => {
   const dom = bootDom();
   const S = loadAll();
   await S.Store.init();
   S.Applicators.applyAll();
   const el = dom.window.document.getElementById('editor');
-  // Registry defaults: fontFamily=Courier Prime, fontSize=12, lineHeight='1.0',
-  // spellcheck=true, highlightCurrentLine=true.
-  assert.ok(el.style.getPropertyValue('--font-editor').indexOf('Courier Prime') >= 0);
-  assert.equal(el.style.getPropertyValue('--editor-font-size'), '12pt');
-  assert.equal(el.style.getPropertyValue('--editor-line-height'), '1.0');
+  // Class/attribute applicators have default states (spellcheck="true",
+  // .rga-line-highlight-on) that match the prior surface — they push
+  // at boot without drift risk.
   assert.equal(el.getAttribute('spellcheck'), 'true');
   assert.equal(el.classList.contains('rga-line-highlight-on'), true);
+  // Font-family / font-size matched the existing CSS chain even with
+  // the inline override in place — still pushed unconditionally.
+  assert.ok(el.style.getPropertyValue('--font-editor').indexOf('Courier Prime') >= 0);
+  assert.equal(el.style.getPropertyValue('--editor-font-size'), '12pt');
+});
+
+test('Slice 4A drift guard — applyAll() at boot does NOT inline --editor-line-height when there is no user override', async () => {
+  const dom = bootDom();
+  const S = loadAll();
+  await S.Store.init();
+  S.Applicators.applyAll();
+  // Registry default for editor.lineHeight is '1.0'. Pushing it
+  // inline at boot would override the CSS fallback (1.5) and change
+  // the visible line-height without user authorization. With the
+  // post-5B gate, applyAll must leave the inline value empty so the
+  // existing CSS rule (line-height: var(--editor-line-height, 1.5))
+  // resolves to its 1.5 fallback.
+  const el = dom.window.document.getElementById('editor');
+  assert.equal(el.style.getPropertyValue('--editor-line-height'), '',
+    'No inline --editor-line-height may be set at boot with no override');
+});
+
+test('Slice 4A drift guard — once user sets editor.lineHeight, applyAll DOES inline it', async () => {
+  const dom = bootDom({ seedPrefs: { 'editor.lineHeight': '2.0' } });
+  const S = loadAll();
+  await S.Store.init();
+  S.Applicators.applyAll();
+  assert.equal(
+    dom.window.document.getElementById('editor').style.getPropertyValue('--editor-line-height'),
+    '2.0');
 });
 
 // ----------------------------------------------------------------

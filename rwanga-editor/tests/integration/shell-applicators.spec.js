@@ -31,16 +31,18 @@ async function launch(userDataDir) {
   return { app, page };
 }
 
-test('Slice 4B — editorDeskColor applies through the applicator at runtime', async () => {
+test('Slice 4B — editorDeskColor applies through the applicator at runtime; no inline at boot', async () => {
   const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'rwanga-shell-'));
   const { app, page } = await launch(userDataDir);
   try {
-    // Registry default '#141414' → --editor-bg present after applyAll().
+    // Post-5B drift fix: at boot with no user override, no inline
+    // --editor-bg is set. Theme tokens (light/dark) own the desk.
     const before = await page.evaluate(() =>
       document.documentElement.style.getPropertyValue('--editor-bg'));
-    expect(before).toBe('#141414');
+    expect(before).toBe('');
 
-    // Switch via Store; applicator pushes the new hex.
+    // Switch via Store; user-tier override now exists → applicator
+    // pushes the new hex inline.
     await page.evaluate(() =>
       window.Rga.Settings.Store.set('appearance.editorDeskColor', '#1a1a2e'));
     const after = await page.evaluate(() =>

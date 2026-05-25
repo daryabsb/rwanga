@@ -47,12 +47,35 @@
   const register = Rga.Settings.Applicators.register;
   const HIDE_STATUS_BAR_CLASS = 'rga-no-status-bar';
 
+  // Drift guard (post-Slice-5B fix): setProperty-style applicators
+  // must only push an inline CSS variable when the user has explicitly
+  // chosen a non-builtin value. Pushing the registry default inline
+  // would override theme-scoped tokens (e.g. [data-theme="light"]
+  // { --editor-bg: #d6d6d6 }) because inline styles win over selector
+  // specificity, turning light theme black on first boot. When no
+  // override exists, remove any inline value so theme tokens flow.
+  function _hasUserOverride(id) {
+    const Store = Rga.Settings && Rga.Settings.Store;
+    if (!Store || typeof Store.get !== 'function') return false;
+    return Store.get(id, 'user')    !== undefined
+        || Store.get(id, 'session') !== undefined
+        || Store.get(id, 'script')  !== undefined;
+  }
+
   // ----- appearance.editorDeskColor ---------------------------------------
   // Overrides the --editor-bg token at the documentElement level so
   // every CSS rule that reads var(--editor-bg) picks up the user's
   // chosen hex. The color validator (Slice 3C) accepts only 6-digit
   // hex; invalid values never reach this handler.
-  register('appearance.editorDeskColor', function(value) {
+  //
+  // Only sets the inline value when the user has actually chosen one
+  // (see _hasUserOverride above) — otherwise theme tokens own the
+  // desk color, so [data-theme="light"] gets its #d6d6d6 desk back.
+  register('appearance.editorDeskColor', function(value, id) {
+    if (!_hasUserOverride(id)) {
+      document.documentElement.style.removeProperty('--editor-bg');
+      return;
+    }
     document.documentElement.style.setProperty('--editor-bg', String(value));
   }, { owner: 'appearance' });
 

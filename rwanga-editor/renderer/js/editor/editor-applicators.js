@@ -44,6 +44,21 @@
     return document.getElementById('editor');
   }
 
+  // Drift guard (post-Slice-5B fix): setProperty-style applicators
+  // must only push an inline CSS var when the user has actually
+  // chosen a non-builtin value. Pushing the registry default inline
+  // would override the CSS fallback (e.g. line-height: var(...,
+  // 1.5)) with the registry default (1.0), changing the visible
+  // surface without explicit user authorization. When no override
+  // exists, remove any inline value so the CSS fallback flows.
+  function _hasUserOverride(id) {
+    const Store = Rga.Settings && Rga.Settings.Store;
+    if (!Store || typeof Store.get !== 'function') return false;
+    return Store.get(id, 'user')    !== undefined
+        || Store.get(id, 'session') !== undefined
+        || Store.get(id, 'script')  !== undefined;
+  }
+
   // ----- editor.fontFamily ------------------------------------------------
   // The chosen face is set as --font-editor on #editor so descendant
   // rules (.ProseMirror, .gutter-line, etc.) that read var(--font-editor)
@@ -70,10 +85,16 @@
   // ----- editor.lineHeight ------------------------------------------------
   // Registry stores '1.0' / '1.15' / '1.5' / '2.0' as strings. CSS
   // line-height accepts unitless numbers, so the value passes through
-  // as-is.
-  register('editor.lineHeight', function(value) {
+  // as-is. Gated on user-override (see _hasUserOverride) — the CSS
+  // fallback (1.5) is the prior visible default and must remain when
+  // the user has not chosen otherwise.
+  register('editor.lineHeight', function(value, id) {
     const el = _editor();
     if (!el) return;
+    if (!_hasUserOverride(id)) {
+      el.style.removeProperty('--editor-line-height');
+      return;
+    }
     el.style.setProperty('--editor-line-height', String(value));
   }, { owner: 'editor' });
 

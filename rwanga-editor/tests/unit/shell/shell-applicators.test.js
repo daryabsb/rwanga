@@ -100,11 +100,14 @@ test('Slice 4B — every wired id has owner="appearance"', () => {
 // §2 — editorDeskColor pushes --editor-bg onto :root
 // ----------------------------------------------------------------
 
-test('Slice 4B — editorDeskColor sets --editor-bg on documentElement', async () => {
+test('Slice 4B — editorDeskColor sets --editor-bg on documentElement when user has set a value', async () => {
   const dom = bootDom();
   const S = loadAll();
   await S.Store.init();
-  S.Applicators.apply('appearance.editorDeskColor', '#1a1a2e');
+  // Set via Store so the user-tier override exists; the applicator
+  // gate (post-5B drift fix) only pushes the inline var when a non-
+  // builtin tier carries a value.
+  S.Store.set('appearance.editorDeskColor', '#1a1a2e');
   const v = dom.window.document.documentElement.style.getPropertyValue('--editor-bg');
   assert.equal(v, '#1a1a2e');
 });
@@ -179,18 +182,35 @@ test('Slice 4B — invalid statusBar (non-boolean) is rejected and body class un
 // §4 — applyAll() at boot pushes defaults to the surface
 // ----------------------------------------------------------------
 
-test('Slice 4B — applyAll() at boot applies registry defaults for the wired ids', async () => {
+test('Slice 4B drift guard — applyAll() at boot does NOT inline --editor-bg when there is no user override', async () => {
   const dom = bootDom();
   const S = loadAll();
   await S.Store.init();
   S.Applicators.applyAll();
-  // Registry defaults: editorDeskColor='#141414', statusBar=true.
+  // Registry default for editorDeskColor is '#141414'. Pushing it
+  // inline at boot would override [data-theme="light"]'s desk token
+  // (#d6d6d6) and turn light theme black. With the post-5B gate,
+  // applyAll must leave the inline value empty so theme tokens win.
   assert.equal(
     dom.window.document.documentElement.style.getPropertyValue('--editor-bg'),
-    '#141414');
+    '',
+    'No inline --editor-bg may be set at boot when there is no user override');
+  // statusBar applicator is a class toggle whose default state (no
+  // class added) already matches the unstyled surface — no drift.
   assert.equal(
     dom.window.document.body.classList.contains('rga-no-status-bar'),
     false, 'default statusBar=true must NOT add the hide class');
+});
+
+test('Slice 4B drift guard — once user sets editorDeskColor, applyAll DOES inline it', async () => {
+  const dom = bootDom({ seedPrefs: { 'appearance.editorDeskColor': '#2d2520' } });
+  const S = loadAll();
+  await S.Store.init();
+  S.Applicators.applyAll();
+  // User-tier value present via seeded prefs → applicator pushes it.
+  assert.equal(
+    dom.window.document.documentElement.style.getPropertyValue('--editor-bg'),
+    '#2d2520');
 });
 
 // ----------------------------------------------------------------
