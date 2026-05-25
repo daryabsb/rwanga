@@ -175,19 +175,25 @@
            { toolbar: true, bottomPanel: true, inspector: true };
   }
 
+  // The class is the workspace-policy ownership marker — toggling it
+  // expresses "this surface is hidden BY policy" rather than mutating
+  // the element's inline display, which would otherwise collide with
+  // user-collapse state (StudioPanel minimize/close), inspector-
+  // collapsed class on #workspace, format-toolbar mode CSS, future
+  // animations, and any future workspace surfaces. The CSS rule that
+  // backs this class lives in renderer/css/shell.css.
+  const HIDDEN_CLASS = 'rga-hidden-by-workspace-policy';
+
   function _applyChromePolicy(tab) {
     const policy = _resolveChromePolicy(tab);
     Object.keys(_CHROME_TARGETS).forEach(function(key) {
       const el = document.querySelector(_CHROME_TARGETS[key]);
       if (!el) return;
-      if (policy[key]) {
-        // Clear inline display so any other system that manages this
-        // element's visibility (StudioPanel collapse, inspector-collapsed
-        // class on #workspace, format-toolbar mode CSS) resumes ownership.
-        el.style.display = '';
-      } else {
-        el.style.display = 'none';
-      }
+      // toggle(class, !policy[key]) — class is PRESENT when the target
+      // is hidden by policy, ABSENT when policy says visible. Other
+      // visibility systems (collapse / minimize / mode) remain in
+      // charge of their own classes; this one is exclusively ours.
+      el.classList.toggle(HIDDEN_CLASS, !policy[key]);
     });
   }
 

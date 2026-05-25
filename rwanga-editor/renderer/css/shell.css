@@ -464,6 +464,15 @@
 body.rga-no-status-bar { --status-bar-height: 0; }
 body.rga-no-status-bar #status-bar { display: none; }
 
+/* Workspace chrome ownership — toggled by TabManager._applyChromePolicy
+   to express "this surface is hidden by the active workspace's policy."
+   Class-based (not inline display) so user-collapse, minimized state,
+   inspector-collapsed class, format-toolbar mode CSS, and future
+   animations can each own their own visibility lever without colliding
+   with workspace policy. The class is absent for document tabs and
+   any workspace that opts in to a given surface. */
+.rga-hidden-by-workspace-policy { display: none; }
+
 .status-left,
 .status-right {
   display: flex;

@@ -36,12 +36,29 @@ async function launch(userDataDir) {
   return { app, page };
 }
 
+// chromeVisibility returns BOTH the policy-class membership and the
+// effective computed display. The class is the workspace-policy lever
+// (TabManager owns it); the computed display is the runtime truth
+// (CSS rule .rga-hidden-by-workspace-policy { display:none } makes
+// them line up). Asserting both keeps the spec honest if the CSS
+// rule is ever dropped or shadowed.
+const HIDDEN_CLASS = 'rga-hidden-by-workspace-policy';
+
 async function chromeVisibility(page) {
-  return await page.evaluate(() => ({
-    toolbar:     getComputedStyle(document.getElementById('rga-shell-toolbar')).display,
-    bottomPanel: getComputedStyle(document.getElementById('bottom-panel')).display,
-    inspector:   getComputedStyle(document.getElementById('inspector-panel')).display
-  }));
+  return await page.evaluate((cls) => {
+    function read(id) {
+      const el = document.getElementById(id);
+      return {
+        hiddenByPolicy: el.classList.contains(cls),
+        computedDisplay: getComputedStyle(el).display
+      };
+    }
+    return {
+      toolbar:     read('rga-shell-toolbar'),
+      bottomPanel: read('bottom-panel'),
+      inspector:   read('inspector-panel')
+    };
+  }, HIDDEN_CLASS);
 }
 
 async function activateFirstDoc(page) {
@@ -50,8 +67,9 @@ async function activateFirstDoc(page) {
     const doc = TM.tabs().find(function(t) { return t.kind === 'document'; });
     if (doc) TM.activate(doc.id);
   });
-  await page.waitForFunction(() =>
-    document.getElementById('rga-shell-toolbar').style.display === '');
+  await page.waitForFunction((cls) =>
+    !document.getElementById('rga-shell-toolbar').classList.contains(cls),
+    HIDDEN_CLASS);
 }
 
 test('chrome — document tab keeps toolbar/bottomPanel/inspector visible', async () => {
@@ -59,9 +77,12 @@ test('chrome — document tab keeps toolbar/bottomPanel/inspector visible', asyn
   const { app, page } = await launch(userDataDir);
   try {
     const v = await chromeVisibility(page);
-    expect(v.toolbar).not.toBe('none');
-    expect(v.bottomPanel).not.toBe('none');
-    expect(v.inspector).not.toBe('none');
+    expect(v.toolbar.hiddenByPolicy).toBe(false);
+    expect(v.bottomPanel.hiddenByPolicy).toBe(false);
+    expect(v.inspector.hiddenByPolicy).toBe(false);
+    expect(v.toolbar.computedDisplay).not.toBe('none');
+    expect(v.bottomPanel.computedDisplay).not.toBe('none');
+    expect(v.inspector.computedDisplay).not.toBe('none');
   } finally {
     await app.close();
     try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
@@ -75,9 +96,12 @@ test('chrome — Settings tab hides toolbar + bottom panel + inspector', async (
     await page.keyboard.press('Control+Comma');
     await page.waitForSelector(WS_SEL + ' .rga-settings-rows .rga-settings-row');
     const v = await chromeVisibility(page);
-    expect(v.toolbar).toBe('none');
-    expect(v.bottomPanel).toBe('none');
-    expect(v.inspector).toBe('none');
+    expect(v.toolbar.hiddenByPolicy).toBe(true);
+    expect(v.bottomPanel.hiddenByPolicy).toBe(true);
+    expect(v.inspector.hiddenByPolicy).toBe(true);
+    expect(v.toolbar.computedDisplay).toBe('none');
+    expect(v.bottomPanel.computedDisplay).toBe('none');
+    expect(v.inspector.computedDisplay).toBe('none');
   } finally {
     await app.close();
     try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
@@ -89,20 +113,20 @@ test('chrome — switching back to the document tab restores all three', async (
   const { app, page } = await launch(userDataDir);
   try {
     const before = await chromeVisibility(page);
-    expect(before.toolbar).not.toBe('none');
+    expect(before.toolbar.hiddenByPolicy).toBe(false);
 
     await page.keyboard.press('Control+Comma');
     await page.waitForSelector(WS_SEL + ' .rga-settings-rows .rga-settings-row');
     const open = await chromeVisibility(page);
-    expect(open.toolbar).toBe('none');
-    expect(open.bottomPanel).toBe('none');
-    expect(open.inspector).toBe('none');
+    expect(open.toolbar.hiddenByPolicy).toBe(true);
+    expect(open.bottomPanel.hiddenByPolicy).toBe(true);
+    expect(open.inspector.hiddenByPolicy).toBe(true);
 
     await activateFirstDoc(page);
     const after = await chromeVisibility(page);
-    expect(after.toolbar).not.toBe('none');
-    expect(after.bottomPanel).not.toBe('none');
-    expect(after.inspector).not.toBe('none');
+    expect(after.toolbar.hiddenByPolicy).toBe(false);
+    expect(after.bottomPanel.hiddenByPolicy).toBe(false);
+    expect(after.inspector.hiddenByPolicy).toBe(false);
   } finally {
     await app.close();
     try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
