@@ -690,10 +690,12 @@
 <script src="js/editor/mount.js"></script>
 <script src="js/editor/page-surface.js"></script>
 <script src="js/editor/page-setup-dialog.js"></script>
-<!-- Settings applicator (Slice 2 proof). Subscribes to
-     editor.highlightCurrentLine and toggles a class on #editor.
-     Loaded AFTER mount.js so #editor exists when init() runs. -->
-<script src="js/editor/highlight-current-line.js"></script>
+<!-- Editor settings applicators (Slice 4A). Registers handlers for
+     editor.fontFamily / fontSize / lineHeight / spellcheck /
+     highlightCurrentLine against Rga.Settings.Applicators. Loaded
+     AFTER mount.js so #editor exists in the DOM, and AFTER
+     settings-applicators.js so register() resolves. -->
+<script src="js/editor/editor-applicators.js"></script>
 <script src="js/editor/shortcuts.js"></script>
 <script src="js/view-mode.js"></script>
 <script src="js/units.js"></script>
