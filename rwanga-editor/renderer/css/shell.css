@@ -424,11 +424,32 @@
    keeps the host from refusing to shrink below its content's intrinsic
    width on narrow viewports. The document renderer's .rga-page-row
    self-centers #editor at var(--page-width) inside its width:100%, so
-   stretching the host is visually invariant for document tabs. */
+   stretching the host is visually invariant for document tabs.
+
+   align-self:stretch overrides editor-container's align-items:flex-start
+   so tab-content-host fills the cross-axis (height). Workspace renderers
+   that declare height:100% now have a defined parent height to bind
+   against — without this, the Settings workspace would collapse to its
+   intrinsic height and the whole workspace would scroll inside
+   #editor-container instead of letting its nav rail / content column
+   own scroll independently. The document renderer's .rga-page-row has
+   its own content-driven height inside tab-content-host, so making the
+   host fill vertically just leaves desk-coloured space below the page
+   row — visually invariant for document tabs. */
 #tab-content-host {
   flex: 1 1 auto;
   min-width: 0;
   width: 100%;
+  align-self: stretch;
+}
+
+/* Workspace renderer subtrees (added at runtime by TabManager.openWorkspace
+   as direct children of #tab-content-host with data-renderer="workspace").
+   They must fill the host vertically so the workspace's own height:100%
+   binds to a defined parent height. Document renderers are NOT included
+   here — they have their own .rga-page-row layout. */
+#tab-content-host > [data-renderer="workspace"] {
+  height: 100%;
 }
 
 /* ============================================================
@@ -1926,11 +1947,30 @@ body.view-print-preview-active #rga-shell-toolbar { display: none; }
 
 /* (1) Per-element hide. Bare class for unforeseen targets; enumerated
    id+class for the canonical surfaces so id-display rules elsewhere
-   in the file don't beat us on specificity. */
+   in the file don't beat us on specificity.
+   Toolbar is intentionally excluded from the display:none list — see
+   the freeze rule directly below. */
 .rga-hidden-by-workspace-policy,
-#rga-shell-toolbar.rga-hidden-by-workspace-policy,
 #bottom-panel.rga-hidden-by-workspace-policy,
 #inspector-panel.rga-hidden-by-workspace-policy { display: none; }
+
+/* Toolbar geometry freeze — when policy hides the toolbar, the row
+   it occupies on #app must STAY at its full height so the tab bar
+   (immediately below) does not jump vertically when switching to a
+   workspace tab. visibility:hidden keeps the element's layout box
+   (the row stays); pointer-events:none makes it inert. Per WAI-ARIA,
+   visibility:hidden also removes the subtree from the accessibility
+   tree, so screen readers skip it without an explicit aria-hidden.
+   The explicit display:grid re-establishes the toolbar's normal
+   inner grid layout — the toolbar id+class selector is excluded from
+   the display:none enumeration above, but display:grid here is a
+   safety net so any future re-ordering can't silently collapse the
+   row. */
+#rga-shell-toolbar.rga-hidden-by-workspace-policy {
+  display: grid;
+  visibility: hidden;
+  pointer-events: none;
+}
 
 /* (2) Per-container grid-track collapse — recovers the space the
    hidden surface used to occupy. */

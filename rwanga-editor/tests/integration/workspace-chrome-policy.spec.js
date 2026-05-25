@@ -145,6 +145,97 @@ test('chrome — switching back to the document tab restores all three', async (
   }
 });
 
+test('chrome (freeze) — tab-bar Y position is identical across doc → Settings → doc', async () => {
+  const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'rwanga-chrome-freeze-'));
+  const { app, page } = await launch(userDataDir);
+  try {
+    async function ys() {
+      return await page.evaluate(() => ({
+        toolbarY: Math.round(document.getElementById('rga-shell-toolbar').getBoundingClientRect().y),
+        toolbarH: Math.round(document.getElementById('rga-shell-toolbar').getBoundingClientRect().height),
+        tabBarY:  Math.round(document.getElementById('tab-bar').getBoundingClientRect().y),
+        toolbarVisibility: getComputedStyle(document.getElementById('rga-shell-toolbar')).visibility,
+        toolbarDisplay:    getComputedStyle(document.getElementById('rga-shell-toolbar')).display
+      }));
+    }
+    const a = await ys();
+    expect(a.toolbarVisibility).toBe('visible');
+    expect(a.toolbarH).toBeGreaterThan(0);
+
+    await page.keyboard.press('Control+Comma');
+    await page.waitForSelector(WS_SEL + ' .rga-settings-rows .rga-settings-row');
+    const b = await ys();
+    // Geometry frozen: toolbar row still h>0 and same Y; tab-bar Y unchanged.
+    expect(b.toolbarY).toBe(a.toolbarY);
+    expect(b.toolbarH).toBe(a.toolbarH);
+    expect(b.tabBarY).toBe(a.tabBarY);
+    // Toolbar contents are inert + invisible.
+    expect(b.toolbarVisibility).toBe('hidden');
+    expect(b.toolbarDisplay).not.toBe('none');
+
+    await activateFirstDoc(page);
+    const c = await ys();
+    expect(c.toolbarY).toBe(a.toolbarY);
+    expect(c.tabBarY).toBe(a.tabBarY);
+    expect(c.toolbarVisibility).toBe('visible');
+  } finally {
+    await app.close();
+    try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
+  }
+});
+
+test('chrome (scroll) — Settings nav rail is independent of content scroll; search stays sticky', async () => {
+  const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'rwanga-chrome-scroll-'));
+  const { app, page } = await launch(userDataDir);
+  try {
+    await page.keyboard.press('Control+Comma');
+    await page.waitForSelector(WS_SEL + ' .rga-settings-rows .rga-settings-row');
+
+    // 1. Both columns are scroll containers (overflow-y allows scrolling).
+    const containers = await page.evaluate((sel) => {
+      const ws = document.querySelector(sel);
+      const nav = ws.querySelector('.rga-settings-nav');
+      const content = ws.querySelector('.rga-settings-content');
+      return {
+        navOverflow:     getComputedStyle(nav).overflowY,
+        contentOverflow: getComputedStyle(content).overflowY,
+        navY0:           Math.round(nav.getBoundingClientRect().y),
+        searchY0:        Math.round(ws.querySelector('.rga-settings-search-input').getBoundingClientRect().y)
+      };
+    }, WS_SEL);
+    expect(containers.navOverflow).toBe('auto');
+    expect(containers.contentOverflow).toBe('auto');
+
+    // 2. Scroll the content area to the bottom. Nav and search must not move.
+    await page.evaluate((sel) => {
+      const content = document.querySelector(sel).querySelector('.rga-settings-content');
+      content.scrollTop = content.scrollHeight;
+    }, WS_SEL);
+    // Brief settle.
+    await page.waitForTimeout(50);
+    const after = await page.evaluate((sel) => {
+      const ws = document.querySelector(sel);
+      const nav = ws.querySelector('.rga-settings-nav');
+      const search = ws.querySelector('.rga-settings-search-input');
+      const content = ws.querySelector('.rga-settings-content');
+      return {
+        navY:        Math.round(nav.getBoundingClientRect().y),
+        searchY:     Math.round(search.getBoundingClientRect().y),
+        contentScrollTop: content.scrollTop
+      };
+    }, WS_SEL);
+    // The content actually scrolled (sanity).
+    expect(after.contentScrollTop).toBeGreaterThan(0);
+    // Nav rail did not move — independent scroll container.
+    expect(after.navY).toBe(containers.navY0);
+    // Search stayed put — sticky at top of content column.
+    expect(after.searchY).toBe(containers.searchY0);
+  } finally {
+    await app.close();
+    try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
+  }
+});
+
 test('chrome (layout) — tab-content-host grows when Settings hides the inspector + bottom-panel tracks', async () => {
   const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'rwanga-chrome-grow-'));
   const { app, page } = await launch(userDataDir);

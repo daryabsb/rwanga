@@ -81,6 +81,19 @@
 
 .rga-settings-content-header {
   margin-bottom: 24px;
+  /* Sticky header so search stays pinned to the top of the content
+     column as rows scroll. Background is opaque-ish (uses the editor
+     desk token, same as the workspace root) so rows that scroll
+     beneath the search are masked instead of bleeding through. */
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--editor-bg);
+  /* Tighten the original 24px bottom margin into padding so the
+     sticky band has the spacing built in (margin on a sticky element
+     leaves a visible gap above when scrolled). */
+  margin-bottom: 0;
+  padding-bottom: 24px;
 }
 
 .rga-settings-search-input {
