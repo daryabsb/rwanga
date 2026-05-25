@@ -22,9 +22,23 @@
 //   - per-tier read/write (get / set)
 //   - subscribe / unsubscribe with change-only emission
 //   - re-emit on `editor.tabActivated` for script-tier effective changes
+//   - set() validation via Rga.Settings.Validators (Slice 3C)
+//
+// set() validation policy (Slice 3C):
+//   - set() returns boolean.
+//   - true  → value was valid AND the write succeeded.
+//   - false → value was rejected. Causes:
+//       * id is not in the registry
+//       * value fails the type validator for the entry
+//       * tier is unknown
+//       * tier is 'project' (stub)
+//       * tier is 'script' with no active doc
+//   - On rejection: console.warn with the reason; NO _userValues /
+//     _sessionValues / doc.settings mutation; NO prefs.write call;
+//     NO subscriber notification.
 //
 // Substrate explicitly does NOT ship:
-//   - validators, migration, undo, restart-required handling
+//   - migration, undo, restart-required handling
 //   - any UI or applicator wiring (applicators are independent consumers
 //     that subscribe to ids they care about)
 'use strict';
@@ -114,11 +128,33 @@
     opts = opts || {};
     const tier = opts.tier || 'user';
 
+    // Validate against the registry entry. Unknown ids and values that
+    // fail the type validator are both rejected here, before any state
+    // mutation.
+    const reg = Rga.Settings && Rga.Settings.Registry;
+    const validators = Rga.Settings && Rga.Settings.Validators;
+    if (!reg || typeof reg.get !== 'function') {
+      console.warn('[Rga.Settings.Store] registry not loaded — set() rejected:', id);
+      return false;
+    }
+    const entry = reg.get(id);
+    if (!entry) {
+      console.warn('[Rga.Settings.Store] unknown setting id — set() rejected:', id);
+      return false;
+    }
+    if (!validators || typeof validators.validateValue !== 'function') {
+      console.warn('[Rga.Settings.Store] validators not loaded — set() rejected:', id);
+      return false;
+    }
+    if (!validators.validateValue(entry, value)) {
+      console.warn('[Rga.Settings.Store] value rejected by ' + entry.type +
+        ' validator for "' + id + '":', value);
+      return false;
+    }
+
     if (tier === 'project') {
-      // Project tier is intentionally a no-op in Slice 2; a later slice
-      // adds the project container + storage.
       console.warn('[Rga.Settings.Store] project tier is a stub — write ignored:', id);
-      return;
+      return false;
     }
 
     if (tier === 'session') {
@@ -130,7 +166,7 @@
       const doc = _activeDoc();
       if (!doc) {
         console.warn('[Rga.Settings.Store] no active doc — script-tier write dropped:', id);
-        return;
+        return false;
       }
       doc.settings = doc.settings || {};
       doc.settings[id] = value;
@@ -139,10 +175,11 @@
       }
     } else {
       console.warn('[Rga.Settings.Store] unknown tier:', tier);
-      return;
+      return false;
     }
 
     _emitIfChanged(id);
+    return true;
   }
 
   function _persistUserValue(id, value) {

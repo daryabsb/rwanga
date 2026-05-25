@@ -83,6 +83,7 @@
       id: 'language', label: 'Interface Language',
       description: 'Controls UI text direction and translations. Editor content language is separate.',
       type: 'select', default: 'en', scope: 'all', owner: 'general',
+      options: ['en', 'ku', 'ar'],
       restartRequired: true,
       keywords: ['ui', 'locale', 'translation', 'rtl', 'kurdish', 'arabic'],
       requiresOnboarding: true
@@ -91,6 +92,7 @@
       id: 'theme', label: 'Theme',
       description: 'Switch between dark and light appearance.',
       type: 'radio', default: 'dark', scope: 'all', owner: 'general',
+      options: ['dark', 'light', 'system'],
       keywords: ['dark', 'light', 'system', 'appearance', 'mode'],
       requiresOnboarding: true
     }),
@@ -124,6 +126,7 @@
       id: 'editor.fontFamily', label: 'Editor Font',
       description: 'Font used in the writing surface. Courier Prime is the screenplay standard.',
       type: 'select', default: 'Courier Prime', scope: 'flow', owner: 'editor',
+      options: ['Courier Prime', 'Courier New', 'Noto Naskh Arabic'],
       keywords: ['font', 'typeface', 'courier']
     }),
     entry({
@@ -136,6 +139,7 @@
       id: 'editor.lineHeight', label: 'Line Height',
       description: 'Spacing between lines in the editor. Standard is 1.0 (single-spaced).',
       type: 'select', default: '1.0', scope: 'flow', owner: 'editor',
+      options: ['1.0', '1.15', '1.5', '2.0'],
       keywords: ['line', 'spacing', 'leading']
     }),
     entry({
@@ -166,6 +170,7 @@
       id: 'editor.wordWrap', label: 'Word Wrap',
       description: 'How long lines wrap within the editor. Page-width follows page setup margins.',
       type: 'select', default: 'page', scope: 'flow', owner: 'editor',
+      options: ['page', 'viewport', 'off'],
       keywords: ['wrap', 'word', 'page', 'viewport']
     }),
 
@@ -175,6 +180,7 @@
       description: 'Formatting standard used for margins, indents, and block spacing. Controls both Flow View layout and print/export output.',
       type: 'select', default: 'standard_us',
       scope: 'all', persistsTo: 'script', owner: 'screenplay',
+      options: ['standard_us', 'standard_eu', 'bbc', 'custom'],
       keywords: ['profile', 'format', 'standard', 'bbc']
     }),
     entry({
@@ -189,6 +195,7 @@
       description: 'Where scene numbers appear on the printed page.',
       type: 'select', default: 'both',
       scope: 'print', persistsTo: 'script', owner: 'screenplay',
+      options: ['left', 'both', 'right'],
       dependencies: [{ id: 'screenplay.sceneNumbering', value: true }],
       keywords: ['scene', 'number', 'position', 'margin']
     }),
@@ -227,6 +234,7 @@
       description: 'Page dimensions for print and export. US Letter (8.5×11") or A4 (210×297mm).',
       type: 'select', default: 'letter',
       scope: 'print', persistsTo: 'script', owner: 'pageSetup',
+      options: ['letter', 'a4', 'custom'],
       previewKind: 'page',
       keywords: ['paper', 'size', 'letter', 'a4', 'page']
     }),
@@ -235,6 +243,7 @@
       description: 'Page orientation for print and export output.',
       type: 'radio', default: 'portrait',
       scope: 'print', persistsTo: 'script', owner: 'pageSetup',
+      options: ['portrait', 'landscape'],
       previewKind: 'page',
       keywords: ['orientation', 'portrait', 'landscape']
     }),
@@ -259,6 +268,7 @@
       description: 'Where the page number appears on each page.',
       type: 'select', default: 'top_right',
       scope: 'print', persistsTo: 'script', owner: 'pageSetup',
+      options: ['top_right', 'top_center', 'bottom_right', 'bottom_center'],
       dependencies: [{ id: 'pageSetup.pageNumbers', value: true }],
       previewKind: 'page',
       keywords: ['page', 'number', 'position', 'header', 'footer']
@@ -286,6 +296,7 @@
       description: 'File format used when exporting without specifying.',
       type: 'select', default: 'pdf',
       scope: 'export', owner: 'printExport',
+      options: ['pdf', 'docx', 'fdx', 'fountain'],
       keywords: ['export', 'format', 'pdf', 'docx', 'fdx', 'fountain']
     }),
     entry({
@@ -314,6 +325,7 @@
       description: 'Controls Rwanga logo placement on exported documents. Pro plan required for custom or no branding.',
       type: 'select', default: 'rwanga',
       scope: 'export', owner: 'printExport',
+      options: ['rwanga', 'custom', 'none'],
       keywords: ['branding', 'logo', 'watermark', 'pro']
     }),
     entry({
@@ -328,6 +340,7 @@
       description: 'Whether tag highlights and colors are preserved in the exported document.',
       type: 'select', default: 'bw',
       scope: 'export', owner: 'printExport',
+      options: ['bw', 'color'],
       keywords: ['color', 'black', 'white', 'bw', 'highlight']
     }),
 
@@ -355,6 +368,7 @@
       id: 'files.defaultSaveFormat', label: 'Default Save Format',
       description: 'File format used when saving a new script.',
       type: 'select', default: 'rga', scope: 'all', owner: 'autosave',
+      options: ['rga', 'fountain'],
       keywords: ['save', 'format', 'rga', 'fountain']
     }),
     entry({
@@ -376,6 +390,7 @@
       id: 'appearance.sidebarPosition', label: 'Sidebar Position',
       description: 'Which side of the window the sidebar appears on.',
       type: 'radio', default: 'left', scope: 'flow', owner: 'appearance',
+      options: ['left', 'right'],
       keywords: ['sidebar', 'position', 'left', 'right']
     }),
     entry({
@@ -502,6 +517,7 @@
       id: 'advanced.logLevel', label: 'Console Log Level',
       description: 'Controls verbosity of console logging for debugging.',
       type: 'select', default: 'warn', scope: 'all', owner: 'advanced',
+      options: ['error', 'warn', 'info', 'debug'],
       keywords: ['log', 'level', 'debug', 'verbose']
     })
   ];
@@ -512,6 +528,13 @@
   // --------------------------------------------------------------
 
   function _validate(entries) {
+    // Validators must have loaded first — the registry consults
+    // them to ensure every default passes its type validator.
+    const validators = Rga.Settings && Rga.Settings.Validators;
+    if (!validators || typeof validators.validateValue !== 'function') {
+      throw new Error('[Rga.Settings.Registry] Rga.Settings.Validators must load before the registry');
+    }
+
     const seen = new Set();
     entries.forEach(function(e, i) {
       // Required fields.
@@ -563,6 +586,43 @@
       if (typeof e.description !== 'string' || e.description.length === 0) {
         throw new Error('[Rga.Settings.Registry] ' + e.id + ': description must be a non-empty string');
       }
+      // select/radio require an options array containing the default.
+      if (e.type === 'select' || e.type === 'radio') {
+        if (!Array.isArray(e.options) || e.options.length === 0) {
+          throw new Error('[Rga.Settings.Registry] ' + e.id +
+            ': select/radio must declare a non-empty options array');
+        }
+        if (e.options.indexOf(e.default) < 0) {
+          throw new Error('[Rga.Settings.Registry] ' + e.id +
+            ': default "' + e.default + '" not in options ' +
+            JSON.stringify(e.options));
+        }
+      }
+      // Default must pass the type validator.
+      if (!validators.validateValue(e, e.default)) {
+        throw new Error('[Rga.Settings.Registry] ' + e.id +
+          ': default value ' + JSON.stringify(e.default) +
+          ' fails the ' + e.type + ' validator');
+      }
+      // Each dependency must reference a registered id.
+      e.dependencies.forEach(function(dep) {
+        if (!dep || typeof dep.id !== 'string') {
+          throw new Error('[Rga.Settings.Registry] ' + e.id +
+            ': dependency must be {id, ...} object');
+        }
+      });
+    });
+
+    // Second pass — cross-reference dependency ids (now that every id
+    // is known). This split lets self-referential or forward refs all
+    // be caught uniformly without depending on declaration order.
+    entries.forEach(function(e) {
+      e.dependencies.forEach(function(dep) {
+        if (!seen.has(dep.id)) {
+          throw new Error('[Rga.Settings.Registry] ' + e.id +
+            ': dependency references unknown id "' + dep.id + '"');
+        }
+      });
     });
   }
 

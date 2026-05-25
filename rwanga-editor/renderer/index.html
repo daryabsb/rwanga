@@ -522,6 +522,11 @@
     <!-- Workspaces registry — must load BEFORE tab-manager.js so
          TabManager.openWorkspace can resolve Rga.Workspaces.get(kind). -->
     <script src="js/shell/workspaces.js"></script>
+    <!-- Settings Validators (Slice 3C) — pure type-validator functions
+         (boolean / number / select / color / shortcut / margins / …).
+         Must load BEFORE the registry so registry load-time
+         validation can confirm every default passes its validator. -->
+    <script src="js/shell/settings-validators.js"></script>
     <!-- Settings Registry (Slice 3A) — declarative truth for every
          setting in the product. Must load BEFORE settings-store so
          the store can read built-in defaults from it. -->

@@ -203,6 +203,10 @@ test('Phase 3: no new ownership introduced — no new shell module file', () => 
     // Settings Search (added Slice 3B — distinct owner of the pure
     // search functions over registry entries; not Phase 3 ownership creep).
     'settings-search.js',
+    // Settings Validators (added Slice 3C — distinct owner of the
+    // pure type-validator functions; registry + store consult it
+    // at load and write respectively; not Phase 3 ownership creep).
+    'settings-validators.js',
     // Shell Doctrine §4 workspace-tab registry (added Slice 1 —
     // distinct owner of the workspace-kind registration map; consumed
     // by TabManager.openWorkspace; not Phase 3 ownership creep).

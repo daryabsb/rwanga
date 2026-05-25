@@ -35,9 +35,13 @@ function bootDom() {
 }
 
 function loadLayout() {
-  // Registry must load first — the layout validates against it.
+  // Validators → Registry → Layout. Same load order as
+  // renderer/index.html. Layout validates against the registry; the
+  // registry itself requires validators (Slice 3C).
+  delete require.cache[require.resolve('../../../renderer/js/shell/settings-validators.js')];
   delete require.cache[require.resolve('../../../renderer/js/shell/settings-registry.js')];
   delete require.cache[require.resolve('../../../renderer/js/shell/settings-layout.js')];
+  require('../../../renderer/js/shell/settings-validators.js');
   require('../../../renderer/js/shell/settings-registry.js');
   require('../../../renderer/js/shell/settings-layout.js');
   return global.window.Rga.Settings;

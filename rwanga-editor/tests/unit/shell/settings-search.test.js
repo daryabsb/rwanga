@@ -23,8 +23,12 @@ function bootDom() {
 }
 
 function loadSearch() {
+  // Validators → Registry → Search. The registry requires validators
+  // at load time (Slice 3C).
+  delete require.cache[require.resolve('../../../renderer/js/shell/settings-validators.js')];
   delete require.cache[require.resolve('../../../renderer/js/shell/settings-registry.js')];
   delete require.cache[require.resolve('../../../renderer/js/shell/settings-search.js')];
+  require('../../../renderer/js/shell/settings-validators.js');
   require('../../../renderer/js/shell/settings-registry.js');
   require('../../../renderer/js/shell/settings-search.js');
   return global.window.Rga.Settings;

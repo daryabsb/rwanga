@@ -125,6 +125,9 @@ test('Bundle 2 §B: no new shell module file (boot-script wiring only — preser
     // Settings Search (added Slice 3B — distinct owner of the pure
     // search functions over registry entries; not Bundle 2 creep).
     'settings-search.js',
+    // Settings Validators (added Slice 3C — distinct owner of the
+    // pure type-validator functions; not Bundle 2 ownership creep).
+    'settings-validators.js',
     // Shell Doctrine §4 workspace-tab registry (added Slice 1 —
     // distinct owner of workspace registration map; consumed by
     // TabManager.openWorkspace; not Bundle 2 ownership creep).

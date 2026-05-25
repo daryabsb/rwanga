@@ -50,7 +50,11 @@ function bootDom() {
 }
 
 function loadRegistry() {
+  // Validators must load before the registry (Slice 3C — registry
+  // load-time check consults Validators.validateValue on every default).
+  delete require.cache[require.resolve('../../../renderer/js/shell/settings-validators.js')];
   delete require.cache[require.resolve('../../../renderer/js/shell/settings-registry.js')];
+  require('../../../renderer/js/shell/settings-validators.js');
   require('../../../renderer/js/shell/settings-registry.js');
   return global.window.Rga.Settings.Registry;
 }
@@ -254,10 +258,13 @@ test('Slice 3A — Registry.getDefault() returns undefined for an unknown id', (
 // behavior — existing settings-store tests still cover that.
 
 function loadStoreWithRegistry() {
-  // Order doesn't matter — both modules are IIFEs that publish onto
-  // Rga.Settings.* and the store reads the registry lazily.
+  // Validators → Registry → Store. Same load order as
+  // renderer/index.html. The store's set() consults validators at
+  // write time (Slice 3C); the registry consults validators at load.
+  delete require.cache[require.resolve('../../../renderer/js/shell/settings-validators.js')];
   delete require.cache[require.resolve('../../../renderer/js/shell/settings-registry.js')];
   delete require.cache[require.resolve('../../../renderer/js/shell/settings-store.js')];
+  require('../../../renderer/js/shell/settings-validators.js');
   require('../../../renderer/js/shell/settings-registry.js');
   require('../../../renderer/js/shell/settings-store.js');
   return global.window.Rga.Settings;
@@ -317,4 +324,61 @@ test('Slice 3A — Store.set() at user tier still wins over registry default', a
   // tested, re-verified after the registry source swap.
   S.Store.set('editor.highlightCurrentLine', false);
   assert.equal(S.Store.effective('editor.highlightCurrentLine'), false);
+});
+
+// ----------------------------------------------------------------
+// §6 — Slice 3C: load-time validation against registered validators
+// ----------------------------------------------------------------
+
+test('Slice 3C — every registry default passes its type validator', () => {
+  bootDom();
+  // Validators must load before the registry so the registry's
+  // load-time validation can call them.
+  delete require.cache[require.resolve('../../../renderer/js/shell/settings-validators.js')];
+  delete require.cache[require.resolve('../../../renderer/js/shell/settings-registry.js')];
+  require('../../../renderer/js/shell/settings-validators.js');
+  require('../../../renderer/js/shell/settings-registry.js');
+  const S = global.window.Rga.Settings;
+  S.Registry.all().forEach(function(entry) {
+    assert.equal(S.Validators.validateValue(entry, entry.default), true,
+      'Default for "' + entry.id + '" (type=' + entry.type +
+      ') must pass its validator. Got default=' + JSON.stringify(entry.default));
+  });
+});
+
+test('Slice 3C — every select/radio entry has options containing its default', () => {
+  bootDom();
+  delete require.cache[require.resolve('../../../renderer/js/shell/settings-validators.js')];
+  delete require.cache[require.resolve('../../../renderer/js/shell/settings-registry.js')];
+  require('../../../renderer/js/shell/settings-validators.js');
+  require('../../../renderer/js/shell/settings-registry.js');
+  const R = global.window.Rga.Settings.Registry;
+  R.all().forEach(function(entry) {
+    if (entry.type === 'select' || entry.type === 'radio') {
+      assert.ok(Array.isArray(entry.options),
+        entry.id + ': select/radio must declare an options array');
+      assert.ok(entry.options.length > 0,
+        entry.id + ': select/radio options must be non-empty');
+      assert.ok(entry.options.indexOf(entry.default) >= 0,
+        entry.id + ': default "' + entry.default + '" must appear in options ' +
+        JSON.stringify(entry.options));
+    }
+  });
+});
+
+test('Slice 3C — every dependency.id references an existing registry id', () => {
+  bootDom();
+  delete require.cache[require.resolve('../../../renderer/js/shell/settings-validators.js')];
+  delete require.cache[require.resolve('../../../renderer/js/shell/settings-registry.js')];
+  require('../../../renderer/js/shell/settings-validators.js');
+  require('../../../renderer/js/shell/settings-registry.js');
+  const R = global.window.Rga.Settings.Registry;
+  R.all().forEach(function(entry) {
+    entry.dependencies.forEach(function(dep) {
+      assert.ok(dep && typeof dep.id === 'string',
+        entry.id + ': each dependency must be {id, ...}');
+      assert.ok(R.has(dep.id),
+        entry.id + ': dependency references unknown id "' + dep.id + '"');
+    });
+  });
 });

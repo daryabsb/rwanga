@@ -361,6 +361,11 @@ test('§E: no new shell module file (StudioPanel is and remains the single owner
     // Distinct owner: pure searchSettings(query, entries?) over
     // registry entries. No overlap with StudioPanel.
     'settings-search.js',
+    // 'settings-validators.js' — Settings Validators (Slice 3C).
+    // Distinct owner: pure type-validator functions consulted by
+    // the registry at load and the store at set(). No overlap
+    // with StudioPanel.
+    'settings-validators.js',
     // 'workspaces.js' — Shell Doctrine §4 workspace-tab registry.
     // Distinct owner: registration map of workspace-kind tabs
     // (Settings, Welcome, …). TabManager.openWorkspace queries it.

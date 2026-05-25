@@ -49,11 +49,14 @@ function bootDom(opts) {
 }
 
 function loadStore() {
-  // Registry loads BEFORE the store — the store reads built-in
-  // defaults via Rga.Settings.Registry.getDefault(id). Same load
-  // order as renderer/index.html.
+  // Validators → Registry → Store. Same load order as
+  // renderer/index.html. The store validates writes through the
+  // validators module (Slice 3C); the registry consults validators
+  // during its own load-time shape check.
+  delete require.cache[require.resolve('../../../renderer/js/shell/settings-validators.js')];
   delete require.cache[require.resolve('../../../renderer/js/shell/settings-registry.js')];
   delete require.cache[require.resolve('../../../renderer/js/shell/settings-store.js')];
+  require('../../../renderer/js/shell/settings-validators.js');
   require('../../../renderer/js/shell/settings-registry.js');
   require('../../../renderer/js/shell/settings-store.js');
   return global.window.Rga.Settings.Store;
@@ -247,4 +250,120 @@ test('Slice 2 — tab activation re-emits when the script-tier value changes eff
     'editor.tabActivated', { detail: { tabId: 'B' } }));
   assert.equal(seen.length, 2);
   assert.deepEqual(seen[1], { newVal: true, oldVal: false });
+});
+
+// ----------------------------------------------------------------
+// Slice 3C — set() validation policy
+//
+// Policy: set() returns boolean. true = write succeeded; false =
+// rejected. Rejection causes: unknown id, value fails the entry's
+// type validator, unknown tier, project tier (stub), script tier
+// with no active doc. On rejection: console.warn, no mutation, no
+// emit, no persist.
+// ----------------------------------------------------------------
+
+test('Slice 3C — set() returns true on a valid write', async () => {
+  bootDom();
+  const S = loadStore();
+  await S.init();
+  assert.equal(S.set('editor.highlightCurrentLine', false), true);
+  assert.equal(S.effective('editor.highlightCurrentLine'), false);
+});
+
+test('Slice 3C — set() returns false when the value fails the boolean validator', async () => {
+  const dom = bootDom();
+  const S = loadStore();
+  await S.init();
+  // editor.highlightCurrentLine is a toggle → boolean validator.
+  const result = S.set('editor.highlightCurrentLine', 'true');
+  assert.equal(result, false, 'set must return false on invalid value');
+  // No mutation: effective remains the registry default (true).
+  assert.equal(S.effective('editor.highlightCurrentLine'), true);
+  // No persist.
+  assert.equal(dom.window.__prefsWrites.length, 0);
+});
+
+test('Slice 3C — set() returns false when a number setting receives a non-number', async () => {
+  bootDom();
+  const S = loadStore();
+  await S.init();
+  assert.equal(S.set('editor.fontSize', '12pt'), false);
+  // effective stays at the registry default.
+  assert.equal(S.effective('editor.fontSize'), 12);
+});
+
+test('Slice 3C — set() returns false when a select receives a value not in options', async () => {
+  bootDom();
+  const S = loadStore();
+  await S.init();
+  assert.equal(S.set('language', 'fr'), false);
+  assert.equal(S.effective('language'), 'en');
+});
+
+test('Slice 3C — set() returns false when a color receives an invalid hex', async () => {
+  bootDom();
+  const S = loadStore();
+  await S.init();
+  assert.equal(S.set('appearance.editorDeskColor', 'red'),       false);
+  assert.equal(S.set('appearance.editorDeskColor', '#fff'),      false);
+  assert.equal(S.set('appearance.editorDeskColor', '#141414'),   true,
+    'valid 6-hex must be accepted');
+});
+
+test('Slice 3C — set() returns false when a shortcut receives a malformed chord', async () => {
+  bootDom();
+  const S = loadStore();
+  await S.init();
+  assert.equal(S.set('kb.save', 'foo bar'), false);
+  assert.equal(S.set('kb.save', 'Ctrl+'),   false);
+  assert.equal(S.set('kb.save', 'Ctrl+X'),  true);
+});
+
+test('Slice 3C — set() returns false when margins receive a malformed object', async () => {
+  bootDom();
+  const S = loadStore();
+  await S.init();
+  assert.equal(S.set('pageSetup.margins', { top: 1 }),                       false);
+  assert.equal(S.set('pageSetup.margins', { top: -1, bottom: 1, left: 1, right: 1 }), false);
+  assert.equal(S.set('pageSetup.margins', { top: 1, bottom: 1, left: 1, right: 1 }),  true);
+});
+
+test('Slice 3C — set() returns false for an unknown registry id', async () => {
+  const dom = bootDom();
+  const S = loadStore();
+  await S.init();
+  assert.equal(S.set('not.a.real.setting', true), false);
+  assert.equal(dom.window.__prefsWrites.length, 0);
+});
+
+test('Slice 3C — invalid set() does NOT notify subscribers', async () => {
+  bootDom();
+  const S = loadStore();
+  await S.init();
+  const seen = [];
+  S.subscribe('editor.highlightCurrentLine', function(n, o) { seen.push({ n, o }); });
+  // Invalid type: subscriber must remain idle.
+  const result = S.set('editor.highlightCurrentLine', 'not-a-boolean');
+  assert.equal(result, false);
+  assert.equal(seen.length, 0,
+    'subscribers must not fire when set() was rejected');
+});
+
+test('Slice 3C — invalid set() does NOT persist to user-tier prefs', async () => {
+  const dom = bootDom();
+  const S = loadStore();
+  await S.init();
+  S.set('editor.highlightCurrentLine', 'nope');
+  await tick();
+  assert.equal(dom.window.__prefsWrites.length, 0,
+    'rejected set must not call prefs.write');
+});
+
+test('Slice 3C — set() at session tier also validates and rejects invalid values', async () => {
+  bootDom();
+  const S = loadStore();
+  await S.init();
+  assert.equal(S.set('editor.highlightCurrentLine', 1, { tier: 'session' }), false);
+  // No session-tier mutation: effective falls back to registry default.
+  assert.equal(S.effective('editor.highlightCurrentLine'), true);
 });
