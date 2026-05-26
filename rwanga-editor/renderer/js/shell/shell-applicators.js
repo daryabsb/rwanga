@@ -374,4 +374,46 @@
       _installKbBinding(settingId, value);
     }, { owner: 'shortcuts' });
   });
+
+  // ----- pageSetup.margins (H7 — Margin group) -----------------------------
+  // Mirrors the user's margin choice into four CSS custom properties on
+  // documentElement: --page-margin-top/right/bottom/left. Today the
+  // existing paper-view / manuscript-geometry code reads margins from
+  // doc.settings.pageSetup.margins (the legacy doc-scoped path), so
+  // these variables do not yet drive a visible surface. The applicator
+  // is registered now so the row clears its PERSISTS_ONLY state and a
+  // future paper-view consumer can pick the variables up without
+  // adding a new applicator (Settings Constitution §1A.4 — registered
+  // applicator is the contract that says "this row is wired"; the
+  // visible surface is intentionally deferred per the H7 brief which
+  // forbids paper-preview work).
+  //
+  // Clamping: the control already clamps to [0, 3]. The applicator
+  // re-applies the same clamp defensively so a stale or programmatic
+  // Store.set with out-of-band values cannot push absurd inline CSS
+  // variables that another consumer might honor.
+  function _clampMargin(n) {
+    if (typeof n !== 'number' || !Number.isFinite(n)) return null;
+    if (n < 0) return 0;
+    if (n > 3) return 3;
+    return n;
+  }
+  register('pageSetup.margins', function(value) {
+    if (!document.documentElement) return;
+    if (!value || typeof value !== 'object') {
+      ['top', 'right', 'bottom', 'left'].forEach(function(k) {
+        document.documentElement.style.removeProperty('--page-margin-' + k);
+      });
+      return;
+    }
+    ['top', 'right', 'bottom', 'left'].forEach(function(k) {
+      const clamped = _clampMargin(value[k]);
+      if (clamped === null) {
+        document.documentElement.style.removeProperty('--page-margin-' + k);
+      } else {
+        document.documentElement.style.setProperty(
+          '--page-margin-' + k, String(clamped) + 'in');
+      }
+    });
+  }, { owner: 'pageSetup' });
 })();

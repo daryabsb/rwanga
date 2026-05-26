@@ -176,18 +176,20 @@ test('Slice 5A — clicking a nav item moves the active class', () => {
 // §4 — Editable controls boundary (5C overrides 5B)
 // ----------------------------------------------------------------
 // 5B forbade ANY input inside .rga-settings-rows. 5C makes the safe
-// types (toggle / select / radio / number / text) editable. The new
-// boundary: unsupported types (color / margins) stay strictly
-// read-only. The §11 block below covers the editable contract
+// types (toggle / select / radio / number / text) editable. H5/H6/H7
+// shipped the remaining control types (slider, shortcut, margins,
+// color); no registry-declared type renders as the read-only
+// fallback anymore. The §11 block below covers the editable contract
 // end-to-end.
 
-test('Slice 5C — unsupported types stay read-only (no input/select/fieldset on their rows)', async () => {
+test('Slice 5C / post-H7 — every registry-declared control type is editable; no entry falls back to read-only', async () => {
   bootDom();
   const el = await mountInitialized();
   const Rga = global.window.Rga;
-  // H5 retired `slider`; H6 retired `shortcut`. The remaining
-  // unsupported types stay strictly read-only until their own slices.
-  const UNSUPPORTED = ['color', 'margins'];
+  // Post-H7: zero deferred control types. The unsupported-set is
+  // empty; the legacy fallback path remains only as a safety net for
+  // unknown future types.
+  const UNSUPPORTED = [];
   const unsupportedIds = Rga.Settings.Registry.all()
     .filter(function(e) { return UNSUPPORTED.indexOf(e.type) >= 0; })
     .map(function(e) { return e.id; });
@@ -685,14 +687,18 @@ test('Slice 5C — requiresPro rows render disabled controls and do NOT write on
 // §15 — Unsupported types list (reporting parity)
 // ----------------------------------------------------------------
 
-test('Editable type set is exactly {toggle, select, radio, number, text, slider, shortcut} (post-H6)', async () => {
+test('Editable type set is exactly {toggle, select, radio, number, text, slider, shortcut, margins, color} (post-H7)', async () => {
   bootDom();
   await loadAllInitialized();
   const editable = global.window.Rga.Settings._workspaceInternals._editableTypes.slice().sort();
-  // H5 added `slider`; H6 added `shortcut`. The remaining unsupported
-  // types (color, margins) are tracked in
+  // H5 added `slider`; H6 added `shortcut`; H7 added `margins` and
+  // `color`. Every registry-declared control type now has an
+  // editable control — zero deferred entries per
   // docs/rwanga-settings/UNSUPPORTED_CONTROL_INVENTORY.md.
-  assert.deepEqual(editable, ['number', 'radio', 'select', 'shortcut', 'slider', 'text', 'toggle']);
+  assert.deepEqual(editable, [
+    'color', 'margins', 'number', 'radio', 'select',
+    'shortcut', 'slider', 'text', 'toggle'
+  ]);
 });
 
 // ----------------------------------------------------------------

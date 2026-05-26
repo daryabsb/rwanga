@@ -441,6 +441,16 @@
       id: 'appearance.editorDeskColor', label: 'Desk Color',
       description: 'Background color behind the page surface.',
       type: 'color', default: '#141414', scope: 'flow', owner: 'appearance',
+      // H7 — RC1 §15.9 palette. The color control surfaces these as a
+      // curated swatch row; no free-form picker. Values are 6-digit
+      // hex (Validators.color is the type-level gate).
+      options: ['#141414', '#1a1a2e', '#1c1c1c', '#2d2520'],
+      labels: {
+        '#141414': 'Charcoal',
+        '#1a1a2e': 'Midnight',
+        '#1c1c1c': 'True Dark',
+        '#2d2520': 'Warm'
+      },
       keywords: ['desk', 'background', 'color']
     }),
     entry({
@@ -625,14 +635,24 @@
       // interactive, its labels must be human. Validator enforces that
       // every label key is a real option; missing keys are tolerated
       // (display falls back to the raw code).
+      //
+      // H7 — color entries also carry options + labels (the color
+      // swatch control reads labels for human swatch names per RC1
+      // §15.9). The validator treats select/radio/color the same way:
+      // labels must key into options, every label value must be a
+      // non-empty string.
       if (e.labels !== undefined) {
         if (typeof e.labels !== 'object' || e.labels === null || Array.isArray(e.labels)) {
           throw new Error('[Rga.Settings.Registry] ' + e.id +
             ': labels must be a plain object keyed by option value');
         }
-        if (e.type !== 'select' && e.type !== 'radio') {
+        if (e.type !== 'select' && e.type !== 'radio' && e.type !== 'color') {
           throw new Error('[Rga.Settings.Registry] ' + e.id +
-            ': labels are only meaningful on select/radio entries');
+            ': labels are only meaningful on select/radio/color entries');
+        }
+        if (!Array.isArray(e.options)) {
+          throw new Error('[Rga.Settings.Registry] ' + e.id +
+            ': labels requires an options array');
         }
         Object.keys(e.labels).forEach(function(key) {
           if (e.options.indexOf(key) < 0) {

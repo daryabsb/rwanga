@@ -39,7 +39,11 @@
   //   - 5C ships: toggle, select, radio, number, text
   //   - H5  adds: slider (windowZoom + future range-shaped settings)
   //   - H6  adds: shortcut (kb.*)
-  const EDITABLE_TYPES = new Set(['toggle', 'select', 'radio', 'number', 'text', 'slider', 'shortcut']);
+  //   - H7  adds: margins (pageSetup.margins) + color (appearance.editorDeskColor)
+  const EDITABLE_TYPES = new Set([
+    'toggle', 'select', 'radio', 'number', 'text',
+    'slider', 'shortcut', 'margins', 'color'
+  ]);
 
   // --------------------------------------------------------------
   // Value formatting (read-only fallback for unsupported types)
@@ -94,6 +98,8 @@
       case 'text':     return _makeText(entry);
       case 'slider':   return _makeSlider(entry);
       case 'shortcut': return _makeShortcut(entry);
+      case 'margins':  return _makeMargins(entry);
+      case 'color':    return _makeColor(entry);
       default:         return null;
     }
   }
@@ -526,6 +532,194 @@
     } else {
       console.warn('[settings-workspace] ' + message);
     }
+  }
+
+  // H7 — Margin Group control (RC1 §5.2.9 + Component Library §12).
+  //
+  // Value shape: { top: number, right: number, bottom: number, left: number }
+  // Bounds: min 0, max 3, step 0.1, unit 'in'. Field order per the
+  // constitution: top, right, bottom, left.
+  //
+  // Clamping policy: every input commits the whole object back to
+  // Store; values below min snap up to 0, values above max snap down
+  // to 3, NaN snaps back to the prior value for that field. This is
+  // honest clamping at the control layer — the value that the user
+  // sees is exactly the value Store receives.
+  function _makeMargins(entry) {
+    const wrap = document.createElement('div');
+    wrap.className = 'rga-settings-control-margins';
+    wrap.setAttribute('data-control-for', entry.id);
+
+    const FIELDS = ['top', 'right', 'bottom', 'left'];
+    const LABELS = { top: 'TOP', right: 'RIGHT', bottom: 'BOTTOM', left: 'LEFT' };
+    const MIN  = 0;
+    const MAX  = 3;
+    const STEP = 0.1;
+    const UNIT = (entry && typeof entry.unit === 'string') ? entry.unit : 'in';
+
+    const inputs = {};
+    const cur = _currentValue(entry) || entry.default || {};
+
+    FIELDS.forEach(function(key) {
+      const field = document.createElement('div');
+      field.className = 'rga-settings-control-margins-field';
+
+      const label = document.createElement('label');
+      label.className = 'rga-settings-control-margins-label';
+      label.textContent = LABELS[key];
+
+      const input = document.createElement('input');
+      input.type = 'number';
+      input.className = 'rga-settings-control-margins-input';
+      input.min  = String(MIN);
+      input.max  = String(MAX);
+      input.step = String(STEP);
+      input.setAttribute('data-margin-field', key);
+      input.setAttribute('aria-label', LABELS[key]);
+      if (entry.requiresPro) input.disabled = true;
+      const initial = (typeof cur[key] === 'number' && Number.isFinite(cur[key]))
+        ? cur[key] : (entry.default && entry.default[key]);
+      if (typeof initial === 'number' && Number.isFinite(initial)) {
+        input.value = String(initial);
+      }
+
+      const unit = document.createElement('span');
+      unit.className = 'rga-settings-control-margins-unit';
+      unit.textContent = UNIT;
+
+      label.setAttribute('for', '');
+      field.appendChild(label);
+      field.appendChild(input);
+      field.appendChild(unit);
+      wrap.appendChild(field);
+      inputs[key] = input;
+    });
+
+    function _clamp(n, fallback) {
+      if (typeof n !== 'number' || !Number.isFinite(n)) return fallback;
+      if (n < MIN) return MIN;
+      if (n > MAX) return MAX;
+      return n;
+    }
+
+    function _readAll() {
+      const out = {};
+      FIELDS.forEach(function(key) {
+        const raw = inputs[key].value;
+        const n   = (raw === '' || raw === null || raw === undefined) ? NaN : Number(raw);
+        const fallback = (entry.default && typeof entry.default[key] === 'number')
+          ? entry.default[key] : 0;
+        out[key] = _clamp(n, fallback);
+      });
+      return out;
+    }
+
+    // After clamping the user's typed value, write the visible field
+    // value back so the typed value and the committed value never
+    // disagree (e.g. typing 5 in a max-3 field shows "3").
+    function _writeVisible(values) {
+      FIELDS.forEach(function(key) {
+        inputs[key].value = String(values[key]);
+      });
+    }
+
+    FIELDS.forEach(function(key) {
+      inputs[key].addEventListener('change', function() {
+        const values = _readAll();
+        _writeVisible(values);
+        // Bubble a change up through the wrap so _wireControl picks it
+        // up and writes through Store. readValue() returns `values`.
+        const ev = new Event('change', { bubbles: true });
+        wrap.__pendingValue = values;
+        wrap.dispatchEvent(ev);
+      });
+    });
+
+    function sync(value) {
+      if (!value || typeof value !== 'object') return;
+      FIELDS.forEach(function(key) {
+        if (typeof value[key] === 'number' && Number.isFinite(value[key])) {
+          inputs[key].value = String(value[key]);
+        }
+      });
+    }
+    function readValue() {
+      // The change handler stashes the clamped object before
+      // dispatching; readValue returns it. Fall back to reading the
+      // inputs directly so synthetic test paths work too.
+      return wrap.__pendingValue || _readAll();
+    }
+    return { element: wrap, sync: sync, readValue: readValue };
+  }
+
+  // H7 — Color control (RC1 §5.2.7 + Component Library §10).
+  //
+  // Renders a curated palette of circular swatches. The palette MUST
+  // come from entry.options (RC1 §5.2.7 — "MUST always have predefined
+  // options. MUST NOT use a free-form color picker"). Selection writes
+  // through Store; the existing per-id applicator drives the visible
+  // effect (e.g. shell-applicators.js sets --editor-bg).
+  function _makeColor(entry) {
+    const wrap = document.createElement('div');
+    wrap.className = 'rga-settings-control-color';
+    wrap.setAttribute('role', 'radiogroup');
+    wrap.setAttribute('data-control-for', entry.id);
+    if (entry.label) wrap.setAttribute('aria-label', entry.label);
+
+    const options = Array.isArray(entry.options) ? entry.options.slice() : [];
+    const labels  = (entry.labels && typeof entry.labels === 'object') ? entry.labels : {};
+    const swatches = [];
+
+    let currentValue = String(_currentValue(entry) || entry.default || '');
+
+    options.forEach(function(value) {
+      const sw = document.createElement('button');
+      sw.type = 'button';
+      sw.className = 'rga-settings-control-color-swatch';
+      sw.setAttribute('role', 'radio');
+      sw.setAttribute('data-color-value', value);
+      const human = labels[value] || value;
+      sw.setAttribute('aria-label', human);
+      sw.setAttribute('title', human);
+      sw.style.background = value;
+      if (entry.requiresPro) sw.disabled = true;
+      if (value === currentValue) {
+        sw.classList.add('is-active');
+        sw.setAttribute('aria-checked', 'true');
+      } else {
+        sw.setAttribute('aria-checked', 'false');
+      }
+      sw.addEventListener('click', function() {
+        if (entry.requiresPro) return;
+        if (currentValue === value) return;
+        currentValue = value;
+        _refreshActive();
+        const ev = new Event('change', { bubbles: true });
+        wrap.__pendingValue = value;
+        wrap.dispatchEvent(ev);
+      });
+      wrap.appendChild(sw);
+      swatches.push(sw);
+    });
+
+    function _refreshActive() {
+      swatches.forEach(function(sw) {
+        const v = sw.getAttribute('data-color-value');
+        const active = v === currentValue;
+        sw.classList.toggle('is-active', active);
+        sw.setAttribute('aria-checked', active ? 'true' : 'false');
+      });
+    }
+
+    function sync(value) {
+      if (typeof value !== 'string') return;
+      currentValue = value;
+      _refreshActive();
+    }
+    function readValue() {
+      return wrap.__pendingValue || currentValue;
+    }
+    return { element: wrap, sync: sync, readValue: readValue };
   }
 
   // --------------------------------------------------------------

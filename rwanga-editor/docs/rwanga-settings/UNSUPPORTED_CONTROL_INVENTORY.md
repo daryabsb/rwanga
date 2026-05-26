@@ -21,31 +21,57 @@ This inventory is **read-only**. Engineers MUST NOT use it as a wiring backlog w
 
 ## Inventory
 
-### 1. `margins`
-
-| Field | Value |
-|---|---|
-| Control type | `margins` — referred to as `margin_group` in the constitution (RC1 §5.2.9). The registry uses the shorter `margins` token; both refer to the same control. |
-| Affected setting IDs | `pageSetup.margins` |
-| Count | 1 |
-| Current fallback | Read-only formatted text (e.g. `T 1 · B 1 · L 1.5 · R 1`). The row's value column shows the four numeric fields collapsed into a single readable summary. |
-| Why unsupported | The constitution-mandated control (RC1 §5.2.9) requires a 2×2 grid of labeled numeric fields (TOP / RIGHT / BOTTOM / LEFT) with shared container styling, per-field clamping (0–3), and a 0.1 step. Narrow use case (only one entry) so the work is properly paired with other Page Setup wiring rather than shipped in isolation. |
-| Proposed future slice | **H7** |
-
-### 2. `color`
-
-| Field | Value |
-|---|---|
-| Control type | `color` (RC1 §5.2.7) |
-| Affected setting IDs | `appearance.editorDeskColor` |
-| Count | 1 |
-| Current fallback | Read-only text rendering of the hex value (e.g. `#141414`). Note: an applicator was registered for this id in an earlier slice (`shell-applicators.js`); the applicator is currently orphaned because no editable control surfaces the value to the user. |
-| Why unsupported | The constitution-mandated control (RC1 §5.2.7) requires a horizontal row of curated-palette swatches with active/hover/scale states. Crucially, the control "MUST always have predefined options" — the registry today carries only a default hex, not a palette array. Wiring requires both a registry shape extension (palette options) and the swatch-row component. |
-| Proposed future slice | **H7** |
+*No remaining unsupported control types.* H5 (slider), H6 (shortcut), and H7 (margins + color) have shipped every constitution-declared control. Future settings whose registry shape declares one of these types render the real control with no inventory entry required.
 
 ---
 
 ## Shipped Slices
+
+### `margins` — closed by H7 (2026-05-26)
+
+The margin group control is implemented. `pageSetup.margins` is now
+live: the `_makeMargins` factory in
+`renderer/js/shell/workspaces/settings-workspace.js` renders the
+constitution-mandated 2×2 grid of labeled numeric fields (TOP /
+RIGHT / BOTTOM / LEFT) with min=0, max=3, step=0.1, unit "in" per
+RC1 §5.2.9 + Component Library §12. Every field commits the
+complete `{top, right, bottom, left}` object back to
+`Settings.Store` on change, with clamping handled in the control
+itself so the visible value and the stored value never disagree.
+
+The new `pageSetup.margins` applicator (`owner: 'pageSetup'`) in
+`shell-applicators.js` mirrors the user's choice into four CSS
+custom properties on `documentElement`
+(`--page-margin-top/right/bottom/left`). Today the existing
+paper-view / manuscript-geometry chain still reads margins from
+`doc.settings.pageSetup.margins` (the legacy doc-scoped path), so
+these variables do not yet drive a visible surface — page-preview
+work is explicitly out of scope per the H7 brief. The applicator
+exists to satisfy the constitution's "registered applicator =
+wired" contract and to provide a forward-compatible hook for
+future paper-view consumers.
+
+### `color` — closed by H7 (2026-05-26)
+
+The color swatch control is implemented. `appearance.editorDeskColor`
+is now live: the registry entry gained a curated `options` palette
+(Charcoal `#141414`, Midnight `#1a1a2e`, True Dark `#1c1c1c`, Warm
+`#2d2520`) plus a `labels` map for human names per RC1 §15.9. The
+`_makeColor` factory in
+`renderer/js/shell/workspaces/settings-workspace.js` renders the
+horizontal row of 24px circular swatches with active/hover/scale
+states per RC1 §5.2.7 + Component Library §10. The control is a
+`role="radiogroup"` with each swatch as a `role="radio"` button;
+keyboard focus shows the accent outline.
+
+Free-form picker is forbidden — selection writes through Store
+with one of the palette hex values, validated by the existing
+6-digit-hex `color` validator. The existing
+`appearance.editorDeskColor` applicator in `shell-applicators.js`
+(previously orphaned per the H4 inventory) now drives the visible
+effect: the `--editor-bg` custom property on `documentElement`
+updates immediately on selection, and the editor desk repaints
+without restart.
 
 ### `shortcut` — closed by H6 (2026-05-26)
 
@@ -99,19 +125,19 @@ ship in a later slice.
 
 ## Summary Table
 
-| Type | Affected IDs | Count | Fallback | Future slice |
+| Type | Affected IDs | Count | Fallback | Slice |
 |---|---|---|---|---|
-| `margins` | `pageSetup.margins` | 1 | read-only summary | **H7** |
-| `color` | `appearance.editorDeskColor` | 1 | read-only hex | **H7** |
-| **Total deferred** | | **2 entries** | | |
 | `slider` | `windowZoom` | 1 | — shipped — | **H5** (done) |
 | `shortcut` | `kb.*` | 10 | — shipped — | **H6** (done) |
+| `margins` | `pageSetup.margins` | 1 | — shipped — | **H7** (done) |
+| `color` | `appearance.editorDeskColor` | 1 | — shipped — | **H7** (done) |
+| **Total deferred** | | **0 entries** | | |
 
 ---
 
 ## Render-Layer Behavior Notes
 
-The two remaining unsupported types share the same workspace fallback (see `renderer/js/shell/workspaces/settings-workspace.js` `_buildRow`):
+The read-only fallback in `renderer/js/shell/workspaces/settings-workspace.js` `_buildRow` is now reserved purely as a safety net for unknown / future control types — every type that the registry declares today (`toggle`, `select`, `radio`, `number`, `text`, `slider`, `shortcut`, `margins`, `color`) ships its own editable control. The fallback path remains in place so a future malformed registry entry degrades gracefully instead of crashing the workspace.
 
 ```js
 // Read-only fallback (unsupported types + safety net).
@@ -130,7 +156,7 @@ The fallback never exposes:
 - Control-type words (`slider`, `color`, `shortcut`, `margins`)
 - Enum identifiers (the values it displays are user-meaningful units, not engineer tokens)
 
-This is sufficient for H4's "no implementation leakage" rule. Replacing the fallback with the constitution-mandated controls was completed across H5 (slider), H6 (shortcut), and is owed by H7 (margins + color).
+This was H4's "no implementation leakage" rule. Replacing the fallback with the constitution-mandated controls was completed across H5 (slider), H6 (shortcut), and H7 (margins + color).
 
 ---
 
