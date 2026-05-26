@@ -216,12 +216,30 @@
   // Row rendering
   // --------------------------------------------------------------
 
+  // RC1 §1A.5 + §8.1.2 — PERSISTS_ONLY = editable control type + no
+  // registered applicator. Per the design constitution the row MUST
+  // render at 60% opacity, pointer-events:none, with helper text
+  // appended with the literal "Behavior not wired yet." — and MUST
+  // carry no badge (opacity + helper text are sufficient signal).
+  function _isPersistsOnly(entry) {
+    if (!EDITABLE_TYPES.has(entry.type)) return false;
+    const Applicators = Rga.Settings && Rga.Settings.Applicators;
+    if (!Applicators || typeof Applicators.registered !== 'function') return true;
+    return Applicators.registered().indexOf(entry.id) < 0;
+  }
+
   function _buildRow(entry, subs) {
     const row = document.createElement('article');
     row.className = 'rga-settings-row';
     if (entry.requiresPro) row.classList.add('is-pro');
     if (entry.restartRequired) row.classList.add('is-restart-required');
     row.setAttribute('data-setting-id', entry.id);
+
+    const persistsOnly = _isPersistsOnly(entry);
+    if (persistsOnly) {
+      row.classList.add('is-persists-only');
+      row.setAttribute('aria-disabled', 'true');
+    }
 
     const header = document.createElement('header');
     header.className = 'rga-settings-row-header';
@@ -231,32 +249,35 @@
     label.textContent = entry.label;
     header.appendChild(label);
 
-    if (entry.type) {
-      const chip = document.createElement('span');
-      chip.className = 'rga-settings-row-type-chip';
-      chip.textContent = entry.type;
-      header.appendChild(chip);
-    }
-
-    if (entry.requiresPro) {
-      const pro = document.createElement('span');
-      pro.className = 'rga-settings-row-pro-marker';
-      pro.textContent = 'Pro';
-      header.appendChild(pro);
-    }
-
-    if (entry.restartRequired) {
-      const restart = document.createElement('span');
-      restart.className = 'rga-settings-row-restart-marker';
-      restart.textContent = 'Restart required';
-      header.appendChild(restart);
+    // RC1 §8.1.2 forbids badges on PERSISTS_ONLY rows. RC1 §7.3 forbids
+    // any badge that exposes control types (`toggle`, `select`, etc).
+    // The previously-rendered type chip is retired here.
+    //
+    // Pro and Restart-required markers (RC1 §7.2 status badges) render
+    // only on REAL rows; PERSISTS_ONLY suppresses them.
+    if (!persistsOnly) {
+      if (entry.requiresPro) {
+        const pro = document.createElement('span');
+        pro.className = 'rga-settings-row-pro-marker';
+        pro.textContent = 'Pro';
+        header.appendChild(pro);
+      }
+      if (entry.restartRequired) {
+        const restart = document.createElement('span');
+        restart.className = 'rga-settings-row-restart-marker';
+        restart.textContent = 'Restart required';
+        header.appendChild(restart);
+      }
     }
 
     row.appendChild(header);
 
     const desc = document.createElement('p');
     desc.className = 'rga-settings-row-description';
-    desc.textContent = entry.description || '';
+    // RC1 §8.1.2 — append the literal honest-state text when not wired.
+    desc.textContent = persistsOnly
+      ? (entry.description || '') + ' Behavior not wired yet.'
+      : (entry.description || '');
     row.appendChild(desc);
 
     const valueSlot = document.createElement('div');
@@ -266,8 +287,15 @@
     if (EDITABLE_TYPES.has(entry.type)) {
       const ctrl = _makeControl(entry);
       if (ctrl) {
+        if (persistsOnly) {
+          // RC1 §8.1.2 — non-interactive at the control level. The row
+          // also blocks pointer-events via CSS (.is-persists-only). The
+          // `disabled` attribute makes the native control unfocusable
+          // and unreachable by keyboard.
+          _disableControlElement(ctrl.element);
+        }
         valueSlot.appendChild(ctrl.element);
-        _wireControl(entry, ctrl, subs);
+        _wireControl(entry, ctrl, subs, persistsOnly);
         return row;
       }
     }
@@ -278,13 +306,26 @@
     return row;
   }
 
-  function _wireControl(entry, ctrl, subs) {
+  function _disableControlElement(el) {
+    if (!el) return;
+    if (el.tagName === 'FIELDSET') {
+      // Radio: disable every inner input.
+      Array.from(el.querySelectorAll('input')).forEach(function(i) { i.disabled = true; });
+      el.disabled = true;
+      return;
+    }
+    el.disabled = true;
+  }
+
+  function _wireControl(entry, ctrl, subs, persistsOnly) {
     const Store = Rga.Settings && Rga.Settings.Store;
     if (!Store) return;
 
-    if (entry.requiresPro) {
-      // No change handler, no subscription — just ensure visual state
-      // reflects current effective value if it changes elsewhere.
+    if (entry.requiresPro || persistsOnly) {
+      // No change handler, no subscription writes back. PERSISTS_ONLY
+      // controls are non-interactive at the DOM level; subscribing
+      // only to mirror external changes (e.g. tier flips) keeps the
+      // visual aligned with the canonical effective value.
       const unsub = Store.subscribe(entry.id, function(newVal) {
         ctrl.sync(newVal);
       });

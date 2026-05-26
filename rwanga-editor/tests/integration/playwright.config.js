@@ -8,9 +8,15 @@
 
 const { defineConfig } = require('@playwright/test');
 
+// H3: also discover specs under tests/e2e/ so the design constitution's
+// preferred path (tests/e2e/settings/*.spec.js) is found by the same
+// runner without forcing a layout migration of existing integration
+// specs in this slice.
+const path = require('path');
+
 module.exports = defineConfig({
-  testDir: __dirname,
-  testMatch: '**/*.spec.js',
+  testDir: path.resolve(__dirname, '..'),
+  testMatch: ['integration/**/*.spec.js', 'e2e/**/*.spec.js'],
   timeout: 60000,
   expect: { timeout: 10000 },
   fullyParallel: false,

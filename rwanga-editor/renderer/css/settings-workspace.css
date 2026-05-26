@@ -182,7 +182,9 @@
   color: var(--text-primary);
 }
 
-.rga-settings-row-type-chip,
+/* Type chip retired (H3 / RC1 §7.3 — control-type badges are
+   forbidden as they expose engineer vocabulary to writers). */
+
 .rga-settings-row-pro-marker {
   display: inline-block;
   padding: 1px 6px;
@@ -191,13 +193,20 @@
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  background: var(--surface-tertiary, rgba(255, 255, 255, 0.06));
-  color: var(--text-tertiary, #999);
-}
-
-.rga-settings-row-pro-marker {
   color: var(--accent-gold, #c9a227);
   background: rgba(201, 162, 39, 0.12);
+}
+
+/* RC1 §8.1.2 — PERSISTS_ONLY rows render at 60% opacity, pointer-events
+   none, cursor not-allowed. No badge. Helper text is appended with the
+   literal "Behavior not wired yet." at the JS layer. The row-level
+   opacity is the sole visual signal alongside the helper text. */
+.rga-settings-row.is-persists-only {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.rga-settings-row.is-persists-only .rga-settings-row-value {
+  pointer-events: none;
 }
 
 .rga-settings-row-description {

@@ -36,6 +36,9 @@ function loadAll() {
    '../../../renderer/js/shell/settings-layout.js',
    '../../../renderer/js/shell/settings-search.js',
    '../../../renderer/js/shell/settings-store.js',
+   '../../../renderer/js/shell/settings-applicators.js',
+   '../../../renderer/js/editor/editor-applicators.js',
+   '../../../renderer/js/shell/shell-applicators.js',
    '../../../renderer/js/shell/workspaces.js',
    '../../../renderer/js/shell/workspaces/settings-workspace.js'
   ].forEach(function(p) {
@@ -270,7 +273,7 @@ test('Slice 5B — each row carries data-setting-id matching its setting', async
   assert.deepEqual(got, general.settingIds);
 });
 
-test('Slice 5B+5C — each row shows label, description, value control, and a type chip', async () => {
+test('Slice 5B+5C+H3 — each row shows label, description, value control (no engineer type chip per RC1 §7.3)', async () => {
   bootDom();
   const el = await mountInitialized();
   const Rga = global.window.Rga;
@@ -282,7 +285,6 @@ test('Slice 5B+5C — each row shows label, description, value control, and a ty
   const label = row.querySelector('.rga-settings-row-label');
   const desc  = row.querySelector('.rga-settings-row-description');
   const value = row.querySelector('.rga-settings-row-value');
-  const chip  = row.querySelector('.rga-settings-row-type-chip');
   const entry = Rga.Settings.Registry.get('editor.highlightCurrentLine');
   assert.equal(label.textContent, entry.label);
   assert.equal(desc.textContent,  entry.description);
@@ -291,8 +293,11 @@ test('Slice 5B+5C — each row shows label, description, value control, and a ty
   const cb = value.querySelector('input[type="checkbox"]');
   assert.ok(cb, 'toggle row must contain a checkbox in 5C');
   assert.equal(cb.checked, true, 'default true must render as checked');
-  assert.ok(chip);
-  assert.equal(chip.textContent.trim(), 'toggle');
+  // H3 / RC1 §7.3 — the type chip ("toggle", "select", "radio") is
+  // explicitly forbidden. It must not be rendered.
+  const chip = row.querySelector('.rga-settings-row-type-chip');
+  assert.equal(chip, null,
+    'RC1 §7.3 forbids control-type chips on rows; this row must render none');
 });
 
 test('Slice 5C — boolean false renders as an unchecked checkbox', async () => {
@@ -458,12 +463,15 @@ test('Slice 5B — empty state is hidden when results exist', async () => {
 // renderer with a synthetic entry — same pattern Slice 3B used for
 // alias/keyword testing on the search module.
 
-test('Slice 5B — a requiresPro entry renders a pro marker', async () => {
+test('Slice 5B + H3 — a REAL requiresPro entry renders a pro marker (PERSISTS_ONLY suppresses badges per RC1 §8.1.2)', async () => {
   bootDom();
-  await loadAllInitialized();
-  const internals = global.window.Rga.Settings._workspaceInternals;
+  const Rga = await loadAllInitialized();
+  const internals = Rga.Settings._workspaceInternals;
   assert.ok(internals && typeof internals.renderRowsInto === 'function',
     'renderRowsInto fixture hook must be exposed for testing');
+  // Register a synthetic applicator so the row is REAL — under RC1
+  // §8.1.2 only REAL rows display any badges (incl. the pro marker).
+  Rga.Settings.Applicators.register('fake.pro', function() {}, { owner: 'test' });
   const fakeEntry = {
     id: 'fake.pro', label: 'Fake Pro Setting', description: 'demo',
     type: 'toggle', default: false, requiresPro: true
@@ -474,8 +482,10 @@ test('Slice 5B — a requiresPro entry renders a pro marker', async () => {
   assert.ok(row);
   assert.ok(row.classList.contains('is-pro'),
     'pro row must carry the is-pro class for styling');
+  assert.equal(row.classList.contains('is-persists-only'), false,
+    'REAL row must not be flagged PERSISTS_ONLY');
   const marker = row.querySelector('.rga-settings-row-pro-marker');
-  assert.ok(marker, 'pro marker element must exist on a requiresPro row');
+  assert.ok(marker, 'pro marker element must exist on a REAL requiresPro row');
 });
 
 test('Slice 5B — non-pro entries do NOT render the pro marker', async () => {
@@ -538,45 +548,49 @@ test('Slice 5C — toggling a boolean checkbox writes the new value via Store.se
 // ----------------------------------------------------------------
 
 test('Slice 5C — changing a <select> writes the new option via Store.set', async () => {
+  // H3: control-contract test must target a REAL select (has an
+  // applicator). pageSetup.paperSize was the prior target but is
+  // PERSISTS_ONLY post-H3 and correctly renders disabled.
+  // editor.fontFamily is a REAL select.
   bootDom();
   const Rga = await loadAllInitialized();
   const spec = Rga.Workspaces.get('settings');
   const el = global.document.createElement('div');
   global.document.body.appendChild(el);
   spec.mount(el);
-  el.querySelector('[data-section-id="pageSetup"]')
+  el.querySelector('[data-section-id="editor"]')
     .dispatchEvent(new global.window.MouseEvent('click', { bubbles: true }));
 
   const sel = el.querySelector(
-    '.rga-settings-row[data-setting-id="pageSetup.paperSize"] select');
+    '.rga-settings-row[data-setting-id="editor.fontFamily"] select');
   assert.ok(sel);
-  assert.equal(sel.value, 'letter');
+  assert.equal(sel.value, 'Courier Prime');
 
-  sel.value = 'a4';
+  sel.value = 'Courier New';
   _change(sel);
 
-  assert.equal(Rga.Settings.Store.effective('pageSetup.paperSize'), 'a4');
+  assert.equal(Rga.Settings.Store.effective('editor.fontFamily'), 'Courier New');
 });
 
 test('Slice 5C — picking a radio option writes via Store.set', async () => {
+  // H3: the only REAL radio in the registry is `theme` (wired in H2).
+  // pageSetup.orientation is PERSISTS_ONLY post-H3.
   bootDom();
   const Rga = await loadAllInitialized();
   const spec = Rga.Workspaces.get('settings');
   const el = global.document.createElement('div');
   global.document.body.appendChild(el);
   spec.mount(el);
-  el.querySelector('[data-section-id="pageSetup"]')
-    .dispatchEvent(new global.window.MouseEvent('click', { bubbles: true }));
-
+  // 'theme' lives in General — that's the default section.
   const group = el.querySelector(
-    '.rga-settings-row[data-setting-id="pageSetup.orientation"] fieldset');
+    '.rga-settings-row[data-setting-id="theme"] fieldset');
   assert.ok(group);
-  const landscape = group.querySelector('input[type="radio"][value="landscape"]');
-  assert.ok(landscape);
-  landscape.checked = true;
-  _change(landscape);
+  const light = group.querySelector('input[type="radio"][value="light"]');
+  assert.ok(light);
+  light.checked = true;
+  _change(light);
 
-  assert.equal(Rga.Settings.Store.effective('pageSetup.orientation'), 'landscape');
+  assert.equal(Rga.Settings.Store.effective('theme'), 'light');
 });
 
 // ----------------------------------------------------------------
@@ -606,8 +620,15 @@ test('Slice 5C — number input parses and writes a valid number via Store.set',
 });
 
 test('Slice 5C — text input writes a string via Store.set', async () => {
+  // H3: no REAL text setting exists today (every text entry is
+  // PERSISTS_ONLY). Register a synthetic applicator for the target
+  // text entry to lift it to REAL for the duration of this test —
+  // the test's concern is the text control's write contract, not the
+  // wiring of any specific setting.
   bootDom();
   const Rga = await loadAllInitialized();
+  Rga.Settings.Applicators.register('pageSetup.headerText', function() {},
+    { owner: 'test' });
   const spec = Rga.Workspaces.get('settings');
   const el = global.document.createElement('div');
   global.document.body.appendChild(el);
@@ -766,20 +787,51 @@ test('Slice 5C — when Store changes from elsewhere, the control reflects the n
 // §19 — restartRequired marker (no banner)
 // ----------------------------------------------------------------
 
-test('Slice 5C — restartRequired entries render a marker AND keep an editable control', async () => {
+test('H3 / RC1 §8.1.2 — restartRequired entries that are PERSISTS_ONLY suppress the restart marker (no badges on un-wired rows)', async () => {
   bootDom();
   const el = await mountInitialized();
-  // 'language' has restartRequired=true and type=select.
+  // 'language' has restartRequired=true, type=select, AND no applicator.
+  // Under RC1 §8.1.2 a PERSISTS_ONLY row carries no badges — the lower
+  // opacity + appended helper text are the sole signals.
   const row = el.querySelector(
     '.rga-settings-row[data-setting-id="language"]');
   assert.ok(row);
-  assert.ok(row.classList.contains('is-restart-required'),
-    'restart-required row must carry the is-restart-required class');
+  assert.ok(row.classList.contains('is-persists-only'),
+    'language is PERSISTS_ONLY (no applicator) — row must carry the is-persists-only class');
+  assert.equal(row.getAttribute('aria-disabled'), 'true',
+    'PERSISTS_ONLY row must declare aria-disabled');
   const marker = row.querySelector('.rga-settings-row-restart-marker');
-  assert.ok(marker, 'restart marker element must exist');
+  assert.equal(marker, null,
+    'RC1 §8.1.2 — PERSISTS_ONLY rows must not render the restart marker');
   const sel = row.querySelector('select');
-  assert.ok(sel, 'restart-required entries are still editable in 5C');
-  assert.equal(sel.disabled, false);
+  assert.ok(sel, 'control still renders, just non-interactive');
+  assert.equal(sel.disabled, true,
+    'RC1 §8.1.2 — PERSISTS_ONLY controls must be disabled');
+  const desc = row.querySelector('.rga-settings-row-description');
+  assert.ok(/Behavior not wired yet\.$/.test(desc.textContent),
+    'helper text must be appended with the literal "Behavior not wired yet."');
+});
+
+test('H3 — REAL row (theme: has registered applicator) renders fully interactive and not flagged PERSISTS_ONLY', async () => {
+  bootDom();
+  const el = await mountInitialized();
+  const Rga = global.window.Rga;
+  // Force-register a synthetic applicator for theme so the workspace
+  // sees it as REAL (the production boot also registers one).
+  if (!Rga.Settings.Applicators.registered().includes('theme')) {
+    Rga.Settings.Applicators.register('theme', function() {}, { owner: 'test' });
+  }
+  // Mount fresh to pick up the registration.
+  const fresh = await mountInitialized();
+  const row = fresh.querySelector('.rga-settings-row[data-setting-id="theme"]');
+  assert.ok(row);
+  assert.equal(row.classList.contains('is-persists-only'), false,
+    'theme is REAL (applicator registered) — must not carry the PERSISTS_ONLY class');
+  const radios = row.querySelectorAll('input[type="radio"]');
+  assert.ok(radios.length > 0);
+  radios.forEach(function(r) {
+    assert.equal(r.disabled, false, 'REAL row controls must not be disabled');
+  });
 });
 
 // ----------------------------------------------------------------
