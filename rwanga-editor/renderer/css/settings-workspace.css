@@ -197,14 +197,16 @@
   background: rgba(201, 162, 39, 0.12);
 }
 
-/* RC1 §8.1.2 — PERSISTS_ONLY rows render at 60% opacity, pointer-events
-   none, cursor not-allowed. No badge. Helper text is appended with the
-   literal "Behavior not wired yet." at the JS layer. The row-level
-   opacity is the sole visual signal alongside the helper text. */
-.rga-settings-row.is-persists-only {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
+/* H3A correction (2026-05-26):
+   PERSISTS_ONLY signals belong to the INTERACTION layer only.
+   Row, label, and helper text retain full visual fidelity — no
+   row-level opacity, no cursor change, no spacing change. The
+   native `disabled` attribute on the control surfaces the control's
+   own visual state (browser disabled style), and pointer-events is
+   blocked on the value column so accidental click-through is
+   prevented. The honest helper-text append "Behavior not wired yet."
+   is the textual signal; the control's disabled state is the visual
+   signal. No row degradation. */
 .rga-settings-row.is-persists-only .rga-settings-row-value {
   pointer-events: none;
 }

@@ -50,7 +50,10 @@ const REAL_ID = 'theme';
 // Rule (1) + (3) — PERSISTS_ONLY rows are non-interactive at 60%
 // -----------------------------------------------------------------
 
-test('H3 — PERSISTS_ONLY row carries 60% opacity and aria-disabled (RC1 §8.1.2)', async () => {
+test('H3 + H3A — PERSISTS_ONLY row carries the class and aria-disabled, retains full opacity (visual contract)', async () => {
+  // H3A correction: PERSISTS_ONLY signals belong to the interaction
+  // layer only. Row opacity stays at 1; the disabled control + the
+  // helper-text append are the entire signal.
   const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'rwanga-h3-opacity-'));
   const { app, page } = await launch(userDataDir);
   try {
@@ -59,7 +62,7 @@ test('H3 — PERSISTS_ONLY row carries 60% opacity and aria-disabled (RC1 §8.1.
     await expect(row).toHaveClass(/is-persists-only/);
     await expect(row).toHaveAttribute('aria-disabled', 'true');
     const opacity = await row.evaluate((el) => getComputedStyle(el).opacity);
-    expect(parseFloat(opacity)).toBeCloseTo(0.6, 2);
+    expect(parseFloat(opacity)).toBeCloseTo(1.0, 2);
   } finally {
     await app.close();
     try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
