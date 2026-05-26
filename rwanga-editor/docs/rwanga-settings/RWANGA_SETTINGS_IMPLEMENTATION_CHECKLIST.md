@@ -101,7 +101,7 @@ Use for periodic visual audits of the Settings UI, or before a release.
 - [ ] Nav shows all 9 sections in correct order (General through Advanced)
 - [ ] Each nav item has icon + label + count badge
 - [ ] Active nav item has blue left border and --bg-active background
-- [ ] Bottom of nav has Reset All + Save buttons
+- [ ] Bottom of nav has **Reset All button only** (NO Save button — Save was removed in S10 per the immediate-apply doctrine; see RC1 §3.3)
 - [ ] Status bar shows "Settings" and modified count
 
 ### Rows
@@ -126,12 +126,12 @@ Use for periodic visual audits of the Settings UI, or before a release.
 - [ ] Shortcuts: key caps with correct styling
 - [ ] Margin group: 2×2 grid in bordered container
 
-### Disabled States
-- [ ] DEFERRED settings render at 40% opacity with "coming soon" helper text
-- [ ] PERSISTS_ONLY settings render at 60% opacity with "Behavior not wired yet." helper text
-- [ ] PERSISTS_ONLY controls are non-interactive (pointer-events: none)
-- [ ] Conditionally disabled settings render at 40% opacity
-- [ ] All disabled controls have pointer-events: none
+### Disabled States (S10 canonical — H3A doctrine for PERSISTS_ONLY)
+- [ ] DEFERRED settings render at **40% row opacity** with `"This feature is coming soon."` helper-text suffix
+- [ ] PERSISTS_ONLY settings render at **100% row opacity (NO row-level fade)** with `"Behavior not wired yet."` helper-text suffix — only the control is disabled (interaction-layer signal)
+- [ ] PERSISTS_ONLY controls carry the native `disabled` attribute; `pointer-events: none` is applied to the row's value column, NOT the row container
+- [ ] Conditionally disabled settings render at 40% row opacity
+- [ ] Every registry entry without an applicator carries an explicit `state` field (`'persists-only'` or `'deferred'` per RC1 §8.1.0 operational rule); default for missing `state` is DEFERRED
 - [ ] No disabled rows show lock icons, strikethrough, or special badges
 
 ### Density

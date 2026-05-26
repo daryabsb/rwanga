@@ -133,18 +133,22 @@ Click to change zoom level   ← instruction, not label
 
 ---
 
-## Disabled States — Quick Reference
+## Disabled States — Quick Reference (S10 canonical)
 
-| State | Opacity | Interactive? | Helper text change |
-|---|---|---|---|
-| **DEFERRED** (not implemented) | 40% | No | Append: `"This feature is coming soon."` |
-| **PERSISTS_ONLY** (no Applicator registered) | 60% | No | Append: `"Behavior not wired yet."` |
-| **Conditionally disabled** (dependency unmet) | 40% | No | No change |
-| **Fully live** | 100% | Yes | No change |
+| State | Row opacity | Control state | Interactive? | Helper text change |
+|---|---|---|---|---|
+| **DEFERRED** (no near-term wiring named) | 40% | disabled | No | Append: `"This feature is coming soon."` |
+| **PERSISTS_ONLY** (wiring named ≤ 2 slices ahead) | **100% (no fade)** | **disabled (interaction layer only)** | No | Append: `"Behavior not wired yet."` |
+| **Conditionally disabled** (dependency unmet) | 40% | disabled | No | No change |
+| **Fully live (REAL)** | 100% | enabled | Yes | No change |
 
-Apply opacity at the ROW level. Never use lock icons, strikethrough, or special badges.
+**PERSISTS_ONLY rule (S10 canonical — H3A doctrine):** Row keeps full visual fidelity. Only the control is disabled. The native `disabled` attribute carries the visual signal; `pointer-events: none` is applied to the row's value column, NOT the row container. NO row-level fade. See RC1 §8.1.2.
 
-PERSISTS_ONLY means: no Applicator registered → control locked → user cannot interact.
+**DEFERRED and Conditionally-disabled rules:** Apply opacity at the ROW level (40%). The full-fade pattern from RC1 v1.0 applies to THESE categories only.
+
+Never use lock icons, strikethrough, or special badges on any disabled row.
+
+**Operational distinction PERSISTS_ONLY vs DEFERRED (RC1 §8.1.0):** PERSISTS_ONLY = wiring named within ≤ next 2 slices. DEFERRED = unknown / later milestone. Registry entries without an applicator carry an explicit `state` field; default for a missing `state` is DEFERRED.
 
 ---
 

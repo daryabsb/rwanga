@@ -1,17 +1,33 @@
 // Copyright (c) 2026 Rwanga. Licensed under Apache 2.0.
-// Visual Contract — H3A (RC1 §8.1.2 INTERPRETATION CORRECTION).
+// PERSISTS_ONLY Visual Contract (canonical post-S10 — RC1 §8.1.2).
 //
-// H3 first read RC1 §8.1.2 ("entire row at 60% opacity") literally and
-// applied a row-level fade. The designer corrected: PERSISTS_ONLY
-// signals belong to the INTERACTION LAYER ONLY. Row, label, helper,
-// padding, and hierarchy must remain visually untouched compared to a
-// REAL row. The control surfaces its own disabled state via the native
-// `disabled` attribute; the textual signal is the appended
-// "Behavior not wired yet." helper.
+// HISTORY:
+//   This spec was created as the H3A correction guard
+//   (formerly `visual-contract-h3a.spec.js`). H3 first read RC1 §8.1.2
+//   ("entire row at 60% opacity") literally and applied a row-level
+//   fade; the designer corrected — PERSISTS_ONLY signals belong to the
+//   INTERACTION LAYER ONLY. S10 (2026-05-26) canonicalized that
+//   correction in RC1 §8.1.2 and renamed this file to reflect that
+//   the H3A doctrine IS the constitutional doctrine — no longer "an
+//   interpretation correction" but the rule itself.
 //
-// This spec proves the corrected visual contract by snapshotting
-// computed styles + box geometry on a REAL row and a PERSISTS_ONLY row
-// side-by-side and asserting the structural metrics match.
+// PURPOSE:
+//   Regression guard against four specific drifts that turn PERSISTS_ONLY
+//   rows into visually-damaged surfaces:
+//     (1) row-level opacity drift   — row must stay at 1.0 opacity
+//     (2) helper-text opacity drift — helper must keep --text-secondary
+//                                     color and full opacity
+//     (3) label-helper hierarchy collapse — label weight 500 + helper
+//                                           weight 400 must stay distinct
+//     (4) row spacing collapse — padding / gap / line-height must match
+//                                a REAL row in the same section
+//
+// METHOD:
+//   Snapshot computed styles + box geometry on a REAL row and a
+//   PERSISTS_ONLY row side-by-side; assert the structural metrics
+//   match. The control surfaces its own disabled state via the native
+//   `disabled` attribute; the textual signal is the appended
+//   "Behavior not wired yet." helper.
 'use strict';
 
 const { test, expect, _electron: electron } = require('@playwright/test');

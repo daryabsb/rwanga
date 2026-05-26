@@ -1,3 +1,53 @@
+<!--
+  ═══════════════════════════════════════════════════════════════════════
+  Settings UI.html — Designer prototype + future fidelity-test fixture
+  ═══════════════════════════════════════════════════════════════════════
+
+  POST-S10 ROLE (2026-05-26):
+    This file is preserved as the frozen designer prototype AND is used
+    as the visual-truth fixture for downstream fidelity tests (S4, S6,
+    S1, S2, S3, S5, S8 in the recovery plan).
+
+  data-test-* convention for fidelity tests:
+    When a recovery slice writes a fidelity test that needs to query a
+    prototype element, that slice (NOT this file) adds the corresponding
+    `data-test-*` attribute to the relevant JSX component file
+    (settings-app.jsx, settings-controls.jsx, settings-nav.jsx,
+    settings-page-setup.jsx) and consumes it in the test. Naming
+    convention:
+
+      data-test-row            — every settings row wrapper
+      data-test-section-title  — section heading
+      data-test-row-label      — row label
+      data-test-row-helper     — row helper text
+      data-test-scope          — scope badge (value = scope name)
+      data-test-reset          — per-row reset button
+      data-test-toggle         — toggle control wrap
+      data-test-radio          — radio (segmented) control wrap
+      data-test-number         — number control wrap
+      data-test-slider         — slider control wrap
+      data-test-color          — color swatch row wrap
+      data-test-shortcut       — shortcut keycap row wrap
+      data-test-margins        — margin-group wrap
+      data-test-nav-header     — nav header (⚙ + "Settings")
+      data-test-nav-item       — each nav item
+      data-test-nav-count      — per-section count pill
+      data-test-nav-footer     — nav footer container
+      data-test-page-preview   — Page Setup live preview panel
+      data-test-status-bar     — Settings status bar
+      data-test-tab            — Settings tab (with ⚙ icon + modified count)
+
+    Production renderer (renderer/js/shell/workspaces/settings-workspace.js)
+    MUST mirror the same attribute names on its equivalent elements so the
+    fidelity test can compare like-for-like.
+
+    The data-test-* attributes are forbidden from carrying any visual
+    semantics. They are query selectors only.
+
+  S10 itself adds NO attributes — the convention is documented here,
+  applied by the slice that needs each hook.
+  ═══════════════════════════════════════════════════════════════════════
+-->
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
 <head>

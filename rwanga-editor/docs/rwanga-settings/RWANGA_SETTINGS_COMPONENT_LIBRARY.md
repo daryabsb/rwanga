@@ -588,9 +588,10 @@ Section List:
 Bottom Actions:
   padding: 12px 16px
   border-top: 1px solid var(--border-secondary)
-  Two buttons side by side (flex, gap 8px):
+  One button (Reset All only — Save removed in S10):
     Reset All: --bg-tertiary bg, --text-secondary color, 1px solid --border-primary, --radius-md
-    Save: --accent-primary bg, #fff color, --radius-md, weight 500
+    (no Save button — Settings uses immediate-apply per RC1 §3.3 amended; a Save button
+    with no pending state is fake interaction and is forbidden)
 ```
 
 ---

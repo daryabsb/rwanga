@@ -202,7 +202,7 @@ Settings opens as a tab within the Rwanga IDE editor tab bar. It is NOT a modal.
 │  Keyboard  │                                                         │
 │  Advanced  │                                                         │
 │            │                                                         │
-│  [Reset] [Save]                                                      │
+│  [Reset All]                                                         │
 ├────────────┴─────────────────────────────────────────────────────────┤
 │ STATUS BAR   Settings   3 modified                Rwanga Script Editor│
 └──────────────────────────────────────────────────────────────────────┘
@@ -244,8 +244,9 @@ Settings opens as a tab within the Rwanga IDE editor tab bar. It is NOT a modal.
 
 ### Bottom Actions
 - Separated by `1px solid --border-secondary` top border
-- Two buttons side by side: **Reset All** (ghost) and **Save** (primary)
+- **One button: Reset All** (ghost style — `--bg-tertiary` background, `--text-secondary` color, `1px solid --border-primary`, `--radius-md`)
 - Padding: 12px 16px
+- **No Save button.** Settings uses immediate-apply doctrine (see §1A.4 — every UI change flows through Settings.Store → Applicator → Owner immediately). A Save button with no pending state would be fake interaction → fake ownership → trust damage. (Amended in S10, 2026-05-26.)
 
 ## 3.4 Center — Content Area
 
@@ -699,6 +700,27 @@ The following patterns are explicitly forbidden:
 
 Settings can be disabled for three reasons. Each has a distinct visual treatment.
 
+### 8.1.0 Operational classification rule (added in S10, 2026-05-26)
+
+The four disabled-state categories below are **operationally classifiable** — engineers can answer "which state does this row belong to?" without subjective debate. The rule is:
+
+| State | Test | Visual category |
+|---|---|---|
+| REAL | An applicator is registered for the entry. | Full opacity, interactive. |
+| PERSISTS_ONLY | No applicator AND a named follow-up slice within **≤ the next 2 slices** of the active plan will wire it. | §8.1.2 |
+| DEFERRED | No applicator AND **no follow-up slice** named within the next 2 slices. Implementation horizon unknown or later milestone. | §8.1.1 |
+| CONDITIONAL_DISABLED | Applicator registered AND a dependency declared in `entry.dependencies` is currently unmet. | §8.1.3 |
+
+**Registry signaling:**
+
+Each registry entry without an applicator MUST carry an explicit `state` field:
+- `state: 'persists-only'` — set by the slice author when the next-2-slices wiring is named.
+- `state: 'deferred'` — set when no near-term wiring is named.
+
+**Default behavior:** a no-applicator entry that omits the `state` field renders as DEFERRED. The conservative default — when in doubt, the answer to "when will this be wired?" is "we don't know" — protects users from being shown rows that look mid-wiring when no wiring is actually planned.
+
+**PERSISTS_ONLY is transient.** The state moves with the plan: an entry tagged `persists-only` while a wiring slice is queued transitions to REAL when the slice ships. If the slice is removed from the plan, the entry must be retagged DEFERRED. A registry-level unit test (introduced in S9.2) asserts every no-applicator entry has an explicit `state` field; PRs that add a no-applicator entry without tagging fail the check.
+
 ### 8.1.1 NOT YET IMPLEMENTED (DEFERRED)
 
 The setting exists in the schema but the behavior is not wired.
@@ -713,15 +735,21 @@ The setting exists in the schema but the behavior is not wired.
 
 ### 8.1.2 PERSISTS ONLY
 
-The setting saves its value but does not yet affect application behavior. The setting has no registered Applicator (see Section 1A.5). The control is non-interactive — the user cannot change the value until behavior is wired.
+The setting saves its value but does not yet affect application behavior. The setting has no registered Applicator (see Section 1A.5) AND a named follow-up slice within the next 2 slices will wire it (see §8.1.0). The control is non-interactive — the user cannot change the value until behavior is wired.
 
-**Visual treatment:**
-- Entire row at **60% opacity**
-- Control is non-interactive (pointer-events: none)
-- Helper text appended with: `"Behavior not wired yet."`
-- No special badge (the lower opacity and helper text are sufficient)
+**Visual treatment (canonicalized in S10, 2026-05-26 — H3A doctrine):**
 
-**Rule:** PERSISTS_ONLY settings MUST retain their default value. They MUST NOT allow user interaction. The 60% opacity distinguishes them from DEFERRED (40%) while still signaling incompleteness. Once an Applicator is registered and behavior is confirmed, remove the appended text and set to full opacity.
+- **Row retains full visual fidelity.** No row-level opacity fade. Label, helper text, padding, spacing, hierarchy, and typography are visually identical to a REAL row.
+- **Control is disabled / non-interactive.** The native `disabled` attribute on the control surfaces the browser's standard disabled treatment (greyed-out, `cursor: not-allowed`). `pointer-events: none` is applied to the row's value column to prevent accidental click-through, NOT to the row container.
+- **Helper text** is appended with the literal string `"Behavior not wired yet."`.
+- **No row-level opacity fade.** (Distinguishes PERSISTS_ONLY from DEFERRED — see §8.1.1.)
+- **No badges, no chips, no labels.** The disabled control plus the appended helper text are the only signals.
+- **No lock icons.**
+- **No tooltip-only explanations.** The "Behavior not wired yet." signal is always visible inline.
+
+**History:** RC1 v1.0 originally specified a 60% row-level opacity. The H3 slice applied that literally and the result visually damaged the UI — labels and hierarchy collapsed together at 60%. The H3A correction (slice authored 2026-05-26) moved the disabled signal to the interaction layer only. S10 (this slice) canonicalizes H3A as the doctrine and amends the prior 60% rule. The `tests/e2e/settings/persists-only-visual-contract.spec.js` test (renamed from `visual-contract-h3a.spec.js` in S10) is the binding regression guard against the four named drifts: row-level opacity drift, helper opacity drift, label-helper hierarchy collapse, and row spacing collapse.
+
+**Rule:** PERSISTS_ONLY settings MUST retain their default value. They MUST NOT allow user interaction. Row-level opacity MUST stay at 1.0. Once an Applicator is registered and behavior is confirmed, remove the appended `"Behavior not wired yet."` text and the row transitions to REAL.
 
 ### 8.1.3 CONDITIONALLY DISABLED
 
@@ -919,7 +947,7 @@ Document preferences and application preferences MUST be visually distinguishabl
 - Content: full width, 12px horizontal padding
 - All controls: minimum touch target 44px height
 - Status bar: hidden
-- Bottom actions (Reset/Save): sticky at bottom of scroll
+- Bottom action (Reset All only): sticky at bottom of scroll
 
 ## 11.3 Responsive Rules
 
@@ -1057,7 +1085,7 @@ Settings MUST NOT use:
 
 1. Search input
 2. Navigation items (top to bottom)
-3. Navigation action buttons (Reset All, Save)
+3. Navigation action button (Reset All)
 4. Settings rows in content area (top to bottom, each row: control then reset)
 5. JSON panel copy button (if visible)
 
@@ -1381,18 +1409,20 @@ Every setting MUST have the following Playwright assertions:
 
 **Row rendering:**
 ```
-┌─────────────────────────────────────────────────┬──────────────────────┐  ← 60% opacity
-│  Minimap                             ● Flow     │           [━━━━━●]   │
+┌─────────────────────────────────────────────────┬──────────────────────┐
+│  Minimap                             ● Flow     │           [━━━━━●]   │  ← control disabled
 │  Show a miniature overview of the script on     │                      │
 │  the right edge. Behavior not wired yet.        │                      │
 └─────────────────────────────────────────────────┴──────────────────────┘
 ```
 
-**Engineer rules:**
-- Row renders at 60% opacity
-- Control is NOT interactive (pointer-events: none)
+**Engineer rules (S10 canonical — H3A doctrine):**
+- Row renders at **full (1.0) opacity** — NO row-level fade
+- Control surfaces its own disabled state via the native `disabled` attribute
+- `pointer-events: none` on the row's value column only, NOT on the row container
+- Helper text is appended with the literal `"Behavior not wired yet."`
 - Value remains at default until an Applicator is registered
-- Once behavior is wired: remove appended text, register Applicator, set to full opacity
+- Once behavior is wired: remove appended text and register the Applicator — row transitions to REAL
 
 ---
 

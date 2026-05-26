@@ -1,5 +1,14 @@
 /*
  * settings-nav.jsx — Left navigation sidebar for Settings sections
+ *
+ * POST-S10 DOCTRINE NOTE (2026-05-26):
+ *   This prototype file is preserved as the original designer artifact.
+ *   The implementation port (recovery slice S5) MUST NOT include the
+ *   Save button rendered in the bottom-actions <div> below. RC1 §3.3
+ *   was amended in S10 to remove Save in favour of immediate-apply
+ *   doctrine — a Save button with no pending state is fake interaction
+ *   → fake ownership → trust damage. Only the Reset All button ports
+ *   to the renderer.
  */
 
 const NAV_ICONS = {

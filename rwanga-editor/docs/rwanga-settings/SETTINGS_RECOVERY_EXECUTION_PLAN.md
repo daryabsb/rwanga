@@ -49,7 +49,7 @@ Truth first, then shape. Then expansion (saturation reduction). The visual fidel
 
 S10 lands three RC1 amendments in one documentation slice:
 
-1. **§8.1.2 ↔ H3A reconciliation.** The H3A doctrine ("PERSISTS_ONLY = full opacity, control-disabled-only") was locked into user memory and into `visual-contract-h3a.spec.js`. RC1 §8.1.2 still says "60% opacity". S10 amends §8.1.2 to match H3A and **renames** `visual-contract-h3a.spec.js` → `persists-only-visual-contract.spec.js` (kept, not deleted; broadened scope as a regression guard against row-level opacity drift, helper opacity drift, label-helper hierarchy collapse, and row spacing collapse).
+1. **§8.1.2 ↔ H3A reconciliation.** The H3A doctrine ("PERSISTS_ONLY = full opacity, control-disabled-only") was locked into user memory and into the H3A visual-contract test. Pre-S10, RC1 §8.1.2 still specified "60% opacity" — the two were in direct conflict. S10 (shipped) amended §8.1.2 to canonicalize H3A and **renamed** `visual-contract-h3a.spec.js` → `persists-only-visual-contract.spec.js` (kept, not deleted; broadened scope as a regression guard against row-level opacity drift, helper opacity drift, label-helper hierarchy collapse, and row spacing collapse).
 2. **§3.3 Save button removal.** RC1 §3.3 currently mandates "Reset All + Save" in the nav footer. Settings uses immediate-apply; a Save button with no pending state is fake interaction → fake ownership → trust damage. S10 amends §3.3 to specify Reset All only.
 3. **§8.1 operational classification rule.** S10 adds the operational PERSISTS_ONLY/DEFERRED rule (≤ next 2 slices → PERSISTS_ONLY; else DEFERRED) so engineers have a checkable answer instead of "engine in progress" debates.
 
