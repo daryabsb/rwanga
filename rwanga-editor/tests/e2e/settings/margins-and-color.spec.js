@@ -36,18 +36,44 @@ async function launchAndOpen(userDataDir) {
   await page.waitForLoadState('domcontentloaded');
   await page.waitForFunction(() => !!(
     window.Rga && window.Rga.Settings && window.Rga.Settings.Store &&
-    window.Rga.Settings.Applicators && window.Rga.SettingsWorkspace));
+    window.Rga.Settings.Applicators && window.Rga.SettingsWorkspace &&
+    window.Rga.TabManager && typeof window.Rga.TabManager.activeDoc === 'function'));
   await page.evaluate(async () => { await window.Rga.Settings.Store.init(); });
   await page.evaluate(() => window.Rga.SettingsWorkspace.open());
   await page.waitForSelector(
     '[data-renderer="workspace"][data-workspace-kind="settings"] .rga-settings-row',
     { timeout: 5000 });
+  // S7 (recovery slice, 2026-05-26) — pageSetup.* has persistsTo:'script',
+  // so Settings.Store auto-routes writes to the document tier. Even
+  // though SettingsWorkspace.open() above deactivates the Untitled
+  // doc tab, TabManager.lastActiveDoc() still returns it, and the
+  // Store's auto-route uses that fallback (see
+  // settings-store.js _activeDoc). No explicit wait needed here.
   return { app, page };
 }
 
 async function openMarginsSection(page) {
   await page.click('[data-section-id="pageSetup"]');
   await page.waitForSelector('.rga-settings-row[data-setting-id="pageSetup.margins"]');
+}
+
+// S7 (recovery slice, 2026-05-26) — Store.set for persistsTo:'script'
+// settings calls Rga.Doc.markDirty on the active doc. On app.close,
+// Electron's CloseGuard prompts "save changes?" — and the prompt waits
+// for a user reply that never comes in Playwright. Tests that write
+// document-scope settings MUST clear the dirty flag before close.
+async function clearDirtyAndClose(app, page) {
+  try {
+    await page.evaluate(() => {
+      const TM = window.Rga && window.Rga.TabManager;
+      const docs = TM ? [TM.activeDoc(), TM.lastActiveDoc && TM.lastActiveDoc()].filter(Boolean) : [];
+      docs.forEach((d) => {
+        if (window.Rga.Doc && window.Rga.Doc.clearDirty) window.Rga.Doc.clearDirty(d);
+        else d.dirty = false;
+      });
+    });
+  } catch (_) {}
+  await app.close();
 }
 
 async function openAppearanceSection(page) {
@@ -97,7 +123,7 @@ test('H7 — pageSetup.margins row renders the constitutional 2×2 margin-group 
       window.Rga.Settings.Store.effective('pageSetup.margins'));
     expect(cur).toEqual({ top: 1, bottom: 1, left: 1.5, right: 1 });
   } finally {
-    await app.close();
+    await clearDirtyAndClose(app, page);
     try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
   }
 });
@@ -120,7 +146,7 @@ test('H7 — editing a margin field writes the whole {top, right, bottom, left} 
       window.Rga.Settings.Store.effective('pageSetup.margins'));
     expect(stored).toEqual({ top: 2, bottom: 1, left: 1.5, right: 1 });
   } finally {
-    await app.close();
+    await clearDirtyAndClose(app, page);
     try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
   }
 });
@@ -129,41 +155,53 @@ test('H7 — editing a margin field writes the whole {top, right, bottom, left} 
 // 3. margin values persist after reload
 // -----------------------------------------------------------------
 
-test('H7 — pageSetup.margins survives a close + reopen and rehydrates the inputs', async () => {
+test('H7 — pageSetup.margins persists into document tier and rehydrates the inputs after re-mount', async () => {
+  // S7 (recovery slice, 2026-05-26) — this test originally checked
+  // window.rwanga.prefs.read() roundtrip for pageSetup.margins, which
+  // implicitly assumed user-tier persistence. Per RC1 §10.3 and the
+  // S7 Store auto-route, pageSetup.* persists to the DOCUMENT tier
+  // (doc.settings.pageSetup.margins) — not the prefs file. Cross-app-
+  // launch reload of document-tier values requires saving the .rga
+  // file and reopening it; that surface is not yet covered in this
+  // suite. This test now verifies the in-session contract: the Store
+  // write lands in document metadata, the Settings UI rehydrates
+  // from it on re-open of the Settings tab, and Store.effective
+  // observes the same value.
   const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'h7-margins-persist-'));
+  const { app, page } = await launchAndOpen(userDataDir);
   try {
-    {
-      const { app, page } = await launchAndOpen(userDataDir);
-      await page.evaluate(() => window.Rga.Settings.Store.set(
-        'pageSetup.margins', { top: 0.5, bottom: 0.75, left: 2.5, right: 0.5 }));
-      await page.waitForFunction(() =>
-        window.rwanga.prefs.read().then((p) => {
-          const m = p['pageSetup.margins'];
-          return m && m.top === 0.5 && m.left === 2.5;
-        }));
-      await app.close();
-    }
-    {
-      const { app, page } = await launchAndOpen(userDataDir);
-      try {
-        const stored = await page.evaluate(() =>
-          window.Rga.Settings.Store.effective('pageSetup.margins'));
-        expect(stored).toEqual({ top: 0.5, bottom: 0.75, left: 2.5, right: 0.5 });
+    await page.evaluate(() => window.Rga.Settings.Store.set(
+      'pageSetup.margins', { top: 0.5, bottom: 0.75, left: 2.5, right: 0.5 }));
 
-        await openMarginsSection(page);
-        const topVal = await page.locator(
-          '.rga-settings-row[data-setting-id="pageSetup.margins"] input[data-margin-field="top"]'
-        ).inputValue();
-        expect(topVal).toBe('0.5');
-        const leftVal = await page.locator(
-          '.rga-settings-row[data-setting-id="pageSetup.margins"] input[data-margin-field="left"]'
-        ).inputValue();
-        expect(leftVal).toBe('2.5');
-      } finally {
-        await app.close();
-      }
-    }
+    // 1. Document metadata received the write (script-tier landing).
+    const onDoc = await page.evaluate(() => {
+      const doc = window.Rga.TabManager.lastActiveDoc
+        ? (window.Rga.TabManager.activeDoc() || window.Rga.TabManager.lastActiveDoc())
+        : window.Rga.TabManager.activeDoc();
+      const m = doc && doc.settings && doc.settings.pageSetup && doc.settings.pageSetup.margins;
+      return m && { top: m.top, bottom: m.bottom, left: m.left, right: m.right };
+    });
+    expect(onDoc).toEqual({ top: 0.5, bottom: 0.75, left: 2.5, right: 0.5 });
+
+    // 2. Store.effective observes the same value (single-source read).
+    const stored = await page.evaluate(() =>
+      window.Rga.Settings.Store.effective('pageSetup.margins'));
+    expect(stored).toEqual({ top: 0.5, bottom: 0.75, left: 2.5, right: 0.5 });
+
+    // 3. Settings UI rehydrates from the document tier when the
+    //    margins section is re-opened (the row reads via Store, which
+    //    reads via _scriptValue → doc.settings.pageSetup.margins).
+    await openMarginsSection(page);
+    const topVal = await page.locator(
+      '.rga-settings-row[data-setting-id="pageSetup.margins"] input[data-margin-field="top"]'
+    ).inputValue();
+    expect(topVal).toBe('0.5');
+    const leftVal = await page.locator(
+      '.rga-settings-row[data-setting-id="pageSetup.margins"] input[data-margin-field="left"]'
+    ).inputValue();
+    expect(leftVal).toBe('2.5');
   } finally {
+    await clearDirtyAndClose(app, page);
     try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
   }
 });
@@ -197,7 +235,7 @@ test('H7 — Store.set(default) restores the registry default margins object', a
     ).inputValue();
     expect(topVal).toBe('1');
   } finally {
-    await app.close();
+    await clearDirtyAndClose(app, page);
     try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
   }
 });
@@ -231,7 +269,7 @@ test('H7 — typing an out-of-range margin clamps both the visible value and the
       window.Rga.Settings.Store.effective('pageSetup.margins'));
     expect(stored.bottom).toBe(0);
   } finally {
-    await app.close();
+    await clearDirtyAndClose(app, page);
     try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
   }
 });
@@ -269,7 +307,7 @@ test('H7 — appearance.editorDeskColor row renders one swatch per palette optio
       .getAttribute('data-color-value');
     expect(activeValue).toBe('#141414');
   } finally {
-    await app.close();
+    await clearDirtyAndClose(app, page);
     try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
   }
 });
@@ -306,7 +344,7 @@ test('H7 — clicking a color swatch writes through Store and the --editor-bg cu
       .getAttribute('data-color-value');
     expect(activeAfter).toBe('#1a1a2e');
   } finally {
-    await app.close();
+    await clearDirtyAndClose(app, page);
     try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
   }
 });
@@ -389,7 +427,7 @@ test('H7 — Store.set(default) restores the original desk color and the --edito
       .getAttribute('data-color-value');
     expect(activeValue).toBe('#141414');
   } finally {
-    await app.close();
+    await clearDirtyAndClose(app, page);
     try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
   }
 });

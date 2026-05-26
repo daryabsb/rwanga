@@ -1,5 +1,15 @@
 // Copyright (c) 2026 Rwanga. Licensed under Apache 2.0.
-// Page Setup modal — edits doc.settings.pageSetup (paper size + 4 margins).
+// Page Setup modal — Ctrl+Shift+G surface.
+//
+// S7 (recovery slice, 2026-05-26): Apply now writes through
+// Rga.Settings.Store.set(...) for pageSetup.paperSize and
+// pageSetup.margins. The Store auto-routes by entry.persistsTo:'script'
+// to the document tier and mirrors into the nested doc.settings.pageSetup
+// shape that this modal (and LayoutProfile + manuscript-geometry) reads.
+// No direct doc.settings.pageSetup writes remain in this file.
+//
+// Stages 2 (Ctrl+Shift+G repoint to Settings UI) and 3 (modal deletion)
+// are tracked in SETTINGS_RECOVERY_EXECUTION_PLAN.md.
 'use strict';
 
 (function() {
@@ -90,15 +100,35 @@
       const choice = e.target && e.target.dataset && e.target.dataset.choice;
       if (choice === 'cancel') { close(); return; }
       if (choice === 'apply') {
-        ps.paperSize = paper.value;
-        ps.margins = {
+        // S7 — route through Settings.Store. Store auto-routes
+        // persistsTo:'script' entries to the document tier and writes
+        // into the nested doc.settings.pageSetup shape. No direct
+        // doc.settings.pageSetup writes here.
+        const Store = Rga.Settings && Rga.Settings.Store;
+        const nextMargins = {
           top:    parseFloat(top.value)    || 0,
           right:  parseFloat(right.value)  || 0,
           bottom: parseFloat(bottom.value) || 0,
-          left:   parseFloat(left.value)   || 0
+          left:   parseFloat(left.value)   || 0,
+          unit:   (ps.margins && ps.margins.unit) || 'in'
         };
-        if (Rga.Doc && Rga.Doc.markDirty) Rga.Doc.markDirty(doc);
-        if (typeof onApply === 'function') onApply(ps);
+        if (Store && typeof Store.set === 'function') {
+          Store.set('pageSetup.paperSize', paper.value);
+          Store.set('pageSetup.margins',   nextMargins);
+          // Store.set calls Rga.Doc.markDirty for tier:'script' writes
+          // automatically; no separate markDirty here. The onApply
+          // callback (legacy compatibility surface for PageSurface,
+          // PrintPreview etc.) still receives the just-written
+          // pageSetup blob so visual surfaces refresh on the same
+          // gesture.
+        } else {
+          // Defensive legacy path — Store unavailable (jsdom / early
+          // boot). Direct write preserves the modal's pre-S7 behavior.
+          ps.paperSize = paper.value;
+          ps.margins   = nextMargins;
+          if (Rga.Doc && Rga.Doc.markDirty) Rga.Doc.markDirty(doc);
+        }
+        if (typeof onApply === 'function') onApply(doc.settings.pageSetup);
         // SP-03: Dispatch a zero-text-change transaction carrying rga.forceReindex
         // so the nav-index plugin rebuilds the PageMap (and page-break bands update)
         // without requiring the user to type. onApply(ps) runs first so visual

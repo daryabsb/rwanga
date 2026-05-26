@@ -347,7 +347,18 @@ test('Slice 3C — set() returns false when a shortcut receives a malformed chor
 });
 
 test('Slice 3C — set() returns false when margins receive a malformed object', async () => {
-  bootDom();
+  // S7 (recovery slice, 2026-05-26) — pageSetup.margins has
+  // persistsTo:'script', so Settings.Store auto-routes to the
+  // document tier. The bootDom() default stub returns null for
+  // activeDoc, which would drop a valid script-tier write. Provide a
+  // stable doc singleton so the "valid value → set returns true"
+  // assertion exercises the script-tier write path.
+  const dom = bootDom();
+  const _stubDoc = { settings: {} };
+  dom.window.Rga.TabManager = {
+    activeDoc:     function() { return _stubDoc; },
+    lastActiveDoc: function() { return _stubDoc; }
+  };
   const S = loadStore();
   await S.init();
   assert.equal(S.set('pageSetup.margins', { top: 1 }),                       false);

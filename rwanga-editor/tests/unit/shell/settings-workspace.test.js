@@ -629,7 +629,21 @@ test('Slice 5C — text input writes a string via Store.set', async () => {
   // text entry to lift it to REAL for the duration of this test —
   // the test's concern is the text control's write contract, not the
   // wiring of any specific setting.
+  //
+  // S7 (recovery slice, 2026-05-26) — `pageSetup.headerText` has
+  // `persistsTo:'script'`, so Settings.Store auto-routes writes to
+  // the document tier. The default jsdom stub returns null for
+  // TabManager.activeDoc(), which would drop the write. Provide a
+  // stable active-doc singleton (every call returns the SAME object)
+  // so the write and the read observe the same doc.settings, and the
+  // test exercises the wire path through the constitutionally-correct
+  // script tier (RC1 §10.3).
   bootDom();
+  const _stubDoc = { settings: {} };
+  global.window.Rga.TabManager = {
+    activeDoc:     function() { return _stubDoc; },
+    lastActiveDoc: function() { return _stubDoc; }
+  };
   const Rga = await loadAllInitialized();
   Rga.Settings.Applicators.register('pageSetup.headerText', function() {},
     { owner: 'test' });

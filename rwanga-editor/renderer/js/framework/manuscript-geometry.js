@@ -22,9 +22,15 @@
 //   veryCompact: { top: 0.5,  bottom: 0.5,  left: 1.0,  right: 0.5  }
 //   expanded:    { top: 1.25, bottom: 1.25, left: 1.75, right: 1.25 }
 //
-// applyPreset writes margins into doc.settings.pageSetup.margins and calls
-//   Rga.Doc.markDirty(doc) if available. Invalid presetName or missing doc
-//   is silently ignored (no throw).
+// applyPreset writes margins through Rga.Settings.Store.set(
+//   'pageSetup.margins', {...}). The Store auto-routes
+//   persistsTo:'script' to the document tier and mirrors into the
+//   nested doc.settings.pageSetup.margins path that downstream readers
+//   (LayoutProfile, page-setup-dialog seeding) consume. Store.set also
+//   calls Rga.Doc.markDirty internally for script-tier writes. Invalid
+//   presetName or missing doc is silently ignored (no throw). When
+//   Store is unavailable (jsdom / early boot), a defensive direct
+//   write preserves the pre-S7 behavior.
 //
 // presetOf returns the matching preset name on exact match (tolerance 1e-9),
 //   'custom' otherwise (including null/undefined doc).
@@ -76,27 +82,46 @@
     if (!doc || !doc.settings || !doc.settings.pageSetup) return;
 
     const preset = PRESETS[presetName];
-    const margins = doc.settings.pageSetup.margins;
+    const existingUnit = (doc.settings.pageSetup.margins &&
+                          doc.settings.pageSetup.margins.unit) || 'in';
+    const nextMargins = {
+      top:    preset.top,
+      bottom: preset.bottom,
+      left:   preset.left,
+      right:  preset.right,
+      unit:   existingUnit
+    };
 
-    if (!margins || typeof margins !== 'object') {
-      // Create margins object if missing.
-      doc.settings.pageSetup.margins = {
-        top:    preset.top,
-        bottom: preset.bottom,
-        left:   preset.left,
-        right:  preset.right,
-        unit:   'in'
-      };
-    } else {
-      // Write preset values; preserve existing unit field if present.
-      margins.top    = preset.top;
-      margins.bottom = preset.bottom;
-      margins.left   = preset.left;
-      margins.right  = preset.right;
-      if (!margins.unit) margins.unit = 'in';
+    // S7 — route through Settings.Store. Store auto-routes
+    // persistsTo:'script' to document tier, writes the nested
+    // doc.settings.pageSetup.margins shape, fires applicators, and
+    // notifies subscribers. Defensive fallback for environments where
+    // Store is unavailable (jsdom / early-boot scaffolding) preserves
+    // the pre-S7 direct-write behavior so no consumer regresses.
+    const Store = window.Rga && window.Rga.Settings && window.Rga.Settings.Store;
+    if (Store && typeof Store.set === 'function') {
+      // _activeDoc() drives Store's script-tier resolver; if it does
+      // not return the same doc we were handed, fall through to legacy
+      // path to guarantee the requested doc receives the preset.
+      const TM = window.Rga && window.Rga.TabManager;
+      const active = TM && typeof TM.activeDoc === 'function' ? TM.activeDoc() : null;
+      if (active === doc) {
+        Store.set('pageSetup.margins', nextMargins);
+        return;
+      }
     }
 
-    // Notify doc system if available.
+    // Defensive legacy path. Direct write to the nested shape.
+    const margins = doc.settings.pageSetup.margins;
+    if (!margins || typeof margins !== 'object') {
+      doc.settings.pageSetup.margins = nextMargins;
+    } else {
+      margins.top    = nextMargins.top;
+      margins.bottom = nextMargins.bottom;
+      margins.left   = nextMargins.left;
+      margins.right  = nextMargins.right;
+      if (!margins.unit) margins.unit = nextMargins.unit;
+    }
     if (Rga.Doc && typeof Rga.Doc.markDirty === 'function') {
       Rga.Doc.markDirty(doc);
     }

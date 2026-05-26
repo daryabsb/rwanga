@@ -6,6 +6,11 @@
 
   const tabs = [];
   let activeTabId = null;
+  // S7 (recovery slice, 2026-05-26) — remembers the most recent
+  // document tab id so Settings.Store can resolve document-scope writes
+  // while a workspace tab (Settings, etc.) is in focus. See
+  // lastActiveDoc() below.
+  let _lastDocTabId = null;
   let tabIdCounter = 0;
   let editorView = null;  // singleton EditorView
 
@@ -114,6 +119,10 @@
     const tab = tabs.find(function(t) { return t.id === tabId; });
     if (!tab) return;
     activeTabId = tabId;
+    // S7 — remember the most recently active document tab so workspace
+    // tabs (Settings, etc.) don't break Settings.Store's ability to
+    // route document-scope writes to the doc the user was just editing.
+    if (tab.kind === 'document') _lastDocTabId = tabId;
     setNoDocState(false);
     renderTabBar();
 
@@ -392,6 +401,32 @@
     if (!t || t.kind !== 'document') return null;
     return t.doc || null;
   }
+  // S7 (recovery slice, 2026-05-26) — lastActiveDoc.
+  //
+  // Workspace tabs (Settings, etc.) deactivate the document tab, so
+  // activeDoc() correctly returns null while a workspace is in focus.
+  // But the Settings UI legitimately needs to write document-scope
+  // settings (pageSetup.*, screenplay.*) while the user is editing
+  // them in the Settings workspace — at that moment activeDoc() is
+  // null and the writes would drop.
+  //
+  // lastActiveDoc() answers "which document was the user last looking
+  // at?" by returning the doc of the most-recently-active document
+  // tab. activate() updates _lastDocTabId every time a document tab
+  // becomes active. If that tab is still open, its doc is returned;
+  // otherwise we walk back through tabs[] for any document tab; if
+  // none exists, null. Callers (Settings.Store._activeDoc, primarily)
+  // prefer activeDoc() and fall back to lastActiveDoc() — never the
+  // other way around.
+  function lastActiveDoc() {
+    if (_lastDocTabId !== null) {
+      const t = tabs.find(function(x) { return x.id === _lastDocTabId; });
+      if (t && t.kind === 'document' && t.doc) return t.doc;
+    }
+    // Fallback: any open document tab.
+    const fallback = tabs.find(function(x) { return x.kind === 'document' && x.doc; });
+    return fallback ? fallback.doc : null;
+  }
   function getTabs() { return tabs.slice(); }
 
   function init() {
@@ -516,6 +551,7 @@
     activate,
     activeTab,
     activeDoc,
+    lastActiveDoc,
     tabs: getTabs,
     renderTabBar,
     bootSession: bootSession,

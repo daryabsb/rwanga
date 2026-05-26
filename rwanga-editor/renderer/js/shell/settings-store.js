@@ -81,28 +81,61 @@
   function _activeDoc() {
     const TM = window.Rga && window.Rga.TabManager;
     if (!TM || typeof TM.activeDoc !== 'function') return null;
-    return TM.activeDoc();
+    // S7 — workspace tabs (Settings, etc.) deactivate the document tab,
+    // so activeDoc() correctly returns null while Settings is focused.
+    // Fall back to lastActiveDoc() so Settings UI can still route
+    // document-scope writes (pageSetup.*, screenplay.*) to the doc the
+    // user was just editing. Only the legacy activeDoc path counts as
+    // "live" — the fallback fires only when activeDoc is null.
+    const live = TM.activeDoc();
+    if (live) return live;
+    if (typeof TM.lastActiveDoc === 'function') return TM.lastActiveDoc();
+    return null;
   }
 
   function _scriptValue(id) {
     const doc = _activeDoc();
     if (!doc || !doc.settings) return undefined;
-    if (!Object.prototype.hasOwnProperty.call(doc.settings, id)) return undefined;
+
     // Constitutional rule (Settings Constitution, 2026-05-26 + H2B):
     // an entry whose registry says `persistsTo: 'user'` is a user-tier
     // preference. Per-script `doc.settings` MUST NOT shadow the user
     // choice for such entries — Settings.Store is the single source of
-    // truth at the user tier. Legacy .rga files that baked user-scope
-    // ids (e.g. `theme`) into their settings blob are gracefully
-    // ignored here. The cascade still applies in full for entries
-    // whose `persistsTo` is 'script' (screenplay.*, pageSetup.*) —
-    // those remain per-script overridable as designed.
+    // truth at the user tier. The cascade still applies in full for
+    // entries whose `persistsTo` is 'script' (screenplay.*,
+    // pageSetup.*) — those remain per-script overridable as designed.
     const reg = Rga.Settings && Rga.Settings.Registry;
     if (reg && typeof reg.get === 'function') {
       const entry = reg.get(id);
       if (entry && entry.persistsTo === 'user') return undefined;
     }
-    return doc.settings[id];
+
+    // S7 (Page Setup ownership correction) — dual-shape script-tier
+    // reads. Two storage shapes coexist on disk:
+    //
+    //   1. FLAT — Store-managed convention for plain ids:
+    //        doc.settings['theme'] = 'dark'
+    //   2. NESTED — file-format convention for namespaced ids
+    //      (pageSetup.*, screenplay.*, etc.) — preserved so legacy
+    //      .rga files keep loading:
+    //        doc.settings.pageSetup = { margins: {...}, paperSize: ... }
+    //
+    // Read priority: flat first, nested fallback for dotted ids.
+    // Writes for script tier mirror the same shape (see set() below).
+    if (Object.prototype.hasOwnProperty.call(doc.settings, id)) {
+      return doc.settings[id];
+    }
+    const dot = id.indexOf('.');
+    if (dot > 0) {
+      const ns  = id.slice(0, dot);
+      const key = id.slice(dot + 1);
+      const obj = doc.settings[ns];
+      if (obj && typeof obj === 'object' &&
+          Object.prototype.hasOwnProperty.call(obj, key)) {
+        return obj[key];
+      }
+    }
+    return undefined;
   }
 
   function effective(id) {
@@ -140,7 +173,6 @@
 
   function set(id, value, opts) {
     opts = opts || {};
-    const tier = opts.tier || 'user';
 
     // Validate against the registry entry. Unknown ids and values that
     // fail the type validator are both rejected here, before any state
@@ -166,6 +198,17 @@
       return false;
     }
 
+    // S7 — auto-route by entry.persistsTo when caller did not specify
+    // a tier. This is the constitutional fix for RC1 §10.3 — document-
+    // scope settings (persistsTo:'script', e.g. pageSetup.*,
+    // screenplay.*) MUST write to document metadata, not user prefs.
+    // Callers can still override with opts.tier for special cases
+    // (migrations, debug, tests).
+    let tier = opts.tier;
+    if (!tier) {
+      tier = (entry.persistsTo === 'script') ? 'script' : 'user';
+    }
+
     if (tier === 'project') {
       console.warn('[Rga.Settings.Store] project tier is a stub — write ignored:', id);
       return false;
@@ -183,7 +226,22 @@
         return false;
       }
       doc.settings = doc.settings || {};
-      doc.settings[id] = value;
+      // S7 — dual-shape script-tier writes. For dotted ids
+      // (pageSetup.margins, pageSetup.paperSize, etc.) mirror to the
+      // nested file-format path that legacy readers and on-disk .rga
+      // files use. For plain ids, write flat. See _scriptValue() for
+      // the matching read path.
+      const dot = id.indexOf('.');
+      if (dot > 0) {
+        const ns  = id.slice(0, dot);
+        const key = id.slice(dot + 1);
+        if (!doc.settings[ns] || typeof doc.settings[ns] !== 'object') {
+          doc.settings[ns] = {};
+        }
+        doc.settings[ns][key] = value;
+      } else {
+        doc.settings[id] = value;
+      }
       if (Rga.Doc && typeof Rga.Doc.markDirty === 'function') {
         Rga.Doc.markDirty(doc);
       }
