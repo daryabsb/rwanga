@@ -164,6 +164,25 @@
     _inverseSyncInstalled = true;
   }
 
+  // Constitutional helper (H2B). Every production theme-toggle entry
+  // point (titlebar button, status bar instrument, command palette,
+  // keyboard shortcut, Tools menu) calls this helper instead of
+  // Rga.Theme.toggle directly. Intent is explicit: callers do not
+  // touch the DOM or localStorage; they write through Settings.Store.
+  // The theme applicator below drives Rga.Theme.apply in response.
+  window.Rga.SettingsTheme = window.Rga.SettingsTheme || {};
+  window.Rga.SettingsTheme.toggle = function() {
+    const Theme = window.Rga && window.Rga.Theme;
+    const cur = (Theme && Theme.current) || 'dark';   // resolves 'system' to applied literal
+    const next = cur === 'light' ? 'dark' : 'light';
+    const Store = window.Rga && window.Rga.Settings && window.Rga.Settings.Store;
+    if (Store && typeof Store.set === 'function') {
+      Store.set('theme', next, { tier: 'user' });
+    } else if (Theme && typeof Theme.apply === 'function') {
+      Theme.apply(next);   // pre-Store fallback only
+    }
+  };
+
   register('theme', function(value) {
     _ensureInverseSync();
     _currentThemeSetting = value;

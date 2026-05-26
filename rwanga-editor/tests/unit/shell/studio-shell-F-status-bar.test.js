@@ -55,7 +55,7 @@ function boot(opts) {
     getPageMap: function() { return stub.pageMap; },
     getOutline: function() { return stub.outline || { statistics: { words: 0, sceneCount: 0, pages: 0 } }; }
   };
-  // Theme stub — mirrors Rga.Theme (current SSOT shape).
+  // Theme stub — mirrors Rga.Theme (the rendered theme owner).
   const themeListeners = new Set();
   global.window.Rga.Theme = {
     current: opts.theme || 'dark',
@@ -67,6 +67,17 @@ function boot(opts) {
     onChange: function(fn) {
       themeListeners.add(fn);
       return function() { themeListeners.delete(fn); };
+    }
+  };
+  // SettingsTheme stub (H2B): the constitutional helper that all
+  // production theme-toggle callers route through.
+  stub.settingsThemeToggleCount = 0;
+  global.window.Rga.SettingsTheme = {
+    toggle: function() {
+      stub.settingsThemeToggleCount += 1;
+      // Mimic the real helper's effect via the Theme stub so the
+      // status-bar segment subscriber updates.
+      global.window.Rga.Theme.toggle();
     }
   };
 
@@ -169,11 +180,12 @@ test('§F: theme instrument re-renders when Rga.Theme changes (subscribes to onC
   assert.equal(status.querySelector('[data-segment="theme"]').textContent, 'Light');
 });
 
-test('§F: clicking the theme instrument calls Rga.Theme.toggle (existing SSOT — no new owner)', () => {
+test('§F: clicking the theme instrument routes through Rga.SettingsTheme.toggle (Settings is the SSOT — H2B constitution)', () => {
   const { status, stub } = boot();
-  assert.equal(stub.themeToggleCount, 0);
+  assert.equal(stub.settingsThemeToggleCount, 0);
   status.querySelector('[data-segment="theme"]').click();
-  assert.equal(stub.themeToggleCount, 1);
+  assert.equal(stub.settingsThemeToggleCount, 1,
+    'click must invoke the constitutional helper, not Rga.Theme directly');
 });
 
 test('§F: theme instrument is a text segment, NOT a styled button (brief: no button strip)', () => {

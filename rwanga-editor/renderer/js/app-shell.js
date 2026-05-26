@@ -43,8 +43,19 @@ Rga.Theme = {
   },
 
   toggle: function() {
+    // Settings Constitution / H2B: theme intent flows ONLY through
+    // Settings.Store. The toggle convenience now writes the next
+    // value through Store.set; the theme applicator drives the
+    // resulting Rga.Theme.apply call. If Store is not yet loaded
+    // (very early boot), fall back to the direct apply so legacy
+    // tests and edge cases that pre-date Store still work.
     var next = this.current === 'dark' ? 'light' : 'dark';
-    this.apply(next);
+    var Store = window.Rga && window.Rga.Settings && window.Rga.Settings.Store;
+    if (Store && typeof Store.set === 'function') {
+      Store.set('theme', next, { tier: 'user' });
+    } else {
+      this.apply(next);
+    }
     if (Rga.Toast && typeof Rga.Toast.show === 'function') {
       Rga.Toast.show('Switched to ' + next + ' theme', 'success', 1500);
     }

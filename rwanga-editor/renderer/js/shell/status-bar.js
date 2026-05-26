@@ -47,7 +47,7 @@
     // Studio Shell Recovery §F: three-section layout. Existing 7 segments
     // are regrouped (no new sources, no new features) plus one new
     // right-side instrument (theme indicator that reads Rga.Theme.current
-    // — an existing SSOT — and toggles via Rga.Theme.toggle on click).
+    // and routes click intent through Rga.SettingsTheme.toggle per H2B).
     //
     //   LEFT    sync/local state   →  offline  (the "Local" indicator)
     //           scene position     →  scene
@@ -99,7 +99,8 @@
 
   // Studio Shell Recovery §F: theme instrument. Reads Rga.Theme.current
   // (existing SSOT), shows "Dark" / "Light" as a text instrument, and
-  // toggles on click via Rga.Theme.toggle (existing API). No new
+  // routes click intent through Rga.SettingsTheme.toggle per H2B
+  // (Settings.Store is the constitutional source of truth). No new
   // toggle button — this is a text segment that happens to be clickable,
   // matching the brief's "text/light-icons as instruments, do not turn
   // status bar into a button strip" rule.
@@ -110,8 +111,12 @@
     spanEl.addEventListener('click', _onThemeClick);
   }
   function _onThemeClick() {
-    if (Rga.Theme && typeof Rga.Theme.toggle === 'function') {
-      Rga.Theme.toggle();
+    // Constitutional path (H2B): theme intent flows through
+    // Settings.Store. No bypass to Rga.Theme.toggle — if the helper
+    // isn't loaded yet (only possible in early-boot edge cases) the
+    // click is a no-op rather than a constitutional violation.
+    if (Rga.SettingsTheme && typeof Rga.SettingsTheme.toggle === 'function') {
+      Rga.SettingsTheme.toggle();
     }
   }
   function _themeLabel() {

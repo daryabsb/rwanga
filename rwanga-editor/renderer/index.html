@@ -779,7 +779,11 @@
     var P = Rga.CommandPalette;
 
     P.register({ label: 'Toggle Theme', shortcut: 'Ctrl+Shift+T', category: 'View',
-      action: function() { Rga.Theme.toggle(); }
+      action: function() {
+        // Constitutional path (H2B): theme intent flows through
+        // Settings.Store, never directly via Rga.Theme.
+        if (Rga.SettingsTheme && Rga.SettingsTheme.toggle) Rga.SettingsTheme.toggle();
+      }
     });
     P.register({ label: 'Toggle Sidebar', shortcut: 'Ctrl+B', category: 'View',
       action: function() {
@@ -961,8 +965,10 @@
     var btn = Rga.$('#rga-shell-titlebar-theme');
     if (btn) {
       btn.addEventListener('click', function() {
-        if (Rga.Theme && typeof Rga.Theme.toggle === 'function') {
-          Rga.Theme.toggle();
+        // Constitutional path (H2B): theme intent flows through
+        // Settings.Store, never directly via Rga.Theme.
+        if (Rga.SettingsTheme && Rga.SettingsTheme.toggle) {
+          Rga.SettingsTheme.toggle();
         }
       });
     }
@@ -1172,7 +1178,11 @@
     KR.registerCommand({ command: 'tools.commandPalette', label: 'Command Palette', key: 'p', mods: { ctrl: true, shift: true },
       handler: function() { if (Rga.CommandPalette && Rga.CommandPalette.open) Rga.CommandPalette.open(); }, source: 'A4.1 menu (Tools → Command Palette)' });
     KR.registerCommand({ command: 'tools.toggleTheme',    label: 'Toggle Theme',    key: 't', mods: { ctrl: true, shift: true },
-      handler: function() { if (Rga.Theme && Rga.Theme.toggle) Rga.Theme.toggle(); }, source: 'A4.1 menu (Tools → Toggle Theme)' });
+      handler: function() {
+        // Constitutional path (H2B): theme intent flows through
+        // Settings.Store, never directly via Rga.Theme.
+        if (Rga.SettingsTheme && Rga.SettingsTheme.toggle) Rga.SettingsTheme.toggle();
+      }, source: 'A4.1 menu (Tools → Toggle Theme)' });
   }
 
   function wireMenubar() {

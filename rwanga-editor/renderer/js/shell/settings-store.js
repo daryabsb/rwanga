@@ -88,6 +88,20 @@
     const doc = _activeDoc();
     if (!doc || !doc.settings) return undefined;
     if (!Object.prototype.hasOwnProperty.call(doc.settings, id)) return undefined;
+    // Constitutional rule (Settings Constitution, 2026-05-26 + H2B):
+    // an entry whose registry says `persistsTo: 'user'` is a user-tier
+    // preference. Per-script `doc.settings` MUST NOT shadow the user
+    // choice for such entries — Settings.Store is the single source of
+    // truth at the user tier. Legacy .rga files that baked user-scope
+    // ids (e.g. `theme`) into their settings blob are gracefully
+    // ignored here. The cascade still applies in full for entries
+    // whose `persistsTo` is 'script' (screenplay.*, pageSetup.*) —
+    // those remain per-script overridable as designed.
+    const reg = Rga.Settings && Rga.Settings.Registry;
+    if (reg && typeof reg.get === 'function') {
+      const entry = reg.get(id);
+      if (entry && entry.persistsTo === 'user') return undefined;
+    }
     return doc.settings[id];
   }
 

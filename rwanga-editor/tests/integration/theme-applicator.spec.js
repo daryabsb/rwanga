@@ -193,6 +193,102 @@ test('H2 — Ctrl+Shift+T inverse-syncs Rga.Theme back into the Settings store',
   }
 });
 
+// -----------------------------------------------------------------
+// H2B — Settings is the SINGLE source of truth for theme
+// -----------------------------------------------------------------
+
+test("H2B — legacy doc.settings.theme MUST NOT shadow the user's Settings choice across close + reopen", async () => {
+  // Reproduces the bug the user reported: pick Light in Settings,
+  // close, reopen, app reverts to Dark because a legacy .rga file
+  // carries `settings.theme = 'dark'` and the Store cascade used to
+  // give script-tier priority over user-tier. H2B blocks script-tier
+  // shadowing of persistsTo:'user' ids.
+  const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'rwanga-h2b-legacy-'));
+  try {
+    {
+      const { app, page } = await launch(userDataDir);
+      // Force an active doc to carry the legacy theme key, then set
+      // Light via Settings.Store and wait for prefs to flush.
+      await page.evaluate(() => {
+        const doc = window.Rga.TabManager.activeDoc && window.Rga.TabManager.activeDoc();
+        if (doc) { doc.settings = doc.settings || {}; doc.settings.theme = 'dark'; }
+        window.Rga.Settings.Store.set('theme', 'light', { tier: 'user' });
+      });
+      await page.waitForFunction(() =>
+        window.rwanga.prefs.read().then((p) => p['theme'] === 'light'));
+      // Effective MUST be 'light' immediately, despite the script-tier
+      // 'dark' in doc.settings — Settings.Store user-tier wins.
+      const effective = await page.evaluate(() =>
+        window.Rga.Settings.Store.effective('theme'));
+      expect(effective).toBe('light');
+      const dom = await page.evaluate(() =>
+        document.documentElement.getAttribute('data-theme'));
+      expect(dom).toBe('light');
+      await app.close();
+    }
+    {
+      const { app, page } = await launch(userDataDir);
+      try {
+        const effective = await page.evaluate(() =>
+          window.Rga.Settings.Store.effective('theme'));
+        expect(effective).toBe('light');
+        const dom = await page.evaluate(() =>
+          document.documentElement.getAttribute('data-theme'));
+        expect(dom).toBe('light');
+      } finally {
+        await app.close();
+      }
+    }
+  } finally {
+    try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
+  }
+});
+
+test('H2B — Rga.SettingsTheme.toggle is the production helper and writes through Settings.Store', async () => {
+  const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'rwanga-h2b-helper-'));
+  const { app, page } = await launch(userDataDir);
+  try {
+    const hasHelper = await page.evaluate(() =>
+      !!(window.Rga.SettingsTheme && typeof window.Rga.SettingsTheme.toggle === 'function'));
+    expect(hasHelper).toBe(true);
+
+    await page.evaluate(() => window.Rga.Settings.Store.set('theme', 'dark', { tier: 'user' }));
+    await page.evaluate(() => window.Rga.SettingsTheme.toggle());
+    expect(await page.evaluate(() =>
+      window.Rga.Settings.Store.get('theme', 'user'))).toBe('light');
+    expect(await page.evaluate(() =>
+      document.documentElement.getAttribute('data-theme'))).toBe('light');
+  } finally {
+    await app.close();
+    try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
+  }
+});
+
+test('H2B — the status bar theme instrument click routes through Settings.Store, not Rga.Theme directly', async () => {
+  const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'rwanga-h2b-statusbar-'));
+  const { app, page } = await launch(userDataDir);
+  try {
+    // Establish a known starting state via Settings.
+    await page.evaluate(() => window.Rga.Settings.Store.set('theme', 'dark', { tier: 'user' }));
+
+    // Click the status bar theme instrument.
+    const seg = await page.$('[data-segment="theme"]');
+    expect(seg).not.toBeNull();
+    await seg.click();
+
+    // After the click, Settings.Store user-tier must hold the new
+    // value AND the DOM must reflect it.
+    await page.waitForFunction(() =>
+      window.Rga.Settings.Store.get('theme', 'user') === 'light',
+      null, { timeout: 2000 });
+    expect(await page.evaluate(() =>
+      document.documentElement.getAttribute('data-theme'))).toBe('light');
+  } finally {
+    await app.close();
+    try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
+  }
+});
+
 test('H2 — legacy localStorage rga-theme migrates into prefs.theme exactly once', async () => {
   const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'rwanga-h2-migrate-'));
   const { app, page } = await launch(userDataDir);

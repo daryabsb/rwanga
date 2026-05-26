@@ -104,16 +104,22 @@ test('Slice 2 — session tier overrides user tier in effective()', async () => 
 });
 
 test('Slice 2 — script tier reads from the active doc.settings (overrides user)', async () => {
+  // H2B: this test exercises the script-tier-overrides-user pattern.
+  // Per the Settings Constitution, that pattern is allowed ONLY for
+  // entries whose registry says `persistsTo: 'script'`. We swap the
+  // proof setting from editor.highlightCurrentLine (persistsTo:'user',
+  // now constitutionally locked) to screenplay.sceneNumbering, which
+  // is per-script by design.
   const dom = bootDom();
   const S = loadStore();
   await S.init();
-  S.set('editor.highlightCurrentLine', false, { tier: 'user' });
+  S.set('screenplay.sceneNumbering', false, { tier: 'user' });
   // Active doc has the setting at script tier.
   dom.window.Rga.TabManager.activeDoc = function() {
-    return { settings: { 'editor.highlightCurrentLine': true } };
+    return { settings: { 'screenplay.sceneNumbering': true } };
   };
-  assert.equal(S.effective('editor.highlightCurrentLine'), true,
-    'script-tier (doc.settings) wins over user');
+  assert.equal(S.effective('screenplay.sceneNumbering'), true,
+    'script-tier (doc.settings) wins over user for persistsTo:script entries');
 });
 
 test('Slice 2 — project tier set is a no-op (returns undefined at that tier)', async () => {
@@ -227,16 +233,20 @@ test('Slice 2 — multiple subscribers all receive the event', async () => {
 });
 
 test('Slice 2 — tab activation re-emits when the script-tier value changes effective', async () => {
+  // H2B note: the Settings Constitution forbids script-tier shadowing
+  // of user-tier ids. This test must use a `persistsTo:'script'` entry
+  // to exercise the cascade legitimately. screenplay.sceneNumbering
+  // (toggle, default true) is per-script by design.
   const dom = bootDom();
   const S = loadStore();
   await S.init();
   const seen = [];
-  S.subscribe('editor.highlightCurrentLine', function(newVal, oldVal) {
+  S.subscribe('screenplay.sceneNumbering', function(newVal, oldVal) {
     seen.push({ newVal, oldVal });
   });
   // Doc A has script-tier override `false`; activate it.
   dom.window.Rga.TabManager.activeDoc = function() {
-    return { settings: { 'editor.highlightCurrentLine': false } };
+    return { settings: { 'screenplay.sceneNumbering': false } };
   };
   dom.window.document.dispatchEvent(new dom.window.CustomEvent(
     'editor.tabActivated', { detail: { tabId: 'A' } }));
@@ -250,6 +260,23 @@ test('Slice 2 — tab activation re-emits when the script-tier value changes eff
     'editor.tabActivated', { detail: { tabId: 'B' } }));
   assert.equal(seen.length, 2);
   assert.deepEqual(seen[1], { newVal: true, oldVal: false });
+});
+
+test('H2B — constitutional: per-script settings cannot shadow user-tier ids', async () => {
+  // Even if a legacy .rga doc has `theme` baked into its settings blob,
+  // the Store must not let it override the user's choice. This is the
+  // direct fix for the close/reopen reversion bug.
+  const dom = bootDom();
+  const S = loadStore();
+  await S.init();
+  S.set('theme', 'light');                          // user tier
+  dom.window.Rga.TabManager.activeDoc = function() {
+    return { settings: { theme: 'dark' } };         // legacy script-tier override
+  };
+  assert.equal(S.effective('theme'), 'light',
+    'user-tier MUST win over per-script for persistsTo:user ids');
+  assert.equal(S.get('theme', 'script'), undefined,
+    'script tier read MUST return undefined for persistsTo:user ids');
 });
 
 // ----------------------------------------------------------------

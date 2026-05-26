@@ -323,6 +323,47 @@ test('B: reload preserves theme via localStorage (two-session simulation)', () =
   assert.equal(document.documentElement.getAttribute('data-theme'), 'light');
 });
 
+test('H2B: only the theme owner files may call Rga.Theme.toggle / Rga.Theme.apply (constitutional ownership)', () => {
+  // Settings Constitution + H2B: production code outside the theme
+  // owner files MUST route theme intent through Rga.SettingsTheme.toggle
+  // (which writes Settings.Store), not through Rga.Theme directly.
+  //
+  // Permitted callers:
+  //   - app-shell.js          (defines Rga.Theme itself; toggle/apply live there)
+  //   - shell-applicators.js  (theme applicator + Rga.SettingsTheme.toggle helper)
+  //
+  // Everything else must be empty of `Rga.Theme.apply(` and
+  // `Rga.Theme.toggle(` call-site patterns. This guard catches new
+  // drift before review.
+  const FORBIDDEN_PATHS = [/[\\/]editor[\\/]/, /[\\/]framework[\\/]/, /[\\/]doc-types[\\/]/, /bundle\.js$/, /bundle\.js\.map$/];
+  const ALLOWED = new Set([
+    'renderer/js/app-shell.js',
+    'renderer/js/shell/shell-applicators.js'
+  ]);
+  function walk(dir, out) {
+    fs.readdirSync(dir).forEach(function(name) {
+      const full = path.join(dir, name);
+      const stat = fs.statSync(full);
+      if (stat.isDirectory()) walk(full, out);
+      else if (/\.js$/.test(name)) out.push(full);
+    });
+  }
+  const files = [];
+  walk(path.join(REPO, 'renderer', 'js'), files);
+  const offenders = [];
+  files.forEach(function(f) {
+    if (FORBIDDEN_PATHS.some(function(re) { return re.test(f); })) return;
+    const rel = path.relative(REPO, f).replace(/\\/g, '/');
+    if (ALLOWED.has(rel)) return;
+    const src = fs.readFileSync(f, 'utf8');
+    if (/Rga\.Theme\.apply\s*\(/.test(src) || /Rga\.Theme\.toggle\s*\(/.test(src)) {
+      offenders.push(rel);
+    }
+  });
+  assert.deepEqual(offenders, [],
+    'production code outside the theme owner files must route through Rga.SettingsTheme.toggle / Rga.Settings.Store.set. Drifting files: ' + offenders.join(', '));
+});
+
 test('B: only Rga.Theme writes data-theme / rga-theme — no duplicate writers in renderer/js', () => {
   // Source audit: walk renderer/js/**/*.js (excluding bundle.js, editor/,
   // framework/, doc-types/ which are off-limits) and assert ONLY
