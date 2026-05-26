@@ -38,7 +38,8 @@
   // Types this workspace renders as editable controls.
   //   - 5C ships: toggle, select, radio, number, text
   //   - H5  adds: slider (windowZoom + future range-shaped settings)
-  const EDITABLE_TYPES = new Set(['toggle', 'select', 'radio', 'number', 'text', 'slider']);
+  //   - H6  adds: shortcut (kb.*)
+  const EDITABLE_TYPES = new Set(['toggle', 'select', 'radio', 'number', 'text', 'slider', 'shortcut']);
 
   // --------------------------------------------------------------
   // Value formatting (read-only fallback for unsupported types)
@@ -86,13 +87,14 @@
 
   function _makeControl(entry) {
     switch (entry.type) {
-      case 'toggle': return _makeToggle(entry);
-      case 'select': return _makeSelect(entry);
-      case 'radio':  return _makeRadio(entry);
-      case 'number': return _makeNumber(entry);
-      case 'text':   return _makeText(entry);
-      case 'slider': return _makeSlider(entry);
-      default:       return null;
+      case 'toggle':   return _makeToggle(entry);
+      case 'select':   return _makeSelect(entry);
+      case 'radio':    return _makeRadio(entry);
+      case 'number':   return _makeNumber(entry);
+      case 'text':     return _makeText(entry);
+      case 'slider':   return _makeSlider(entry);
+      case 'shortcut': return _makeShortcut(entry);
+      default:         return null;
     }
   }
 
@@ -292,6 +294,240 @@
     return String(value) + unit;
   }
 
+  // H6 — Shortcut control (RC1 §5.2.8 + Component Library §11).
+  //
+  // Value format follows the Settings.Validators.shortcut grammar:
+  //   (Modifier '+')* Key — e.g. 'Ctrl+Shift+P', 'Ctrl+S', 'Escape'
+  //
+  // Visible UI is a sequence of key caps with '+' separators. Click
+  // anywhere on the wrap enters rebind mode: the wrap's caps are
+  // replaced by the prompt "Press new shortcut..." in accent color,
+  // and a window-level keydown listener (capture phase) intercepts
+  // the next non-modifier keystroke. Escape exits without writing.
+  //
+  // Conflict policy (RC1 §15.5 + H6 brief): if the captured combo is
+  // already bound to ANOTHER kb.* setting in the registry, the rebind
+  // is rejected with a toast and the prior value remains. No silent
+  // overwrite. The setting being rebound is excluded from the conflict
+  // check so re-pressing the same combo is a no-op, not a self-conflict.
+  //
+  // Wire path: a successful capture dispatches a synthetic 'change'
+  // event on the wrap; _wireControl reads the new value via readValue()
+  // and writes it through Settings.Store, which fans out to the
+  // shortcut applicator that re-binds the KeyboardRegistry combo.
+  function _makeShortcut(entry) {
+    const wrap = document.createElement('span');
+    wrap.className = 'rga-settings-control-shortcut';
+    wrap.setAttribute('data-control-for', entry.id);
+    wrap.setAttribute('role', 'button');
+    wrap.setAttribute('tabindex', entry.requiresPro ? '-1' : '0');
+
+    let currentValue = String(_currentValue(entry) || '');
+    let rebinding    = false;
+    let captureFn    = null;
+
+    function _renderCaps(value) {
+      wrap.textContent = '';
+      wrap.classList.remove('is-rebinding');
+      const parts = String(value || '').split('+').filter(Boolean);
+      parts.forEach(function(part, i) {
+        if (i > 0) {
+          const sep = document.createElement('span');
+          sep.className = 'rga-settings-control-shortcut-sep';
+          sep.textContent = '+';
+          wrap.appendChild(sep);
+        }
+        const cap = document.createElement('span');
+        cap.className = 'rga-settings-control-shortcut-cap';
+        cap.textContent = part;
+        wrap.appendChild(cap);
+      });
+    }
+
+    function _renderRebindPrompt() {
+      wrap.textContent = '';
+      wrap.classList.add('is-rebinding');
+      const prompt = document.createElement('span');
+      prompt.className = 'rga-settings-control-shortcut-prompt';
+      prompt.textContent = 'Press new shortcut...';
+      wrap.appendChild(prompt);
+    }
+
+    function _exitRebind(restoreValue) {
+      if (!rebinding) return;
+      rebinding = false;
+      if (captureFn) {
+        window.removeEventListener('keydown', captureFn, true);
+        captureFn = null;
+      }
+      _renderCaps(restoreValue == null ? currentValue : restoreValue);
+    }
+
+    function _commitNewValue(newCombo) {
+      currentValue = newCombo;
+      // The synthetic change event bubbles through the wrap; _wireControl
+      // is listening for 'change' and writes through Store.set on read.
+      wrap.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+
+    function _enterRebind() {
+      if (rebinding) return;
+      if (wrap.classList.contains('is-disabled')) return;
+      rebinding = true;
+      _renderRebindPrompt();
+
+      captureFn = function(e) {
+        // Capture phase + immediate stop so the KeyboardRegistry
+        // dispatcher never sees this event.
+        e.preventDefault();
+        e.stopPropagation();
+        if (typeof e.stopImmediatePropagation === 'function') {
+          e.stopImmediatePropagation();
+        }
+
+        const k = e.key;
+        if (!k) return;
+        // Skip modifier-only keystrokes — they are not a complete chord.
+        if (k === 'Shift' || k === 'Control' || k === 'Alt' || k === 'Meta') return;
+        if (k === 'Escape') {
+          _exitRebind(currentValue);
+          return;
+        }
+
+        const keyToken = _keyEventToShortcutToken(k);
+        if (!keyToken) return;
+
+        const mods = [];
+        if (e.ctrlKey || e.metaKey) mods.push('Ctrl');
+        if (e.shiftKey)             mods.push('Shift');
+        if (e.altKey)               mods.push('Alt');
+        const combo = mods.concat([keyToken]).join('+');
+
+        const Validators = Rga.Settings && Rga.Settings.Validators;
+        if (Validators && typeof Validators.shortcut === 'function' && !Validators.shortcut(combo)) {
+          _exitRebind(currentValue);
+          _toast('That key combination is not supported.', 'warning');
+          return;
+        }
+
+        // No-op when the user presses the same combination — exit
+        // cleanly without firing a Store write or a conflict toast.
+        if (combo === currentValue) {
+          _exitRebind(currentValue);
+          return;
+        }
+
+        const conflict = _findShortcutConflict(entry.id, combo);
+        if (conflict) {
+          _exitRebind(currentValue);
+          _toast(combo + ' is already bound to "' + conflict.label + '". Shortcut unchanged.', 'warning');
+          return;
+        }
+
+        _exitRebind(combo);
+        _commitNewValue(combo);
+      };
+
+      window.addEventListener('keydown', captureFn, true);
+    }
+
+    _renderCaps(currentValue);
+
+    wrap.addEventListener('click', function() {
+      if (entry.requiresPro) return;
+      _enterRebind();
+    });
+    wrap.addEventListener('keydown', function(e) {
+      if (entry.requiresPro) return;
+      if (rebinding) return;
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        _enterRebind();
+      }
+    });
+
+    function sync(value) {
+      if (rebinding) _exitRebind(value);
+      currentValue = String(value || '');
+      _renderCaps(currentValue);
+    }
+    function readValue() { return currentValue; }
+    return { element: wrap, sync: sync, readValue: readValue };
+  }
+
+  // Map a KeyboardEvent.key to the Settings.Validators.shortcut grammar.
+  // Returns null for unsupported keys (modifier-only events filtered
+  // earlier; everything else either passes the grammar or is rejected).
+  function _keyEventToShortcutToken(k) {
+    if (!k) return null;
+    if (k.length === 1) {
+      const u = k.toUpperCase();
+      if (/^[A-Z0-9]$/.test(u)) return u;
+      switch (k) {
+        case ',':  return 'Comma';
+        case '.':  return 'Period';
+        case '/':  return 'Slash';
+        case '\\': return 'Backslash';
+        case '+':  return 'Plus';
+        case '-':  return 'Minus';
+        case '=':  return 'Equal';
+        case ';':  return 'Semicolon';
+        case "'":  return 'Quote';
+        case '`':  return 'Tick';
+        case '[':  return 'OpenBracket';
+        case ']':  return 'CloseBracket';
+        case ' ':  return 'Space';
+        default:   return null;
+      }
+    }
+    if (/^F([1-9]|1[0-2])$/.test(k)) return k;
+    switch (k) {
+      case 'Tab':       case 'Enter':    case 'Escape':
+      case 'Backspace': case 'Delete':
+      case 'Home':      case 'End':
+      case 'PageUp':    case 'PageDown': case 'Insert':
+        return k;
+      case 'ArrowUp':    return 'Up';
+      case 'ArrowDown':  return 'Down';
+      case 'ArrowLeft':  return 'Left';
+      case 'ArrowRight': return 'Right';
+      default:           return null;
+    }
+  }
+
+  // RC1 §15.5 conflict detection — scope is the kb.* family in the
+  // registry. Returns the first OTHER kb.* entry whose current
+  // effective value matches `combo`, or null when free.
+  //
+  // Broader system-wide conflict detection (against ad-hoc bindings
+  // installed outside the kb.* registry, e.g. the editor keymap) is a
+  // future-slice concern — the constitution's required check is
+  // within the rebindable Keyboard Shortcuts section.
+  function _findShortcutConflict(myId, combo) {
+    const R     = Rga.Settings && Rga.Settings.Registry;
+    const Store = Rga.Settings && Rga.Settings.Store;
+    if (!R || !Store || typeof R.all !== 'function') return null;
+    const all = R.all();
+    for (let i = 0; i < all.length; i += 1) {
+      const other = all[i];
+      if (!other || other.type !== 'shortcut') continue;
+      if (other.id === myId) continue;
+      const v = Store.effective(other.id);
+      if (typeof v === 'string' && v === combo) {
+        return { id: other.id, label: other.label || other.id };
+      }
+    }
+    return null;
+  }
+
+  function _toast(message, type) {
+    if (Rga.Toast && typeof Rga.Toast.show === 'function') {
+      Rga.Toast.show(message, type || 'warning');
+    } else {
+      console.warn('[settings-workspace] ' + message);
+    }
+  }
+
   // --------------------------------------------------------------
   // Row rendering
   // --------------------------------------------------------------
@@ -396,6 +632,17 @@
       Array.from(inner).forEach(function(i) { i.disabled = true; });
     }
     if ('disabled' in el) el.disabled = true;
+    // Wrap-style controls with no nested <input> (e.g. the shortcut
+    // wrap, whose interactive surface is the wrap itself) take a class
+    // hook so CSS can render the disabled visual without a host
+    // disabled attribute.
+    if (el.classList) el.classList.add('is-disabled');
+    if (el.setAttribute) {
+      el.setAttribute('aria-disabled', 'true');
+      if (el.getAttribute && el.getAttribute('tabindex') !== null) {
+        el.setAttribute('tabindex', '-1');
+      }
+    }
   }
 
   function _wireControl(entry, ctrl, subs, persistsOnly) {

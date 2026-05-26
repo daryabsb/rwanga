@@ -356,6 +356,60 @@
   user-select: none;
 }
 
+/* H6 — Shortcut control (RC1 §5.2.8 + Component Library §11).
+   Click-to-rebind sequence of key caps. */
+.rga-settings-control-shortcut {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  cursor: pointer;
+  user-select: none;
+  outline: none;
+}
+
+.rga-settings-control-shortcut:focus-visible {
+  outline: 1px solid var(--accent-primary, #007acc);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+.rga-settings-control-shortcut-cap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 2px 6px;
+  background: var(--bg-tertiary, var(--surface-tertiary, rgba(255, 255, 255, 0.06)));
+  border: 1px solid var(--border-primary, var(--border-subtle));
+  border-radius: 3px;
+  font-family: var(--font-ui, system-ui, sans-serif);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.rga-settings-control-shortcut-sep {
+  color: var(--text-tertiary, #999);
+  font-size: 11px;
+}
+
+.rga-settings-control-shortcut-prompt {
+  color: var(--accent-primary, #007acc);
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.rga-settings-control-shortcut.is-rebinding {
+  cursor: text;
+}
+
+.rga-settings-control-shortcut.is-disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
 .rga-settings-empty {
   padding: 32px 0;
   text-align: center;

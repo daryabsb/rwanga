@@ -177,18 +177,17 @@ test('Slice 5A — clicking a nav item moves the active class', () => {
 // ----------------------------------------------------------------
 // 5B forbade ANY input inside .rga-settings-rows. 5C makes the safe
 // types (toggle / select / radio / number / text) editable. The new
-// boundary: unsupported types (slider / color / shortcut / margins)
-// stay strictly read-only. The §11 block below covers the editable
-// contract end-to-end.
+// boundary: unsupported types (color / margins) stay strictly
+// read-only. The §11 block below covers the editable contract
+// end-to-end.
 
 test('Slice 5C — unsupported types stay read-only (no input/select/fieldset on their rows)', async () => {
   bootDom();
   const el = await mountInitialized();
   const Rga = global.window.Rga;
-  // H5 retired `slider` from the unsupported set — windowZoom now
-  // renders a constitution-mandated range control. The remaining
+  // H5 retired `slider`; H6 retired `shortcut`. The remaining
   // unsupported types stay strictly read-only until their own slices.
-  const UNSUPPORTED = ['color', 'shortcut', 'margins'];
+  const UNSUPPORTED = ['color', 'margins'];
   const unsupportedIds = Rga.Settings.Registry.all()
     .filter(function(e) { return UNSUPPORTED.indexOf(e.type) >= 0; })
     .map(function(e) { return e.id; });
@@ -686,14 +685,14 @@ test('Slice 5C — requiresPro rows render disabled controls and do NOT write on
 // §15 — Unsupported types list (reporting parity)
 // ----------------------------------------------------------------
 
-test('Editable type set is exactly {toggle, select, radio, number, text, slider} (post-H5)', async () => {
+test('Editable type set is exactly {toggle, select, radio, number, text, slider, shortcut} (post-H6)', async () => {
   bootDom();
   await loadAllInitialized();
   const editable = global.window.Rga.Settings._workspaceInternals._editableTypes.slice().sort();
-  // H5 added `slider` to the editable set; the remaining unsupported
-  // types (color, shortcut, margins) are tracked in
+  // H5 added `slider`; H6 added `shortcut`. The remaining unsupported
+  // types (color, margins) are tracked in
   // docs/rwanga-settings/UNSUPPORTED_CONTROL_INVENTORY.md.
-  assert.deepEqual(editable, ['number', 'radio', 'select', 'slider', 'text', 'toggle']);
+  assert.deepEqual(editable, ['number', 'radio', 'select', 'shortcut', 'slider', 'text', 'toggle']);
 });
 
 // ----------------------------------------------------------------

@@ -21,18 +21,7 @@ This inventory is **read-only**. Engineers MUST NOT use it as a wiring backlog w
 
 ## Inventory
 
-### 1. `shortcut`
-
-| Field | Value |
-|---|---|
-| Control type | `shortcut` (RC1 §5.2.8) |
-| Affected setting IDs | `kb.commandPalette`, `kb.save`, `kb.saveAs`, `kb.find`, `kb.replace`, `kb.toggleSidebar`, `kb.toggleTheme`, `kb.exportPdf`, `kb.sceneNavigator`, `kb.quickSceneJump` |
-| Count | 10 |
-| Current fallback | Read-only text rendering of the value string (e.g. `Ctrl+Shift+P`). The row enters the workspace's "is-readonly" branch — no editable input, no key-cap chrome. |
-| Why unsupported | The constitution-mandated control (RC1 §5.2.8) requires: (a) per-key-cap rendering, (b) click-to-rebind interaction with a "Press new shortcut…" rebind mode, (c) conflict detection across the full shortcut set, (d) Escape-to-cancel handling. This is a multi-component subsystem, not a single control. Implementing it in H4 would exceed the slicing-discipline rule (one tightly-related setting group per slice). |
-| Proposed future slice | **H5** |
-
-### 2. `margins`
+### 1. `margins`
 
 | Field | Value |
 |---|---|
@@ -41,9 +30,9 @@ This inventory is **read-only**. Engineers MUST NOT use it as a wiring backlog w
 | Count | 1 |
 | Current fallback | Read-only formatted text (e.g. `T 1 · B 1 · L 1.5 · R 1`). The row's value column shows the four numeric fields collapsed into a single readable summary. |
 | Why unsupported | The constitution-mandated control (RC1 §5.2.9) requires a 2×2 grid of labeled numeric fields (TOP / RIGHT / BOTTOM / LEFT) with shared container styling, per-field clamping (0–3), and a 0.1 step. Narrow use case (only one entry) so the work is properly paired with other Page Setup wiring rather than shipped in isolation. |
-| Proposed future slice | **H6** |
+| Proposed future slice | **H7** |
 
-### 3. `color`
+### 2. `color`
 
 | Field | Value |
 |---|---|
@@ -52,11 +41,42 @@ This inventory is **read-only**. Engineers MUST NOT use it as a wiring backlog w
 | Count | 1 |
 | Current fallback | Read-only text rendering of the hex value (e.g. `#141414`). Note: an applicator was registered for this id in an earlier slice (`shell-applicators.js`); the applicator is currently orphaned because no editable control surfaces the value to the user. |
 | Why unsupported | The constitution-mandated control (RC1 §5.2.7) requires a horizontal row of curated-palette swatches with active/hover/scale states. Crucially, the control "MUST always have predefined options" — the registry today carries only a default hex, not a palette array. Wiring requires both a registry shape extension (palette options) and the swatch-row component. |
-| Proposed future slice | **H6** |
+| Proposed future slice | **H7** |
 
 ---
 
 ## Shipped Slices
+
+### `shortcut` — closed by H6 (2026-05-26)
+
+The shortcut control is implemented. All 10 `kb.*` rows are now live:
+the `_makeShortcut` factory in
+`renderer/js/shell/workspaces/settings-workspace.js` renders each
+shortcut as a sequence of key caps (RC1 §5.2.8 + Component Library
+§11), click-to-rebind enters the "Press new shortcut..."
+accent-coloured prompt, Escape cancels, and a successful capture
+writes through `Settings.Store`. The new applicator block at the end
+of `renderer/js/shell/shell-applicators.js` registers a per-id
+applicator (`owner: 'shortcuts'`) for every `kb.*` setting — each
+parses the Store value into a `KeyboardEvent.key`-style key + modifier
+mask and installs the binding against `Rga.KeyboardRegistry`. KR's
+last-wins semantics mean the registry-driven combo replaces any
+hardcoded pre-Settings binding (e.g. `view.toggleSidebar` on Ctrl+B);
+rebinds take effect immediately with no restart.
+
+Conflict policy (RC1 §15.5): the shortcut control checks every
+captured combo against the current effective value of every OTHER
+`kb.*` entry. On collision the control surfaces a toast and leaves
+the setting unchanged — no silent overwrite. Broader system-wide
+conflict detection (against ad-hoc engine bindings outside the
+`kb.*` registry) is a future-slice concern.
+
+For `kb.*` ids whose target command does not yet exist in
+`KeyboardRegistry` (`kb.commandPalette`, `kb.save`, etc. — many slices
+away from being wired), the applicator still installs the binding but
+the handler's `invokeCommand` call is a graceful no-op. When the
+underlying command does land, it starts firing through the
+user-chosen combo with no further wiring.
 
 ### `slider` — closed by H5 (2026-05-26)
 
@@ -81,17 +101,17 @@ ship in a later slice.
 
 | Type | Affected IDs | Count | Fallback | Future slice |
 |---|---|---|---|---|
-| `shortcut` | `kb.*` | 10 | read-only text | (TBD — was H5, slider took H5) |
-| `margins` | `pageSetup.margins` | 1 | read-only summary | **H6** |
-| `color` | `appearance.editorDeskColor` | 1 | read-only hex | **H6** |
-| **Total deferred** | | **12 entries** | | |
+| `margins` | `pageSetup.margins` | 1 | read-only summary | **H7** |
+| `color` | `appearance.editorDeskColor` | 1 | read-only hex | **H7** |
+| **Total deferred** | | **2 entries** | | |
 | `slider` | `windowZoom` | 1 | — shipped — | **H5** (done) |
+| `shortcut` | `kb.*` | 10 | — shipped — | **H6** (done) |
 
 ---
 
 ## Render-Layer Behavior Notes
 
-All four control types share the same workspace fallback today (see `renderer/js/shell/workspaces/settings-workspace.js` `_buildRow`):
+The two remaining unsupported types share the same workspace fallback (see `renderer/js/shell/workspaces/settings-workspace.js` `_buildRow`):
 
 ```js
 // Read-only fallback (unsupported types + safety net).
@@ -110,7 +130,7 @@ The fallback never exposes:
 - Control-type words (`slider`, `color`, `shortcut`, `margins`)
 - Enum identifiers (the values it displays are user-meaningful units, not engineer tokens)
 
-This is sufficient for H4's "no implementation leakage" rule. Replacing the fallback with the constitution-mandated controls is the responsibility of H5–H7.
+This is sufficient for H4's "no implementation leakage" rule. Replacing the fallback with the constitution-mandated controls was completed across H5 (slider), H6 (shortcut), and is owed by H7 (margins + color).
 
 ---
 

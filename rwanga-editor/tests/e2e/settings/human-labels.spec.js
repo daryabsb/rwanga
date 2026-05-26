@@ -203,14 +203,14 @@ test('H4 — human labels persist across a close + reopen (labels live in regist
 // 5. The unsupported-control inventory document exists
 // -----------------------------------------------------------------
 
-test('H4 — UNSUPPORTED_CONTROL_INVENTORY.md exists and lists the deferred control types (post-H5)', () => {
+test('H4 — UNSUPPORTED_CONTROL_INVENTORY.md exists and lists the deferred control types (post-H6)', () => {
   const docPath = path.resolve(__dirname, '..', '..', '..',
     'docs', 'rwanga-settings', 'UNSUPPORTED_CONTROL_INVENTORY.md');
   expect(fs.existsSync(docPath)).toBe(true);
   const body = fs.readFileSync(docPath, 'utf8');
-  // H5 retired `slider` (windowZoom) from the deferred set. The
-  // remaining deferred types still need to be enumerated; `slider`
-  // continues to appear in the Shipped section.
+  // H5 retired `slider` (windowZoom); H6 retired `shortcut` (kb.*).
+  // The remaining deferred types are `margins` and `color`.
+  // `slider` and `shortcut` continue to appear in the Shipped section.
   expect(body).toMatch(/`shortcut`/);
   expect(body).toMatch(/`margins`/);
   expect(body).toMatch(/`color`/);
@@ -227,14 +227,13 @@ test('H4 — unsupported-control rows do not expose control-type words or settin
   const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'h4-fallback-'));
   const { app, page } = await launchAndOpen(userDataDir);
   try {
-    // H5 shipped the slider control; windowZoom is now editable and
-    // its value column is no longer the read-only fallback. The
-    // remaining unsupported types still render as read-only text.
+    // H5 shipped the slider control; H6 shipped the shortcut control.
+    // Both windowZoom and the kb.* rows are now editable and no longer
+    // render as the read-only fallback. The remaining unsupported
+    // types still render as read-only text.
     const unsupportedIds = [
       'pageSetup.margins',           // margins
-      'appearance.editorDeskColor',  // color
-      'kb.commandPalette',           // shortcut
-      'kb.save', 'kb.find', 'kb.toggleTheme'
+      'appearance.editorDeskColor'   // color
     ];
 
     // Helper: find the section containing an id from the registry.

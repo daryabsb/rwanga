@@ -238,4 +238,140 @@
     try { Theme.apply(resolved); }
     finally { _themeSyncInProgress = false; }
   }, { owner: 'appearance' });
+
+  // ----- kb.* (H6 — Shortcut applicators) ---------------------------------
+  // RC1 §1A.4 wire path for shortcut settings:
+  //   UI shortcut control → Settings.Store.set('kb.<id>', combo)
+  //                       → kb.<id> applicator (this file)
+  //                       → Rga.KeyboardRegistry.register(key, mods, handler)
+  //                       → handler invokes the bound command
+  //
+  // Per-id model: we keep a private map of the LAST KR binding we
+  // installed for each kb.* id. When the Store value moves, we unbind
+  // the prior combo and install the new one. KR's last-wins semantics
+  // mean a fresh applicator install at boot replaces any hardcoded
+  // pre-Settings binding (e.g. index.js's Ctrl+B for view.toggleSidebar)
+  // — the registry-driven value becomes the source of truth.
+  //
+  // Command mapping: each kb.* id targets an existing KR command id.
+  // The handler calls KR.invokeCommand(commandId), which dispatches to
+  // the command's registered handler. For commands not yet wired
+  // (kb.commandPalette, kb.save, kb.find, etc. — many landing slices
+  // away), invokeCommand returns false silently; the binding is
+  // installed but inert. When the underlying command DOES register, it
+  // will start firing through the user-chosen combo with no further
+  // wiring.
+  //
+  // Tolerant of missing host APIs (jsdom / headless): if KR is absent,
+  // the applicator becomes a no-op and the Store-side state still
+  // persists. Playwright proves the rebinding path on real Electron.
+
+  const _KB_COMMAND_MAP = {
+    'kb.commandPalette':  'palette.open',
+    'kb.save':            'file.save',
+    'kb.saveAs':          'file.saveAs',
+    'kb.find':            'edit.find',
+    'kb.replace':         'edit.replace',
+    'kb.toggleSidebar':   'view.toggleSidebar',
+    'kb.toggleTheme':     'theme.toggle',
+    'kb.exportPdf':       'export.pdf',
+    'kb.sceneNavigator':  'panel.sceneNavigator',
+    'kb.quickSceneJump':  'nav.quickSceneJump'
+  };
+
+  // Token translation from the Settings.Validators.shortcut grammar to
+  // the form KeyboardRegistry expects (KeyboardEvent.key, lowercased).
+  // Validator stores Title-cased named keys ('Tab', 'Escape', 'Up')
+  // and uppercase letters/digits ('A', '5'); KR normalises to
+  // KeyboardEvent.key, lower-cased.
+  function _comboToKeyOpts(combo) {
+    if (typeof combo !== 'string' || combo.length === 0) return null;
+    const parts = combo.split('+');
+    if (parts.length === 0) return null;
+    const last = parts[parts.length - 1];
+    const mods = { ctrl: false, shift: false, alt: false };
+    for (let i = 0; i < parts.length - 1; i += 1) {
+      const m = parts[i];
+      if (m === 'Ctrl' || m === 'Meta') mods.ctrl = true;
+      else if (m === 'Shift')           mods.shift = true;
+      else if (m === 'Alt')             mods.alt   = true;
+      else return null;
+    }
+    let key;
+    if (/^[A-Z0-9]$/.test(last))        key = last.toLowerCase();
+    else if (/^F([1-9]|1[0-2])$/.test(last)) key = last.toLowerCase();
+    else {
+      // Map validator named tokens to KeyboardEvent.key (lower-cased).
+      const NAMED = {
+        Tab:         'tab',
+        Space:       ' ',
+        Enter:       'enter',
+        Escape:      'escape',
+        Backspace:   'backspace',
+        Delete:      'delete',
+        Up:          'arrowup',
+        Down:        'arrowdown',
+        Left:        'arrowleft',
+        Right:       'arrowright',
+        Home:        'home',
+        End:         'end',
+        PageUp:      'pageup',
+        PageDown:    'pagedown',
+        Insert:      'insert',
+        Comma:       ',',
+        Period:      '.',
+        Slash:       '/',
+        Backslash:   '\\',
+        Plus:        '+',
+        Minus:       '-',
+        Equal:       '=',
+        Semicolon:   ';',
+        Quote:       "'",
+        Tick:        '`',
+        OpenBracket: '[',
+        CloseBracket:']'
+      };
+      key = NAMED[last];
+      if (!key) return null;
+    }
+    return { key: key, mods: mods };
+  }
+
+  // Per-id KR unregister fns so the next apply() can release the prior
+  // binding before installing the new one.
+  const _kbUnregister = Object.create(null);
+
+  function _installKbBinding(settingId, combo) {
+    const prior = _kbUnregister[settingId];
+    if (typeof prior === 'function') {
+      try { prior(); } catch (_) {}
+      _kbUnregister[settingId] = null;
+    }
+    const KR = window.Rga && window.Rga.KeyboardRegistry;
+    if (!KR || typeof KR.register !== 'function') return;
+
+    const parsed = _comboToKeyOpts(combo);
+    if (!parsed) return;
+
+    const commandId = _KB_COMMAND_MAP[settingId];
+    const source    = 'kb-applicator:' + settingId;
+    const unregister = KR.register(
+      parsed.key,
+      parsed.mods,
+      function(e) {
+        if (commandId && typeof KR.invokeCommand === 'function') {
+          KR.invokeCommand(commandId, e);
+        }
+      },
+      source
+    );
+    _kbUnregister[settingId] = unregister;
+  }
+
+  Object.keys(_KB_COMMAND_MAP).forEach(function(settingId) {
+    register(settingId, function(value) {
+      if (typeof value !== 'string' || value.length === 0) return;
+      _installKbBinding(settingId, value);
+    }, { owner: 'shortcuts' });
+  });
 })();
