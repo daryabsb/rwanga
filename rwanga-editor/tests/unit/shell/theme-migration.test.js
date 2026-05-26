@@ -358,7 +358,7 @@ test('H2 — _makeRadio uses entry.labels for option textContent', () => {
   assert.deepEqual(texts, ['Dark', 'Light', 'System']);
 });
 
-test('H2 — _makeSelect uses entry.labels when present, falls back to raw codes when not', () => {
+test('H2 + H4 — _makeSelect uses entry.labels when present, falls back to raw codes when labels absent', () => {
   const dom = bootDom();
   const S = loadSubstrate();
   dom.window.Rga.Workspaces = { register: function() {} };
@@ -366,21 +366,22 @@ test('H2 — _makeSelect uses entry.labels when present, falls back to raw codes
   require('../../../renderer/js/shell/workspaces/settings-workspace.js');
 
   const make = S._workspaceInternals._makeControl;
-  // language has no labels yet (H5 populates) — must render raw codes.
-  const langEntry = S.Registry.get('language');
-  // language is a select... let's check
-  if (langEntry.type === 'select') {
-    const ctl = make(langEntry);
-    const texts = Array.from(ctl.element.querySelectorAll('option'))
-      .map((o) => o.textContent.trim());
-    assert.deepEqual(texts, langEntry.options.map(String),
-      'language has no labels yet — should fall back to raw codes');
-  }
 
-  // editor.fontFamily is a select with no labels.
-  const fontEntry = S.Registry.get('editor.fontFamily');
-  const ctl = make(fontEntry);
-  const texts = Array.from(ctl.element.querySelectorAll('option'))
+  // H4 populated labels on `language` — it must now render the human
+  // labels English / Kurdish / Arabic, not raw en/ku/ar.
+  const langEntry = S.Registry.get('language');
+  const langCtl = make(langEntry);
+  const langTexts = Array.from(langCtl.element.querySelectorAll('option'))
     .map((o) => o.textContent.trim());
-  assert.deepEqual(texts, fontEntry.options.map(String));
+  assert.deepEqual(langTexts, ['English', 'Kurdish', 'Arabic']);
+
+  // editor.fontFamily has no labels — its options are already human
+  // strings, so fallback (raw option value as textContent) is correct.
+  const fontEntry = S.Registry.get('editor.fontFamily');
+  assert.equal(fontEntry.labels, undefined,
+    'editor.fontFamily has no labels by design (options are already human)');
+  const fontCtl = make(fontEntry);
+  const fontTexts = Array.from(fontCtl.element.querySelectorAll('option'))
+    .map((o) => o.textContent.trim());
+  assert.deepEqual(fontTexts, fontEntry.options.map(String));
 });

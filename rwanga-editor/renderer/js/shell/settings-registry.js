@@ -84,6 +84,7 @@
       description: 'Controls UI text direction and translations. Editor content language is separate.',
       type: 'select', default: 'en', scope: 'all', owner: 'general',
       options: ['en', 'ku', 'ar'],
+      labels:  { en: 'English', ku: 'Kurdish', ar: 'Arabic' },
       restartRequired: true,
       keywords: ['ui', 'locale', 'translation', 'rtl', 'kurdish', 'arabic'],
       requiresOnboarding: true
@@ -141,6 +142,8 @@
       description: 'Spacing between lines in the editor. Standard is 1.0 (single-spaced).',
       type: 'select', default: '1.0', scope: 'flow', owner: 'editor',
       options: ['1.0', '1.15', '1.5', '2.0'],
+      labels:  { '1.0': '1.0 — Single', '1.15': '1.15 — Compact',
+                 '1.5': '1.5', '2.0': '2.0 — Double' },
       keywords: ['line', 'spacing', 'leading']
     }),
     entry({
@@ -172,6 +175,7 @@
       description: 'How long lines wrap within the editor. Page-width follows page setup margins.',
       type: 'select', default: 'page', scope: 'flow', owner: 'editor',
       options: ['page', 'viewport', 'off'],
+      labels:  { page: 'Page Width', viewport: 'Viewport Width', off: 'Off' },
       keywords: ['wrap', 'word', 'page', 'viewport']
     }),
 
@@ -182,6 +186,9 @@
       type: 'select', default: 'standard_us',
       scope: 'all', persistsTo: 'script', owner: 'screenplay',
       options: ['standard_us', 'standard_eu', 'bbc', 'custom'],
+      labels:  { standard_us: 'US Standard (Letter)',
+                 standard_eu: 'EU Standard (A4)',
+                 bbc: 'BBC', custom: 'Custom' },
       keywords: ['profile', 'format', 'standard', 'bbc']
     }),
     entry({
@@ -197,6 +204,7 @@
       type: 'select', default: 'both',
       scope: 'print', persistsTo: 'script', owner: 'screenplay',
       options: ['left', 'both', 'right'],
+      labels:  { left: 'Left Margin', both: 'Both Margins', right: 'Right Margin' },
       dependencies: [{ id: 'screenplay.sceneNumbering', value: true }],
       keywords: ['scene', 'number', 'position', 'margin']
     }),
@@ -236,6 +244,7 @@
       type: 'select', default: 'letter',
       scope: 'print', persistsTo: 'script', owner: 'pageSetup',
       options: ['letter', 'a4', 'custom'],
+      labels:  { letter: 'US Letter', a4: 'A4', custom: 'Custom' },
       previewKind: 'page',
       keywords: ['paper', 'size', 'letter', 'a4', 'page']
     }),
@@ -245,6 +254,7 @@
       type: 'radio', default: 'portrait',
       scope: 'print', persistsTo: 'script', owner: 'pageSetup',
       options: ['portrait', 'landscape'],
+      labels:  { portrait: 'Portrait', landscape: 'Landscape' },
       previewKind: 'page',
       keywords: ['orientation', 'portrait', 'landscape']
     }),
@@ -270,6 +280,8 @@
       type: 'select', default: 'top_right',
       scope: 'print', persistsTo: 'script', owner: 'pageSetup',
       options: ['top_right', 'top_center', 'bottom_right', 'bottom_center'],
+      labels:  { top_right: 'Top Right', top_center: 'Top Center',
+                 bottom_right: 'Bottom Right', bottom_center: 'Bottom Center' },
       dependencies: [{ id: 'pageSetup.pageNumbers', value: true }],
       previewKind: 'page',
       keywords: ['page', 'number', 'position', 'header', 'footer']
@@ -298,6 +310,8 @@
       type: 'select', default: 'pdf',
       scope: 'export', owner: 'printExport',
       options: ['pdf', 'docx', 'fdx', 'fountain'],
+      labels:  { pdf: 'PDF', docx: 'Word (DOCX)',
+                 fdx: 'Final Draft (FDX)', fountain: 'Fountain (.fountain)' },
       keywords: ['export', 'format', 'pdf', 'docx', 'fdx', 'fountain']
     }),
     entry({
@@ -327,6 +341,7 @@
       type: 'select', default: 'rwanga',
       scope: 'export', owner: 'printExport',
       options: ['rwanga', 'custom', 'none'],
+      labels:  { rwanga: 'Rwanga Logo', custom: 'Custom Letterhead', none: 'No Branding' },
       keywords: ['branding', 'logo', 'watermark', 'pro']
     }),
     entry({
@@ -342,6 +357,7 @@
       type: 'select', default: 'bw',
       scope: 'export', owner: 'printExport',
       options: ['bw', 'color'],
+      labels:  { bw: 'Black & White', color: 'Color' },
       keywords: ['color', 'black', 'white', 'bw', 'highlight']
     }),
 
@@ -370,6 +386,7 @@
       description: 'File format used when saving a new script.',
       type: 'select', default: 'rga', scope: 'all', owner: 'autosave',
       options: ['rga', 'fountain'],
+      labels:  { rga: 'Rwanga (.rga)', fountain: 'Fountain (.fountain)' },
       keywords: ['save', 'format', 'rga', 'fountain']
     }),
     entry({
@@ -392,6 +409,7 @@
       description: 'Which side of the window the sidebar appears on.',
       type: 'radio', default: 'left', scope: 'flow', owner: 'appearance',
       options: ['left', 'right'],
+      labels:  { left: 'Left', right: 'Right' },
       keywords: ['sidebar', 'position', 'left', 'right']
     }),
     entry({
@@ -519,6 +537,8 @@
       description: 'Controls verbosity of console logging for debugging.',
       type: 'select', default: 'warn', scope: 'all', owner: 'advanced',
       options: ['error', 'warn', 'info', 'debug'],
+      labels:  { error: 'Errors Only', warn: 'Warnings',
+                 info: 'Info', debug: 'Debug (Verbose)' },
       keywords: ['log', 'level', 'debug', 'verbose']
     })
   ];
