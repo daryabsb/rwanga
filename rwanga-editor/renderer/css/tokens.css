@@ -80,6 +80,12 @@
 
 :root,
 [data-theme="dark"] {
+  /* Tell native UI (select dropdowns, scrollbars) we support both
+     light and dark — fixes white-on-white option text in the dark
+     theme's native <select> popup. The actual page theme is still
+     resolved by Rga.Theme via [data-theme="…"]. */
+  color-scheme: dark light;
+
   /* === Layout Dimensions === */
   --menu-bar-height: 32px;
   --status-bar-height: 24px;

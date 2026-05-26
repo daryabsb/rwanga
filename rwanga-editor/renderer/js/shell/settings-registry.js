@@ -93,6 +93,7 @@
       description: 'Switch between dark and light appearance.',
       type: 'radio', default: 'dark', scope: 'all', owner: 'general',
       options: ['dark', 'light', 'system'],
+      labels:  { dark: 'Dark', light: 'Light', system: 'System' },
       keywords: ['dark', 'light', 'system', 'appearance', 'mode'],
       requiresOnboarding: true
     }),
@@ -597,6 +598,32 @@
             ': default "' + e.default + '" not in options ' +
             JSON.stringify(e.options));
         }
+      }
+      // Optional `labels` map: human-readable display strings keyed by
+      // option value. Constitutional rule #1 — when a setting becomes
+      // interactive, its labels must be human. Validator enforces that
+      // every label key is a real option; missing keys are tolerated
+      // (display falls back to the raw code).
+      if (e.labels !== undefined) {
+        if (typeof e.labels !== 'object' || e.labels === null || Array.isArray(e.labels)) {
+          throw new Error('[Rga.Settings.Registry] ' + e.id +
+            ': labels must be a plain object keyed by option value');
+        }
+        if (e.type !== 'select' && e.type !== 'radio') {
+          throw new Error('[Rga.Settings.Registry] ' + e.id +
+            ': labels are only meaningful on select/radio entries');
+        }
+        Object.keys(e.labels).forEach(function(key) {
+          if (e.options.indexOf(key) < 0) {
+            throw new Error('[Rga.Settings.Registry] ' + e.id +
+              ': labels key "' + key + '" is not in options ' +
+              JSON.stringify(e.options));
+          }
+          if (typeof e.labels[key] !== 'string' || e.labels[key].length === 0) {
+            throw new Error('[Rga.Settings.Registry] ' + e.id +
+              ': labels["' + key + '"] must be a non-empty string');
+          }
+        });
       }
       // Default must pass the type validator.
       if (!validators.validateValue(e, e.default)) {

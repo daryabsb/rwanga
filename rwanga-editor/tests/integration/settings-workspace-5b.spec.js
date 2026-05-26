@@ -52,10 +52,14 @@ test('Slice 5B — General section rows render with current effective values', a
       'language', 'theme', 'windowZoom',
       'recentFilesLimit', 'confirmBeforeClose', 'restoreLastSession'
     ]);
-    // Spot-check the theme row's value text — registry default is 'dark'.
+    // Spot-check the theme row's effective value via the checked
+    // radio input — registry default is 'dark'. (H2 turned this row
+    // into an editable radio with human labels; reading the checked
+    // input's `value` keeps the assertion aligned with the underlying
+    // value, not the localized display text.)
     const themeVal = await page.$eval(
-      WS_SEL + ' .rga-settings-row[data-setting-id="theme"] .rga-settings-row-value',
-      (el) => el.textContent.trim());
+      WS_SEL + ' .rga-settings-row[data-setting-id="theme"] [data-control-for="theme"] input[type="radio"]:checked',
+      (el) => el.value);
     expect(themeVal).toBe('dark');
   } finally {
     await app.close();

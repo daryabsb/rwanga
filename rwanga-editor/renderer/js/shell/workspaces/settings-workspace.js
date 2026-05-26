@@ -111,10 +111,12 @@
     select.className = 'rga-settings-control-select';
     select.setAttribute('data-control-for', entry.id);
     if (entry.requiresPro) select.disabled = true;
+    const labels = (entry.labels && typeof entry.labels === 'object') ? entry.labels : null;
     (entry.options || []).forEach(function(opt) {
       const o = document.createElement('option');
       o.value = String(opt);
-      o.textContent = String(opt);
+      o.textContent = (labels && Object.prototype.hasOwnProperty.call(labels, opt))
+        ? labels[opt] : String(opt);
       select.appendChild(o);
     });
     const cur = _currentValue(entry);
@@ -135,6 +137,7 @@
     group.setAttribute('data-control-for', entry.id);
 
     const cur = _currentValue(entry);
+    const labels = (entry.labels && typeof entry.labels === 'object') ? entry.labels : null;
     const inputs = [];
     (entry.options || []).forEach(function(opt) {
       const label = document.createElement('label');
@@ -146,7 +149,8 @@
       input.checked = String(cur) === String(opt);
       if (entry.requiresPro) input.disabled = true;
       const span = document.createElement('span');
-      span.textContent = String(opt);
+      span.textContent = (labels && Object.prototype.hasOwnProperty.call(labels, opt))
+        ? labels[opt] : String(opt);
       label.appendChild(input);
       label.appendChild(span);
       group.appendChild(label);

@@ -551,6 +551,11 @@
          any applicator-module file so register() resolves. The boot
          path calls Store.init() then Applicators.applyAll() once. -->
     <script src="js/shell/settings-applicators.js"></script>
+    <!-- Settings Migrations (H2) — boot-time legacy → store
+         reconciliations. Loads AFTER store + applicator registry so
+         Migrations.run() can call Store.set. The boot path runs
+         Store.init() → Migrations.run() → Applicators.applyAll(). -->
+    <script src="js/shell/settings-migrations.js"></script>
     <!-- Shell / appearance settings applicators (Slice 4B) — registers
          appearance.editorDeskColor (CSS var on documentElement) and
          appearance.statusBar (rga-no-status-bar class on body). -->
@@ -1400,9 +1405,14 @@
     // continues synchronously while the Promise resolves.
     if (Rga.Settings && Rga.Settings.Store) {
       Rga.Settings.Store.init().then(function() {
-        if (Rga.Settings.Applicators) {
-          Rga.Settings.Applicators.applyAll();
-        }
+        const migrate = (Rga.Settings.Migrations && typeof Rga.Settings.Migrations.run === 'function')
+          ? Rga.Settings.Migrations.run()
+          : Promise.resolve();
+        return migrate.then(function() {
+          if (Rga.Settings.Applicators) {
+            Rga.Settings.Applicators.applyAll();
+          }
+        });
       });
     }
     Rga.ScriptLanguage.init();

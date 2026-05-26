@@ -44,7 +44,12 @@
 
   function defaultSettings() {
     return {
-      theme: 'dark',
+      // `theme` removed 2026-05-26 (H2): it is a user-tier preference
+      // per the Settings Architecture Doctrine and lives in user prefs
+      // via Rga.Settings.Store, not in per-script doc.settings.
+      // Existing .rga files with `theme` baked into settings remain
+      // tolerated — the Store ignores script-tier reads of entries
+      // whose registry says persistsTo:'user'.
       font_size: 12,
       font_family: 'Courier Prime',
       show_scene_numbers: true,
