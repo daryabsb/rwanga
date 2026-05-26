@@ -66,6 +66,41 @@
         || Store.get(id, 'script')  !== undefined;
   }
 
+  // ----- windowZoom -------------------------------------------------------
+  // H5 — Window Zoom slider (RC1 §5.2.5).
+  //
+  // Maps the user-facing percentage (50–200) to Electron's zoom factor
+  // (0.5–2.0) and pushes it through the webFrame.setZoomFactor bridge
+  // exposed in electron/preload.js. The factor scales the ENTIRE
+  // renderer including the Settings UI itself — that is the constitution-
+  // mandated behavior, not a bug.
+  //
+  // Bridge fallback: when running under jsdom or any non-Electron host
+  // (unit tests, headless harnesses), window.rwanga is absent. The
+  // applicator becomes a no-op so the registry-driven boot still
+  // succeeds; Playwright proves the live-zoom path on a real Electron
+  // window.
+  function _setZoomFactor(factor) {
+    const api = window.rwanga && window.rwanga.window;
+    if (!api || typeof api.setZoomFactor !== 'function') return;
+    try { api.setZoomFactor(factor); }
+    catch (err) { console.warn('[shell-applicators] setZoomFactor threw:', err); }
+  }
+
+  register('windowZoom', function(value) {
+    let pct;
+    if (typeof value === 'number' && Number.isFinite(value)) {
+      pct = value;
+    } else {
+      pct = 100;
+    }
+    // Defensive clamp matching the registry's min/max so a stale or
+    // out-of-band Store value never escapes into webFrame.
+    if (pct < 50)  pct = 50;
+    if (pct > 200) pct = 200;
+    _setZoomFactor(pct / 100);
+  }, { owner: 'general' });
+
   // ----- appearance.editorDeskColor ---------------------------------------
   // Overrides the --editor-bg token at the documentElement level so
   // every CSS rule that reads var(--editor-bg) picks up the user's

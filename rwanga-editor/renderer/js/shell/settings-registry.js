@@ -102,6 +102,7 @@
       id: 'windowZoom', label: 'Window Zoom',
       description: 'Scale the entire application UI. Does not affect print/export output.',
       type: 'slider', default: 100, scope: 'flow', owner: 'general',
+      min: 50, max: 200, step: 10, unit: '%',
       keywords: ['scale', 'size', 'ui', 'zoom']
     }),
     entry({

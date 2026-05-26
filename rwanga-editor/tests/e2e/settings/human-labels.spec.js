@@ -203,19 +203,20 @@ test('H4 — human labels persist across a close + reopen (labels live in regist
 // 5. The unsupported-control inventory document exists
 // -----------------------------------------------------------------
 
-test('H4 — UNSUPPORTED_CONTROL_INVENTORY.md exists and lists the four deferred control types', () => {
+test('H4 — UNSUPPORTED_CONTROL_INVENTORY.md exists and lists the deferred control types (post-H5)', () => {
   const docPath = path.resolve(__dirname, '..', '..', '..',
     'docs', 'rwanga-settings', 'UNSUPPORTED_CONTROL_INVENTORY.md');
   expect(fs.existsSync(docPath)).toBe(true);
   const body = fs.readFileSync(docPath, 'utf8');
-  // Each deferred type and its proposed slice MUST appear in the doc.
+  // H5 retired `slider` (windowZoom) from the deferred set. The
+  // remaining deferred types still need to be enumerated; `slider`
+  // continues to appear in the Shipped section.
   expect(body).toMatch(/`shortcut`/);
   expect(body).toMatch(/`margins`/);
   expect(body).toMatch(/`color`/);
   expect(body).toMatch(/`slider`/);
   expect(body).toMatch(/\bH5\b/);
   expect(body).toMatch(/\bH6\b/);
-  expect(body).toMatch(/\bH7\b/);
 });
 
 // -----------------------------------------------------------------
@@ -226,8 +227,10 @@ test('H4 — unsupported-control rows do not expose control-type words or settin
   const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'h4-fallback-'));
   const { app, page } = await launchAndOpen(userDataDir);
   try {
+    // H5 shipped the slider control; windowZoom is now editable and
+    // its value column is no longer the read-only fallback. The
+    // remaining unsupported types still render as read-only text.
     const unsupportedIds = [
-      'windowZoom',                  // slider
       'pageSetup.margins',           // margins
       'appearance.editorDeskColor',  // color
       'kb.commandPalette',           // shortcut

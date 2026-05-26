@@ -35,8 +35,10 @@
   const Rga = window.Rga = window.Rga || {};
   if (!Rga.Workspaces || typeof Rga.Workspaces.register !== 'function') return;
 
-  // Types this slice renders as editable controls.
-  const EDITABLE_TYPES = new Set(['toggle', 'select', 'radio', 'number', 'text']);
+  // Types this workspace renders as editable controls.
+  //   - 5C ships: toggle, select, radio, number, text
+  //   - H5  adds: slider (windowZoom + future range-shaped settings)
+  const EDITABLE_TYPES = new Set(['toggle', 'select', 'radio', 'number', 'text', 'slider']);
 
   // --------------------------------------------------------------
   // Value formatting (read-only fallback for unsupported types)
@@ -89,6 +91,7 @@
       case 'radio':  return _makeRadio(entry);
       case 'number': return _makeNumber(entry);
       case 'text':   return _makeText(entry);
+      case 'slider': return _makeSlider(entry);
       default:       return null;
     }
   }
@@ -212,6 +215,83 @@
     return { element: input, sync: sync, readValue: readValue };
   }
 
+  // H5 — Slider control (RC1 §5.2.5 + Component Library #8).
+  //
+  // Wrap: <span> housing the native <input type="range"> + a value
+  // label to its right. The wrap is the `element` so _wireControl's
+  // change listener catches bubbled events from the inner input.
+  // Native range fires `change` only on release; we re-emit a change
+  // on each `input` event so the wire layer commits live to Store
+  // (Window Zoom must respond mid-drag — the user wants to see the UI
+  // scale as they slide, not after they let go).
+  //
+  // Disabled handling: _disableControlElement handles the wrap by
+  // disabling every inner <input> child, so PERSISTS_ONLY rows render
+  // a properly-greyed slider.
+  function _makeSlider(entry) {
+    const wrap = document.createElement('span');
+    wrap.className = 'rga-settings-control-slider';
+    wrap.setAttribute('data-control-for', entry.id);
+
+    const input = document.createElement('input');
+    input.type = 'range';
+    input.className = 'rga-settings-control-slider-input';
+    if (typeof entry.min  === 'number') input.min  = String(entry.min);
+    if (typeof entry.max  === 'number') input.max  = String(entry.max);
+    if (typeof entry.step === 'number') input.step = String(entry.step);
+    if (entry.requiresPro) input.disabled = true;
+
+    const cur = _currentValue(entry);
+    if (typeof cur === 'number' && Number.isFinite(cur)) {
+      input.value = String(cur);
+    }
+
+    const valueLabel = document.createElement('span');
+    valueLabel.className = 'rga-settings-control-slider-value';
+    valueLabel.textContent = _formatSliderValue(entry, cur);
+
+    wrap.appendChild(input);
+    wrap.appendChild(valueLabel);
+
+    // Live label update + change-event re-emit on every input tick.
+    // The dispatched event bubbles through the wrap, where _wireControl
+    // is listening for `change`.
+    input.addEventListener('input', function() {
+      const n = Number(input.value);
+      valueLabel.textContent = _formatSliderValue(entry, n);
+      input.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+
+    function sync(value) {
+      // Native range inputs clamp internally on assignment: setting
+      // input.value beyond min/max silently snaps to the boundary, and
+      // the getter then returns that boundary value. Reading back
+      // post-assign keeps the visible value label aligned with what
+      // the slider is actually showing.
+      if (typeof value === 'number' && Number.isFinite(value)) {
+        input.value = String(value);
+      } else if (value === undefined || value === null) {
+        input.value = String(entry.default);
+      } else {
+        return;
+      }
+      const shown = Number(input.value);
+      valueLabel.textContent = _formatSliderValue(entry, shown);
+    }
+    function readValue() {
+      const raw = input.value;
+      if (raw === '' || raw === null || raw === undefined) return NaN;
+      return Number(raw);
+    }
+    return { element: wrap, sync: sync, readValue: readValue };
+  }
+
+  function _formatSliderValue(entry, value) {
+    if (typeof value !== 'number' || !Number.isFinite(value)) return '';
+    const unit = (entry && typeof entry.unit === 'string') ? entry.unit : '';
+    return String(value) + unit;
+  }
+
   // --------------------------------------------------------------
   // Row rendering
   // --------------------------------------------------------------
@@ -308,13 +388,14 @@
 
   function _disableControlElement(el) {
     if (!el) return;
-    if (el.tagName === 'FIELDSET') {
-      // Radio: disable every inner input.
-      Array.from(el.querySelectorAll('input')).forEach(function(i) { i.disabled = true; });
-      el.disabled = true;
-      return;
+    // Wrap-style controls (fieldset for radio, span for slider) carry
+    // their interactive element inside. Disable every nested input so
+    // the visible control reflects PERSISTS_ONLY / Pro status.
+    const inner = el.querySelectorAll && el.querySelectorAll('input');
+    if (inner && inner.length > 0) {
+      Array.from(inner).forEach(function(i) { i.disabled = true; });
     }
-    el.disabled = true;
+    if ('disabled' in el) el.disabled = true;
   }
 
   function _wireControl(entry, ctrl, subs, persistsOnly) {

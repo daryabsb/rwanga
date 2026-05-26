@@ -54,16 +54,26 @@ This inventory is **read-only**. Engineers MUST NOT use it as a wiring backlog w
 | Why unsupported | The constitution-mandated control (RC1 §5.2.7) requires a horizontal row of curated-palette swatches with active/hover/scale states. Crucially, the control "MUST always have predefined options" — the registry today carries only a default hex, not a palette array. Wiring requires both a registry shape extension (palette options) and the swatch-row component. |
 | Proposed future slice | **H6** |
 
-### 4. `slider`
+---
 
-| Field | Value |
-|---|---|
-| Control type | `slider` (RC1 §5.2.5) |
-| Affected setting IDs | `windowZoom` |
-| Count | 1 |
-| Current fallback | Read-only text rendering of the numeric value (e.g. `100`). No track, no thumb, no value label. |
-| Why unsupported | The constitution-mandated control (RC1 §5.2.5) requires a 120px track + 14px circular thumb + right-aligned value label, plus a `prefers-reduced-motion` instant-transition path. The behavior side (Electron `webFrame.setZoomLevel` coupling) is a separate substrate concern that pairs naturally with the slider control. |
-| Proposed future slice | **H7** |
+## Shipped Slices
+
+### `slider` — closed by H5 (2026-05-26)
+
+The slider control is implemented. `windowZoom` is now live: the
+registry carries `min: 50, max: 200, step: 10, unit: '%'`; the
+`_makeSlider` factory in `renderer/js/shell/workspaces/settings-workspace.js`
+renders the constitution-mandated 120px track + 14px thumb + value
+label per RC1 §5.2.5; and the `windowZoom` applicator in
+`renderer/js/shell/shell-applicators.js` bridges Store → `webFrame.setZoomFactor`
+(routed through `electron/preload.js` because the renderer runs with
+`contextIsolation: true`).
+
+The slider row is no longer in the deferred set above. The slice
+brief renamed H5 from the inventory's original "shortcut" assignment
+to "slider/windowZoom" — the shortcut row remains H5-tagged in the
+deferred section for historical continuity but is now expected to
+ship in a later slice.
 
 ---
 
@@ -71,11 +81,11 @@ This inventory is **read-only**. Engineers MUST NOT use it as a wiring backlog w
 
 | Type | Affected IDs | Count | Fallback | Future slice |
 |---|---|---|---|---|
-| `shortcut` | `kb.*` | 10 | read-only text | **H5** |
+| `shortcut` | `kb.*` | 10 | read-only text | (TBD — was H5, slider took H5) |
 | `margins` | `pageSetup.margins` | 1 | read-only summary | **H6** |
 | `color` | `appearance.editorDeskColor` | 1 | read-only hex | **H6** |
-| `slider` | `windowZoom` | 1 | read-only number | **H7** |
-| **Total** | | **13 entries** | | |
+| **Total deferred** | | **12 entries** | | |
+| `slider` | `windowZoom` | 1 | — shipped — | **H5** (done) |
 
 ---
 

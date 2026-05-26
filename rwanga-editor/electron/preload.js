@@ -1,7 +1,7 @@
 // Copyright (c) 2026 Rwanga. Licensed under Apache 2.0.
 'use strict';
 
-const { contextBridge, ipcRenderer } = require('electron');
+const { contextBridge, ipcRenderer, webFrame } = require('electron');
 
 contextBridge.exposeInMainWorld('rwanga', {
   files: {
@@ -58,6 +58,12 @@ contextBridge.exposeInMainWorld('rwanga', {
     // Regression Fix §B — initial state query for the maximize-button
     // icon resolver in title-bar.js.
     getState: () => ipcRenderer.invoke('window.getState'),
+    // H5 — Window Zoom slider. webFrame is a renderer-process API
+    // (no IPC needed). Exposed through the preload bridge because
+    // the renderer runs with contextIsolation:true + nodeIntegration:
+    // false and so cannot require('electron') directly.
+    setZoomFactor: (factor) => webFrame.setZoomFactor(factor),
+    getZoomFactor: () => webFrame.getZoomFactor(),
   },
   lifecycle: {
     // Persistence Safety Contract §6 — the app-close handshake. main sends

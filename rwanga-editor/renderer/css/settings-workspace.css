@@ -325,6 +325,37 @@
   opacity: 0.5;
 }
 
+/* H5 — Slider control (RC1 §5.2.5 + Component Library #8).
+   120px track, 14px thumb, value label min-width 40px right-aligned.
+   Native input[type=range] inherits accessibility semantics. */
+.rga-settings-control-slider {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rga-settings-control-slider-input {
+  width: 120px;
+  height: 14px;
+  cursor: pointer;
+  accent-color: var(--accent-primary, #007acc);
+  vertical-align: middle;
+}
+
+.rga-settings-control-slider-input:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.rga-settings-control-slider-value {
+  display: inline-block;
+  min-width: 40px;
+  text-align: end;
+  font-size: 12px;
+  color: var(--text-primary);
+  user-select: none;
+}
+
 .rga-settings-empty {
   padding: 32px 0;
   text-align: center;

@@ -185,7 +185,10 @@ test('Slice 5C — unsupported types stay read-only (no input/select/fieldset on
   bootDom();
   const el = await mountInitialized();
   const Rga = global.window.Rga;
-  const UNSUPPORTED = ['slider', 'color', 'shortcut', 'margins'];
+  // H5 retired `slider` from the unsupported set — windowZoom now
+  // renders a constitution-mandated range control. The remaining
+  // unsupported types stay strictly read-only until their own slices.
+  const UNSUPPORTED = ['color', 'shortcut', 'margins'];
   const unsupportedIds = Rga.Settings.Registry.all()
     .filter(function(e) { return UNSUPPORTED.indexOf(e.type) >= 0; })
     .map(function(e) { return e.id; });
@@ -683,11 +686,14 @@ test('Slice 5C — requiresPro rows render disabled controls and do NOT write on
 // §15 — Unsupported types list (reporting parity)
 // ----------------------------------------------------------------
 
-test('Slice 5C — editable type set is exactly {toggle, select, radio, number, text}', async () => {
+test('Editable type set is exactly {toggle, select, radio, number, text, slider} (post-H5)', async () => {
   bootDom();
   await loadAllInitialized();
   const editable = global.window.Rga.Settings._workspaceInternals._editableTypes.slice().sort();
-  assert.deepEqual(editable, ['number', 'radio', 'select', 'text', 'toggle']);
+  // H5 added `slider` to the editable set; the remaining unsupported
+  // types (color, shortcut, margins) are tracked in
+  // docs/rwanga-settings/UNSUPPORTED_CONTROL_INVENTORY.md.
+  assert.deepEqual(editable, ['number', 'radio', 'select', 'slider', 'text', 'toggle']);
 });
 
 // ----------------------------------------------------------------
