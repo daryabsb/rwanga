@@ -154,25 +154,50 @@
 .rga-settings-rows {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  /* S4 — the bottom separator on each row IS the visual break between
+     rows. No extra gap needed; rows abut their neighbours and the line
+     does the work. (Pre-S4 the rows had a 16px gap to separate card-
+     style rectangles.) */
+  gap: 0;
 }
 
+/* ============================================================
+   S4 — RC1 §4.1 row anatomy.
+   Two-column grid: 1fr label/helper column + auto control column,
+   8px column gap, no card chrome, single 1px bottom separator.
+   The grid-template-areas mapping lets the existing DOM (header /
+   description / value) drop into the right cells without JS changes.
+   ============================================================ */
 .rga-settings-row {
-  padding: 14px 16px;
-  background: var(--surface-secondary, rgba(255, 255, 255, 0.03));
-  border: 1px solid var(--border-subtle);
-  border-radius: 4px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas:
+    "label   control"
+    "helper  control";
+  column-gap: 8px;
+  row-gap: 0;
+  padding: 14px 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  border-bottom: 1px solid var(--border-secondary, var(--border-subtle));
 }
 
+/* S4 — flat-anatomy: the pre-S4 .is-pro left-border decoration was
+   card-style chrome that doesn't fit the new flat row. The inline Pro
+   badge in the header carries the signal; the decorative left border
+   is retired. (Badges themselves are out of S4 scope — this is the
+   removal of an existing card decoration, not a new badge.) */
 .rga-settings-row.is-pro {
-  border-left: 2px solid var(--accent-gold, #c9a227);
+  border-left: 0;
 }
 
 .rga-settings-row-header {
+  grid-area: label;
   display: flex;
   align-items: baseline;
   gap: 8px;
-  margin-bottom: 4px;
+  margin-bottom: 0;
 }
 
 .rga-settings-row-label {
@@ -212,13 +237,22 @@
 }
 
 .rga-settings-row-description {
-  margin: 0 0 6px 0;
+  /* S4 — slots into the helper area below the label, same left column.
+     Bottom margin retired (it was the card-era gap between description
+     and value-below; in the grid the value sits in column 2). */
+  grid-area: helper;
+  margin: 0;
   color: var(--text-secondary, #cfcfcf);
   font-size: 12px;
   max-width: 60ch;
 }
 
 .rga-settings-row-value {
+  /* S4 — spans both rows of the grid in column 2, vertically centred
+     against the label+helper stack and hugged to the right edge. */
+  grid-area: control;
+  align-self: center;
+  justify-self: end;
   margin: 0;
   font-size: 12px;
   color: var(--text-primary);
