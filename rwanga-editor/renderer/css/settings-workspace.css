@@ -386,21 +386,80 @@
   color: #d6a800;
 }
 
+/* ============================================================
+   S3 — RC1 §5.2.1 switch (toggle) control.
+   The label is the track (36×20, 10px radius); a visually-hidden
+   native checkbox lives inside so keyboard focus / Space-toggle /
+   change events all flow through standard form semantics. CSS uses
+   :has(input:checked) to flip the track background AND the thumb
+   position — no JS required to keep visual + state in sync.
+   ============================================================ */
 .rga-settings-control-toggle {
+  position: relative;
+  display: inline-block;
+  width: 36px;
+  height: 20px;
+  border-radius: 10px;
+  background: var(--bg-quaternary, #555);
+  cursor: pointer;
+  vertical-align: middle;
+  transition: background 0.15s ease;
+  flex-shrink: 0;
+}
+
+.rga-settings-control-toggle:has(.rga-settings-control-toggle-input:checked) {
+  background: var(--accent-primary, #007acc);
+}
+
+.rga-settings-control-toggle-input {
+  /* Visually hidden but interactive. opacity:0 hides the native
+     checkbox; position:absolute + inset:0 + 100% size make the input
+     the click-receiving surface across the whole 36×20 track so
+     clicks anywhere on the toggle land on the input directly. The
+     thumb above sets pointer-events:none so it never intercepts. */
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.rga-settings-control-toggle-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
   width: 16px;
   height: 16px;
-  cursor: pointer;
-  accent-color: var(--accent-primary, #007acc);
+  border-radius: 50%;
+  background: #fff;
+  transition: left 0.15s ease;
+  pointer-events: none;
 }
 
-.rga-settings-control-toggle:disabled {
-  cursor: not-allowed;
+.rga-settings-control-toggle:has(.rga-settings-control-toggle-input:checked)
+  .rga-settings-control-toggle-thumb {
+  left: 18px;
+}
+
+.rga-settings-control-toggle:has(.rga-settings-control-toggle-input:disabled) {
   opacity: 0.5;
+  cursor: not-allowed;
 }
 
+.rga-settings-control-toggle:focus-within {
+  outline: 1px solid var(--accent-primary, #007acc);
+  outline-offset: 2px;
+}
+
+/* ============================================================
+   Shared input chrome — select + text. Number is RC1 §5.2.4 and
+   uses its own wrap (see below), so it leaves this rule.
+   ============================================================ */
 .rga-settings-control-select,
-.rga-settings-control-text,
-.rga-settings-control-number {
+.rga-settings-control-text {
   display: inline-block;
   min-width: 180px;
   padding: 6px 10px;
@@ -413,11 +472,6 @@
   outline: none;
 }
 
-.rga-settings-control-number {
-  min-width: 100px;
-  width: 100px;
-}
-
 .rga-settings-control-text {
   min-width: 280px;
   width: 100%;
@@ -425,43 +479,176 @@
 }
 
 .rga-settings-control-select:focus,
-.rga-settings-control-text:focus,
-.rga-settings-control-number:focus {
+.rga-settings-control-text:focus {
   border-color: var(--accent-primary, #007acc);
 }
 
 .rga-settings-control-select:disabled,
-.rga-settings-control-text:disabled,
-.rga-settings-control-number:disabled {
+.rga-settings-control-text:disabled {
   cursor: not-allowed;
   opacity: 0.5;
 }
 
+/* ============================================================
+   S3 — RC1 §5.2.4 number control.
+   Wrap [- input unit? +] with a shared border + radius. The native
+   number input keeps focus + accessibility; CSS strips the
+   browser's default up/down spinners so the inline ± buttons own
+   the increment affordance.
+   ============================================================ */
+.rga-settings-control-number {
+  display: inline-flex;
+  align-items: stretch;
+  background: var(--bg-primary, transparent);
+  border: 1px solid var(--border-primary, var(--border-subtle));
+  border-radius: var(--radius-md, 4px);
+  overflow: hidden;
+}
+
+.rga-settings-control-number-btn {
+  background: transparent;
+  border: 0;
+  width: 24px;
+  font: inherit;
+  font-size: 14px;
+  line-height: 1;
+  color: var(--text-secondary, #cfcfcf);
+  cursor: pointer;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rga-settings-control-number-btn:hover:not(:disabled) {
+  color: var(--text-primary);
+  background: var(--surface-hover, rgba(255, 255, 255, 0.06));
+}
+
+.rga-settings-control-number-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.rga-settings-control-number-input {
+  width: 56px;
+  text-align: center;
+  background: transparent;
+  border: 0;
+  font: inherit;
+  font-size: 12px;
+  color: var(--text-primary);
+  outline: none;
+  padding: 4px 0;
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+.rga-settings-control-number-input::-webkit-outer-spin-button,
+.rga-settings-control-number-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.rga-settings-control-number-input:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.rga-settings-control-number-input:focus {
+  outline: 1px solid var(--accent-primary, #007acc);
+  outline-offset: -1px;
+}
+
+.rga-settings-control-number-unit {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 6px 0 0;
+  font-size: 11px;
+  color: var(--text-tertiary, #999);
+  pointer-events: none;
+}
+
+/* ============================================================
+   S3 — RC1 §5.2.2 segmented radio control.
+   The fieldset draws the shared outer border; per-option labels
+   sit inside with 5px 12px padding. The native radio is hidden
+   visually but stays in the DOM for state + keyboard nav.
+   :has(input:checked) + data-checked together drive the active
+   segment's background + colour.
+   ============================================================ */
 .rga-settings-control-radio {
   display: inline-flex;
-  gap: 12px;
-  border: 0;
-  padding: 0;
+  align-items: stretch;
   margin: 0;
+  padding: 0;
+  border: 1px solid var(--border-primary, var(--border-subtle));
+  border-radius: var(--radius-md, 4px);
+  background: var(--bg-primary, transparent);
+  overflow: hidden;
 }
 
 .rga-settings-control-radio-option {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  justify-content: center;
+  padding: 5px 12px;
   font-size: 12px;
-  color: var(--text-primary);
+  color: var(--text-secondary, #cfcfcf);
   cursor: pointer;
+  user-select: none;
+  background: transparent;
+  border-right: 1px solid var(--border-primary, var(--border-subtle));
+  transition: background 0.1s ease, color 0.1s ease;
 }
 
+.rga-settings-control-radio-option:last-child {
+  border-right: 0;
+}
+
+/* Visually hide the native radio while keeping it as the click
+   surface that fills its label segment — clicks anywhere on the
+   segment land on the input directly, and the input's
+   :checked state drives the active styling via :has(). */
 .rga-settings-control-radio-option input[type="radio"] {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
   cursor: pointer;
-  accent-color: var(--accent-primary, #007acc);
 }
 
-.rga-settings-control-radio-option input[type="radio"]:disabled {
+.rga-settings-control-radio-option {
+  position: relative;            /* anchor for the absolute input */
+}
+
+/* The text span sits above the absolute input — set pointer-events:
+   none so the input is the click target across the whole segment. */
+.rga-settings-control-radio-option-text {
+  pointer-events: none;
+}
+
+/* Active segment: highlighted with the accent token. Two selectors
+   carry the same rule — modern :has() and the JS-mirrored data-
+   checked attribute — so the active style applies even if
+   :has() is unavailable. */
+.rga-settings-control-radio-option:has(input:checked),
+.rga-settings-control-radio-option[data-checked] {
+  background: var(--accent-primary, #007acc);
+  color: #fff;
+}
+
+.rga-settings-control-radio-option:has(input:disabled),
+.rga-settings-control-radio.is-disabled .rga-settings-control-radio-option {
   cursor: not-allowed;
   opacity: 0.5;
+}
+
+.rga-settings-control-radio-option:focus-within {
+  outline: 1px solid var(--accent-primary, #007acc);
+  outline-offset: -1px;
 }
 
 /* H5 — Slider control (RC1 §5.2.5 + Component Library #8).

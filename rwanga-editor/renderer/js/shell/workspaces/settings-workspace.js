@@ -104,17 +104,47 @@
     }
   }
 
+  // S3 — RC1 §5.2.1 switch control.
+  //
+  // Element is a <label> wrapping a visually-hidden native checkbox
+  // plus a thumb <span>. The native checkbox carries the actual state
+  // + keyboard interaction (Space toggles) + focus management; the
+  // label is the visual track. CSS uses :has(input:checked) to flip
+  // both the track background and the thumb position so no JS is
+  // needed for visual sync. role="switch" + aria-checked on the label
+  // give assistive tech the two-state semantics the brief specifies.
   function _makeToggle(entry) {
+    const label = document.createElement('label');
+    label.className = 'rga-settings-control-toggle';
+    label.setAttribute('role', 'switch');
+    label.setAttribute('data-control-for', entry.id);
+
     const input = document.createElement('input');
     input.type = 'checkbox';
-    input.className = 'rga-settings-control-toggle';
-    input.setAttribute('data-control-for', entry.id);
+    input.className = 'rga-settings-control-toggle-input';
     input.checked = !!_currentValue(entry);
     if (entry.requiresPro) input.disabled = true;
 
-    function sync(value) { input.checked = !!value; }
+    const thumb = document.createElement('span');
+    thumb.className = 'rga-settings-control-toggle-thumb';
+
+    label.appendChild(input);
+    label.appendChild(thumb);
+    label.setAttribute('aria-checked', input.checked ? 'true' : 'false');
+
+    // Keep aria-checked in sync with the native input. The change
+    // bubbles up so _wireControl still observes a single 'change'
+    // event from label-level listening.
+    input.addEventListener('change', function() {
+      label.setAttribute('aria-checked', input.checked ? 'true' : 'false');
+    });
+
+    function sync(value) {
+      input.checked = !!value;
+      label.setAttribute('aria-checked', input.checked ? 'true' : 'false');
+    }
     function readValue() { return input.checked; }
-    return { element: input, sync: sync, readValue: readValue };
+    return { element: label, sync: sync, readValue: readValue };
   }
 
   function _makeSelect(entry) {
@@ -141,6 +171,17 @@
     return { element: select, sync: sync, readValue: readValue };
   }
 
+  // S3 — RC1 §5.2.2 segmented control.
+  //
+  // DOM remains <fieldset> → <label><input type="radio"><span>… so the
+  // native radio inputs continue to drive state + keyboard nav and so
+  // existing E2E selectors (.rga-settings-row-value input) still match.
+  // CSS visually hides the native dot, draws a shared outer border on
+  // the fieldset, and lights up the active segment via
+  //   label:has(input:checked) { background:var(--accent-primary); color:#fff; }
+  // The data-checked attribute mirrors input.checked for browsers
+  // without :has() support (defensive — Electron's Chromium supports
+  // :has() natively).
   function _makeRadio(entry) {
     const group = document.createElement('fieldset');
     group.className = 'rga-settings-control-radio';
@@ -151,26 +192,46 @@
     const labels = (entry.labels && typeof entry.labels === 'object') ? entry.labels : null;
     const inputs = [];
     (entry.options || []).forEach(function(opt) {
-      const label = document.createElement('label');
-      label.className = 'rga-settings-control-radio-option';
+      const optLabel = document.createElement('label');
+      optLabel.className = 'rga-settings-control-radio-option';
       const input = document.createElement('input');
       input.type = 'radio';
       input.name = 'rga-setting-' + entry.id;
       input.value = String(opt);
       input.checked = String(cur) === String(opt);
       if (entry.requiresPro) input.disabled = true;
+      if (input.checked) optLabel.setAttribute('data-checked', '');
       const span = document.createElement('span');
+      span.className = 'rga-settings-control-radio-option-text';
       span.textContent = (labels && Object.prototype.hasOwnProperty.call(labels, opt))
         ? labels[opt] : String(opt);
-      label.appendChild(input);
-      label.appendChild(span);
-      group.appendChild(label);
+      optLabel.appendChild(input);
+      optLabel.appendChild(span);
+      group.appendChild(optLabel);
       inputs.push(input);
+      // Mirror data-checked on this label whenever its input toggles —
+      // covers programmatic state changes from sync(value).
+      input.addEventListener('change', function() {
+        // Only one option in the group can be checked; clear the
+        // marker on every sibling label and set it on this one.
+        Array.prototype.forEach.call(
+          group.querySelectorAll('.rga-settings-control-radio-option'),
+          function(l) { l.removeAttribute('data-checked'); });
+        if (input.checked) optLabel.setAttribute('data-checked', '');
+      });
     });
 
     function sync(value) {
       const s = (value === undefined || value === null) ? '' : String(value);
-      inputs.forEach(function(i) { i.checked = i.value === s; });
+      inputs.forEach(function(i) {
+        i.checked = i.value === s;
+        // Mirror data-checked on the parent label.
+        const par = i.parentElement;
+        if (par) {
+          if (i.checked) par.setAttribute('data-checked', '');
+          else par.removeAttribute('data-checked');
+        }
+      });
     }
     function readValue() {
       const sel = inputs.find(function(i) { return i.checked; });
@@ -179,16 +240,96 @@
     return { element: group, sync: sync, readValue: readValue, _inputs: inputs };
   }
 
+  // S3 — RC1 §5.2.4 number control.
+  //
+  // Wrap: <span> hosting [- input unit? +]. Decrement and increment
+  // buttons step by entry.step (default 1) and clamp to [entry.min,
+  // entry.max] when those are present on the registry entry. Direct
+  // typing into the input is allowed; clamping fires on blur so the
+  // visible value never exceeds the legal range.
+  //
+  // Disabled handling: the native input carries the disabled attribute
+  // so existing _disableControlElement (which targets nested <input>
+  // elements) keeps working. _disableControlElement also disables
+  // nested <button> children — see the helper below — so the +/−
+  // buttons grey out alongside the input on PERSISTS_ONLY / Pro rows.
   function _makeNumber(entry) {
+    const wrap = document.createElement('span');
+    wrap.className = 'rga-settings-control-number';
+    wrap.setAttribute('data-control-for', entry.id);
+
+    const dec = document.createElement('button');
+    dec.type = 'button';
+    dec.className = 'rga-settings-control-number-btn rga-settings-control-number-btn--dec';
+    dec.textContent = '−'; // U+2212 minus sign (visually balanced with +)
+    dec.setAttribute('aria-label', 'Decrement');
+    dec.setAttribute('tabindex', '-1');
+    if (entry.requiresPro) dec.disabled = true;
+
     const input = document.createElement('input');
     input.type = 'number';
-    input.className = 'rga-settings-control-number';
-    input.setAttribute('data-control-for', entry.id);
+    input.className = 'rga-settings-control-number-input';
+    if (typeof entry.min  === 'number') input.min  = String(entry.min);
+    if (typeof entry.max  === 'number') input.max  = String(entry.max);
+    if (typeof entry.step === 'number') input.step = String(entry.step);
     if (entry.requiresPro) input.disabled = true;
     const cur = _currentValue(entry);
-    if (typeof cur === 'number' && Number.isFinite(cur)) {
-      input.value = String(cur);
+    if (typeof cur === 'number' && Number.isFinite(cur)) input.value = String(cur);
+
+    const inc = document.createElement('button');
+    inc.type = 'button';
+    inc.className = 'rga-settings-control-number-btn rga-settings-control-number-btn--inc';
+    inc.textContent = '+';
+    inc.setAttribute('aria-label', 'Increment');
+    inc.setAttribute('tabindex', '-1');
+    if (entry.requiresPro) inc.disabled = true;
+
+    wrap.appendChild(dec);
+    wrap.appendChild(input);
+    if (typeof entry.unit === 'string' && entry.unit.length > 0) {
+      const u = document.createElement('span');
+      u.className = 'rga-settings-control-number-unit';
+      u.textContent = entry.unit;
+      wrap.appendChild(u);
     }
+    wrap.appendChild(inc);
+
+    function _clamp(n) {
+      if (typeof n !== 'number' || !Number.isFinite(n)) return n;
+      if (typeof entry.min === 'number' && n < entry.min) return entry.min;
+      if (typeof entry.max === 'number' && n > entry.max) return entry.max;
+      return n;
+    }
+
+    function _stepBy(direction) {
+      if (input.disabled) return;
+      const step = (typeof entry.step === 'number') ? entry.step : 1;
+      const cur = Number(input.value);
+      const base = Number.isFinite(cur)
+        ? cur
+        : (Number.isFinite(entry.default) ? entry.default : 0);
+      const next = _clamp(base + direction * step);
+      if (next === cur) return;
+      input.value = String(next);
+      input.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+    dec.addEventListener('click', function() { _stepBy(-1); });
+    inc.addEventListener('click', function() { _stepBy(1); });
+
+    // Clamp on blur for direct typing. The browser already permits
+    // out-of-range typing; we re-clamp + dispatch change so the Store
+    // sees the legal value.
+    input.addEventListener('blur', function() {
+      const raw = input.value;
+      if (raw === '') return;
+      const n = Number(raw);
+      if (!Number.isFinite(n)) return;
+      const clamped = _clamp(n);
+      if (clamped !== n) {
+        input.value = String(clamped);
+        input.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+    });
 
     function sync(value) {
       if (typeof value === 'number' && Number.isFinite(value)) {
@@ -204,7 +345,7 @@
       if (raw === '' || raw === null || raw === undefined) return NaN;
       return Number(raw);
     }
-    return { element: input, sync: sync, readValue: readValue };
+    return { element: wrap, sync: sync, readValue: readValue };
   }
 
   function _makeText(entry) {
@@ -857,12 +998,19 @@
 
   function _disableControlElement(el) {
     if (!el) return;
-    // Wrap-style controls (fieldset for radio, span for slider) carry
-    // their interactive element inside. Disable every nested input so
-    // the visible control reflects PERSISTS_ONLY / Pro status.
+    // Wrap-style controls (fieldset for radio, span for slider/number,
+    // label for toggle) carry their interactive elements inside.
+    // Disable every nested input AND button so the visible control
+    // reflects PERSISTS_ONLY / Pro status. S3 introduced the +/−
+    // buttons on number controls — those are buttons, not inputs, so
+    // the nested-button sweep below catches them.
     const inner = el.querySelectorAll && el.querySelectorAll('input');
     if (inner && inner.length > 0) {
       Array.from(inner).forEach(function(i) { i.disabled = true; });
+    }
+    const innerButtons = el.querySelectorAll && el.querySelectorAll('button');
+    if (innerButtons && innerButtons.length > 0) {
+      Array.from(innerButtons).forEach(function(b) { b.disabled = true; });
     }
     if ('disabled' in el) el.disabled = true;
     // Wrap-style controls with no nested <input> (e.g. the shortcut
