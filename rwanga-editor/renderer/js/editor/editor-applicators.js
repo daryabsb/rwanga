@@ -118,4 +118,17 @@
     if (!el) return;
     el.classList.toggle('rga-line-highlight-on', !!value);
   }, { owner: 'editor' });
+
+  // ----- editor.scriptLanguage (S12 — Promoted from legacy module) --------
+  // Per-script writing language. Drives the `lang` attribute on #editor,
+  // editor-container direction, .sh-location input direction, and the
+  // status-bar language indicator. Rga.ScriptLanguage._applyDom is the
+  // pure-DOM mutation entry point; the legacy localStorage path
+  // ('rga-script-lang') was retired in S12.
+  register('editor.scriptLanguage', function(value) {
+    const SL = window.Rga && window.Rga.ScriptLanguage;
+    if (!SL || typeof SL._applyDom !== 'function') return;
+    if (typeof value !== 'string' || !SL.LANGUAGES[value]) return;
+    SL._applyDom(value);
+  }, { owner: 'editor' });
 })();

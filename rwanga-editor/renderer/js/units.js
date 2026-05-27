@@ -1,11 +1,18 @@
 // Copyright (c) 2026 Rwanga. Licensed under Apache 2.0.
-// Rga.Units — measurement-unit preference + conversion helper.
+// Rga.Units — measurement-unit conversion helper.
 //
-// Two layers:
-//   1. App default (localStorage 'rga-default-units'), used when no doc is open
-//      or as a fallback. Default: 'in'.
-//   2. Per-document override at doc.settings.units. Always wins when a doc is
-//      active. Saved with the .rga file so collaborators see consistent units.
+// S12 (Settings Recovery — legacy paths cleanup): the canonical unit
+// preference now lives in the Settings Store under id 'units' (user
+// tier). This module became a thin facade:
+//   - current()  → reads Store.effective('units')
+//   - set(unit)  → writes Store.set('units', unit) (user tier)
+//   - onChange() → driven by the units applicator (shell-applicators.js)
+//                  which invokes _notify on every effective change.
+//
+// The legacy localStorage key 'rga-default-units' and the per-document
+// `doc.settings.units` write path are retired. A future slice may add
+// `pageSetup.units` (script-tier) as an explicit per-script override —
+// not in scope for S12.
 //
 // Reference: 1in = 2.54cm = 25.4mm = 96px (CSS pixel standard).
 'use strict';
@@ -13,7 +20,6 @@
 (function() {
   const Rga = window.Rga = window.Rga || {};
 
-  const KEY = 'rga-default-units';
   const UNITS = ['in', 'cm', 'mm', 'px'];
   const DEFAULT = 'in';
 
@@ -22,42 +28,32 @@
 
   const listeners = [];
 
-  function _appDefault() {
-    try {
-      const v = localStorage.getItem(KEY);
-      return UNITS.indexOf(v) !== -1 ? v : DEFAULT;
-    } catch (_) { return DEFAULT; }
+  function _store() {
+    return (Rga.Settings && Rga.Settings.Store) || null;
   }
 
-  function _setAppDefault(unit) {
-    if (UNITS.indexOf(unit) === -1) return;
-    try { localStorage.setItem(KEY, unit); } catch (_) {}
-  }
-
-  // Active unit: per-doc if a doc is open, else app default.
   function current() {
-    const doc = Rga.TabManager && Rga.TabManager.activeDoc && Rga.TabManager.activeDoc();
-    if (doc && doc.settings && UNITS.indexOf(doc.settings.units) !== -1) {
-      return doc.settings.units;
+    const store = _store();
+    if (store && typeof store.effective === 'function') {
+      const v = store.effective('units');
+      if (UNITS.indexOf(v) !== -1) return v;
     }
-    return _appDefault();
+    return DEFAULT;
   }
 
-  // Set the unit. Defaults to per-doc scope; pass scope='app' to set the
-  // global default instead.
-  function set(unit, scope) {
+  // `scope` parameter retained for legacy callers (e.g. status-bar cycle);
+  // post-S12 all writes go through the Store user tier. A future slice
+  // may reinstate per-script units via a separate `pageSetup.units` entry.
+  function set(unit /* , scope */) {
     if (UNITS.indexOf(unit) === -1) return;
-    if (scope === 'app') {
-      _setAppDefault(unit);
-    } else {
-      const doc = Rga.TabManager && Rga.TabManager.activeDoc && Rga.TabManager.activeDoc();
-      if (doc && doc.settings) {
-        doc.settings.units = unit;
-        if (Rga.Doc && Rga.Doc.markDirty) Rga.Doc.markDirty(doc);
-      }
-      // Also update the app default — most users want one consistent unit.
-      _setAppDefault(unit);
+    const store = _store();
+    if (store && typeof store.set === 'function') {
+      store.set('units', unit);
     }
+    // Subscribers are normally notified by the applicator on Store change.
+    // _notify here keeps cycle()/set() responsive in early-boot test
+    // contexts where the Store is not yet wired; idempotent on the
+    // applicator path because _notify forwards the same value.
     _notify(unit);
   }
 
@@ -103,5 +99,5 @@
     listeners.forEach(function(fn) { try { fn(unit); } catch (_) {} });
   }
 
-  Rga.Units = { current, set, cycle, convert, format, toCss, onChange, UNITS };
+  Rga.Units = { current, set, cycle, convert, format, toCss, onChange, UNITS, _notify };
 })();

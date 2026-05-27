@@ -699,6 +699,18 @@ To prevent scope creep:
 
 ---
 
+## Appendix B.1 — Transitional behaviors to remove later
+
+These are intentional one-shot shims introduced during the recovery work. Each has a stable post-condition. Remove the shim **after** the migration window closes (defined as: enough release cycles for every active install to have booted at least once post-migration so the legacy state is no longer the truth).
+
+| Shim | Introduced in | Source | Remove when |
+|---|---|---|---|
+| Flat→nested compatibility bridge in `Settings.Store._scriptValue` and the script-tier write path | S7 | `renderer/js/shell/settings-store.js` (`_scriptValue`, `set`) | All on-disk `.rga` files have been re-saved after S7 lands. The flat-shape fallback for dotted ids (`doc.settings['pageSetup.margins']` instead of `doc.settings.pageSetup.margins`) is read-only legacy support; new writes always nest. Drop the flat fallback once the engineering team is satisfied no pre-S7 `.rga` files are still in circulation. |
+| Legacy `localStorage('rga-theme')` read in `settings-migrations.js` | H2 (kept post-S12) | `renderer/js/shell/settings-migrations.js` | Every active install has booted at least once post-S12 (so legacy `rga-theme` has been migrated to prefs once). Then delete the legacy read; if a user signs in on a fresh device, they pick the theme again. |
+| Matching-default migration guard in `_migrateTheme` | H2 (defensive) | `renderer/js/shell/settings-migrations.js` | Same window as above — the guard exists to absorb pre-S12 boot-time writes of the registry default and is no longer load-bearing post-S12. |
+
+These shims are SAFE to keep indefinitely (they're idempotent), but each one is dead weight after its window. Track them here so a future "Settings cleanup" slice can sweep them in one commit.
+
 ## Appendix C — Open questions for review before S1 starts
 
 These do not block plan approval but are decisions needed *during* slice execution:

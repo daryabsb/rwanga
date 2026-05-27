@@ -375,6 +375,19 @@
     }, { owner: 'shortcuts' });
   });
 
+  // ----- units (S12 — Measurement units) ----------------------------------
+  // S12 promotion: the canonical units choice now lives in the Settings
+  // Store under id 'units' (user tier). Rga.Units is a thin facade — see
+  // renderer/js/units.js. The applicator's job is to fan the Store-side
+  // change out to legacy in-memory subscribers (page-setup-dialog,
+  // status-bar unit display, etc.) by invoking Rga.Units._notify.
+  register('units', function(value) {
+    const Units = window.Rga && window.Rga.Units;
+    if (!Units || typeof Units._notify !== 'function') return;
+    if (typeof value !== 'string' || Units.UNITS.indexOf(value) === -1) return;
+    Units._notify(value);
+  }, { owner: 'general' });
+
   // ----- pageSetup.margins (H7 — Margin group) -----------------------------
   // Mirrors the user's margin choice into four CSS custom properties on
   // documentElement: --page-margin-top/right/bottom/left. Today the

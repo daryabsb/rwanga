@@ -127,6 +127,42 @@ Each setting MUST have a registered Applicator that:
 
 Settings without registered Applicators are PERSISTS_ONLY (see Section 8.1.2).
 
+## 1A.6 Categorical Exemptions (added in S12)
+
+Section 1A.3 forbids `localStorage` writes for **configuration values**. Two narrow categories of state are NOT configuration and are exempt by category — not by individual key. Drift guard enforcement uses owner-file enumeration, so renaming a key cannot bypass the rule.
+
+### Category 1 — UI Session State
+
+Transient per-session state about which surface the user is looking at right now. Not a preference. Not configurable in the Settings UI. Lost on signout / cleared cache is acceptable.
+
+| Owner file | Key | Why it qualifies |
+|---|---|---|
+| `renderer/js/view-mode.js` | `rga-view-mode` | Active view (Flow / Print / Draft) for this session |
+| `renderer/js/shell/workspace-state.js` | `rga-workspace-layout` (+ legacy keys) | Sidebar/panel visibility per session |
+| `renderer/js/tab-manager.js` | `rga-session-tabs` | Which tabs were open per session |
+
+### Category 2 — Recent / History Data
+
+Data records, not preferences. Bounded list of past artifacts.
+
+| Owner file | Key | Why it qualifies |
+|---|---|---|
+| `renderer/js/file-manager.js` | `recent-files-list` | History of opened files; not configurable as "what should appear here" |
+
+### Forbidden
+
+**Any configuration value.** A configuration value is anything a writer would expect to set in the Settings UI: theme, font, language, units, script language, page setup, autosave behavior, keyboard shortcuts, etc. Configuration values MUST go through `Settings.Store`. If a value sits in `localStorage` outside the four allowed owner files above, S12 either promotes it to the registry or proves it belongs to one of the two ALLOWED categories.
+
+### Drift guard
+
+`tests/unit/shell/ownership-stab-slice2.test.js` enforces these exemptions by owner-file enumeration. Adding a new key in a new file requires either:
+1. Declaring the new file as a Category 1 or Category 2 owner in this section (and in the drift guard's enumerated list), or
+2. Routing the value through `Settings.Store`.
+
+### Read-only roles (separately allowed)
+
+The legacy `localStorage` **read** in `renderer/js/shell/settings-migrations.js` (one-shot import of pre-S12 `rga-theme`) is allowed by category as well: it has no write side and is idempotent after first run.
+
 ---
 
 # SECTION 2 — SETTINGS INFORMATION ARCHITECTURE

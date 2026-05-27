@@ -20,10 +20,18 @@ Rga.Theme = {
   current: 'dark',
   _listeners: [],
 
+  // S12 — boot-time direct-apply bypass removed. init() no longer reads
+  // localStorage or paints the DOM; it just primes `current` from the
+  // HTML default (renderer/index.html sets data-theme="dark" statically)
+  // so any pre-applyAll readers see a sensible value. The Store + theme
+  // applicator chain (settings-migrations.js + Applicators.applyAll)
+  // owns the boot-time paint. The legacy `rga-theme` localStorage key
+  // is read once by settings-migrations.js as a one-shot import — no
+  // other reader or writer remains.
   init: function() {
-    var saved = null;
-    try { saved = localStorage.getItem('rga-theme'); } catch (_) {}
-    this.apply(saved || 'dark');
+    var attr = (document && document.documentElement
+                 && document.documentElement.getAttribute('data-theme')) || 'dark';
+    if (attr === 'dark' || attr === 'light') this.current = attr;
   },
 
   apply: function(theme) {
@@ -31,7 +39,8 @@ Rga.Theme = {
     var prev = this.current;
     this.current = theme;
     document.documentElement.setAttribute('data-theme', theme);
-    try { localStorage.setItem('rga-theme', theme); } catch (_) {}
+    // S12 — localStorage('rga-theme') write removed. Persistence is
+    // owned by Settings.Store at the user tier (window.rwanga.prefs).
 
     // Force repaint of all themed elements.
     document.body.style.display = 'none';

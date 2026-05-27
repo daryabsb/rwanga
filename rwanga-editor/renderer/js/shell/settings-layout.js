@@ -35,7 +35,7 @@
       description: 'Language, theme, and session preferences that affect the whole app.',
       icon: 'settings',
       settingIds: [
-        'language', 'theme', 'windowZoom',
+        'language', 'theme', 'windowZoom', 'units',
         'recentFilesLimit', 'confirmBeforeClose', 'restoreLastSession'
       ]
     },
@@ -47,7 +47,7 @@
       settingIds: [
         'editor.fontFamily', 'editor.fontSize', 'editor.lineHeight',
         'editor.spellcheck', 'editor.autocomplete', 'editor.showLineNumbers',
-        'editor.highlightCurrentLine', 'editor.wordWrap'
+        'editor.highlightCurrentLine', 'editor.wordWrap', 'editor.scriptLanguage'
       ]
     },
     {

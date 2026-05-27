@@ -42,15 +42,16 @@
     const legacy = _readLegacyTheme();
     if (!legacy) return;                    // nothing to migrate.
 
-    // Rga.Theme.init() writes the registry default to localStorage on
-    // every fresh boot (no prior `rga-theme` key), which would make the
-    // migration treat every fresh install as if the user had explicitly
-    // chosen the default. Only migrate when the legacy value differs
-    // from the registry default — that signal is the only honest one
-    // we have for "user previously made an explicit choice." A user who
-    // chose a value equal to the default is indistinguishable from a
-    // fresh user and the effective value is identical either way; once
-    // they change it again, prefs gets populated normally.
+    // Pre-S12: Rga.Theme.init() wrote the registry default to localStorage
+    // on every fresh boot, so a legacy value equal to the default could
+    // not be distinguished from a fresh install. S12 removed that write,
+    // but the matching-default guard is kept defensively: a user who had
+    // explicitly chosen the default value is indistinguishable from a
+    // fresh user, and migrating in that case adds noise to prefs without
+    // changing observable behavior. Skipping it keeps the migration's
+    // one-shot semantics clean. Drop this guard in a future cleanup once
+    // enough time has passed that every install with localStorage data
+    // has booted at least once post-S12.
     const reg = Rga.Settings && Rga.Settings.Registry;
     const defaultValue = (reg && typeof reg.getDefault === 'function')
       ? reg.getDefault('theme') : undefined;
@@ -58,9 +59,11 @@
 
     // Seed prefs from the legacy localStorage value. The applicator
     // fanout via applyAll() that follows this migration will pick up
-    // the new effective value and reconcile DOM if needed; since
-    // Rga.Theme.init() already painted from the same localStorage
-    // value pre-paint, no visible flicker occurs.
+    // the new effective value and apply it to the DOM. Post-S12,
+    // Rga.Theme.init() no longer pre-paints from localStorage, so a
+    // brief boot-time flash dark → user-chosen may occur on migrated
+    // sessions — acceptable trade-off for the constitutional fix
+    // (RC1 §1A.3, S12).
     Store.set('theme', legacy);
   }
 

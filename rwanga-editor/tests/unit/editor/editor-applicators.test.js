@@ -58,11 +58,16 @@ test('Slice 4A — editor-applicators registers exactly the wired editor setting
   await S.Store.init();
   const ids = S.Applicators.registered().sort();
   // Wired in this slice + the proof from Slice 2/3D.
+  // S12 added editor.scriptLanguage (promoted from the legacy
+  // localStorage('rga-script-lang') path) — see renderer/js/editor/
+  // editor-applicators.js and tests/unit/shell/ownership-stab-slice2
+  // .test.js §S12 §4.
   assert.deepEqual(ids, [
     'editor.fontFamily',
     'editor.fontSize',
     'editor.highlightCurrentLine',
     'editor.lineHeight',
+    'editor.scriptLanguage',
     'editor.spellcheck'
   ], 'applicator inventory must match the wired set (deferred ids must not appear)');
 });

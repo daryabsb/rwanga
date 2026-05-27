@@ -78,16 +78,18 @@ test('Slice 3A — Rga.Settings.Registry exists with required public API', () =>
 // §2 — Registry contents
 // ----------------------------------------------------------------
 
-test('Slice 3A — registry contains the full settings inventory (~62 entries)', () => {
+test('Slice 3A — registry contains the full settings inventory (~64 entries post-S12)', () => {
   bootDom();
   const R = loadRegistry();
   const all = R.all();
   assert.ok(Array.isArray(all), 'Registry.all() must return an array');
-  // Inventory in docs/rwanga-settings/settings-data.jsx totals 62. If
-  // an entry is added or removed, update this guard explicitly so the
-  // count change is reviewed, not silent.
-  assert.equal(all.length, 62,
-    'Registry size must equal the documented inventory of 62 settings');
+  // Inventory grew from 62 → 64 in S12: `units` (user-tier) and
+  // `editor.scriptLanguage` (script-tier) were promoted from legacy
+  // localStorage modules into the Settings Store. If an entry is added
+  // or removed, update this guard explicitly so the count change is
+  // reviewed, not silent.
+  assert.equal(all.length, 64,
+    'Registry size must equal the documented inventory (64 settings post-S12)');
 });
 
 test('Slice 3A — every registry entry has all 16 required fields', () => {

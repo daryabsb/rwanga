@@ -123,6 +123,15 @@
       type: 'toggle', default: true, scope: 'all', owner: 'general',
       keywords: ['restore', 'session', 'reopen', 'launch']
     }),
+    entry({
+      id: 'units', label: 'Measurement Units',
+      description: 'Default measurement units shown across the app (margins, page setup, rulers).',
+      type: 'select', default: 'in', scope: 'all', owner: 'general',
+      options: ['in', 'cm', 'mm', 'px'],
+      labels:  { in: 'Inches (in)', cm: 'Centimeters (cm)',
+                 mm: 'Millimeters (mm)', px: 'Pixels (px)' },
+      keywords: ['units', 'inches', 'centimeters', 'millimeters', 'measurement']
+    }),
 
     // ── Editor ──
     entry({
@@ -178,6 +187,15 @@
       options: ['page', 'viewport', 'off'],
       labels:  { page: 'Page Width', viewport: 'Viewport Width', off: 'Off' },
       keywords: ['wrap', 'word', 'page', 'viewport']
+    }),
+    entry({
+      id: 'editor.scriptLanguage', label: 'Script Language',
+      description: 'Primary writing language for this script. Controls UI language tag and RTL handling.',
+      type: 'select', default: 'en',
+      scope: 'all', persistsTo: 'script', owner: 'editor',
+      options: ['en', 'ku', 'ar', 'fa'],
+      labels:  { en: 'English', ku: 'Kurdish (Sorani)', ar: 'Arabic', fa: 'Persian' },
+      keywords: ['language', 'script', 'rtl', 'kurdish', 'arabic', 'persian']
     }),
 
     // ── Screenplay (per-script: travels with the .rga) ──

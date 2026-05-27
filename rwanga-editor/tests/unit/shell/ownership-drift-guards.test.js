@@ -240,18 +240,29 @@ test('G3: no shell-state classes (bottom-collapsed, sidebar-collapsed, view-*-ac
 // docs/design-system/rwanga-storage-ownership.md.
 // ----------------------------------------------------------------
 const STORAGE_OWNERS = {
-  'rga-theme':              { writers: ['renderer/js/app-shell.js'],     restoreIn: ['renderer/js/app-shell.js']     },
+  // S12 retired 'rga-theme' and 'rga-script-lang' as writable owned
+  // keys — both are now read-only legacy migration shims. See LEGACY_KEYS
+  // below and tests/unit/shell/ownership-stab-slice2.test.js §S12 §2.
   'rga-view-mode':          { writers: ['renderer/js/view-mode.js'],     restoreIn: ['renderer/js/view-mode.js']     },
-  'rga-script-lang':        { writers: ['renderer/js/shell/script-language.js'], restoreIn: ['renderer/js/shell/script-language.js'] },
   'rga-session-tabs':       { writers: ['renderer/js/tab-manager.js'],   restoreIn: ['renderer/js/tab-manager.js']   },
   'rga-workspace-layout':   { writers: ['renderer/js/shell/workspace-state.js'], restoreIn: ['renderer/js/shell/workspace-state.js'] }
 };
 
-// Legacy keys: WorkspaceState READS these once during migration; no
-// module is allowed to WRITE them anymore. Listed so the unknown-key
-// guard knows they're known-but-deprecated rather than truly unknown.
+// Legacy keys: known-but-deprecated. WorkspaceState (Slice 4 §A) or
+// settings-migrations (S12) reads them once during the migration window;
+// no module is allowed to WRITE them anymore. Listed so the unknown-key
+// guard treats them as known.
 const LEGACY_KEYS = {
-  'rga-shell-studio-panel-visible': { migratedTo: 'rga-workspace-layout', migratedIn: 'Slice 4 §A' }
+  'rga-shell-studio-panel-visible': { migratedTo: 'rga-workspace-layout', migratedIn: 'Slice 4 §A' },
+  // S12 — 'rga-theme' is migrated by settings-migrations.js (one-shot)
+  // into Settings.Store user tier (window.rwanga.prefs.theme). After
+  // migration runs, no further writes occur; settings-migrations keeps
+  // the read for forward-compat with not-yet-migrated installs.
+  'rga-theme':              { migratedTo: 'Settings.Store user tier (prefs.theme)', migratedIn: 'S12' }
+  // 'rga-script-lang' is retired with no migration target; the legacy
+  // module no longer reads or writes it. Not listed because no renderer
+  // source touches the key (G6 won't see it). Stale browser localStorage
+  // values are inert.
 };
 
 test('G4: every localStorage write key is claimed by exactly one owner module', () => {
