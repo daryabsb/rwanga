@@ -672,6 +672,13 @@
      removed or kept as a debug aid once Settings ships as the first
      real workspace tab. -->
 <script src="js/shell/workspaces/hello-world.js"></script>
+<!-- S8 — Page Setup live preview. Single-resolver page-truth surface
+     for the Settings UI Page Setup section. Loads BEFORE settings-
+     workspace.js so Rga.PageSetupPreview is available when the
+     workspace mounts the section. Reads via Rga.ManuscriptGeometry
+     .resolve(doc) → Rga.LayoutProfile.compose; never reads Store
+     .effective for geometry. -->
+<script src="js/shell/page-setup-preview.js"></script>
 <!-- Slice 5A — Settings workspace skeleton. Loads AFTER settings-
      layout.js (already loaded earlier in the substrate chain) and
      workspaces.js so Rga.Workspaces.register + Rga.Settings.Layout

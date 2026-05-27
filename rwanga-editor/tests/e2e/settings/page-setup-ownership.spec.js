@@ -1,11 +1,15 @@
 // Copyright (c) 2026 Rwanga. Licensed under Apache 2.0.
-// Page Setup Ownership — S7 Stage 1 (recovery slice, 2026-05-26).
+// Page Setup Ownership — S7 Stage 1 (recovery slice, 2026-05-26),
+// updated for S8 single-resolver page truth (2026-05-27).
 //
-// Proves the seven behaviors required by the S7 brief:
+// Proves the seven behaviors required by the S7 brief; S8 retires the
+// orphan --page-margin-* CSS variable side effect from #3:
 //   1. Ctrl+Shift+G still opens the legacy modal (muscle memory preserved)
 //   2. Modal Apply writes through Rga.Settings.Store (no direct doc.settings writes)
-//   3. Store updates the owner: subscribers fire and the H7 applicator
-//      pushes margins into --page-margin-* CSS custom properties
+//   3. Store updates the owner: Rga.LayoutProfile.compose (the single
+//      resolver) reflects the new margins. (Pre-S8 this also asserted
+//      --page-margin-* CSS vars repainted; those writes were retired
+//      in S8 — no consumer ever read them.)
 //   4. Document truth updates: doc.settings.pageSetup.margins receives
 //      the new value through Store's nested-shape script-tier write
 //   5. Legacy path removed: no direct doc.settings.pageSetup writes
@@ -173,11 +177,15 @@ test('S7 — modal Apply routes through Settings.Store (no direct doc.settings.p
 });
 
 // -----------------------------------------------------------------
-// 3. Store updates the owner (H7 applicator fires → --page-margin-* CSS vars)
+// 3. Store updates the owner — S8: LayoutProfile.compose reflects the
+// change. (Pre-S8 this test asserted --page-margin-* CSS vars repaint;
+// those writes were orphan — no consumer ever read them — and were
+// retired in S8. The new owner contract is LayoutProfile.compose →
+// downstream consumers, PageSetupPreview being the first.)
 // -----------------------------------------------------------------
 
-test('S7 — modal Apply fires the registered applicator (--page-margin-* CSS vars repaint)', async () => {
-  const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 's7-applicator-'));
+test('S8 — modal Apply propagates through Store → LayoutProfile.compose reflects new margins', async () => {
+  const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 's8-applicator-'));
   const { app, page } = await launchAndOpen(userDataDir);
   try {
     await page.evaluate(() => {
@@ -188,18 +196,26 @@ test('S7 — modal Apply fires the registered applicator (--page-margin-* CSS va
     await fillModal(page, { top: 2.5, right: 0.75, bottom: 2.5, left: 0.75 });
     await clickApply(page);
 
-    const cssTop    = await page.evaluate(() =>
-      document.documentElement.style.getPropertyValue('--page-margin-top').trim());
-    const cssRight  = await page.evaluate(() =>
-      document.documentElement.style.getPropertyValue('--page-margin-right').trim());
-    const cssBottom = await page.evaluate(() =>
-      document.documentElement.style.getPropertyValue('--page-margin-bottom').trim());
-    const cssLeft   = await page.evaluate(() =>
-      document.documentElement.style.getPropertyValue('--page-margin-left').trim());
-    expect(cssTop).toBe('2.5in');
-    expect(cssRight).toBe('0.75in');
-    expect(cssBottom).toBe('2.5in');
-    expect(cssLeft).toBe('0.75in');
+    const composed = await page.evaluate(() => {
+      const doc = window.Rga.TabManager.activeDoc();
+      const profile = window.Rga.ManuscriptGeometry.resolve(doc);
+      return {
+        top:    profile.margins.top,
+        right:  profile.margins.right,
+        bottom: profile.margins.bottom,
+        left:   profile.margins.left
+      };
+    });
+    expect(composed).toEqual({ top: 2.5, right: 0.75, bottom: 2.5, left: 0.75 });
+
+    // Drift guard — the orphan CSS path must not have been written.
+    const cssVars = await page.evaluate(() => ({
+      top:    document.documentElement.style.getPropertyValue('--page-margin-top').trim(),
+      right:  document.documentElement.style.getPropertyValue('--page-margin-right').trim(),
+      bottom: document.documentElement.style.getPropertyValue('--page-margin-bottom').trim(),
+      left:   document.documentElement.style.getPropertyValue('--page-margin-left').trim()
+    }));
+    expect(cssVars).toEqual({ top: '', right: '', bottom: '', left: '' });
   } finally {
     await clearDirtyAndClose(app, page);
     try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}

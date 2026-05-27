@@ -1001,6 +1001,34 @@
     });
     _renderSectionHeader(el, section);
     _renderForState(el);
+    _syncPageSetupPreview(el, sectionId);
+  }
+
+  // S8 — mount Rga.PageSetupPreview as a side panel when the user is
+  // on the Page Setup section; unmount on any other section. The side
+  // panel host is a 240px column appended to .rga-settings-content;
+  // CSS in settings-workspace.css scopes it so other sections don't
+  // see the column. The preview module owns its own subscriptions to
+  // the watched pageSetup.* ids; this function only manages mount /
+  // unmount and the host element.
+  function _syncPageSetupPreview(el, sectionId) {
+    const PSP = Rga.PageSetupPreview;
+    let host = el.querySelector('.rga-settings-page-setup-preview-host');
+    if (sectionId === 'pageSetup') {
+      if (!PSP || typeof PSP.mount !== 'function') return;
+      if (!host) {
+        host = document.createElement('aside');
+        host.className = 'rga-settings-page-setup-preview-host';
+        const content = el.querySelector('.rga-settings-content');
+        if (content) content.appendChild(host);
+      }
+      PSP.mount(host);
+    } else {
+      if (host) {
+        if (PSP && typeof PSP.unmount === 'function') PSP.unmount(host);
+        if (host.parentNode) host.parentNode.removeChild(host);
+      }
+    }
   }
 
   function _onSearchInput(el) {

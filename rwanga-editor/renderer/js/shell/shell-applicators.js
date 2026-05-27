@@ -388,45 +388,40 @@
     Units._notify(value);
   }, { owner: 'general' });
 
-  // ----- pageSetup.margins (H7 — Margin group) -----------------------------
-  // Mirrors the user's margin choice into four CSS custom properties on
-  // documentElement: --page-margin-top/right/bottom/left. Today the
-  // existing paper-view / manuscript-geometry code reads margins from
-  // doc.settings.pageSetup.margins (the legacy doc-scoped path), so
-  // these variables do not yet drive a visible surface. The applicator
-  // is registered now so the row clears its PERSISTS_ONLY state and a
-  // future paper-view consumer can pick the variables up without
-  // adding a new applicator (Settings Constitution §1A.4 — registered
-  // applicator is the contract that says "this row is wired"; the
-  // visible surface is intentionally deferred per the H7 brief which
-  // forbids paper-preview work).
+  // ----- pageSetup.* (S8 — Single-resolver page truth) --------------------
+  // The H7 orphan `--page-margin-*` CSS variable writes are RETIRED.
+  // No consumer ever read those custom properties — page geometry has
+  // always come from the document's settings via
+  // Rga.LayoutProfile.compose (and its caller Rga.ManuscriptGeometry).
   //
-  // Clamping: the control already clamps to [0, 3]. The applicator
-  // re-applies the same clamp defensively so a stale or programmatic
-  // Store.set with out-of-band values cannot push absurd inline CSS
-  // variables that another consumer might honor.
-  function _clampMargin(n) {
-    if (typeof n !== 'number' || !Number.isFinite(n)) return null;
-    if (n < 0) return 0;
-    if (n > 3) return 3;
-    return n;
+  // After S8 the wire path is:
+  //   Settings.Store.set('pageSetup.*', v)
+  //     → this applicator
+  //       → Rga.PageSetupPreview.update()      (Settings UI side panel)
+  //       → (future) Rga.PrintRenderer.invalidate()
+  //
+  // The applicators carry NO DOM writes of their own — the Owner
+  // Service (PageSetupPreview today, PrintRenderer tomorrow) reads its
+  // truth from LayoutProfile.compose. Registering one applicator per
+  // pageSetup.* id clears the rows' PERSISTS_ONLY state (RC1 §1A.5 —
+  // "settings without applicators are PERSISTS_ONLY") and gives the
+  // preview a deterministic notification beat (≤ one rAF per change).
+  function _notifyPageSetupConsumers() {
+    const PSP = window.Rga && window.Rga.PageSetupPreview;
+    if (PSP && typeof PSP.update === 'function') PSP.update();
+    // Future hook: Rga.PrintRenderer.invalidate() when the print engine
+    // ships. Both consumers route through Rga.LayoutProfile.compose so
+    // they cannot diverge.
   }
-  register('pageSetup.margins', function(value) {
-    if (!document.documentElement) return;
-    if (!value || typeof value !== 'object') {
-      ['top', 'right', 'bottom', 'left'].forEach(function(k) {
-        document.documentElement.style.removeProperty('--page-margin-' + k);
-      });
-      return;
-    }
-    ['top', 'right', 'bottom', 'left'].forEach(function(k) {
-      const clamped = _clampMargin(value[k]);
-      if (clamped === null) {
-        document.documentElement.style.removeProperty('--page-margin-' + k);
-      } else {
-        document.documentElement.style.setProperty(
-          '--page-margin-' + k, String(clamped) + 'in');
-      }
-    });
-  }, { owner: 'pageSetup' });
+  [
+    'pageSetup.paperSize',
+    'pageSetup.orientation',
+    'pageSetup.margins',
+    'pageSetup.pageNumbers',
+    'pageSetup.pageNumberPosition',
+    'pageSetup.headerText',
+    'pageSetup.footerText'
+  ].forEach(function(id) {
+    register(id, function() { _notifyPageSetupConsumers(); }, { owner: 'pageSetup' });
+  });
 })();

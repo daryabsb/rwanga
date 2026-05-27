@@ -527,3 +527,118 @@
 .rga-settings-empty-message {
   margin: 0;
 }
+
+/* ============================================================
+   S8 — Page Setup live preview side panel.
+   When the user is on the Page Setup section the workspace
+   carries data-active-section-id="pageSetup" and the content
+   area splits into rows + 240px preview column. The preview is
+   the live miniature of the active doc's geometry; values come
+   from Rga.LayoutProfile.compose (RC1 §10 single-resolver rule).
+   ============================================================ */
+
+.rga-settings-workspace[data-active-section-id="pageSetup"] .rga-settings-content {
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  grid-template-rows: auto 1fr;
+  column-gap: 24px;
+}
+
+/* Sticky header spans both columns so the preview sits below it. */
+.rga-settings-workspace[data-active-section-id="pageSetup"]
+  .rga-settings-content > .rga-settings-content-header,
+.rga-settings-workspace[data-active-section-id="pageSetup"]
+  .rga-settings-content > .rga-settings-empty {
+  grid-column: 1 / -1;
+}
+
+.rga-settings-page-setup-preview-host {
+  grid-column: 2;
+  grid-row: 2;
+  position: sticky;
+  top: 96px;            /* clears the sticky header */
+  align-self: start;
+  padding: 8px 0 24px;
+  background: transparent;
+  border-left: 1px solid var(--border-subtle);
+  padding-left: 24px;
+  min-width: 0;
+}
+
+.rga-page-setup-preview-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.rga-page-setup-preview-heading {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary, #cfcfcf);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.rga-page-setup-preview-page {
+  position: relative;
+  background: #ffffff;
+  border-radius: 2px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+}
+
+.rga-page-setup-preview-margin-overlay {
+  position: absolute;
+  border: 1px dashed rgba(0, 120, 204, 0.35);
+  border-radius: 1px;
+  pointer-events: none;
+}
+
+.rga-page-setup-preview-line {
+  position: absolute;
+  height: 1.5px;
+  background: #ececec;
+  border-radius: 1px;
+}
+
+.rga-page-setup-preview-line--bold {
+  height: 2px;
+  background: #e0e0e0;
+}
+
+.rga-page-setup-preview-pagenum {
+  position: absolute;
+  font-size: 6px;
+  color: #999;
+  font-family: serif;
+}
+
+.rga-page-setup-preview-header,
+.rga-page-setup-preview-footer {
+  position: absolute;
+  font-size: 5px;
+  color: #bbb;
+  font-family: sans-serif;
+}
+
+.rga-page-setup-preview-header {
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.rga-page-setup-preview-label {
+  font-size: 11px;
+  color: var(--text-tertiary, #999);
+  text-align: center;
+  font-family: var(--font-ui, system-ui);
+  line-height: 1.4;
+}
+
+.rga-page-setup-preview-empty {
+  font-size: 11px;
+  color: var(--text-tertiary, #999);
+  font-style: italic;
+  padding: 24px 8px;
+  text-align: center;
+}

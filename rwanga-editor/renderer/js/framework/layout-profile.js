@@ -136,9 +136,20 @@
     const _settings = settings || {};
 
     // Overrides: settings may carry pageSetup / fontSize. Use defensively.
-    const pageSize = _resolvePageSize(_settings) || HOLLYWOOD_DEFAULTS.pageSize;
-    const margins  = _resolveMargins(_settings)  || HOLLYWOOD_DEFAULTS.margins;
-    const font     = _resolveFont(_settings)     || HOLLYWOOD_DEFAULTS.font;
+    const orientation = _resolveOrientation(_settings);
+    let   pageSize    = _resolvePageSize(_settings) || HOLLYWOOD_DEFAULTS.pageSize;
+    const margins     = _resolveMargins(_settings)  || HOLLYWOOD_DEFAULTS.margins;
+    const font        = _resolveFont(_settings)     || HOLLYWOOD_DEFAULTS.font;
+
+    // S8 — landscape rotates the paper. Page-derived geometry (usable
+    // dims, linesPerPage, cpl) must reflect the rotated paper, so the
+    // swap happens BEFORE the arithmetic below. The single-resolver
+    // truth rule (RC1 §10 + S8 stop condition) makes this the only
+    // place where paper/orientation math runs — both PageSetupPreview
+    // (Settings UI) and PrintRenderer (future) read this output.
+    if (orientation === 'landscape' && pageSize.w < pageSize.h) {
+      pageSize = { w: pageSize.h, h: pageSize.w, unit: pageSize.unit };
+    }
 
     const usableH  = Math.max(0, pageSize.h - margins.top - margins.bottom);
     const usableW  = Math.max(0, pageSize.w - margins.left - margins.right);
@@ -181,15 +192,28 @@
     // through so PrintRenderer can apply the RTL margin mirror (the wider
     // binding side is the right margin for Arabic/Kurdish).
 
+    // S8 — page decorations (numbering + header/footer text) carried on
+    // the composed profile so PageSetupPreview and PrintRenderer share
+    // ONE source of truth. The Single-resolver truth rule forbids the
+    // preview from reading Store.effective directly; everything renders
+    // off this returned shape.
+    const pageNumbers = _resolvePageNumbers(_settings);
+    const header      = _resolveHeader(_settings);
+    const footer      = _resolveFooter(_settings);
+
     return {
       linesPerPage:            linesPerPage,
       theoreticalLinesPerPage: theoreticalLinesPerPage,  // pre-reserve; diagnostic + testability
       safetyLines:             SAFETY_LINES,              // applied reserve; explicit not magic
       pageSize:                pageSize,
+      orientation:             orientation,
       margins:                 margins,
       font:                    font,
       blocks:                  blocks,
-      direction:               direction
+      direction:               direction,
+      pageNumbers:             pageNumbers,
+      header:                  header,
+      footer:                  footer
     };
   }
 
@@ -197,6 +221,12 @@
   // where <name> is a key in Rga.Constants.PAPER_SIZES (Letter / A4 / Legal / …).
   // `paperSize` is the canonical field (written by page-setup-dialog.js and doc.js defaults).
   // `size` is accepted as a legacy alias for v2 docs persisted before the rename.
+  //
+  // S8 — name lookup is case-insensitive. The Settings registry options
+  // are lowercase ('letter', 'a4'); Constants.PAPER_SIZES historically
+  // uses capitalised keys ('Letter', 'A4', 'Legal'). Both forms resolve
+  // to the same entry so the registry-driven path and the legacy modal-
+  // driven path agree.
   function _resolvePageSize(settings) {
     if (!settings) return null;
     const ps = settings.pageSetup;
@@ -214,12 +244,54 @@
       // module) yields null here, and compose() falls back to
       // HOLLYWOOD_DEFAULTS.pageSize exactly as it did before.
       const table = (Rga.Constants && Rga.Constants.PAPER_SIZES) || null;
-      const entry = table && table[sizeName];
+      let entry = table && table[sizeName];
+      if (!entry && table) {
+        // S8 — case-insensitive fallback. Settings registry feeds
+        // 'letter' / 'a4' / 'custom'; table keys are 'Letter' / 'A4' /
+        // 'Legal'. Walk once to find a case-insensitive match.
+        const lower = sizeName.toLowerCase();
+        const keys = Object.keys(table);
+        for (let i = 0; i < keys.length; i += 1) {
+          if (keys[i].toLowerCase() === lower) { entry = table[keys[i]]; break; }
+        }
+      }
       if (entry && typeof entry.width === 'number' && typeof entry.height === 'number') {
         return { w: entry.width, h: entry.height, unit: 'in' };
       }
     }
     return null;
+  }
+
+  // S8 — orientation. Defaults to 'portrait'. The registry option set is
+  // ['portrait', 'landscape']; LayoutProfile.compose swaps page width/
+  // height when 'landscape' is in effect.
+  function _resolveOrientation(settings) {
+    if (!settings) return 'portrait';
+    const ps = settings.pageSetup;
+    if (!ps) return 'portrait';
+    return (ps.orientation === 'landscape') ? 'landscape' : 'portrait';
+  }
+
+  // S8 — page-number decoration. Carried on the composed profile so
+  // both PageSetupPreview and PrintRenderer (when it ships) read from a
+  // single source of truth.
+  function _resolvePageNumbers(settings) {
+    const ps = (settings && settings.pageSetup) || {};
+    const enabled  = (ps.pageNumbers !== false);          // default true
+    const position = (typeof ps.pageNumberPosition === 'string'
+                       && ps.pageNumberPosition.length > 0)
+                       ? ps.pageNumberPosition : 'top_right';
+    return { enabled: enabled, position: position };
+  }
+
+  function _resolveHeader(settings) {
+    const ps = (settings && settings.pageSetup) || {};
+    return { text: typeof ps.headerText === 'string' ? ps.headerText : '' };
+  }
+
+  function _resolveFooter(settings) {
+    const ps = (settings && settings.pageSetup) || {};
+    return { text: typeof ps.footerText === 'string' ? ps.footerText : '' };
   }
   function _resolveMargins(settings) {
     if (!settings) return null;
