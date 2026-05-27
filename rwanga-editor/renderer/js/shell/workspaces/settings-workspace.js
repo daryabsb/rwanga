@@ -759,12 +759,41 @@
     label.textContent = entry.label;
     header.appendChild(label);
 
-    // RC1 §8.1.2 forbids badges on PERSISTS_ONLY rows. RC1 §7.3 forbids
-    // any badge that exposes control types (`toggle`, `select`, etc).
-    // The previously-rendered type chip is retired here.
+    // S1 — RC1 §4.4 / §7.1: every row carries exactly one scope badge,
+    // inline after the label. Renders for ALL rows (REAL and
+    // PERSISTS_ONLY alike — scope is an identity signal, not a status
+    // one). Scope-modifier classes carry the colour token; CSS in
+    // settings-workspace.css owns the visual treatment (8% alpha bg,
+    // solid dot, 10px/600/0.04em label).
+    const scopeKey = (entry.scope === 'flow' || entry.scope === 'print' ||
+                      entry.scope === 'export' || entry.scope === 'all')
+                     ? entry.scope : 'all';
+    const scopeLabels = { flow: 'Flow', print: 'Print', export: 'Export', all: 'All' };
+    const scopeDescs  = {
+      flow:   'Affects writing comfort in Flow View',
+      print:  'Affects printed page geometry',
+      export: 'Affects exported PDF/DOCX output',
+      all:    'Affects all modes'
+    };
+    const badge = document.createElement('span');
+    badge.className = 'rga-settings-row-scope-badge rga-settings-row-scope-badge--' + scopeKey;
+    badge.setAttribute('data-test-scope', scopeKey);
+    badge.setAttribute('title', scopeDescs[scopeKey]);
+    const dot = document.createElement('span');
+    dot.className = 'rga-settings-row-scope-badge-dot';
+    badge.appendChild(dot);
+    const badgeText = document.createTextNode(scopeLabels[scopeKey]);
+    badge.appendChild(badgeText);
+    header.appendChild(badge);
+
+    // RC1 §8.1.2 forbids STATUS badges on PERSISTS_ONLY rows. RC1 §7.3
+    // forbids any badge that exposes control types (`toggle`, `select`,
+    // etc). The previously-rendered type chip is retired here.
     //
     // Pro and Restart-required markers (RC1 §7.2 status badges) render
-    // only on REAL rows; PERSISTS_ONLY suppresses them.
+    // only on REAL rows; PERSISTS_ONLY suppresses them. The scope badge
+    // above is NOT a status badge — it identifies which mode the
+    // setting affects — and renders on every row.
     if (!persistsOnly) {
       if (entry.requiresPro) {
         const pro = document.createElement('span');
