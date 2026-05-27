@@ -306,13 +306,61 @@
 
 .rga-settings-row-value {
   /* S4 — spans both rows of the grid in column 2, vertically centred
-     against the label+helper stack and hugged to the right edge. */
+     against the label+helper stack and hugged to the right edge.
+     S2 — inner flex layout so [control, reset] sit side-by-side with
+     a 6px gap (RC1 §4.1). The grid cell itself still justify-self:end
+     so the right edge of the rightmost child hugs the row's right
+     edge. */
   grid-area: control;
   align-self: center;
   justify-self: end;
+  display: flex;
+  align-items: center;
+  gap: 6px;
   margin: 0;
   font-size: 12px;
   color: var(--text-primary);
+}
+
+/* ============================================================
+   S2 — RC1 §4.1 per-row reset button.
+   Sits AFTER the control inside the value cell. Visible only when
+   the row's effective value differs from the registry default; the
+   .is-modified class on .rga-settings-row drives the opacity (and
+   pointer-events) so the button reserves its layout slot at all
+   times — no jitter when it appears.
+   ============================================================ */
+.rga-settings-row-reset {
+  background: transparent;
+  border: 0;
+  padding: 2px 4px;
+  border-radius: var(--radius-sm, 3px);
+  color: var(--text-tertiary, #999);
+  font: inherit;
+  font-size: 11px;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+  /* Locked layout slot — the button keeps its width even when
+     invisible so .rga-settings-row-value's flex line doesn't shift. */
+  flex-shrink: 0;
+}
+
+.rga-settings-row.is-modified .rga-settings-row-reset {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.rga-settings-row-reset:hover {
+  color: var(--text-primary);
+  background: var(--surface-hover, rgba(255, 255, 255, 0.06));
+}
+
+.rga-settings-row-reset:focus-visible {
+  outline: 1px solid var(--accent-primary, #007acc);
+  outline-offset: 1px;
 }
 
 /* Read-only fallback for unsupported types — keeps the 5B look. */

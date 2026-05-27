@@ -834,6 +834,16 @@
           _disableControlElement(ctrl.element);
         }
         valueSlot.appendChild(ctrl.element);
+        // S2 — per-row reset button. RC1 §4.1: ↺ glyph hugs the right
+        // of the control column, separated by a 6px flex gap. Visible
+        // only when the effective value differs from the registry
+        // default; opacity transition handles the appear/disappear.
+        // PERSISTS_ONLY rows do NOT receive a reset button — those
+        // rows are non-interactive per H3A doctrine, and a clickable
+        // reset on an otherwise-disabled row would be a UX trap.
+        if (!persistsOnly) {
+          _wireRowReset(row, entry, valueSlot, subs);
+        }
         _wireControl(entry, ctrl, subs, persistsOnly);
         return row;
       }
@@ -866,6 +876,74 @@
         el.setAttribute('tabindex', '-1');
       }
     }
+  }
+
+  // S2 — per-row reset (RC1 §4.1, §4.4, §12.7).
+  //
+  // Appends a ↺ button to the value cell, kept in the DOM at all times
+  // so the row layout doesn't twitch. Visibility flips via the
+  // .is-modified class on the row (opacity transition handles the
+  // appear/disappear). The click writes the registry default through
+  // Settings.Store.set — S7 auto-routing places the value in the
+  // correct tier based on entry.persistsTo (user / script). For object
+  // settings (pageSetup.margins) the default is cloned to avoid the
+  // registry sharing references with persisted state.
+  function _wireRowReset(row, entry, valueSlot, subs) {
+    const Store = Rga.Settings && Rga.Settings.Store;
+    const Registry = Rga.Settings && Rga.Settings.Registry;
+    if (!Store || !Registry) return;
+
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'rga-settings-row-reset';
+    btn.textContent = '↺';            // ↺
+    btn.setAttribute('aria-label', 'Reset to default');
+    btn.setAttribute('title', 'Reset to default');
+    btn.setAttribute('data-test-reset', '');
+    valueSlot.appendChild(btn);
+
+    function _equal(a, b) {
+      if (a === b) return true;
+      if (typeof a !== 'object' || typeof b !== 'object' ||
+          a === null || b === null) return false;
+      const ka = Object.keys(a);
+      const kb = Object.keys(b);
+      if (ka.length !== kb.length) return false;
+      for (let i = 0; i < ka.length; i += 1) {
+        if (a[ka[i]] !== b[ka[i]]) return false;
+      }
+      return true;
+    }
+
+    function _clone(v) {
+      if (v && typeof v === 'object') {
+        // Plain-object / margins-shape clone; sufficient for registry
+        // defaults (no functions, no nested objects beyond margins).
+        return Array.isArray(v) ? v.slice() : Object.assign({}, v);
+      }
+      return v;
+    }
+
+    function _refresh() {
+      const def = Registry.getDefault(entry.id);
+      const cur = Store.effective(entry.id);
+      const modified = !_equal(cur, def);
+      row.classList.toggle('is-modified', modified);
+    }
+
+    btn.addEventListener('click', function() {
+      const def = Registry.getDefault(entry.id);
+      Store.set(entry.id, _clone(def));
+      // After the write, the Store subscriber below will flip the
+      // class — but call _refresh defensively so the UI is correct
+      // even if subscription delivery is delayed (jsdom edge cases).
+      _refresh();
+    });
+
+    // Initial state + live tracking. Re-emit on every effective change.
+    _refresh();
+    const unsub = Store.subscribe(entry.id, function() { _refresh(); });
+    subs.push(unsub);
   }
 
   function _wireControl(entry, ctrl, subs, persistsOnly) {
