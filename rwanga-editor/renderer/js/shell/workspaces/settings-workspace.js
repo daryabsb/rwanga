@@ -1299,6 +1299,60 @@
   // Mount
   // --------------------------------------------------------------
 
+  // S5 — RC1 §3.3 left navigation chrome. NAV_ICONS mirrors the
+  // prototype's SVG set (docs/rwanga-settings/settings-nav.jsx). Each
+  // SVG renders at 18×18 inside the nav-item icon slot.
+  const NAV_ICONS = {
+    settings:   '<svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="9" r="2.5"/><path d="M9 2v1.5M9 14.5V16M3.4 3.4l1.06 1.06M13.54 13.54l1.06 1.06M2 9h1.5M14.5 9H16M3.4 14.6l1.06-1.06M13.54 4.46l1.06-1.06"/></svg>',
+    editor:     '<svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="14" height="14" rx="1.5"/><path d="M5 6h8M5 9h6M5 12h4"/></svg>',
+    screenplay: '<svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2h7l3 3v10a1.5 1.5 0 01-1.5 1.5h-8A1.5 1.5 0 013 15V3.5A1.5 1.5 0 014.5 2z"/><path d="M11 2v3.5h3"/><path d="M6 8h6M7 11h4"/></svg>',
+    page:       '<svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="1.5" width="12" height="15" rx="1"/><path d="M6 5h6M6 8h6M6 11h3"/><path d="M3 13.5h12"/></svg>',
+    export:     '<svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2v9M6 8l3 3 3-3"/><path d="M3 12v3a1 1 0 001 1h10a1 1 0 001-1v-3"/></svg>',
+    autosave:   '<svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="9" r="6.5"/><path d="M9 5.5V9l2.5 1.5"/></svg>',
+    appearance: '<svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="9" r="7"/><path d="M9 2v14" stroke-dasharray="2 2"/><path d="M9 2a7 7 0 010 14" fill="currentColor" opacity="0.15"/></svg>',
+    keyboard:   '<svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="4" width="15" height="10" rx="1.5"/><path d="M5 8h1M8.5 8h1M12 8h1M6 11h6"/></svg>',
+    advanced:   '<svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3v12M9 3v12M13 3v12"/><circle cx="5" cy="7" r="2"/><circle cx="9" cy="11" r="2"/><circle cx="13" cy="5" r="2"/></svg>'
+  };
+
+  // Gear icon for the nav header (matches the prototype's 20×20 mark).
+  const NAV_HEADER_GEAR = '<svg viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="3"/><path d="M11 2v2M11 18v2M4.22 4.22l1.42 1.42M16.36 16.36l1.42 1.42M2 11h2M18 11h2M4.22 17.78l1.42-1.42M16.36 5.64l1.42-1.42"/></svg>';
+
+  function _equalForReset(a, b) {
+    if (a === b) return true;
+    if (typeof a !== 'object' || typeof b !== 'object' || a === null || b === null) return false;
+    const ka = Object.keys(a), kb = Object.keys(b);
+    if (ka.length !== kb.length) return false;
+    for (let i = 0; i < ka.length; i += 1) {
+      if (a[ka[i]] !== b[ka[i]]) return false;
+    }
+    return true;
+  }
+
+  function _cloneForReset(v) {
+    if (v && typeof v === 'object') {
+      return Array.isArray(v) ? v.slice() : Object.assign({}, v);
+    }
+    return v;
+  }
+
+  // S5 — Reset All. Walks the registry and writes the default through
+  // Settings.Store.set on every entry where effective() differs from
+  // the registry default. S7 auto-routing places each write in the
+  // correct tier (user / script). Script-tier writes with no active
+  // doc are dropped silently by the Store and skipped here.
+  function _runResetAll() {
+    const Store = Rga.Settings && Rga.Settings.Store;
+    const Reg   = Rga.Settings && Rga.Settings.Registry;
+    if (!Store || !Reg || typeof Reg.ids !== 'function') return;
+    Reg.ids().forEach(function(id) {
+      const def = Reg.getDefault(id);
+      if (def === undefined) return;
+      const cur = Store.effective(id);
+      if (_equalForReset(cur, def)) return;
+      Store.set(id, _cloneForReset(def));
+    });
+  }
+
   function _buildSkeleton(el) {
     const L = Rga.Settings && Rga.Settings.Layout;
     const sections = (L && typeof L.sections === 'function') ? L.sections() : [];
@@ -1307,17 +1361,78 @@
     // Left nav rail.
     const nav = document.createElement('nav');
     nav.className = 'rga-settings-nav';
+
+    // S5 — nav header. Gear icon + "Settings" title.
+    const navHeader = document.createElement('header');
+    navHeader.className = 'rga-settings-nav-header';
+    const navHeaderIcon = document.createElement('span');
+    navHeaderIcon.className = 'rga-settings-nav-header-icon';
+    navHeaderIcon.setAttribute('aria-hidden', 'true');
+    navHeaderIcon.innerHTML = NAV_HEADER_GEAR;
+    const navHeaderTitle = document.createElement('span');
+    navHeaderTitle.className = 'rga-settings-nav-header-title';
+    navHeaderTitle.textContent = 'Settings';
+    navHeader.appendChild(navHeaderIcon);
+    navHeader.appendChild(navHeaderTitle);
+    nav.appendChild(navHeader);
+
+    // S5 — nav items. Each carries an SVG icon, a two-line text stack
+    // (title + section description), and a count badge of the section's
+    // settingIds length. data-section-id is the click contract for
+    // _setActiveSection and existing E2E selectors.
+    const navList = document.createElement('div');
+    navList.className = 'rga-settings-nav-list';
     sections.forEach(function(section) {
       const item = document.createElement('button');
       item.type = 'button';
       item.className = 'rga-settings-nav-item';
       item.setAttribute('data-section-id', section.id);
-      item.textContent = section.label;
+
+      const itemIcon = document.createElement('span');
+      itemIcon.className = 'rga-settings-nav-item-icon';
+      itemIcon.setAttribute('aria-hidden', 'true');
+      itemIcon.innerHTML = NAV_ICONS[section.icon] || NAV_ICONS.settings;
+
+      const itemText = document.createElement('span');
+      itemText.className = 'rga-settings-nav-item-text';
+      const itemTitle = document.createElement('span');
+      itemTitle.className = 'rga-settings-nav-item-title';
+      itemTitle.textContent = section.label;
+      const itemDesc = document.createElement('span');
+      itemDesc.className = 'rga-settings-nav-item-desc';
+      itemDesc.textContent = section.description || '';
+      itemText.appendChild(itemTitle);
+      itemText.appendChild(itemDesc);
+
+      const itemCount = document.createElement('span');
+      itemCount.className = 'rga-settings-nav-item-count';
+      itemCount.setAttribute('aria-hidden', 'true');
+      itemCount.textContent = String(section.settingIds.length);
+
+      item.appendChild(itemIcon);
+      item.appendChild(itemText);
+      item.appendChild(itemCount);
+
       item.addEventListener('click', function() {
         _setActiveSection(el, section.id);
       });
-      nav.appendChild(item);
+      navList.appendChild(item);
     });
+    nav.appendChild(navList);
+
+    // S5 — nav footer. Reset All only (no Save — RC1 §3.3 amended in
+    // S10 to immediate-apply doctrine; a Save button with no pending
+    // state is fake interaction).
+    const navFooter = document.createElement('footer');
+    navFooter.className = 'rga-settings-nav-footer';
+    const resetAllBtn = document.createElement('button');
+    resetAllBtn.type = 'button';
+    resetAllBtn.className = 'rga-settings-nav-reset-all';
+    resetAllBtn.setAttribute('data-test-reset-all', '');
+    resetAllBtn.textContent = 'Reset All';
+    resetAllBtn.addEventListener('click', function() { _runResetAll(); });
+    navFooter.appendChild(resetAllBtn);
+    nav.appendChild(navFooter);
 
     // Right content area.
     const content = document.createElement('section');

@@ -95,13 +95,21 @@ test('Slice 5A — mount() renders one nav item per layout section (9 sections)'
 });
 
 test('Slice 5A — nav item labels match settings-layout section labels', () => {
+  // S5 — each nav item now renders icon + title + description + count
+  // (RC1 §3.3 chrome). Read the explicit title span rather than the
+  // whole item's textContent so this assertion stays focused on the
+  // label-vs-layout match. The description / count are exercised by
+  // tests/e2e/settings/navigation-fidelity.spec.js §2 + §3.
   bootDom();
   loadAll();
   const expected = global.window.Rga.Settings.Layout.sections()
     .map(function(s) { return s.label; });
   const el = mountWorkspace();
   const got = Array.from(el.querySelectorAll('.rga-settings-nav-item'))
-    .map(function(li) { return li.textContent.trim(); });
+    .map(function(li) {
+      const title = li.querySelector('.rga-settings-nav-item-title');
+      return title ? title.textContent.trim() : li.textContent.trim();
+    });
   assert.deepEqual(got, expected);
 });
 
