@@ -64,11 +64,14 @@
 }
 
 .rga-settings-content {
-  /* No top padding here — moved inside the sticky header below so
-     when the header pins it sits at the very top of the scroll
-     viewport with no exposed strip above it. Side + bottom padding
-     stay so rows have their original column inset. */
-  padding: 0 40px 32px;
+  /* S6 — RC1 §3.4 content geometry. Padding 24px 32px (was 0 40px 32px
+     during the card era); max-width 680px caps the rendering column so
+     long lines stay readable. The 24px top padding replaces the
+     compensation the sticky header used to carry. The pageSetup section
+     overrides max-width below to make room for the live preview side
+     panel (S8). */
+  padding: 24px 32px;
+  max-width: 680px;
   overflow-y: auto;
   /* Same min-height:0 reason as .rga-settings-nav above — lets the
      1fr grid track honor the workspace's height so overflow-y:auto
@@ -79,7 +82,7 @@
 
 .rga-settings-content-title {
   margin: 0 0 8px 0;
-  font-size: 22px;
+  font-size: 16px;
   font-weight: 600;
 }
 
@@ -105,20 +108,17 @@
 .rga-settings-content-header {
   /* Sticky header — pins to the top of .rga-settings-content's scroll
      viewport so search + section title stay visible as rows scroll.
-
-     The parent (.rga-settings-content) had its padding-top moved into
-     this header (padding-top:32px below). When pinned at top:0 the
-     header naturally sits at the very top of the scroll viewport with
-     no exposed strip above it where rows could bleed through.
+     S6 moved padding-top duties to .rga-settings-content (24px); the
+     header now carries only its own internal padding (0 0 16px), so
+     when pinned at top:0 the search input sits closer to the viewport
+     edge.
 
      Coverage rules:
        1. background:var(--editor-bg) is a fully-opaque hex in both
           themes (#141414 / #d6d6d6). Rows scrolling behind the band
           are fully masked.
-       2. The parent's L/R padding (40px each) is intact, so the band
-          reaches edge-to-edge inside the column's content-box; rows
-          (also inset by that same 40px) cannot bleed past the band
-          on the left or right.
+       2. The parent's L/R padding (32px each, RC1 §3.4) is intact;
+          rows share that inset.
        3. z-index:10 keeps the band above any future row decoration
           that introduces its own stacking context.
        4. border-bottom gives a subtle separator so the user perceives
@@ -128,7 +128,7 @@
   z-index: 10;
   background: var(--editor-bg);
   margin: 0 0 24px 0;
-  padding: 32px 0 16px;
+  padding: 0 0 16px;
   border-bottom: 1px solid var(--border-subtle);
 }
 
@@ -203,7 +203,7 @@
 .rga-settings-row-label {
   margin: 0;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 500;
   color: var(--text-primary);
 }
 
@@ -239,11 +239,13 @@
 .rga-settings-row-description {
   /* S4 — slots into the helper area below the label, same left column.
      Bottom margin retired (it was the card-era gap between description
-     and value-below; in the grid the value sits in column 2). */
+     and value-below; in the grid the value sits in column 2).
+     S6 — RC1 helper text: 11px / 400. */
   grid-area: helper;
   margin: 0;
   color: var(--text-secondary, #cfcfcf);
-  font-size: 12px;
+  font-size: 11px;
+  font-weight: 400;
   max-width: 60ch;
 }
 
@@ -576,6 +578,12 @@
   grid-template-columns: 1fr 280px;
   grid-template-rows: auto 1fr;
   column-gap: 24px;
+  /* S6 — the RC1 §3.4 680px max-width applies to the rendering column.
+     In Page Setup mode the content is also a 280px preview sidebar
+     (S8), so the outer .rga-settings-content widens to accommodate it.
+     The rows column inside the grid still respects readability — it
+     gets a 1fr track which fills the remainder after the preview. */
+  max-width: 1000px;
 }
 
 /* Sticky header spans both columns so the preview sits below it. */
