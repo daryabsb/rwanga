@@ -35,10 +35,10 @@
 
   let _initialized = false;
   let _unsubLayout = null;
-  // Scene-notes state (folded in from the dead Rga.SceneNotesConnector).
-  // Kept as private module state; only StudioPanel touches it.
-  let _currentSceneId = null;
-  const _notesBySceneId = Object.create(null);
+  // F1A.5 — scene-notes state moved to Rga.SceneNotes
+  // (doc-types/screenplay/scene-notes.js). StudioPanel now holds only
+  // the subscription handle so _reset can detach cleanly.
+  let _sceneNotesUnsub = null;
 
   // ----------------------------------------------------------------
   // Lifecycle
@@ -350,36 +350,62 @@
   }
 
   // ----------------------------------------------------------------
-  // Scene-notes routing (folded in from the dead Rga.SceneNotesConnector)
+  // Bottom-panel Scene Notes routing — F1A.5 migration (2026-05-29)
   // ----------------------------------------------------------------
   //
-  // Pre-Slice-9 the connector module existed in app-shell.js but its
-  // init() was never wired at boot — zero call sites. Slice 9 folds
-  // the connector's behavior into StudioPanel and wires it in init().
-  // The behavior: cursor moves → detect the enclosing scene-header
-  // DOM element → update the notes textarea + label.
+  // Pre-F1A.5: studio-panel.js owned a private _notesBySceneId map AND
+  // walked the editor DOM to detect the enclosing scene. The Rga.Scene-
+  // Manager dual-write here was dead code (no module defined Scene-
+  // Manager). Notes existed only inside this closure.
   //
-  // This intentionally walks editor DOM rather than going through the
-  // engine (`framework/`, off-limits this slice). If the BottomPanel
-  // re-design ever surfaces a structured "current scene" event, this
-  // wiring should be replaced by a subscriber to that event.
+  // Post-F1A.5: the data + change notifications live in Rga.SceneNotes
+  // (a screenplay-plugin-owned shared source — see
+  // doc-types/screenplay/scene-notes.js). The DOM-walk to find the
+  // current scene STAYS here for now (per the F1A.5 brief's "if a
+  // parallel path is safer, use it and document the remaining
+  // cleanup") — moving the walk requires routing through the engine's
+  // framework layer, which is out of scope. The walk publishes its
+  // result via Rga.SceneNotes.setCurrentScene so the inspector panel
+  // (also screenplay-owned) can react. The bottom-panel UI subscribes
+  // to the shared source so notes written from the inspector reflect
+  // here, and vice versa.
+  //
+  // Remaining CORE cleanup deferred to a future slice:
+  //   - _detectCurrentScene's DOM walk should move into the screenplay
+  //     plugin (it reads screenplay-specific attributes). When the
+  //     engine surfaces a "current scene" event from PM state, this
+  //     wiring becomes a subscriber to that event and the DOM walk
+  //     retires entirely.
   function _wireSceneNotesConnector() {
-    if (!Rga.debounce) return;  // defensive — Rga.debounce comes from utils.js
+    if (!Rga.debounce) return;   // defensive — Rga.debounce comes from utils.js
+    if (!Rga.SceneNotes) return; // F1A.5 — the shared source must exist
     document.addEventListener('selectionchange', Rga.debounce(function() {
       _detectCurrentScene();
     }, 150));
     const textarea = Rga.$ ? Rga.$('#notes-textarea') : document.getElementById('notes-textarea');
     if (textarea) {
       textarea.addEventListener('input', Rga.debounce(function() {
-        if (_currentSceneId) {
-          _notesBySceneId[_currentSceneId] = textarea.value;
-          if (Rga.SceneManager && Rga.SceneManager.scenes) {
-            const scene = Rga.SceneManager.scenes.get(_currentSceneId);
-            if (scene) scene.notes = textarea.value;
-          }
-        }
+        const sceneId = Rga.SceneNotes.currentSceneId();
+        if (sceneId) Rga.SceneNotes.set(sceneId, textarea.value);
       }, 300));
     }
+    // Inbound — subscribe to the shared source so writes from the
+    // inspector panel (or any future surface) reflect in this textarea.
+    // We unsubscribe in _reset; the wiring is idempotent because
+    // _wireSceneNotesConnector is called only from init() which is
+    // _initialized-gated.
+    _sceneNotesUnsub = Rga.SceneNotes.subscribe(function(event, payload) {
+      const ta = Rga.$ ? Rga.$('#notes-textarea') : document.getElementById('notes-textarea');
+      if (!ta) return;
+      if (event === 'current') {
+        _renderBottomNotesUiForCurrentScene();
+        return;
+      }
+      if (event === 'notes' && payload
+          && payload.sceneId === Rga.SceneNotes.currentSceneId()) {
+        if (ta.value !== payload.value) ta.value = payload.value;
+      }
+    });
   }
 
   function _detectCurrentScene() {
@@ -402,22 +428,28 @@
       }
       el = el.previousElementSibling;
     }
-    if (sceneId !== _currentSceneId) {
-      _currentSceneId = sceneId;
-      _updateNotesUi(sceneId, sceneName);
+    // F1A.5 — publish to the shared source. The subscriber installed
+    // in _wireSceneNotesConnector calls _renderBottomNotesUiForCurrent-
+    // Scene to repaint the bottom-panel UI; the inspector panel (if
+    // active) repaints itself via its own subscription.
+    if (Rga.SceneNotes && typeof Rga.SceneNotes.setCurrentScene === 'function') {
+      Rga.SceneNotes.setCurrentScene(sceneId, sceneName);
     }
   }
 
-  function _updateNotesUi(sceneId, sceneName) {
+  function _renderBottomNotesUiForCurrentScene() {
     const label = Rga.$ ? Rga.$('#notes-scene-label') : document.getElementById('notes-scene-label');
     const textarea = Rga.$ ? Rga.$('#notes-textarea') : document.getElementById('notes-textarea');
+    const sceneId = Rga.SceneNotes ? Rga.SceneNotes.currentSceneId() : null;
+    const sceneName = Rga.SceneNotes ? Rga.SceneNotes.currentSceneName() : '';
     if (label) {
       label.textContent = sceneId ? 'Notes — Scene ' + sceneName : 'Notes — No scene selected';
     }
     if (textarea) {
       if (sceneId) {
         textarea.disabled = false;
-        textarea.value = _notesBySceneId[sceneId] || '';
+        const v = Rga.SceneNotes.get(sceneId);
+        if (textarea.value !== v) textarea.value = v;
         textarea.placeholder = 'Add notes for Scene ' + sceneName + '...';
       } else {
         textarea.disabled = true;
@@ -433,9 +465,11 @@
 
   function _reset() {
     if (_unsubLayout) { _unsubLayout(); _unsubLayout = null; }
+    if (_sceneNotesUnsub) { _sceneNotesUnsub(); _sceneNotesUnsub = null; }
     _initialized = false;
-    _currentSceneId = null;
-    Object.keys(_notesBySceneId).forEach(function(k) { delete _notesBySceneId[k]; });
+    // The shared scene-notes source (Rga.SceneNotes) owns its own
+    // reset; test harnesses that want a pristine notes map call
+    // Rga.SceneNotes._reset() directly.
   }
 
   Rga.Shell.StudioPanel = {

@@ -762,6 +762,41 @@
   letter-spacing: 0.04em;
 }
 
+/* ---- Filmustageation F1A.5 — inspector Scene Notes panel ----
+   Owned by doc-types/screenplay/inspector-scene-notes.js. Mirrors the
+   bottom-panel Scene tab's textarea pattern so the two surfaces feel
+   consistent without inventing new visual treatment. */
+.rga-inspector-scene-notes {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.rga-inspector-scene-notes-label {
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+.rga-inspector-scene-notes-textarea {
+  width: 100%;
+  min-height: 160px;
+  resize: vertical;
+  font: inherit;
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-secondary);
+  border-radius: 4px;
+  padding: 8px 10px;
+  line-height: 1.45;
+}
+.rga-inspector-scene-notes-textarea:focus {
+  outline: none;
+  border-color: var(--accent-primary, #007acc);
+}
+.rga-inspector-scene-notes-textarea[disabled] {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 .inspector-field {
   margin-bottom: 12px;
 }

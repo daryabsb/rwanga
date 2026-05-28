@@ -721,6 +721,16 @@
      and after doc-types/screenplay/index.js so the plugin order is
      coherent. -->
 <script src="js/doc-types/screenplay/status-bar.js"></script>
+<!-- Filmustageation F1A.5 — Rga.SceneNotes shared source. Loads
+     BEFORE inspector-scene-notes.js (which registers a panel that
+     consumes it) AND before studio-panel.js's _wireSceneNotesConnector
+     reaches it at init time. Both surfaces read/write per-scene notes
+     through this single owner. -->
+<script src="js/doc-types/screenplay/scene-notes.js"></script>
+<!-- F1A.5 — screenplay-owned inspector panel for Scene Notes. First
+     production consumer of the F1A.3 inspector host. Registers via
+     Rga.Shell.Inspector.registerPanel; never auto-activates. -->
+<script src="js/doc-types/screenplay/inspector-scene-notes.js"></script>
 <!-- Cross-schema mark plugins — work on the v3 doc via PM marks. -->
 <script src="js/doc-types/screenplay/plugins/context-menu.js"></script>
 <script src="js/doc-types/screenplay/plugins/annotations.js"></script>

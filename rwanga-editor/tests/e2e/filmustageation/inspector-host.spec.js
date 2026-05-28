@@ -57,14 +57,21 @@ test('F1A.3 — Rga.Shell.Inspector exposes the F1A.3 public API at boot', async
 // 2. F1A.3 dormancy — no production module registers a panel.
 // =================================================================
 
-test('F1A.3 — no inspector panels are registered at boot (frame-only)', async () => {
+test('F1A.3 — inspector host boots with no panel ACTIVE (no auto-open)', async () => {
+  // Updated for F1A.5 (2026-05-29): the registry is no longer
+  // "frame-only" — the screenplay plugin contributes the scene-notes
+  // panel at script-load. The F1A.3 invariant being guarded here is
+  // narrower: NO panel is auto-activated, so the captured empty state
+  // remains visible at boot. The presence of a registered panel is
+  // expected; auto-activation is not.
   const { app, page, userDataDir } = await launchApp();
   try {
     const state = await page.evaluate(() => ({
       registered: window.Rga.Shell.Inspector.registered(),
       current:    window.Rga.Shell.Inspector.current()
     }));
-    expect(state.registered).toEqual([]);
+    // F1A.5 lands the first production panel: 'scene-notes'.
+    expect(state.registered).toContain('scene-notes');
     expect(state.current).toBe(null);
   } finally {
     await teardown(app, userDataDir);
@@ -167,11 +174,17 @@ test('F1A.3 — register / activate / deactivate round-trips and restores the em
 // 6. Invalid registrations fail safely.
 // =================================================================
 
-test('F1A.3 — invalid panel registrations return false without throwing', async () => {
+test('F1A.3 — invalid panel registrations return false without throwing or polluting the registry', async () => {
+  // Updated for F1A.5: registered() now contains the production
+  // 'scene-notes' panel. The invariant being guarded is unchanged —
+  // none of the invalid registration attempts may pollute the
+  // registry — but the baseline is "the scene-notes panel exists",
+  // not "the registry is empty".
   const { app, page, userDataDir } = await launchApp();
   try {
     const result = await page.evaluate(() => {
       const I = window.Rga.Shell.Inspector;
+      const baseline = I.registered().slice();
       let anyThrow = false;
       let results;
       try {
@@ -187,11 +200,18 @@ test('F1A.3 — invalid panel registrations return false without throwing', asyn
       } catch (_) {
         anyThrow = true;
       }
-      return { anyThrow: anyThrow, results: results, registered: I.registered() };
+      return {
+        anyThrow:   anyThrow,
+        results:    results,
+        baseline:   baseline,
+        registered: I.registered()
+      };
     });
     expect(result.anyThrow).toBe(false);
     expect(result.results.every((r) => r === false)).toBe(true);
-    expect(result.registered).toEqual([]);
+    // No invalid attempt joined the registry; production panel still there.
+    expect(result.registered).toEqual(result.baseline);
+    expect(result.registered).toContain('scene-notes');
   } finally {
     await teardown(app, userDataDir);
   }
