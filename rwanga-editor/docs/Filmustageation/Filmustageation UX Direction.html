@@ -1,0 +1,1241 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rwanga Editor — Filmustageation UX Direction</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;1,14..32,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0F0F12;
+    --surface: #17171C;
+    --surface-2: #1E1E26;
+    --surface-3: #26262E;
+    --border: #2C2C38;
+    --text: #EDEAD8;
+    --text-2: #9A98A8;
+    --text-3: #5C5A6A;
+    --amber: #D4A574;
+    --amber-dim: rgba(212,165,116,0.10);
+    --pink: #F72585;
+    --pink-dim: rgba(247,37,133,0.08);
+    --script: #FF6B35;
+    --break: #2D5BE3;
+    --vis: #00A896;
+    --plan: #7C3AED;
+    --shoot: #F72585;
+    --font: 'Inter', system-ui, sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+    --r: 2px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 15px;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 80px 32px 120px;
+  }
+
+  /* ── Typography ─────────────────────── */
+  .doc-header {
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 40px;
+    margin-bottom: 64px;
+  }
+
+  .doc-overline {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--amber);
+    margin-bottom: 16px;
+  }
+
+  .doc-title {
+    font-size: 36px;
+    font-weight: 700;
+    line-height: 1.15;
+    color: var(--text);
+    margin-bottom: 12px;
+    letter-spacing: -0.5px;
+  }
+
+  .doc-subtitle {
+    font-size: 16px;
+    color: var(--text-2);
+    line-height: 1.6;
+    max-width: 600px;
+  }
+
+  .doc-meta {
+    display: flex;
+    gap: 24px;
+    margin-top: 24px;
+    font-size: 12px;
+    color: var(--text-3);
+    font-family: var(--mono);
+  }
+
+  .doc-meta span { white-space: nowrap; }
+
+  h2 {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.8px;
+    text-transform: uppercase;
+    color: var(--amber);
+    margin-top: 80px;
+    margin-bottom: 8px;
+  }
+
+  h3 {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 20px;
+    letter-spacing: -0.2px;
+    line-height: 1.3;
+  }
+
+  h4 {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    margin-top: 32px;
+    margin-bottom: 10px;
+    letter-spacing: 0.2px;
+  }
+
+  p {
+    margin-bottom: 16px;
+    color: var(--text-2);
+  }
+
+  p strong {
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  .section {
+    margin-bottom: 64px;
+    padding-bottom: 64px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section:last-of-type {
+    border-bottom: none;
+  }
+
+  /* ── Callout blocks ─────────────────── */
+  .callout {
+    background: var(--surface);
+    border-left: 3px solid var(--amber);
+    padding: 20px 24px;
+    margin: 24px 0;
+    font-size: 14px;
+  }
+
+  .callout.doctrine {
+    border-left-color: var(--plan);
+    background: rgba(124,58,237,0.05);
+  }
+
+  .callout.observation {
+    border-left-color: var(--script);
+    background: rgba(255,107,53,0.05);
+  }
+
+  .callout.direction {
+    border-left-color: var(--vis);
+    background: rgba(0,168,150,0.05);
+  }
+
+  .callout-label {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .callout.doctrine .callout-label { color: var(--plan); }
+  .callout.observation .callout-label { color: var(--script); }
+  .callout.direction .callout-label { color: var(--vis); }
+  .callout p:last-child { margin-bottom: 0; }
+
+  /* ── Lists ──────────────────────────── */
+  ul, ol {
+    margin: 12px 0 20px;
+    padding-left: 20px;
+    color: var(--text-2);
+  }
+
+  li {
+    margin-bottom: 6px;
+    padding-left: 4px;
+  }
+
+  li strong { color: var(--text); }
+
+  /* ── Spectrum / Weight diagrams ────── */
+  .spectrum {
+    display: flex;
+    gap: 2px;
+    margin: 24px 0;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .spectrum-item {
+    flex: 1;
+    padding: 14px 12px;
+    text-align: center;
+    line-height: 1.4;
+  }
+
+  .spectrum-label {
+    display: block;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+    opacity: 0.7;
+  }
+
+  /* ── Hierarchy diagram ────────────── */
+  .diagram {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 32px;
+    margin: 28px 0;
+    overflow-x: auto;
+  }
+
+  .diagram-title {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+    color: var(--text-3);
+    margin-bottom: 24px;
+  }
+
+  /* ── Layer diagrams ────────────────── */
+  .layers {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .layer {
+    display: flex;
+    align-items: stretch;
+    gap: 3px;
+    min-height: 56px;
+  }
+
+  .layer-label {
+    width: 120px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.9);
+  }
+
+  .layer-content {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    font-size: 12px;
+    color: var(--text-2);
+    background: var(--surface-2);
+    line-height: 1.5;
+  }
+
+  .layer-content code {
+    font-family: var(--mono);
+    font-size: 11px;
+    background: var(--surface-3);
+    padding: 1px 6px;
+    color: var(--text);
+  }
+
+  /* ── Weight table ──────────────────── */
+  .weight-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 24px 0;
+    font-size: 13px;
+  }
+
+  .weight-table th {
+    text-align: left;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text-3);
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .weight-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid rgba(44,44,56,0.4);
+    vertical-align: top;
+    color: var(--text-2);
+  }
+
+  .weight-table td:first-child {
+    color: var(--text);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  /* ── Inline tag ────────────────────── */
+  .tag {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    padding: 2px 8px;
+    border-radius: 2px;
+    vertical-align: middle;
+  }
+
+  .tag-core { background: rgba(212,165,116,0.15); color: var(--amber); }
+  .tag-plugin { background: rgba(255,107,53,0.12); color: var(--script); }
+  .tag-platform { background: rgba(124,58,237,0.12); color: var(--plan); }
+
+  /* ── Zone diagram ──────────────────── */
+  .zone-diagram {
+    display: grid;
+    grid-template-columns: 48px 200px 1fr 240px;
+    grid-template-rows: 32px auto 24px;
+    gap: 2px;
+    min-height: 320px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .zone {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px;
+    text-align: center;
+    line-height: 1.4;
+  }
+
+  .zone-name {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  .zone-desc {
+    font-size: 10px;
+    font-weight: 400;
+    color: rgba(255,255,255,0.5);
+    display: block;
+  }
+
+  /* ── Focus mode transition ─────────── */
+  .focus-strip {
+    display: flex;
+    gap: 2px;
+    margin: 24px 0;
+  }
+
+  .focus-state {
+    flex: 1;
+    padding: 20px 16px;
+    text-align: center;
+  }
+
+  .focus-state-name {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    display: block;
+  }
+
+  .focus-state-desc {
+    font-size: 11px;
+    color: rgba(255,255,255,0.5);
+    line-height: 1.5;
+    display: block;
+  }
+
+  /* ── Closing ───────────────────────── */
+  .assessment {
+    margin-top: 80px;
+  }
+
+  .assessment-block {
+    margin-bottom: 40px;
+  }
+
+  .assessment-num {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--amber);
+    margin-bottom: 8px;
+  }
+
+  .assessment h4 {
+    margin-top: 0;
+    margin-bottom: 12px;
+    font-size: 16px;
+  }
+
+  .stop-marker {
+    margin-top: 80px;
+    padding-top: 40px;
+    border-top: 1px solid var(--border);
+    text-align: center;
+  }
+
+  .stop-marker span {
+    font-family: var(--mono);
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 4px;
+    color: var(--text-3);
+  }
+
+  /* ── Responsive ────────────────────── */
+  @media (max-width: 700px) {
+    body { padding: 40px 20px 80px; }
+    .doc-title { font-size: 26px; }
+    .zone-diagram { grid-template-columns: 1fr; grid-template-rows: auto; }
+    .layer { flex-direction: column; }
+    .layer-label { width: 100%; padding: 8px 16px; }
+    .doc-meta { flex-direction: column; gap: 8px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════
+     HEADER
+     ═══════════════════════════════════════════════════════ -->
+<header class="doc-header">
+  <div class="doc-overline">Phase 0A — Designer Direction</div>
+  <h1 class="doc-title">Filmustageation UX Direction</h1>
+  <p class="doc-subtitle">
+    Interaction philosophy, visual direction, and system thinking for the Rwanga Editor's evolution from screenplay tool to living creative writing engine.
+  </p>
+  <div class="doc-meta">
+    <span>status: direction-only</span>
+    <span>grounded-in: core-plugin-platform-doctrine</span>
+    <span>date: 2026-05-28</span>
+  </div>
+</header>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     §1 — WORKSPACE PHILOSOPHY
+     ═══════════════════════════════════════════════════════ -->
+<div class="section" id="s1">
+  <h2>Section 1</h2>
+  <h3>Overall Workspace Philosophy</h3>
+
+  <h4>The Central Question</h4>
+  <p>
+    Every decision in this document answers one question: <strong>how should this editor feel while writing?</strong> Not "how should it look." Not "how many features can we surface." The feeling during a writing session is the product. Everything else is infrastructure.
+  </p>
+
+  <h4>Emotional Hierarchy</h4>
+  <p>
+    The workspace has four emotional layers. They are listed here in order of visual weight — heaviest first, lightest last. This is <em>not</em> the order of screen real estate. The heaviest layer occupies the most attention but may occupy relatively little space. The lightest may be large but should never demand focus.
+  </p>
+
+  <table class="weight-table">
+    <thead>
+      <tr>
+        <th>Layer</th>
+        <th>Feels like</th>
+        <th>Behavior</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>The Page</td>
+        <td>Sacred, stable, physically important</td>
+        <td>Always present. Never shifts, slides, or resizes during writing. The gravitational center. Every other layer orbits this.</td>
+      </tr>
+      <tr>
+        <td>Contextual Intelligence</td>
+        <td>A quiet observer in the room</td>
+        <td>Appears only when relevant. Whispers, never shouts. Surfaces information the writer didn't know they needed — then retreats.</td>
+      </tr>
+      <tr>
+        <td>Session Awareness</td>
+        <td>Ambient knowledge of where you are</td>
+        <td>Scene count, position in the script, session continuity markers. Peripheral — you glance, you don't stare.</td>
+      </tr>
+      <tr>
+        <td>Shell Chrome</td>
+        <td>Architecture — walls, not furniture</td>
+        <td>The rail, toolbar, status bar. These are the room's walls. You don't notice good walls. You notice bad ones.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h4>The "Living Script" Feeling</h4>
+  <p>
+    The doctrine defines the script as a <strong>session with its own brain</strong>. Notes, scenes, tags, revisions, AI conversations all travel with the script. The UX consequence: when you open a script, you are not opening a file. You are <strong>resuming a creative session</strong>. The editor should communicate this through continuity — your cursor position, your open panels, your last note, your most recent AI conversation — all restored silently. No "welcome back" splash screen. No loading sequence. Just: you're here again, where you left off.
+  </p>
+
+  <div class="callout doctrine">
+    <div class="callout-label">Doctrine Anchor</div>
+    <p>
+      <strong>"The script is no longer a flat file. It is a session with its own brain."</strong> — §7.1. Notes, scenes, tags, revisions, AI conversations all travel with the script. The editor's job is to make this feel inevitable, not technical.
+    </p>
+  </div>
+
+  <h4>Cinematic Atmosphere Without Costume</h4>
+  <p>
+    "Cinematic" does not mean dark gradients, lens flares, or film-grain textures. It means <strong>the composition principles of cinema applied to interface design</strong>: clear focal points, deliberate negative space, controlled depth of field (some things sharp, others ambient), and rhythm — scenes flow, panels breathe, transitions have purpose.
+  </p>
+  <p>
+    The workspace should feel like a <strong>production studio at 2 AM</strong> — focused, quiet, purposeful. Not a movie theater. Not a VFX suite. A place where serious creative work happens under controlled conditions.
+  </p>
+
+  <h4>What Should Feel Heavy</h4>
+  <ul>
+    <li><strong>The page itself.</strong> The screenplay text is the heaviest object in the room. Its typography, its spacing, its presence — all communicate authority.</li>
+    <li><strong>Scene boundaries.</strong> When you cross from one scene to another, the editor should acknowledge it. Not dramatically — structurally. Scene transitions are architectural events in a screenplay.</li>
+  </ul>
+
+  <h4>What Should Feel Invisible</h4>
+  <ul>
+    <li><strong>Navigation between tools.</strong> Switching from writing to breakdown to notes should feel like turning your head, not changing applications.</li>
+    <li><strong>Persistence.</strong> Autosave, session recovery, state preservation — all of this should be so reliable that the writer forgets it exists.</li>
+    <li><strong>Plugin boundaries.</strong> The writer should never think "I am now in the screenplay plugin." They are writing. The system knows the rules.</li>
+  </ul>
+
+  <h4>What Should Feel Ambient</h4>
+  <ul>
+    <li><strong>Production context.</strong> Character counts, prop lists, location data — all of this exists in the periphery. It's knowledge you accumulate by glancing, not by switching modes.</li>
+    <li><strong>AI readiness.</strong> The intelligence layer should feel like a colleague sitting nearby — available if you turn to them, silent otherwise.</li>
+    <li><strong>Session history.</strong> Your revision trail, your note timeline, your AI conversations — they form a sediment layer beneath the current writing surface. Present but not foregrounded.</li>
+  </ul>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     §2 — SHELL DIRECTION
+     ═══════════════════════════════════════════════════════ -->
+<div class="section" id="s2">
+  <h2>Section 2</h2>
+  <h3>Shell Direction</h3>
+
+  <h4>Current State Observation</h4>
+
+  <div class="callout observation">
+    <div class="callout-label">Observation — Screenshot Analysis</div>
+    <p>
+      The current shell has <strong>three layers of chrome competing for the same role</strong>. The Filmustage top navigation bar (Script / Scheduling / Call Sheets / Budgeting / Storyboards) is platform navigation. Below it, a secondary toolbar (Scene Breaks, Download Synopsis, Share, AI Dude, Export) mixes document actions with platform features. The left sidebar is a breakdown inventory panel posing as a scene navigator. All three are "always on" — none adapts to the writer's current focus.
+    </p>
+  </div>
+
+  <p>
+    The shell must be decomposed into zones with clear ownership. The doctrine's three-layer architecture (Engine → Plugin → Platform) must be <strong>physically visible</strong> in the shell's structure — not as labels, but as behavior. Engine chrome stays permanent. Plugin chrome adapts to the active doc-type. Platform chrome lives outside the editor viewport entirely.
+  </p>
+
+  <h4>Shell Zone Map</h4>
+  <p>The following diagram defines the intended spatial relationships and ownership of each shell zone:</p>
+
+  <div class="diagram">
+    <div class="diagram-title">Workspace Zone Ownership</div>
+    <div class="zone-diagram">
+      <!-- Row 1: Top chrome -->
+      <div class="zone" style="grid-column: 1 / -1; grid-row: 1; background: var(--surface-3);">
+        <span>
+          <span class="zone-name">Title Bar</span>
+          <span class="zone-desc"><span class="tag tag-core" style="font-size:8px;">CORE</span> — Script name · Session indicator · Window controls</span>
+        </span>
+      </div>
+
+      <!-- Row 2: Main workspace -->
+      <div class="zone" style="grid-column: 1; grid-row: 2; background: #0A0A0D; writing-mode: vertical-lr; text-orientation: mixed;">
+        <span>
+          <span class="zone-name">Rail</span>
+          <span class="zone-desc" style="writing-mode: horizontal-tb; margin-top: 8px;"><span class="tag tag-core" style="font-size:8px;">CORE</span></span>
+        </span>
+      </div>
+
+      <div class="zone" style="grid-column: 2; grid-row: 2; background: var(--surface); flex-direction: column; justify-content: flex-start; padding: 16px; align-items: flex-start;">
+        <span>
+          <span class="zone-name" style="text-align:left;">Sidebar</span>
+          <span class="zone-desc" style="text-align:left; display: block; margin-top: 8px;">
+            <span class="tag tag-core" style="font-size:8px;">CORE</span> frame<br>
+            <span class="tag tag-plugin" style="font-size:8px;">PLUGIN</span> contents<br><br>
+            Scene navigator, structure view, search — provided by the active doc-type plugin. CORE provides the panel host and collapse behavior.
+          </span>
+        </span>
+      </div>
+
+      <div class="zone" style="grid-column: 3; grid-row: 2; background: var(--bg); flex-direction: column;">
+        <span>
+          <span class="zone-name">Writing Surface</span>
+          <span class="zone-desc">
+            <span class="tag tag-core" style="font-size:8px;">CORE</span> editor kernel<br>
+            <span class="tag tag-plugin" style="font-size:8px;">PLUGIN</span> schema + formatting<br><br>
+            The sacred center. Occupies maximum available space. Never compresses below a comfortable reading width. The page is the product.
+          </span>
+        </span>
+      </div>
+
+      <div class="zone" style="grid-column: 4; grid-row: 2; background: var(--surface); flex-direction: column; justify-content: flex-start; padding: 16px; align-items: flex-start;">
+        <span>
+          <span class="zone-name" style="text-align:left;">Inspector</span>
+          <span class="zone-desc" style="text-align:left; display: block; margin-top: 8px;">
+            <span class="tag tag-core" style="font-size:8px;">CORE</span> frame<br>
+            <span class="tag tag-plugin" style="font-size:8px;">PLUGIN</span> panels<br><br>
+            Contextual intelligence, notes, breakdown detail, AI conversations. Appears on demand. Default: hidden.
+          </span>
+        </span>
+      </div>
+
+      <!-- Row 3: Status bar -->
+      <div class="zone" style="grid-column: 1 / -1; grid-row: 3; background: var(--surface-2);">
+        <span>
+          <span class="zone-name">Status Bar</span>
+          <span class="zone-desc"><span class="tag tag-core" style="font-size:8px;">CORE</span> frame · <span class="tag tag-plugin" style="font-size:8px;">PLUGIN</span> contributions — Page count · Word count · Scene position · Sync status</span>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <h4>Zone-by-Zone Direction</h4>
+
+  <p><strong>Activity Rail</strong> — Stays minimal. 48px. Icon-only. This is the editor's spine — it provides access to sidebar views (scenes, tags/breakdown, search, extensions, settings) but does not itself contain content. The rail is always CORE. Its icon set changes subtly per doc-type — screenplay shows a clapboard scene icon; a future novel plugin would show chapter markers. But the <em>rail structure</em> never changes. The active-indicator (currently a left-edge accent bar) should use the section color system: Script orange when in writing mode, Breakdown blue when in breakdown view, etc.</p>
+
+  <p><strong>Sidebar</strong> — This is where the biggest evolution must happen. Currently the sidebar is a <strong>static inventory accordion</strong> (CAST (5), PROPS (8), SET DRESSING (3)...). This is production data, not writing navigation. The sidebar's primary identity must be <strong>structural navigation</strong> — scenes, sequences, acts. The breakdown inventory is a secondary view, accessible via a rail icon switch, not the default.</p>
+
+  <div class="callout direction">
+    <div class="callout-label">Direction</div>
+    <p>
+      The sidebar's default view when writing should be the <strong>scene navigator</strong> — a clean list of scenes with minimal metadata (number, slug, estimated duration). The breakdown categories accordion becomes a <strong>separate sidebar view</strong> activated from the rail, used during breakdown work, not during writing. This single change eliminates the "admin panel" feeling.
+    </p>
+  </div>
+
+  <p><strong>Inspector (Right Panel)</strong> — Currently shows "Notes: Scene 4" — a plain text box. The inspector should become the <strong>contextual intelligence surface</strong>. Its contents depend on what's selected or where the cursor is. Click a character name → inspector shows character details, occurrences, notes. Place cursor in a scene → inspector shows scene-level metadata, notes, AI observations. Select nothing → inspector shows script-level overview. The inspector is plugin-contributed content inside a CORE-owned frame. Default state: <strong>collapsed</strong>. The writing surface expands to fill the space. The inspector opens when the writer explicitly requests context.</p>
+
+  <p><strong>Top Chrome</strong> — Must be radically simplified. The current toolbar (Scene Breaks, Download Synopsis, Share Project, Script AI Dude, Export) mixes document verbs, platform actions, and AI access into one bar. Direction: the title bar shows <strong>only the script name and session state</strong>. Document verbs (export, print) live in the menu system or command palette. Platform actions (share, sync) live at the platform layer — not inside the editor's toolbar. The "Script AI Dude" button should not exist as a persistent toolbar element. AI is accessed contextually, not via a chrome button.</p>
+
+  <p><strong>Command Palette</strong> — This becomes the editor's primary power-user surface. All commands, document verbs, navigation, plugin actions — accessible via a single keyboard shortcut. The palette is CORE infrastructure; plugins register their commands into it. This replaces the need for toolbar buttons. The palette's visual grammar should follow the existing Rwanga design system: dark surface, amber focus indicators, monospace shortcut labels.</p>
+
+  <p><strong>Status Bar</strong> — Remains a thin, ambient strip. CORE provides: page count, word count, cursor position, sync status. Plugins contribute additional slots: screenplay adds scene count and estimated screen time; a future research plugin adds citation count. The status bar uses the existing Rwanga design system's status-bar pattern — tinted background, compact type, information density without clutter. The status bar is where the section color system is <em>most visible</em> — its tint reflects the current workspace mode.</p>
+
+  <h4>What Stays Minimal</h4>
+  <ul>
+    <li>The activity rail — icon-only, narrow, permanent</li>
+    <li>The status bar — one line, ambient, glanceable</li>
+    <li>The title bar — script name and session indicator only</li>
+  </ul>
+
+  <h4>What Becomes Adaptive</h4>
+  <ul>
+    <li>The sidebar — its content changes based on the rail selection and the active doc-type</li>
+    <li>The inspector — its panels change based on cursor position and selection</li>
+  </ul>
+
+  <h4>What Should Disappear During Writing Focus</h4>
+  <ul>
+    <li>The sidebar — collapsible to zero width; writing surface expands</li>
+    <li>The inspector — default collapsed; opened on demand</li>
+    <li>Any toolbar or action bar — the page rules alone during deep writing</li>
+  </ul>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     §3 — PLUGIN-AWARE UX DIRECTION
+     ═══════════════════════════════════════════════════════ -->
+<div class="section" id="s3">
+  <h2>Section 3</h2>
+  <h3>Plugin-Aware UX Direction</h3>
+
+  <h4>The Core Problem</h4>
+  <p>
+    Today, the editor <em>is</em> the screenplay plugin. Every surface, every icon, every panel assumes screenplay. The doctrine names this explicitly: <strong>"Screenplay is a doc-type, not the kernel."</strong> The UX must separate what belongs to the engine from what belongs to the plugin — without making the separation visible to the writer.
+  </p>
+  <p>
+    The paradox: <strong>the writer should never think about plugins</strong>. They open a screenplay and the editor knows screenplay rules. They open a novel and the editor knows novel rules. The mechanism is invisible. The experience is seamless. But the architecture beneath must be clean.
+  </p>
+
+  <h4>How Screenplay Mode Should Feel</h4>
+  <p>
+    When a screenplay document is open, the editor should feel like it was <em>born</em> for screenwriting. The formatting toolbar understands slug lines, action, dialogue, parenthetical, transition. The scene navigator in the sidebar speaks screenplay language. The inspector surfaces character and location data. The status bar shows page count in industry-standard units. Nothing feels "plugged in." It feels native.
+  </p>
+
+  <h4>How Future Plugins Coexist</h4>
+  <p>
+    A future novel plugin will replace the sidebar's scene navigator with a chapter navigator. The formatting toolbar will offer paragraph, heading, blockquote — not slug line and dialogue. The inspector will surface character arcs and timeline data instead of props and locations. The status bar will show word count and chapter position instead of page count and scene number.
+  </p>
+  <p>
+    The <strong>shell remains identical</strong>. Rail, sidebar frame, writing surface, inspector frame, status bar — same geometry, same behavior. What changes is the <em>contents</em> of each slot. This is the plugin contract made visible.
+  </p>
+
+  <div class="diagram">
+    <div class="diagram-title">Plugin Slot Architecture — Same Shell, Different Contents</div>
+    <div class="layers">
+      <div class="layer">
+        <div class="layer-label" style="background: var(--amber); color: #0F0F12;">Shell (CORE)</div>
+        <div class="layer-content">
+          Rail · Sidebar frame · Writing surface · Inspector frame · Status bar · Command palette · Title bar<br>
+          <em style="color:var(--text-3); font-size:11px;">Permanent. Domain-neutral. Never changes per doc-type.</em>
+        </div>
+      </div>
+      <div class="layer">
+        <div class="layer-label" style="background: var(--script);">Screenplay</div>
+        <div class="layer-content">
+          Scene navigator → sidebar · Scene heading / action / dialogue → schema · Character/prop/location panels → inspector · Page count → status bar · FDX/PDF → export · Breakdown categories → sidebar (alt view)
+        </div>
+      </div>
+      <div class="layer">
+        <div class="layer-label" style="background: var(--break);">Novel</div>
+        <div class="layer-content" style="opacity: 0.6;">
+          Chapter navigator → sidebar · Paragraph / heading / blockquote → schema · Character arc / timeline → inspector · Word count → status bar · EPUB/DOCX → export · Outline view → sidebar (alt view)
+        </div>
+      </div>
+      <div class="layer">
+        <div class="layer-label" style="background: var(--vis);">Research</div>
+        <div class="layer-content" style="opacity: 0.4;">
+          Section navigator → sidebar · Paragraph / citation / figure → schema · References / footnotes → inspector · Citation count → status bar · BibTeX/PDF → export · Outline view → sidebar (alt view)
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h4>Plugin Identity in the UI</h4>
+  <p>
+    Each plugin should have a <strong>subtle identity presence</strong> — not branding, but a recognizable feel. The section color system already provides this vocabulary: Script orange for screenplay, Breakdown blue for production work. A novel plugin might adopt a warm neutral; research a cool slate. This color appears in:
+  </p>
+  <ul>
+    <li>The active rail indicator</li>
+    <li>The status bar tint</li>
+    <li>The sidebar's section header</li>
+    <li>The command palette's plugin-prefixed commands</li>
+  </ul>
+  <p>
+    Never in the writing surface itself. The page is neutral ground.
+  </p>
+
+  <h4>Plugin Switching Conceptual Direction</h4>
+  <p>
+    Plugin switching is a <strong>document-level</strong> event, not a workspace-level mode switch. You don't "switch to novel mode." You open a novel document and the editor adapts. The New Document flow should offer doc-type selection as a calm choice — not a dramatic mode picker. Think: a clean list with doc-type icons and one-line descriptions. No splash screens, no onboarding wizards, no "Choose your experience" fanfare.
+  </p>
+
+  <div class="callout doctrine">
+    <div class="callout-label">Doctrine Anchor</div>
+    <p>
+      <strong>"Each plugin's purpose is to teach the engine a writing form. The engine learns; it does not get rewritten."</strong> — §6. The editor absorbs new writing forms without losing its identity. It becomes more capable with each plugin, never more confused.
+    </p>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     §4 — SCREENPLAY PLUGIN UX DIRECTION
+     ═══════════════════════════════════════════════════════ -->
+<div class="section" id="s4">
+  <h2>Section 4</h2>
+  <h3>Screenplay Plugin UX Direction</h3>
+
+  <h4>What Works</h4>
+  <ul>
+    <li><strong>The writing surface itself.</strong> Courier typography, proper screenplay block formatting (action full-width, character centered, dialogue indented, parentheticals narrower). This is the correct foundation. The page feels like a screenplay page.</li>
+    <li><strong>Color-coded breakdown tags inline.</strong> The highlighted words (characters in blue, props in amber/orange, locations in green, etc.) are valuable — they surface production information <em>within</em> the writing context, not in a separate panel. This is the right instinct: intelligence embedded in the page, not extracted from it.</li>
+    <li><strong>Scene numbering in the gutter area.</strong> Scene numbers as structural markers, positioned near the scene header — this is correct screenplay convention and helps with navigation.</li>
+    <li><strong>The scene list in the left sidebar.</strong> The list of scenes (0: PRE-SCENE, 1: INT. EMPTY STUDIO, 2: EXT. DEVASTATED CITY, etc.) is useful navigation. Scene highlighting with color-coded bars for the selected scene works.</li>
+  </ul>
+
+  <h4>What Feels Too SaaS</h4>
+
+  <div class="callout observation">
+    <div class="callout-label">Observation</div>
+    <p>
+      The breakdown categories accordion (CAST (5), EXTRAS (1), PROPS (8), SET DRESSING (3), LOCATION DETAILS (1), SPECIAL EFFECTS (5), STUNTS (14), SOUND (4), COSTUMES (1), MAKEUP (2), SET (2)) is the single biggest contributor to the "admin panel" feeling. This is <strong>inventory management UI</strong> — it belongs in a production management view, not in the writer's primary sidebar.
+    </p>
+  </div>
+
+  <ul>
+    <li><strong>The breakdown accordion as the default sidebar content.</strong> Category names with counts in parentheses is a database interface pattern. During writing, this data is noise. It should be available — but as a dedicated breakdown view, not as the default writing companion.</li>
+    <li><strong>The top action bar.</strong> "Scene Breaks · Download Script Synopsis · Share Project · Script AI Dude · Export" — this is a feature showcase toolbar. Every button competes with every other button. Most of these are occasional actions (export, download, share) that don't deserve permanent toolbar presence.</li>
+    <li><strong>"ADD NEW CATEGORY" at the bottom of the sidebar.</strong> This is a CMS pattern. Writers don't add categories; production staff might, and that's a platform concern.</li>
+  </ul>
+
+  <h4>What Feels Too Technical</h4>
+  <ul>
+    <li><strong>The "3 4/8" page count format.</strong> While this is industry-standard (pages in eighths), its presentation currently feels like a raw data readout. It should be formatted more gracefully — perhaps with a subtle label: "Page 3⅜ of 8" or simply positioned in the status bar with clear typography rather than floating in the top-right corner.</li>
+    <li><strong>The tag popup ("CAST" badge).</strong> The inline tag that appears when hovering over a character name is informational but looks like a developer tooltip. Tags should feel integrated — either as subtle inline marks (already partially achieved with the color underlines) or as inspector content when the writer explicitly requests detail.</li>
+  </ul>
+
+  <h4>What Feels Distracting</h4>
+  <ul>
+    <li><strong>Color saturation of inline tags.</strong> The combination of bold purple character names, green locations, amber props, pink SFX markers, and yellow highlights creates visual competition with the screenplay text itself. The tags are <em>louder</em> than the writing. Direction: tags should use lower-opacity backgrounds and thinner underlines. The text content remains primary; tags are annotation, not decoration.</li>
+    <li><strong>Multiple navigation FABs in the bottom-right.</strong> The floating action buttons (navigate forward/back, grid icon, chat icon with notification badge) add visual clutter to an area that should be quiet. These should integrate into the shell chrome or be accessible via keyboard/command palette.</li>
+  </ul>
+
+  <h4>What Screenplay Writing Should Emotionally Prioritize</h4>
+  <ol>
+    <li><strong>Flow.</strong> The act of writing — entering text, formatting it correctly, moving between blocks — must be the fastest, most frictionless experience in the product.</li>
+    <li><strong>Structure.</strong> Awareness of where you are in the script (which scene, which act, how many pages) should be ambient, not effortful.</li>
+    <li><strong>Story.</strong> Characters, locations, the emotional arc — the breakdown data exists to serve story understanding, not inventory counting.</li>
+    <li><strong>Production readiness.</strong> The awareness that this script will eventually be shot. Formatting matters. Scene numbers matter. But this awareness should be <em>quiet confidence</em>, not prominent UI.</li>
+  </ol>
+
+  <div class="callout direction">
+    <div class="callout-label">Direction</div>
+    <p>
+      <strong>The screenplay page must remain the center of gravity.</strong> Tags are whispered annotations — visible when you look for them, never louder than the prose. The sidebar serves scene navigation first, breakdown second. Production data is a deeper layer — accessed intentionally, never imposed.
+    </p>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     §5 — INSPECTOR & INTELLIGENCE PHILOSOPHY
+     ═══════════════════════════════════════════════════════ -->
+<div class="section" id="s5">
+  <h2>Section 5</h2>
+  <h3>Inspector &amp; Intelligence Philosophy</h3>
+
+  <h4>The Inspector as Contextual Companion</h4>
+  <p>
+    The inspector panel is the editor's primary intelligence surface. It is <strong>not</strong> a permanent sidebar. It is a <strong>responsive companion</strong> that shows information relevant to the writer's current focus. Its default state is collapsed — the writing surface uses the full width. When opened, it provides depth without disruption.
+  </p>
+  <p>
+    The inspector's contents are always driven by context:
+  </p>
+
+  <table class="weight-table">
+    <thead>
+      <tr>
+        <th>Writer's Focus</th>
+        <th>Inspector Shows</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Cursor in scene</td>
+        <td>Scene notes, scene-level metadata (location, time, estimated duration), scene-level AI observations</td>
+      </tr>
+      <tr>
+        <td>Character name selected</td>
+        <td>Character card — occurrences, relationships, wardrobe notes, first/last appearance</td>
+      </tr>
+      <tr>
+        <td>Tagged prop/location</td>
+        <td>Prop/location detail — description, occurrences, continuity notes</td>
+      </tr>
+      <tr>
+        <td>Nothing specific</td>
+        <td>Script-level overview — structure summary, character list, recent notes, revision state</td>
+      </tr>
+      <tr>
+        <td>AI conversation active</td>
+        <td>AI panel — variations, critique, or breakdown results for the selected passage</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h4>Intelligence Positioning</h4>
+  <p>
+    The doctrine is clear: <strong>AI assists, never authors</strong>. The UX implication: AI never produces finished prose in-line. It never auto-completes. It never suggests while you type. Instead, AI is <strong>invoked</strong> — the writer asks, and the AI responds in a contained surface (the inspector panel or a focused overlay).
+  </p>
+
+  <div class="diagram">
+    <div class="diagram-title">Intelligence Behavior Spectrum</div>
+    <div class="spectrum">
+      <div class="spectrum-item" style="background: rgba(0,168,150,0.15); color: var(--vis);">
+        <span class="spectrum-label">Correct</span>
+        Writer invokes AI.<br>AI offers options.<br>Writer chooses or dismisses.
+      </div>
+      <div class="spectrum-item" style="background: rgba(212,165,116,0.08); color: var(--amber);">
+        <span class="spectrum-label">Acceptable</span>
+        Editor surfaces an observation.<br>"Scene 4 has no location details."<br>Writer decides to act or ignore.
+      </div>
+      <div class="spectrum-item" style="background: rgba(247,37,133,0.08); color: var(--shoot);">
+        <span class="spectrum-label">Forbidden</span>
+        AI writes text into the document.<br>Autocomplete appears while typing.<br>Suggestions overlay the page.
+      </div>
+    </div>
+  </div>
+
+  <h4>How AI Should Feel</h4>
+  <ul>
+    <li><strong>Quiet.</strong> No animated AI avatars. No pulsing "thinking" indicators that demand attention. When AI is processing, a minimal progress indicator in the inspector is sufficient — never a modal overlay.</li>
+    <li><strong>Contextual.</strong> AI responses appear in the inspector, anchored to the passage or element the writer was focused on. They don't float. They don't pop up.</li>
+    <li><strong>Respectful.</strong> AI offers <em>variations</em> (multiple alternatives, never one "answer"), <em>critique</em> (observations and questions, never rewrites), <em>breakdown</em> (structural understanding offered, never imposed), and <em>ask</em> (conversational lookup of the writer's own material).</li>
+    <li><strong>Optional.</strong> Every AI surface can be dismissed. No AI feature is required to use the editor. The editor functions fully without any AI engagement.</li>
+    <li><strong>Non-invasive.</strong> AI never modifies the document without explicit writer action. No "accept suggestion" flows that modify text automatically. The writer copies, adapts, or types — always manually.</li>
+  </ul>
+
+  <h4>Intelligence Visual Language</h4>
+  <p>
+    AI-originated content should have a distinct but quiet visual identity. The existing design system uses an <strong>amber accent</strong> for AI-related surfaces (AI progress indicators, thinking states). This is correct — amber communicates "supplementary intelligence" without the connotations of blue (corporate AI) or green (success/completion). AI content in the inspector should use:
+  </p>
+  <ul>
+    <li>A subtle amber left-border on AI-generated content blocks</li>
+    <li>Slightly reduced text opacity compared to writer-authored content</li>
+    <li>Clear provenance labels: "AI Variation" / "AI Observation" — never unlabeled</li>
+    <li>The existing <code style="font-family: var(--mono); font-size: 12px; background: var(--surface-3); padding: 1px 6px;">rw-ai-thinking</code> pattern for processing states — subtle pulse dots, not dramatic animations</li>
+  </ul>
+
+  <h4>Inspector Behavior Rules</h4>
+  <ul>
+    <li><strong>Never auto-open.</strong> The inspector opens only when the writer explicitly requests it (keyboard shortcut, rail icon, right-click context action).</li>
+    <li><strong>Context-switch smoothly.</strong> When the writer moves their cursor from one scene to another, the inspector's content updates — but without animation or transition that draws attention. The content simply changes.</li>
+    <li><strong>Remember state per session.</strong> If the writer opened the inspector to the notes panel, it stays on notes until they change it. Per-session memory, not per-cursor-position switching between panels.</li>
+    <li><strong>Respect the page's gravity.</strong> The inspector never exceeds 280px width. It uses compact typography. It is dense but clear — the style of a reference margin, not a feature panel.</li>
+  </ul>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     §6 — FILMUSTAGEATION VISUAL DIRECTION
+     ═══════════════════════════════════════════════════════ -->
+<div class="section" id="s6">
+  <h2>Section 6</h2>
+  <h3>Filmustageation Visual Direction</h3>
+
+  <h4>Color Philosophy</h4>
+  <p>
+    The existing Rwanga palette is strong and should be preserved. The dark theme (<code style="font-family: var(--mono); font-size: 12px; background: var(--surface-3); padding: 1px 6px;">#0F0F12</code> base) is the correct foundation for a writing environment — it reduces eye strain during long sessions and makes the page itself feel luminous by contrast. The warm amber accent (<code style="font-family: var(--mono); font-size: 12px; background: var(--surface-3); padding: 1px 6px;">#D4A574</code>) correctly avoids the cold blue accent trap that makes tools feel corporate.
+  </p>
+  <p>Direction adjustments:</p>
+  <ul>
+    <li><strong>The page surface should have a subtle warmth</strong> — not pure white or pure black, but a warm dark (<code style="font-family: var(--mono); font-size: 12px; background: var(--surface-3); padding: 1px 6px;">#1A1A1A</code> range) that suggests paper under low light. The page is not a browser viewport; it is a manuscript surface.</li>
+    <li><strong>Tag colors should be reduced in saturation by 30–40%</strong> when inline in the document. Full-saturation tags compete with the writing. Tags in the sidebar or inspector can use full saturation because they're separated from the prose.</li>
+    <li><strong>The section color system (Script orange, Breakdown blue, Visualize teal, Plan purple, Shoot pink) should remain — but as environment tinting, not element coloring.</strong> The status bar tints. The rail indicator tints. A panel header might tint. But the writing surface never tints.</li>
+  </ul>
+
+  <h4>Contrast Philosophy</h4>
+  <p>
+    Three contrast zones:
+  </p>
+  <ul>
+    <li><strong>The page</strong> — highest contrast. Text is bright against dark. This is where the eye lives.</li>
+    <li><strong>Chrome</strong> — medium contrast. Sidebar, inspector, status bar use muted text against slightly lighter surfaces. Readable but not attention-grabbing.</li>
+    <li><strong>Ambient elements</strong> — lowest contrast. Rail icons, inactive tab labels, background metadata — these exist at the edge of perception. Visible when sought, invisible when not.</li>
+  </ul>
+
+  <h4>Typography Feeling</h4>
+  <p>
+    Two type worlds:
+  </p>
+  <ul>
+    <li><strong>The writing surface:</strong> Courier Prime (or equivalent Courier). 12pt. Fixed-pitch. Double-spaced. This is non-negotiable for screenplay; it's the industry standard. The monospace grid is the page's skeleton — it communicates "this is a professional screenplay, not a blog post."</li>
+    <li><strong>The chrome:</strong> Inter (already in the design system) or the system font stack. Variable-width. Compact sizes (10–13px). The chrome type should feel like instrument labeling — precise, small, subordinate to the content it describes.</li>
+  </ul>
+  <p>
+    The type contrast between these two worlds is itself a design feature. The jarring difference between Courier on the page and Inter in the chrome reinforces the boundary between content and environment.
+  </p>
+
+  <h4>Motion Philosophy</h4>
+  <p>
+    Motion in the editor should be <strong>functional, not decorative</strong>. The existing design system specifies <code style="font-family: var(--mono); font-size: 12px; background: var(--surface-3); padding: 1px 6px;">0.12s ease</code> transitions — this is correct. Motion serves three purposes:
+  </p>
+  <ul>
+    <li><strong>State confirmation.</strong> A sidebar collapses with a quick slide. A panel opens with a brief fade. These confirm "something happened" without demanding attention.</li>
+    <li><strong>Spatial continuity.</strong> When the inspector opens, the writing surface narrows smoothly — not instantly. This maintains spatial awareness ("the page is still here, just sharing space").</li>
+    <li><strong>Focus transitions.</strong> When entering deep-writing mode, chrome fades out over ~200ms. This is slow enough to feel intentional, fast enough to not feel theatrical.</li>
+  </ul>
+  <p>
+    <strong>No motion should exist for its own sake.</strong> No loading animations beyond minimal spinners. No micro-interactions on buttons (the current <code style="font-family: var(--mono); font-size: 12px; background: var(--surface-3); padding: 1px 6px;">opacity 0.88</code> hover is sufficient). No parallax, no elastic bounce, no spring physics.
+  </p>
+
+  <h4>Spacing Philosophy</h4>
+  <p>
+    The editor uses <strong>architectural spacing</strong> — spacing that creates rooms, not margins. The writing surface has generous padding (1 inch top, 0.5 inch sides in the current spec) that creates a "page" within the viewport. Chrome surfaces use tighter spacing (8–16px internal padding) because they are utility spaces, not creative spaces. The contrast in spacing density between page and chrome reinforces their different roles.
+  </p>
+
+  <h4>Paper vs. Chrome Relationship</h4>
+
+  <div class="diagram">
+    <div class="diagram-title">Paper / Chrome Attention Balance</div>
+    <div style="display: flex; gap: 2px; height: 200px;">
+      <div style="flex: 0 0 48px; background: #0A0A0D; display: flex; align-items: center; justify-content: center;">
+        <span style="writing-mode: vertical-lr; font-size: 9px; color: var(--text-3); font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;">Rail</span>
+      </div>
+      <div style="flex: 0 0 180px; background: var(--surface); display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 4px;">
+        <span style="font-size: 9px; color: var(--text-3); font-weight: 700; letter-spacing: 1px; text-transform: uppercase;">Sidebar</span>
+        <span style="font-size: 10px; color: var(--text-3);">Low attention</span>
+        <span style="font-size: 10px; color: var(--text-3);">Glanceable</span>
+      </div>
+      <div style="flex: 1; background: var(--bg); display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 8px; border: 1px solid var(--border);">
+        <span style="font-size: 12px; color: var(--amber); font-weight: 700; letter-spacing: 2px; text-transform: uppercase;">The Page</span>
+        <span style="font-size: 11px; color: var(--text-2);">Maximum attention</span>
+        <span style="font-size: 11px; color: var(--text-2);">Sacred territory</span>
+        <span style="font-size: 11px; color: var(--text-2);">Highest contrast</span>
+      </div>
+      <div style="flex: 0 0 180px; background: var(--surface); display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 4px; border-left: 1px solid var(--border);">
+        <span style="font-size: 9px; color: var(--text-3); font-weight: 700; letter-spacing: 1px; text-transform: uppercase;">Inspector</span>
+        <span style="font-size: 10px; color: var(--text-3);">On-demand</span>
+        <span style="font-size: 10px; color: var(--text-3);">Contextual depth</span>
+      </div>
+    </div>
+  </div>
+
+  <p>
+    The page is always the brightest, most spacious, most typographically generous surface. Chrome surrounds it at lower contrast, tighter density, smaller type. This relationship should be <strong>perceptible even in screenshots</strong> — a stranger glancing at the editor should immediately understand: "the thing in the middle is what matters."
+  </p>
+
+  <h4>"Studio" Feeling</h4>
+  <p>
+    The overall atmosphere should evoke a professional workspace at night — controlled lighting, clean surfaces, purposeful arrangement. Not a tech startup (bright colors, playful shapes). Not a film set (dramatic, chaotic). Not a library (dusty, analog). A studio: where skilled people make things under good conditions.
+  </p>
+  <p>
+    The design system's near-flat radius (<code style="font-family: var(--mono); font-size: 12px; background: var(--surface-3); padding: 1px 6px;">2px</code>) contributes to this — rounded corners signal friendliness; squared corners signal precision. The editor is precise. The total absence of box-shadows (already enforced in the design system) contributes further — shadows suggest floating; the editor's surfaces are <em>placed</em>, architecturally, not hovering.
+  </p>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     §7 — FOCUS MODES & WORKFLOW ATMOSPHERE
+     ═══════════════════════════════════════════════════════ -->
+<div class="section" id="s7">
+  <h2>Section 7</h2>
+  <h3>Focus Modes &amp; Workflow Atmosphere</h3>
+
+  <h4>The Spectrum of Attention</h4>
+  <p>
+    Writing is not one activity. It moves between states — sometimes within minutes. The editor must accommodate each state without requiring the writer to explicitly "switch modes." The transitions should be organic: the writer's behavior signals which state they're in, and the editor responds.
+  </p>
+
+  <div class="diagram">
+    <div class="diagram-title">Workflow States — Chrome Visibility Gradient</div>
+    <div class="focus-strip">
+      <div class="focus-state" style="background: rgba(0,168,150,0.08);">
+        <span class="focus-state-name" style="color: var(--vis);">Deep Writing</span>
+        <span class="focus-state-desc">
+          Chrome: minimal<br>
+          Sidebar: collapsed<br>
+          Inspector: hidden<br>
+          Status bar: subtle<br>
+          Only the page exists
+        </span>
+      </div>
+      <div class="focus-state" style="background: rgba(212,165,116,0.06);">
+        <span class="focus-state-name" style="color: var(--amber);">Navigating</span>
+        <span class="focus-state-desc">
+          Chrome: present<br>
+          Sidebar: open (scenes)<br>
+          Inspector: optional<br>
+          Status bar: visible<br>
+          Moving between scenes
+        </span>
+      </div>
+      <div class="focus-state" style="background: rgba(255,107,53,0.06);">
+        <span class="focus-state-name" style="color: var(--script);">Reviewing</span>
+        <span class="focus-state-desc">
+          Chrome: full<br>
+          Sidebar: open (scenes)<br>
+          Inspector: open (notes)<br>
+          Markup: visible<br>
+          Reading + annotating
+        </span>
+      </div>
+      <div class="focus-state" style="background: rgba(45,91,227,0.06);">
+        <span class="focus-state-name" style="color: var(--break);">Breakdown</span>
+        <span class="focus-state-desc">
+          Chrome: full<br>
+          Sidebar: breakdown view<br>
+          Inspector: open (detail)<br>
+          Tags: highlighted<br>
+          Production analysis
+        </span>
+      </div>
+      <div class="focus-state" style="background: rgba(124,58,237,0.06);">
+        <span class="focus-state-name" style="color: var(--plan);">AI Assist</span>
+        <span class="focus-state-desc">
+          Chrome: full<br>
+          Inspector: AI panel<br>
+          Page: selection visible<br>
+          Focus: split (page + AI)<br>
+          Collaborative thinking
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <h4>Deep Writing</h4>
+  <p>
+    The most important mode. When the writer is composing — typing new text, editing dialogue, crafting action lines — the editor should shed everything that isn't the page. This doesn't require a manual "focus mode" button (though one should exist as a shortcut). It means: when the sidebar and inspector are closed, the writing surface expands to fill the available space with generous margins. The status bar dims to near-invisibility. The title bar shows only the script name. The writer's world is: their words, the cursor, the page.
+  </p>
+
+  <h4>Review</h4>
+  <p>
+    When the writer shifts from creating to evaluating — reading through a sequence, checking continuity, adding notes — the chrome should feel welcoming. The sidebar shows scene navigation for quick jumping. The inspector opens to notes or revision history. Markup and revision colors appear on the page. The environment says: "you're reading now, here's context to help."
+  </p>
+
+  <h4>Breakdown</h4>
+  <p>
+    The production-analysis mode. This is where the breakdown accordion currently lives — and where it <em>should</em> live. During breakdown work, the sidebar switches to the category view (characters, props, locations, etc.), tag highlights on the page increase in visibility, and the inspector shows detailed tag information. This is the mode where the "admin panel" feeling is <em>appropriate</em> — because the writer has shifted to production thinking. The key: this mode is entered intentionally, not imposed by default.
+  </p>
+
+  <h4>AI Assistance</h4>
+  <p>
+    When the writer invokes AI (selecting a passage and requesting variations, critique, or breakdown), the inspector opens to the AI panel. The selected passage remains visible on the page with a subtle highlight. The writer's attention splits between the page (source) and the inspector (AI response). This is a <strong>dialogue</strong> — the writer asks, the AI responds, the writer acts or dismisses. The AI panel is never the primary surface; it's always secondary to the page.
+  </p>
+
+  <h4>When Chrome Fades</h4>
+  <p>
+    Chrome fades when the writer's behavior signals deep creation: sustained typing without navigation, no sidebar or inspector interactions for more than a few minutes, cursor staying within a single scene. The editor doesn't literally hide chrome on a timer — but it should never <em>add</em> chrome during writing flow. No notifications, no "you've been writing for an hour" badges, no proactive suggestions. Silence is the editor's deepest feature.
+  </p>
+
+  <h4>When Information Expands</h4>
+  <p>
+    Information expands when the writer explicitly requests it: clicking a rail icon to open the sidebar, pressing a keyboard shortcut to open the inspector, right-clicking a tagged element to see its details, invoking the command palette. Every information expansion is writer-initiated. The editor never decides "you probably want to see this now."
+  </p>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     §8 — COLLABORATION DIRECTION
+     ═══════════════════════════════════════════════════════ -->
+<div class="section" id="s8">
+  <h2>Section 8</h2>
+  <h3>Future Collaboration Direction</h3>
+
+  <div class="callout doctrine">
+    <div class="callout-label">Doctrine Anchor</div>
+    <p>
+      Collaboration features live at the <strong>platform layer</strong>, not in CORE. CORE provides revision anchoring as a primitive. The platform decides who sees what. — §4.2, §7.5
+    </p>
+  </div>
+
+  <h4>Emotional Direction for Collaboration</h4>
+  <p>
+    Collaboration in a writing environment is fundamentally different from collaboration in a spreadsheet or design tool. Writing is <strong>intimate</strong>. A screenplay is a creative act, not a group deliverable. Collaboration features must respect this intimacy.
+  </p>
+
+  <h4>Comments</h4>
+  <p>
+    Comments should feel like <strong>margin notes in a printed script</strong> — small, anchored to a specific passage, visible but not intrusive. Not chat bubbles. Not threaded conversations with avatars and timestamps dominating the view. A comment is a pencil mark in the margin: you notice it, you read it, you respond or dismiss. The writing remains the page's primary content. Comments are annotations — secondary, subordinate, peripheral.
+  </p>
+
+  <h4>Reviews</h4>
+  <p>
+    A review is a <strong>structured reading pass</strong>. The reviewer reads the script with the ability to annotate — approving, questioning, or requesting changes on specific elements. The review UI should feel like a reading experience with annotation capability, not a task-management interface. No "Approve" / "Request Changes" buttons that look like Jira tickets. Instead: margin marks, inline notes, a summary that the writer can process at their own pace.
+  </p>
+
+  <h4>Collaborative Notes</h4>
+  <p>
+    Notes are the most natural collaboration surface for screenwriting. Directors leave notes. Producers leave notes. Actors leave notes. The editor should treat notes as <strong>layered voices</strong> — each contributor's notes are attributed and distinguishable, but all are subordinate to the script itself. Notes never modify the document; they annotate it.
+  </p>
+
+  <h4>Production Feedback</h4>
+  <p>
+    Production feedback (budget concerns, scheduling conflicts, location availability) is <strong>platform-level context</strong> that may need to surface in the editor. When it does, it should appear as structured metadata in the inspector — not as inline comments competing with creative notes. A production concern about a location is a different category of information than a director's note about a character's motivation. The UI should distinguish these categories through visual language (perhaps using the section color system: production feedback uses the Plan purple, creative notes use the Script orange).
+  </p>
+
+  <h4>Revision Tracking</h4>
+  <p>
+    Screenplay revision tracking has industry conventions: revision colors (white, blue, pink, yellow, green, goldenrod, buff, salmon, cherry, tan, second blue…). The editor should respect this convention while making it feel integrated rather than overlaid. Revision colors should appear as subtle page tinting or margin indicators — not as tracked-changes redlines competing with the readable text. The writer should be able to view any revision draft cleanly, without markup — and then overlay the revision markers when comparing.
+  </p>
+
+  <h4>The Principle</h4>
+  <p>
+    All collaboration features share one principle: <strong>the script is sacred ground</strong>. Collaboration happens <em>around</em> the script — in margins, in panels, in overlays. Never <em>inside</em> the script text. Other people's voices enrich the writer's awareness; they never invade the writing surface.
+  </p>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     CLOSING ASSESSMENT
+     ═══════════════════════════════════════════════════════ -->
+<div class="assessment" id="assessment">
+  <h2>Closing Assessment</h2>
+  <h3>Strengths, Risks, and Future Work</h3>
+
+  <div class="assessment-block">
+    <div class="assessment-num">01</div>
+    <h4>Strongest Current UX Strengths</h4>
+    <ul>
+      <li><strong>The writing surface is fundamentally sound.</strong> Proper Courier typography, correct screenplay block formatting (action/character/dialogue/parenthetical with appropriate indentation), scene-header structure. The page feels like a screenplay page. This is the foundation — it must not be disrupted.</li>
+      <li><strong>Inline breakdown tags are the right instinct.</strong> Surfacing production data (characters, props, locations) as color-coded highlights within the writing itself — rather than in separate panels — is the correct approach. It keeps the writer in context. The execution needs refinement (lower saturation, less visual competition with prose), but the concept is strong.</li>
+      <li><strong>The design system has excellent bones.</strong> The dark palette with warm amber accent, near-flat 2px radius, no-shadow philosophy, section color system, Inter/Noto Sans Arabic type stack — all of this is mature, intentional, and well-suited to a professional creative tool. The evolution should build on this vocabulary, not replace it.</li>
+      <li><strong>The scene navigator exists and works.</strong> The left sidebar's scene list — numbered scenes with slug-line previews, collapsible by act/sequence — is useful and follows correct screenplay workflow. It needs to be elevated to the sidebar's primary role (currently it shares space with the breakdown accordion, which dilutes both).</li>
+      <li><strong>The dark-theme-first approach is correct</strong> for a writing environment. Extended sessions benefit from reduced eye strain. The warm dark base avoids the cold, institutional feel of pure-black dark modes.</li>
+    </ul>
+  </div>
+
+  <div class="assessment-block">
+    <div class="assessment-num">02</div>
+    <h4>Biggest UX Risks</h4>
+    <ul>
+      <li><strong>Platform chrome contaminating editor identity.</strong> The top navigation bar (Script / Scheduling / Call Sheets / Budgeting / Storyboards) is platform-level navigation that currently lives inside the editor viewport. As the platform grows, this contamination will worsen — more tabs, more features, more chrome that has nothing to do with writing. The editor must have its own viewport boundary that the platform wraps, never penetrates.</li>
+      <li><strong>The "admin panel" sidebar.</strong> The breakdown accordion (CAST (5), PROPS (8), etc.) as the default sidebar creates an inventory-management first impression. If this remains the default view, every new user will perceive the editor as a production management tool rather than a writing environment. The fix is simple (default to scene navigator; move breakdown to a secondary view) but must happen before the pattern calcifies further.</li>
+      <li><strong>Tag visual competition with prose.</strong> The current tag highlighting (bold + color + background) makes tagged words visually louder than surrounding prose. In a script with many tagged elements, the page becomes a coloring book rather than a screenplay. Tags must be subordinate to prose — always. The writer needs to be able to control tag visibility (off / subtle / visible) as a personal preference.</li>
+      <li><strong>Feature-toolbar creep.</strong> The current action bar (5 buttons plus navigation FABs) will grow as features are added. Without a strong containment strategy (command palette as primary access, toolbar limited to 2–3 context-sensitive actions), the toolbar will become an unmanageable strip of competing buttons — the canonical SaaS admin-panel pattern.</li>
+      <li><strong>AI surface competing with writing.</strong> If the "Script AI Dude" button evolves into a persistent sidebar, chatbot panel, or inline suggestion system, it will directly violate the doctrine's "AI assists, never authors" principle. The AI access pattern must be established now — invoked, contained, dismissible — before product pressure pushes toward more aggressive AI presence.</li>
+    </ul>
+  </div>
+
+  <div class="assessment-block">
+    <div class="assessment-num">03</div>
+    <h4>Areas Needing Future Engineering Cooperation</h4>
+    <ul>
+      <li><strong>Inspector panel reactivity.</strong> The contextual inspector (content changes based on cursor position / selection) requires tight integration with the ProseMirror editor state. Engineering must define how cursor-position events propagate to the inspector panel without performance cost.</li>
+      <li><strong>Plugin slot injection system.</strong> The sidebar, inspector, status bar, and toolbar all accept plugin-contributed content. Engineering must build the injection-point API before the second plugin exists, so the contract is tested by both the screenplay plugin and a neutral test plugin.</li>
+      <li><strong>Focus-mode state management.</strong> Deep-writing focus (minimal chrome) vs. breakdown mode (full chrome) vs. review mode (markup visible) requires a state machine that coordinates sidebar visibility, inspector state, tag visibility, and toolbar contents. This should be CORE infrastructure, not per-plugin logic.</li>
+      <li><strong>Tag visibility controls.</strong> The ability to toggle inline tag visibility (off / subtle / visible) per tag category and globally requires coordination between the ProseMirror schema decoration system and a user-preference layer. Engineering should design this as a CORE capability that plugins configure.</li>
+      <li><strong>Platform / editor viewport separation.</strong> The editor must render inside a bounded viewport that the platform chrome (navigation, project management, account UI) wraps. This is likely an iframe or a well-defined DOM boundary. Engineering must define this boundary before the platform grows further.</li>
+    </ul>
+  </div>
+
+  <div class="assessment-block">
+    <div class="assessment-num">04</div>
+    <h4>Areas Requiring Future Visual Exploration</h4>
+    <ul>
+      <li><strong>Tag visual design at reduced saturation.</strong> The current full-saturation tags need to be redesigned at 60–70% saturation with thinner underlines and optional backgrounds. This requires visual exploration — the tags must remain distinguishable from each other while being subordinate to the prose. Color accessibility across the dark and light themes adds complexity.</li>
+      <li><strong>Inspector panel content design.</strong> The contextual inspector has many potential content types (scene notes, character cards, AI variations, revision history, breakdown detail). Each needs a distinct but harmonious visual treatment within the inspector's 280px constraint. This is a significant design surface that needs its own exploration phase.</li>
+      <li><strong>Focus-mode transitions.</strong> How exactly does chrome fade during deep writing? How does the status bar dim? How does the sidebar collapse feel? These transitions are small but define the editor's personality. They need motion-design exploration — not as spec, but as feel.</li>
+      <li><strong>New-document type chooser.</strong> When multiple plugins coexist, the New Document flow must offer doc-type selection. This is a first-impression surface — it communicates "this editor supports multiple writing forms" without overwhelming. Needs careful visual exploration to avoid both under-designed (plain list) and over-designed (wizard/onboarding) extremes.</li>
+      <li><strong>Screenplay-specific page chrome.</strong> Scene headers, act breaks, page breaks, MORE/CONT'D markers — these are screenplay-plugin-contributed page elements that live on the writing surface. They need visual design that's distinct from body text but doesn't feel like UI widgets on the page. The current scene-header styling (yellow left-border, tinted background) is a starting point but needs refinement.</li>
+      <li><strong>Collaborative annotation visual language.</strong> Comments, review marks, production notes, revision indicators — each needs a visual identity that's distinguishable from the others and from the writer's own content. This is a future exploration that should happen before the platform's collaboration features are implemented.</li>
+    </ul>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     STOP
+     ═══════════════════════════════════════════════════════ -->
+<div class="stop-marker">
+  <span>STOP</span>
+</div>
+
+</body>
+</html>
