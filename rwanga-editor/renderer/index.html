@@ -643,6 +643,11 @@
      first-paint mode decision. init() is called in the boot script. -->
 <script src="js/shell/responsive.js"></script>
 <script src="js/shell/sidebar.js"></script>
+<!-- Filmustageation F1A.3 — neutral inspector content registry,
+     parallel to Rga.Shell.Sidebar. Loads after sidebar.js for
+     naming-parallel ordering; setHost is called by Rga.Shell.init
+     once the .inspector-body element is reachable. -->
+<script src="js/shell/inspector.js"></script>
 <!-- Keyboard Registry — Runtime Ownership Stab. Slice 2 SSOT.
      Must load before every consumer (Rga.Keyboard shim, shell/index.js,
      view-mode.js) so they can call .register() at boot. -->

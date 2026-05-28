@@ -42,6 +42,18 @@
     // Wire the sidebar host BEFORE rail init so panel mounts have a target.
     Rga.Shell.Sidebar.setHost(sidebarHost);
 
+    // F1A.3 — wire the Inspector content host. The element is the
+    // .inspector-body inside #inspector-panel. The module captures
+    // the existing empty-state HTML at this call so a future
+    // deactivate / mount-error restore returns to the pristine state.
+    // No panels are registered yet (F1A.3 is frame-only); the
+    // registry stays dormant — the static empty state remains visible.
+    if (Rga.Shell.Inspector && typeof Rga.Shell.Inspector.setHost === 'function') {
+      const inspectorBody = document.querySelector(
+        '#inspector-panel .inspector-body');
+      if (inspectorBody) Rga.Shell.Inspector.setHost(inspectorBody);
+    }
+
     // Render the rail from whatever panels have IIFE-registered themselves.
     Rga.Shell.ActivityRail.init(railContainer);
 
