@@ -71,19 +71,21 @@ test('§D3: Note + Flag buttons exist with the right data-command', () => {
     'Flag button must declare data-command="writing.flag"');
 });
 
-test('§D3: Tag dropdown exists with id="rga-shell-toolbar-tag" + aria-label', () => {
+test('§D3 (superseded by F1A.7): Tag dropdown is now plugin-owned (lives in doc-types/screenplay/toolbar-tag.js, no longer in CORE index.html)', () => {
+  // Filmustageation F1A.7 (2026-05-29) moved the Tag dropdown out of
+  // CORE static HTML into the screenplay plugin via the F1A.6
+  // toolbar contribution API. The pre-F1A.7 assertion (a <select
+  // id="rga-shell-toolbar-tag"> in index.html with 9 options) is
+  // inverted: the select MUST NOT appear in CORE HTML now.
   const html = read(INDEX_HTML);
-  const selectMatch = html.match(/<select[^>]*id="rga-shell-toolbar-tag"[\s\S]*?<\/select>/);
-  assert.ok(selectMatch, '#rga-shell-toolbar-tag select must exist');
-  assert.ok(/aria-label\s*=/.test(selectMatch[0]),
-    'tag select must declare aria-label (G-OC-8)');
-  // The tag options must mirror the Scene Toolbox tag list — all
-  // 9 categories + the placeholder.
-  ['character', 'prop', 'wardrobe', 'location', 'sfx', 'vfx', 'vehicle', 'animal', 'custom'].forEach(function(t) {
-    const re = new RegExp('<option[^>]*value="' + t + '"');
-    assert.ok(re.test(selectMatch[0]),
-      'tag select must include option value="' + t + '"');
-  });
+  assert.equal(/id="rga-shell-toolbar-tag"/.test(html), false,
+    'tag <select id="rga-shell-toolbar-tag"> must NOT live in CORE index.html — owned by doc-types/screenplay/toolbar-tag.js');
+  // Cross-check: the static writing group must keep ONLY Note / Flag
+  // / Undo / Redo — no tag select inside it.
+  const writingMatch = html.match(/<div class="rga-shell-toolbar-group" data-group="writing">([\s\S]*?)<\/div>/);
+  assert.ok(writingMatch, 'Writing group must still exist in CORE HTML');
+  assert.equal(/<select/.test(writingMatch[1]), false,
+    'Writing group must contain no <select> — it carries only Note/Flag/Undo/Redo buttons');
 });
 
 test('§D3: Undo + Redo buttons exist with data-command="edit.undo|redo" (§A4.1 commands)', () => {
@@ -134,18 +136,17 @@ test('§D3: Undo / Redo NOT re-registered in format-toolbar.js (consume the §A4
 // 5. Tag dispatch shared with Scene Toolbox (no duplicate logic)
 // ----------------------------------------------------------------
 
-test('§D3: Tag dispatch routes through the existing applyTagFromSelection', () => {
+test('§D3 (superseded by F1A.7): tag dispatch is plugin-owned (applyTagFromSelection removed from CORE)', () => {
+  // F1A.7 (2026-05-29): the dispatch helper moved to
+  // doc-types/screenplay/toolbar-tag.js. CORE no longer references
+  // it. The pre-F1A.7 assertion (Row 3 handler in format-toolbar.js
+  // calls applyTagFromSelection, which is a CORE function) is
+  // inverted: both must be absent in CORE.
   const src = read(FORMAT_TOOLBAR_JS);
-  // §A Shell Final Polish retired the Scene Toolbox; only the Row 3
-  // tag dropdown remains. applyTagFromSelection is still the single
-  // logic owner — Row 3 routes through it.
-  const row3Tag = src.match(/rga-shell-toolbar-tag[\s\S]{0,500}\}\);/);
-  assert.ok(row3Tag, 'rga-shell-toolbar-tag handler must exist');
-  assert.ok(/applyTagFromSelection/.test(row3Tag[0]),
-    'Row 3 tag handler must call applyTagFromSelection');
-  // The single owner still exists in the file.
-  assert.ok(/function applyTagFromSelection\b/.test(src),
-    'applyTagFromSelection helper must still exist (single tagging logic owner)');
+  assert.equal(/function applyTagFromSelection\b/.test(src), false,
+    'applyTagFromSelection must NOT live in CORE format-toolbar.js — moved to plugin');
+  assert.equal(/applyTagFromSelection\s*\(/.test(src), false,
+    'CORE format-toolbar.js must not call applyTagFromSelection');
 });
 
 // ----------------------------------------------------------------
@@ -174,13 +175,18 @@ test('§D3: D1.1 manuscript alignment contract intact (.rga-shell-toolbar-inner 
     '.rga-shell-toolbar-inner must still consume var(--page-width) — D1.1 alignment preserved');
 });
 
-test('§D3: D2 scene tools intact (scene.insert + #rga-shell-toolbar-blocktype unchanged)', () => {
+test('§D3 (superseded by F1A.6/F1A.7): scene + tag tools live in screenplay plugin, not CORE', () => {
+  // F1A.6 (scene group) + F1A.7 (tag group) moved these into
+  // doc-types/screenplay/toolbar*.js. The D3 pre-condition that
+  // scene.insert + #rga-shell-toolbar-blocktype + the tag select
+  // live in CORE HTML/JS is inverted: all three are now absent in
+  // CORE and present in the plugin files.
   const html = read(INDEX_HTML);
   const src  = read(FORMAT_TOOLBAR_JS);
-  assert.ok(/<button[^>]*data-command="scene\.insert"/.test(html),
-    '+ Scene button must still exist (D2)');
-  assert.ok(/<select[^>]*id="rga-shell-toolbar-blocktype"/.test(html),
-    'block-type dropdown must still exist (D2)');
-  assert.ok(/registerCommand\(\{[^}]*command:\s*['"]scene\.insert['"]/.test(src),
-    'scene.insert must still be registered (D2)');
+  assert.equal(/data-command="scene\.insert"/.test(html), false,
+    '+ Scene button must NOT live in CORE index.html (owned by screenplay/toolbar.js)');
+  assert.equal(/id="rga-shell-toolbar-blocktype"/.test(html), false,
+    'block-type dropdown must NOT live in CORE index.html (owned by screenplay/toolbar.js)');
+  assert.equal(/registerCommand\(\{[^}]*command:\s*['"]scene\.insert['"]/.test(src), false,
+    'scene.insert must NOT be registered by CORE format-toolbar.js (owned by screenplay/toolbar.js)');
 });

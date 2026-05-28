@@ -108,10 +108,16 @@ test('F1A.6 — Row 3 visible group order matches pre-F1A.6 chrome', async () =>
       }
       return seq;
     });
+    // F1A.7 (2026-05-29): the screenplay plugin now contributes a
+    // second group ('tag') at order 300 — landing inside the same
+    // content slot after 'scene', with its own leading separator.
+    // The static writing + mode segments are unchanged.
     expect(layout).toEqual([
       'group:text',
       'sep',          // plugin-inserted leading sep for scene
-      'group:scene',  // plugin-mounted
+      'group:scene',  // plugin-mounted at order 200
+      'sep',          // plugin-inserted leading sep for tag
+      'group:tag',    // plugin-mounted at order 300 (F1A.7)
       'sep',          // static sep between content-slot and writing
       'group:writing',
       'sep',          // static sep between writing and mode

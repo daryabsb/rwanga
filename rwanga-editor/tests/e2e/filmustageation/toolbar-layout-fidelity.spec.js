@@ -81,7 +81,16 @@ test('F1A.6A — .rga-shell-toolbar-content-slot resolves to display: contents',
 //    slot, so its top edge sat noticeably below text/writing/mode.
 // =================================================================
 
-test('F1A.6A — every toolbar group renders on a single horizontal line (top edges aligned)', async () => {
+test('F1A.6A — every toolbar group renders on a single horizontal line (vertical centers aligned)', async () => {
+  // F1A.7 (2026-05-29) note: the tolerance widened from ±1px (top
+  // edges) to ±2px on vertical centers. The toolbar's inner band uses
+  // `align-items: center`, so when groups have different intrinsic
+  // heights (e.g., the F1A.7 Tag group is just a native <select>,
+  // taller-text groups have buttons that lift the group's bbox), top
+  // edges legitimately differ by a few pixels even though the
+  // controls visually center on the same line. The right invariant
+  // is "centers aligned," which is what `align-items: center` actually
+  // guarantees.
   const { app, page, userDataDir } = await launchApp();
   try {
     const rects = await page.evaluate(() => {
@@ -94,14 +103,15 @@ test('F1A.6A — every toolbar group renders on a single horizontal line (top ed
           x:      Math.round(r.x),
           y:      Math.round(r.y),
           width:  Math.round(r.width),
-          height: Math.round(r.height)
+          height: Math.round(r.height),
+          cy:     Math.round(r.y + r.height / 2)
         };
       });
     });
     expect(rects.length).toBeGreaterThan(0);
-    const firstY = rects[0].y;
+    const firstCy = rects[0].cy;
     rects.forEach((r) => {
-      expect(Math.abs(r.y - firstY)).toBeLessThanOrEqual(1);
+      expect(Math.abs(r.cy - firstCy)).toBeLessThanOrEqual(2);
       expect(r.width).toBeGreaterThan(0);
       expect(r.height).toBeGreaterThan(0);
     });
@@ -126,8 +136,11 @@ test('F1A.6A — toolbar groups flow left-to-right without overlap', async () =>
         right: el.getBoundingClientRect().right
       }));
     });
+    // F1A.7 (2026-05-29): expected sequence grew to include the 'tag'
+    // group (between 'scene' at order 200 and the static 'writing'
+    // group). The L→R + no-overlap invariant still holds.
     expect(rects.map((r) => r.dataGroup))
-      .toEqual(['text', 'scene', 'writing', 'mode']);
+      .toEqual(['text', 'scene', 'tag', 'writing', 'mode']);
     for (let i = 1; i < rects.length; i += 1) {
       const prev = rects[i - 1];
       const cur  = rects[i];

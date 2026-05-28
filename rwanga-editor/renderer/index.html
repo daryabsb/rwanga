@@ -140,34 +140,27 @@
              hosts; with screenplay loaded the visible Row-3 layout
              is identical. -->
       <div class="rga-shell-toolbar-content-slot" data-toolbar-slot="content"></div>
-      <!-- §D3 — Writing tools group. Note + Flag + Tag reuse the
-           existing format-toolbar.js handlers (openAnnotationDialog /
-           openFlagPopup / applyTagFromSelection) that the Scene
-           Toolbox also calls — one logic, two surfaces (same dedup
-           pattern §D2 used for block-type). Undo + Redo route through
-           the §A4.1 edit.undo / edit.redo commands (already registered
-           by index.html's registerMenuCommands — no new ownership).
-           Icon policy: no vendored icons for note/flag/tag/undo/redo
-           → text labels per the §D3 brief. -->
+      <!-- §D3 — Writing tools group. CORE-owned controls only:
+           Note + Flag (annotations / revision flags — both
+           document-neutral concerns) and Undo + Redo (edit-history
+           verbs owned by §A4.1's edit.undo / edit.redo commands; no
+           new ownership here, the buttons just declare data-command).
+             The Tag dropdown previously lived between Flag and Undo
+           inside this group. It was screenplay production vocabulary
+           (character / prop / wardrobe / location / sfx / vfx /
+           vehicle / animal / custom) hard-coded in CORE HTML — a
+           Doctrine Law 8 contamination. Filmustageation F1A.7
+           (2026-05-29) moved it into the screenplay plugin via the
+           F1A.6 toolbar contribution API. It now mounts inside the
+           plugin slot above as its own group (order 300, after Scene
+           at 200), which renders visually just before this Writing
+           group. -->
       <div class="rga-shell-toolbar-group-sep" role="separator" aria-hidden="true"></div>
       <div class="rga-shell-toolbar-group" data-group="writing">
         <button class="rga-shell-toolbar-btn rga-shell-toolbar-btn--text"
                 data-command="writing.note" type="button" title="Add note to selection">Note</button>
         <button class="rga-shell-toolbar-btn rga-shell-toolbar-btn--text"
                 data-command="writing.flag" type="button" title="Flag selection for revision">Flag</button>
-        <select class="rga-shell-toolbar-tag" id="rga-shell-toolbar-tag"
-                aria-label="Tag selected text" title="Tag selected text">
-          <option value="">Tag…</option>
-          <option value="character">Character</option>
-          <option value="prop">Prop</option>
-          <option value="wardrobe">Wardrobe</option>
-          <option value="location">Location</option>
-          <option value="sfx">SFX</option>
-          <option value="vfx">VFX</option>
-          <option value="vehicle">Vehicle</option>
-          <option value="animal">Animal</option>
-          <option value="custom">Custom</option>
-        </select>
         <div class="rga-shell-toolbar-sep" role="separator" aria-hidden="true"></div>
         <button class="rga-shell-toolbar-btn rga-shell-toolbar-btn--text"
                 data-command="edit.undo" type="button" title="Undo">Undo</button>
@@ -735,6 +728,13 @@
      vocabulary and the scene.insert command out of CORE
      format-toolbar.js into plugin ownership. -->
 <script src="js/doc-types/screenplay/toolbar.js"></script>
+<!-- Filmustageation F1A.7 — screenplay-owned Tag toolbar group.
+     Registers via Rga.Shell.Toolbar.registerGroup at order 300 with
+     the production-vocabulary tag dropdown (character / prop /
+     wardrobe / location / sfx / vfx / vehicle / animal / custom).
+     Moves the dropdown + its applyTagFromSelection handler out of
+     CORE format-toolbar.js + index.html into plugin ownership. -->
+<script src="js/doc-types/screenplay/toolbar-tag.js"></script>
 <!-- Cross-schema mark plugins — work on the v3 doc via PM marks. -->
 <script src="js/doc-types/screenplay/plugins/context-menu.js"></script>
 <script src="js/doc-types/screenplay/plugins/annotations.js"></script>

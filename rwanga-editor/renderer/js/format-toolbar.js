@@ -235,28 +235,15 @@
   }
 
   // ============================================================
-  // Tag selection (Scene toolbox)
+  // Tag selection — F1A.7 (2026-05-29) — applyTagFromSelection and
+  // the Row 3 tag <select> change handler MOVED to the screenplay
+  // plugin (doc-types/screenplay/toolbar-tag.js). CORE no longer
+  // knows about the production tag vocabulary; the dropdown and its
+  // wiring are plugin-owned. The schema's `tag` mark + Rga.Doc's
+  // tag_registry remain (the data model is still screenplay-shaped,
+  // tracked separately as `framework/screenplay-normalizer.js`
+  // drift in the doctrine).
   // ============================================================
-
-  function applyTagFromSelection(tagType) {
-    if (!tagType) return;
-    const view = _view();
-    if (!view) return;
-    const { from, to, empty } = view.state.selection;
-    if (empty) return;
-    const text = view.state.doc.textBetween(from, to, ' ').trim();
-    if (!text) return;
-    const doc = Rga.TabManager && Rga.TabManager.activeDoc && Rga.TabManager.activeDoc();
-    if (!doc || !Rga.Doc || typeof Rga.Doc.addEntity !== 'function') return;
-    // Add to tag_registry, get its id
-    const entityId = Rga.Doc.addEntity(doc, tagType, { name: text, color: null });
-    const mt = view.state.schema.marks.tag;
-    if (!mt) return;
-    view.dispatch(view.state.tr.addMark(from, to, mt.create({ tagType: tagType, entityId: entityId })));
-    view.focus();
-    // Mark doc dirty so save knows
-    if (Rga.Doc.markDirty) Rga.Doc.markDirty(doc);
-  }
 
   // ============================================================
   // Annotation + Revision flag dialogs
@@ -550,19 +537,12 @@
     // routed via writing.note → openAnnotationDialog).
     wireAnnotationDialog();
 
-    // §D3 — Row 3 Tag dropdown. Calls applyTagFromSelection (the
-    // single tagging logic). After applying, reset the dropdown to
-    // its placeholder option so re-selecting the same tag re-fires
-    // the change event.
-    const row3Tag = document.getElementById('rga-shell-toolbar-tag');
-    if (row3Tag) {
-      row3Tag.addEventListener('change', function() {
-        const t = row3Tag.value;
-        if (!t) return;
-        applyTagFromSelection(t);
-        row3Tag.value = '';
-      });
-    }
+    // §D3 — Row 3 Tag dropdown wiring moved to the screenplay plugin
+    // in F1A.7 (2026-05-29). The dropdown is now mounted by the
+    // plugin's toolbar contribution at order 300 (between the Scene
+    // group and the static Writing group) and its change handler
+    // lives in doc-types/screenplay/toolbar-tag.js. CORE no longer
+    // queries #rga-shell-toolbar-tag.
 
     // §D4 — Mode toggle (Screenplay / Text). State owned by
     // Rga.Shell.Layout.toolbar.mode (existing shell-truth surface;
