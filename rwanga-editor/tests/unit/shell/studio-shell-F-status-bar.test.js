@@ -85,7 +85,13 @@ function boot(opts) {
    '../../../renderer/js/shell/sidebar.js',
    '../../../renderer/js/shell/script-session.js',
    '../../../renderer/js/shell/script-metrics.js',
-   '../../../renderer/js/shell/status-bar.js'
+   '../../../renderer/js/shell/status-bar.js',
+   // F1A.4 — the screenplay status-bar contribution registers the
+   // four screenplay-owned segments (scene / blockType / page /
+   // language) that pre-F1A.4 lived inside CORE. The §F invariants
+   // below require the full 8-segment surface, so we load the
+   // contribution file in this test's boot.
+   '../../../renderer/js/doc-types/screenplay/status-bar.js'
   ].forEach(function(p) { delete require.cache[require.resolve(p)]; require(p); });
 
   const Rga = global.window.Rga;

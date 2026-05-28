@@ -83,7 +83,12 @@ function boot(opts) {
    // ScriptMetrics (delegating layer over ScriptSession). Must load
    // before status-bar.js so the consumer can find it.
    '../../../renderer/js/shell/script-metrics.js',
-   '../../../renderer/js/shell/status-bar.js'
+   '../../../renderer/js/shell/status-bar.js',
+   // F1A.4 — scene / blockType / page / language are screenplay-
+   // contributed segments now. The pre-F1A.4 status-bar.test.js
+   // assertions about those segments still hold, but they require
+   // the screenplay contribution file to be loaded.
+   '../../../renderer/js/doc-types/screenplay/status-bar.js'
   ].forEach(function(p) { delete require.cache[require.resolve(p)]; require(p); });
 
   const Rga = global.window.Rga;

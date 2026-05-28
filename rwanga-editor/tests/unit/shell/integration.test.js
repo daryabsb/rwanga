@@ -33,6 +33,11 @@ function boot(opts) {
    '../../../renderer/js/shell/activity-rail.js',
    '../../../renderer/js/shell/script-session.js',
    '../../../renderer/js/shell/status-bar.js',
+   // F1A.4 — the screenplay status-bar contribution registers scene /
+   // blockType / page / language segments. The integration boot
+   // requires the screenplay contribution so the legacy 8-segment
+   // assertion downstream still holds.
+   '../../../renderer/js/doc-types/screenplay/status-bar.js',
    '../../../renderer/js/shell/panels/scene-navigator.js',
    '../../../renderer/js/shell/panels/script-workspace.js',
    '../../../renderer/js/shell/panels/outline.js',

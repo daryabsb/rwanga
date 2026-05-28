@@ -715,6 +715,12 @@
 <!-- Screenplay doc-type registration — wires Rga.DocTypes.screenplay
      into the registry with selectSchema → buildSchemaV3. -->
 <script src="js/doc-types/screenplay/index.js"></script>
+<!-- Filmustageation F1A.4 — screenplay status-bar contribution. Calls
+     Rga.Shell.StatusBar.registerSegment for scene / blockType / page /
+     language. Loads after shell/status-bar.js so the registry exists,
+     and after doc-types/screenplay/index.js so the plugin order is
+     coherent. -->
+<script src="js/doc-types/screenplay/status-bar.js"></script>
 <!-- Cross-schema mark plugins — work on the v3 doc via PM marks. -->
 <script src="js/doc-types/screenplay/plugins/context-menu.js"></script>
 <script src="js/doc-types/screenplay/plugins/annotations.js"></script>
