@@ -1,13 +1,18 @@
 // Copyright (c) 2026 Rwanga. Licensed under Apache 2.0.
-// Editor settings applicators — Slice 4A.
+// Editor settings applicators — Slice 4A + S9.1.
 //
 // Wires editor.* settings (fontFamily, fontSize, lineHeight,
-// spellcheck) through Rga.Settings.Applicators. editor.highlight-
-// CurrentLine remains wired by its own module from Slice 2/3D.
+// spellcheck, scriptLanguage) through Rga.Settings.Applicators.
+// editor.highlightCurrentLine remains wired by its own module from
+// Slice 2/3D, consolidated into editor-applicators.js in 4A.
 //
-// Out of Slice 4A: autocomplete (no engine yet), wordWrap (needs
-// column-mode switcher), showLineNumbers (conflicts with the Phase 3
-// Flow View gutter default — needs a UX decision).
+// S9.1 (2026-05-28) wires the previously-deferred trio:
+//   - editor.wordWrap        → body[data-word-wrap]
+//   - editor.autocomplete    → body[data-autocomplete] + stub flag
+//   - editor.showLineNumbers → body.rga-no-line-numbers (CSS hides
+//                              .flow-line-gutter); default flipped
+//                              false → true to match the locked Flow
+//                              gutter visible-default.
 'use strict';
 
 const { test } = require('node:test');
@@ -52,35 +57,36 @@ function loadAll() {
 // §1 — Registered ids: every wired id present; every deferred id absent
 // ----------------------------------------------------------------
 
-test('Slice 4A — editor-applicators registers exactly the wired editor settings', async () => {
+test('Slice 4A + S9.1 — editor-applicators registers exactly the wired editor settings', async () => {
   bootDom();
   const S = loadAll();
   await S.Store.init();
   const ids = S.Applicators.registered().sort();
-  // Wired in this slice + the proof from Slice 2/3D.
-  // S12 added editor.scriptLanguage (promoted from the legacy
-  // localStorage('rga-script-lang') path) — see renderer/js/editor/
-  // editor-applicators.js and tests/unit/shell/ownership-stab-slice2
-  // .test.js §S12 §4.
+  // S9.1 (2026-05-28): autocomplete + wordWrap + showLineNumbers
+  // promoted from PERSISTS_ONLY to REAL. The inventory now covers the
+  // entire editor.* group in the registry.
   assert.deepEqual(ids, [
+    'editor.autocomplete',
     'editor.fontFamily',
     'editor.fontSize',
     'editor.highlightCurrentLine',
     'editor.lineHeight',
     'editor.scriptLanguage',
-    'editor.spellcheck'
-  ], 'applicator inventory must match the wired set (deferred ids must not appear)');
+    'editor.showLineNumbers',
+    'editor.spellcheck',
+    'editor.wordWrap'
+  ], 'applicator inventory must match the S9.1 wired set');
 });
 
-test('Slice 4A — deferred editor settings are NOT registered (autocomplete / wordWrap / showLineNumbers)', () => {
+test('S9.1 — previously-deferred editor settings are NOW registered', () => {
   bootDom();
   const S = loadAll();
-  // No applicator may be registered for any of these — wiring them
-  // without real behavior is the anti-pattern the slice scope forbids.
+  // S9.1 inverts the prior Slice-4A "NOT registered" assertion.
   ['editor.autocomplete', 'editor.wordWrap', 'editor.showLineNumbers']
     .forEach(function(id) {
-      assert.equal(S.Applicators.get(id), null,
-        'Deferred id "' + id + '" must NOT have a registered applicator');
+      const a = S.Applicators.get(id);
+      assert.ok(a, 'S9.1 id "' + id + '" must have a registered applicator');
+      assert.equal(a.owner, 'editor', id + ': owner must be "editor"');
     });
 });
 
@@ -88,7 +94,10 @@ test('Slice 4A — every wired id has an owner of "editor"', () => {
   bootDom();
   const S = loadAll();
   ['editor.fontFamily', 'editor.fontSize', 'editor.lineHeight',
-   'editor.spellcheck', 'editor.highlightCurrentLine']
+   'editor.spellcheck', 'editor.highlightCurrentLine',
+   'editor.scriptLanguage',
+   // S9.1 additions
+   'editor.autocomplete', 'editor.wordWrap', 'editor.showLineNumbers']
     .forEach(function(id) {
       const a = S.Applicators.get(id);
       assert.ok(a, id + ' must have an applicator');
@@ -139,6 +148,60 @@ test('Slice 4A — editor.spellcheck toggles the spellcheck attribute on #editor
   assert.equal(dom.window.document.getElementById('editor').getAttribute('spellcheck'), 'true');
   S.Applicators.apply('editor.spellcheck', false);
   assert.equal(dom.window.document.getElementById('editor').getAttribute('spellcheck'), 'false');
+});
+
+// ----------------------------------------------------------------
+// S9.1 — new applicators push to <body> + (autocomplete) stub flag
+// ----------------------------------------------------------------
+
+test('S9.1 — editor.wordWrap writes data-word-wrap on <body> (page | viewport | off)', async () => {
+  const dom = bootDom();
+  const S = loadAll();
+  await S.Store.init();
+  S.Applicators.apply('editor.wordWrap', 'page');
+  assert.equal(dom.window.document.body.getAttribute('data-word-wrap'), 'page');
+  S.Applicators.apply('editor.wordWrap', 'viewport');
+  assert.equal(dom.window.document.body.getAttribute('data-word-wrap'), 'viewport');
+  S.Applicators.apply('editor.wordWrap', 'off');
+  assert.equal(dom.window.document.body.getAttribute('data-word-wrap'), 'off');
+  // Defensive: unknown values normalise to 'page'.
+  S.Applicators.apply('editor.wordWrap', 'bogus');
+  assert.equal(dom.window.document.body.getAttribute('data-word-wrap'), 'page');
+});
+
+test('S9.1 — editor.autocomplete writes data-autocomplete on <body> + calls stub setEnabled when present', async () => {
+  const dom = bootDom();
+  const S = loadAll();
+  await S.Store.init();
+  // Install a stub Rga.Autocomplete so the applicator's hook is exercised.
+  const calls = [];
+  dom.window.Rga.Autocomplete = { setEnabled: function(v) { calls.push(v); } };
+  S.Applicators.apply('editor.autocomplete', true);
+  assert.equal(dom.window.document.body.getAttribute('data-autocomplete'), 'on');
+  S.Applicators.apply('editor.autocomplete', false);
+  assert.equal(dom.window.document.body.getAttribute('data-autocomplete'), 'off');
+  assert.deepEqual(calls, [true, false], 'stub flag must mirror Store value');
+});
+
+test('S9.1 — editor.autocomplete is tolerant when Rga.Autocomplete is absent (engine ships later)', async () => {
+  const dom = bootDom();
+  const S = loadAll();
+  await S.Store.init();
+  delete dom.window.Rga.Autocomplete;
+  S.Applicators.apply('editor.autocomplete', true);  // must not throw
+  assert.equal(dom.window.document.body.getAttribute('data-autocomplete'), 'on');
+});
+
+test('S9.1 — editor.showLineNumbers toggles .rga-no-line-numbers on <body> (inverse polarity)', async () => {
+  const dom = bootDom();
+  const S = loadAll();
+  await S.Store.init();
+  S.Applicators.apply('editor.showLineNumbers', true);
+  assert.equal(dom.window.document.body.classList.contains('rga-no-line-numbers'), false,
+    'ON → class absent (gutter visible via .view-flow rule)');
+  S.Applicators.apply('editor.showLineNumbers', false);
+  assert.equal(dom.window.document.body.classList.contains('rga-no-line-numbers'), true,
+    'OFF → class present (CSS hides .flow-line-gutter)');
 });
 
 test('Slice 4A — editor.highlightCurrentLine still toggles rga-line-highlight-on (regression)', async () => {

@@ -37,11 +37,12 @@ async function launch(userDataDir) {
 }
 
 // A known PERSISTS_ONLY entry (no applicator today). Stable across the
-// arc — autosave.enabled stays PERSISTS_ONLY until its applicator
-// lands in a future slice. If it becomes REAL, this test will report
-// the change explicitly.
-const PERSISTS_ONLY_ID = 'autosave.enabled';
-const PERSISTS_ONLY_SECTION = 'autosave';
+// arc — appearance.minimap stays PERSISTS_ONLY until an overview
+// engine ships. If it becomes REAL, this test will report the change
+// explicitly. S9.1 (2026-05-28) swapped this from autosave.enabled
+// (now REAL via Rga.Autosave.setEnabled) to appearance.minimap.
+const PERSISTS_ONLY_ID = 'appearance.minimap';
+const PERSISTS_ONLY_SECTION = 'appearance';
 
 // A known REAL entry — wired in H2.
 const REAL_ID = 'theme';
@@ -125,7 +126,7 @@ test('H3 — attempting to interact with a PERSISTS_ONLY control does NOT call S
     });
 
     const before = await page.evaluate(() =>
-      window.Rga.Settings.Store.get('autosave.enabled', 'user'));
+      window.Rga.Settings.Store.get('appearance.minimap', 'user'));
 
     // Try to interact. The control is disabled, so click should be a
     // no-op; we also dispatch a synthetic change event in case some
@@ -143,9 +144,9 @@ test('H3 — attempting to interact with a PERSISTS_ONLY control does NOT call S
     });
 
     const after = await page.evaluate(() =>
-      window.Rga.Settings.Store.get('autosave.enabled', 'user'));
+      window.Rga.Settings.Store.get('appearance.minimap', 'user'));
     const setCalls = await page.evaluate(() =>
-      window.__setCalls.filter((c) => c.id === 'autosave.enabled'));
+      window.__setCalls.filter((c) => c.id === 'appearance.minimap'));
 
     expect(setCalls.length).toBe(0);   // no Store.set for this id
     expect(after).toBe(before);         // user tier unchanged

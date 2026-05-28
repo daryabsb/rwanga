@@ -9,11 +9,21 @@
 
   const C = Rga.Constants || {};
   const DEBOUNCE_MS = C.AUTOSAVE_DEBOUNCE_MS || 2000;
-  const MAX_INTERVAL_MS = C.AUTOSAVE_MAX_INTERVAL_MS || 10000;
+  const DEFAULT_MAX_INTERVAL_MS = C.AUTOSAVE_MAX_INTERVAL_MS || 10000;
   const SCHEMA_VERSION = 1;
 
   // docId -> { lastSnapshotAt: number, debounceTimer: timerId|null }
   const _state = new Map();
+
+  // S9.1 — Settings-driven gates.
+  //   _enabled       — when false, notifyChange short-circuits; no
+  //                    snapshots written, no debounce armed. Persists
+  //                    via the `autosave.enabled` Store entry.
+  //   _maxIntervalMs — max-interval ceiling. Persists via the
+  //                    `autosave.interval` Store entry (seconds, the
+  //                    applicator converts to ms here).
+  let _enabled = true;
+  let _maxIntervalMs = DEFAULT_MAX_INTERVAL_MS;
 
   // Sync the latest editor content into doc.body before serializing — only for
   // the active document (its live edits are in the EditorView, not doc.body).
@@ -53,6 +63,11 @@
   // Called by Rga.Doc.markDirty on every document-changing edit.
   function notifyChange(doc) {
     if (!doc || !doc.docId) return;
+    // S9.1 gate: when autosave.enabled is false, drop the notification
+    // entirely. No capture, no snapshot, no debounce. This preserves
+    // the existing per-doc state map untouched so re-enabling autosave
+    // resumes from the same point.
+    if (!_enabled) return;
     _capture(doc);
     const id = doc.docId;
     const st = _state.get(id);
@@ -64,7 +79,7 @@
       return;
     }
     // Already dirty: enforce the max interval, then (re)arm the debounce.
-    if (now - st.lastSnapshotAt >= MAX_INTERVAL_MS) {
+    if (now - st.lastSnapshotAt >= _maxIntervalMs) {
       _writeSnapshot(doc);
       st.lastSnapshotAt = now;
     }
@@ -87,7 +102,32 @@
   function _reset() {
     _state.forEach(function(st) { if (st.debounceTimer) clearTimeout(st.debounceTimer); });
     _state.clear();
+    _enabled = true;
+    _maxIntervalMs = DEFAULT_MAX_INTERVAL_MS;
   }
 
-  Rga.Autosave = { notifyChange, notifyClean, _reset, _state: _state };
+  // S9.1 — Settings-driven control points. Both are called by the
+  // `autosave.enabled` and `autosave.interval` applicators in
+  // shell-applicators.js; they are also safe to call from tests.
+  function setEnabled(v) {
+    _enabled = !!v;
+  }
+  function setInterval(seconds) {
+    // Defensive: any non-positive number falls back to the registry
+    // default (30 seconds) to match the applicator's clamp.
+    const s = (typeof seconds === 'number' && Number.isFinite(seconds) && seconds > 0)
+      ? Math.floor(seconds)
+      : 30;
+    _maxIntervalMs = s * 1000;
+  }
+
+  Rga.Autosave = {
+    notifyChange, notifyClean,
+    setEnabled, setInterval,
+    _reset,
+    _state: _state,
+    // Read-only views for tests / debug overlays.
+    _isEnabled: function() { return _enabled; },
+    _maxIntervalMs: function() { return _maxIntervalMs; }
+  };
 })();

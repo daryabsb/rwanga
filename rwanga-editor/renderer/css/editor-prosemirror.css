@@ -49,6 +49,13 @@
 #editor-container.view-flow .flow-line-gutter {
   display: block;
 }
+/* S9.1 — editor.showLineNumbers OFF state.
+   Specificity (1,2,2,1) beats the .view-flow rule above (0,2,1) so the
+   gutter hides cleanly when the user opts out. Default registry value
+   is true (gutter visible — preserves the locked Flow chrome). */
+body.rga-no-line-numbers #editor-container.view-flow .flow-line-gutter {
+  display: none;
+}
 /* ---- Page row + line gutter (Flow only by default) ---- */
 .rga-page-row {
   display: flex;

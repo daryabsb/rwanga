@@ -1,12 +1,12 @@
 // Copyright (c) 2026 Rwanga. Licensed under Apache 2.0.
-// Shell / appearance settings applicators — Slice 4B.
+// Shell / appearance settings applicators — Slice 4B + S9.1.
 //
 // Wires the appearance.* settings that have real, low-risk
 // behavior today. Each handler is one register() call against
 // Rga.Settings.Applicators (Slice 3D); the registry owns the
 // Store subscription and the boot-time applyAll() fanout.
 //
-// Wired:
+// Wired (Slice 4B):
 //   - appearance.editorDeskColor → --editor-bg on documentElement
 //   - appearance.statusBar       → toggle .rga-no-status-bar on <body>
 //                                  (CSS hides #status-bar and zeroes
@@ -14,6 +14,24 @@
 //   - theme                       → Rga.Theme.apply, resolving 'system'
 //                                  via matchMedia (H2 — Theme
 //                                  Constitutional Activation).
+//
+// S9.1 — Saturation Reduction (2026-05-28). Seven additional ids
+// promoted from PERSISTS_ONLY to REAL:
+//   - appearance.editorPageShadow → body[data-page-shadow] (paper-view
+//                                  consumers respond via CSS hook).
+//   - appearance.sidebarPosition → body[data-sidebar-position];
+//                                  shell.css reassigns grid-column on
+//                                  #workspace > * to flip layout.
+//   - appearance.activityBar     → body.rga-no-activity-bar;
+//                                  shell.css zeroes the rail track.
+//   - appearance.formatToolbar   → body.rga-no-format-toolbar;
+//                                  shell.css hides #rga-shell-toolbar.
+//   - autosave.enabled           → body[data-autosave] + drives
+//                                  Rga.Autosave.setEnabled().
+//   - autosave.interval          → body[data-autosave-interval-seconds]
+//                                  + drives Rga.Autosave.setInterval().
+//   - confirmBeforeClose         → body[data-confirm-close] + drives
+//                                  Rga.CloseGuard.setConfirmEnabled().
 //
 // Theme bridge contract (H2):
 //   The Settings store is canonical for the user's CHOICE
@@ -23,18 +41,9 @@
 //   An inverse-sync hook reflects Rga.Theme changes (e.g. from
 //   Ctrl+Shift+T) back into the Store. The legacy localStorage key
 //   `rga-theme` is migrated once at boot by settings-migrations.js.
-//   - appearance.sidebarPosition  → multiple grid-template-columns
-//                                  definitions need reworking; out of
-//                                  scope for an applicator slice.
-//   - appearance.activityBar      → same hide-by-class pattern as
-//   - appearance.formatToolbar     statusBar but each introduces a
-//                                  new empty-grid-track visual state
-//                                  that needs responsive-shell and
-//                                  a11y verification beyond owned
-//                                  tests; queued for follow-up.
-//   - appearance.minimap          → overview engine does not exist.
-//   - appearance.editorPageShadow → touches paper-view CSS ownership;
-//                                  defer to a paper-view slice.
+//
+// Still deferred (engine genuinely doesn't exist):
+//   - appearance.minimap          — overview engine does not exist.
 //
 // User-listed candidates not present in the registry (cannot wire
 // without a registry slice to add them): accentColor, uiDensity,
@@ -424,4 +433,117 @@
   ].forEach(function(id) {
     register(id, function() { _notifyPageSetupConsumers(); }, { owner: 'pageSetup' });
   });
+
+  // ==================================================================
+  // S9.1 — Saturation Reduction (2026-05-28)
+  // ==================================================================
+  // Seven previously-PERSISTS_ONLY entries promoted to REAL. Every
+  // applicator writes a non-Settings DOM property (body class or data-
+  // attr) AND (where applicable) drives the underlying module API. The
+  // body attrs serve as the testable visible-DOM delta required by the
+  // Phase 3 contract (handoff §6).
+  // ==================================================================
+
+  // ----- appearance.editorPageShadow --------------------------------------
+  // Registry: toggle, default true, scope 'flow'.
+  // S9.1 publishes the setting via body[data-page-shadow="on"|"off"].
+  // The Flow doctrine (locked 2026-05-23) bans paper seams from the
+  // continuous drafting surface, so the visible effect today lands on
+  // future paper-view / Print Preview surfaces that opt in via the
+  // body data-attr. The applicator never touches the locked Flow CSS.
+  register('appearance.editorPageShadow', function(value) {
+    if (!document.body) return;
+    document.body.setAttribute('data-page-shadow', value ? 'on' : 'off');
+  }, { owner: 'appearance' });
+
+  // ----- appearance.sidebarPosition ---------------------------------------
+  // Registry: radio ['left' | 'right'], default 'left'.
+  // S9.1 writes body[data-sidebar-position]; shell.css reassigns
+  // grid-column on each #workspace child to flip activity rail +
+  // sidebar to the opposite edge. Risk: combined-state interactions
+  // with sidebar-collapsed + inspector-collapsed are out of scope for
+  // this slice (a follow-up may add per-state grid templates).
+  register('appearance.sidebarPosition', function(value) {
+    if (!document.body) return;
+    const pos = (value === 'right') ? 'right' : 'left';
+    document.body.setAttribute('data-sidebar-position', pos);
+  }, { owner: 'appearance' });
+
+  // ----- appearance.activityBar -------------------------------------------
+  // Registry: toggle, default true, scope 'flow'.
+  // S9.1 adds .rga-no-activity-bar to <body> when the setting is OFF;
+  // shell.css zeroes the rail's grid track width and hides
+  // #activity-bar. Default ON preserves current visible behaviour.
+  register('appearance.activityBar', function(value) {
+    if (!document.body) return;
+    document.body.classList.toggle('rga-no-activity-bar', !value);
+  }, { owner: 'appearance' });
+
+  // ----- appearance.formatToolbar -----------------------------------------
+  // Registry: toggle, default true, scope 'flow'.
+  // S9.1 adds .rga-no-format-toolbar to <body> when OFF; shell.css
+  // hides #rga-shell-toolbar (Row 3 writing instruments). The
+  // setting's description already notes "Hidden in Draft view
+  // regardless" — the existing body.view-draft-active rule continues
+  // to enforce that orthogonally.
+  register('appearance.formatToolbar', function(value) {
+    if (!document.body) return;
+    document.body.classList.toggle('rga-no-format-toolbar', !value);
+  }, { owner: 'appearance' });
+
+  // ----- autosave.enabled -------------------------------------------------
+  // Registry: toggle, default true, scope 'all'.
+  // S9.1 drives Rga.Autosave.setEnabled and publishes the state to
+  // body[data-autosave]. When OFF, Rga.Autosave.notifyChange short-
+  // circuits — no new snapshots, no debounce arming. The body attr is
+  // the testable visible-DOM delta.
+  register('autosave.enabled', function(value) {
+    if (document.body) {
+      document.body.setAttribute('data-autosave', value ? 'on' : 'off');
+    }
+    const AS = window.Rga && window.Rga.Autosave;
+    if (AS && typeof AS.setEnabled === 'function') {
+      try { AS.setEnabled(!!value); }
+      catch (err) { console.error('[shell-applicators] Autosave.setEnabled threw:', err); }
+    }
+  }, { owner: 'autosave' });
+
+  // ----- autosave.interval ------------------------------------------------
+  // Registry: number, default 30 (seconds), scope 'all',
+  // dependencies: [{ id: 'autosave.enabled', value: true }].
+  // S9.1 drives Rga.Autosave.setInterval and publishes the value to
+  // body[data-autosave-interval-seconds].
+  register('autosave.interval', function(value) {
+    let seconds;
+    if (typeof value === 'number' && Number.isFinite(value) && value > 0) {
+      seconds = Math.floor(value);
+    } else {
+      seconds = 30;
+    }
+    if (document.body) {
+      document.body.setAttribute('data-autosave-interval-seconds', String(seconds));
+    }
+    const AS = window.Rga && window.Rga.Autosave;
+    if (AS && typeof AS.setInterval === 'function') {
+      try { AS.setInterval(seconds); }
+      catch (err) { console.error('[shell-applicators] Autosave.setInterval threw:', err); }
+    }
+  }, { owner: 'autosave' });
+
+  // ----- confirmBeforeClose -----------------------------------------------
+  // Registry: toggle, default true, scope 'all'.
+  // S9.1 drives Rga.CloseGuard.setConfirmEnabled and publishes the
+  // state to body[data-confirm-close]. When OFF, CloseGuard skips the
+  // confirmation prompt and proceeds straight to discard (autosave
+  // recovery snapshots are still cleared via the standard discard path).
+  register('confirmBeforeClose', function(value) {
+    if (document.body) {
+      document.body.setAttribute('data-confirm-close', value ? 'on' : 'off');
+    }
+    const CG = window.Rga && window.Rga.CloseGuard;
+    if (CG && typeof CG.setConfirmEnabled === 'function') {
+      try { CG.setConfirmEnabled(!!value); }
+      catch (err) { console.error('[shell-applicators] CloseGuard.setConfirmEnabled threw:', err); }
+    }
+  }, { owner: 'general' });
 })();

@@ -56,3 +56,27 @@
 #editor[dir="rtl"] {
   font-family: var(--font-editor-rtl);
 }
+
+/* ============================================================
+   S9.1 — editor.wordWrap modes
+   body[data-word-wrap="page"]     — default; #editor inherits the
+                                     page-width column (locked Flow).
+   body[data-word-wrap="viewport"] — #editor stretches to viewport.
+   body[data-word-wrap="off"]      — no wrap; horizontal scroll.
+
+   Selectors target #editor-container.view-flow so Print + Draft + Paper
+   surfaces are unaffected (their own view rules win on specificity).
+   ============================================================ */
+body[data-word-wrap="viewport"] #editor-container.view-flow #editor {
+  width: 100%;
+  max-width: none;
+  padding-left: 1in;
+  padding-right: 1in;
+}
+body[data-word-wrap="viewport"] #editor-container.view-flow .rga-page-row {
+  width: 100%;
+}
+body[data-word-wrap="off"] #editor-container.view-flow #editor {
+  white-space: pre;
+  overflow-x: auto;
+}

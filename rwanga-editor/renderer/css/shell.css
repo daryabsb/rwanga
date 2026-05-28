@@ -502,6 +502,54 @@
 body.rga-no-status-bar { --status-bar-height: 0; }
 body.rga-no-status-bar #status-bar { display: none; }
 
+/* ============================================================
+   S9.1 — Saturation Reduction (2026-05-28)
+   Body-class / data-attr hooks for previously-PERSISTS_ONLY entries
+   promoted to REAL. Each rule keeps the standing layout untouched in
+   its default state; the override fires only when the user opts in.
+   ============================================================ */
+
+/* appearance.activityBar=false → zero the rail track, hide the rail.
+   Matches the existing #activity-bar pattern (--activity-bar-width is
+   the grid-template-columns var) so the workspace grid collapses the
+   first column cleanly without grid-template gymnastics. */
+body.rga-no-activity-bar { --activity-bar-width: 0px; }
+body.rga-no-activity-bar #activity-bar { display: none; }
+
+/* appearance.formatToolbar=false → hide Row 3 writing instruments.
+   The toolbar lives outside #workspace; no grid effect needed — just
+   display:none. Existing body.view-draft-active and body.view-print-
+   preview-active rules continue to hide the toolbar orthogonally. */
+body.rga-no-format-toolbar #rga-shell-toolbar { display: none; }
+
+/* appearance.sidebarPosition=right → flip the workspace's six grid
+   columns to put inspector + its handle on the LEFT and the activity
+   rail + sidebar on the RIGHT. Each child carries an explicit
+   grid-column assignment (per the Responsive Shell pattern above);
+   the [data-sidebar-position="right"] selectors reassign them. The
+   grid-template-columns ordering also flips so each track's width
+   token lands in the correct slot.
+
+   S9.1 scope: combined-state interactions (right + sidebar-collapsed
+   + inspector-collapsed) are not covered here. The default
+   data-sidebar-position="left" or its absence is the standing layout
+   and is unaffected by this block. */
+body[data-sidebar-position="right"] #workspace {
+  grid-template-columns:
+    var(--inspector-width, 0px)
+    4px
+    1fr
+    4px
+    var(--sidebar-width)
+    var(--activity-bar-width);
+}
+body[data-sidebar-position="right"] #workspace > #inspector-panel       { grid-column: 1; }
+body[data-sidebar-position="right"] #workspace > .resize-handle[data-resize="inspector"] { grid-column: 2; }
+body[data-sidebar-position="right"] #workspace > #center-column        { grid-column: 3; }
+body[data-sidebar-position="right"] #workspace > .resize-handle[data-resize="sidebar"]  { grid-column: 4; }
+body[data-sidebar-position="right"] #workspace > #sidebar              { grid-column: 5; }
+body[data-sidebar-position="right"] #workspace > #activity-bar         { grid-column: 6; }
+
 /* Workspace policy rules used to live here; moved to the END of this
    file so they win source-order against the per-element display rules
    that come later in the file (notably #rga-shell-toolbar.rga-shell-

@@ -7,6 +7,14 @@
 (function() {
   const Rga = window.Rga = window.Rga || {};
 
+  // S9.1 — Settings-driven gate. When `confirmBeforeClose` is false the
+  // guard skips the prompt and proceeds straight to discard (autosave
+  // recovery snapshots are still cleared via the standard discard path
+  // in confirmClose). Default is true so the long-standing behaviour
+  // is preserved when no override exists.
+  let _confirmEnabled = true;
+  function setConfirmEnabled(v) { _confirmEnabled = !!v; }
+
   // Confirm closing ONE tab's document.
   //   tab = { id, kind, doc }
   // Workspace tabs (Shell Doctrine — kind !== 'document') have no
@@ -17,6 +25,17 @@
     if (!tab) return 'proceed';
     if (tab.kind && tab.kind !== 'document') return 'proceed';
     if (!tab.doc || !tab.doc.dirty) return 'proceed';
+
+    // S9.1 gate: skip the prompt entirely when the user has disabled
+    // `confirmBeforeClose`. The recovery-snapshot cleanup below still
+    // runs via the 'discard' branch.
+    if (!_confirmEnabled) {
+      if (window.rwanga && window.rwanga.autosave
+          && typeof window.rwanga.autosave.discard === 'function') {
+        window.rwanga.autosave.discard(tab.doc.docId);
+      }
+      return 'proceed';
+    }
 
     const name = tab.doc.displayName;
     const choice = (Rga.Modal && typeof Rga.Modal.showUnsaved === 'function')
@@ -63,5 +82,11 @@
     return true;
   }
 
-  Rga.CloseGuard = { confirmClose, confirmAppClose };
+  Rga.CloseGuard = {
+    confirmClose,
+    confirmAppClose,
+    // S9.1 control point — called by the `confirmBeforeClose` applicator.
+    setConfirmEnabled: setConfirmEnabled,
+    _isConfirmEnabled: function() { return _confirmEnabled; }
+  };
 })();

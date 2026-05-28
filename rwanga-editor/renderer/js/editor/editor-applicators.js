@@ -1,5 +1,5 @@
 // Copyright (c) 2026 Rwanga. Licensed under Apache 2.0.
-// Editor settings applicators — Slice 4A.
+// Editor settings applicators — Slice 4A + S9.1.
 //
 // Registers handlers for the editor.* settings that can be wired
 // today. The applicator-registry layer owns the Store subscription;
@@ -13,19 +13,23 @@
 //   - editor.highlightCurrentLine → toggles .rga-line-highlight-on
 //     (consolidated here in Slice 4A; was a separate file in Slice 2
 //     / Slice 3D — behavior unchanged)
+//   - editor.scriptLanguage      → Rga.ScriptLanguage._applyDom (S12)
 //
-// Intentionally deferred (no real wiring possible without out-of-
-// scope work — Slice 4A scope forbids fake behavior):
-//   - editor.autocomplete   — character/location/transition engine
-//                             does not exist yet
-//   - editor.wordWrap       — requires a column-mode switcher
-//                             (page/viewport/off) that does not exist
-//   - editor.showLineNumbers — would conflict with the Phase 3 Flow
-//                              View gutter default; needs a UX
-//                              decision about which default wins
-//
-// Future slices add applicators for the deferred items as their
-// supporting machinery lands.
+// S9.1 — Saturation Reduction (2026-05-28):
+//   - editor.wordWrap            → data-word-wrap attr on <body>
+//                                  ('page' | 'viewport' | 'off');
+//                                  editor.css picks up the mode.
+//   - editor.autocomplete        → data-autocomplete attr on <body>
+//                                  ('on' | 'off'). Engine is a stub —
+//                                  Rga.Autocomplete.setEnabled hook
+//                                  exists so the future engine can
+//                                  pick up the flag without a wiring
+//                                  retrofit (plan §6 / S9.1).
+//   - editor.showLineNumbers     → .rga-no-line-numbers class on
+//                                  <body>; CSS hides .flow-line-gutter
+//                                  when present. Registry default
+//                                  changed false → true to match the
+//                                  locked Flow gutter visible-default.
 'use strict';
 
 (function() {
@@ -130,5 +134,55 @@
     if (!SL || typeof SL._applyDom !== 'function') return;
     if (typeof value !== 'string' || !SL.LANGUAGES[value]) return;
     SL._applyDom(value);
+  }, { owner: 'editor' });
+
+  // ----- editor.wordWrap (S9.1 — Saturation Reduction) -------------------
+  // Registry: select ['page' | 'viewport' | 'off'], default 'page'.
+  // The applicator writes the chosen mode to data-word-wrap on <body>.
+  // editor.css selectors respond:
+  //   - 'page'     → no override; #editor inherits the page-width column
+  //                  (current locked Flow behaviour).
+  //   - 'viewport' → #editor + .rga-page-row stretch to viewport.
+  //   - 'off'      → #editor white-space: pre, overflow-x: auto.
+  // Defensive: any unknown value is normalised to 'page' so the body
+  // attr never holds a junk token.
+  const _WRAP_MODES = ['page', 'viewport', 'off'];
+  register('editor.wordWrap', function(value) {
+    if (!document.body) return;
+    const mode = _WRAP_MODES.indexOf(value) >= 0 ? value : 'page';
+    document.body.setAttribute('data-word-wrap', mode);
+  }, { owner: 'editor' });
+
+  // ----- editor.autocomplete (S9.1 — Saturation Reduction) ----------------
+  // Registry: toggle, default true.
+  // The character/location/transition engine does not yet exist; this
+  // applicator is the engine-ready flag (plan §6 / S9.1: "Stub flag in
+  // Rga.Autocomplete (engine doesn't exist yet — flag is wired even if
+  // the engine is no-op)"). Two effects:
+  //   1. data-autocomplete attr on <body> — testable visible-DOM delta.
+  //   2. window.Rga.Autocomplete.setEnabled(value) — called if the hook
+  //      exists; otherwise no-op. The future autocomplete engine should
+  //      define this hook to receive the boot value automatically.
+  register('editor.autocomplete', function(value) {
+    if (document.body) {
+      document.body.setAttribute('data-autocomplete', value ? 'on' : 'off');
+    }
+    const AC = window.Rga && window.Rga.Autocomplete;
+    if (AC && typeof AC.setEnabled === 'function') {
+      try { AC.setEnabled(!!value); }
+      catch (err) { console.error('[editor-applicators] Autocomplete.setEnabled threw:', err); }
+    }
+  }, { owner: 'editor' });
+
+  // ----- editor.showLineNumbers (S9.1 — Saturation Reduction) -------------
+  // Registry: toggle. Default changed false → true in S9.1 so the
+  // applicator's "on" state matches the locked Flow gutter visible-
+  // default (editor-prosemirror.css line 49). When the setting is OFF,
+  // the applicator adds .rga-no-line-numbers to <body>; CSS in
+  // editor-prosemirror.css (higher specificity than the .view-flow rule)
+  // hides .flow-line-gutter.
+  register('editor.showLineNumbers', function(value) {
+    if (!document.body) return;
+    document.body.classList.toggle('rga-no-line-numbers', !value);
   }, { owner: 'editor' });
 })();

@@ -171,7 +171,11 @@
     entry({
       id: 'editor.showLineNumbers', label: 'Show Line Numbers',
       description: 'Display line numbers in the gutter next to the writing surface.',
-      type: 'toggle', default: false, scope: 'flow', owner: 'editor',
+      // S9.1 — default changed false → true so the applicator's "on"
+      // state matches the locked Flow chrome (the per-visual-line gutter
+      // has been visible by default since the Flow framework lock at
+      // commit 501a4b00, 2026-05-15).
+      type: 'toggle', default: true, scope: 'flow', owner: 'editor',
       keywords: ['line', 'numbers', 'gutter']
     }),
     entry({

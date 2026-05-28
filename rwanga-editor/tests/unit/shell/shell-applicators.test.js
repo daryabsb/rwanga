@@ -1,18 +1,21 @@
 // Copyright (c) 2026 Rwanga. Licensed under Apache 2.0.
-// Shell / appearance settings applicators — Slice 4B.
+// Shell / appearance settings applicators — Slice 4B + S9.1.
 //
-// Wires the appearance.* settings that can land today via the
-// applicator registry:
+// Wired (Slice 4B):
 //   - appearance.editorDeskColor → --editor-bg on documentElement
 //   - appearance.statusBar       → rga-no-status-bar class on <body>
 //
-// Out of Slice 4B: theme (Rga.Theme legacy localStorage SSOT
-// conflict — needs migration), sidebarPosition (grid rework),
-// activityBar / formatToolbar (parallel hide-pattern, deferred for
-// pairing with their own verification), minimap (no engine),
-// editorPageShadow (paper-view ownership), and the four
-// candidate ids not yet in the registry (accentColor / uiDensity /
-// reduceMotion / inspectorCollapseMode).
+// Wired (S9.1, 2026-05-28):
+//   - appearance.editorPageShadow → body[data-page-shadow]
+//   - appearance.sidebarPosition  → body[data-sidebar-position]
+//   - appearance.activityBar      → body.rga-no-activity-bar
+//   - appearance.formatToolbar    → body.rga-no-format-toolbar
+//   - autosave.enabled            → body[data-autosave] + Autosave.setEnabled
+//   - autosave.interval           → body[data-autosave-interval-seconds] + Autosave.setInterval
+//   - confirmBeforeClose          → body[data-confirm-close] + CloseGuard.setConfirmEnabled
+//
+// Still deferred:
+//   - appearance.minimap          → overview engine does not exist.
 'use strict';
 
 const { test } = require('node:test');
@@ -56,43 +59,77 @@ function loadAll() {
 // §1 — Registered ids: only the wired ids appear
 // ----------------------------------------------------------------
 
-test('Slice 4B — shell-applicators registers exactly the wired appearance settings', async () => {
+test('Slice 4B + S9.1 — shell-applicators registers exactly the wired appearance settings', async () => {
   bootDom();
   const S = loadAll();
   await S.Store.init();
   const wired = S.Applicators.registered()
     .filter(function(id) { return id.indexOf('appearance.') === 0 || id === 'theme'; })
     .sort();
-  assert.deepEqual(wired,
-    ['appearance.editorDeskColor', 'appearance.statusBar'],
-    'shell-applicators inventory must match the 2 wired ids exactly');
+  assert.deepEqual(wired, [
+    'appearance.activityBar',        // S9.1
+    'appearance.editorDeskColor',
+    'appearance.editorPageShadow',   // S9.1
+    'appearance.formatToolbar',      // S9.1
+    'appearance.sidebarPosition',    // S9.1
+    'appearance.statusBar',
+    'theme'                          // H2 (post-S12)
+  ], 'shell-applicators inventory must match the wired appearance.* + theme set');
 });
 
-test('Slice 4B — deferred appearance/shell settings are NOT registered', () => {
+test('S9.1 — previously-deferred appearance settings are NOW registered', () => {
   bootDom();
   const S = loadAll();
-  // theme + 5 others in the registry that this slice chose to defer
-  // for substantive reasons. Wiring any of them without their
-  // supporting work would violate the "Real behavior only" rule.
-  ['theme',
-   'appearance.sidebarPosition',
+  ['appearance.sidebarPosition',
    'appearance.activityBar',
    'appearance.formatToolbar',
-   'appearance.minimap',
    'appearance.editorPageShadow'
   ].forEach(function(id) {
-    assert.equal(S.Applicators.get(id), null,
-      'Deferred id "' + id + '" must NOT have a registered applicator');
+    const a = S.Applicators.get(id);
+    assert.ok(a, 'S9.1 id "' + id + '" must have a registered applicator');
+    assert.equal(a.owner, 'appearance', id + ': owner must be "appearance"');
   });
 });
 
-test('Slice 4B — every wired id has owner="appearance"', () => {
+test('S9.1 — autosave.* and confirmBeforeClose are registered with the right owners', () => {
   bootDom();
   const S = loadAll();
-  ['appearance.editorDeskColor', 'appearance.statusBar'].forEach(function(id) {
+  const autosaveEnabled = S.Applicators.get('autosave.enabled');
+  const autosaveInterval = S.Applicators.get('autosave.interval');
+  const confirmClose = S.Applicators.get('confirmBeforeClose');
+  assert.ok(autosaveEnabled, 'autosave.enabled must have an applicator');
+  assert.equal(autosaveEnabled.owner, 'autosave');
+  assert.ok(autosaveInterval, 'autosave.interval must have an applicator');
+  assert.equal(autosaveInterval.owner, 'autosave');
+  assert.ok(confirmClose, 'confirmBeforeClose must have an applicator');
+  assert.equal(confirmClose.owner, 'general');
+});
+
+test('Slice 4B + S9.1 — appearance.minimap remains DEFERRED (engine doesn\'t exist)', () => {
+  bootDom();
+  const S = loadAll();
+  assert.equal(S.Applicators.get('appearance.minimap'), null,
+    'appearance.minimap must remain unregistered until an overview engine ships');
+});
+
+test('Slice 4B — every wired id has the expected owner', () => {
+  bootDom();
+  const S = loadAll();
+  const expected = {
+    'appearance.editorDeskColor':  'appearance',
+    'appearance.statusBar':        'appearance',
+    'appearance.editorPageShadow': 'appearance',   // S9.1
+    'appearance.sidebarPosition':  'appearance',   // S9.1
+    'appearance.activityBar':      'appearance',   // S9.1
+    'appearance.formatToolbar':    'appearance',   // S9.1
+    'autosave.enabled':            'autosave',     // S9.1
+    'autosave.interval':           'autosave',     // S9.1
+    'confirmBeforeClose':          'general'       // S9.1
+  };
+  Object.keys(expected).forEach(function(id) {
     const a = S.Applicators.get(id);
     assert.ok(a, id + ' must have an applicator');
-    assert.equal(a.owner, 'appearance', id + ': owner must be "appearance"');
+    assert.equal(a.owner, expected[id], id + ': owner mismatch');
   });
 });
 
@@ -228,4 +265,102 @@ test('Slice 4B — persisted appearance.editorDeskColor hydrates from prefs and 
     dom.window.document.documentElement.style.getPropertyValue('--editor-bg'),
     '#2d2520',
     'persisted hex must apply on boot, not the registry default #141414');
+});
+
+// ----------------------------------------------------------------
+// §6 — S9.1 visible-DOM-delta proofs (one per new applicator)
+// ----------------------------------------------------------------
+
+test('S9.1 — appearance.editorPageShadow writes data-page-shadow on <body>', async () => {
+  const dom = bootDom();
+  const S = loadAll();
+  await S.Store.init();
+  S.Applicators.apply('appearance.editorPageShadow', true);
+  assert.equal(dom.window.document.body.getAttribute('data-page-shadow'), 'on');
+  S.Applicators.apply('appearance.editorPageShadow', false);
+  assert.equal(dom.window.document.body.getAttribute('data-page-shadow'), 'off');
+});
+
+test('S9.1 — appearance.sidebarPosition writes data-sidebar-position on <body> (left | right)', async () => {
+  const dom = bootDom();
+  const S = loadAll();
+  await S.Store.init();
+  S.Applicators.apply('appearance.sidebarPosition', 'left');
+  assert.equal(dom.window.document.body.getAttribute('data-sidebar-position'), 'left');
+  S.Applicators.apply('appearance.sidebarPosition', 'right');
+  assert.equal(dom.window.document.body.getAttribute('data-sidebar-position'), 'right');
+  // Defensive: unknown values normalise to 'left'.
+  S.Applicators.apply('appearance.sidebarPosition', 'bogus');
+  assert.equal(dom.window.document.body.getAttribute('data-sidebar-position'), 'left');
+});
+
+test('S9.1 — appearance.activityBar toggles .rga-no-activity-bar on <body> (inverse polarity)', async () => {
+  const dom = bootDom();
+  const S = loadAll();
+  await S.Store.init();
+  S.Applicators.apply('appearance.activityBar', true);
+  assert.equal(dom.window.document.body.classList.contains('rga-no-activity-bar'), false,
+    'ON → class absent (rail visible)');
+  S.Applicators.apply('appearance.activityBar', false);
+  assert.equal(dom.window.document.body.classList.contains('rga-no-activity-bar'), true,
+    'OFF → class present (rail hidden)');
+});
+
+test('S9.1 — appearance.formatToolbar toggles .rga-no-format-toolbar on <body> (inverse polarity)', async () => {
+  const dom = bootDom();
+  const S = loadAll();
+  await S.Store.init();
+  S.Applicators.apply('appearance.formatToolbar', true);
+  assert.equal(dom.window.document.body.classList.contains('rga-no-format-toolbar'), false);
+  S.Applicators.apply('appearance.formatToolbar', false);
+  assert.equal(dom.window.document.body.classList.contains('rga-no-format-toolbar'), true);
+});
+
+test('S9.1 — autosave.enabled writes data-autosave + drives Rga.Autosave.setEnabled when present', async () => {
+  const dom = bootDom();
+  const S = loadAll();
+  await S.Store.init();
+  const calls = [];
+  dom.window.Rga.Autosave = { setEnabled: function(v) { calls.push(v); } };
+  S.Applicators.apply('autosave.enabled', true);
+  assert.equal(dom.window.document.body.getAttribute('data-autosave'), 'on');
+  S.Applicators.apply('autosave.enabled', false);
+  assert.equal(dom.window.document.body.getAttribute('data-autosave'), 'off');
+  assert.deepEqual(calls, [true, false]);
+});
+
+test('S9.1 — autosave.enabled is tolerant when Rga.Autosave is absent', async () => {
+  const dom = bootDom();
+  const S = loadAll();
+  await S.Store.init();
+  delete dom.window.Rga.Autosave;
+  S.Applicators.apply('autosave.enabled', true);   // must not throw
+  assert.equal(dom.window.document.body.getAttribute('data-autosave'), 'on');
+});
+
+test('S9.1 — autosave.interval writes data-autosave-interval-seconds + drives Autosave.setInterval', async () => {
+  const dom = bootDom();
+  const S = loadAll();
+  await S.Store.init();
+  const calls = [];
+  dom.window.Rga.Autosave = { setInterval: function(v) { calls.push(v); } };
+  S.Applicators.apply('autosave.interval', 45);
+  assert.equal(dom.window.document.body.getAttribute('data-autosave-interval-seconds'), '45');
+  assert.deepEqual(calls, [45]);
+  // Defensive: invalid values fall back to 30.
+  S.Applicators.apply('autosave.interval', 'broken');
+  assert.equal(dom.window.document.body.getAttribute('data-autosave-interval-seconds'), '30');
+});
+
+test('S9.1 — confirmBeforeClose writes data-confirm-close + drives CloseGuard.setConfirmEnabled', async () => {
+  const dom = bootDom();
+  const S = loadAll();
+  await S.Store.init();
+  const calls = [];
+  dom.window.Rga.CloseGuard = { setConfirmEnabled: function(v) { calls.push(v); } };
+  S.Applicators.apply('confirmBeforeClose', true);
+  assert.equal(dom.window.document.body.getAttribute('data-confirm-close'), 'on');
+  S.Applicators.apply('confirmBeforeClose', false);
+  assert.equal(dom.window.document.body.getAttribute('data-confirm-close'), 'off');
+  assert.deepEqual(calls, [true, false]);
 });
