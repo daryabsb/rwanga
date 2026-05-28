@@ -519,6 +519,12 @@
      JS — load in this order (dependencies flow downward)
      ============================================================ -->
     <script src="js/constants.js"></script>
+    <!-- Filmustageation F1A.1 — Editor / Platform boundary helper.
+         Rga.Platform.has() / .invoke() / .get() is the single read-only
+         API for the optional window.rwanga.platform namespace. Loads
+         early so any consumer (today: none) can probe at boot. Contract:
+         docs/filmustageation/EDITOR_VIEWPORT_PLATFORM_BOUNDARY_CONTRACT.md -->
+    <script src="js/platform.js"></script>
     <script src="js/doc.js"></script>
     <script src="js/file-manager.js"></script>
     <!-- Workspaces registry — must load BEFORE tab-manager.js so
