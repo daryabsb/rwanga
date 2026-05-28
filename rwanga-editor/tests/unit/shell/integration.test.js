@@ -152,6 +152,78 @@ test('ScriptSession is initialized before the default panel mounts (panel sees a
 });
 
 // ----------------------------------------------------------------
+// F1A.2 — Sidebar default per doc-type
+// ----------------------------------------------------------------
+
+test('F1A.2 — Layout.get().sidebar.activePanel is null BEFORE init (no screenplay leak in CORE Layout)', () => {
+  const { Rga } = boot();
+  // Pre-init: CORE Layout exposes the neutral default. Asserting null
+  // here is the canary against re-introducing a screenplay-specific
+  // default in CORE state.
+  assert.equal(Rga.Shell.Layout.get().sidebar.activePanel, null);
+});
+
+test('F1A.2 — Rga.Shell.init activates the doc-type-declared default when DocTypes registry exists', () => {
+  const { Rga } = boot();
+  // Stub Rga.DocTypes with the same shape the framework registry
+  // exposes. The shell never imports the registry directly — it just
+  // calls Rga.DocTypes.bootDefaultSidebarPanel() if present.
+  Rga.DocTypes = {
+    bootDefaultSidebarPanel: function() { return 'outline'; }
+  };
+  Rga.Shell.init();
+  // Outline is registered (the integration boot loads its panel
+  // module). The plugin-declared default wins over the registered[0]
+  // fallback (which would have picked sceneNavigator).
+  assert.equal(Rga.Shell.Sidebar.current(), 'outline');
+  assert.equal(Rga.Shell.Layout.get().sidebar.activePanel, 'outline');
+});
+
+test('F1A.2 — Rga.Shell.init falls back to registered[0] when no DocTypes registry exists', () => {
+  const { Rga } = boot();
+  // No Rga.DocTypes (the host that loads only the shell — e.g. a
+  // future non-screenplay test harness). _resolveDefaultPanel guards
+  // for the registry's absence and returns the first registered panel.
+  assert.equal(typeof Rga.DocTypes, 'undefined');
+  Rga.Shell.init();
+  assert.equal(Rga.Shell.Sidebar.current(), 'sceneNavigator');  // first registered
+});
+
+test('F1A.2 — Rga.Shell.init falls back to registered[0] when DocTypes default is unregistered', () => {
+  const { Rga } = boot();
+  // The doc-type names a panel id that nobody registered as a sidebar
+  // panel (boot-order bug, unloaded plugin). The resolver must NOT
+  // pass that bogus id to Sidebar.activate — fall back to registered[0].
+  Rga.DocTypes = {
+    bootDefaultSidebarPanel: function() { return 'imaginaryPanel'; }
+  };
+  Rga.Shell.init();
+  assert.equal(Rga.Shell.Sidebar.current(), 'sceneNavigator');
+});
+
+test('F1A.2 — persisted activePanel still wins over the doc-type default', () => {
+  const { Rga } = boot();
+  Rga.DocTypes = {
+    bootDefaultSidebarPanel: function() { return 'sceneNavigator'; }
+  };
+  // Simulate WorkspaceState hydrating Layout with a non-default panel
+  // the user had open last session.
+  Rga.Shell.Layout.set({ sidebar: { activePanel: 'outline' } });
+  Rga.Shell.init();
+  // Persisted choice wins.
+  assert.equal(Rga.Shell.Sidebar.current(), 'outline');
+});
+
+test('F1A.2 — invalid (null / non-string) doc-type defaults fall back safely', () => {
+  const { Rga } = boot();
+  Rga.DocTypes = {
+    bootDefaultSidebarPanel: function() { return null; }
+  };
+  Rga.Shell.init();
+  assert.equal(Rga.Shell.Sidebar.current(), 'sceneNavigator');  // fallback path
+});
+
+// ----------------------------------------------------------------
 // Slice 2 — final integration sweep
 // ----------------------------------------------------------------
 

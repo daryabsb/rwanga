@@ -127,7 +127,12 @@ test('§A: first boot with no persisted blob uses Layout DEFAULTS', () => {
 
   const s = Rga.Shell.Layout.get();
   assert.equal(s.sidebar.visible, true);
-  assert.equal(s.sidebar.activePanel, 'sceneNavigator');
+  // F1A.2 (2026-05-28): CORE Layout no longer names a default sidebar
+  // panel. Pristine boot through WorkspaceState (no persisted state
+  // and no doc-type-resolver) yields the neutral null. Rga.Shell.init's
+  // boot resolver is what activates the plugin's declared default; this
+  // test exercises only the WorkspaceState → Layout path, not init.
+  assert.equal(s.sidebar.activePanel, null);
   assert.equal(s.studioPanel.visible, true);
   assert.equal(s.inspector.visible, true);
 });

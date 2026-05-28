@@ -22,7 +22,12 @@ test('Layout.get() returns the default state on first read', () => {
   const s = Layout.get();
   assert.equal(s.sidebar.visible, true);
   assert.equal(s.sidebar.width, 280);
-  assert.equal(s.sidebar.activePanel, 'sceneNavigator');
+  // F1A.2 (2026-05-28): CORE Layout no longer names a default sidebar
+  // panel. The active doc-type does (see doc-types/screenplay/index.js
+  // and Rga.DocTypes.bootDefaultSidebarPanel). Layout's neutral default
+  // is null; the boot resolver in Rga.Shell.init reads the doc-type's
+  // declaration and falls back to registered[0] otherwise.
+  assert.equal(s.sidebar.activePanel, null);
   // Slice 4 §A: studioPanel.visible default flipped false → true to
   // match the long-standing UX where a fresh install boots with the
   // bottom panel visible.
@@ -52,7 +57,10 @@ test('Layout.set({sidebar: {visible: false}}) merges; other sidebar fields prese
   const s = Layout.get();
   assert.equal(s.sidebar.visible, false);
   assert.equal(s.sidebar.width, 280, 'width preserved');
-  assert.equal(s.sidebar.activePanel, 'sceneNavigator', 'activePanel preserved');
+  // F1A.2: default activePanel is null; merging a partial sidebar
+  // update must preserve that null (not silently fall back to a screenplay
+  // string).
+  assert.equal(s.sidebar.activePanel, null, 'activePanel default preserved');
 });
 
 test('Layout.set with deeply-merged path only touches specified leaves', () => {
@@ -128,7 +136,8 @@ test('Layout._reset() restores defaults', () => {
     // Responsive Shell: sidebar gained userOverride (session-scoped
     // — true when the user has manually toggled the sidebar via
     // Cmd-B or activity-rail click; engine respects it).
-    sidebar:     { visible: true,  width: 280, activePanel: 'sceneNavigator', userOverride: false },
+    // F1A.2: neutral activePanel default (was 'sceneNavigator').
+    sidebar:     { visible: true,  width: 280, activePanel: null, userOverride: false },
     // Studio Shell Recovery §E: studioPanel gained a `state` field
     // ('open' | 'minimized' | 'closed') as the new SSOT for the
     // three-state model. `visible` is auto-derived (state !== 'closed')

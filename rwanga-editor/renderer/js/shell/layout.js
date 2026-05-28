@@ -31,7 +31,14 @@
     // zone the user has explicitly chosen. Session-scoped — not
     // persisted across app restarts so a fresh boot returns to the
     // window-driven defaults.
-    sidebar:     { visible: true,  width: 280, activePanel: 'sceneNavigator', userOverride: false },
+    // F1A.2 (Filmustageation, 2026-05-28): activePanel default flipped
+    // 'sceneNavigator' → null. CORE Layout is now neutral about which
+    // panel is "default"; the boot resolver in Rga.Shell.init asks the
+    // active doc-type via Rga.DocTypes.bootDefaultSidebarPanel() and
+    // falls back to the first-registered sidebar panel if no doc-type
+    // declares one. Persisted user choice (restored by WorkspaceState)
+    // still wins over either default — no change to that contract.
+    sidebar:     { visible: true,  width: 280, activePanel: null, userOverride: false },
     // Slice 4 §A: default changed from false → true to match the
     // long-standing UX where a fresh install boots with the bottom
     // panel visible. WorkspaceState restores user-explicit closes.

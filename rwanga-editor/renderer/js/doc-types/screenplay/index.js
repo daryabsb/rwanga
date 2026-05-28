@@ -25,6 +25,13 @@
   }
 
   Rga.DocTypes.register('screenplay', {
-    selectSchema: selectSchema
+    selectSchema: selectSchema,
+    // F1A.2 — Boot-time default sidebar panel for screenplay documents.
+    // Read by Rga.Shell.init via Rga.DocTypes.bootDefaultSidebarPanel().
+    // CORE Layout no longer names a default; screenplay owns its own.
+    // The screenplay shell still resolves to 'sceneNavigator' at boot —
+    // identical to the pre-F1A.2 visible behaviour, with correct
+    // architectural ownership.
+    defaultSidebarPanel: 'sceneNavigator'
   });
 })();

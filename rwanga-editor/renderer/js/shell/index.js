@@ -17,7 +17,6 @@
   const Rga = window.Rga = window.Rga || {};
   Rga.Shell = Rga.Shell || {};
 
-  const DEFAULT_PANEL = 'sceneNavigator';
   let _initialized = false;
 
   function init() {
@@ -69,12 +68,17 @@
     // enter this handler.
     _wireKeyboardShortcuts();
 
-    // Activate the panel the user last had open. Order:
+    // Activate the panel the user last had open. Order (F1A.2 update):
     //   1. Layout.sidebar.activePanel — restored by WorkspaceState
     //      from `rga-workspace-layout`. If the restored id is still
     //      a registered panel, use it.
-    //   2. Otherwise fall back to DEFAULT_PANEL (sceneNavigator), or
-    //      the first registered panel if even that isn't present.
+    //   2. Otherwise ask the active doc-type via
+    //      Rga.DocTypes.bootDefaultSidebarPanel() (screenplay declares
+    //      'sceneNavigator' in doc-types/screenplay/index.js). If that
+    //      id is registered, use it.
+    //   3. Final fallback — the first registered panel. Keeps the boot
+    //      safe when no doc-type is loaded (tests, future hosts) or the
+    //      doc-type's declared default isn't registered as a panel.
     // Layout.sidebar.visible is similarly trusted from WorkspaceState
     // (or DEFAULTS) — the boot no longer hard-codes `visible: true`.
     // Slice 5 §B: Sidebar.activate now syncs its own activePanel
@@ -203,9 +207,25 @@
   // _comboString lived here pre-Slice-2 to normalise events to combo
   // strings. Rga.KeyboardRegistry owns the normaliser now.
 
+  // F1A.2 — plugin-aware boot resolution. CORE no longer names a
+  // default panel; the active doc-type does. Resolution chain:
+  //   1. Doc-type's declared defaultSidebarPanel — if it exists AND
+  //      is a registered sidebar panel.
+  //   2. registered[0] — the first sidebar panel, by registration
+  //      order. Used when no doc-type is loaded (jsdom unit tests,
+  //      future non-screenplay hosts) or the declared default isn't
+  //      registered as a panel (boot-order bug, plugin unload).
+  //   3. null — only when nothing is registered. Init is a no-op
+  //      against the sidebar in that case (the caller is the only
+  //      consumer; it guards on the return value).
   function _resolveDefaultPanel() {
     const registered = Rga.Shell.Sidebar.registered();
-    if (registered.indexOf(DEFAULT_PANEL) >= 0) return DEFAULT_PANEL;
+    const docTypeDefault = (Rga.DocTypes && typeof Rga.DocTypes.bootDefaultSidebarPanel === 'function')
+      ? Rga.DocTypes.bootDefaultSidebarPanel()
+      : null;
+    if (docTypeDefault && registered.indexOf(docTypeDefault) >= 0) {
+      return docTypeDefault;
+    }
     return registered.length > 0 ? registered[0] : null;
   }
 
