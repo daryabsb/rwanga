@@ -126,29 +126,20 @@
         <div class="rga-shell-toolbar-sep" role="separator" aria-hidden="true"></div>
         <button class="rga-shell-toolbar-btn" data-command="text.clear"         type="button" title="Clear formatting">A<sub>×</sub></button>
       </div>
-      <!-- §D2 — Scene tools group. Block-type dropdown reflects
-           selection (subscribes to Rga.ScriptMetrics.currentBlockType).
-           +Scene routes through Rga.DocTypes.screenplay.v3Commands.
-           insertSceneSmart (existing engine command — no engine
-           modification). Insert Page Break is DEFERRED: v3-commands.js
-           does not currently expose a page-break command. -->
-      <div class="rga-shell-toolbar-group-sep" role="separator" aria-hidden="true"></div>
-      <div class="rga-shell-toolbar-group" data-group="scene">
-        <select class="rga-shell-toolbar-blocktype" id="rga-shell-toolbar-blocktype"
-                aria-label="Block type" title="Change block type">
-          <option value="">—</option>
-          <option value="action">Action</option>
-          <option value="character">Character</option>
-          <option value="dialogue">Dialogue</option>
-          <option value="parenthetical">Parenthetical</option>
-          <option value="shot">Shot</option>
-          <option value="transition">Transition</option>
-          <option value="sceneHeading" disabled hidden>Scene Heading</option>
-        </select>
-        <div class="rga-shell-toolbar-sep" role="separator" aria-hidden="true"></div>
-        <button class="rga-shell-toolbar-btn rga-shell-toolbar-btn--text"
-                data-command="scene.insert" type="button" title="Insert scene after current">+ Scene</button>
-      </div>
+      <!-- Filmustageation F1A.6 (2026-05-29) — Scene tools group
+           ownership moved to the screenplay plugin
+           (doc-types/screenplay/toolbar.js). The slot below is the
+           mount target; the plugin registers via
+           Rga.Shell.Toolbar.registerGroup at script-load and mounts
+           the block-type select + Insert Scene button + the
+           surrounding separators here.
+             Pre-F1A.6: the static <div data-group="scene"> with its
+             two adjacent separators lived between the text and
+             writing groups.
+             Post-F1A.6: this slot stays empty in non-screenplay
+             hosts; with screenplay loaded the visible Row-3 layout
+             is identical. -->
+      <div class="rga-shell-toolbar-content-slot" data-toolbar-slot="content"></div>
       <!-- §D3 — Writing tools group. Note + Flag + Tag reuse the
            existing format-toolbar.js handlers (openAnnotationDialog /
            openFlagPopup / applyTagFromSelection) that the Scene
@@ -648,6 +639,13 @@
      naming-parallel ordering; setHost is called by Rga.Shell.init
      once the .inspector-body element is reachable. -->
 <script src="js/shell/inspector.js"></script>
+<!-- Filmustageation F1A.6 — neutral toolbar contribution registry,
+     parallel to Rga.Shell.Sidebar / Inspector / StatusBar. CORE owns
+     the Row 3 toolbar frame; plugins register groups (today: the
+     screenplay Scene group with block-type select + +Scene button).
+     Loads before format-toolbar.js so the registry is available when
+     init() calls Rga.Shell.Toolbar.setHost. -->
+<script src="js/shell/toolbar.js"></script>
 <!-- Keyboard Registry — Runtime Ownership Stab. Slice 2 SSOT.
      Must load before every consumer (Rga.Keyboard shim, shell/index.js,
      view-mode.js) so they can call .register() at boot. -->
@@ -731,6 +729,12 @@
      production consumer of the F1A.3 inspector host. Registers via
      Rga.Shell.Inspector.registerPanel; never auto-activates. -->
 <script src="js/doc-types/screenplay/inspector-scene-notes.js"></script>
+<!-- Filmustageation F1A.6 — screenplay-owned Scene toolbar group.
+     Registers via Rga.Shell.Toolbar.registerGroup with the block-type
+     select + Insert Scene button. Moves screenplay block-type
+     vocabulary and the scene.insert command out of CORE
+     format-toolbar.js into plugin ownership. -->
+<script src="js/doc-types/screenplay/toolbar.js"></script>
 <!-- Cross-schema mark plugins — work on the v3 doc via PM marks. -->
 <script src="js/doc-types/screenplay/plugins/context-menu.js"></script>
 <script src="js/doc-types/screenplay/plugins/annotations.js"></script>

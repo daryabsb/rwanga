@@ -374,33 +374,12 @@
   // Init
   // ============================================================
 
-  // §D2 — shared block-type dispatcher. The Row 3 toolbar dropdown
-  // (#rga-shell-toolbar-blocktype) calls this single helper, so the
-  // PM.setBlockType invocation lives in one place. (Scene Toolbox
-  // dropdown — the prior second consumer — was retired in §A Shell
-  // Final Polish; controls migrated entirely to Row 3.)
-  function _dispatchBlockType(nodeTypeName) {
-    if (!nodeTypeName) return;
-    const view = _view();
-    const sp = window.Rga && window.Rga.DocTypes && window.Rga.DocTypes.screenplay;
-    const PM = _PM();
-    if (!view || !sp || !PM) return;
-    const nodeType = view.state.schema.nodes[nodeTypeName];
-    if (!nodeType || !PM.setBlockType) return;
-    PM.setBlockType(nodeType)(view.state, view.dispatch.bind(view));
-    view.focus();
-  }
-
-  // §D2 — Insert Scene command. Routes ONLY through the existing
-  // engine command (Rga.DocTypes.screenplay.v3Commands.insertSceneSmart).
-  // No engine modification. No new command logic.
-  function _dispatchInsertScene() {
-    const view = _view();
-    const sp = window.Rga && window.Rga.DocTypes && window.Rga.DocTypes.screenplay;
-    if (!view || !sp || !sp.v3Commands || typeof sp.v3Commands.insertSceneSmart !== 'function') return;
-    sp.v3Commands.insertSceneSmart(view.state, view.dispatch.bind(view));
-    view.focus();
-  }
+  // §D2 — block-type dispatch + scene.insert dispatch + the ScriptMetrics
+  // selection sync moved to doc-types/screenplay/toolbar.js in
+  // Filmustageation F1A.6 (2026-05-29). CORE no longer knows about
+  // screenplay block types or the insertSceneSmart engine command.
+  // Plugins register their own toolbar groups via
+  // Rga.Shell.Toolbar.registerGroup.
 
   // §D1 — register the eight Text-tools commands via the §A4.1
   // command layer. KR is the single owner; the Row 3 toolbar invokes
@@ -437,12 +416,12 @@
     KR.registerCommand({ command: 'text.clear',         label: 'Clear formatting',
       handler: clearAllFormatting,                source: 'D1 toolbar (text.clear)' });
 
-    // §D2 — Scene tools. scene.insert is invoked by the Row 3 "+ Scene"
-    // button. No keyboard accelerator (insertSceneSmart is the engine's
-    // canonical path; Tab cycles block type, Enter spawns scenes per
-    // v3-keymap.js — neither conflict with a toolbar button).
-    KR.registerCommand({ command: 'scene.insert', label: 'Insert Scene',
-      handler: _dispatchInsertScene, source: 'D2 toolbar (scene.insert)' });
+    // §D2 — Scene tools (scene.insert command) moved to the
+    // screenplay plugin in F1A.6
+    // (doc-types/screenplay/toolbar.js). The plugin registers the
+    // command at script-load; the Row 3 click delegation here still
+    // dispatches it via KR.invokeCommand because the registry is
+    // a single owner.
 
     // §D3 — Writing tools. Note + Flag wrap the existing
     // openAnnotationDialog / openFlagPopup handlers (the Scene Toolbox
@@ -548,30 +527,21 @@
       });
     }
 
-    // §D2 — Row 3 block-type dropdown. Shared _dispatchBlockType helper.
-    // Selection-aware: subscribes to Rga.ScriptMetrics so the
-    // dropdown's value tracks the cursor's current block type.
-    const row3BlockType = document.getElementById('rga-shell-toolbar-blocktype');
-    if (row3BlockType) {
-      row3BlockType.addEventListener('change', function() {
-        _dispatchBlockType(row3BlockType.value);
-      });
-      if (window.Rga && window.Rga.ScriptMetrics &&
-          typeof window.Rga.ScriptMetrics.subscribe === 'function') {
-        const sync = function() {
-          const snap = window.Rga.ScriptMetrics.get && window.Rga.ScriptMetrics.get();
-          const bt = snap && snap.currentBlockType;
-          if (!bt) { row3BlockType.value = ''; return; }
-          // sceneHeading is held by a disabled+hidden option (lets
-          // .value carry it without showing in the dropdown list);
-          // any unknown block type falls back to '' (empty).
-          const exists = Array.prototype.some.call(row3BlockType.options,
-            function(o) { return o.value === bt; });
-          row3BlockType.value = exists ? bt : '';
-        };
-        window.Rga.ScriptMetrics.subscribe(sync);
-        sync();
-      }
+    // §D2 — block-type dropdown wiring + ScriptMetrics subscription
+    // moved to doc-types/screenplay/toolbar.js in F1A.6. CORE no
+    // longer owns the screenplay block-type select.
+    //
+    // F1A.6: hand the plugin contribution slot to Rga.Shell.Toolbar
+    // so plugins (today: screenplay) can mount their registered
+    // groups. The slot is the static <div data-toolbar-slot="content">
+    // in renderer/index.html, positioned between the text group and
+    // the writing group. Plugins register at script-load; setHost
+    // here drives the mount.
+    if (window.Rga && window.Rga.Shell && window.Rga.Shell.Toolbar
+        && typeof window.Rga.Shell.Toolbar.setHost === 'function') {
+      const slot = document.querySelector(
+        '#rga-shell-toolbar [data-toolbar-slot="content"]');
+      if (slot) window.Rga.Shell.Toolbar.setHost(slot);
     }
 
     // Annotation dialog handlers (the dialog DOM lives elsewhere
