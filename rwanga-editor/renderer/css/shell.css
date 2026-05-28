@@ -1087,6 +1087,26 @@ body.window-maximized #rga-shell-titlebar {
   align-items: center;
   padding: 0 8px;
 }
+/* Filmustageation F1A.6A (2026-05-29) — toolbar contribution slot
+   layout fix. The slot (created by F1A.6 as a static wrapper inside
+   .rga-shell-toolbar-inner) holds plugin-mounted groups + their
+   leading separators. Without `display: contents`, the slot becomes
+   ONE flex child of the inner band — the plugin's separator + group
+   stack vertically INSIDE the slot, instead of flowing as siblings of
+   the static text-group and writing-group in the inner-band flex
+   line. The visible result: clipped controls, broken rhythm, the
+   Scene group does not align with neighbouring groups.
+   `display: contents` removes the slot from the layout box tree;
+   its children are promoted to be direct layout children of
+   .rga-shell-toolbar-inner. The flex flow becomes
+     text-group → plugin-sep → scene-group → static-sep → writing-group
+       → static-sep → mode-group
+   — exactly the pre-F1A.6 visible composition. The DOM tree is
+   unchanged; only layout is affected, so Rga.Shell.Toolbar's
+   queries (_slot.children, appendChild) keep working. */
+.rga-shell-toolbar-content-slot {
+  display: contents;
+}
 .rga-shell-toolbar-group {
   display: inline-flex;
   align-items: center;
