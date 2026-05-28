@@ -30,6 +30,11 @@
   // separate.")
   let _selectedNodeId = null;
   let _keydownHandler = null;
+  // SN.1 — tracks the previous render's current-scene nodeId so the
+  // navigator only auto-scrolls when the cursor crosses a scene boundary,
+  // not on every incidental re-render (keyboard selection, view changes,
+  // ScriptSession ticks where currentScene is unchanged).
+  let _lastCurrentNodeId = null;
 
   // ----------------------------------------------------------------
   // Sidebar panel controller
@@ -61,6 +66,7 @@
         _keydownHandler = null;
       }
       _selectedNodeId = null;
+      _lastCurrentNodeId = null;
       _container = null;
     }
   };
@@ -83,6 +89,7 @@
     if (!scenes || scenes.length === 0) {
       wrapper.appendChild(_buildEmpty());
       _container.appendChild(wrapper);
+      _lastCurrentNodeId = null;
       return;
     }
     const idx = (Rga.Nav && typeof Rga.Nav.getIndex === 'function') ? Rga.Nav.getIndex(view.state) : null;
@@ -96,6 +103,20 @@
     }
     wrapper.appendChild(list);
     _container.appendChild(wrapper);
+
+    // SN.1 — keep the current-scene row visible. Calm guard: only scroll
+    // when the current scene actually changed since the previous render.
+    // `block: 'nearest'` is a no-op when the row is already in view, so a
+    // writer who manually scrolled the panel won't get yanked unless the
+    // cursor itself transitioned to a different scene. Behaviour is auto
+    // (instant) per UX Direction §6 — functional confirmation, not motion.
+    if (currentNodeId && currentNodeId !== _lastCurrentNodeId) {
+      const currentRow = _container.querySelector('.rga-shell-scene-navigator-row-current');
+      if (currentRow && typeof currentRow.scrollIntoView === 'function') {
+        currentRow.scrollIntoView({ behavior: 'auto', block: 'nearest' });
+      }
+    }
+    _lastCurrentNodeId = currentNodeId;
   }
 
   // Bundle 1 §B: unified empty-state. The Sidebar's renderEmpty
@@ -328,6 +349,7 @@
       _keydownHandler = null;
     }
     _selectedNodeId = null;
+    _lastCurrentNodeId = null;
     if (_container) _container.innerHTML = '';
     _container = null;
   }

@@ -331,3 +331,162 @@ test('Slice 2: SEPARATION INVARIANT — selected row and current scene can co-ex
   assert.ok(rowsAfter[0].classList.contains('rga-shell-scene-navigator-row-selected'));
   // Classes are independently applied; no collapse.
 });
+
+// ----------------------------------------------------------------
+// SN.1 — auto-scroll current row into view on scene transition
+// ----------------------------------------------------------------
+// The current-scene marker is the writer's "you are here" cue. It only
+// helps if "here" is visible. SN.1 makes the navigator scroll the current
+// row into view when the cursor crosses a scene boundary, while leaving
+// selection-driven scroll, click-to-jump, and the separation invariant
+// untouched. Tests below install a per-DOM spy on Element.prototype.
+// scrollIntoView so each call's target classList can be inspected.
+
+function installScrollSpy() {
+  const calls = [];
+  global.window.Element.prototype.scrollIntoView = function(opts) {
+    calls.push({ on: this.className || '', opts: opts });
+  };
+  // sn1Calls() isolates the SN.1 code path from _setSelected's selected-row
+  // scroll. Both pass `block: 'nearest'`, so the only argument-level
+  // distinguisher is the SN.1-only `behavior: 'auto'` opt. We also require
+  // the target row to carry the current-scene class — defensive against
+  // future code that might pass `behavior: 'auto'` from a different path.
+  return {
+    calls: calls,
+    sn1Calls: function() {
+      return calls.filter(function(c) {
+        return c.opts && c.opts.behavior === 'auto'
+            && c.on.indexOf('rga-shell-scene-navigator-row-current') >= 0;
+      });
+    },
+    reset: function() { calls.length = 0; }
+  };
+}
+
+test('SN.1: current row scrolls into view when ScriptSession transitions to a new current scene', () => {
+  const { Rga, stub } = boot({
+    cursor: 5,  // inside scene 'a'
+    scenes: [
+      { nodeId: 'a', sceneNumber: 1, headingDisplay: 'A', pmPos: 0,  pmEndPos: 10 },
+      { nodeId: 'b', sceneNumber: 2, headingDisplay: 'B', pmPos: 10, pmEndPos: 30 }
+    ]
+  });
+  // Install spy AFTER boot — `boot()` replaces global.window, so the spy
+  // must target the NEW window's Element.prototype to be picked up by the
+  // elements rendered by Sidebar.activate below.
+  const spy = installScrollSpy();
+  Rga.Shell.Sidebar.activate('sceneNavigator');
+  // Initial mount: a is the current scene → scrolled into view once.
+  const initial = spy.sn1Calls();
+  assert.equal(initial.length, 1, 'initial mount scrolls the current row into view');
+  assert.deepEqual(initial[0].opts, { behavior: 'auto', block: 'nearest' });
+  spy.reset();
+  // Move cursor into scene 'b'. ScriptSession re-derives current → re-render.
+  stub.view.state.selection.from = 20;
+  stub.view.state.selection.to = 20;
+  document.dispatchEvent(new window.Event('selectionchange'));
+  // Transition into a new current scene → exactly one current-row scroll.
+  const transition = spy.sn1Calls();
+  assert.equal(transition.length, 1, 'scene transition scrolls the new current row');
+  assert.deepEqual(transition[0].opts, { behavior: 'auto', block: 'nearest' });
+});
+
+test('SN.1: no auto-scroll when re-render fires but the current scene is unchanged', () => {
+  const { Rga } = boot({
+    cursor: 5,
+    scenes: [
+      { nodeId: 'a', sceneNumber: 1, headingDisplay: 'A', pmPos: 0,  pmEndPos: 10 },
+      { nodeId: 'b', sceneNumber: 2, headingDisplay: 'B', pmPos: 10, pmEndPos: 30 }
+    ]
+  });
+  Rga.Shell.Sidebar.activate('sceneNavigator');
+  // Install spy AFTER mount so the initial-mount scroll is not counted.
+  const spy = installScrollSpy();
+  // Multiple incidental re-renders with the same current scene.
+  Rga.Shell.SceneNavigator._render();
+  Rga.Shell.SceneNavigator._render();
+  Rga.Shell.SceneNavigator._render();
+  assert.equal(spy.sn1Calls().length, 0,
+    'identical-current re-renders must not trigger scroll');
+});
+
+test('SN.1: keyboard selection does NOT trigger current-row auto-scroll', () => {
+  const { Rga, host } = boot({
+    cursor: 5,  // cursor stays in scene 'a' throughout
+    scenes: [
+      { nodeId: 'a', sceneNumber: 1, headingDisplay: 'A', pmPos: 0,  pmEndPos: 10 },
+      { nodeId: 'b', sceneNumber: 2, headingDisplay: 'B', pmPos: 10, pmEndPos: 30 },
+      { nodeId: 'c', sceneNumber: 3, headingDisplay: 'C', pmPos: 30, pmEndPos: 50 }
+    ]
+  });
+  Rga.Shell.Sidebar.activate('sceneNavigator');
+  const spy = installScrollSpy();  // installed after mount → clean slate
+  // Walk the keyboard selection forward — cursor (and therefore current) stays in 'a'.
+  fireKey(host, 'ArrowDown');  // select 'a'
+  fireKey(host, 'ArrowDown');  // select 'b'
+  fireKey(host, 'ArrowDown');  // select 'c'
+  // Selected scrolls fire on the SELECTED row, never on the current row.
+  assert.equal(spy.sn1Calls().length, 0,
+    'keyboard selection must not touch the current-row scroll');
+  // Sanity: selected state advanced; current state unchanged.
+  assert.equal(Rga.Shell.SceneNavigator.selectedRowNodeId(), 'c');
+  const rows = host.querySelectorAll('.rga-shell-scene-navigator-row');
+  assert.ok(rows[0].classList.contains('rga-shell-scene-navigator-row-current'),
+    'a stays current — cursor never moved');
+  assert.ok(rows[2].classList.contains('rga-shell-scene-navigator-row-selected'),
+    'c carries the selected mark');
+});
+
+test('SN.1: separation invariant holds when current transitions while a different row is selected', () => {
+  const { Rga, host, stub } = boot({
+    cursor: 5,  // cursor in scene 'a'
+    scenes: [
+      { nodeId: 'a', sceneNumber: 1, headingDisplay: 'A', pmPos: 0,  pmEndPos: 10 },
+      { nodeId: 'b', sceneNumber: 2, headingDisplay: 'B', pmPos: 10, pmEndPos: 30 },
+      { nodeId: 'c', sceneNumber: 3, headingDisplay: 'C', pmPos: 30, pmEndPos: 50 }
+    ]
+  });
+  // Install spy AFTER boot (see note in the transition test above).
+  const spy = installScrollSpy();
+  Rga.Shell.Sidebar.activate('sceneNavigator');
+  // Keyboard-select row 'c' while cursor (current) stays in 'a'.
+  fireKey(host, 'End');
+  assert.equal(Rga.Shell.SceneNavigator.selectedRowNodeId(), 'c');
+  spy.reset();
+  // Now move the cursor into scene 'b' — current transitions 'a' → 'b'.
+  stub.view.state.selection.from = 20;
+  stub.view.state.selection.to = 20;
+  document.dispatchEvent(new window.Event('selectionchange'));
+  // Auto-scroll fires on row 'b' (the new current). Selected row 'c' is preserved.
+  const transition = spy.sn1Calls();
+  assert.equal(transition.length, 1, 'current-row scroll fires for the transitioned scene');
+  const rows = host.querySelectorAll('.rga-shell-scene-navigator-row');
+  assert.ok(!rows[0].classList.contains('rga-shell-scene-navigator-row-current'),
+    'a is no longer current');
+  assert.ok(rows[1].classList.contains('rga-shell-scene-navigator-row-current'),
+    'b is current');
+  assert.ok(rows[2].classList.contains('rga-shell-scene-navigator-row-selected'),
+    'c remains the keyboard-selected row');
+  assert.ok(!rows[1].classList.contains('rga-shell-scene-navigator-row-selected'),
+    'b is not selected');
+  assert.ok(!rows[2].classList.contains('rga-shell-scene-navigator-row-current'),
+    'c is not current');
+  assert.equal(Rga.Shell.SceneNavigator.selectedRowNodeId(), 'c',
+    'selected nodeId survives the auto-scroll');
+});
+
+test('SN.1: unmount clears the last-current tracker so a fresh re-mount scrolls again', () => {
+  const { Rga } = boot({
+    cursor: 5,
+    scenes: [{ nodeId: 'a', sceneNumber: 1, headingDisplay: 'A', pmPos: 0, pmEndPos: 10 }]
+  });
+  Rga.Shell.Sidebar.activate('sceneNavigator');
+  // Spy installed AFTER initial mount.
+  const spy = installScrollSpy();
+  Rga.Shell.Sidebar.deactivate();
+  // Re-activate → fresh mount on the same nodeId must still scroll (unmount cleared tracker).
+  Rga.Shell.Sidebar.activate('sceneNavigator');
+  assert.equal(spy.sn1Calls().length, 1,
+    'fresh mount after unmount scrolls current row even if nodeId is unchanged');
+});
