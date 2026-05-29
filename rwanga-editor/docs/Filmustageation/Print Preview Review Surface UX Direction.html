@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rwanga Editor — Print Preview Review Surface UX Direction</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;1,14..32,400&family=JetBrains+Mono:wght@400;500;700&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0F0F12;
+    --surface: #17171C;
+    --surface-2: #1E1E26;
+    --surface-3: #26262E;
+    --border: #2C2C38;
+    --text: #EDEAD8;
+    --text-2: #9A98A8;
+    --text-3: #5C5A6A;
+    --amber: #D4A574;
+    --gold: #FFC107;
+    --pink: #C2185B;
+    --blue: #4FA3E3;
+    --script: #FF6B35;
+    --break: #2D5BE3;
+    --vis: #00A896;
+    --plan: #7C3AED;
+    --paper: #F3EFE2;
+    --paper-ink: #1B1A16;
+    --font: 'Inter', system-ui, sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+    --screenplay: 'Courier Prime', 'Courier New', monospace;
+    --r: 2px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html {
+    background: var(--bg); color: var(--text);
+    font-family: var(--font); font-size: 15px; line-height: 1.7;
+    -webkit-font-smoothing: antialiased; scroll-behavior: smooth;
+  }
+  body { max-width: 860px; margin: 0 auto; padding: 80px 32px 120px; }
+
+  .doc-header { border-bottom: 1px solid var(--border); padding-bottom: 40px; margin-bottom: 56px; }
+  .doc-overline { font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--amber); margin-bottom: 16px; }
+  .doc-title { font-size: 38px; font-weight: 700; line-height: 1.12; color: var(--text); margin-bottom: 14px; letter-spacing: -0.6px; }
+  .doc-subtitle { font-size: 16px; color: var(--text-2); line-height: 1.6; max-width: 640px; }
+  .doc-meta { display: flex; flex-wrap: wrap; gap: 10px 22px; margin-top: 26px; font-size: 11.5px; color: var(--text-3); font-family: var(--mono); }
+
+  h2 { font-size: 11px; font-weight: 700; letter-spacing: 1.8px; text-transform: uppercase; color: var(--amber); margin-bottom: 6px; }
+  h3 { font-size: 24px; font-weight: 700; color: var(--text); margin-bottom: 18px; letter-spacing: -0.3px; line-height: 1.25; }
+  h4 { font-size: 14px; font-weight: 700; color: var(--text); margin-top: 30px; margin-bottom: 10px; letter-spacing: 0.2px; }
+  p { margin-bottom: 16px; color: var(--text-2); }
+  p strong { color: var(--text); font-weight: 600; }
+  em { color: var(--text); font-style: italic; }
+
+  .section { margin-bottom: 56px; padding-bottom: 56px; border-bottom: 1px solid var(--border); }
+  .section-num { font-family: var(--mono); font-size: 12px; font-weight: 500; color: var(--text-3); }
+
+  .callout { background: var(--surface); border-left: 3px solid var(--amber); padding: 18px 22px; margin: 22px 0; font-size: 14px; }
+  .callout.doctrine { border-left-color: var(--plan); background: rgba(124,58,237,0.06); }
+  .callout.observation { border-left-color: var(--script); background: rgba(255,107,53,0.05); }
+  .callout.direction { border-left-color: var(--vis); background: rgba(0,168,150,0.05); }
+  .callout-label { font-size: 9px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 8px; }
+  .callout.doctrine .callout-label { color: var(--plan); }
+  .callout.observation .callout-label { color: var(--script); }
+  .callout.direction .callout-label { color: var(--vis); }
+  .callout p { color: var(--text-2); }
+  .callout p:last-child { margin-bottom: 0; }
+
+  ul, ol { margin: 12px 0 20px; padding-left: 20px; color: var(--text-2); }
+  li { margin-bottom: 8px; padding-left: 4px; }
+  li strong { color: var(--text); }
+  li code, p code, td code { font-family: var(--mono); font-size: 12px; background: var(--surface-3); padding: 1px 6px; border-radius: 2px; color: var(--amber); }
+
+  .wt { width: 100%; border-collapse: collapse; margin: 22px 0; font-size: 13px; }
+  .wt th { text-align: left; font-size: 9px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text-3); padding: 8px 12px; border-bottom: 1px solid var(--border); }
+  .wt td { padding: 11px 12px; border-bottom: 1px solid rgba(44,44,56,0.5); vertical-align: top; color: var(--text-2); }
+  .wt td:first-child { color: var(--text); font-weight: 600; white-space: nowrap; }
+
+  .specimen { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 26px; margin: 28px 0; }
+  .specimen-label { font-size: 9px; font-weight: 700; letter-spacing: 1.4px; text-transform: uppercase; color: var(--text-3); margin-bottom: 18px; display: flex; align-items: center; gap: 8px; }
+  .specimen-label::before { content: ""; width: 6px; height: 6px; background: var(--amber); border-radius: 50%; }
+
+  /* ── Review bar mock ─────────────── */
+  .rb {
+    display: flex; align-items: center; gap: 10px;
+    background: #14141A; border: 1px solid #25252F; border-radius: var(--r);
+    padding: 0 12px; height: 46px; font-size: 12.5px; color: var(--text-2);
+    overflow-x: auto;
+  }
+  .rb-zone { display: flex; align-items: center; gap: 10px; }
+  .rb-zone.center { margin: 0 auto; }
+  .rb-sep { width: 1px; height: 22px; background: #2A2A35; flex-shrink: 0; }
+  .rb-exit { display: flex; align-items: center; gap: 6px; color: var(--text); font-weight: 500; white-space: nowrap; }
+  .rb-exit .arw { color: var(--text-3); }
+  .rb-id { font-size: 11px; color: var(--text-3); white-space: nowrap; }
+  .rb-id b { color: var(--text-2); font-weight: 600; }
+  .rb-nav { display: flex; align-items: center; gap: 8px; }
+  .rb-chev { width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; color: var(--text-2); border-radius: 2px; }
+  .rb-chev:hover { background: rgba(255,255,255,0.05); }
+  .rb-pg { font-family: var(--mono); font-size: 12px; color: var(--text); padding: 3px 8px; border: 1px solid #2A2A35; border-radius: 2px; background: #1A1A21; white-space: nowrap; }
+  .rb-pg .tot { color: var(--text-3); }
+  .rb-zoom { display: flex; align-items: center; gap: 8px; color: var(--text-3); }
+  .rb-fit { display: inline-flex; align-items: center; gap: 5px; color: var(--text-2); font-weight: 500; padding: 3px 8px; border: 1px solid #2A2A35; border-radius: 2px; }
+  .rb-step { font-family: var(--mono); font-size: 11.5px; color: var(--text-2); display: inline-flex; align-items: center; gap: 8px; }
+  .rb-step span { color: var(--text-3); }
+  .rb-out { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .rb-btn { display: inline-flex; align-items: center; gap: 6px; padding: 6px 13px; border-radius: 2px; font-size: 12.5px; font-weight: 600; white-space: nowrap; }
+  .rb-btn.primary { background: var(--gold); color: #1A1408; }
+  .rb-btn.ghost { background: transparent; border: 1px solid #2E2E39; color: var(--text-3); }
+  .rb svg { width: 14px; height: 14px; stroke-width: 2; fill: none; stroke: currentColor; }
+  .rb-chev svg, .rb-fit svg { width: 13px; height: 13px; }
+
+  .anno { display: grid; grid-template-columns: 130px 1fr; gap: 6px 16px; margin-top: 18px; font-size: 12px; }
+  .anno dt { font-family: var(--mono); font-size: 9.5px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; color: var(--amber); padding-top: 1px; }
+  .anno dd { color: var(--text-2); line-height: 1.5; }
+  .anno dd strong { color: var(--text); }
+
+  /* ── Atmosphere mock: page on dark field ── */
+  .field {
+    background: radial-gradient(120% 100% at 50% 0%, #1A1A20 0%, #101014 70%);
+    border: 1px solid #23232C; border-radius: var(--r);
+    padding: 0; overflow: hidden;
+  }
+  .field .topbar {
+    height: 42px; background: #14141A; border-bottom: 1px solid #23232C;
+    display: flex; align-items: center; gap: 10px; padding: 0 12px; font-size: 11.5px; color: var(--text-3);
+  }
+  .field .topbar .e { color: var(--text); font-weight: 500; }
+  .field .topbar .c { margin: 0 auto; font-family: var(--mono); color: var(--text-2); }
+  .field .topbar .o { color: #1A1408; background: var(--gold); font-weight: 700; font-size: 10px; padding: 3px 9px; border-radius: 2px; }
+  .field .stage { padding: 34px 0 38px; display: flex; flex-direction: column; align-items: center; gap: 26px; }
+  .sheet {
+    width: 230px; background: var(--paper); color: var(--paper-ink);
+    box-shadow: 0 18px 40px -12px rgba(0,0,0,0.7), 0 3px 10px rgba(0,0,0,0.4);
+    border-radius: 1px; padding: 20px 22px 18px; position: relative;
+    font-family: var(--screenplay); font-size: 6.4px; line-height: 1.55;
+  }
+  .sheet .pn { position: absolute; top: 12px; right: 18px; font-size: 6px; color: #6b6862; }
+  .sheet .sl { font-weight: 700; letter-spacing: 0.3px; margin-bottom: 7px; }
+  .sheet .ac { margin-bottom: 7px; color: #2a2823; }
+  .sheet .ch { text-align: center; font-weight: 700; margin-bottom: 1px; }
+  .sheet .pa { text-align: center; color: #4a4842; margin-bottom: 1px; }
+  .sheet .di { width: 60%; margin: 0 auto 8px; text-align: center; }
+  .sheet.cover { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 150px; gap: 14px; }
+  .sheet.cover .ttl { font-size: 9px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
+  .sheet.cover .by { font-size: 6.2px; color: #4a4842; }
+  .sheet.cover .badge { position: absolute; top: 10px; left: 12px; font-family: var(--font); font-size: 6px; font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase; color: var(--amber); background: rgba(212,165,116,0.14); padding: 2px 6px; border-radius: 2px; }
+  .field-cap { font-size: 11px; color: var(--text-3); text-align: center; padding: 0 24px 22px; line-height: 1.5; }
+  .field-cap b { color: var(--text-2); }
+
+  .tag { display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: 0.5px; padding: 2px 8px; border-radius: 2px; vertical-align: middle; }
+  .tag-now { background: rgba(0,168,150,0.14); color: var(--vis); }
+  .tag-defer { background: rgba(212,165,116,0.14); color: var(--amber); }
+
+  .route { display: flex; gap: 14px; margin: 22px 0; flex-wrap: wrap; }
+  .route-card { flex: 1; min-width: 240px; background: var(--surface); border: 1px solid var(--border); border-top: 2px solid var(--vis); padding: 18px 20px; }
+  .route-card.df { border-top-color: var(--amber); }
+  .route-card h5 { font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--vis); margin-bottom: 12px; }
+  .route-card.df h5 { color: var(--amber); }
+  .route-card ul { margin: 0; padding-left: 18px; font-size: 12.5px; }
+  .route-card li { margin-bottom: 6px; }
+
+  .flow { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 4px 0 8px; font-size: 12.5px; }
+  .flow .step { padding: 7px 13px; border: 1px solid var(--border); border-radius: 2px; color: var(--text-2); background: var(--surface); }
+  .flow .step.gate { border-color: var(--vis); color: var(--text); background: rgba(0,168,150,0.06); font-weight: 600; }
+  .flow .arr { color: var(--text-3); font-family: var(--mono); }
+  .flow.bad .step { color: var(--text-3); }
+  .flow .x { color: var(--script); font-family: var(--mono); font-weight: 700; }
+  .flow .ok { color: var(--vis); font-family: var(--mono); font-weight: 700; }
+
+  .closing { margin-top: 64px; }
+  .closing-block { margin-bottom: 36px; }
+  .closing-num { font-family: var(--mono); font-size: 12px; color: var(--amber); margin-bottom: 6px; }
+  .closing-block h4 { margin-top: 0; margin-bottom: 12px; font-size: 17px; }
+  .closing-block p { font-size: 14.5px; }
+
+  .stop { margin-top: 56px; padding-top: 36px; border-top: 1px solid var(--border); text-align: center; }
+  .stop .mark { font-family: var(--mono); font-size: 15px; font-weight: 700; letter-spacing: 6px; color: var(--text-3); }
+  .stop p { font-size: 12.5px; color: var(--text-3); margin: 14px auto 0; max-width: 560px; }
+
+  @media (max-width: 720px) {
+    body { padding: 44px 20px 80px; }
+    .doc-title { font-size: 28px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="doc-header" data-screen-label="Header">
+  <div class="doc-overline">Surface Direction — Print Preview Review Surface</div>
+  <h1 class="doc-title">Print Preview<br>Review Surface</h1>
+  <p class="doc-subtitle">
+    The page, held up to the light. A first-class screenplay page-review surface — the gate before export — across fourteen dimensions of direction. The pages are already real; this designs the room around them.
+  </p>
+  <div class="doc-meta">
+    <span>status: direction-only</span>
+    <span>surface: #rga-print-preview-root</span>
+    <span>grounded-in: print-preview-phase0-audit · ux-direction</span>
+    <span>date: 2026-05-29</span>
+  </div>
+</header>
+
+<!-- INTRO -->
+<div class="section">
+  <h2>The correction this surface serves</h2>
+  <h3>Review first, export second</h3>
+  <p class="flow bad">
+    <span class="step">Flow Editor</span><span class="arr">→</span><span class="step">Export PDF</span><span class="x">✗ wrong shape</span>
+  </p>
+  <p class="flow">
+    <span class="step">Flow Editor</span><span class="arr">→</span><span class="step gate">Print Preview</span><span class="arr">→</span><span class="step">Review real pages</span><span class="arr">→</span><span class="step">Export / Print</span><span class="ok">✓</span>
+  </p>
+  <p>
+    Print Preview is the <strong>gate before export</strong>. The director/writer sees the screenplay as a <em>package</em> — real pages, real geometry — and only then ships it. Export and Print become actions <em>inside</em> this surface, not menu verbs that bypass review.
+  </p>
+  <div class="callout observation">
+    <div class="callout-label">Observation — the audit's finding</div>
+    <p>
+      The pages are already real: the pipeline (Normalizer → ManuscriptGeometry → PageMap → RenderModel → PrintRenderer) paints one inch-true <code>.rga-page-sheet</code> per page, mirrors for RTL, and the PDF pipe works underneath. What's missing is <strong>the room around the pages</strong> — today Print Preview is a bare stack of sheets on a dark overlay with <em>zero</em> visible chrome, reachable only by Esc and undiscoverable PageUp/PageDown.
+    </p>
+  </div>
+</div>
+
+<!-- 1 IDENTITY -->
+<div class="section">
+  <h2><span class="section-num">01 ·</span> Review-Surface Identity</h2>
+  <h3>A room you step into, not a panel you toggle</h3>
+  <p>
+    Print Preview is the moment the draft stops being editable text and becomes a <strong>deliverable</strong> — the room you enter to review the package before it leaves your hands. The closest analogue is the lock review at a production office: the script held up, read as pages, checked before it's sent.
+  </p>
+  <ul>
+    <li><strong>A deliberate shift of mode.</strong> Entering recedes the writing chrome and gives the pages the stage. Reverent, full-attention review — not a glance.</li>
+    <li><strong>Read-only by nature.</strong> Nothing here edits the script — no dirty state, no save anxiety, no inline editing. You look, navigate, and ship or step back.</li>
+    <li><strong>A ViewManager peer mode, dressed as a first-class surface.</strong> Keep the lifecycle simple (mutual exclusion, restore prior view on exit); own bespoke chrome rather than borrowing the shell's. The "peer vs. workspace tab" question stays closed in this arc.</li>
+  </ul>
+  <div class="callout doctrine">
+    <div class="callout-label">Three things it must never be</div>
+    <p>Not a <strong>browser print dialog</strong> (no Destination/Pages/Layout sidebar). Not a <strong>generic OS print panel</strong>. Not a <strong>dashboard</strong> (no stat tiles, no metadata panels). It is a screenplay page-review surface — the page is the hero and the chrome whispers.</p>
+  </div>
+</div>
+
+<!-- 2 TOOLBAR ANATOMY -->
+<div class="section">
+  <h2><span class="section-num">02 ·</span> Top Toolbar Anatomy</h2>
+  <h3>One slim review bar, three zones</h3>
+  <p>
+    The central missing piece is a <strong>persistent chrome host that is not one of the scrolling sheets.</strong> Direction: one slim top bar, floating above the sheet stack, always present — controls up and out of the way so the page stays uninterrupted.
+  </p>
+
+  <div class="specimen">
+    <div class="specimen-label">Specimen — review bar, three zones (LTR)</div>
+    <div class="rb">
+      <div class="rb-zone">
+        <span class="rb-exit"><span class="arw"><svg viewBox="0 0 24 24"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></span> Done</span>
+        <span class="rb-id"><b>The Collector</b> · Letter · 12 pp</span>
+      </div>
+      <div class="rb-sep"></div>
+      <div class="rb-zone center">
+        <span class="rb-nav">
+          <span class="rb-chev"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></span>
+          <span class="rb-pg">3 <span class="tot">/ 12</span></span>
+          <span class="rb-chev"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></span>
+        </span>
+        <div class="rb-sep"></div>
+        <span class="rb-zoom">
+          <span class="rb-fit"><svg viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg> Fit page</span>
+          <span class="rb-step"><span>−</span> 100% <span>+</span></span>
+        </span>
+      </div>
+      <div class="rb-sep"></div>
+      <div class="rb-out">
+        <span class="rb-btn primary"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg> Export PDF</span>
+        <span class="rb-btn ghost"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> Print</span>
+      </div>
+    </div>
+    <dl class="anno">
+      <dt>Context / Exit</dt><dd><strong>Inline-start.</strong> Visible exit + package identity (title · page size · total). "Where am I, what am I reviewing."</dd>
+      <dt>Navigation + Zoom</dt><dd><strong>Center.</strong> The functional heart — page cluster and fit/zoom cluster (§3, §4).</dd>
+      <dt>Output / Commit</dt><dd><strong>Inline-end.</strong> Export PDF (weighted) + Print (deferred slot). The only loud elements in the surface.</dd>
+    </dl>
+  </div>
+  <p>
+    Treatment: calm, dark, thin — built from the shell's chrome tokens (<code>--statusbar-bg</code> family, not accent fills), quiet separators, utility density. Not a ribbon. Always visible — hiding it would repeat today's "no controls" failure — though it may dim slightly when the pointer rests over the pages.
+  </p>
+</div>
+
+<!-- 3 NAVIGATION -->
+<div class="section">
+  <h2><span class="section-num">03 ·</span> Page Navigation</h2>
+  <h3>The indicator is the spine</h3>
+  <p>All of this is backed by data that <strong>already exists</strong> — <code>RenderModel.totalPages</code>, <code>ScriptSession.currentPage</code>, and the current-sheet index <code>_scrollByOneSheet</code> already computes but never reports.</p>
+  <ul>
+    <li><strong>Live current-page indicator.</strong> A monospaced <code>3 / 12</code> at the bar's center, updating <em>as the writer scrolls</em>. The "you are on page N of the package" signal — the navigation cluster's gravitational center.</li>
+    <li><strong>Prev / next.</strong> Quiet chevrons flanking the indicator, each scrolling one sheet via the existing mechanism. PageUp/PageDown keep working and gain a discoverable hint.</li>
+    <li><strong>Page count.</strong> The <code>/ 12</code> from <code>totalPages</code> — one honest total.</li>
+    <li><strong>Jump = the indicator itself.</strong> Click the number, it becomes a small mono input; type <code>7</code>, Enter → page 7. No separate go-to modal; the indicator and the jump are one object. Esc cancels.</li>
+    <li><strong>Keyboard:</strong> PageUp/PageDown, Home/End, and the jump field — surfaced as a quiet, discoverable hint.</li>
+  </ul>
+</div>
+
+<!-- 4 ZOOM -->
+<div class="section">
+  <h2><span class="section-num">04 ·</span> Zoom / Fit</h2>
+  <h3>Fit page on entry; transform only</h3>
+  <ul>
+    <li><strong>Fit page — the default.</strong> A director wants to see the whole page <em>as a page</em> — composition, white space, where scenes break. Entering lands here.</li>
+    <li><strong>Fit width — the reading mode.</strong> Fills the horizontal space to read action and dialogue, scrolling vertically through the package.</li>
+    <li><strong>Zoom in/out — secondary.</strong> A <code>−  100%  +</code> stepper with a readout for inspecting detail. A stepper + fit buttons, never a continuous slider (dashboard-y for this surface).</li>
+  </ul>
+  <div class="callout direction">
+    <div class="callout-label">Direction — the hard constraint</div>
+    <p>Zoom and fit are <strong>presentation transforms only</strong> (CSS scale on the sheet stack). They must never feed back into PageMap or inch-truth. The page geometry is the single source of truth; zoom changes how big the page <em>looks</em>, never what the page <em>is</em>.</p>
+  </div>
+</div>
+
+<!-- 5 EXPORT/PRINT -->
+<div class="section">
+  <h2><span class="section-num">05 ·</span> Export / Print Actions</h2>
+  <h3>The commit edge — review's whole point</h3>
+  <p>Export is <em>downstream of review</em>. These live in the output zone (inline-end) and are the only "loud" elements in an otherwise quiet surface.</p>
+  <ul>
+    <li><strong>Export PDF — primary, weighted.</strong> A filled accent button — the one place a confident fill belongs. Routes to the working <code>Rga.PdfExport.run()</code> pipe; no backend change.</li>
+    <li><strong>A light review-aware popover — not a modal, not silent.</strong> Silent one-tap export undercuts the "review first" correction; a heavy generic modal becomes the print dialog the brief forbids. Between them: a compact options popover anchored to the button — filename, page range, and a place that <em>grows</em> as package features land (title page, scene-number draft, revision color — deferred). Designed to expand gracefully, with an explicit "Export" confirm.</li>
+    <li><strong>Print — present the slot, defer the wire.</strong> Native print / <code>@media print</code> is a deferred slice. Print sits beside Export as a sibling action but is shown-but-deferred until the print path lands. Design the home; don't assume the pipe.</li>
+  </ul>
+</div>
+
+<!-- 6 EXIT -->
+<div class="section">
+  <h2><span class="section-num">06 ·</span> Exit / Back-to-Editor</h2>
+  <h3>A visible step back out of the room</h3>
+  <ul>
+    <li><strong>A visible exit in the context zone.</strong> A <code>← Done</code> / <code>← Editor</code> affordance — label + arrow reads clearer than a bare ✕ for "step back to writing." Keep Esc as the keyboard path.</li>
+    <li><strong>Returns to the prior view exactly.</strong> ViewManager restores Flow/Draft and the writer's cursor and scroll — stepping out lands you precisely where you left writing. Already implemented; preserve it.</li>
+    <li><strong>Instant and safe.</strong> Read-only surface → no confirmation, no "discard?" prompt. A frictionless step back.</li>
+  </ul>
+</div>
+
+<!-- 7 ATMOSPHERE -->
+<div class="section">
+  <h2><span class="section-num">07 ·</span> Page Review Atmosphere</h2>
+  <h3>Table read, not browser preview</h3>
+
+  <div class="specimen">
+    <div class="specimen-label">Specimen — the surface: paper on a warm-dark field</div>
+    <div class="field">
+      <div class="topbar">
+        <span class="e">← Done</span>
+        <span class="c">2 / 12 · Fit page</span>
+        <span class="o">Export PDF</span>
+      </div>
+      <div class="stage">
+        <div class="sheet cover">
+          <span class="badge tag-defer" style="background:rgba(212,165,116,0.14);color:var(--amber)">Title · deferred</span>
+          <span class="ttl">The Collector</span>
+          <span class="by">written by<br>D. Ibrahim</span>
+          <span class="by" style="margin-top:6px">Draft · 28 May 2026</span>
+        </div>
+        <div class="sheet">
+          <span class="pn">1.</span>
+          <div class="sl">INT. APARTMENT 8 — DIMLY LIT</div>
+          <div class="ac">Inside is an ordinary cheap apartment with a glass of milk on the table and toys scattered on the carpet.</div>
+          <div class="ch">COLLECTOR (V.O.)</div>
+          <div class="di">Damn, I hate this job.</div>
+          <div class="ac">The woman sits in the corner of the bathroom, covered with her body — a small creature with blue eyes.</div>
+          <div class="ch">MOTHER</div>
+          <div class="pa">(desperate)</div>
+          <div class="di">No! I will not let you have it!</div>
+        </div>
+      </div>
+      <div class="field-cap"><b>Warm-dark field, real paper shadow, centered stack, per-sheet page numbers.</b> The sheets are the only bright objects; the chrome recedes. The cover sheet shows the deferred title-page model (§11).</div>
+    </div>
+  </div>
+
+  <ul>
+    <li><strong>Paper on a warm-dark field</strong> — matching Rwanga's writing philosophy, never cold institutional black. The sheets are the only bright objects.</li>
+    <li><strong>Real paper presence.</strong> A soft, realistic page shadow — the <em>one</em> place the no-shadow philosophy is rightly suspended, because the surface depicts paper, a real object held up for review.</li>
+    <li><strong>Generous rhythm, centered column,</strong> per-sheet manuscript page number (top-right, already rendered — correct convention).</li>
+    <li>The mood is <strong>"table read / lock review,"</strong> not edit, not configure, not browser preview.</li>
+  </ul>
+  <div class="callout direction">
+    <div class="callout-label">Direction — the one test</div>
+    <p>Every chrome decision is judged against one question: does the page still feel like the hero? If a control or panel makes the chrome compete with the paper, it is wrong for this surface.</p>
+  </div>
+</div>
+
+<!-- 8 THUMBNAILS -->
+<div class="section">
+  <h2><span class="section-num">08 ·</span> Page Thumbnails / Strip</h2>
+  <h3>Yes — collapsible left rail, deferred past v1</h3>
+  <ul>
+    <li><strong>Where:</strong> a narrow vertical rail on the inline-start edge — mini-sheets with page numbers, click to jump, current page highlighted. The only side-chrome the surface has.</li>
+    <li><strong>Off by default.</strong> The page is the hero; the strip is a power tool for long packages (100+ pages). Toggle from the top bar.</li>
+    <li><strong>Deferred by necessity.</strong> Needs render-to-thumbnail + virtualization. Designed now, built later — the jump-to-page field covers navigation in v1.</li>
+  </ul>
+</div>
+
+<!-- 9 RTL -->
+<div class="section">
+  <h2><span class="section-num">09 ·</span> RTL / LTR Chrome</h2>
+  <h3>The chrome mirrors with the sheets</h3>
+  <ul>
+    <li><strong>The whole top bar flows by logical direction.</strong> In RTL (Kurdish/Sorani, Arabic), zones flip: exit/context to the right, output/commit to the left — each on the natural forward edge.</li>
+    <li><strong>Directional glyphs mirror;</strong> the page indicator and jump field stay logical (<code>3 / 12</code> reads consistently).</li>
+    <li><strong>Matches the editor's existing RTL discipline</strong> — logical properties throughout. Native in each direction, never a mirrored-content bolt-on.</li>
+  </ul>
+</div>
+
+<!-- 10 STATES -->
+<div class="section">
+  <h2><span class="section-num">10 ·</span> Empty / Error / Loading</h2>
+  <h3>Composure, because the page is the artifact</h3>
+  <ul>
+    <li><strong>Loading:</strong> a calm, centered "Composing pages…" with page-size context — no heavy spinner, no progress-bar theatre. The pages are being <em>laid out</em>, briefly.</li>
+    <li><strong>Empty:</strong> "Nothing to preview yet — write a scene to see pages." Centered, muted, no illustration, no CTA hero.</li>
+    <li><strong>Error:</strong> "Couldn't compose the page preview," with Retry and Back-to-editor. Never a stack trace, never alarm-red. The writer's work is safe in Flow — the message should make that obvious.</li>
+  </ul>
+</div>
+
+<!-- 11+12 FUTURE FIT -->
+<div class="section">
+  <h2><span class="section-num">11 · 12 ·</span> Title Page · MORE / CONT'D · Revision Marks</h2>
+  <h3>The package, anticipated</h3>
+  <h4>Title page (§11)</h4>
+  <p>
+    The title page is the <strong>cover of the package</strong> — currently an in-flow body block, not a cover sheet (deferred). When it lands, it becomes the <strong>first sheet in the reviewed stack</strong> (title, author, contact, draft date), page-number suppressed. The package reads cover-first; the indicator reads "Title," body numbering begins at <code>1</code>. The surface's package framing absorbs it without rework.
+  </p>
+  <h4>MORE / CONT'D &amp; revision marks (§12)</h4>
+  <ul>
+    <li><strong>MORE / CONT'D — render in the sheet, no chrome.</strong> Continuation marks are page-output content; they appear within the sheets when the slice lands. The surface needs no control — it is simply the only place they can be <em>verified</em>.</li>
+    <li><strong>Scene-number gutters &amp; revision marks — toggleable review layers.</strong> Draft-state overlays the director may want on (production draft) or off (clean copy). A small <strong>"review layers" toggle group</strong> in the top bar (<em>Scene numbers · Revision marks</em>) shows/hides them on the sheets. Reserve the slot now; both are deferred slices.</li>
+  </ul>
+</div>
+
+<!-- 13+14 NOW/DEFERRED -->
+<div class="section">
+  <h2><span class="section-num">13 · 14 ·</span> Now vs Deferred</h2>
+  <h3>Everything in v1 uses data that already exists</h3>
+  <div class="route">
+    <div class="route-card">
+      <h5>§13 — In this surface NOW <span class="tag tag-now">v1</span></h5>
+      <ul>
+        <li>Persistent top review bar (the chrome host)</li>
+        <li>Visible exit (<code>← Done</code>) + Esc</li>
+        <li>Live page indicator <code>N / total</code>, prev/next, jump</li>
+        <li>Fit page (default) / Fit width / zoom stepper</li>
+        <li>Export PDF → existing pipe, light options popover</li>
+        <li>Warm-dark field, paper shadow, page numbers</li>
+        <li>RTL chrome mirroring · loading / empty / error</li>
+      </ul>
+    </div>
+    <div class="route-card df">
+      <h5>§14 — Deferred <span class="tag tag-defer">design now, build later</span></h5>
+      <ul>
+        <li>Thumbnail / page-strip rail (render + virtualization)</li>
+        <li>Print wiring (native print / <code>@media print</code> slice)</li>
+        <li>Title page as cover sheet</li>
+        <li>MORE / CONT'D rendering (in-sheet)</li>
+        <li>Scene-number / revision gutters + layer toggles</li>
+        <li>Fuller "package" (sides, scene-number draft)</li>
+        <li>Workspace-tab reframe (Shell-doctrine question)</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- CLOSING -->
+<div class="closing">
+  <h2>Closing</h2>
+
+  <div class="closing-block">
+    <div class="closing-num">01</div>
+    <h4>Strongest existing foundation</h4>
+    <p>
+      <strong>The pure, well-tested rendering pipeline — the pages are already real and correct.</strong> Normalizer → <code>ManuscriptGeometry.resolve</code> → <code>PageMap</code> → <code>RenderModel</code> → <code>PrintRenderer</code> paints one inch-true <code>.rga-page-sheet</code> per page, never measuring DOM, with correct Letter/A4/Legal geometry and RTL binding-side mirroring — and <code>Rga.PdfExport.run()</code> works end-to-end underneath. Page-awareness data (<code>totalPages</code>, <code>nav-index</code> pages, <code>ScriptSession.currentPage</code>) already exists, merely unsurfaced. The redesign never touches page truth; it builds the room around pages that are already trustworthy.
+    </p>
+  </div>
+
+  <div class="closing-block">
+    <div class="closing-num">02</div>
+    <h4>Biggest missing UX piece</h4>
+    <p>
+      <strong>There is no chrome at all — and therefore no review <em>workflow</em>.</strong> While active, every shell control is hidden, leaving a bare stack of sheets with only Esc and undiscoverable PageUp/PageDown — no page count, no current-page tracking, no navigation affordance, no export from within. The single biggest piece is the <strong>persistent top review bar</strong> hosting page awareness, navigation, and Export — the element that converts a silent sheet stack into a reviewable, shippable package.
+    </p>
+  </div>
+
+  <div class="closing-block">
+    <div class="closing-num">03</div>
+    <h4>Recommended first implementation bundle</h4>
+    <p>
+      <strong>"Review Bar v1."</strong> The persistent top bar carrying: a visible exit (<code>← Done</code>); a live page indicator (<code>N / total</code>) with prev/next and jump-to-page; Fit page (default) / Fit width / zoom stepper; and Export PDF wired to the existing pipe with a light options popover. No thumbnails, no Print wire, no package features. Every element draws on data and pipes that already exist (audit §3), so the bundle is low-risk and high-payoff — it delivers the entire "review then export" correction in one coherent surface without touching page truth or any deferred slice.
+    </p>
+  </div>
+
+  <div class="closing-block">
+    <div class="closing-num">04</div>
+    <h4>Highest-risk design mistake to avoid</h4>
+    <p>
+      <strong>Turning the review surface into a browser print dialog, a generic export modal, or a dashboard</strong> — burying the page under system-style option panels, destination pickers, or stat tiles. The page must stay the hero and the chrome must whisper; the moment options out-shout the paper, the surface has failed. Two technical corollaries of the same mistake: letting <strong>zoom or chrome feed back into page truth</strong> (zoom is presentation-only; PageMap is the single resolver), and <strong>leaking page seams back into Flow</strong> (page truth lives here, never upstream in continuous drafting). Guard the page's primacy and the single-source-of-truth boundary above all.
+    </p>
+  </div>
+
+  <div class="stop">
+    <div class="mark">STOP</div>
+    <p>
+      UX Direction only. No implementation has begun, no code or CSS has been written, and no engineering plan beyond the recommended first bundle has been authored. The render pipeline, single-resolver page truth, no-DOM-measurement, ViewManager mutual exclusion, and the deferred-slice boundaries are treated as immovable. The next decision — authorize, amend, or reject — belongs to the user.
+    </p>
+  </div>
+</div>
+
+</body>
+</html>
