@@ -718,6 +718,14 @@
      reaches it at init time. Both surfaces read/write per-scene notes
      through this single owner. -->
 <script src="js/doc-types/screenplay/scene-notes.js"></script>
+<!-- Filmustageation SN-Helper-1 — read-only scene-level projection helper.
+     Rga.Screenplay.SceneCatalog.byScene(sceneNodeId, idx) returns a
+     unified per-scene bundle (notes, flags, characters, props,
+     wardrobe, locations, sfx, vfx, vehicles, animals, custom, page).
+     Pure read against nav-index; no mutation, no persistence, no UI.
+     Foundation for nested sidebar, inspector scene-detail, timeline,
+     print/report, MCP integrations, and AI scene analysis. -->
+<script src="js/doc-types/screenplay/scene-catalog.js"></script>
 <!-- F1A.5 — screenplay-owned inspector panel for Scene Notes. First
      production consumer of the F1A.3 inspector host. Registers via
      Rga.Shell.Inspector.registerPanel; never auto-activates. -->
