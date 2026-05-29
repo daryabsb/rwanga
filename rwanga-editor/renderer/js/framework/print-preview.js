@@ -60,9 +60,17 @@
         // footer/header slots are populated when the user has opted in.
         Rga.PrintRenderer.render(model, _root, _opts);
       }
+      // Review Bar v1 — mount/refresh the persistent review chrome over the
+      // freshly-rendered sheets. Guarded so the pure-pipeline tests (which
+      // load print-preview.js without review-bar.js) remain a no-op. All
+      // measurement-based fit/zoom logic lives in Rga.ReviewBar, NOT here.
+      if (Rga.ReviewBar && typeof Rga.ReviewBar.show === 'function') Rga.ReviewBar.show();
       return true;
     },
     deactivate: function() {
+      // Tear the review bar down before the root is removed (resets the
+      // presentation zoom + unwires its scroll/resize listeners).
+      if (Rga.ReviewBar && typeof Rga.ReviewBar.hide === 'function') Rga.ReviewBar.hide();
       if (_root && _root.parentNode) _root.parentNode.removeChild(_root);
       _root = null;
     }
