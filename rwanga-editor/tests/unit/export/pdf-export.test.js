@@ -9,6 +9,20 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { JSDOM } = require('jsdom');
+const fs = require('node:fs');
+const path = require('node:path');
+
+// Regression guard (fix campaign): exporting from the Review Bar must NOT
+// re-activate the preview. run() previously called Rga.PrintPreview.refresh(),
+// which re-ran the Review Bar's fit/zoom and produced a visible zoom jump on
+// every Export click ("Export behaves like zoom"). The export builds a fresh
+// DETACHED render, so it must never touch the live preview.
+test('PB1.B regression: run() does not call PrintPreview.refresh (export must not re-zoom)', () => {
+  const src = fs.readFileSync(path.join(__dirname, '../../../renderer/js/export/pdf-export.js'), 'utf8')
+    .split('\n').map(function(l) { const i = l.indexOf('//'); return i >= 0 ? l.slice(0, i) : l; }).join('\n');
+  assert.equal(/PrintPreview\.refresh\s*\(/.test(src), false,
+    'pdf-export.js must NOT call PrintPreview.refresh() — it re-zooms the live preview on Export');
+});
 
 function boot() {
   const dom = new JSDOM('<!DOCTYPE html><html><head>' +

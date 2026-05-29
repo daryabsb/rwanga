@@ -2186,6 +2186,10 @@ body.view-print-preview-active #rga-print-preview-root {
 /* While the preview is up, the editor + shell stay in the DOM (so we
  * never tear them down) but are hidden — preview is the sole foreground. */
 body.view-print-preview-active #menu-bar,
+/* Review surface — the writing-chrome menubar (Row 2) recedes while the
+ * pages take the stage (UX Direction §1). It is also a frameless-window
+ * drag region; receding it removes any overlap with the review bar. */
+body.view-print-preview-active #rga-shell-menubar,
 body.view-print-preview-active #activity-bar,
 body.view-print-preview-active #sidebar,
 body.view-print-preview-active #tab-bar,
@@ -2365,6 +2369,11 @@ body.view-print-preview-active #rga-review-bar {
   font-family: var(--font-ui);
   font-size: 12.5px;
   overflow-x: auto;
+  /* Frameless-window safety: the bar layers over the owned title bar's
+   * drag region. Without no-drag, OS-level window dragging swallows clicks
+   * on the controls (the failure mode that synthetic test clicks bypass but
+   * real mouse clicks hit). Force the whole bar interactive. */
+  -webkit-app-region: no-drag;
 }
 .rga-review-bar[dir="rtl"] { font-family: var(--font-ui-rtl); }
 
@@ -2453,4 +2462,4 @@ body.view-print-preview-active #rga-review-bar {
   padding: 6px 13px; border-radius: 2px; font-weight: 600; font-size: 12.5px;
   border: 1px solid var(--border-primary, #3c3c3c); color: var(--text-tertiary, #6e6e6e);
 }
-.rga-review-print[disabled] { opacity: 0.5; cursor: default; }
+.rga-review-print[disabled] { opacity: 0.5; cursor: default; pointer-events: none; }

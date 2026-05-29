@@ -3,8 +3,9 @@
 //
 // Proves the live review-surface behaviour jsdom cannot: the bar mounts over
 // the real sheet stack, the page indicator tracks scroll, prev/next/jump
-// navigate, Fit/zoom transform the stack (presentation only), Export routes
-// to the PDF pipe, and Done/Esc return to the editor.
+// navigate (and the page VISIBLY scrolls), Fit/zoom transform the stack
+// (presentation only), Export routes to the PDF pipe WITHOUT re-zooming, the
+// export carries real screenplay formatting, and Done/Esc return to the editor.
 //
 // Prerequisite: `npm run build:renderer`. Run with: npm run test:e2e
 'use strict';
@@ -24,7 +25,6 @@ test.beforeEach(async () => {
   page = await app.firstWindow();
   await page.waitForLoadState('domcontentloaded');
   await page.waitForFunction(() => !!(window.Rga && window.Rga.PrintPreview && window.Rga.ReviewBar));
-  // A document tab must be active so the preview has a view to render.
   await page.waitForFunction(() => !!(window.Rga.TabManager && window.Rga.TabManager._editorView()));
 });
 
@@ -40,13 +40,28 @@ function enterPreview() {
   return page.evaluate(() => window.Rga.PrintPreview.open());
 }
 
-// Insert enough text to force a multi-page package, then enter preview.
-async function enterMultiPagePreview() {
-  await page.locator('#editor').click();
+// Build a properly-structured, MULTI-PAGE screenplay (scene headings, action,
+// cues, dialogue, parentheticals, transitions) so PrintRenderer emits the real
+// screenplay block classes — the fidelity the writer expects in the package.
+// Uses updateState (NOT dispatch) so the doc is not marked dirty — a dirty
+// doc makes the CloseGuard block app.close() and hangs afterEach.
+async function buildRealScript() {
   await page.evaluate(() => {
     const v = window.Rga.TabManager._editorView();
-    const big = 'A long line of action that fills the page. '.repeat(220);
-    v.dispatch(v.state.tr.insertText(big));
+    const s = v.state.schema, PM = window.RgaProseMirror;
+    const scenes = [];
+    for (let i = 0; i < 8; i += 1) {
+      scenes.push(s.nodes.scene.create({ id: 'sc' + i, notes: '', revisionFlag: null, metadata: { linkedScenes: [], references: [], production: {} } }, [
+        s.nodes.sceneHeading.create({ setting: 'INT.', time: 'NIGHT', headingStyle: null }, s.text('APARTMENT ' + i)),
+        s.nodes.action.create(null, s.text('The room is dim. ' + 'Action detail. '.repeat(18))),
+        s.nodes.character.create(null, s.text('COLLECTOR')),
+        s.nodes.parenthetical.create(null, s.text('(quietly)')),
+        s.nodes.dialogue.create(null, s.text('I hate this job, every single night of it.')),
+        s.nodes.transition.create({ presetType: 'CUT' }, s.text('CUT TO:'))
+      ]));
+    }
+    const doc = s.nodes.doc.create(null, [s.nodes.titleStrip.create({ removable: true }), s.nodes.body.create(null, scenes)]);
+    v.updateState(PM.EditorState.create({ schema: s, doc: doc, plugins: v.state.plugins }));
   });
   await enterPreview();
   await expect(page.locator('#rga-review-bar')).toBeVisible();
@@ -123,7 +138,8 @@ test('zoom is presentation-only — it sets root.style.zoom and never the sheet 
 
 test('Export PDF routes through the review surface to Rga.PdfExport.run()', async () => {
   await enterPreview();
-  // Stub the pipe so no native save dialog blocks the test; assert it fires.
+  // Stub the renderer-side caller (a plain Rga object, unlike the immutable
+  // contextBridge bridge) so no native save dialog blocks the test.
   await page.evaluate(() => {
     window.__exportRan = 0;
     window.Rga.PdfExport.run = () => { window.__exportRan += 1; return Promise.resolve(true); };
@@ -132,19 +148,24 @@ test('Export PDF routes through the review surface to Rga.PdfExport.run()', asyn
   expect(await page.evaluate(() => window.__exportRan)).toBe(1);
 });
 
-test('next / prev navigate the package and the indicator tracks the page', async () => {
-  await enterMultiPagePreview();
+test('next / prev navigate the package — the page VISIBLY scrolls, not just the indicator', async () => {
+  await buildRealScript();
   const total = await page.locator('#rga-print-preview-root .rga-page-sheet').count();
   expect(total).toBeGreaterThanOrEqual(2);
+  const scrollTop = () => page.evaluate(() => document.getElementById('rga-print-preview-root').scrollTop);
   await expect(page.locator('.rga-review-pageind')).toHaveText(new RegExp('^\\s*1 / ' + total));
+  const at1 = await scrollTop();
   await page.locator('.rga-review-next').click();
   await expect(page.locator('.rga-review-pageind')).toHaveText(new RegExp('^\\s*2 / ' + total));
+  const at2 = await scrollTop();
+  expect(at2).toBeGreaterThan(at1);                 // the surface actually moved
   await page.locator('.rga-review-prev').click();
   await expect(page.locator('.rga-review-pageind')).toHaveText(new RegExp('^\\s*1 / ' + total));
+  expect(await scrollTop()).toBeLessThan(at2);
 });
 
 test('jump-to-page: click the indicator, type a page, Enter scrolls there', async () => {
-  await enterMultiPagePreview();
+  await buildRealScript();
   const total = await page.locator('#rga-print-preview-root .rga-page-sheet').count();
   await page.locator('.rga-review-pageind').click();
   const input = page.locator('.rga-review-pageind-input');
@@ -152,4 +173,78 @@ test('jump-to-page: click the indicator, type a page, Enter scrolls there', asyn
   await input.fill(String(total));
   await input.press('Enter');
   await expect(page.locator('.rga-review-pageind')).toHaveText(new RegExp(total + ' / ' + total));
+});
+
+test('FIX: Export PDF never changes the zoom (no re-zoom side-effect)', async () => {
+  // run() must not call PrintPreview.refresh() — that re-ran fit/zoom on every
+  // Export click. The real bridge is contextBridge-immutable (can't stub), so
+  // we exercise the REAL run() and assert the synchronous zoom is untouched.
+  // (A native save dialog may open; the synchronous re-zoom check has already
+  // happened by then, and afterEach force-closes the app.)
+  await buildRealScript();
+  const z = () => page.evaluate(() => document.getElementById('rga-print-preview-root').style.zoom);
+  const before = await z();
+  await page.locator('.rga-review-export').click();
+  expect(await z()).toBe(before);
+});
+
+test('FIX: Fit page is stable across a preview refresh (Page Setup-style)', async () => {
+  await buildRealScript();
+  const z = () => page.evaluate(() => document.getElementById('rga-print-preview-root').style.zoom);
+  const z1 = await z();
+  await page.evaluate(() => window.Rga.PrintPreview.refresh());
+  expect(await z()).toBe(z1);   // same content + window → same fit, no drift
+});
+
+test('FIX: the writing-chrome menubar recedes while the review surface is active', async () => {
+  await enterPreview();
+  const display = await page.evaluate(() => {
+    const m = document.querySelector('#rga-shell-menubar');
+    return m ? getComputedStyle(m).display : 'absent';
+  });
+  expect(['none', 'absent']).toContain(display);
+});
+
+test('FIX: the export carries the real screenplay formatting (export matches preview)', async () => {
+  // Reconstruct the exact HTML run() builds (bridge is immutable). It must
+  // carry the screenplay block classes AND link the formatting stylesheet, so
+  // the exported PDF is laid out like Print Preview — not plain text.
+  await buildRealScript();
+  const fmt = await page.evaluate(() => {
+    const v = window.Rga.TabManager._editorView();
+    const model = window.Rga.PrintPreview.buildModel(v);
+    const tmp = document.createElement('div');
+    window.Rga.PrintRenderer.render(model, tmp, {});
+    const html = window.Rga.PdfExport._buildExportHtml({ sheetsHTML: tmp.innerHTML, cssHrefs: window.Rga.PdfExport._cssHrefs(), geometry: window.Rga.PdfExport._geometry() });
+    return {
+      slug: /rga-print-block-sceneHeading/.test(html),
+      dialogue: /rga-print-block-dialogue/.test(html),
+      character: /rga-print-block-character/.test(html),
+      css: /editor-prosemirror\.css/.test(html)
+    };
+  });
+  expect(fmt.slug).toBe(true);
+  expect(fmt.dialogue).toBe(true);
+  expect(fmt.character).toBe(true);
+  expect(fmt.css).toBe(true);
+});
+
+test('the preview renders real screenplay formatting (uppercase bold sluglines, indented dialogue)', async () => {
+  await buildRealScript();
+  const styles = await page.evaluate(() => {
+    const root = document.getElementById('rga-print-preview-root');
+    const slug = root.querySelector('.rga-print-block-sceneHeading');
+    const dlg = root.querySelector('.rga-print-block-dialogue');
+    const ch = root.querySelector('.rga-print-block-character');
+    return {
+      slugUpper: slug && getComputedStyle(slug).textTransform,
+      slugWeight: slug && getComputedStyle(slug).fontWeight,
+      dlgPad: dlg && getComputedStyle(dlg).paddingLeft,
+      chPad: ch && getComputedStyle(ch).paddingLeft
+    };
+  });
+  expect(styles.slugUpper).toBe('uppercase');
+  expect(parseInt(styles.slugWeight, 10)).toBeGreaterThanOrEqual(700);
+  expect(parseFloat(styles.dlgPad)).toBeGreaterThan(0);   // dialogue indented
+  expect(parseFloat(styles.chPad)).toBeGreaterThan(0);    // character cue indented
 });

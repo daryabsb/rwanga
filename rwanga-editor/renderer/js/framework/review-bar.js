@@ -250,6 +250,12 @@
 
   function _applyFit(mode) {
     _fitMode = mode;
+    // Measure the viewport at zoom-neutral. CSS `zoom` on the root distorts
+    // its own clientWidth/clientHeight, so computing a fit scale while a
+    // previous zoom is still applied yields an inconsistent result (the same
+    // content fitting to a different scale on each call). Reset, measure,
+    // then apply the freshly-computed zoom.
+    if (_root) _root.style.zoom = '';
     _zoom = _fitScale(mode, _availSize(), _naturalSheetSize());
     _applyZoom();
   }

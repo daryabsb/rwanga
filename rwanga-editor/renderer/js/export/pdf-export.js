@@ -165,13 +165,12 @@
       return Promise.resolve(false);
     }
 
-    // Keep an open preview in sync (non-destructive: capture is via the
-    // detached render below, not the live root).
-    if (Rga.PrintPreview && typeof Rga.PrintPreview.isActive === 'function'
-        && Rga.PrintPreview.isActive() && typeof Rga.PrintPreview.refresh === 'function') {
-      Rga.PrintPreview.refresh();
-    }
-
+    // NOTE: we deliberately do NOT call Rga.PrintPreview.refresh() here.
+    // Refresh re-activates the preview, which re-runs the Review Bar's
+    // fit/zoom — producing a visible zoom jump on every Export click
+    // ("Export behaves like zoom"). The export captures a FRESH detached
+    // render below (_sheetsHTML rebuilds the model from the live view), so
+    // it is always current without disturbing the on-screen preview.
     const sheets = _sheetsHTML();
     if (sheets == null) {
       _toast('Open a script before exporting to PDF.', 'warning');
