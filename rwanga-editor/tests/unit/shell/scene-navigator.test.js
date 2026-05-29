@@ -83,17 +83,23 @@ test('panel registers with Sidebar under id "sceneNavigator" + writer-facing lab
   assert.equal(c.shortcut, 'Cmd-Shift-S');
 });
 
-test('mount with no scenes renders the empty state (Bundle 1 §B: unified .rga-shell-panel-empty class)', () => {
+// SN-Bundle-1 — empty-state copy refreshed to doc-type-neutral voice.
+// Title stays "Scenes" (identity); body now describes what the catalogue
+// will show, not the screenplay-specific slug-Enter mechanic.
+test('mount with no scenes renders the empty state with SN-Bundle-1 doc-type-neutral copy', () => {
   const { Rga, host } = boot();
   Rga.Shell.Sidebar.activate('sceneNavigator');
   const empty = host.querySelector('.rga-shell-panel-empty');
   assert.ok(empty, 'unified empty-state DOM rendered');
-  assert.match(empty.textContent, /No scenes yet/);
-  // Bundle 1 §B: also check the title segment is present.
-  assert.ok(empty.querySelector('.rga-shell-panel-empty-title'),
-    'empty state includes a title segment');
-  assert.ok(empty.querySelector('.rga-shell-panel-empty-body'),
-    'empty state includes a body segment');
+  assert.equal(empty.querySelector('.rga-shell-panel-empty-title').textContent, 'Scenes');
+  assert.equal(empty.querySelector('.rga-shell-panel-empty-body').textContent,
+    'Scenes will appear here as you write.');
+  // True empty state must NOT show the header (the empty surface IS the
+  // identity in this state) or the find input (nothing to find).
+  assert.equal(host.querySelector('.rga-shell-scene-navigator-section-header'), null,
+    'header is not rendered when there are zero scenes');
+  assert.equal(host.querySelector('.rga-shell-scene-navigator-find-input'), null,
+    'find input is not rendered when there are zero scenes');
 });
 
 test('each row renders sceneNumber + headingDisplay + estimated page + indicators in documented order', () => {
@@ -524,4 +530,225 @@ test('SN.1: unmount clears the last-current tracker so a fresh re-mount scrolls 
   Rga.Shell.Sidebar.activate('sceneNavigator');
   assert.equal(spy.sn1Calls().length, 1,
     'fresh mount after unmount scrolls current row even if nodeId is unchanged');
+});
+
+// ----------------------------------------------------------------
+// SN-Bundle-1 — header + find/filter foundation
+// ----------------------------------------------------------------
+// Coverage: header renders count when scenes exist; find input present
+// when scenes exist; filter by heading (case-insensitive) + by scene
+// number; no-results surface with Clear affordance; Escape precedence
+// (filter first, then selection); SEPARATION INVARIANT survives filter;
+// SN.1 auto-scroll re-fires after Clear when current was filtered out.
+
+function fireInput(input, value) {
+  input.value = value;
+  input.dispatchEvent(new window.Event('input', { bubbles: true }));
+}
+
+test('SN-Bundle-1: header renders "Scenes" + count when scenes exist', () => {
+  const { Rga, host } = boot({
+    scenes: [
+      { nodeId: 'a', sceneNumber: 1, headingDisplay: 'INT. ROOM — DAY',     pmPos: 0,  pmEndPos: 10 },
+      { nodeId: 'b', sceneNumber: 2, headingDisplay: 'EXT. STREET — NIGHT', pmPos: 10, pmEndPos: 30 },
+      { nodeId: 'c', sceneNumber: 3, headingDisplay: 'INT. CAFÉ — DAY',     pmPos: 30, pmEndPos: 50 }
+    ]
+  });
+  Rga.Shell.Sidebar.activate('sceneNavigator');
+  const header = host.querySelector('.rga-shell-scene-navigator-section-header');
+  assert.ok(header, 'header rendered above the scene list');
+  assert.equal(
+    header.querySelector('.rga-shell-scene-navigator-section-header-label').textContent,
+    'Scenes');
+  assert.equal(
+    header.querySelector('.rga-shell-scene-navigator-section-header-count').textContent,
+    ' · 3');
+  // Header has no buttons / no actions — identity + count only (UX
+  // Direction §9 forbids a button strip).
+  assert.equal(header.querySelector('button'), null,
+    'header carries no button — identity + count only');
+});
+
+test('SN-Bundle-1: find input rendered above list, placeholder + aria-label correct', () => {
+  const { Rga, host } = boot({
+    scenes: [{ nodeId: 'a', sceneNumber: 1, headingDisplay: 'A', pmPos: 0, pmEndPos: 10 }]
+  });
+  Rga.Shell.Sidebar.activate('sceneNavigator');
+  const input = host.querySelector('.rga-shell-scene-navigator-find-input');
+  assert.ok(input, 'find input rendered');
+  assert.equal(input.getAttribute('placeholder'), 'Find scene…');
+  assert.equal(input.getAttribute('aria-label'), 'Find scene');
+  assert.equal(input.value, '', 'find input starts empty');
+});
+
+test('SN-Bundle-1: find filters by heading (substring, case-insensitive)', () => {
+  const { Rga, host } = boot({
+    scenes: [
+      { nodeId: 'a', sceneNumber: 1, headingDisplay: 'INT. ROOM — DAY',       pmPos: 0,  pmEndPos: 10 },
+      { nodeId: 'b', sceneNumber: 2, headingDisplay: 'EXT. STREET — NIGHT',   pmPos: 10, pmEndPos: 30 },
+      { nodeId: 'c', sceneNumber: 3, headingDisplay: 'INT. ROOFTOP — NIGHT',  pmPos: 30, pmEndPos: 50 }
+    ]
+  });
+  Rga.Shell.Sidebar.activate('sceneNavigator');
+  const input = host.querySelector('.rga-shell-scene-navigator-find-input');
+  fireInput(input, 'ROOF');
+  const rows = host.querySelectorAll('.rga-shell-scene-navigator-row');
+  assert.equal(rows.length, 1, 'only the matching row remains');
+  assert.equal(rows[0].getAttribute('data-scene-node-id'), 'c');
+  // Case-insensitivity: lowercase query matches uppercase heading.
+  fireInput(input, 'street');
+  const rows2 = host.querySelectorAll('.rga-shell-scene-navigator-row');
+  assert.equal(rows2.length, 1);
+  assert.equal(rows2[0].getAttribute('data-scene-node-id'), 'b');
+  // Header count reflects the unfiltered total — orientation, not result count.
+  assert.equal(
+    host.querySelector('.rga-shell-scene-navigator-section-header-count').textContent,
+    ' · 3');
+});
+
+test('SN-Bundle-1: find filters by scene number string', () => {
+  const { Rga, host } = boot({
+    scenes: [
+      { nodeId: 'a', sceneNumber: 1,  headingDisplay: 'A', pmPos: 0,  pmEndPos: 10 },
+      { nodeId: 'b', sceneNumber: 12, headingDisplay: 'B', pmPos: 10, pmEndPos: 30 },
+      { nodeId: 'c', sceneNumber: 22, headingDisplay: 'C', pmPos: 30, pmEndPos: 50 }
+    ]
+  });
+  Rga.Shell.Sidebar.activate('sceneNavigator');
+  const input = host.querySelector('.rga-shell-scene-navigator-find-input');
+  // "2" matches scene 12 AND scene 22 (substring on number string).
+  fireInput(input, '2');
+  const rows = host.querySelectorAll('.rga-shell-scene-navigator-row');
+  assert.equal(rows.length, 2);
+  const ids = Array.from(rows).map(function(r) { return r.getAttribute('data-scene-node-id'); });
+  assert.deepEqual(ids, ['b', 'c']);
+});
+
+test('SN-Bundle-1: no-results surface renders with query echo + Clear affordance', () => {
+  const { Rga, host } = boot({
+    scenes: [
+      { nodeId: 'a', sceneNumber: 1, headingDisplay: 'INT. ROOM — DAY', pmPos: 0, pmEndPos: 10 }
+    ]
+  });
+  Rga.Shell.Sidebar.activate('sceneNavigator');
+  const input = host.querySelector('.rga-shell-scene-navigator-find-input');
+  fireInput(input, 'xyz-impossible');
+  // No matching rows.
+  assert.equal(host.querySelectorAll('.rga-shell-scene-navigator-row').length, 0);
+  // Unified empty-surface used for the no-results state (consistent voice).
+  const empty = host.querySelector('.rga-shell-panel-empty');
+  assert.ok(empty, 'no-results uses the unified .rga-shell-panel-empty surface');
+  assert.equal(empty.querySelector('.rga-shell-panel-empty-title').textContent, 'No scenes found');
+  assert.match(empty.querySelector('.rga-shell-panel-empty-body').textContent, /xyz-impossible/);
+  // Clear affordance present.
+  const clearBtn = empty.querySelector('.rga-shell-panel-empty-action');
+  assert.ok(clearBtn, 'Clear button present in no-results state');
+  assert.equal(clearBtn.textContent, 'Clear');
+  // Header + find input still present — identity stays put through no-results.
+  assert.ok(host.querySelector('.rga-shell-scene-navigator-section-header'),
+    'header remains visible in no-results state');
+  assert.ok(host.querySelector('.rga-shell-scene-navigator-find-input'),
+    'find input remains visible in no-results state');
+});
+
+test('SN-Bundle-1: Clear affordance restores full list and clears filter input', () => {
+  const { Rga, host } = boot({
+    scenes: [
+      { nodeId: 'a', sceneNumber: 1, headingDisplay: 'A', pmPos: 0,  pmEndPos: 10 },
+      { nodeId: 'b', sceneNumber: 2, headingDisplay: 'B', pmPos: 10, pmEndPos: 30 }
+    ]
+  });
+  Rga.Shell.Sidebar.activate('sceneNavigator');
+  const input = host.querySelector('.rga-shell-scene-navigator-find-input');
+  fireInput(input, 'nothing-matches');
+  const clearBtn = host.querySelector('.rga-shell-panel-empty-action');
+  clearBtn.click();
+  assert.equal(host.querySelectorAll('.rga-shell-scene-navigator-row').length, 2,
+    'full list restored');
+  // Find input present + value cleared.
+  const inputAfter = host.querySelector('.rga-shell-scene-navigator-find-input');
+  assert.ok(inputAfter);
+  assert.equal(inputAfter.value, '', 'find input value cleared');
+});
+
+test('SN-Bundle-1: Escape precedence — filter has text → first Escape clears filter (not selection)', () => {
+  const { Rga, host } = boot({
+    scenes: [
+      { nodeId: 'a', sceneNumber: 1, headingDisplay: 'INT. ROOM — DAY',     pmPos: 0,  pmEndPos: 10 },
+      { nodeId: 'b', sceneNumber: 2, headingDisplay: 'EXT. STREET — NIGHT', pmPos: 10, pmEndPos: 30 }
+    ]
+  });
+  Rga.Shell.Sidebar.activate('sceneNavigator');
+  // Keyboard-select row 'b' first.
+  fireKey(host, 'ArrowDown');
+  fireKey(host, 'ArrowDown');
+  assert.equal(Rga.Shell.SceneNavigator.selectedRowNodeId(), 'b');
+  // Apply a filter.
+  const input = host.querySelector('.rga-shell-scene-navigator-find-input');
+  fireInput(input, 'street');
+  // First Escape — clears filter, selection preserved.
+  fireKey(host, 'Escape');
+  assert.equal(host.querySelector('.rga-shell-scene-navigator-find-input').value, '',
+    'first Escape cleared the filter');
+  assert.equal(Rga.Shell.SceneNavigator.selectedRowNodeId(), 'b',
+    'first Escape did NOT clear selection (precedence: filter first)');
+  // Second Escape — clears selection.
+  fireKey(host, 'Escape');
+  assert.equal(Rga.Shell.SceneNavigator.selectedRowNodeId(), null,
+    'second Escape (filter empty) cleared selection — today\'s behaviour preserved');
+});
+
+test('SN-Bundle-1: SEPARATION INVARIANT holds across filtered renders', () => {
+  const { Rga, host } = boot({
+    cursor: 15,  // cursor inside scene 'b'
+    scenes: [
+      { nodeId: 'a', sceneNumber: 1, headingDisplay: 'INT. ROOM — DAY',     pmPos: 0,  pmEndPos: 10 },
+      { nodeId: 'b', sceneNumber: 2, headingDisplay: 'EXT. STREET — NIGHT', pmPos: 10, pmEndPos: 30 },
+      { nodeId: 'c', sceneNumber: 3, headingDisplay: 'INT. CAFÉ — DAY',     pmPos: 30, pmEndPos: 50 }
+    ]
+  });
+  Rga.Shell.Sidebar.activate('sceneNavigator');
+  // Keyboard-select scene 'c' while cursor is in 'b'.
+  Rga.Shell.SceneNavigator.focusRow('c');
+  // Filter to include both 'b' (current) and 'c' (selected) — substring 'T' hits both headings.
+  const input = host.querySelector('.rga-shell-scene-navigator-find-input');
+  fireInput(input, 'T');
+  // Both classes still render on their respective rows.
+  const rowB = host.querySelector('[data-scene-node-id="b"]');
+  const rowC = host.querySelector('[data-scene-node-id="c"]');
+  assert.ok(rowB && rowB.classList.contains('rga-shell-scene-navigator-row-current'),
+    'current class preserved under filter');
+  assert.ok(rowC && rowC.classList.contains('rga-shell-scene-navigator-row-selected'),
+    'selected class preserved under filter');
+  // They never collapse onto the same row.
+  assert.ok(!rowB.classList.contains('rga-shell-scene-navigator-row-selected'));
+  assert.ok(!rowC.classList.contains('rga-shell-scene-navigator-row-current'));
+});
+
+test('SN-Bundle-1: SN.1 auto-scroll re-fires after a Clear when current was filtered out', () => {
+  const { Rga, host } = boot({
+    cursor: 5,
+    scenes: [
+      { nodeId: 'a', sceneNumber: 1, headingDisplay: 'INT. ROOM — DAY',     pmPos: 0,  pmEndPos: 10 },
+      { nodeId: 'b', sceneNumber: 2, headingDisplay: 'EXT. STREET — NIGHT', pmPos: 10, pmEndPos: 30 }
+    ]
+  });
+  Rga.Shell.Sidebar.activate('sceneNavigator');
+  // Install scroll spy AFTER initial mount so we measure only post-mount
+  // transitions. sn1Calls() filters by behavior:'auto' + current-row class
+  // — both required to distinguish SN.1 scrolls from _setSelected scrolls.
+  const spy = installScrollSpy();
+  const baseline = spy.sn1Calls().length;
+  // Filter to exclude scene 'a' (current). _setFilter resets
+  // _lastCurrentNodeId; the filtered render has no current row in DOM,
+  // so SN.1's inner querySelector returns null and the scroll is skipped.
+  const input = host.querySelector('.rga-shell-scene-navigator-find-input');
+  fireInput(input, 'STREET');
+  assert.equal(spy.sn1Calls().length, baseline,
+    'SN.1 does not fire while current row is filtered out');
+  // Clear filter — current row returns to DOM, _lastCurrentNodeId is still
+  // null (was reset on the filter set), so SN.1 fires on the unfiltered render.
+  fireInput(input, '');
+  assert.ok(spy.sn1Calls().length > baseline,
+    'SN.1 re-fires on filter clear so "you are here" is visible again');
 });

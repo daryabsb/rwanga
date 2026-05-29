@@ -35,6 +35,10 @@
   // not on every incidental re-render (keyboard selection, view changes,
   // ScriptSession ticks where currentScene is unchanged).
   let _lastCurrentNodeId = null;
+  // SN-Bundle-1 — transient find/filter text. Substring-matched against
+  // scene number + headingDisplay, case-insensitive, never persisted.
+  // Cleared on Escape (first press) per UX Direction §10 precedence rule.
+  let _filterText = '';
 
   // ----------------------------------------------------------------
   // Sidebar panel controller
@@ -67,6 +71,7 @@
       }
       _selectedNodeId = null;
       _lastCurrentNodeId = null;
+      _filterText = '';
       _container = null;
     }
   };
@@ -81,28 +86,61 @@
   // ----------------------------------------------------------------
   function _render() {
     if (!_container) return;
+    // SN-Bundle-1 — preserve find-input focus + cursor across re-renders.
+    // The renderer rebuilds DOM from scratch on every tick (ScriptSession
+    // subscriptions, filter changes, manual triggers); without this guard,
+    // a writer typing in the find field would lose focus on each keystroke.
+    const focusState = _captureFindInputFocus();
+
     _container.innerHTML = '';
     const wrapper = document.createElement('div');
     wrapper.className = 'rga-shell-scene-navigator';
     const view = _activeView();
     const scenes = _scenes(view);
+
+    // True zero-scenes empty: no header, no find — the unified empty surface
+    // carries identity. Adding header/find here would duplicate "Scenes" and
+    // expose a find input that filters nothing.
     if (!scenes || scenes.length === 0) {
       wrapper.appendChild(_buildEmpty());
       _container.appendChild(wrapper);
       _lastCurrentNodeId = null;
       return;
     }
+
+    // SN-Bundle-1 — header + find above the list, present whenever the doc
+    // has scenes (identity stays put through find→no-results→clear loop).
+    wrapper.appendChild(_buildHeader(scenes.length));
+    wrapper.appendChild(_buildFind());
+
+    const filtered = _filterText ? _applyFilter(scenes, _filterText) : scenes;
+
+    // No-results branch: filter active, zero matches. Header + find stay;
+    // the list is replaced by a calm "no scenes found" surface with a
+    // Clear affordance. SN.1 does not scroll here (no row in DOM).
+    if (filtered.length === 0) {
+      wrapper.appendChild(_buildNoResults(_filterText));
+      _container.appendChild(wrapper);
+      _restoreFindInputFocus(focusState);
+      return;
+    }
+
     const idx = (Rga.Nav && typeof Rga.Nav.getIndex === 'function') ? Rga.Nav.getIndex(view.state) : null;
     const currentNodeId = (Rga.ScriptSession && typeof Rga.ScriptSession.get === 'function')
       ? (Rga.ScriptSession.get().currentScene && Rga.ScriptSession.get().currentScene.nodeId) || null
       : null;
     const list = document.createElement('ul');
     list.className = 'rga-shell-scene-navigator-list';
-    for (let i = 0; i < scenes.length; i += 1) {
-      list.appendChild(_buildRow(scenes[i], idx, currentNodeId));
+    for (let i = 0; i < filtered.length; i += 1) {
+      list.appendChild(_buildRow(filtered[i], idx, currentNodeId));
     }
     wrapper.appendChild(list);
     _container.appendChild(wrapper);
+
+    // SN-Bundle-1: restore find input focus + cursor before the SN.1
+    // scroll block so a writer typing in find with the editor cursor
+    // simultaneously transitioning scenes does not lose either signal.
+    _restoreFindInputFocus(focusState);
 
     // SN.1 — keep the current-scene row visible. Calm guard: only scroll
     // when the current scene actually changed since the previous render.
@@ -116,19 +154,140 @@
         currentRow.scrollIntoView({ behavior: 'auto', block: 'nearest' });
       }
     }
-    _lastCurrentNodeId = currentNodeId;
+    // SN-Bundle-1 contract: only update the tracker when the current row
+    // is actually rendered. If filter excludes the current scene, leave
+    // the tracker stale so a subsequent filter clear re-triggers the
+    // scroll-into-view (the user expects "you are here" to be visible
+    // again after clearing find).
+    if (currentNodeId && _container.querySelector('.rga-shell-scene-navigator-row-current')) {
+      _lastCurrentNodeId = currentNodeId;
+    } else if (!currentNodeId) {
+      _lastCurrentNodeId = null;
+    }
+  }
+
+  // SN-Bundle-1 — focus preservation across re-render. Capture before
+  // innerHTML is wiped; restore after the new input element is in DOM.
+  function _captureFindInputFocus() {
+    if (!_container) return null;
+    const input = _container.querySelector('.rga-shell-scene-navigator-find-input');
+    if (!input || (typeof document !== 'undefined' && document.activeElement !== input)) return null;
+    return { cursorPos: (typeof input.selectionEnd === 'number') ? input.selectionEnd : (input.value || '').length };
+  }
+  function _restoreFindInputFocus(state) {
+    if (!state || !_container) return;
+    const input = _container.querySelector('.rga-shell-scene-navigator-find-input');
+    if (!input) return;
+    try {
+      input.focus();
+      if (typeof input.setSelectionRange === 'function') {
+        input.setSelectionRange(state.cursorPos, state.cursorPos);
+      }
+    } catch (_) {
+      /* JSDOM occasionally throws on selection-range for text inputs. */
+    }
   }
 
   // Bundle 1 §B: unified empty-state. The Sidebar's renderEmpty
   // helper expects a container, but _render() builds a wrapper first;
   // we return a one-off div that the Sidebar helper has populated.
+  // SN-Bundle-1 — copy refreshed to doc-type-neutral voice per UX
+  // Direction §11: describe what will appear, not the screenplay-specific
+  // mechanic that creates a scene. Title stays "Scenes" (panel identity).
   function _buildEmpty() {
     const host = document.createElement('div');
     Rga.Shell.Sidebar.renderEmpty(host, {
       title: 'Scenes',
-      body: 'No scenes yet. Press Enter on the slug line to start one.'
+      body: 'Scenes will appear here as you write.'
     });
     return host;
+  }
+
+  // SN-Bundle-1 — quiet section header + scene count. Non-interactive
+  // identity (unlike Outline's collapsible section headers). Counts are
+  // raw orientation — the only awareness figure permitted per UX
+  // Direction §9 ("at most one figure, used with caution").
+  function _buildHeader(count) {
+    const header = document.createElement('div');
+    header.className = 'rga-shell-scene-navigator-section-header';
+    const label = document.createElement('span');
+    label.className = 'rga-shell-scene-navigator-section-header-label';
+    label.textContent = 'Scenes';
+    header.appendChild(label);
+    const countEl = document.createElement('span');
+    countEl.className = 'rga-shell-scene-navigator-section-header-count';
+    countEl.textContent = ' · ' + String(count);
+    header.appendChild(countEl);
+    return header;
+  }
+
+  // SN-Bundle-1 — find field. Single input, substring-matched against
+  // scene number + headingDisplay, transient (UX Direction §10).
+  // Re-render on input event with focus + cursor preservation (handled
+  // in _render itself via _captureFindInputFocus / _restoreFindInputFocus).
+  function _buildFind() {
+    const wrap = document.createElement('div');
+    wrap.className = 'rga-shell-scene-navigator-find';
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'rga-shell-scene-navigator-find-input';
+    input.placeholder = 'Find scene…';
+    input.value = _filterText || '';
+    input.setAttribute('aria-label', 'Find scene');
+    input.addEventListener('input', function(e) {
+      _setFilter(e.target.value);
+      _render();
+    });
+    wrap.appendChild(input);
+    return wrap;
+  }
+
+  // SN-Bundle-1 — "no results" surface. Reuses the unified panel-empty
+  // class set (sidebar.js renderEmpty) so it inherits the same calm voice
+  // as the true-empty state. Clear affordance restores the full list.
+  function _buildNoResults(query) {
+    const host = document.createElement('div');
+    Rga.Shell.Sidebar.renderEmpty(host, {
+      title: 'No scenes found',
+      body: 'No scenes match “' + query + '”.',
+      actions: [{
+        label: 'Clear',
+        onClick: function() {
+          _setFilter('');
+          _render();
+          const input = _container && _container.querySelector('.rga-shell-scene-navigator-find-input');
+          if (input) try { input.focus(); } catch (_) {}
+        }
+      }]
+    });
+    return host;
+  }
+
+  // SN-Bundle-1 — case-insensitive substring filter against the visible
+  // signals a writer scans by: scene number (for jumping to "scene 12")
+  // and headingDisplay (for jumping to "the dancer scene"). No tag fields,
+  // no per-scene meta — staying inside the navigator's "find, not query"
+  // posture (UX Direction §10).
+  function _applyFilter(scenes, query) {
+    const q = String(query || '').toLowerCase();
+    if (!q) return scenes;
+    return scenes.filter(function(scene) {
+      const num = String(scene.sceneNumber == null ? '' : scene.sceneNumber).toLowerCase();
+      const heading = String(scene.headingDisplay || '').toLowerCase();
+      return num.indexOf(q) >= 0 || heading.indexOf(q) >= 0;
+    });
+  }
+
+  // SN-Bundle-1 — every filter mutation resets _lastCurrentNodeId so the
+  // SN.1 scroll re-fires when the visible row set changes. This restores
+  // "you are here" after a filter clear (current scene may have been
+  // hidden by the filter; user expects it on-screen when cleared).
+  function _setFilter(text) {
+    const newText = String(text == null ? '' : text);
+    if (newText !== _filterText) {
+      _filterText = newText;
+      _lastCurrentNodeId = null;
+    }
   }
 
   function _buildRow(scene, idx, currentNodeId) {
@@ -272,9 +431,25 @@
   // indicator update via the normal ScriptSession flow.
   function _onKeydown(e) {
     if (!_container) return;
-    const scenes = _scenes(_activeView());
-    if (!scenes || scenes.length === 0) return;
+    // SN-Bundle-1 — events bubble from the find input into the container's
+    // handler. Some keys (Home/End/Enter) collide with input text-cursor
+    // semantics; those skip when the target IS the input. Arrow Up/Down
+    // are safe to intercept globally (single-line inputs ignore them).
+    // Escape is always intercepted because its precedence rule (filter
+    // first, then selection) is the same regardless of focus origin.
+    const inFindInput = !!(e.target && e.target.classList &&
+      e.target.classList.contains('rga-shell-scene-navigator-find-input'));
+
+    // SN-Bundle-1: list operations run against the filtered view, not the
+    // raw scene set, so keyboard selection stays inside what the writer
+    // can see. Filtering by '' returns the full list — no behaviour change
+    // when find is empty.
+    const allScenes = _scenes(_activeView());
+    if (!allScenes || allScenes.length === 0) return;
+    const scenes = _filterText ? _applyFilter(allScenes, _filterText) : allScenes;
+    if (scenes.length === 0 && e.key !== 'Escape') return;
     const currentIdx = _selectedIndex(scenes);
+
     switch (e.key) {
       case 'ArrowDown': {
         e.preventDefault();
@@ -289,22 +464,40 @@
         break;
       }
       case 'Home': {
+        if (inFindInput) return;
         e.preventDefault();
         _setSelected(scenes[0].nodeId);
         break;
       }
       case 'End': {
+        if (inFindInput) return;
         e.preventDefault();
         _setSelected(scenes[scenes.length - 1].nodeId);
         break;
       }
       case 'Enter': {
+        if (inFindInput) return;
         e.preventDefault();
         if (_selectedNodeId) scrollToScene(_selectedNodeId);
         break;
       }
       case 'Escape': {
-        // Clear the selection; release focus back to wherever it came from.
+        e.preventDefault();
+        // SN-Bundle-1 precedence (UX Direction §10):
+        //   filter has text → first Escape clears filter (stay focused)
+        //   filter is empty → Escape clears selection (as today)
+        if (_filterText) {
+          _setFilter('');
+          _render();
+          // Re-focus the input if Escape came from inside it, so the
+          // writer can keep typing without re-clicking. If Escape came
+          // from outside the input, leave focus where it was.
+          if (inFindInput) {
+            const input = _container.querySelector('.rga-shell-scene-navigator-find-input');
+            if (input) try { input.focus(); } catch (_) {}
+          }
+          break;
+        }
         _selectedNodeId = null;
         _render();
         if (_container && typeof _container.blur === 'function') _container.blur();
@@ -366,6 +559,7 @@
     }
     _selectedNodeId = null;
     _lastCurrentNodeId = null;
+    _filterText = '';
     if (_container) _container.innerHTML = '';
     _container = null;
   }
