@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rwanga Editor — Scene Sidebar Catalogue UX Direction</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;1,14..32,400&family=JetBrains+Mono:wght@400;500;700&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0F0F12;
+    --surface: #17171C;
+    --surface-2: #1E1E26;
+    --surface-3: #26262E;
+    --border: #2C2C38;
+    --text: #EDEAD8;
+    --text-2: #9A98A8;
+    --text-3: #5C5A6A;
+    --amber: #D4A574;
+    --gold: #FFC107;
+    --pink: #C2185B;
+    --blue: #4FA3E3;
+    --script: #FF6B35;
+    --break: #2D5BE3;
+    --vis: #00A896;
+    --plan: #7C3AED;
+    --font: 'Inter', system-ui, sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+    --screenplay: 'Courier Prime', 'Courier New', monospace;
+    --r: 2px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 15px;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 80px 32px 120px;
+  }
+
+  /* ── Header ─────────────────────────── */
+  .doc-header {
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 40px;
+    margin-bottom: 56px;
+  }
+
+  .doc-overline {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--amber);
+    margin-bottom: 16px;
+  }
+
+  .doc-title {
+    font-size: 38px;
+    font-weight: 700;
+    line-height: 1.12;
+    color: var(--text);
+    margin-bottom: 14px;
+    letter-spacing: -0.6px;
+  }
+
+  .doc-subtitle {
+    font-size: 16px;
+    color: var(--text-2);
+    line-height: 1.6;
+    max-width: 640px;
+  }
+
+  .doc-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 22px;
+    margin-top: 26px;
+    font-size: 11.5px;
+    color: var(--text-3);
+    font-family: var(--mono);
+  }
+
+  .doc-meta span { white-space: nowrap; }
+
+  /* ── Type scale ─────────────────────── */
+  h2 {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.8px;
+    text-transform: uppercase;
+    color: var(--amber);
+    margin-bottom: 6px;
+  }
+
+  h3 {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 18px;
+    letter-spacing: -0.3px;
+    line-height: 1.25;
+  }
+
+  h4 {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    margin-top: 30px;
+    margin-bottom: 10px;
+    letter-spacing: 0.2px;
+  }
+
+  p {
+    margin-bottom: 16px;
+    color: var(--text-2);
+  }
+
+  p strong { color: var(--text); font-weight: 600; }
+
+  em { color: var(--text); font-style: italic; }
+
+  .section {
+    margin-bottom: 56px;
+    padding-bottom: 56px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-num {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-3);
+  }
+
+  /* ── Callouts ───────────────────────── */
+  .callout {
+    background: var(--surface);
+    border-left: 3px solid var(--amber);
+    padding: 18px 22px;
+    margin: 22px 0;
+    font-size: 14px;
+  }
+
+  .callout.doctrine { border-left-color: var(--plan); background: rgba(124,58,237,0.06); }
+  .callout.observation { border-left-color: var(--script); background: rgba(255,107,53,0.05); }
+  .callout.direction { border-left-color: var(--vis); background: rgba(0,168,150,0.05); }
+
+  .callout-label {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .callout.doctrine .callout-label { color: var(--plan); }
+  .callout.observation .callout-label { color: var(--script); }
+  .callout.direction .callout-label { color: var(--vis); }
+  .callout p:last-child { margin-bottom: 0; }
+  .callout p { color: var(--text-2); }
+
+  /* ── Lists ──────────────────────────── */
+  ul, ol { margin: 12px 0 20px; padding-left: 20px; color: var(--text-2); }
+  li { margin-bottom: 8px; padding-left: 4px; }
+  li strong { color: var(--text); }
+  li code, p code, td code {
+    font-family: var(--mono);
+    font-size: 12px;
+    background: var(--surface-3);
+    padding: 1px 6px;
+    border-radius: 2px;
+    color: var(--amber);
+  }
+
+  /* ── Tier / weight table ────────────── */
+  .wt {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 22px 0;
+    font-size: 13px;
+  }
+  .wt th {
+    text-align: left;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text-3);
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .wt td {
+    padding: 11px 12px;
+    border-bottom: 1px solid rgba(44,44,56,0.5);
+    vertical-align: top;
+    color: var(--text-2);
+  }
+  .wt td:first-child { color: var(--text); font-weight: 600; white-space: nowrap; }
+
+  /* ── Specimen frame ─────────────────── */
+  .specimen {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    padding: 26px 26px 22px;
+    margin: 28px 0;
+  }
+  .specimen-label {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+    color: var(--text-3);
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .specimen-label::before {
+    content: "";
+    width: 6px; height: 6px;
+    background: var(--amber);
+    border-radius: 50%;
+  }
+
+  /* ── Mini scene-navigator (real Rwanga tokens) ── */
+  .nav {
+    background: #131318;
+    border: 1px solid #23232C;
+    border-radius: var(--r);
+    width: 300px;
+    max-width: 100%;
+    padding: 8px 0;
+    user-select: none;
+  }
+  .nav-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    padding: 4px 12px 10px;
+    border-bottom: 1px solid #23232C;
+    margin-bottom: 6px;
+  }
+  .nav-head .ttl {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--text-2);
+  }
+  .nav-head .cnt {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-3);
+  }
+  .nav-row {
+    display: grid;
+    grid-template-columns: 30px 1fr 30px 34px;
+    align-items: center;
+    gap: 6px;
+    min-height: 30px;
+    padding: 4px 10px 4px 8px;
+    margin: 1px 6px;
+    border-radius: 3px;
+    border-left: 2px solid transparent;
+    position: relative;
+  }
+  .nav-num {
+    font-family: var(--screenplay);
+    font-size: 11px;
+    color: var(--gold);
+    text-align: right;
+    opacity: 0.85;
+  }
+  .nav-heading {
+    font-size: 11.5px;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    letter-spacing: 0.1px;
+  }
+  .nav-heading .set { color: var(--text-3); }
+  .nav-heading .loc { color: var(--text); font-weight: 500; }
+  .nav-heading .tod { color: var(--text-3); }
+  .nav-sig {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+    justify-content: flex-start;
+  }
+  .mk {
+    width: 11px; height: 11px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-3);
+  }
+  .mk svg { width: 11px; height: 11px; stroke-width: 2; }
+  .mk.note { color: var(--amber); }
+  .mk.rev { color: var(--pink); }
+  .nav-page {
+    font-family: var(--screenplay);
+    font-size: 10px;
+    color: var(--text-3);
+    text-align: right;
+  }
+  .nav-row.hover { background: rgba(255,255,255,0.035); }
+  .nav-row.current {
+    border-left-color: var(--pink);
+    background: rgba(194,24,91,0.07);
+  }
+  .nav-row.current .nav-num { color: var(--pink); opacity: 1; font-weight: 700; }
+  .nav-row.current .nav-heading { font-weight: 600; }
+  .nav-row.selected {
+    background: rgba(79,163,227,0.10);
+    box-shadow: inset 0 0 0 1px rgba(79,163,227,0.45);
+  }
+
+  /* annotation rows under the specimen */
+  .anno {
+    display: grid;
+    grid-template-columns: 110px 1fr;
+    gap: 6px 16px;
+    margin-top: 18px;
+    font-size: 12px;
+  }
+  .anno dt {
+    font-family: var(--mono);
+    font-size: 9.5px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--amber);
+    padding-top: 1px;
+  }
+  .anno dd { color: var(--text-2); line-height: 1.5; }
+  .anno dd strong { color: var(--text); }
+
+  .spec-grid {
+    display: flex;
+    gap: 28px;
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+  .spec-grid .col { flex: 1; min-width: 240px; }
+  .spec-cap {
+    font-size: 11px;
+    color: var(--text-3);
+    margin-top: 10px;
+    line-height: 1.5;
+  }
+  .spec-cap b { color: var(--text-2); font-weight: 600; }
+
+  /* zone-anatomy bar */
+  .zones {
+    display: grid;
+    grid-template-columns: 30px 1fr 30px 34px;
+    gap: 6px;
+    width: 300px;
+    max-width: 100%;
+    margin-top: 14px;
+  }
+  .zones .z {
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--text-3);
+    text-align: center;
+    padding: 5px 2px;
+    border-top: 2px solid var(--surface-3);
+    line-height: 1.3;
+  }
+  .zones .z.gutter { border-top-color: var(--gold); color: var(--gold); }
+  .zones .z.head { border-top-color: var(--text-2); color: var(--text-2); }
+  .zones .z.sig { border-top-color: var(--amber); color: var(--amber); }
+  .zones .z.pg { border-top-color: var(--text-3); }
+
+  /* tag chips */
+  .tag {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    padding: 2px 8px;
+    border-radius: 2px;
+    vertical-align: middle;
+  }
+  .tag-keep { background: rgba(0,168,150,0.14); color: var(--vis); }
+  .tag-defer { background: rgba(212,165,116,0.14); color: var(--amber); }
+  .tag-exile { background: rgba(255,107,53,0.13); color: var(--script); }
+
+  /* routing split (inspector / breakdown) */
+  .route {
+    display: flex;
+    gap: 14px;
+    margin: 22px 0;
+    flex-wrap: wrap;
+  }
+  .route-card {
+    flex: 1;
+    min-width: 240px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-top: 2px solid var(--vis);
+    padding: 18px 20px;
+  }
+  .route-card.bd { border-top-color: var(--break); }
+  .route-card h5 {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--vis);
+    margin-bottom: 12px;
+  }
+  .route-card.bd h5 { color: var(--break); }
+  .route-card ul { margin: 0; padding-left: 18px; font-size: 12.5px; }
+  .route-card li { margin-bottom: 6px; }
+
+  /* ── Closing ────────────────────────── */
+  .closing { margin-top: 64px; }
+  .closing-block { margin-bottom: 36px; }
+  .closing-num {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--amber);
+    margin-bottom: 6px;
+  }
+  .closing-block h4 { margin-top: 0; margin-bottom: 12px; font-size: 17px; }
+  .closing-block p { font-size: 14.5px; }
+
+  .stop {
+    margin-top: 56px;
+    padding-top: 36px;
+    border-top: 1px solid var(--border);
+    text-align: center;
+  }
+  .stop .mark {
+    font-family: var(--mono);
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 6px;
+    color: var(--text-3);
+  }
+  .stop p { font-size: 12.5px; color: var(--text-3); margin-top: 14px; max-width: 560px; margin-left: auto; margin-right: auto; }
+
+  @media (max-width: 720px) {
+    body { padding: 44px 20px 80px; }
+    .doc-title { font-size: 28px; }
+    .spec-grid { gap: 22px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="doc-header" data-screen-label="Header">
+  <div class="doc-overline">Surface Direction — Scene Sidebar Catalogue</div>
+  <h1 class="doc-title">Scene Sidebar Catalogue<br>UX Direction</h1>
+  <p class="doc-subtitle">
+    Orientation, navigation, awareness — never management. Sixteen dimensions of direction for the writing-first scene navigator, grounded in the post-F1A shell and the Filmustageation UX Direction.
+  </p>
+  <div class="doc-meta">
+    <span>status: direction-only</span>
+    <span>surface: .rga-shell-scene-navigator-*</span>
+    <span>grounded-in: phase0-audit · post-f1a-review · doctrine</span>
+    <span>date: 2026-05-29</span>
+  </div>
+</header>
+
+<!-- INTRO -->
+<div class="section">
+  <h2>Premise</h2>
+  <h3>Three verbs, and a refusal</h3>
+  <p>
+    The Scene Sidebar Catalogue is <strong>orientation, navigation, and awareness.</strong> Three verbs, no more. <em>Where am I in the structure? Take me to that scene. How much script is there, and what's near me?</em> It belongs to the UX Direction's <strong>Session Awareness</strong> layer — "peripheral, you glance, you don't stare." The screenplay page is the heaviest object in the room and the permanent center of gravity. The catalogue orbits it.
+  </p>
+  <div class="callout observation">
+    <div class="callout-label">Observation — the anti-pattern in the current shell</div>
+    <p>
+      The screenshot's breakdown accordion — <code>CAST (5)</code>, <code>PROPS (8)</code>, <code>STUNTS (14)</code>, <code>ADD NEW CATEGORY</code> — is a database-table interface. Counts-in-parentheses is inventory thinking. As the default writing sidebar it makes a writing tool feel like a production database with a text field attached. That surface belongs in breakdown mode (§16); the scene catalogue belongs in the writer's hands.
+    </p>
+  </div>
+  <div class="callout doctrine">
+    <div class="callout-label">Doctrine anchor</div>
+    <p>
+      It is <strong>not management. Not a production inventory. Not a dashboard.</strong> The catalogue earns its calm by refusing most of what could be shown. Every dimension below is, at root, a discipline against accretion.
+    </p>
+  </div>
+</div>
+
+<!-- 1 ROW ANATOMY -->
+<div class="section">
+  <h2><span class="section-num">01 ·</span> Row Anatomy</h2>
+  <h3>The row is a label, not a card</h3>
+  <p>
+    The scene row is the atomic unit of the whole surface; everything else is frame. A row encodes three zones in one glance and one line, reading inline-start → inline-end: an <strong>index gutter</strong> (the number, fixed-width, monospaced — numbers stack into a scannable column), a <strong>heading</strong> (the slug, the one load-bearing token, flexing and ellipsising), and a <strong>signal margin</strong> (awareness marks + page hint, in fixed reserved tracks that never reflow the heading).
+  </p>
+
+  <div class="specimen">
+    <div class="specimen-label">Specimen — row anatomy, three zones (real Rwanga tokens)</div>
+    <div class="nav">
+      <div class="nav-row">
+        <span class="nav-num">4</span>
+        <span class="nav-heading"><span class="set">INT.</span> <span class="loc">APARTMENT</span> <span class="tod">— NIGHT</span></span>
+        <span class="nav-sig">
+          <span class="mk note" title="has notes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></span>
+        </span>
+        <span class="nav-page">p.3</span>
+      </div>
+    </div>
+    <div class="zones">
+      <div class="z gutter">Index<br>gutter</div>
+      <div class="z head">Heading — load-bearing, ellipsised</div>
+      <div class="z sig">Signal<br>margin</div>
+      <div class="z pg">Page<br>track</div>
+    </div>
+    <dl class="anno">
+      <dt>Index</dt><dd><strong>Fixed-width mono track.</strong> Numbers form a vertical column the eye runs down. Orientation anchor.</dd>
+      <dt>Heading</dt><dd><strong>Flexes, single line, ellipsis.</strong> What the writer actually reads. Never wraps to two lines in the default catalogue.</dd>
+      <dt>Signal</dt><dd><strong>Reserved track.</strong> A note mark appearing on a row must never shove its slug leftward.</dd>
+      <dt>Page</dt><dd><strong>Reserved-but-quiet.</strong> One coordinate, dim, right-aligned.</dd>
+    </dl>
+  </div>
+
+  <p>
+    The current grid (<code>26px 1fr auto auto</code>, <code>min-height: 28px</code>) already expresses this skeleton correctly. The direction is not to rebuild it — it is to enforce each zone's discipline: <strong>one line always</strong>; <strong>reserved, non-collapsing signal tracks</strong>; and <strong>no row chrome beyond state</strong> — no leading icon, no per-row button, no drag handle, no checkbox, no swatch.
+  </p>
+  <div class="callout direction">
+    <div class="callout-label">Direction</div>
+    <p>Label rows scan; card rows demand. Keep the row a label. Anything that makes a row <em>hold</em> content rather than <em>point at</em> it is the admin panel knocking.</p>
+  </div>
+</div>
+
+<!-- 2 CURRENT VS SELECTED -->
+<div class="section">
+  <h2><span class="section-num">02 ·</span> Current vs Selected</h2>
+  <h3>Edge versus interior — the surface's best idea</h3>
+  <p>
+    The catalogue already separates two states lesser navigators conflate. Protect this — it is the most sophisticated existing behavior.
+  </p>
+  <table class="wt">
+    <thead><tr><th>State</th><th>Means</th><th>Driven by</th><th>Posture</th></tr></thead>
+    <tbody>
+      <tr><td>Current</td><td>"The cursor is in this scene."</td><td><code>ScriptSession.currentScene</code></td><td>Passive — tracks you, changes constantly.</td></tr>
+      <tr><td>Selected</td><td>"I moved the highlight here."</td><td>keyboard <code>_selectedNodeId</code></td><td>Active — reflects a deliberate act.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="specimen">
+    <div class="specimen-label">Specimen — current, selected, and the divergent case</div>
+    <div class="spec-grid">
+      <div class="col">
+        <div class="nav">
+          <div class="nav-row current">
+            <span class="nav-num">4</span>
+            <span class="nav-heading"><span class="set">INT.</span> <span class="loc">APARTMENT</span> <span class="tod">— NIGHT</span></span>
+            <span class="nav-sig"></span><span class="nav-page">p.3</span>
+          </div>
+          <div class="nav-row">
+            <span class="nav-num">5</span>
+            <span class="nav-heading"><span class="set">INT.</span> <span class="loc">REFRIGERATOR</span></span>
+            <span class="nav-sig"></span><span class="nav-page">p.4</span>
+          </div>
+        </div>
+        <p class="spec-cap"><b>Current</b> — brand-pink (<code>#C2185B</code>) inline-start rail + tinted number. An edge marker, never a fill. It <em>whispers</em>, because it moves every few seconds.</p>
+      </div>
+      <div class="col">
+        <div class="nav">
+          <div class="nav-row current">
+            <span class="nav-num">4</span>
+            <span class="nav-heading"><span class="set">INT.</span> <span class="loc">APARTMENT</span> <span class="tod">— NIGHT</span></span>
+            <span class="nav-sig"></span><span class="nav-page">p.3</span>
+          </div>
+          <div class="nav-row selected">
+            <span class="nav-num">5</span>
+            <span class="nav-heading"><span class="set">INT.</span> <span class="loc">REFRIGERATOR</span></span>
+            <span class="nav-sig"></span><span class="nav-page">p.4</span>
+          </div>
+        </div>
+        <p class="spec-cap"><b>Divergent</b> — cursor in scene 4 (current rail) while the keyboard peeks at scene 5 (selected fill + ring). <strong>Edge vs interior, pink vs blue</strong> — different pixels, no competition.</p>
+      </div>
+    </div>
+  </div>
+
+  <p>
+    <strong>Current</strong> owns the inline-start edge (vertical signal); <strong>selected</strong> owns the interior (fill + ring, horizontal signal). When they coincide they stack cleanly into "here, and focused." The SEPARATION INVARIANT — documented in code, enforced in CSS, pinned by 30+ tests — is non-negotiable.
+  </p>
+  <div class="callout direction">
+    <div class="callout-label">Direction</div>
+    <p>Never make <em>current</em> louder to "fix" its visibility. Its problem is positional — it scrolls off-screen (§14) — not chromatic. Keep it on-screen; never make it brighter.</p>
+  </div>
+</div>
+
+<!-- 3 METADATA HIERARCHY -->
+<div class="section">
+  <h2><span class="section-num">03 ·</span> Scene Metadata Hierarchy</h2>
+  <h3>A spent budget, not a canvas</h3>
+  <p>What earns a place in a row, in strict order — and what is exiled below the line.</p>
+  <table class="wt">
+    <thead><tr><th>Tier</th><th>Fields</th><th>Weight</th></tr></thead>
+    <tbody>
+      <tr><td>1 — Primary</td><td>Location text (the navigational signal — writers think "the rooftop scene")</td><td>Full <code>--text</code></td></tr>
+      <tr><td>2 — Secondary</td><td>Scene number · setting (INT./EXT.) · time-of-day</td><td><code>--text-2 / --text-3</code></td></tr>
+      <tr><td>3 — Signals</td><td>Page hint · notes-present mark · revision mark (only when true)</td><td>Reserved margin</td></tr>
+      <tr><td style="color:var(--script)">Below the line</td><td>Tag counts · duration · block count · transitions · any status</td><td>Inspector / breakdown</td></tr>
+    </tbody>
+  </table>
+  <div class="callout direction">
+    <div class="callout-label">Direction</div>
+    <p>The ladder answers every future "could we also show…": if it isn't Tier 1–3, it lives in the inspector or breakdown mode. The row's calm is a budget, and it is already spent.</p>
+  </div>
+</div>
+
+<!-- 4 NUMBERING -->
+<div class="section">
+  <h2><span class="section-num">04 ·</span> Scene Numbering</h2>
+  <h3>A typographic column, not a label</h3>
+  <ul>
+    <li><strong>A column.</strong> Right-aligned, monospaced (Courier — the page's screenplay DNA), in <code>--accent-gold</code>, the warmth accent reserved for structural signals. Numbers stack into a scannable edge.</li>
+    <li><strong>Display, never compute.</strong> Numbers come from <code>nav-index</code> (<code>scene.sceneNumber</code>), which the engine owns. The catalogue renders numbers; it never assigns or renumbers. Locked by the nav-index moratorium.</li>
+    <li><strong>Drop the decorative <code>#</code>.</strong> The fixed gutter already says "this is the number." A literal <code>#</code> adds noise to every row.</li>
+    <li><strong>Plan for non-integer numbers.</strong> Production numbering (<code>A1</code>, <code>12A</code>) is a real future — right-align and tolerate ~3–4 mono chars now, so the gutter never has to be re-laid-out. (Generation of such numbers is deferred and engine-owned.)</li>
+    <li><strong>Honest blanks.</strong> A pre-scene / title sequence renders an empty or muted gutter — never a faked "0."</li>
+  </ul>
+</div>
+
+<!-- 5 PAGE/LOCATION -->
+<div class="section">
+  <h2><span class="section-num">05 ·</span> Page / Location Indicators</h2>
+  <h3>One coordinate, and a refusal to color the rows</h3>
+  <h4>Page</h4>
+  <p>
+    The most useful awareness number after the scene number. The page where the scene <strong>starts</strong> (<code>p.3</code>), right-aligned, monospaced, dim. One number, not a range, at rest — a span can reveal on hover/inspect. It is <strong>awareness, not pagination control</strong>: no "go to page" lives here. Shown only when PageMap data exists; otherwise the track stays reserved-but-empty (no "p.?" noise).
+  </p>
+  <h4>Location</h4>
+  <p>
+    There is no separate location indicator — <strong>location is already the heaviest token in the heading.</strong> A chip or swatch would duplicate the slug and reintroduce inventory texture.
+  </p>
+  <div class="callout direction">
+    <div class="callout-label">Direction</div>
+    <p>Resist location color-coding. Tinting rows by place is the single most tempting slide toward the breakdown panel — it turns a calm list into a heat-map and demands a legend. Location lives as <em>text</em>, where it's already legible.</p>
+  </div>
+</div>
+
+<!-- 6+7 NOTE & REVISION -->
+<div class="section">
+  <h2><span class="section-num">06 · 07 ·</span> Note &amp; Revision Indicators</h2>
+  <h3>Presence, by shape — not count, not color alone</h3>
+  <p>
+    Scene Notes already live in the inspector (post-F1A.5). The catalogue's only job is to signal <strong>presence</strong>. Revision flags follow the same logic, with one critical addition: <strong>distinguish them by shape, not by color alone</strong> (colorblind-safe).
+  </p>
+
+  <div class="specimen">
+    <div class="specimen-label">Specimen — distinct marks in the reserved signal track</div>
+    <div class="nav">
+      <div class="nav-row">
+        <span class="nav-num">4</span>
+        <span class="nav-heading"><span class="set">INT.</span> <span class="loc">APARTMENT</span> <span class="tod">— NIGHT</span></span>
+        <span class="nav-sig">
+          <span class="mk note" title="has notes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></span>
+        </span>
+        <span class="nav-page">p.3</span>
+      </div>
+      <div class="nav-row">
+        <span class="nav-num">5</span>
+        <span class="nav-heading"><span class="set">INT.</span> <span class="loc">REFRIGERATOR</span></span>
+        <span class="nav-sig">
+          <span class="mk rev" title="revision flagged"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg></span>
+        </span>
+        <span class="nav-page">p.4</span>
+      </div>
+      <div class="nav-row">
+        <span class="nav-num">6</span>
+        <span class="nav-heading"><span class="set">INT.</span> <span class="loc">BATHROOM</span> <span class="tod">— CONTINUOUS</span></span>
+        <span class="nav-sig">
+          <span class="mk note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></span>
+          <span class="mk rev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg></span>
+        </span>
+        <span class="nav-page">p.5</span>
+      </div>
+    </div>
+    <dl class="anno">
+      <dt>Note</dt><dd>A restrained line glyph (a <strong>pen</strong>) — presence of a note, not a count.</dd>
+      <dt>Revision</dt><dd>A distinct shape (a <strong>flag</strong>) — tellable apart without relying on color.</dd>
+      <dt>Both</dt><dd>Stack in the fixed track; row never reflows.</dd>
+    </dl>
+  </div>
+
+  <ul>
+    <li><strong>Marks, not emoji.</strong> The current 📝 / 🚩 are platform-dependent and read as debug-noise. Replace with restrained Lucide line glyphs (CORE-provided), sized to text.</li>
+    <li><strong>Presence, not depth.</strong> A count ("3 notes") invites <em>managing</em> notes from the navigator. Presence: yes/no. Depth: the inspector.</li>
+    <li><strong>Revision colors are a careful future.</strong> Industry draft colors, if introduced, stay a thin subordinate mark — never a fill — and keep the shape distinction so color is reinforcement, not the sole carrier.</li>
+  </ul>
+</div>
+
+<!-- 8 ICON STRATEGY -->
+<div class="section">
+  <h2><span class="section-num">08 ·</span> Icon Strategy</h2>
+  <h3>A deliberately tiny budget</h3>
+  <p>Rwanga's identity is restraint — VS Code calm, explicitly anti-Discord, anti-AI-playground.</p>
+  <ul>
+    <li><strong>No per-row leading icons.</strong> <code>INT.</code>/<code>EXT.</code> is text, and text is clearer and more screenplay-native than a door/tree glyph. Time-of-day is <code>NIGHT</code>, not a moon.</li>
+    <li><strong>One family, line weight, sized to text.</strong> Where icons appear — panel identity, the note/revision marks, a collapse chevron if grouping ships — they come from the single Lucide set: line-style, monochrome. No filled tiles, no two-tone.</li>
+    <li><strong>Never emoji.</strong> No place in a professional writing instrument's chrome.</li>
+    <li><strong>Marks vs icons.</strong> Treat the note/revision signals as <em>typographic marks</em> — the restraint of punctuation, not the prominence of buttons.</li>
+  </ul>
+</div>
+
+<!-- 9 HEADER -->
+<div class="section">
+  <h2><span class="section-num">09 ·</span> Header Treatment</h2>
+  <h3>Identity and one figure — not a toolbar</h3>
+  <div class="specimen">
+    <div class="specimen-label">Specimen — quiet header, one awareness figure</div>
+    <div class="nav">
+      <div class="nav-head"><span class="ttl">Scenes</span><span class="cnt">· 42</span></div>
+      <div class="nav-row current">
+        <span class="nav-num">4</span>
+        <span class="nav-heading"><span class="set">INT.</span> <span class="loc">APARTMENT</span> <span class="tod">— NIGHT</span></span>
+        <span class="nav-sig"></span><span class="nav-page">p.3</span>
+      </div>
+      <div class="nav-row">
+        <span class="nav-num">5</span>
+        <span class="nav-heading"><span class="set">INT.</span> <span class="loc">REFRIGERATOR</span></span>
+        <span class="nav-sig"></span><span class="nav-page">p.4</span>
+      </div>
+    </div>
+  </div>
+  <ul>
+    <li><strong>Quiet section identity</strong> matching the established <code>.sidebar-section-header</code> voice — small, uppercase, wide-tracked.</li>
+    <li><strong>One awareness figure, used with caution.</strong> A scene count (<code>Scenes · 42</code>) is genuine orientation — but it's one keystroke from feeling like a tally. If it reads as inventory, drop it. One number, never a row of stats.</li>
+    <li><strong>No button strip.</strong> At most one understated affordance (the find entry, §10). Toolbar-creep in the header is exactly the failure mode the UX Direction names.</li>
+    <li><strong>Pinned</strong> while the list scrolls beneath it.</li>
+  </ul>
+</div>
+
+<!-- 10 SEARCH -->
+<div class="section">
+  <h2><span class="section-num">10 ·</span> Search / Filter Posture</h2>
+  <h3>Find, not query</h3>
+  <p>The catalogue's search exists to <strong>jump</strong>, not to build saved, faceted views.</p>
+  <ul>
+    <li><strong>A single progressive find field</strong> — understated, expands on focus; substring-matches the visible slug and the scene number. Solves "find the dancer scene" without scrolling or the palette.</li>
+    <li><strong>Temporary, not sticky.</strong> Escape/blur clears it and restores the full list. The catalogue never persists a filtered state as a saved view — that's a management construct.</li>
+    <li><strong>No faceted filtering.</strong> "All night exteriors," filter-by-tag — those are <em>breakdown</em> queries (§16). At most one optional presence toggle ("scenes with notes").</li>
+    <li><strong>Honor the existing power path.</strong> <code>Cmd+P</code> quick-scene-jump is the keyboard-first jump; the find field is its discoverable sibling. Complementary, not redundant.</li>
+    <li><strong>Escape precedence is explicit:</strong> first Escape clears the filter, second clears selection.</li>
+  </ul>
+</div>
+
+<!-- 11 EMPTY -->
+<div class="section">
+  <h2><span class="section-num">11 ·</span> Empty State</h2>
+  <h3>Calm instruction, never a marketing surface</h3>
+  <ul>
+    <li><strong>No scenes yet</strong> — quiet, centered, <code>--text-3</code>: one sentence on what the catalogue <em>will</em> show. Describe the purpose ("Scenes will appear here as you write"), not the keystroke — doc-type-neutral as the platform grows.</li>
+    <li><strong>No results</strong> — "No scenes match '…'" with a one-tap clear-filter affordance, so the writer is never stranded.</li>
+    <li><strong>No illustration, no CTA hero.</strong> A zero-state graphic or "Create your first scene" button is dashboard onboarding — the admin-panel impression to avoid.</li>
+  </ul>
+</div>
+
+<!-- 12 DENSITY -->
+<div class="section">
+  <h2><span class="section-num">12 ·</span> Density Rules</h2>
+  <h3>A comfort dial, not a feature surface</h3>
+  <ul>
+    <li><strong>28px is the calm default</strong> — right for a feature script (~40–90 scenes), matching the chrome-spacing philosophy.</li>
+    <li><strong>Adaptive, single-token.</strong> A long episodic (200+ short scenes) benefits from a tighter row — one <em>compact</em> step governed by one density token, never per-element nudges.</li>
+    <li><strong>What compresses, in order:</strong> Tier-2 modifiers yield first — time-of-day, then the INT./EXT. abbreviation. The number gutter, location, and reserved signal margin <strong>never</strong> compress away.</li>
+    <li><strong>Fixed margins across densities</strong>, so the no-reflow guarantee survives.</li>
+  </ul>
+  <div class="callout direction">
+    <div class="callout-label">Direction</div>
+    <p>Density changes how much air a row has — never <em>what</em> the row means.</p>
+  </div>
+</div>
+
+<!-- 13 HOVER/FOCUS -->
+<div class="section">
+  <h2><span class="section-num">13 ·</span> Hover / Focus Behavior</h2>
+  <h3>Three layers, no nervous reflow</h3>
+  <p>Hover (transient mouse), selected (intent), and current (cursor) must coexist without muddiness.</p>
+  <ul>
+    <li><strong>Hover is a whisper</strong> — a subtle <code>--bg-hover</code> lift and slight brightening, nothing structural. No buttons appear, no card expands. The one acceptable reveal: an OS tooltip for a truncated slug.</li>
+    <li><strong>No layout shift, ever.</strong> Fills, rails, and rings draw on pre-reserved tracks (§1). The difference between a surface that feels solid and one that feels nervous.</li>
+    <li><strong>Focus is keyboard-first and complete</strong> — Arrow moves selection without moving the cursor; Home/End jump; Enter bridges selection → cursor; Escape clears. Protect this model; keep the ring distinct from hover and current.</li>
+    <li><strong>Click navigates and confirms</strong> — the existing ~1.2s flash pulse answers "did it work?" without a modal. Keep it brief.</li>
+    <li><strong>Power actions live behind right-click</strong>, never as hover-revealed buttons that fight the scan.</li>
+  </ul>
+</div>
+
+<!-- 14 WORKFLOW -->
+<div class="section">
+  <h2><span class="section-num">14 ·</span> Writer Workflow Support</h2>
+  <h3>Orient → navigate → return to writing</h3>
+  <div class="callout observation">
+    <div class="callout-label">Observation — the dominant lived weakness</div>
+    <p>
+      The writer types in scene 47 of a 60-scene script while the panel shows scenes 1–25 — so the pink "you are here" marker points <strong>off-screen</strong>. The catalogue claims awareness while delivering none.
+    </p>
+  </div>
+  <ul>
+    <li><strong>Auto-scroll the current row into view — the spine.</strong> When the current scene changes, the current row must come into view. The highest-value single behavior the surface can gain. It must be <strong>functional, not theatrical</strong>: instant alignment, no decorative motion, fired only on a real transition and only when the row is off-screen.</li>
+    <li><strong>Click-to-jump + flash confirm</strong> is the navigation core. Keep it.</li>
+    <li><strong>Keyboard jump</strong> (<code>Cmd+P</code>) is the power path; the find field (§10) the discoverable one.</li>
+    <li><strong>Act/sequence grouping is deferred, not directed</strong> — it would genuinely help long scripts but requires new per-scene data, which collides with the nav-index moratorium. Gate it behind that work.</li>
+    <li><strong>Reordering does NOT belong here.</strong> Drag-to-reorder is a structural edit — management. It belongs to outline/breakdown. The catalogue's gestures are click, keyboard, right-click. No drag handles.</li>
+    <li><strong>Never add</strong> completion checkboxes, status toggles, assignment, or color-by-status — each a small, reasonable-sounding step toward the dashboard.</li>
+  </ul>
+</div>
+
+<!-- 15+16 ROUTING -->
+<div class="section">
+  <h2><span class="section-num">15 · 16 ·</span> What Belongs Elsewhere</h2>
+  <h3>The cleanest test: which scene, vs. what's inside it</h3>
+  <p>
+    The catalogue answers <strong>"which scene, and where am I?"</strong> The inspector answers <strong>"what's inside <em>this</em> scene?"</strong> Breakdown mode answers <strong>"what does production need across all scenes?"</strong>
+  </p>
+  <div class="route">
+    <div class="route-card">
+      <h5>§15 — To the Inspector</h5>
+      <ul>
+        <li>Notes <em>content</em> (the row shows only a presence mark)</li>
+        <li>Tagged entities for the scene (characters, props, locations)</li>
+        <li>Revision history &amp; flag detail</li>
+        <li>Scene metadata editing (rename location, change time-of-day)</li>
+        <li>Scene-level AI observations (gated behind Alive App)</li>
+        <li>Estimated duration, when a model exists</li>
+      </ul>
+    </div>
+    <div class="route-card bd">
+      <h5>§16 — To Breakdown Mode</h5>
+      <ul>
+        <li>The category accordion — CAST / PROPS / STUNTS counts</li>
+        <li><code>ADD NEW CATEGORY</code> &amp; category CMS actions</li>
+        <li>Cross-scene queries ("every scene with this character")</li>
+        <li>Per-category counts and tallies</li>
+        <li>Bulk ops, scheduling, stripboard, status tracking</li>
+      </ul>
+    </div>
+  </div>
+  <div class="callout direction">
+    <div class="callout-label">Direction — the central decision</div>
+    <p>
+      The two surfaces share the same physical sidebar zone but never the same default: <strong>writing → scene catalogue; breakdown work → breakdown panel</strong> (entered deliberately from the rail). This separation is what keeps the editor feeling like a writing tool rather than a production database with a text field attached. The instant a row becomes editable in place or expandable into a detail card, the inspector's reason to exist evaporates.
+    </p>
+  </div>
+</div>
+
+<!-- CLOSING -->
+<div class="closing">
+  <h2>Closing</h2>
+
+  <div class="closing-block">
+    <div class="closing-num">01</div>
+    <h4>Strongest current behavior</h4>
+    <p>
+      The <strong>current-vs-selected SEPARATION INVARIANT.</strong> The catalogue already distinguishes <em>current</em> (cursor position — passive, brand-pink edge rail, tied to <code>ScriptSession.currentScene</code>) from <em>selected</em> (keyboard intent — soft fill + ring) and lets them coexist on one row without collapsing into a single ambiguous "active" state. It separates <em>where you are</em> from <em>what you're looking at</em> — the mature, correct anatomy for a writing-first navigator. Documented in code, enforced in CSS, pinned by tests. Build on it; never erode it.
+    </p>
+  </div>
+
+  <div class="closing-block">
+    <div class="closing-num">02</div>
+    <h4>Most important UX change</h4>
+    <p>
+      <strong>Establish the scene catalogue as the sidebar's primary writing surface, and make "you are here" actually visible by keeping the current row on-screen.</strong> Two faces of one principle: the catalogue must <em>be</em> the default writing companion (not the breakdown accordion, which belongs in breakdown mode), and it must deliver the awareness it promises. Today the pink marker points off-screen the moment the writer moves past the visible rows. Auto-scrolling the current row into view converts the catalogue from a static list into a live "you are here" map — repairing the surface's core promise at its weakest point.
+    </p>
+  </div>
+
+  <div class="closing-block">
+    <div class="closing-num">03</div>
+    <h4>Safest first implementation slice</h4>
+    <p>
+      <strong>Auto-scroll the current row into view when the current scene changes (SN.1).</strong> Pure presentation behavior, isolated to the navigator: touches no engine code, honors the nav-index moratorium (no new per-scene data), changes no CSS identity, and preserves the separation invariant, keyboard nav, click-to-jump, and empty state untouched. It must align instantly (no theatrical motion), fire only on a real current-scene transition, and only when the row is actually off-screen. Small, reversible, and it fixes the most-felt weakness — the correct first step before any visual-refinement slice.
+    </p>
+  </div>
+
+  <div class="closing-block">
+    <div class="closing-num">04</div>
+    <h4>Highest-risk change to avoid</h4>
+    <p>
+      <strong>Letting the catalogue become a management surface.</strong> Per-scene tag/character counts, duration columns, status toggles or checkboxes, location color-coding, drag-to-reorder, faceted/saved filters, or promoting the breakdown accordion back into the writing default — each pulls the surface toward the admin-panel/dashboard the Doctrine rejects, and most also collide with the nav-index moratorium. The subtler trap: making <em>current</em> louder to "fix" its visibility when the real problem is positional, solved by scrolling. Guard the row's calm; it is a spent budget, not a canvas.
+    </p>
+  </div>
+
+  <div class="stop">
+    <div class="mark">STOP</div>
+    <p>
+      UX Direction only. No implementation has begun, no code has been written, and no engineering plan beyond the single recommended first slice has been authored. The numbering, indexing, and schema constraints (the nav-index moratorium, engine freeze) are treated as immovable. The next decision — authorize, amend, or reject — belongs to the user.
+    </p>
+  </div>
+</div>
+
+</body>
+</html>
