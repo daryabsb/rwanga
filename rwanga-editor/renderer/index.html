@@ -596,6 +596,8 @@
 <script src="js/framework/print-renderer.js"></script>
 <script src="js/framework/print-preview.js"></script>
 <script src="js/framework/paper-view.js"></script>
+<!-- PB1.B — PDF export caller (renderer side of the export.toPDF pipe). -->
+<script src="js/export/pdf-export.js"></script>
 <!-- Slice 1 shell — Layout (state truth), Sidebar (panel host), ActivityRail.
      Loaded BEFORE engine + panel modules so the registries exist when panel
      IIFEs run. Remaining slice-1 modules (ScriptSession, panels, status bar,
@@ -1097,6 +1099,8 @@
       { type: 'separator' },
       // D.1 — Print Preview entry in renderer-owned File menu.
       { label: 'Print Preview', command: 'view.printPreview' },
+      // PB1.B — Export to PDF (accelerator label resolved via displayAccelerator).
+      { label: 'Export to PDF…', command: 'file.exportPdf' },
       { type: 'separator' },
       { label: 'Open Recent…',    disabled: true },
       { label: 'Manage Storage…', disabled: true },
@@ -1180,6 +1184,18 @@
     // the §A4.1 invariant).
     KR.registerCommand({ command: 'file.saveAs', label: 'Save As…',   key: 's', mods: { ctrl: true, shift: true },
       handler: function() { if (Rga.FileManager) Rga.FileManager.saveAs(); }, source: 'A4.1 menu (File → Save As)' });
+
+    // PB1.B — Export to PDF. The menu (native macOS + owned menubar) invokes
+    // file.exportPdf by id; the keyboard accelerator Ctrl+Shift+E is owned by
+    // the kb.exportPdf settings applicator, which targets the export.pdf
+    // command. Both route to Rga.PdfExport.run. file.exportPdf carries a
+    // displayAccelerator (not a KR key binding) so the owned menubar shows the
+    // shortcut WITHOUT duplicating the Ctrl+Shift+E combo (one accelerator,
+    // one owner — the §A4.1 invariant).
+    KR.registerCommand({ command: 'file.exportPdf', label: 'Export to PDF…', displayAccelerator: 'Ctrl+Shift+E',
+      handler: function() { if (Rga.PdfExport && Rga.PdfExport.run) Rga.PdfExport.run(); }, source: 'PB1.B menu (File → Export to PDF)' });
+    KR.registerCommand({ command: 'export.pdf', label: 'Export to PDF',
+      handler: function() { if (Rga.PdfExport && Rga.PdfExport.run) Rga.PdfExport.run(); }, source: 'PB1.B (kb.exportPdf target)' });
 
     // Edit. Undo/Redo dispatched against the active editor via the PM
     // history plugin (already imported as window.RgaProseMirror).
