@@ -1,12 +1,14 @@
 // Copyright (c) 2026 Rwanga. Licensed under Apache 2.0.
-// Rga.Icons.Lucide — registry of the seven Lucide glyphs used by the
-// activity rail. Authored as the single icon family per
-// docs/rwanga-activity-rail-doctrine.md (Rule 1).
+// Rga.Icons.Lucide — registry of the Lucide glyphs used by the shell.
+// First populated for the activity rail (per
+// docs/rwanga-activity-rail-doctrine.md Rule 1, the single icon family);
+// the same registry now also serves the scene-navigator indicators
+// (SN.2: square-pen / flag-triangle-right replacing emoji glyphs).
 //
 // Vendoring: the canonical SVG files live at
 //   renderer/static/vendor/icons/lucide/*.svg
 // licensed under ISC (see the LICENSE file alongside them). The path
-// data below is reproduced verbatim from those files so the rail can
+// data below is reproduced verbatim from those files so the shell can
 // inject SVG inline without an async fetch — the renderer runs from
 // file:// on Electron and inline SVG keeps `currentColor` styling
 // working without CSP gymnastics.
@@ -15,10 +17,11 @@
 //   viewBox 0 0 24 24, fill="none", stroke="currentColor",
 //   stroke-width="2", stroke-linecap="round", stroke-linejoin="round".
 //
-// To add a new rail icon: add the .svg to the vendor directory AND a
-// matching entry below. Anything in the rail that resolves to a name
-// not present here will render a fallback dot (·) and the rail audit
-// tests will catch the regression.
+// To add a new icon: add the .svg to the vendor directory AND a matching
+// entry below. Anything that resolves to a name not present here will
+// render an empty body (fallback handled per consumer — the rail draws
+// a dot; the scene-navigator leaves the indicator visually empty while
+// preserving its aria-label). Audit tests catch the regression.
 'use strict';
 
 (function() {
@@ -60,7 +63,16 @@
       '<path d="M12 7v5l4 2"/>',
     'settings':
       '<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>' +
-      '<circle cx="12" cy="12" r="3"/>'
+      '<circle cx="12" cy="12" r="3"/>',
+    // SN.2 — scene-navigator indicator glyphs. Two paths each (square-pen)
+    // vs one path (flag-triangle-right) gives a structural shape distinction
+    // so notes and revision marks are tellable apart without relying on
+    // color alone (UX Direction §7 colorblind-safe rule).
+    'square-pen':
+      '<path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>' +
+      '<path d="M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z"/>',
+    'flag-triangle-right':
+      '<path d="M7 22V2l10 5-10 5"/>'
   };
 
   function svgFor(name) {

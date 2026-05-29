@@ -59,6 +59,7 @@ function boot(opts) {
   ['../../../renderer/js/shell/layout.js',
    '../../../renderer/js/shell/sidebar.js',
    '../../../renderer/js/shell/script-session.js',
+   '../../../renderer/js/shell/icons-lucide.js',
    '../../../renderer/js/shell/panels/scene-navigator.js'
   ].forEach(function(p) { delete require.cache[require.resolve(p)]; require(p); });
 
@@ -118,25 +119,59 @@ test('each row renders sceneNumber + headingDisplay + estimated page + indicator
   assert.equal(rows[1].querySelector('.rga-shell-scene-navigator-page').textContent, 'p.2');
 });
 
-test('rows with hasNotes=true show the note indicator', () => {
+// SN.2 — note indicator renders as the Lucide `square-pen` mark (inline
+// SVG), not the old 📝 emoji. The container span keeps its aria-label
+// for assistive tech (the Lucide SVG itself is aria-hidden).
+test('rows with hasNotes=true show the note indicator as a Lucide square-pen SVG', () => {
   const { Rga, host } = boot({
     scenes: [{ nodeId: 'a', sceneNumber: 1, headingDisplay: 'A', pmPos: 0, pmEndPos: 10, hasNotes: true, hasRevisionFlag: false }]
   });
   Rga.Shell.Sidebar.activate('sceneNavigator');
   const ind = host.querySelector('.rga-shell-scene-navigator-indicator');
   assert.ok(ind);
-  assert.equal(ind.textContent, '📝');
   assert.equal(ind.getAttribute('aria-label'), 'Has notes');
+  assert.equal(ind.getAttribute('data-icon-name'), 'square-pen');
+  const svg = ind.querySelector('svg');
+  assert.ok(svg, 'note indicator renders as inline SVG (not emoji glyph)');
+  // square-pen has TWO paths — the square outline + the pencil. This is
+  // also the shape-distinguishability check vs flag-triangle-right (1 path).
+  assert.equal(svg.querySelectorAll('path').length, 2, 'square-pen has 2 paths');
 });
 
-test('rows with hasRevisionFlag=true show the flag indicator', () => {
+// SN.2 — revision indicator renders as the Lucide `flag-triangle-right`
+// mark. Distinct shape from square-pen (1 path vs 2) so notes vs revision
+// is tellable apart without relying on color (UX Direction §7).
+test('rows with hasRevisionFlag=true show the revision indicator as a Lucide flag-triangle-right SVG', () => {
   const { Rga, host } = boot({
     scenes: [{ nodeId: 'a', sceneNumber: 1, headingDisplay: 'A', pmPos: 0, pmEndPos: 10, hasNotes: false, hasRevisionFlag: true }]
   });
   Rga.Shell.Sidebar.activate('sceneNavigator');
   const inds = host.querySelectorAll('.rga-shell-scene-navigator-indicator');
   assert.equal(inds.length, 1);
-  assert.equal(inds[0].textContent, '🚩');
+  assert.equal(inds[0].getAttribute('aria-label'), 'Has revision flag');
+  assert.equal(inds[0].getAttribute('data-icon-name'), 'flag-triangle-right');
+  const svg = inds[0].querySelector('svg');
+  assert.ok(svg, 'revision indicator renders as inline SVG (not emoji glyph)');
+  assert.equal(svg.querySelectorAll('path').length, 1, 'flag-triangle-right has 1 path');
+});
+
+// SN.2 — when both indicators are present they sit in the documented
+// order (notes first, revision second) and remain shape-distinguishable.
+test('SN.2: both indicators present render in documented order with distinct shapes', () => {
+  const { Rga, host } = boot({
+    scenes: [{ nodeId: 'a', sceneNumber: 1, headingDisplay: 'A', pmPos: 0, pmEndPos: 10, hasNotes: true, hasRevisionFlag: true }]
+  });
+  Rga.Shell.Sidebar.activate('sceneNavigator');
+  const inds = host.querySelectorAll('.rga-shell-scene-navigator-indicator');
+  assert.equal(inds.length, 2);
+  assert.equal(inds[0].getAttribute('data-icon-name'), 'square-pen');
+  assert.equal(inds[1].getAttribute('data-icon-name'), 'flag-triangle-right');
+  // Shape-distinguishable structurally: different path counts.
+  assert.notEqual(
+    inds[0].querySelector('svg').querySelectorAll('path').length,
+    inds[1].querySelector('svg').querySelectorAll('path').length,
+    'notes and revision indicators must be shape-distinct, not just color-distinct'
+  );
 });
 
 test('the row containing the cursor gets the current-scene mark — sourced from ScriptSession', () => {

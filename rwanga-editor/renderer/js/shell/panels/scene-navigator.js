@@ -159,8 +159,13 @@
 
     const indicators = document.createElement('span');
     indicators.className = 'rga-shell-scene-navigator-indicators';
-    if (scene.hasNotes)        indicators.appendChild(_indicator('📝', 'Has notes'));
-    if (scene.hasRevisionFlag) indicators.appendChild(_indicator('🚩', 'Has revision flag'));
+    // SN.2 — Lucide marks replace emoji glyphs. Frozen designer picks:
+    //   notes    → square-pen           (2 paths)
+    //   revision → flag-triangle-right  (1 path)
+    // Shape-distinct so the two are tellable apart without relying on
+    // color (UX Direction §7 colorblind-safe rule).
+    if (scene.hasNotes)        indicators.appendChild(_indicator('square-pen',          'Has notes'));
+    if (scene.hasRevisionFlag) indicators.appendChild(_indicator('flag-triangle-right', 'Has revision flag'));
     row.appendChild(indicators);
 
     const page = document.createElement('span');
@@ -175,10 +180,21 @@
     return row;
   }
 
-  function _indicator(glyph, label) {
+  // SN.2 — indicators render as inline Lucide SVG via the established
+  // Rga.Icons.Lucide path (also used by the activity rail). The SVG
+  // wrapper bakes in aria-hidden="true", so the accessible meaning lives
+  // on the container span's aria-label + title (preserved from emoji era).
+  // Graceful-degrade per Doctrine Law 11: if Lucide is absent or the icon
+  // name is unregistered, the span renders empty body but the aria-label
+  // still carries the meaning — assistive tech announces it correctly.
+  function _indicator(iconName, label) {
     const sp = document.createElement('span');
     sp.className = 'rga-shell-scene-navigator-indicator';
-    sp.textContent = glyph;
+    sp.setAttribute('data-icon-name', String(iconName));
+    const svg = (Rga.Icons && Rga.Icons.Lucide && Rga.Icons.Lucide.has(iconName))
+      ? Rga.Icons.Lucide.svgFor(iconName)
+      : '';
+    sp.innerHTML = svg;
     sp.setAttribute('aria-label', label);
     sp.title = label;
     return sp;
