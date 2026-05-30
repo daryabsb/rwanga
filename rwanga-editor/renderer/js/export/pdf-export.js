@@ -99,7 +99,14 @@
     // (preferCSSPageSize:true) and Print Preview agree pixel-for-pixel.
     const reset =
       '@page { size: ' + ps.w + 'in ' + ps.h + 'in; margin: 0; }' +
-      'html, body { margin: 0; padding: 0; background: #fff; }' +
+      // The export links the app's own reset.css, which sets
+      // `html, body { height: 100%; overflow: hidden }` for the on-screen
+      // app shell. Linked into the offscreen print document that clips the
+      // page flow to a single viewport, so printToPDF captures only the
+      // first sheet (the "PDF is only 1 page" bug). Force the print
+      // document to grow to its full multi-sheet height and never clip.
+      'html, body { margin: 0; padding: 0; background: #fff;' +
+        ' height: auto !important; overflow: visible !important; }' +
       '#rga-print-preview-root {' +
         ' display: block !important; position: static !important; inset: auto !important;' +
         ' background: #fff !important; gap: 0 !important; padding: 0 !important;' +

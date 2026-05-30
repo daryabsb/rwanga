@@ -78,6 +78,20 @@ function createMainWindow() {
   mainWindow.loadFile(path.join(__dirname, '..', 'renderer', 'index.html'));
   buildMenu(mainWindow);
 
+  // DevTools toggle — F12 / Ctrl+Shift+I (Cmd+Opt+I on macOS). The custom
+  // frameless menu does not expose DevTools, so this keyboard path is the
+  // only way in. Available in all modes for debugging.
+  mainWindow.webContents.on('before-input-event', (event, input) => {
+    if (input.type !== 'keyDown') return;
+    const f12 = input.key === 'F12';
+    const ctrlShiftI = (input.control || input.meta) && input.shift
+      && (input.key === 'I' || input.key === 'i');
+    if (f12 || ctrlShiftI) {
+      mainWindow.webContents.toggleDevTools();
+      event.preventDefault();
+    }
+  });
+
   mainWindow.once('ready-to-show', () => {
     mainWindow.show();
   });
