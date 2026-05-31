@@ -2305,7 +2305,10 @@ body.view-print-preview-active #workspace {
 }
 .rga-print-block-character {
   margin-top: 1em;
-  padding-left: 2.0in;
+  /* R1 (Filmustageation): logical-property mirror. padding-inline-start ==
+   * padding-left in LTR (pixel-identical), and insets from the reading-start
+   * (right) edge in RTL per RTL_SCREENPLAY_CONVENTION.md. Same 2.0in magnitude. */
+  padding-inline-start: 2.0in;
   text-transform: uppercase;
 }
 .rga-print-block-parenthetical {
@@ -2315,11 +2318,13 @@ body.view-print-preview-active #workspace {
    * (layout-profile.js blockWidthsIn.parenthetical); with the 1.5in indent the
    * box must be 3.5in. The previous 2.0in left only 0.5in of text — a render
    * defect that desynced the Paper surface from PageMap. */
-  padding-left: 1.5in;
+  /* R1 (Filmustageation): logical mirror — same 1.5in magnitude, start-edge. */
+  padding-inline-start: 1.5in;
   max-width: 3.5in;
 }
 .rga-print-block-dialogue {
-  padding-left: 1.0in;
+  /* R1 (Filmustageation): logical mirror — same 1.0in magnitude, start-edge. */
+  padding-inline-start: 1.0in;
   max-width: 3.5in;
 }
 .rga-print-block-shot {
@@ -2328,7 +2333,10 @@ body.view-print-preview-active #workspace {
 }
 .rga-print-block-transition {
   margin-top: 1em;
-  text-align: right;
+  /* R1 (Filmustageation): logical end-alignment. end == right in LTR
+   * (pixel-identical); mirrors to the reading-end (left) edge in RTL per
+   * RTL_SCREENPLAY_CONVENTION.md doctrine 3. */
+  text-align: end;
   text-transform: uppercase;
 }
 .rga-print-block-paragraph,
