@@ -27,7 +27,10 @@
 
 /* ---- FLOW view: comfortable text column, no paper edges ---- */
 #editor-container.view-flow {
-  background: var(--editor-bg);
+  /* Filmustageation F3 — recessive desk: a step deeper than the shared
+   * --editor-bg so the lifted paper is the focal object. Scoped to Flow
+   * only; Print/Draft/export keep --editor-bg. Falls back to --editor-bg. */
+  background: var(--flow-desk-bg, var(--editor-bg));
   padding: 32px 0;
 }
 #editor-container.view-flow .rga-page-row {
@@ -39,7 +42,13 @@
    * distinct from the muted desk (--editor-bg). Colour only — no geometry, no
    * growth model, no paper shell (Fork A invariants intact). */
   background: var(--editor-page-bg);
-  box-shadow: none;
+  /* Filmustageation F2 — soft, low drop shadow so the page reads as a real
+   * sheet lifted off the desk (the one sanctioned suspension of the
+   * no-shadow philosophy, because this depicts paper). Uses the existing
+   * --editor-page-shadow token (soft+low in both themes); paper colour stays
+   * white by default. Flow only — Print Preview/PDF (.rga-page-sheet) own
+   * their own shadow on a separate selector, untouched. */
+  box-shadow: var(--editor-page-shadow);
   width: var(--page-width);
   min-height: auto;
   height: auto;

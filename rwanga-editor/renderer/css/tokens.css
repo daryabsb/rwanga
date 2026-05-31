@@ -120,6 +120,12 @@
   --editor-line-highlight: rgba(255, 255, 255, 0.04);
   /* scene-header-bg/border removed in Phase 0 — scene widget deleted */
 
+  /* Flow desk/backdrop (Filmustageation F3) — a touch deeper than the
+     shared --editor-bg so the lifted paper reads as a separate object on
+     a recessive desk. Scoped to Flow only (Draft/Print keep --editor-bg).
+     Neutral luminance step, no tint/gradient — paper on a calm desk. */
+  --flow-desk-bg: #0f0f0f;
+
   /* === Flow line-number rail (Filmustageation F1/F6) ===
      The rail is a deliberate vertical band framing the page's inline-start
      edge — a DISTINCT surface from both the paper (--editor-page-bg #262626)
@@ -260,6 +266,10 @@
   --editor-page-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
   --editor-line-highlight: rgba(0, 0, 0, 0.04);
   /* scene-header-bg/border removed — scene widget deleted */
+
+  /* Flow desk/backdrop (Filmustageation F3) — a touch deeper grey than the
+     shared --editor-bg so the WHITE paper reads as a lifted object. */
+  --flow-desk-bg: #cdcdcd;
 
   /* Flow line-number rail (Filmustageation F1/F6) — warm-neutral band
      between the white paper (#fff) and grey desk (#d6d6d6). */
