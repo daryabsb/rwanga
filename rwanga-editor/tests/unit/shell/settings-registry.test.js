@@ -85,11 +85,12 @@ test('Slice 3A — registry contains the full settings inventory (~64 entries po
   assert.ok(Array.isArray(all), 'Registry.all() must return an array');
   // Inventory grew from 62 → 64 in S12: `units` (user-tier) and
   // `editor.scriptLanguage` (script-tier) were promoted from legacy
-  // localStorage modules into the Settings Store. If an entry is added
-  // or removed, update this guard explicitly so the count change is
-  // reviewed, not silent.
-  assert.equal(all.length, 64,
-    'Registry size must equal the documented inventory (64 settings post-S12)');
+  // localStorage modules into the Settings Store. Filmustageation F7
+  // (2026-05-31) added `editor.pageColor` (Flow paper colour) → 65. If an
+  // entry is added or removed, update this guard explicitly so the count
+  // change is reviewed, not silent.
+  assert.equal(all.length, 65,
+    'Registry size must equal the documented inventory (65 settings post-F7)');
 });
 
 test('Slice 3A — every registry entry has all 16 required fields', () => {

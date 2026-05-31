@@ -126,6 +126,16 @@
      Neutral luminance step, no tint/gradient — paper on a calm desk. */
   --flow-desk-bg: #0f0f0f;
 
+  /* Flow "Dark" page-color option (Filmustageation F7) — the writer-chosen
+     dark page is a lifted dark SHEET (not the desk), with warm off-white ink,
+     in BOTH themes (a dark page is dark regardless of theme). Defined once in
+     :root; the light theme does NOT override these. Applies only when the user
+     picks Page Color = Dark (body[data-flow-page-color="dark"]); the default
+     (White) keeps the current --editor-page-bg paper. Flow only — never reaches
+     Print Preview / PDF page truth. */
+  --flow-page-dark-bg: #1c1c1c;
+  --flow-page-dark-ink: #d6d6d6;
+
   /* === Flow line-number rail (Filmustageation F1/F6) ===
      The rail is a deliberate vertical band framing the page's inline-start
      edge — a DISTINCT surface from both the paper (--editor-page-bg #262626)

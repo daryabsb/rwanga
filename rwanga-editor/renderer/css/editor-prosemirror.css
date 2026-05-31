@@ -61,9 +61,29 @@
 /* S9.1 — editor.showLineNumbers OFF state.
    Specificity (1,2,2,1) beats the .view-flow rule above (0,2,1) so the
    gutter hides cleanly when the user opts out. Default registry value
-   is true (gutter visible — preserves the locked Flow chrome). */
+   is true (gutter visible — preserves the locked Flow chrome). When the
+   rail is hidden, .rga-page-row (justify-content:center) re-centres
+   #editor and reclaims the rail's width automatically. The P## page
+   marker (F6) sits in #editor's own inline-start padding zone, not the
+   gutter element, so it gracefully falls back to the page boundary
+   (FLOW_VIEW_UX_DIRECTION_V2 §1-Page alternative) — no extra wiring. */
 body.rga-no-line-numbers #editor-container.view-flow .flow-line-gutter {
   display: none;
+}
+
+/* Filmustageation F7 — editor.pageColor = "Dark".
+   The writer opts into a dark night-studio page. We redefine ONLY the Flow
+   paper + ink tokens, scoped to the Flow container, so:
+     - #editor (background: var(--editor-page-bg)) becomes the dark sheet,
+     - descendant text (var(--text-primary) via .ProseMirror) becomes light ink.
+   The F2 page shadow + F3 desk separation still apply (the dark page is a
+   LIFTED dark sheet on the recessive desk). 'white' (default) sets no override,
+   so the current paper is kept. This NEVER reaches Print Preview / PDF:
+   .rga-page-sheet uses its own hardcoded #fff / #111, and these token
+   redefinitions are scoped to #editor-container.view-flow only. */
+body[data-flow-page-color="dark"] #editor-container.view-flow {
+  --editor-page-bg: var(--flow-page-dark-bg);
+  --text-primary:   var(--flow-page-dark-ink);
 }
 /* ---- Page row + line gutter (Flow only by default) ---- */
 .rga-page-row {

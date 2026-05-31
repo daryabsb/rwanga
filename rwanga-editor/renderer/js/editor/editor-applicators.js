@@ -185,4 +185,20 @@
     if (!document.body) return;
     document.body.classList.toggle('rga-no-line-numbers', !value);
   }, { owner: 'editor' });
+
+  // ----- editor.pageColor (Filmustageation F7) ----------------------------
+  // Registry: select ['white' | 'dark'], default 'white', scope 'flow'.
+  // Writes data-flow-page-color on <body>. CSS in editor-prosemirror.css
+  // overrides ONLY the Flow paper + ink tokens (--editor-page-bg /
+  // --text-primary, scoped to #editor-container.view-flow) when 'dark' is
+  // chosen; 'white' keeps the current paper. Flow-scoped: the print sheet
+  // (.rga-page-sheet) uses its own hardcoded white/ink, so Print Preview and
+  // PDF export are untouched (page truth stays white). Unknown values are
+  // normalised to 'white' so the body attr never holds a junk token.
+  const _PAGE_COLORS = ['white', 'dark'];
+  register('editor.pageColor', function(value) {
+    if (!document.body) return;
+    const mode = _PAGE_COLORS.indexOf(value) >= 0 ? value : 'white';
+    document.body.setAttribute('data-flow-page-color', mode);
+  }, { owner: 'editor' });
 })();

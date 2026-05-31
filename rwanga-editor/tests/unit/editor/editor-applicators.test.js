@@ -71,11 +71,13 @@ test('Slice 4A + S9.1 — editor-applicators registers exactly the wired editor 
     'editor.fontSize',
     'editor.highlightCurrentLine',
     'editor.lineHeight',
+    // Filmustageation F7 (2026-05-31) — Flow paper colour, REAL+wired.
+    'editor.pageColor',
     'editor.scriptLanguage',
     'editor.showLineNumbers',
     'editor.spellcheck',
     'editor.wordWrap'
-  ], 'applicator inventory must match the S9.1 wired set');
+  ], 'applicator inventory must match the S9.1 + F7 wired set');
 });
 
 test('S9.1 — previously-deferred editor settings are NOW registered', () => {

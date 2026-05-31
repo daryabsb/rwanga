@@ -47,6 +47,7 @@
       settingIds: [
         'editor.fontFamily', 'editor.fontSize', 'editor.lineHeight',
         'editor.spellcheck', 'editor.autocomplete', 'editor.showLineNumbers',
+        'editor.pageColor',
         'editor.highlightCurrentLine', 'editor.wordWrap', 'editor.scriptLanguage'
       ]
     },

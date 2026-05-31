@@ -64,5 +64,12 @@ test('Fix 2 — colour-only: the Flow #editor geometry is untouched', () => {
   const body = ruleBody(readCss('editor-prosemirror.css'), '#editor-container.view-flow #editor');
   assert.match(body, /width\s*:\s*var\(--page-width\)/, 'width token must be unchanged');
   assert.match(body, /min-height\s*:\s*auto/, 'min-height:auto (no growth model) must be unchanged');
-  assert.match(body, /box-shadow\s*:\s*none/, 'no paper shadow re-introduced');
+  // Filmustageation F2 (2026-05-31) DELIBERATELY gives the Flow page a soft
+  // page shadow so it reads as a lifted sheet — the one sanctioned suspension
+  // of no-shadow, because it depicts paper. The shadow comes from the
+  // --editor-page-shadow token (no hardcoded colour), so "colour-only,
+  // geometry untouched" still holds: width + min-height are unchanged. The
+  // original `box-shadow: none` guard is retired in favour of asserting F2.
+  assert.match(body, /box-shadow\s*:\s*var\(--editor-page-shadow\)/,
+    'F2: the Flow page uses the --editor-page-shadow token (lifted paper)');
 });

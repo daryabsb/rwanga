@@ -179,6 +179,17 @@
       keywords: ['line', 'numbers', 'gutter']
     }),
     entry({
+      // Filmustageation F7 — Flow paper colour. White (default) keeps the
+      // standard page; Dark gives a dark night-studio page. Flow-scoped:
+      // does NOT affect Print Preview or export (page truth stays white).
+      id: 'editor.pageColor', label: 'Page Color',
+      description: 'Flow editor paper colour. White keeps the standard page; Dark gives a dark night-studio page. Does not affect Print Preview or export.',
+      type: 'select', default: 'white', scope: 'flow', owner: 'editor',
+      options: ['white', 'dark'],
+      labels:  { white: 'White', dark: 'Dark' },
+      keywords: ['page', 'paper', 'colour', 'color', 'dark', 'white', 'night']
+    }),
+    entry({
       id: 'editor.highlightCurrentLine', label: 'Highlight Current Line',
       description: 'Subtle background tint on the line where the cursor sits.',
       type: 'toggle', default: true, scope: 'flow', owner: 'editor',
