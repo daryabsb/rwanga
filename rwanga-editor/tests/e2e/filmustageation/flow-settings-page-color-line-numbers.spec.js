@@ -88,46 +88,63 @@ async function pageBg() {
 // =================================================================
 // PAGE COLOR
 // =================================================================
-test('F7 Page Color — White (default) keeps the current paper; the body attr is white', async () => {
+// LOCKED design direction (FLOW_VIEW_UX_DIRECTION_V2 §3 + campaign specimen
+// "DEFAULT — WHITE PAPER"): the default page is LITERALLY WHITE in BOTH themes.
+// Designer tokens (campaign HTML): white #ffffff / ink #1d1c18; dark #232019 /
+// ink #e9e2d0. rgb: white=255,255,255 · whiteInk=29,28,24 · dark=35,32,25 ·
+// darkInk=233,226,208.
+const WHITE = 'rgb(255, 255, 255)';
+const WHITE_INK = 'rgb(29, 28, 24)';
+const DARK = 'rgb(35, 32, 25)';
+const DARK_INK = 'rgb(233, 226, 208)';
+
+async function pageInk() {
+  return page.evaluate(() => {
+    const b = document.querySelector('#editor-container.view-flow .rga-block-dialogue, #editor-container.view-flow .ProseMirror, #editor-container.view-flow #editor');
+    return b ? getComputedStyle(b).color : null;
+  });
+}
+
+test('F7 Page Color — DEFAULT is a literally WHITE page in DARK theme (setting untouched)', async () => {
+  // The user-caught regression: in dark theme the default Flow page must be
+  // WHITE (#fff), NOT the theme grey #262626. We do NOT set the setting —
+  // proving the boot default per the locked spec.
   await setTheme('dark');
   await buildFlowScript();
-  // No explicit set — default effective is white.
-  const eff = await page.evaluate(() => window.Rga.Settings.Store.effective('editor.pageColor'));
-  expect(eff).toBe('white');
-  // Paper equals the theme's --editor-page-bg (dark theme: #262626), NOT the dark-page token.
-  const themePaper = await page.evaluate(() =>
-    getComputedStyle(document.documentElement).getPropertyValue('--editor-page-bg').trim());
-  // resolve themePaper hex to rgb by comparing token-applied bg
-  await setSetting('editor.pageColor', 'white');
-  expect(await page.evaluate(() => document.body.getAttribute('data-flow-page-color'))).toBe('white');
-  expect(await pageBg()).not.toBe('rgb(28, 28, 28)');   // not the dark-page token
-  expect(themePaper.toLowerCase()).toBe('#262626');
+  expect(await page.evaluate(() => window.Rga.Settings.Store.effective('editor.pageColor'))).toBe('white');
+  expect(await pageBg()).toBe(WHITE);                    // literally white in dark theme
+  expect(await pageInk()).toBe(WHITE_INK);              // dark ink on white paper
+  await page.locator('#editor-container').screenshot({ path: path.join(ART_DIR, 'page-white-darkTheme.png') });
 });
 
-test('F7 Page Color — Dark gives a dark page with light ink (dark theme)', async () => {
+test('F7 Page Color — White is a literally WHITE page in LIGHT theme', async () => {
+  await setTheme('light');
+  await buildFlowScript();
+  await setSetting('editor.pageColor', 'white');
+  expect(await page.evaluate(() => document.body.getAttribute('data-flow-page-color'))).toBe('white');
+  expect(await pageBg()).toBe(WHITE);
+  await page.locator('#editor-container').screenshot({ path: path.join(ART_DIR, 'page-white-lightTheme.png') });
+});
+
+test('F7 Page Color — Dark gives the designer dark page with warm off-white ink (dark theme)', async () => {
   await setTheme('dark');
   await buildFlowScript();
   await setSetting('editor.pageColor', 'dark');
   expect(await page.evaluate(() => document.body.getAttribute('data-flow-page-color'))).toBe('dark');
-  expect(await pageBg()).toBe('rgb(28, 28, 28)');       // --flow-page-dark-bg #1c1c1c
-  // ink: a dialogue block resolves to the light page ink (#d6d6d6).
-  const ink = await page.evaluate(() => {
-    const b = document.querySelector('#editor-container.view-flow .rga-block-dialogue, #editor-container.view-flow .ProseMirror');
-    return b ? getComputedStyle(b).color : null;
-  });
-  expect(ink).toBe('rgb(214, 214, 214)');
+  expect(await pageBg()).toBe(DARK);                     // designer --paper-dark #232019
+  expect(await pageInk()).toBe(DARK_INK);              // designer --paper-dark-ink #e9e2d0
   await page.locator('#editor-container').screenshot({ path: path.join(ART_DIR, 'page-dark-darkTheme.png') });
 });
 
-test('F7 Page Color — Dark works in the light theme too (a dark page on a light desk)', async () => {
+test('F7 Page Color — Dark works in the light theme too; White restores white', async () => {
   await setTheme('light');
   await buildFlowScript();
   await setSetting('editor.pageColor', 'dark');
-  expect(await pageBg()).toBe('rgb(28, 28, 28)');       // dark page even under light theme
+  expect(await pageBg()).toBe(DARK);                     // dark page even under light theme
   await page.locator('#editor-container').screenshot({ path: path.join(ART_DIR, 'page-dark-lightTheme.png') });
-  // back to white restores the light theme's white paper.
+  // back to white restores the white paper.
   await setSetting('editor.pageColor', 'white');
-  expect(await pageBg()).toBe('rgb(255, 255, 255)');
+  expect(await pageBg()).toBe(WHITE);
 });
 
 // =================================================================

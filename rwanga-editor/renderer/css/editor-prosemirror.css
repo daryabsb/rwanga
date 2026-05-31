@@ -71,19 +71,42 @@ body.rga-no-line-numbers #editor-container.view-flow .flow-line-gutter {
   display: none;
 }
 
-/* Filmustageation F7 — editor.pageColor = "Dark".
-   The writer opts into a dark night-studio page. We redefine ONLY the Flow
-   paper + ink tokens, scoped to the Flow container, so:
-     - #editor (background: var(--editor-page-bg)) becomes the dark sheet,
-     - descendant text (var(--text-primary) via .ProseMirror) becomes light ink.
-   The F2 page shadow + F3 desk separation still apply (the dark page is a
-   LIFTED dark sheet on the recessive desk). 'white' (default) sets no override,
-   so the current paper is kept. This NEVER reaches Print Preview / PDF:
-   .rga-page-sheet uses its own hardcoded #fff / #111, and these token
-   redefinitions are scoped to #editor-container.view-flow only. */
+/* Filmustageation F7 — editor.pageColor (Flow paper colour).
+   LOCKED design direction (FLOW_VIEW_UX_DIRECTION_V2 §3, campaign specimen
+   "DEFAULT — WHITE PAPER"): the page is LITERALLY WHITE by default in BOTH
+   light AND dark themes — NOT the theme's grey --editor-page-bg. The writer
+   opts into a dark page via the setting. We redefine the Flow paper + ink
+   tokens, scoped to the Flow container, so #editor (background:
+   var(--editor-page-bg)) and its text (var(--text-primary)) follow the choice.
+
+   White is the DEFAULT and is applied whenever the page-color is anything
+   other than "dark" — including before the applicator has written the body
+   attribute at boot — via :not([data-flow-page-color="dark"]). This guarantees
+   the spec's "white in both themes" default even in the first-paint gap; it
+   does NOT depend on the attr being present. Dark applies only on explicit
+   opt-in. The two rules are mutually exclusive (the :not), so order is
+   irrelevant. F2 shadow + F3 desk still apply (white/dark page is a LIFTED
+   sheet on the recessive desk). NEVER reaches Print Preview / PDF:
+   .rga-page-sheet uses its own hardcoded #fff/#111, and these redefinitions
+   are scoped to #editor-container.view-flow only. */
+/* NOTE — `color` is set explicitly (not only the --text-primary token): the
+   body text `color` is computed-inherited from an ancestor ABOVE this container
+   (which resolves --text-primary to the theme default), so redefining the token
+   lower down does not retroactively change that already-computed color. Setting
+   `color` here recomputes the ink at the Flow container so every inheriting text
+   element (action, dialogue, etc.) follows the page colour. Chrome that
+   declares its own colour (line-rail numerals, scene-number gold, slug accent)
+   is unaffected. The token is also redefined so descendants that re-read
+   var(--text-primary) resolve to the same ink. */
+body:not([data-flow-page-color="dark"]) #editor-container.view-flow {
+  --editor-page-bg: var(--flow-page-white-bg);
+  --text-primary:   var(--flow-page-white-ink);
+  color:            var(--flow-page-white-ink);
+}
 body[data-flow-page-color="dark"] #editor-container.view-flow {
   --editor-page-bg: var(--flow-page-dark-bg);
   --text-primary:   var(--flow-page-dark-ink);
+  color:            var(--flow-page-dark-ink);
 }
 /* ---- Page row + line gutter (Flow only by default) ---- */
 .rga-page-row {

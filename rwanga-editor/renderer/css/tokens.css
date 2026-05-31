@@ -126,15 +126,18 @@
      Neutral luminance step, no tint/gradient — paper on a calm desk. */
   --flow-desk-bg: #0f0f0f;
 
-  /* Flow "Dark" page-color option (Filmustageation F7) — the writer-chosen
-     dark page is a lifted dark SHEET (not the desk), with warm off-white ink,
-     in BOTH themes (a dark page is dark regardless of theme). Defined once in
-     :root; the light theme does NOT override these. Applies only when the user
-     picks Page Color = Dark (body[data-flow-page-color="dark"]); the default
-     (White) keeps the current --editor-page-bg paper. Flow only — never reaches
-     Print Preview / PDF page truth. */
-  --flow-page-dark-bg: #1c1c1c;
-  --flow-page-dark-ink: #d6d6d6;
+  /* Flow Page-Color setting (Filmustageation F7). Per the LOCKED design
+     direction (FLOW_VIEW_UX_DIRECTION_V2 §3 + the campaign specimen
+     "DEFAULT — WHITE PAPER"): the default page is LITERALLY WHITE in BOTH
+     light AND dark themes — white paper on a recessive desk. The writer can
+     opt into a dark "night studio" page via the setting. Values are the
+     designer's exact tokens from the campaign spec; defined once in :root and
+     NOT overridden per theme (a white page is white, a dark page is dark,
+     regardless of app theme). Flow only — never reaches Print Preview / PDF. */
+  --flow-page-white-bg:  #ffffff;   /* designer: white paper */
+  --flow-page-white-ink: #1d1c18;   /* designer: white-paper ink */
+  --flow-page-dark-bg:   #232019;   /* designer: --paper-dark (warm near-black) */
+  --flow-page-dark-ink:  #e9e2d0;   /* designer: --paper-dark-ink (warm off-white) */
 
   /* === Flow line-number rail (Filmustageation F1/F6) ===
      The rail is a deliberate vertical band framing the page's inline-start
