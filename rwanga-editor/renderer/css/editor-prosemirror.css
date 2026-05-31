@@ -82,6 +82,15 @@ body.rga-no-line-numbers #editor-container.view-flow .flow-line-gutter {
  *     into the editor's larger type
  * No engine touch; no schema change; no new line-number system. The
  * FlowChrome.rebuildLineNumbers() pipeline is unchanged. */
+/* Filmustageation F1 — the rail is now a first-class element, not an
+ * invisible IDE gutter. It gets its OWN background band (distinct from
+ * paper and desk), a hairline on the page-facing edge that frames the
+ * page's inline-start side, and calm, intentional monospace numerals.
+ * Tokens live in tokens.css (--flow-rail-*); both themes covered. The
+ * band reads as a deliberate Rwanga surface. border-inline-end is the
+ * page-facing edge in BOTH directions (LTR: right edge; RTL: left edge,
+ * because the gutter carries direction:rtl). No engine touch; the
+ * FlowChrome.rebuildLineNumbers() pipeline is unchanged. */
 .flow-line-gutter {
   display: none;
   position: relative;
@@ -89,17 +98,20 @@ body.rga-no-line-numbers #editor-container.view-flow .flow-line-gutter {
   min-height: 0;
   font-family: var(--font-mono, ui-monospace, Menlo, Consolas, monospace);
   font-size: 12px;
-  color: var(--text-secondary, #9e9e9e);
-  opacity: 0.85;
+  color: var(--flow-rail-num, #6e6e6e);
+  background: var(--flow-rail-bg);
+  border-inline-end: 1px solid var(--flow-rail-edge, #3c3c3c);
   user-select: none;
   pointer-events: none;
 }
 .flow-line-num {
   position: absolute;
-  inset-inline-end: 8px;
+  inset-inline-end: 10px;
   text-align: end;
   white-space: nowrap;
   line-height: 1;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
 }
 /* Visual Comfort Slice 3 — Fix B (RTL line-number gutter ownership).
  * SINGLE direction owner for Flow chrome: #editor's `dir` attribute
@@ -2088,16 +2100,30 @@ body.view-draft-active .rga-draft-footer {
  * uppercase. Reads as ambient navigation, not as a break marker.
  * Marker contract unchanged: parent stays height: 0, zero PageMap
  * budget. */
+/* Filmustageation F6 — the floating "— Page N —" is redesigned as a
+ * styled P## accent tab, and MOVED from the inline-END chrome zone to
+ * the inline-START (rail) side. The old inline-end placement collided
+ * with right-aligned transitions (CUT TO: is text-align:end = inline-end);
+ * the rail side is clear of it and consolidates inline-start awareness
+ * next to the line-number rail (FLOW_VIEW_UX_DIRECTION_V2 §1-Page,
+ * boundary fallback). Logical inset-inline-start mirrors to the right in
+ * RTL automatically — the rail side in both directions. Still an ambient
+ * coordinate, never a hard seam: parent stays height:0, zero PageMap
+ * budget (Flow continuous, Law 4). */
 #editor-container.view-flow .rga-page-marker .rga-page-marker-begin {
   position: absolute;
   top: 0;
-  inset-inline-end: -0.5in;     /* into #editor inline-end padding (chrome zone) */
-  inset-inline-start: auto;     /* override the base rule's `left: 50%` */
+  inset-inline-start: -0.5in;   /* rail-side chrome zone (was inline-end → collided with transitions) */
+  inset-inline-end: auto;       /* override the base rule's `left: 50%` */
   transform: translateY(-50%);  /* horizontal-only translate; no centring */
-  background: transparent;
-  padding: 0;
-  font-size: 0.625rem;          /* 10px — ambient hint scale */
-  color: var(--text-tertiary, #888);
+  background: var(--flow-rail-marker-bg);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-family: var(--font-mono, ui-monospace, Menlo, Consolas, monospace);
+  font-size: 0.625rem;          /* 10px — ambient coordinate scale */
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--flow-rail-marker-fg, #d6336c);
   white-space: nowrap;
 }
 
