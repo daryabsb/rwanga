@@ -21,6 +21,7 @@ function boot() {
   global.document = dom.window.document;
   global.window.Rga = {};
   const paths = [
+    '../../../renderer/js/framework/slug-resolver.js',
     '../../../renderer/js/framework/print-renderer.js'
   ];
   paths.forEach(function(p) { delete require.cache[require.resolve(p)]; require(p); });

@@ -574,6 +574,10 @@
      single named geometry resolver (Recovery Step 5); it delegates to
      layout-profile.js, so it loads after it. -->
 <script src="js/framework/screenplay-normalizer.js"></script>
+<!-- SlugResolver — the single canonical scene-heading slug projection
+     (SLUG_TRUTH_DOCTRINE_V1). Pure, no deps; loads before its consumers
+     (pagemap-engine, nav-index, print-renderer) which call it at runtime. -->
+<script src="js/framework/slug-resolver.js"></script>
 <script src="js/framework/layout-profile.js"></script>
 <script src="js/framework/manuscript-geometry.js"></script>
 <script src="js/framework/pagemap-engine.js"></script>

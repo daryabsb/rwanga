@@ -58,6 +58,7 @@ function bootLayoutProfile() {
   global.document = dom.window.document;
   global.window.Rga = {};
   ['../../../renderer/js/constants.js',
+   '../../../renderer/js/framework/slug-resolver.js',
    '../../../renderer/js/framework/layout-profile.js'].forEach(function (p) {
     delete require.cache[require.resolve(p)];
     require(p);

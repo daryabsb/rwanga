@@ -60,21 +60,17 @@
   }
 
   // Engine-internal: build the measurement-only string for a structured
-  // sceneHeading using the profile's separator widths. NOT for display.
+  // sceneHeading. Routes through the single canonical slug projection
+  // (Rga.SlugResolver, SLUG_TRUTH_DOCTRINE_V1) using the profile's convention
+  // (order + separators) so the MEASURED string equals the DISPLAYED string
+  // by construction — no second composer, no geometry drift. NOT for display.
   function _composeHeadingForMeasure(heading, spec) {
     if (!heading) return '';
-    const sep = (spec && spec.separators) || { settingLocation: ' ', locationTime: ' — ' };
-    let s = '';
-    if (heading.setting) s += heading.setting;
-    if (heading.location) {
-      if (s) s += sep.settingLocation;
-      s += heading.location;
-    }
-    if (heading.time) {
-      if (s) s += sep.locationTime;
-      s += heading.time;
-    }
-    return s;
+    const convention = {
+      order:      spec && spec.order,
+      separators: spec && spec.separators
+    };
+    return Rga.SlugResolver.compose(heading, convention).text;
   }
 
   function _measureContentLines(text, cpl) {

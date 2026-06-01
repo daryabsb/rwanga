@@ -155,7 +155,7 @@
     content.className = 'rga-page-sheet-content';
     if (Array.isArray(page.blocks)) {
       for (let i = 0; i < page.blocks.length; i += 1) {
-        content.appendChild(_buildBlockEl(page.blocks[i], i === 0));
+        content.appendChild(_buildBlockEl(page.blocks[i], i === 0, layoutProfile));
       }
     }
     sheet.appendChild(content);
@@ -180,7 +180,7 @@
     return sheet;
   }
 
-  function _buildBlockEl(block, isFirstOnPage) {
+  function _buildBlockEl(block, isFirstOnPage, layoutProfile) {
     const el = document.createElement('div');
     el.className = 'rga-print-block rga-print-block-' + block.type;
     if (isFirstOnPage) el.classList.add('rga-print-block-first');
@@ -194,7 +194,7 @@
     if (typeof block.pmTo   === 'number') el.setAttribute('data-pm-to',   String(block.pmTo));
 
     if (block.type === 'sceneHeading') {
-      _appendHeadingDisplay(el, block.heading);
+      _appendHeadingDisplay(el, block.heading, layoutProfile);
     } else {
       const runs = (block.inlineRuns && block.inlineRuns.length > 0)
         ? block.inlineRuns
@@ -206,17 +206,20 @@
     return el;
   }
 
-  // The renderer is where the structured heading becomes a display string.
-  // Future conventions (Arabic / Kurdish) can override here without
-  // touching the normalizer or engine.
-  function _appendHeadingDisplay(el, heading) {
+  // The structured heading becomes a display string via the SINGLE canonical
+  // slug projection (Rga.SlugResolver, SLUG_TRUTH_DOCTRINE_V1). The convention
+  // (token order + separators) comes from the layout profile — the same
+  // convention PageMap measures with — so Print display === PageMap measure by
+  // construction. When no profile is available (empty-doc / preload path) the
+  // resolver's default convention is used, which equals the legacy Print
+  // composition exactly, keeping output byte-identical.
+  function _appendHeadingDisplay(el, heading, layoutProfile) {
     if (!heading) return;
-    const parts = [];
-    if (heading.setting)  parts.push(heading.setting);
-    if (heading.location) parts.push(heading.location);
-    let display = parts.join(' ');
-    if (heading.time) display += (display ? ' — ' : '') + heading.time;
-    el.textContent = display;
+    const spec = (layoutProfile && layoutProfile.blocks && layoutProfile.blocks.sceneHeading) || null;
+    const convention = spec
+      ? { order: spec.order, separators: spec.separators }
+      : undefined;
+    el.textContent = Rga.SlugResolver.compose(heading, convention).text;
   }
 
   // ----------------------------------------------------------------

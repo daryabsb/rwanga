@@ -201,13 +201,17 @@
     };
   }
 
+  // Routes through the single canonical slug projection (Rga.SlugResolver,
+  // SLUG_TRUTH_DOCTRINE_V1). No convention passed → the resolver's default
+  // convention, which equals the legacy nav-index composition exactly, so
+  // `headingDisplay` is byte-identical. The raw setting/locationText/time are
+  // still stored separately on the scene entry for structured consumers.
   function _composeHeadingDisplay(setting, locationText, time) {
-    const parts = [];
-    if (setting) parts.push(setting);
-    if (locationText) parts.push(locationText);
-    let head = parts.join(' ');
-    if (time) head += (head ? ' — ' : '') + time;
-    return head;
+    return Rga.SlugResolver.compose({
+      setting: setting,
+      location: locationText,
+      time: time
+    }).text;
   }
 
   function _firstChildOfType(node, typeName) {

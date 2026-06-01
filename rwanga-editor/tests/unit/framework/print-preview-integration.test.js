@@ -41,6 +41,7 @@ function boot(options) {
   const paths = [
     '../../../renderer/js/framework/base-outer-marks.js',
     '../../../renderer/js/framework/screenplay-normalizer.js',
+    '../../../renderer/js/framework/slug-resolver.js',
     '../../../renderer/js/framework/layout-profile.js',
     // Recovery Step 5: nav-index + print-preview resolve geometry via ManuscriptGeometry.
     '../../../renderer/js/framework/manuscript-geometry.js',

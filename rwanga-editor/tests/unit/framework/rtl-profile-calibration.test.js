@@ -58,6 +58,7 @@ function predictedByType() {
     Schema: require(path.resolve(__dirname, '../../../node_modules/prosemirror-model')).Schema
   };
   ['constants.js', 'framework/base-outer-marks.js', 'doc-types/screenplay/schema-v3.js',
+   'framework/slug-resolver.js',
    'framework/layout-profile.js', 'framework/pagemap-engine.js',
    'framework/screenplay-normalizer.js'].forEach(function (rel) {
     const p = path.join(RJS, rel);

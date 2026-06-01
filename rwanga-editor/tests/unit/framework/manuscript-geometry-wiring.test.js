@@ -76,6 +76,7 @@ test('Recovery Step 5: ManuscriptGeometry.resolveFrom output equals LayoutProfil
   global.window.Rga = {};
   const paths = [
     '../../../renderer/js/constants.js',
+    '../../../renderer/js/framework/slug-resolver.js',
     '../../../renderer/js/framework/layout-profile.js',
     '../../../renderer/js/framework/manuscript-geometry.js'
   ];

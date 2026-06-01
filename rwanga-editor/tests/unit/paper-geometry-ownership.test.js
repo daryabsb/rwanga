@@ -45,6 +45,8 @@ test('a Paper leaf carries fixed page geometry — PrintRenderer sets an inline 
   global.window = dom.window;
   global.document = dom.window.document;
   global.window.Rga = {};
+  delete require.cache[require.resolve('../../renderer/js/framework/slug-resolver.js')];
+  require('../../renderer/js/framework/slug-resolver.js');
   delete require.cache[require.resolve('../../renderer/js/framework/print-renderer.js')];
   require('../../renderer/js/framework/print-renderer.js');
   const container = document.createElement('div');

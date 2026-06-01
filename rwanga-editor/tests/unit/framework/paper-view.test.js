@@ -22,7 +22,8 @@ function boot() {
   global.window.Rga = {};
   // PrintRenderer is the REAL module so render() paints real .rga-page-sheet
   // leaves; everything upstream of PaperView is faked for isolation.
-  ['../../../renderer/js/framework/print-renderer.js',
+  ['../../../renderer/js/framework/slug-resolver.js',
+   '../../../renderer/js/framework/print-renderer.js',
    '../../../renderer/js/framework/paper-view.js'].forEach(function(p) {
     delete require.cache[require.resolve(p)];
     require(p);

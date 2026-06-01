@@ -81,6 +81,7 @@ function boot() {
     '../../../renderer/js/framework/doc-type-registry.js',
     '../../../renderer/js/framework/runtime-profile.js',
     '../../../renderer/js/framework/screenplay-normalizer.js',
+    '../../../renderer/js/framework/slug-resolver.js',
     '../../../renderer/js/framework/layout-profile.js',
     // Recovery Step 5: nav-index + print-preview resolve geometry via ManuscriptGeometry.
     '../../../renderer/js/framework/manuscript-geometry.js',

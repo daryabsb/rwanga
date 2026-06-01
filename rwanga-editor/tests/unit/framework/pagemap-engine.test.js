@@ -22,6 +22,7 @@ function boot() {
   global.document = dom.window.document;
   global.window.Rga = {};
   const paths = [
+    '../../../renderer/js/framework/slug-resolver.js',
     '../../../renderer/js/framework/layout-profile.js',
     '../../../renderer/js/framework/pagemap-engine.js'
   ];

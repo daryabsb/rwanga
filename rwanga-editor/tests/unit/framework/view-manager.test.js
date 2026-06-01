@@ -41,6 +41,7 @@ function boot() {
   const paths = [
     '../../../renderer/js/framework/base-outer-marks.js',
     '../../../renderer/js/framework/screenplay-normalizer.js',
+    '../../../renderer/js/framework/slug-resolver.js',
     '../../../renderer/js/framework/layout-profile.js',
     '../../../renderer/js/framework/pagemap-engine.js',
     '../../../renderer/js/framework/document-outline.js',

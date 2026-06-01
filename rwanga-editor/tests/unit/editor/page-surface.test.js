@@ -25,6 +25,7 @@ function boot() {
   global.window.Rga = {};
   const paths = [
     '../../../renderer/js/constants.js',
+    '../../../renderer/js/framework/slug-resolver.js',
     '../../../renderer/js/framework/layout-profile.js',
     '../../../renderer/js/framework/manuscript-geometry.js',
     '../../../renderer/js/editor/page-surface.js'

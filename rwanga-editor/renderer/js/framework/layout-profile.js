@@ -187,6 +187,12 @@
       settingLocation: ' ',
       locationTime:    ' — '
     };
+    // Token order for the canonical slug projection (SLUG_TRUTH_DOCTRINE_V1).
+    // Owned here alongside the separators so order + punctuation are a single
+    // convention source that Rga.SlugResolver consumes; a future non-Hollywood
+    // or RTL convention re-sequences here, never in the resolver or the record.
+    // V1 default === today's order exactly.
+    blocks.sceneHeading.order = ['setting', 'location', 'time'];
 
     // D.2 — `direction` (resolved above, next to the cpi it drives) is carried
     // through so PrintRenderer can apply the RTL margin mirror (the wider

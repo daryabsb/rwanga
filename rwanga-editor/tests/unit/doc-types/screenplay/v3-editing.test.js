@@ -62,6 +62,7 @@ function bootEditor(initialDocJson) {
   const paths = [
     '../../../../renderer/js/framework/base-outer-marks.js',
     '../../../../renderer/js/framework/document-outline.js',
+    '../../../../renderer/js/framework/slug-resolver.js',
     '../../../../renderer/js/framework/nav-index.js',
     '../../../../renderer/js/doc-types/screenplay/schema-v3.js',
     '../../../../renderer/js/doc-types/screenplay/v3-commands.js',
