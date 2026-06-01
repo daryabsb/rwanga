@@ -337,8 +337,12 @@
   max-width: 480px;
   margin-bottom: 20px;
   padding: 8px 12px;
-  background: var(--surface-secondary, rgba(255, 255, 255, 0.04));
-  border: 1px solid var(--border-subtle);
+  /* Opaque surface from the defined palette (--surface-* tokens were never
+     defined, so the prior translucent rgba fallback made the field read as
+     a faint smudge over the dark desk). --bg-secondary is opaque in both
+     themes (#252526 / #f3f3f3). */
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-primary, var(--border-subtle));
   border-radius: 4px;
   color: var(--text-primary);
   font: inherit;
@@ -346,8 +350,15 @@
   outline: none;
 }
 
+.rga-settings-search-input::placeholder {
+  color: var(--text-tertiary, #999);
+}
+
 .rga-settings-search-input:focus {
   border-color: var(--accent-primary, #007acc);
+  /* Polished, token-only focus ring — a crisp 1px halo in the accent,
+     consistent with the other controls' accent focus treatment. */
+  box-shadow: 0 0 0 1px var(--accent-primary, #007acc);
 }
 
 .rga-settings-rows {
@@ -554,7 +565,7 @@
 
 .rga-settings-row-reset:hover {
   color: var(--text-primary);
-  background: var(--surface-hover, rgba(255, 255, 255, 0.06));
+  background: var(--bg-hover, rgba(255, 255, 255, 0.06));
 }
 
 .rga-settings-row-reset:focus-visible {
@@ -662,13 +673,27 @@
   display: inline-block;
   min-width: 180px;
   padding: 6px 10px;
-  background: var(--surface-tertiary, rgba(255, 255, 255, 0.06));
-  border: 1px solid var(--border-subtle);
+  /* Opaque field surface from the defined palette. The prior
+     var(--surface-tertiary, …) token was never defined, so the control fell
+     back to a translucent rgba(255,255,255,0.06) — too dark/low-contrast over
+     the desk AND, critically, it gave the native <select> POPUP a near-
+     transparent background, making the dropdown options unreadable.
+     --bg-tertiary is opaque in both themes (#2d2d30 / #e8e8e8). */
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-primary, var(--border-subtle));
   border-radius: 4px;
   color: var(--text-primary);
   font: inherit;
   font-size: 12px;
   outline: none;
+}
+
+/* Native dropdown list items: set an explicit opaque surface + readable ink
+   so the popup is legible cross-platform (Electron/Chromium renders <option>
+   from the select's own colours). */
+.rga-settings-control-select option {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
 }
 
 .rga-settings-control-text {
@@ -677,15 +702,27 @@
   max-width: 480px;
 }
 
+.rga-settings-control-text::placeholder {
+  color: var(--text-tertiary, #999);
+}
+
 .rga-settings-control-select:focus,
 .rga-settings-control-text:focus {
   border-color: var(--accent-primary, #007acc);
+  /* Polished, token-only focus ring (matches the accent focus used by the
+     other controls in this file). */
+  box-shadow: 0 0 0 1px var(--accent-primary, #007acc);
 }
 
+/* Intentionally disabled — NOT washed-out. A recessed opaque surface +
+   the dedicated --text-disabled ink reads as "deliberately off", where the
+   prior opacity:0.5 over a translucent field looked broken. */
 .rga-settings-control-select:disabled,
 .rga-settings-control-text:disabled {
   cursor: not-allowed;
-  opacity: 0.5;
+  background: var(--bg-secondary);
+  color: var(--text-disabled, #6e6e6e);
+  border-color: var(--border-secondary, var(--border-subtle));
 }
 
 /* ============================================================
@@ -721,7 +758,7 @@
 
 .rga-settings-control-number-btn:hover:not(:disabled) {
   color: var(--text-primary);
-  background: var(--surface-hover, rgba(255, 255, 255, 0.06));
+  background: var(--bg-hover, rgba(255, 255, 255, 0.06));
 }
 
 .rga-settings-control-number-btn:disabled {
