@@ -2377,6 +2377,16 @@ body.view-print-preview-active #workspace {
   margin-top: 1em;
   text-transform: uppercase;
   font-weight: bold;
+  /* Recognition Bundle v1 — Package A (SCENE_HEADING_IDENTITY_AUDIT, PRINT_
+   * RECOGNITION_BUNDLE_PHASE0). The Rwanga brand-pink slug underline is the
+   * single Critical, geometry-FREE identity carrier (matches Flow's
+   * .rga-scene-heading-v3 border). border-bottom adds no layout box on a block
+   * that already owns its line; PageMap is pure arithmetic over the layout
+   * profile and never reads the DOM, so this does NOT move a page break.
+   * Geometry untouched: NO font-size / margin / line-height / letter-spacing /
+   * order change. Inherited by the PDF via the existing linked-CSS export path
+   * (no pipeline change). */
+  border-bottom: 3px solid var(--accent-rwanga, #C2185B);
 }
 .rga-print-block-action {
   margin-top: 1em;
