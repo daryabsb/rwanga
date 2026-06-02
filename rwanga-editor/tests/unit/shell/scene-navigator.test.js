@@ -1034,6 +1034,76 @@ test('Marks-Expansion-v1: multiple scenes can stay expanded at once', () => {
 });
 
 // ----------------------------------------------------------------
+// Marks-Expansion RTL — the navigator mirrors the active script's writing
+// direction, and expand/collapse works identically in RTL. The geometric
+// placement (chevron on inline-start, caret direction, marks indent side)
+// is confirmed with real layout in the Electron e2e
+// (scene-navigator-rtl-expansion.spec.js); here we verify the DOM contract:
+// the wrapper carries the right dir, the chevron exists, clicking it toggles
+// (never navigates), the marks zone renders, and LTR is unchanged.
+// ----------------------------------------------------------------
+function navWrapper(host) {
+  return host.querySelector('.rga-shell-scene-navigator');
+}
+// Make the active document RTL the same way the editor learns direction:
+// metadata.screenplayProfile.direction. Override after boot, before activate.
+function makeRtl(Rga) {
+  Rga.TabManager.activeDoc = function() {
+    return { metadata: { screenplayProfile: { direction: 'rtl' } } };
+  };
+}
+
+test('Marks-Expansion RTL: navigator wrapper mirrors the script direction (rtl)', () => {
+  const { Rga, host } = boot({
+    scenes: [{ nodeId: 'a', sceneNumber: 1, headingDisplay: 'مشهد', pmPos: 0, pmEndPos: 10, hasNotes: true, hasRevisionFlag: false }]
+  });
+  makeRtl(Rga);
+  Rga.Shell.Sidebar.activate('sceneNavigator');
+  assert.equal(navWrapper(host).getAttribute('dir'), 'rtl', 'RTL script → navigator renders dir="rtl"');
+});
+
+test('Marks-Expansion RTL: chevron exists and clicking it toggles expansion (marks appear) without navigating', () => {
+  const { Rga, host, stub } = boot({
+    scenes: [{ nodeId: 'a', sceneNumber: 1, headingDisplay: 'مشهد', pmPos: 0, pmEndPos: 10, hasNotes: true, hasRevisionFlag: true }]
+  });
+  makeRtl(Rga);
+  Rga.Shell.Sidebar.activate('sceneNavigator');
+  const chev = chevronOf(host, 'a');
+  assert.ok(chev, 'chevron present in RTL');
+  assert.equal(chev.getAttribute('aria-expanded'), 'false', 'starts collapsed');
+  assert.equal(marksOf(host, 'a'), null, 'no marks zone while collapsed');
+  chev.click();
+  assert.equal(stub.findSceneCall, null, 'chevron click did NOT navigate (stopPropagation holds in RTL)');
+  const zone = marksOf(host, 'a');
+  assert.ok(zone, 'marks zone renders in RTL after expand');
+  assert.equal(chevronOf(host, 'a').getAttribute('aria-expanded'), 'true', 'chevron now expanded');
+  const lines = zone.querySelectorAll('.rga-shell-scene-navigator-mark');
+  assert.equal(lines.length, 2, 'both presence lines render in RTL');
+});
+
+test('Marks-Expansion RTL: row click still navigates (RTL)', () => {
+  const { Rga, host, stub } = boot({
+    scenes: [{ nodeId: 'a', sceneNumber: 1, headingDisplay: 'مشهد', pmPos: 0, pmEndPos: 10, hasNotes: true, hasRevisionFlag: false }]
+  });
+  makeRtl(Rga);
+  Rga.Shell.Sidebar.activate('sceneNavigator');
+  host.querySelector('[data-scene-node-id="a"]').click();
+  assert.equal(stub.findSceneCall, 'a', 'row body click still jumps to the scene in RTL');
+});
+
+test('Marks-Expansion RTL: LTR is unchanged — default script renders dir="ltr"', () => {
+  const { Rga, host } = boot({
+    scenes: [{ nodeId: 'a', sceneNumber: 1, headingDisplay: 'A', pmPos: 0, pmEndPos: 10, hasNotes: true, hasRevisionFlag: false }]
+  });
+  // No RTL doc — activeDoc stub returns null (the default boot behaviour).
+  Rga.Shell.Sidebar.activate('sceneNavigator');
+  assert.equal(navWrapper(host).getAttribute('dir'), 'ltr', 'no RTL profile → navigator stays dir="ltr"');
+  // And expand/collapse still works in LTR.
+  chevronOf(host, 'a').click();
+  assert.ok(marksOf(host, 'a'), 'LTR expand still works');
+});
+
+// ----------------------------------------------------------------
 // Search-v1.1 — selected-result match highlight wiring
 // ----------------------------------------------------------------
 // Activating a BODY-text search result jumps to the scene (as today) AND

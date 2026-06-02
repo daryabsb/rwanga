@@ -113,6 +113,14 @@
     _container.innerHTML = '';
     const wrapper = document.createElement('div');
     wrapper.className = 'rga-shell-scene-navigator';
+    // RTL — the navigator catalogues the active script's scenes, so it
+    // mirrors the script's writing direction (the SAME source #editor reads
+    // via TabManager.applyDocumentDirection: the active document's
+    // metadata.screenplayProfile.direction). Setting dir on the wrapper flips
+    // the row grid, the chevron's inline-start position, the caret, and the
+    // marks-zone indent — all via logical CSS. LTR scripts default to 'ltr',
+    // so the accepted LTR layout is unchanged.
+    wrapper.setAttribute('dir', _scriptDirection());
     const view = _activeView();
     const scenes = _scenes(view);
 
@@ -644,6 +652,20 @@
   function _activeView() {
     if (Rga.TabManager && typeof Rga.TabManager._editorView === 'function') return Rga.TabManager._editorView();
     return null;
+  }
+  // RTL — resolve the active script's writing direction from the document
+  // model, identical to TabManager.applyDocumentDirection (#editor's source
+  // of truth). Falls back to lastActiveDoc() so a workspace tab (Settings)
+  // being focused doesn't drop the navigator back to LTR while it still
+  // shows the last document's scenes. Defaults to 'ltr' when no doc / no
+  // profile / not 'rtl' — so existing LTR behaviour is untouched.
+  function _scriptDirection() {
+    const TM = Rga.TabManager;
+    if (!TM) return 'ltr';
+    let doc = (typeof TM.activeDoc === 'function') ? TM.activeDoc() : null;
+    if (!doc && typeof TM.lastActiveDoc === 'function') doc = TM.lastActiveDoc();
+    const profile = doc && doc.metadata && doc.metadata.screenplayProfile;
+    return (profile && profile.direction === 'rtl') ? 'rtl' : 'ltr';
   }
   function _scenes(view) {
     if (!view || !view.state) return [];

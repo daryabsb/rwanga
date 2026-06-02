@@ -1787,11 +1787,11 @@ body.view-print-preview-active #rga-shell-toolbar { display: none; }
    ============================================================ */
 .rga-shell-scene-navigator-gutter {
   position: relative;
-  text-align: right;        /* keep the number right-aligned as before */
+  text-align: end;          /* number sits toward the heading (right in LTR, left in RTL) */
 }
 .rga-shell-scene-navigator-chevron {
   position: absolute;
-  left: -2px;
+  inset-inline-start: -2px; /* logical: left in LTR, right in RTL — always pokes into the row's start padding, never the heading */
   top: 50%;
   transform: translateY(-50%);
   display: inline-flex;
@@ -1823,8 +1823,15 @@ body.view-print-preview-active #rga-shell-toolbar { display: none; }
   height: 0;
   border-top: 3.5px solid transparent;
   border-bottom: 3.5px solid transparent;
-  border-left: 5px solid currentColor;
+  border-left: 5px solid currentColor;   /* LTR: triangle points right (toward content) */
   transition: transform var(--transition-fast, 0.1s ease);
+}
+/* RTL: the disclosure caret points the other way (toward inline-start = left),
+   so the solid edge moves from border-left to border-right. The expanded
+   rotate(90deg) below points it down in both directions, unchanged. */
+[dir="rtl"] .rga-shell-scene-navigator-chevron::before {
+  border-left: 0;
+  border-right: 5px solid currentColor;
 }
 .rga-shell-scene-navigator-chevron[aria-expanded="true"]::before {
   transform: rotate(90deg);
@@ -1833,7 +1840,7 @@ body.view-print-preview-active #rga-shell-toolbar { display: none; }
 .rga-shell-scene-navigator-marks {
   grid-column: 1 / -1;
   margin-top: 2px;
-  padding-left: 34px;        /* align under the heading: 26px num + 8px gap */
+  padding-inline-start: 34px; /* align under the heading: 26px num + 8px gap (logical: right in RTL) */
   display: flex;
   flex-direction: column;
   gap: 1px;
