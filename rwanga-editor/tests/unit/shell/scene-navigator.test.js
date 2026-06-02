@@ -752,3 +752,163 @@ test('SN-Bundle-1: SN.1 auto-scroll re-fires after a Clear when current was filt
   assert.ok(spy.sn1Calls().length > baseline,
     'SN.1 re-fires on filter clear so "you are here" is visible again');
 });
+
+// ----------------------------------------------------------------
+// Search-v1 — screenplay body-text search + context snippet
+// ----------------------------------------------------------------
+// The find field now matches scene BODY text in addition to slug + number.
+// A body-only match shows a one-line context snippet beneath the row with
+// the matched term highlighted INSIDE the snippet (never in the editor).
+// Slug matches show no snippet. Clicking still jumps to the scene (no
+// line-precision navigation). The doc is walked directly (no nav-index
+// change, no scrollToPos); when the doc can't be walked, body matching
+// degrades to slug-only with zero behaviour change.
+
+// Build a minimal PM-shaped doc whose descendants() honours the
+// skip-subtree contract (callback returning false skips that node's
+// children — used by the navigator to exclude scene-heading text from the
+// body walk). spec: [{ nodeId, heading, body:[lines], sceneNumber? }].
+function makeBodyDoc(spec) {
+  function textNode(t) { return { isText: true, type: { name: 'text' }, text: String(t) }; }
+  const sceneNodes = spec.map(function(s) {
+    const children = [{ type: { name: 'sceneHeading' }, children: [textNode(s.heading || '')] }];
+    (s.body || []).forEach(function(line) {
+      children.push({ type: { name: 'action' }, children: [textNode(line)] });
+    });
+    return { type: { name: 'scene' }, attrs: { id: s.nodeId }, children: children };
+  });
+  const root = { type: { name: 'doc' }, children: sceneNodes };
+  return {
+    descendants: function(cb) {
+      (function walk(node) {
+        const kids = node.children || [];
+        for (let i = 0; i < kids.length; i += 1) {
+          const r = cb(kids[i], 0, node);
+          if (r === false) continue;  // honour skip-subtree
+          walk(kids[i]);
+        }
+      })(root);
+    },
+    resolve: function(p) { return { pos: p }; }
+  };
+}
+
+function bootBody(spec, cursor) {
+  const indexScenes = spec.map(function(s, i) {
+    return {
+      nodeId: s.nodeId,
+      sceneNumber: (s.sceneNumber != null ? s.sceneNumber : i + 1),
+      headingDisplay: s.heading,
+      pmPos: i * 100, pmEndPos: i * 100 + 50,
+      hasNotes: false, hasRevisionFlag: false
+    };
+  });
+  const ctx = boot({ scenes: indexScenes, cursor: cursor || 0 });
+  ctx.stub.view.state.doc = makeBodyDoc(spec);
+  return ctx;
+}
+
+test('Search-v1: body-text match finds a scene whose slug does NOT contain the term', () => {
+  const { Rga, host } = bootBody([
+    { nodeId: 'a', heading: 'INT. ROOM — DAY',    body: ['She crossed the room slowly.'] },
+    { nodeId: 'b', heading: 'EXT. STREET — NIGHT', body: ['He picked up the KNIFE from the table.'] }
+  ]);
+  Rga.Shell.Sidebar.activate('sceneNavigator');
+  const input = host.querySelector('.rga-shell-scene-navigator-find-input');
+  fireInput(input, 'knife');
+  const rows = host.querySelectorAll('.rga-shell-scene-navigator-row');
+  assert.equal(rows.length, 1, 'only the body-matching scene remains');
+  assert.equal(rows[0].getAttribute('data-scene-node-id'), 'b',
+    'matched scene b even though its slug has no "knife"');
+});
+
+test('Search-v1: body match renders a context snippet with the matched term highlighted', () => {
+  const { Rga, host } = bootBody([
+    { nodeId: 'a', heading: 'INT. KITCHEN — DAY', body: ['He picked up the KNIFE from the table and left.'] }
+  ]);
+  Rga.Shell.Sidebar.activate('sceneNavigator');
+  fireInput(host.querySelector('.rga-shell-scene-navigator-find-input'), 'knife');
+  const row = host.querySelector('[data-scene-node-id="a"]');
+  const snip = row.querySelector('.rga-shell-scene-navigator-snippet');
+  assert.ok(snip, 'snippet rendered beneath the body-matching row');
+  const mark = snip.querySelector('.rga-shell-scene-navigator-snippet-match');
+  assert.ok(mark, 'matched term is wrapped in the highlight span');
+  assert.equal(mark.textContent, 'KNIFE', 'highlight preserves the screenplay casing');
+  assert.match(snip.textContent, /picked up the/, 'snippet shows surrounding context');
+});
+
+test('Search-v1: slug/number match shows NO snippet (snippet only for body matches)', () => {
+  const { Rga, host } = bootBody([
+    { nodeId: 'a', heading: 'INT. KITCHEN — DAY', body: ['Nothing relevant here.'] }
+  ]);
+  Rga.Shell.Sidebar.activate('sceneNavigator');
+  fireInput(host.querySelector('.rga-shell-scene-navigator-find-input'), 'kitchen');
+  const row = host.querySelector('[data-scene-node-id="a"]');
+  assert.ok(row, 'slug match still returns the row');
+  assert.equal(row.querySelector('.rga-shell-scene-navigator-snippet'), null,
+    'no snippet for a slug match');
+});
+
+test('Search-v1: slug search still works exactly as before (regression guard)', () => {
+  const { Rga, host } = bootBody([
+    { nodeId: 'a', heading: 'INT. ROOM — DAY',     body: ['x'] },
+    { nodeId: 'b', heading: 'EXT. STREET — NIGHT', body: ['y'] }
+  ]);
+  Rga.Shell.Sidebar.activate('sceneNavigator');
+  const input = host.querySelector('.rga-shell-scene-navigator-find-input');
+  fireInput(input, 'street');
+  const rows = host.querySelectorAll('.rga-shell-scene-navigator-row');
+  assert.equal(rows.length, 1);
+  assert.equal(rows[0].getAttribute('data-scene-node-id'), 'b');
+});
+
+test('Search-v1: clicking a body-match result jumps to that scene (no line-precision)', () => {
+  const { Rga, host, stub } = bootBody([
+    { nodeId: 'a', heading: 'INT. ROOM — DAY',     body: ['quiet'] },
+    { nodeId: 'b', heading: 'EXT. STREET — NIGHT', body: ['a bloody KNIFE on the curb'] }
+  ]);
+  Rga.Shell.Sidebar.activate('sceneNavigator');
+  fireInput(host.querySelector('.rga-shell-scene-navigator-find-input'), 'knife');
+  host.querySelector('[data-scene-node-id="b"]').click();
+  assert.equal(stub.findSceneCall, 'b', 'click routes through existing scrollToScene for the scene');
+});
+
+test('Search-v1: no slug AND no body match → no-results surface', () => {
+  const { Rga, host } = bootBody([
+    { nodeId: 'a', heading: 'INT. ROOM — DAY', body: ['She crossed the room.'] }
+  ]);
+  Rga.Shell.Sidebar.activate('sceneNavigator');
+  fireInput(host.querySelector('.rga-shell-scene-navigator-find-input'), 'zebra');
+  assert.equal(host.querySelectorAll('.rga-shell-scene-navigator-row').length, 0);
+  assert.ok(host.querySelector('.rga-shell-panel-empty'), 'no-results surface shown');
+});
+
+test('Search-v1: degrades to slug-only when the doc cannot be walked (no descendants)', () => {
+  // boot() builds a lean doc with resolve() but NO descendants — body text
+  // is unavailable, so a body-only query must simply find nothing and never throw.
+  const { Rga, host } = boot({
+    scenes: [{ nodeId: 'a', sceneNumber: 1, headingDisplay: 'INT. ROOM — DAY', pmPos: 0, pmEndPos: 10 }]
+  });
+  Rga.Shell.Sidebar.activate('sceneNavigator');
+  fireInput(host.querySelector('.rga-shell-scene-navigator-find-input'), 'knife');
+  assert.equal(host.querySelectorAll('.rga-shell-scene-navigator-row').length, 0,
+    'body-only term finds nothing when body text is unavailable (no crash)');
+  // And a slug term still matches on the same lean doc.
+  fireInput(host.querySelector('.rga-shell-scene-navigator-find-input'), 'room');
+  assert.equal(host.querySelectorAll('.rga-shell-scene-navigator-row').length, 1);
+});
+
+test('Search-v1: large script stays correct — one body match among 200 scenes', () => {
+  const spec = [];
+  for (let i = 1; i <= 200; i += 1) {
+    spec.push({ nodeId: 's' + i, sceneNumber: i, heading: 'INT. ROOM ' + i + ' — DAY',
+      body: [i === 150 ? 'a forgotten UMBRELLA by the door' : 'ordinary action line'] });
+  }
+  const { Rga, host } = bootBody(spec);
+  Rga.Shell.Sidebar.activate('sceneNavigator');
+  fireInput(host.querySelector('.rga-shell-scene-navigator-find-input'), 'umbrella');
+  const rows = host.querySelectorAll('.rga-shell-scene-navigator-row');
+  assert.equal(rows.length, 1, 'exactly the one body-matching scene out of 200');
+  assert.equal(rows[0].getAttribute('data-scene-node-id'), 's150');
+  assert.ok(rows[0].querySelector('.rga-shell-scene-navigator-snippet'), 'snippet present at scale');
+});

@@ -39,6 +39,12 @@
   // scene number + headingDisplay, case-insensitive, never persisted.
   // Cleared on Escape (first press) per UX Direction §10 precedence rule.
   let _filterText = '';
+  // Search-v1 — per-render map of nodeId → snippet parts for scenes whose
+  // match came from BODY text (not the slug). Rebuilt from scratch on every
+  // _render; empty when no filter is active or when all matches were
+  // slug-only. The snippet is the ONLY place a match is highlighted — never
+  // the editor (no decorations, no editor highlight).
+  let _snippets = {};
 
   // ----------------------------------------------------------------
   // Sidebar panel controller
@@ -72,6 +78,7 @@
       _selectedNodeId = null;
       _lastCurrentNodeId = null;
       _filterText = '';
+      _snippets = {};
       _container = null;
     }
   };
@@ -113,7 +120,16 @@
     wrapper.appendChild(_buildHeader(scenes.length));
     wrapper.appendChild(_buildFind());
 
-    const filtered = _filterText ? _applyFilter(scenes, _filterText) : scenes;
+    // Search-v1 — _snippets is rebuilt from scratch each render. When a
+    // query is active, walk the doc once for body text, filter on slug OR
+    // body, then build snippets for body-only matches. No query → no walk.
+    _snippets = {};
+    let filtered = scenes;
+    if (_filterText) {
+      const bodyMap = _sceneBodyTextMap(view);
+      filtered = _applyFilter(scenes, _filterText, bodyMap);
+      _buildSnippets(filtered, _filterText, bodyMap);
+    }
 
     // No-results branch: filter active, zero matches. Header + find stay;
     // the list is replaced by a calm "no scenes found" surface with a
@@ -263,19 +279,98 @@
     return host;
   }
 
-  // SN-Bundle-1 — case-insensitive substring filter against the visible
-  // signals a writer scans by: scene number (for jumping to "scene 12")
-  // and headingDisplay (for jumping to "the dancer scene"). No tag fields,
-  // no per-scene meta — staying inside the navigator's "find, not query"
-  // posture (UX Direction §10).
-  function _applyFilter(scenes, query) {
+  // SN-Bundle-1 — slug/number match: the visible signals a writer scans by
+  // (scene number + headingDisplay). Pure, no doc walk. Search-v1 keeps this
+  // intact and adds body-text matching on top.
+  function _slugMatch(scene, q) {
+    const num = String(scene.sceneNumber == null ? '' : scene.sceneNumber).toLowerCase();
+    const heading = String(scene.headingDisplay || '').toLowerCase();
+    return num.indexOf(q) >= 0 || heading.indexOf(q) >= 0;
+  }
+
+  // Search-v1 — case-insensitive filter matching scene number + heading
+  // (slug) OR scene body text. `bodyMap` is { nodeId: normalizedBodyText }
+  // from _sceneBodyTextMap(); when it is absent (e.g. a doc without
+  // descendants, as in lean unit stubs) only slug/number matching applies —
+  // exactly the pre-Search-v1 behaviour, so existing behaviour is preserved.
+  function _applyFilter(scenes, query, bodyMap) {
     const q = String(query || '').toLowerCase();
     if (!q) return scenes;
     return scenes.filter(function(scene) {
-      const num = String(scene.sceneNumber == null ? '' : scene.sceneNumber).toLowerCase();
-      const heading = String(scene.headingDisplay || '').toLowerCase();
-      return num.indexOf(q) >= 0 || heading.indexOf(q) >= 0;
+      if (_slugMatch(scene, q)) return true;
+      const body = (bodyMap && scene.nodeId != null) ? (bodyMap[scene.nodeId] || '') : '';
+      return body.toLowerCase().indexOf(q) >= 0;
     });
+  }
+
+  // Search-v1 — one direct document walk collecting each scene's BODY text
+  // (everything EXCEPT the scene heading, which slug matching already
+  // covers). Returns { nodeId: normalizedText }; whitespace collapsed so
+  // snippet windows read cleanly. Degrades to {} when the active doc can't
+  // be walked (no view / no descendants) → callers fall back to slug-only
+  // matching with zero behaviour change.
+  //
+  // Scope note (Search-v1): a deliberate O(doc) pass per filter render — no
+  // cached index, no nav-index change, no schema change, no scrollToPos, no
+  // match-position tracking. It runs only while a query is active (empty
+  // query → no walk), and the nav-index plugin already walks the full doc
+  // on every keystroke, so this adds at most one comparable pass.
+  function _sceneBodyTextMap(view) {
+    const map = {};
+    const doc = view && view.state && view.state.doc;
+    if (!doc || typeof doc.descendants !== 'function') return map;
+    let currentId = null;
+    doc.descendants(function(node) {
+      if (!node || !node.type) return true;
+      if (node.type.name === 'scene') {
+        currentId = (node.attrs && node.attrs.id != null) ? String(node.attrs.id) : null;
+        if (currentId) map[currentId] = '';
+        return true;  // descend to collect body blocks
+      }
+      // Skip the heading subtree — its text is the slug, matched separately.
+      if (node.type.name === 'sceneHeading') return false;
+      if (node.isText && currentId != null && map[currentId] != null) {
+        map[currentId] += (node.text || '') + ' ';
+      }
+      return true;
+    });
+    Object.keys(map).forEach(function(id) {
+      map[id] = map[id].replace(/\s+/g, ' ').trim();
+    });
+    return map;
+  }
+
+  // Search-v1 — populate _snippets for filtered scenes whose match is in
+  // BODY text. Slug/number matches get NO snippet (UI rule: "snippet visible
+  // only when the match comes from scene text" — the heading already shows
+  // why a slug match appears).
+  function _buildSnippets(filtered, query, bodyMap) {
+    const q = String(query || '').toLowerCase();
+    if (!q) return;
+    for (let i = 0; i < filtered.length; i += 1) {
+      const scene = filtered[i];
+      if (_slugMatch(scene, q)) continue;  // slug match → no snippet
+      const body = (bodyMap && scene.nodeId != null) ? (bodyMap[scene.nodeId] || '') : '';
+      const idx = body.toLowerCase().indexOf(q);
+      if (idx >= 0) _snippets[scene.nodeId] = _makeSnippet(body, idx, String(query).length);
+    }
+  }
+
+  // Search-v1 — build a one-line context window around the first body match.
+  // CONTEXT chars each side; the matched substring keeps its original
+  // screenplay casing. truncatedStart/End flag whether the text continues
+  // beyond the window (rendered as a leading/trailing ellipsis).
+  function _makeSnippet(bodyText, matchIdx, matchLen) {
+    const CONTEXT = 24;
+    const start = Math.max(0, matchIdx - CONTEXT);
+    const end = Math.min(bodyText.length, matchIdx + matchLen + CONTEXT);
+    return {
+      before:         bodyText.slice(start, matchIdx),
+      match:          bodyText.slice(matchIdx, matchIdx + matchLen),
+      after:          bodyText.slice(matchIdx + matchLen, end),
+      truncatedStart: start > 0,
+      truncatedEnd:   end < bodyText.length
+    };
   }
 
   // SN-Bundle-1 — every filter mutation resets _lastCurrentNodeId so the
@@ -333,6 +428,14 @@
     page.textContent = pageNum != null ? 'p.' + pageNum : '';
     row.appendChild(page);
 
+    // Search-v1 — body-match context snippet: a full-width second line
+    // beneath the row, present only when this scene matched on BODY text
+    // (see _buildSnippets). The match is highlighted inside the snippet
+    // only. Clicking the row still jumps to the scene (existing nav) — no
+    // line-precision navigation.
+    const snip = _snippets[scene.nodeId];
+    if (snip) row.appendChild(_buildSnippetEl(snip));
+
     row.addEventListener('click', function() { scrollToScene(scene.nodeId); });
     row.setAttribute('role', 'button');
     row.setAttribute('tabindex', '0');
@@ -357,6 +460,23 @@
     sp.setAttribute('aria-label', label);
     sp.title = label;
     return sp;
+  }
+
+  // Search-v1 — render the snippet parts as text nodes + a single
+  // highlighted match span. textContent only (no innerHTML) so arbitrary
+  // screenplay text can never inject markup.
+  function _buildSnippetEl(snip) {
+    const el = document.createElement('div');
+    el.className = 'rga-shell-scene-navigator-snippet';
+    if (snip.truncatedStart) el.appendChild(document.createTextNode('…'));
+    el.appendChild(document.createTextNode(snip.before));
+    const mark = document.createElement('span');
+    mark.className = 'rga-shell-scene-navigator-snippet-match';
+    mark.textContent = snip.match;
+    el.appendChild(mark);
+    el.appendChild(document.createTextNode(snip.after));
+    if (snip.truncatedEnd) el.appendChild(document.createTextNode('…'));
+    return el;
   }
 
   function _pageNumberForScene(scene, idx) {
@@ -444,9 +564,15 @@
     // raw scene set, so keyboard selection stays inside what the writer
     // can see. Filtering by '' returns the full list — no behaviour change
     // when find is empty.
-    const allScenes = _scenes(_activeView());
+    const view = _activeView();
+    const allScenes = _scenes(view);
     if (!allScenes || allScenes.length === 0) return;
-    const scenes = _filterText ? _applyFilter(allScenes, _filterText) : allScenes;
+    // Search-v1 — filter the keyboard-navigable set with the SAME body-aware
+    // matcher as the rendered list, so arrow selection stays inside exactly
+    // what the writer can see (slug- AND body-matched rows).
+    const scenes = _filterText
+      ? _applyFilter(allScenes, _filterText, _sceneBodyTextMap(view))
+      : allScenes;
     if (scenes.length === 0 && e.key !== 'Escape') return;
     const currentIdx = _selectedIndex(scenes);
 
@@ -560,6 +686,7 @@
     _selectedNodeId = null;
     _lastCurrentNodeId = null;
     _filterText = '';
+    _snippets = {};
     if (_container) _container.innerHTML = '';
     _container = null;
   }
