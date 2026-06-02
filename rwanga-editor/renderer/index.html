@@ -734,6 +734,13 @@
      Foundation for nested sidebar, inspector scene-detail, timeline,
      print/report, MCP integrations, and AI scene analysis. -->
 <script src="js/doc-types/screenplay/scene-catalog.js"></script>
+<!-- RGA Memory Layer Phase 1 — Rga.Screenplay.Memory. The derived-memory
+     facade: scene(), cuesForScene(), entity(), entities(), coverage().
+     Delegates scene bundles to SceneCatalog (must load after it) and adds
+     lazy scene-scoped cue derivation. Memory reads; Memory never writes.
+     Honors the nav-index + contamination-triad moratoria. Future consumers:
+     nested sidebar, inspector, breakdowns, AI context, MCP, server parse. -->
+<script src="js/doc-types/screenplay/memory.js"></script>
 <!-- F1A.5 — screenplay-owned inspector panel for Scene Notes. First
      production consumer of the F1A.3 inspector host. Registers via
      Rga.Shell.Inspector.registerPanel; never auto-activates. -->
