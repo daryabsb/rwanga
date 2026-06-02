@@ -1032,3 +1032,88 @@ test('Marks-Expansion-v1: multiple scenes can stay expanded at once', () => {
   assert.equal(marksOf(host, 'b'), null, 'b untouched (collapsed)');
   assert.ok(marksOf(host, 'c'), 'c expanded simultaneously');
 });
+
+// ----------------------------------------------------------------
+// Search-v1.1 — selected-result match highlight wiring
+// ----------------------------------------------------------------
+// Activating a BODY-text search result jumps to the scene (as today) AND
+// asks Rga.SearchHighlight to paint the first matching keyword inside that
+// scene. Slug-only results never highlight; selecting another result moves
+// it; clearing the search clears it. The plugin itself is verified with
+// real ProseMirror in search-highlight.test.js — here we verify the
+// navigator wiring against a SearchHighlight spy.
+
+function shStub() {
+  const calls = { set: [], clear: [] };
+  return {
+    calls: calls,
+    // distinct range per scene (from === entry.pmPos), echoing the contract
+    firstMatchInRange: function(_doc, from, _to, query) {
+      return { from: from + 1, to: from + 1 + String(query).length };
+    },
+    set: function(_view, f, t) { calls.set.push({ from: f, to: t }); return true; },
+    clear: function() { calls.clear.push(true); }
+  };
+}
+
+test('Search-v1.1: activating a body-text result jumps AND sets a match highlight', () => {
+  const sh = shStub();
+  const { Rga, host, stub } = bootBody([
+    { nodeId: 'a', heading: 'INT. ROOM — DAY',     body: ['nothing here'] },
+    { nodeId: 'b', heading: 'EXT. STREET — NIGHT', body: ['a bloody KNIFE on the floor'] }
+  ]);
+  Rga.SearchHighlight = sh;
+  Rga.Shell.Sidebar.activate('sceneNavigator');
+  fireInput(host.querySelector('.rga-shell-scene-navigator-find-input'), 'knife');
+  sh.calls.set.length = 0; sh.calls.clear.length = 0;  // typing fires clear; isolate the click
+  host.querySelector('[data-scene-node-id="b"]').click();
+  assert.equal(stub.findSceneCall, 'b', 'still jumps to the scene');
+  assert.equal(sh.calls.set.length, 1, 'a match highlight is set');
+  assert.equal(sh.calls.clear.length, 0, 'no clear when a match is set');
+  assert.ok(sh.calls.set[0].to > sh.calls.set[0].from, 'a valid range');
+});
+
+test('Search-v1.1: a slug-only result does NOT create a body highlight', () => {
+  const sh = shStub();
+  const { Rga, host } = bootBody([
+    { nodeId: 'b', heading: 'EXT. STREET — NIGHT', body: ['a bloody KNIFE on the floor'] }
+  ]);
+  Rga.SearchHighlight = sh;
+  Rga.Shell.Sidebar.activate('sceneNavigator');
+  // "street" matches the heading (slug) only — no body match, so no snippet.
+  fireInput(host.querySelector('.rga-shell-scene-navigator-find-input'), 'street');
+  sh.calls.set.length = 0; sh.calls.clear.length = 0;
+  host.querySelector('[data-scene-node-id="b"]').click();
+  assert.equal(sh.calls.set.length, 0, 'no body highlight for a slug-only match');
+  assert.equal(sh.calls.clear.length, 1, 'any stale highlight is cleared instead');
+});
+
+test('Search-v1.1: selecting another result MOVES the highlight (new range)', () => {
+  const sh = shStub();
+  const { Rga, host } = bootBody([
+    { nodeId: 'a', heading: 'INT. ROOM — DAY',     body: ['the KNIFE was here'] },
+    { nodeId: 'b', heading: 'EXT. STREET — NIGHT', body: ['another KNIFE there'] }
+  ]);
+  Rga.SearchHighlight = sh;
+  Rga.Shell.Sidebar.activate('sceneNavigator');
+  fireInput(host.querySelector('.rga-shell-scene-navigator-find-input'), 'knife');
+  sh.calls.set.length = 0;
+  host.querySelector('[data-scene-node-id="a"]').click();
+  host.querySelector('[data-scene-node-id="b"]').click();
+  assert.equal(sh.calls.set.length, 2, 'highlight set for each selected result');
+  assert.notDeepEqual(sh.calls.set[0], sh.calls.set[1], 'the highlight moved to a new range');
+});
+
+test('Search-v1.1: clearing the search clears the highlight', () => {
+  const sh = shStub();
+  const { Rga, host } = bootBody([
+    { nodeId: 'b', heading: 'EXT. STREET — NIGHT', body: ['a bloody KNIFE on the floor'] }
+  ]);
+  Rga.SearchHighlight = sh;
+  Rga.Shell.Sidebar.activate('sceneNavigator');
+  fireInput(host.querySelector('.rga-shell-scene-navigator-find-input'), 'knife');
+  host.querySelector('[data-scene-node-id="b"]').click();   // sets a highlight
+  sh.calls.clear.length = 0;
+  fireInput(host.querySelector('.rga-shell-scene-navigator-find-input'), '');   // clear search
+  assert.ok(sh.calls.clear.length >= 1, 'clearing the search clears the highlight');
+});

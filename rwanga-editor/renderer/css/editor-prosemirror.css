@@ -1729,6 +1729,17 @@ body.view-draft-active .rga-draft-footer {
   transition: background-color 1.4s ease-out, box-shadow 1.4s ease-out;
 }
 
+/* Scene Search v1.1 — selected search-match highlight. One strong, brand-pink
+   inline highlight over the matched keyword of the SELECTED search result.
+   Set by Rga.SearchHighlight when a body-text result is activated; persists
+   until a new result is selected or the search is cleared (no auto-fade).
+   This is the only in-editor search highlight — no ambient, no highlight-all. */
+.ProseMirror .rga-search-match-active {
+  background-color: rgba(194, 24, 91, 0.30);
+  box-shadow: 0 0 0 2px rgba(194, 24, 91, 0.45);
+  border-radius: 2px;
+}
+
 .annot-log-divider {
   padding: 6px 4px 3px;
   font-size: 11px;

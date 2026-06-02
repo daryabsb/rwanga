@@ -75,6 +75,11 @@
       }
     },
     unmount: function() {
+      // Search-v1.1 — drop any selected-match highlight when the navigator
+      // goes away, so it doesn't linger in the editor.
+      if (Rga.SearchHighlight && typeof Rga.SearchHighlight.clear === 'function') {
+        Rga.SearchHighlight.clear(_activeView());
+      }
       if (_unsubscribeSession) { _unsubscribeSession(); _unsubscribeSession = null; }
       if (_container && _keydownHandler) {
         _container.removeEventListener('keydown', _keydownHandler);
@@ -388,6 +393,12 @@
     if (newText !== _filterText) {
       _filterText = newText;
       _lastCurrentNodeId = null;
+      // Search-v1.1 — any filter change invalidates a prior selected-match
+      // highlight (it belonged to the old query / result). Clearing the
+      // search removes the highlight (guarded: no-op if none is active).
+      if (Rga.SearchHighlight && typeof Rga.SearchHighlight.clear === 'function') {
+        Rga.SearchHighlight.clear(_activeView());
+      }
     }
   }
 
@@ -459,7 +470,7 @@
     // no new derivation, no nav-index/schema change).
     if (expanded) row.appendChild(_buildMarksZone(scene));
 
-    row.addEventListener('click', function() { scrollToScene(scene.nodeId); });
+    row.addEventListener('click', function() { _activateResult(scene.nodeId); });
     row.setAttribute('role', 'button');
     row.setAttribute('tabindex', '0');
     return row;
@@ -592,6 +603,41 @@
     }
   }
 
+  // Search-v1.1 — activate a result: jump to the scene (existing nav), then,
+  // for an ACTIVE body-text search match, paint a single strong highlight on
+  // the first matching keyword inside that scene. Slug-only matches (no
+  // snippet) get no highlight — any stale highlight is cleared instead.
+  function _activateResult(nodeId) {
+    const ok = scrollToScene(nodeId);
+    const view = _activeView();
+    const SH = Rga.SearchHighlight;
+    if (!view || !SH) return ok;
+    if (_filterText && _snippets[nodeId]
+        && typeof SH.firstMatchInRange === 'function' && typeof SH.set === 'function') {
+      const range = _resolveMatchRange(view, nodeId, _filterText);
+      if (range) { SH.set(view, range.from, range.to); return ok; }
+    }
+    if (typeof SH.clear === 'function') SH.clear(view);   // slug-only / no match → no stale highlight
+    return ok;
+  }
+
+  // Search-v1.1 — resolve the first-match PM range inside a scene. Bounds
+  // come from the CURRENT nav-index entry (pmPos/pmEndPos are rebuilt every
+  // doc change, so they are valid at click time); the text search itself is
+  // delegated to Rga.SearchHighlight.firstMatchInRange (heading-skipping,
+  // pure read). No nav-index/schema change; no scrollToPos system.
+  function _resolveMatchRange(view, nodeId, query) {
+    const doc = view.state && view.state.doc;
+    const idx = (Rga.Nav && typeof Rga.Nav.getIndex === 'function') ? Rga.Nav.getIndex(view.state) : null;
+    if (!doc || !idx || !Array.isArray(idx.scenes)) return null;
+    let entry = null;
+    for (let i = 0; i < idx.scenes.length; i += 1) {
+      if (idx.scenes[i].nodeId === nodeId) { entry = idx.scenes[i]; break; }
+    }
+    if (!entry || entry.pmPos == null || entry.pmEndPos == null) return null;
+    return Rga.SearchHighlight.firstMatchInRange(doc, entry.pmPos, entry.pmEndPos, query);
+  }
+
   // ----------------------------------------------------------------
   // Helpers
   // ----------------------------------------------------------------
@@ -670,7 +716,7 @@
       case 'Enter': {
         if (inFindInput) return;
         e.preventDefault();
-        if (_selectedNodeId) scrollToScene(_selectedNodeId);
+        if (_selectedNodeId) _activateResult(_selectedNodeId);
         break;
       }
       case 'Escape': {

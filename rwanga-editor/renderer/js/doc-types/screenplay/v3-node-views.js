@@ -240,7 +240,15 @@
       return [];
     }
     const plugin = Rga.Nav.buildIndexPlugin();
-    return plugin ? [plugin] : [];
+    const out = plugin ? [plugin] : [];
+    // Scene Search v1.1 — transient selected-match highlight. Additive,
+    // content-safe (decoration only); composes with the nav-index
+    // decorations. Absent → no highlight, no error.
+    if (window.Rga && Rga.SearchHighlight && typeof Rga.SearchHighlight.buildPlugin === 'function') {
+      const hl = Rga.SearchHighlight.buildPlugin();
+      if (hl) out.push(hl);
+    }
+    return out;
   }
 
   // Helper: read derived scene number off the decoration list PM passes
