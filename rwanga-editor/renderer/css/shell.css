@@ -1767,6 +1767,69 @@ body.view-print-preview-active #rga-shell-toolbar { display: none; }
 }
 
 /* ============================================================
+   MARKS-EXPANSION-V1 — expandable row: note / revision presence
+   The number gutter hosts a disclosure caret (CSS border-triangle,
+   no glyph) shown on row hover or while expanded. Expanding reveals
+   presence-only lines beneath the row. Uses only the existing
+   hasNotes / hasRevisionFlag flags — no counts, no new data.
+   ============================================================ */
+.rga-shell-scene-navigator-gutter {
+  position: relative;
+  text-align: right;        /* keep the number right-aligned as before */
+}
+.rga-shell-scene-navigator-chevron {
+  position: absolute;
+  left: -3px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 10px;
+  height: 12px;
+  padding: 0;
+  margin: 0;
+  border: none;
+  background: none;
+  color: var(--text-tertiary, #6e6e6e);
+  cursor: pointer;
+  opacity: 0;               /* appear on row hover / when expanded */
+  transition: opacity var(--transition-fast, 0.1s ease);
+}
+.rga-shell-scene-navigator-row:hover .rga-shell-scene-navigator-chevron,
+.rga-shell-scene-navigator-chevron[aria-expanded="true"] {
+  opacity: 1;
+}
+/* Disclosure caret — points right (collapsed), rotates down (expanded). */
+.rga-shell-scene-navigator-chevron::before {
+  content: '';
+  display: block;
+  width: 0;
+  height: 0;
+  border-top: 3px solid transparent;
+  border-bottom: 3px solid transparent;
+  border-left: 4px solid currentColor;
+  transition: transform var(--transition-fast, 0.1s ease);
+}
+.rga-shell-scene-navigator-chevron[aria-expanded="true"]::before {
+  transform: rotate(90deg);
+}
+/* Expanded mark detail — quiet presence lines, aligned under the heading. */
+.rga-shell-scene-navigator-marks {
+  grid-column: 1 / -1;
+  margin-top: 2px;
+  padding-left: 34px;        /* align under the heading: 26px num + 8px gap */
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.rga-shell-scene-navigator-mark {
+  font-size: var(--font-size-xs, 10px);
+  line-height: 1.4;
+  color: var(--text-tertiary, #6e6e6e);
+}
+
+/* ============================================================
    RECOVERY BUNDLE 2 §C — SIDEBAR POLISH PASS
    Outline and Workspace panels rendered with ZERO CSS — that was
    the "feels assembled / debug feeling" symptom. This block aligns

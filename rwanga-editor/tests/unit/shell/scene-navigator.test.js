@@ -912,3 +912,123 @@ test('Search-v1: large script stays correct — one body match among 200 scenes'
   assert.equal(rows[0].getAttribute('data-scene-node-id'), 's150');
   assert.ok(rows[0].querySelector('.rga-shell-scene-navigator-snippet'), 'snippet present at scale');
 });
+
+// ----------------------------------------------------------------
+// Marks-Expansion-v1 — expandable scene row (note / revision presence)
+// ----------------------------------------------------------------
+// A row whose scene has at least one mark gets a disclosure chevron in the
+// number gutter. Expanding reveals presence-only lines ("Note attached" /
+// "Revision flagged"). Uses only the existing hasNotes / hasRevisionFlag
+// flags — no counts, no characters, no new data. Chevron toggles; the row
+// click still navigates; expansion survives re-render; multiple scenes may
+// be expanded at once.
+
+function chevronOf(host, nodeId) {
+  const row = host.querySelector('[data-scene-node-id="' + nodeId + '"]');
+  return row ? row.querySelector('.rga-shell-scene-navigator-chevron') : null;
+}
+function marksOf(host, nodeId) {
+  const row = host.querySelector('[data-scene-node-id="' + nodeId + '"]');
+  return row ? row.querySelector('.rga-shell-scene-navigator-marks') : null;
+}
+
+test('Marks-Expansion-v1: chevron renders only for scenes that have marks', () => {
+  const { Rga, host } = boot({
+    scenes: [
+      { nodeId: 'a', sceneNumber: 1, headingDisplay: 'A', pmPos: 0,  pmEndPos: 10, hasNotes: false, hasRevisionFlag: false },
+      { nodeId: 'b', sceneNumber: 2, headingDisplay: 'B', pmPos: 10, pmEndPos: 30, hasNotes: true,  hasRevisionFlag: false }
+    ]
+  });
+  Rga.Shell.Sidebar.activate('sceneNavigator');
+  assert.equal(chevronOf(host, 'a'), null, 'no chevron when the scene has no marks (no empty expansion)');
+  assert.ok(chevronOf(host, 'b'), 'chevron present when the scene has a mark');
+  assert.equal(chevronOf(host, 'b').getAttribute('aria-expanded'), 'false', 'starts collapsed');
+});
+
+test('Marks-Expansion-v1: clicking the chevron expands (note + revision presence shown)', () => {
+  const { Rga, host } = boot({
+    scenes: [{ nodeId: 'a', sceneNumber: 1, headingDisplay: 'A', pmPos: 0, pmEndPos: 10, hasNotes: true, hasRevisionFlag: true }]
+  });
+  Rga.Shell.Sidebar.activate('sceneNavigator');
+  assert.equal(marksOf(host, 'a'), null, 'collapsed by default — no marks zone');
+  chevronOf(host, 'a').click();
+  const zone = marksOf(host, 'a');
+  assert.ok(zone, 'marks zone appears after expand');
+  assert.equal(chevronOf(host, 'a').getAttribute('aria-expanded'), 'true', 'chevron now expanded');
+  const lines = zone.querySelectorAll('.rga-shell-scene-navigator-mark');
+  assert.equal(lines.length, 2, 'both presence lines render');
+  assert.equal(lines[0].textContent, 'Note attached');
+  assert.equal(lines[1].textContent, 'Revision flagged');
+});
+
+test('Marks-Expansion-v1: only the marks that exist are shown (notes-only / revision-only)', () => {
+  const { Rga, host } = boot({
+    scenes: [
+      { nodeId: 'n', sceneNumber: 1, headingDisplay: 'N', pmPos: 0,  pmEndPos: 10, hasNotes: true,  hasRevisionFlag: false },
+      { nodeId: 'r', sceneNumber: 2, headingDisplay: 'R', pmPos: 10, pmEndPos: 30, hasNotes: false, hasRevisionFlag: true }
+    ]
+  });
+  Rga.Shell.Sidebar.activate('sceneNavigator');
+  chevronOf(host, 'n').click();
+  const nLines = marksOf(host, 'n').querySelectorAll('.rga-shell-scene-navigator-mark');
+  assert.equal(nLines.length, 1);
+  assert.equal(nLines[0].textContent, 'Note attached', 'notes-only scene shows just the note line');
+  chevronOf(host, 'r').click();
+  const rLines = marksOf(host, 'r').querySelectorAll('.rga-shell-scene-navigator-mark');
+  assert.equal(rLines.length, 1);
+  assert.equal(rLines[0].textContent, 'Revision flagged', 'revision-only scene shows just the flag line');
+});
+
+test('Marks-Expansion-v1: clicking the chevron again collapses', () => {
+  const { Rga, host } = boot({
+    scenes: [{ nodeId: 'a', sceneNumber: 1, headingDisplay: 'A', pmPos: 0, pmEndPos: 10, hasNotes: true, hasRevisionFlag: false }]
+  });
+  Rga.Shell.Sidebar.activate('sceneNavigator');
+  chevronOf(host, 'a').click();
+  assert.ok(marksOf(host, 'a'), 'expanded');
+  chevronOf(host, 'a').click();
+  assert.equal(marksOf(host, 'a'), null, 'collapsed again — marks zone removed');
+  assert.equal(chevronOf(host, 'a').getAttribute('aria-expanded'), 'false');
+});
+
+test('Marks-Expansion-v1: chevron click does NOT navigate; row click still does', () => {
+  const { Rga, host, stub } = boot({
+    scenes: [{ nodeId: 'a', sceneNumber: 1, headingDisplay: 'A', pmPos: 0, pmEndPos: 10, hasNotes: true, hasRevisionFlag: false }]
+  });
+  Rga.Shell.Sidebar.activate('sceneNavigator');
+  // Chevron toggles, never navigates (stopPropagation).
+  chevronOf(host, 'a').click();
+  assert.equal(stub.findSceneCall, null, 'chevron click did not trigger navigation');
+  // Clicking the row body still jumps to the scene.
+  host.querySelector('[data-scene-node-id="a"]').click();
+  assert.equal(stub.findSceneCall, 'a', 'row click still navigates');
+});
+
+test('Marks-Expansion-v1: expansion survives a navigator re-render', () => {
+  const { Rga, host } = boot({
+    scenes: [{ nodeId: 'a', sceneNumber: 1, headingDisplay: 'A', pmPos: 0, pmEndPos: 10, hasNotes: true, hasRevisionFlag: false }]
+  });
+  Rga.Shell.Sidebar.activate('sceneNavigator');
+  chevronOf(host, 'a').click();
+  assert.ok(marksOf(host, 'a'), 'expanded');
+  // Incidental re-render (ScriptSession tick analogue).
+  Rga.Shell.SceneNavigator._render();
+  assert.ok(marksOf(host, 'a'), 'still expanded after re-render');
+  assert.equal(chevronOf(host, 'a').getAttribute('aria-expanded'), 'true');
+});
+
+test('Marks-Expansion-v1: multiple scenes can stay expanded at once', () => {
+  const { Rga, host } = boot({
+    scenes: [
+      { nodeId: 'a', sceneNumber: 1, headingDisplay: 'A', pmPos: 0,  pmEndPos: 10, hasNotes: true,  hasRevisionFlag: false },
+      { nodeId: 'b', sceneNumber: 2, headingDisplay: 'B', pmPos: 10, pmEndPos: 30, hasNotes: false, hasRevisionFlag: true },
+      { nodeId: 'c', sceneNumber: 3, headingDisplay: 'C', pmPos: 30, pmEndPos: 50, hasNotes: true,  hasRevisionFlag: true }
+    ]
+  });
+  Rga.Shell.Sidebar.activate('sceneNavigator');
+  chevronOf(host, 'a').click();
+  chevronOf(host, 'c').click();
+  assert.ok(marksOf(host, 'a'), 'a expanded');
+  assert.equal(marksOf(host, 'b'), null, 'b untouched (collapsed)');
+  assert.ok(marksOf(host, 'c'), 'c expanded simultaneously');
+});

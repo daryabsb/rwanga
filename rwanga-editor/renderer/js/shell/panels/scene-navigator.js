@@ -45,6 +45,11 @@
   // slug-only. The snippet is the ONLY place a match is highlighted — never
   // the editor (no decorations, no editor highlight).
   let _snippets = {};
+  // Marks-Expansion-v1 — set of nodeIds whose mark detail (note / revision
+  // flag presence) is expanded. Module-level so expansion survives navigator
+  // re-renders (ScriptSession ticks, filter changes, keyboard selection);
+  // multiple scenes may be expanded at once. Cleared only on unmount/_reset.
+  const _expanded = new Set();
 
   // ----------------------------------------------------------------
   // Sidebar panel controller
@@ -79,6 +84,7 @@
       _lastCurrentNodeId = null;
       _filterText = '';
       _snippets = {};
+      _expanded.clear();
       _container = null;
     }
   };
@@ -401,10 +407,21 @@
       row.classList.add('rga-shell-scene-navigator-row-selected');
     }
 
+    // Marks-Expansion-v1 — the number gutter also hosts the expand chevron
+    // (UX Direction §2: "orientation anchor + expand chevron on hover"). The
+    // chevron appears ONLY when the scene has at least one mark to reveal —
+    // no empty expansions. Clicking it toggles expansion and never navigates
+    // (stopPropagation); clicking the rest of the row still jumps to scene.
+    const hasMarks = !!(scene.hasNotes || scene.hasRevisionFlag);
+    const expanded = hasMarks && _expanded.has(scene.nodeId);
+    const gutter = document.createElement('span');
+    gutter.className = 'rga-shell-scene-navigator-gutter';
+    if (hasMarks) gutter.appendChild(_buildChevron(scene.nodeId, expanded));
     const num = document.createElement('span');
     num.className = 'rga-shell-scene-navigator-num';
     num.textContent = String(scene.sceneNumber);
-    row.appendChild(num);
+    gutter.appendChild(num);
+    row.appendChild(gutter);
 
     const heading = document.createElement('span');
     heading.className = 'rga-shell-scene-navigator-heading';
@@ -435,6 +452,12 @@
     // line-precision navigation.
     const snip = _snippets[scene.nodeId];
     if (snip) row.appendChild(_buildSnippetEl(snip));
+
+    // Marks-Expansion-v1 — expanded mark detail: presence-only lines for
+    // notes / revision flags, as a full-width zone beneath the row. Uses only
+    // the existing scene.hasNotes / scene.hasRevisionFlag flags (no counts,
+    // no new derivation, no nav-index/schema change).
+    if (expanded) row.appendChild(_buildMarksZone(scene));
 
     row.addEventListener('click', function() { scrollToScene(scene.nodeId); });
     row.setAttribute('role', 'button');
@@ -477,6 +500,49 @@
     el.appendChild(document.createTextNode(snip.after));
     if (snip.truncatedEnd) el.appendChild(document.createTextNode('…'));
     return el;
+  }
+
+  // Marks-Expansion-v1 — disclosure control in the number gutter. A bare
+  // button (no text/glyph; the caret is a CSS border-triangle scoped to the
+  // navigator) so the .num cell's textContent stays the scene number. aria
+  // carries the open/closed meaning for assistive tech.
+  function _buildChevron(nodeId, expanded) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'rga-shell-scene-navigator-chevron';
+    btn.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+    btn.setAttribute('aria-label', expanded ? 'Collapse scene marks' : 'Expand scene marks');
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation();   // toggle only — never navigate
+      _toggleExpanded(nodeId);
+    });
+    return btn;
+  }
+
+  // Marks-Expansion-v1 — presence-only mark lines (no counts). Order: notes
+  // first, revision second — mirrors the row indicator order (SN.2).
+  function _buildMarksZone(scene) {
+    const zone = document.createElement('div');
+    zone.className = 'rga-shell-scene-navigator-marks';
+    if (scene.hasNotes)        zone.appendChild(_buildMarkLine('Note attached'));
+    if (scene.hasRevisionFlag) zone.appendChild(_buildMarkLine('Revision flagged'));
+    return zone;
+  }
+  function _buildMarkLine(text) {
+    const line = document.createElement('div');
+    line.className = 'rga-shell-scene-navigator-mark';
+    line.textContent = text;
+    return line;
+  }
+
+  // Marks-Expansion-v1 — toggle expansion for one scene. Multiple scenes may
+  // be expanded simultaneously; state lives in _expanded and survives the
+  // next re-render.
+  function _toggleExpanded(nodeId) {
+    if (!nodeId) return;
+    if (_expanded.has(nodeId)) _expanded.delete(nodeId);
+    else _expanded.add(nodeId);
+    _render();
   }
 
   function _pageNumberForScene(scene, idx) {
@@ -687,6 +753,7 @@
     _lastCurrentNodeId = null;
     _filterText = '';
     _snippets = {};
+    _expanded.clear();
     if (_container) _container.innerHTML = '';
     _container = null;
   }
