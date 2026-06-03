@@ -285,24 +285,24 @@ test('TagsPanel: tombstoned (merged-away) entities are never listed', () => {
 // §3 — Click → jump to first occurrence
 // ================================================================
 
-test('TagsPanel: clicking an entity row moves the editor selection to the FIRST occurrence', () => {
+test('TagsPanel: clicking an entity row expands its occurrences — it does NOT jump (V1.2 behavior)', () => {
+  // V1 made the row click jump to the first occurrence. V1.2 deliberately
+  // changes this: the row click opens the occurrence browser; jumping
+  // happens by clicking a scene inside it (§9 tests cover the jump).
   const h = boot();
   seedEntities(h);
   h.activatePanel();
 
-  // First NALI occurrence is in scene 1 ("NALI stands by the window…").
-  const firstOccurrence = h.occurrencesOf('NALI')[0];
-
+  const before = h.view.state.selection.from;
   const nali = Array.from(h.host.querySelectorAll('.tag-item')).find(function(el) {
     return el.querySelector('.tag-name').textContent === 'NALI';
   });
   nali.dispatchEvent(new h.dom.window.Event('click', { bubbles: true }));
 
-  const sel = h.view.state.selection;
-  assert.ok(sel.from >= firstOccurrence.from && sel.from <= firstOccurrence.to,
-    'selection landed inside the first NALI occurrence (got ' + sel.from +
-    ', expected within [' + firstOccurrence.from + ',' + firstOccurrence.to + '])');
-  assert.ok(h.view._focusCalls() > 0, 'editor receives focus after the jump');
+  assert.equal(h.view.state.selection.from, before,
+    'entity row click no longer moves the editor selection');
+  assert.ok(h.host.querySelectorAll('.tag-occurrence').length > 0,
+    'it expands the occurrence browser instead');
 });
 
 test('TagsPanel: clicking a zero-occurrence (curated, untagged) entity does not move the selection', () => {
@@ -521,4 +521,157 @@ test('TagsPanel V1.1: the count means TAGGED OCCURRENCES and says so (title + ar
     'count title is honest about what it counts: "' + count.title + '"');
   assert.ok(/3 tagged occurrence/i.test(count.getAttribute('aria-label') || ''),
     'aria carries the same honest meaning');
+});
+
+// ================================================================
+// §9 — V1.2: Occurrence Browser
+// ================================================================
+
+// Helper — find an entity row by name.
+function rowByName(h, name) {
+  return Array.from(h.host.querySelectorAll('.tag-item')).find(function(el) {
+    return el.querySelector('.tag-name').textContent === name;
+  });
+}
+function clickRow(h, row) {
+  row.dispatchEvent(new h.dom.window.Event('click', { bubbles: true }));
+}
+
+test('TagsPanel V1.2: clicking an entity row expands its occurrence list (scene number + heading + per-scene count)', () => {
+  const h = boot();
+  seedEntities(h);   // NALI tagged in scene 1 (1×) and scene 2 (2×: NALI + Nali)
+  h.activatePanel();
+
+  clickRow(h, rowByName(h, 'NALI'));
+
+  const occurrences = h.host.querySelectorAll('.tag-occurrence');
+  assert.equal(occurrences.length, 2, 'NALI is tagged in two scenes → two occurrence rows');
+
+  const first = occurrences[0];
+  assert.match(first.textContent, /1/, 'first row carries scene number 1');
+  assert.match(first.textContent, /INT\./, 'first row carries the scene heading');
+  // Per-scene counts: scene 1 has 1 occurrence, scene 2 has 2.
+  const counts = Array.from(occurrences).map(function(el) {
+    return el.querySelector('.tag-occurrence-count').textContent;
+  });
+  assert.deepEqual(counts, ['1', '2'],
+    'per-scene tagged-occurrence counts (scene 1: NALI×1; scene 2: NALI + Nali = 2)');
+});
+
+test('TagsPanel V1.2: clicking the entity row again collapses the occurrence list', () => {
+  const h = boot();
+  seedEntities(h);
+  h.activatePanel();
+
+  clickRow(h, rowByName(h, 'NALI'));
+  assert.ok(h.host.querySelectorAll('.tag-occurrence').length > 0, 'expanded');
+
+  clickRow(h, rowByName(h, 'NALI'));
+  assert.equal(h.host.querySelectorAll('.tag-occurrence').length, 0, 'collapsed');
+});
+
+test('TagsPanel V1.2: clicking a scene occurrence row jumps the editor INTO that scene', () => {
+  const h = boot();
+  seedEntities(h);
+  h.activatePanel();
+
+  clickRow(h, rowByName(h, 'NALI'));
+  const occurrences = h.host.querySelectorAll('.tag-occurrence');
+
+  // The second occurrence row = scene 2. Scene 2's text is
+  // "Nali looks at NALI in the mirror." — its FIRST ent-nali occurrence
+  // is the leading lowercase "Nali" (also tagged in seedEntities).
+  const scene2FirstOccurrence = h.occurrencesOf('Nali')[0];
+
+  occurrences[1].dispatchEvent(new h.dom.window.Event('click', { bubbles: true }));
+
+  const sel = h.view.state.selection;
+  assert.ok(sel.from >= scene2FirstOccurrence.from && sel.from <= scene2FirstOccurrence.to,
+    'selection landed inside scene 2\'s first tagged occurrence (got ' + sel.from +
+    ', expected within [' + scene2FirstOccurrence.from + ',' + scene2FirstOccurrence.to + '])');
+});
+
+test('TagsPanel V1.2: clicking a scene occurrence does NOT collapse the expansion (browsing stays open)', () => {
+  const h = boot();
+  seedEntities(h);
+  h.activatePanel();
+
+  clickRow(h, rowByName(h, 'NALI'));
+  const occurrences = h.host.querySelectorAll('.tag-occurrence');
+  occurrences[0].dispatchEvent(new h.dom.window.Event('click', { bubbles: true }));
+
+  assert.ok(h.host.querySelectorAll('.tag-occurrence').length > 0,
+    'occurrence list still visible after a jump — the writer keeps browsing');
+});
+
+test('TagsPanel V1.2: an unused entity expands to an honest empty line, not a broken blank', () => {
+  const h = boot();
+  seedEntities(h);   // BABAN is registered, never tagged
+  h.activatePanel();
+
+  clickRow(h, rowByName(h, 'BABAN'));
+
+  const empty = h.host.querySelector('.tag-occurrences-empty');
+  assert.ok(empty, 'expansion shows the honest empty line');
+  assert.match(empty.textContent, /not tagged/i, 'copy explains: "' + (empty ? empty.textContent : '') + '"');
+  assert.equal(h.host.querySelectorAll('.tag-occurrence').length, 0, 'no scene rows');
+});
+
+test('TagsPanel V1.2: duplicate entities expand to THEIR OWN scenes — answers "which NALI is this?"', () => {
+  const h = boot();
+  // Two NALI entities; first tagged in scene 1, second tagged in scene 2.
+  h.Rga.Doc.addEntity(h.doc, 'character', { id: 'ent-nali-1', name: 'NALI' });
+  h.Rga.Doc.addEntity(h.doc, 'character', { id: 'ent-nali-2', name: 'NALI' });
+  h.tagOccurrence('NALI', 0, 'character', 'ent-nali-1');   // scene 1
+  h.tagOccurrence('NALI', 1, 'character', 'ent-nali-2');   // scene 2
+  h.activatePanel();
+
+  // NOTE: the panel re-renders (rebuilds DOM) on every expansion toggle,
+  // so rows must be re-queried from the live host after each click.
+  function liveRows() { return Array.from(h.host.querySelectorAll('.tag-item')); }
+  assert.equal(liveRows().length, 2);
+
+  // Expand the FIRST duplicate → only scene 1.
+  clickRow(h, liveRows()[0]);
+  const occurrenceScenes = Array.from(h.host.querySelectorAll('.tag-occurrence'))
+    .map(function(el) { return el.getAttribute('data-scene-node-id'); });
+  assert.equal(occurrenceScenes.length, 1, 'first NALI is tagged in exactly one scene');
+  assert.equal(occurrenceScenes[0], 'sc-1');
+
+  // Expand the SECOND duplicate too → both expansions visible, each
+  // showing its OWN scene.
+  clickRow(h, liveRows()[1]);
+  const allSceneIds = Array.from(h.host.querySelectorAll('.tag-occurrence'))
+    .map(function(el) { return el.getAttribute('data-scene-node-id'); });
+  assert.equal(allSceneIds.length, 2, 'both duplicates expanded simultaneously');
+  assert.ok(allSceneIds.indexOf('sc-1') !== -1, 'first NALI shows scene 1');
+  assert.ok(allSceneIds.indexOf('sc-2') !== -1, 'second NALI shows scene 2');
+});
+
+test('TagsPanel V1.2: expansion survives a panel re-render (tag event)', () => {
+  const h = boot();
+  seedEntities(h);
+  h.activatePanel();
+
+  clickRow(h, rowByName(h, 'NALI'));
+  assert.ok(h.host.querySelectorAll('.tag-occurrence').length > 0, 'expanded');
+
+  // A new tag elsewhere triggers the live refresh (editor.tagApplied).
+  h.Rga.Doc.addEntity(h.doc, 'prop', { id: 'ent-window', name: 'WINDOW' });
+  h.tagOccurrence('window', 0, 'prop', 'ent-window');
+
+  assert.ok(h.host.querySelectorAll('.tag-occurrence').length > 0,
+    'NALI\'s expansion survived the re-render (scene-navigator expansion pattern)');
+});
+
+test('TagsPanel V1.2: occurrence rows are read-only navigation — no merge/edit/rename affordances', () => {
+  const h = boot();
+  seedEntities(h);
+  h.activatePanel();
+  clickRow(h, rowByName(h, 'NALI'));
+
+  const expansion = h.host.querySelector('.tag-occurrences');
+  assert.ok(expansion);
+  assert.equal(expansion.querySelectorAll('button, input, select, textarea').length, 0,
+    'the occurrence browser is a lens: no actions, no controls');
 });

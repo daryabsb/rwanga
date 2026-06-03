@@ -156,8 +156,9 @@ test('Tags Panel V1 — type → tag via toolbar → open panel → see entity �
     expect(panelState.rows).toContainEqual({ name: 'PHOTOGRAPH', count: '1' });
     await page.screenshot({ path: shotPath('02-populated-panel.png') });
 
-    // ---- Move the cursor far away, then click the NALI row: the editor
-    // must jump back to the FIRST occurrence.
+    // ---- V1.2: move the cursor far away, click the NALI row → the
+    // occurrence browser expands; click its first scene → the editor
+    // jumps back to that occurrence.
     await selectOccurrence(page, 'CUT', 0);
     const firstOccurrence = await page.evaluate(() => {
       const view = window.Rga.TabManager._editorView();
@@ -172,11 +173,23 @@ test('Tags Panel V1 — type → tag via toolbar → open panel → see entity �
       return first;
     });
 
+    // Click the entity row → occurrence browser opens.
     await page.evaluate(() => {
       const host = window.Rga.Shell.Sidebar.getHost();
       const nali = Array.from(host.querySelectorAll('.tag-item'))
         .find((el) => el.querySelector('.tag-name').textContent === 'NALI');
       nali.click();
+    });
+    await page.waitForFunction(() => {
+      const host = window.Rga.Shell.Sidebar.getHost();
+      return host.querySelectorAll('.tag-occurrence').length > 0;
+    });
+    await page.screenshot({ path: shotPath('03a-occurrence-browser-open.png') });
+
+    // Click the first scene occurrence → jump.
+    await page.evaluate(() => {
+      const host = window.Rga.Shell.Sidebar.getHost();
+      host.querySelector('.tag-occurrence').click();
     });
 
     const selectionAfter = await page.evaluate(() => {
@@ -184,7 +197,7 @@ test('Tags Panel V1 — type → tag via toolbar → open panel → see entity �
       return view.state.selection.from;
     });
     expect(Math.abs(selectionAfter - firstOccurrence.from)).toBeLessThanOrEqual(4);
-    await page.screenshot({ path: shotPath('03-after-click-jump.png') });
+    await page.screenshot({ path: shotPath('03b-after-scene-jump.png') });
   } finally {
     await teardown(app, userDataDir);
   }
@@ -320,6 +333,63 @@ test('Tags Panel V1.1 — duplicates warned, unused entities clean, counts hones
     expect(taggedNali.warned).toBe(true);
 
     await page.screenshot({ path: shotPath('07-honest-panel-v1-1.png') });
+
+    // ---- V1.2: expand a DUPLICATE entity → see which scenes ITS marks
+    // live in (answers "which NALI is this?").
+    await page.evaluate(() => {
+      const host = window.Rga.Shell.Sidebar.getHost();
+      const taggedNali = Array.from(host.querySelectorAll('.tag-item'))
+        .find((el) => el.querySelector('.tag-name').textContent === 'NALI'
+                   && el.querySelector('.tag-count'));
+      taggedNali.click();
+    });
+    await page.waitForFunction(() => {
+      const host = window.Rga.Shell.Sidebar.getHost();
+      return host.querySelectorAll('.tag-occurrence').length > 0;
+    });
+    const dupExpansion = await page.evaluate(() => {
+      const host = window.Rga.Shell.Sidebar.getHost();
+      return Array.from(host.querySelectorAll('.tag-occurrence')).map((el) => ({
+        label: el.querySelector('.tag-occurrence-label').textContent,
+        count: el.querySelector('.tag-occurrence-count').textContent
+      }));
+    });
+    expect(dupExpansion.length).toBe(1);
+    expect(dupExpansion[0].label).toMatch(/Scene \d/);
+    expect(dupExpansion[0].count).toBe('1');
+    await page.screenshot({ path: shotPath('08-duplicate-expanded-v1-2.png') });
+
+    // ---- V1.2: expand a normal entity (DR. HASSAN) alongside —
+    // multiple expansions coexist.
+    await page.evaluate(() => {
+      const host = window.Rga.Shell.Sidebar.getHost();
+      const hassan = Array.from(host.querySelectorAll('.tag-item'))
+        .find((el) => el.querySelector('.tag-name').textContent === 'DR. HASSAN');
+      hassan.click();
+    });
+    await page.waitForFunction(() => {
+      const host = window.Rga.Shell.Sidebar.getHost();
+      return host.querySelectorAll('.tag-occurrence').length >= 2;
+    });
+    await page.screenshot({ path: shotPath('09-normal-expanded-v1-2.png') });
+
+    // ---- V1.2: expand an UNUSED entity → honest empty line.
+    await page.evaluate(() => {
+      const host = window.Rga.Shell.Sidebar.getHost();
+      const photo = Array.from(host.querySelectorAll('.tag-item'))
+        .find((el) => el.querySelector('.tag-name').textContent === 'PHOTOGRAPH');
+      photo.click();
+    });
+    await page.waitForFunction(() => {
+      const host = window.Rga.Shell.Sidebar.getHost();
+      return !!host.querySelector('.tag-occurrences-empty');
+    });
+    const emptyLine = await page.evaluate(() => {
+      const host = window.Rga.Shell.Sidebar.getHost();
+      return host.querySelector('.tag-occurrences-empty').textContent;
+    });
+    expect(emptyLine).toMatch(/not tagged/i);
+    await page.screenshot({ path: shotPath('10-unused-expanded-v1-2.png') });
   } finally {
     await teardown(app, userDataDir);
   }

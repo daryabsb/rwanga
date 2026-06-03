@@ -474,6 +474,47 @@
   height: 12px;
 }
 
+/* Tags Panel V1.2 — occurrence browser. Expansion zone beneath an
+   entity row: one line per scene the entity is tagged in. Same
+   expansion-zone anatomy as the scene-navigator marks zone
+   (shell.css), indented one step past the entity rows. */
+.tag-occurrences {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding-inline-start: 52px;   /* .tag-item indent (36px) + dot + gap */
+  padding-inline-end: 16px;
+}
+.tag-occurrence {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 0;
+  cursor: pointer;
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  transition: background var(--transition-fast);
+}
+.tag-occurrence:hover {
+  background: var(--bg-hover);
+}
+.tag-occurrence-label {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.tag-occurrence-count {
+  color: var(--text-tertiary);
+  flex-shrink: 0;
+}
+.tag-occurrences-empty {
+  font-size: var(--font-size-xs);
+  font-style: italic;
+  color: var(--text-tertiary);
+  padding: 3px 0;
+}
+
 /* ============================================================
    SIDEBAR — File Explorer Tree
    ============================================================ */

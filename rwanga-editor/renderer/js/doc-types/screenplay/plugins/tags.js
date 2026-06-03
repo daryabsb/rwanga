@@ -118,13 +118,12 @@
     return counts;
   }
 
-  // Jump the editor to the first occurrence (first tag mark in document
-  // order) of an entity. Returns false when the entity has no marks —
-  // clicking a curated-but-untagged entity is a safe no-op.
-  function jumpToFirstOccurrence(view, tagType, entityId) {
-    if (!view || !view.state) return false;
+  // Find the first tag-mark position for an entity, optionally bounded
+  // to a [from, to] document range (a scene's extent). null = no mark.
+  function _firstMarkPos(view, tagType, entityId, rangeFrom, rangeTo) {
+    if (!view || !view.state) return null;
     let foundPos = null;
-    view.state.doc.descendants(function(node, pos) {
+    const visit = function(node, pos) {
       if (foundPos !== null) return false;
       if (!node.isText) return;
       for (let i = 0; i < node.marks.length; i += 1) {
@@ -134,17 +133,25 @@
           return false;
         }
       }
-    });
-    if (foundPos === null) return false;
+    };
+    if (typeof rangeFrom === 'number' && typeof rangeTo === 'number') {
+      view.state.doc.nodesBetween(rangeFrom, rangeTo, visit);
+    } else {
+      view.state.doc.descendants(visit);
+    }
+    return foundPos;
+  }
+
+  // Move the editor selection to a document position + scroll it into
+  // view (PM hint + DOM backup, same pattern as SceneNavigator).
+  function _jumpToPos(view, pos) {
     const PM = window.RgaProseMirror;
     if (!PM || !PM.TextSelection) return false;
     try {
-      const $pos = view.state.doc.resolve(foundPos);
+      const $pos = view.state.doc.resolve(pos);
       view.dispatch(view.state.tr.setSelection(PM.TextSelection.near($pos)).scrollIntoView());
-      // DOM backup scroll — PM's scrollIntoView is a transaction hint,
-      // not a guarantee (same pattern as SceneNavigator.scrollToScene).
       try {
-        const ref = (typeof view.domAtPos === 'function') ? view.domAtPos(foundPos) : null;
+        const ref = (typeof view.domAtPos === 'function') ? view.domAtPos(pos) : null;
         const el = ref && ref.node
           ? (ref.node.nodeType === 3 ? ref.node.parentElement : ref.node) : null;
         if (el && typeof el.scrollIntoView === 'function') {
@@ -154,9 +161,103 @@
       if (typeof view.focus === 'function') view.focus();
       return true;
     } catch (err) {
-      console.error('[Rga.Tags] jumpToFirstOccurrence threw:', err);
+      console.error('[Rga.Tags] jump threw:', err);
       return false;
     }
+  }
+
+  // Jump the editor to the first occurrence (first tag mark in document
+  // order) of an entity. Returns false when the entity has no marks —
+  // a curated-but-untagged entity is a safe no-op.
+  function jumpToFirstOccurrence(view, tagType, entityId) {
+    const pos = _firstMarkPos(view, tagType, entityId);
+    if (pos === null) return false;
+    return _jumpToPos(view, pos);
+  }
+
+  // V1.2 — jump to the entity's first occurrence INSIDE one scene. The
+  // scene's extent is resolved from the nav-index AT CLICK TIME (never
+  // from positions captured at render time — those go stale the moment
+  // the writer types).
+  function jumpToOccurrenceInScene(view, tagType, entityId, sceneNodeId) {
+    if (!view || !view.state || !sceneNodeId) return false;
+    if (!Rga.Nav || typeof Rga.Nav.getIndex !== 'function') return false;
+    const idx = Rga.Nav.getIndex(view.state);
+    if (!idx || !Array.isArray(idx.scenes)) return false;
+    let scene = null;
+    for (let i = 0; i < idx.scenes.length; i += 1) {
+      if (idx.scenes[i] && idx.scenes[i].nodeId === sceneNodeId) { scene = idx.scenes[i]; break; }
+    }
+    if (!scene || scene.pmPos == null || scene.pmEndPos == null) return false;
+    const pos = _firstMarkPos(view, tagType, entityId, scene.pmPos, scene.pmEndPos);
+    if (pos === null) return false;
+    return _jumpToPos(view, pos);
+  }
+
+  // ---------------------------------------------------------------
+  // V1.2 — Occurrence Browser
+  // ---------------------------------------------------------------
+
+  // Which entities are expanded in the panel. Module-level (the
+  // scene-navigator expansion pattern) so browsing survives the
+  // panel's live re-renders. Keyed `tagType:entityId`.
+  const _expandedEntities = new Set();
+
+  function _expansionKey(tagType, entityId) { return tagType + ':' + entityId; }
+
+  // Per-scene occurrence data for one entity:
+  //   [{ sceneNodeId, sceneNumber, headingDisplay, count }]
+  // Scene membership comes from the Memory API (the designed read
+  // surface for "which scenes is this entity tagged in"), falling back
+  // to the nav-index sceneAppearances when Memory isn't loaded. The
+  // per-scene count is a scoped walk of just that scene's subtree.
+  function _occurrencesByScene(view, tagType, entityId) {
+    if (!view || !view.state || !Rga.Nav || typeof Rga.Nav.getIndex !== 'function') return [];
+    const idx = Rga.Nav.getIndex(view.state);
+    if (!idx || !Array.isArray(idx.scenes)) return [];
+
+    // Scene ids the entity appears in — Memory first, index fallback.
+    let sceneIds = null;
+    const Memory = Rga.Screenplay && Rga.Screenplay.Memory;
+    if (Memory && typeof Memory.entity === 'function') {
+      const bundle = Memory.entity(tagType, entityId, idx);
+      if (bundle && Array.isArray(bundle.sceneIds)) sceneIds = bundle.sceneIds;
+    }
+    if (!sceneIds) {
+      const arr = (idx.tags && Array.isArray(idx.tags[tagType])) ? idx.tags[tagType] : [];
+      for (let i = 0; i < arr.length; i += 1) {
+        if (arr[i] && arr[i].nodeId === entityId) {
+          sceneIds = Array.isArray(arr[i].sceneAppearances) ? arr[i].sceneAppearances : [];
+          break;
+        }
+      }
+    }
+    if (!sceneIds || !sceneIds.length) return [];
+
+    const out = [];
+    idx.scenes.forEach(function(scene) {
+      if (!scene || sceneIds.indexOf(scene.nodeId) === -1) return;
+      if (scene.pmPos == null || scene.pmEndPos == null) return;
+      // Count this entity's marks inside this scene's extent.
+      let count = 0;
+      view.state.doc.nodesBetween(scene.pmPos, scene.pmEndPos, function(node) {
+        if (!node.isText) return;
+        node.marks.forEach(function(m) {
+          if (m.type.name === 'tag' && m.attrs.tagType === tagType && m.attrs.entityId === entityId) {
+            count += 1;
+          }
+        });
+      });
+      if (count > 0) {
+        out.push({
+          sceneNodeId:    scene.nodeId,
+          sceneNumber:    scene.sceneNumber,
+          headingDisplay: scene.headingDisplay || '',
+          count:          count
+        });
+      }
+    });
+    return out;
   }
 
   // Render the full tags-panel content into `container`. Returns the
@@ -256,11 +357,68 @@
           row.appendChild(count);
         }
 
+        // V1.2 — the row click opens/closes the occurrence browser.
+        // (V1 jumped from here; the jump now lives on the scene rows
+        // inside the expansion, so the writer first SEES where the
+        // entity is used, then chooses where to go.)
+        const expansionKey = _expansionKey(type, entity.id);
+        const expanded = _expandedEntities.has(expansionKey);
+        row.setAttribute('aria-expanded', expanded ? 'true' : 'false');
         row.addEventListener('click', function() {
-          jumpToFirstOccurrence(_panelView(), type, entity.id);
+          if (_expandedEntities.has(expansionKey)) _expandedEntities.delete(expansionKey);
+          else _expandedEntities.add(expansionKey);
+          renderTagsPanel(container);
         });
 
         items.appendChild(row);
+
+        // V1.2 — the occurrence browser: one row per scene the entity
+        // is tagged in (scene number — heading — per-scene count).
+        // Read-only navigation: clicking a scene jumps the editor to
+        // the entity's first occurrence inside that scene.
+        if (expanded) {
+          const zone = document.createElement('div');
+          zone.className = 'tag-occurrences';
+          const occurrences = _occurrencesByScene(view, type, entity.id);
+          if (!occurrences.length) {
+            const emptyLine = document.createElement('div');
+            emptyLine.className = 'tag-occurrences-empty';
+            emptyLine.textContent = 'Not tagged in any scene yet.';
+            zone.appendChild(emptyLine);
+          } else {
+            occurrences.forEach(function(occ) {
+              const line = document.createElement('div');
+              line.className = 'tag-occurrence';
+              line.setAttribute('data-scene-node-id', occ.sceneNodeId);
+              line.setAttribute('role', 'button');
+              line.setAttribute('tabindex', '0');
+
+              const label = document.createElement('span');
+              label.className = 'tag-occurrence-label';
+              label.textContent = 'Scene ' + occ.sceneNumber
+                + (occ.headingDisplay ? ' — ' + occ.headingDisplay : '');
+              line.appendChild(label);
+
+              const occCount = document.createElement('span');
+              occCount.className = 'tag-occurrence-count';
+              occCount.textContent = String(occ.count);
+              const occText = occ.count + ' tagged occurrence' + (occ.count === 1 ? '' : 's')
+                + ' in scene ' + occ.sceneNumber;
+              occCount.title = occText;
+              occCount.setAttribute('aria-label', occText);
+              line.appendChild(occCount);
+
+              line.addEventListener('click', function(e) {
+                e.stopPropagation();   // jump only — never collapse the browser
+                jumpToOccurrenceInScene(_panelView(), type, entity.id, occ.sceneNodeId);
+              });
+
+              zone.appendChild(line);
+            });
+          }
+          items.appendChild(zone);
+        }
+
         total += 1;
       });
 
@@ -614,6 +772,7 @@
     showTagInfo,
     renderTagsPanel,
     jumpToFirstOccurrence,
+    jumpToOccurrenceInScene,
     refreshTagsPanel,
     tagsPlugin,
     TAG_TYPES,
