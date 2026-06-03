@@ -85,15 +85,17 @@
     // exactly the path divergence that fragmented entity identity
     // (REGISTRY_IDENTITY_INTEGRITY_AUDIT.md §1.2).
     if (!window.Rga.Tags
-        || typeof window.Rga.Tags.findOrCreateEntity !== 'function') return;
+        || typeof window.Rga.Tags.findOrCreateEntity !== 'function'
+        || typeof window.Rga.Tags.applyTag !== 'function') return;
     const entityId = window.Rga.Tags.findOrCreateEntity(doc, tagType, text);
     if (!entityId) return;
-    const mt = view.state.schema.marks.tag;
-    if (!mt) return;
-    view.dispatch(view.state.tr.addMark(sel.from, sel.to, mt.create({
-      tagType:  tagType,
-      entityId: entityId
-    })));
+    // Tags Panel V1 — mark application goes through Rga.Tags.applyTag
+    // (the single mark-application path). applyTag dispatches the
+    // editor.tagApplied document event that live surfaces (the Tags
+    // Panel, the legacy refresh listeners) depend on; the previous
+    // direct tr.addMark here silently skipped that event, so panels
+    // never refreshed on toolbar tagging.
+    window.Rga.Tags.applyTag(view, tagType, entityId);
     if (typeof view.focus === 'function') view.focus();
     if (typeof window.Rga.Doc.markDirty === 'function') {
       window.Rga.Doc.markDirty(doc);

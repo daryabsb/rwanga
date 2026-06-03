@@ -21,6 +21,13 @@ function boot(opts) {
   const dom = new JSDOM(HTML, { url: 'http://localhost/' });
   global.window = dom.window;
   global.document = dom.window.document;
+  // Tags Panel V1: the toolbar routes mark application through
+  // Rga.Tags.applyTag, which dispatches CustomEvents on document.
+  // Alias jsdom's constructors so Node's own CustomEvent class doesn't
+  // get rejected by jsdom's dispatchEvent (same workaround as
+  // v3-plugin-compat.test.js).
+  global.CustomEvent = dom.window.CustomEvent;
+  global.Event = dom.window.Event;
   global.window.Rga = {};
 
   // Stubs the screenplay tag contribution reads.
@@ -189,6 +196,25 @@ test('F1A.7 — selecting a tag category applies the entity + adds the tag mark'
   assert.equal(opts._addMarkCalls.length, 1, 'tag mark dispatched once');
   assert.equal(opts._addMarkCalls[0].mark.attrs.tagType, 'character');
   assert.equal(opts._dirtyCalls, 1, 'doc marked dirty');
+});
+
+test('Tags Panel V1 — toolbar tagging dispatches editor.tagApplied (live surfaces refresh)', () => {
+  // Regression pinned by the Tags Panel e2e: the toolbar previously
+  // applied marks via a direct tr.addMark and never fired the
+  // editor.tagApplied document event — so the Tags Panel (and any other
+  // live listener) never refreshed on toolbar tagging.
+  const opts = {};
+  const { slot } = boot(opts);
+  let tagAppliedEvents = 0;
+  global.document.addEventListener('editor.tagApplied', function() { tagAppliedEvents += 1; });
+
+  const select = slot.querySelector('select.rga-shell-toolbar-tag');
+  select.value = 'character';
+  select.dispatchEvent(new global.window.Event('change'));
+
+  assert.equal(opts._addMarkCalls.length, 1, 'mark applied');
+  assert.equal(tagAppliedEvents, 1,
+    'editor.tagApplied dispatched exactly once — the event live panels subscribe to');
 });
 
 test('F1A.7 — select resets to placeholder after each apply (UX preserved)', () => {

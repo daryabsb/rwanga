@@ -57,50 +57,188 @@
   }
 
   // ---------------------------------------------------------------
-  // Tags panel refresh
+  // Tags Panel V1 — Visible Intelligence.
+  // The screenplay-owned renderer for the sidebar tags content (hosted
+  // by the shell Characters panel). A read-only lens over the registry:
+  //   - every LIVE entity (tombstones never appear — consumer rule C3)
+  //   - grouped by category, occurrence count per row (nav-index
+  //     mentionCount — the maintained source, no extra doc walk)
+  //   - click → jump the editor to the first occurrence
+  //   - panel direction mirrors the script's writing direction (RTL)
+  // Renders with the designed sidebar classes (components.css):
+  //   .tag-group / .tag-group-header / .tag-group-items
+  //   .tag-item / .tag-dot / .tag-name / .tag-count
   // ---------------------------------------------------------------
 
-  function refreshTagsPanel(doc) {
-    const container = document.getElementById('tag-groups-container');
-    if (!container) return;
-    if (!doc || !doc.tagRegistry) { container.innerHTML = ''; return; }
+  // Group headers — the panel's plural screenplay vocabulary (parallel
+  // to TAG_LABELS, which stays singular for per-mark contexts like the
+  // info popup).
+  const TAG_GROUP_LABELS = {
+    character: 'Characters', prop: 'Props', wardrobe: 'Wardrobe',
+    location: 'Locations', sfx: 'SFX', vfx: 'VFX',
+    vehicle: 'Vehicles', animal: 'Animals', custom: 'Custom',
+  };
 
+  function _panelDoc() {
+    const TM = Rga.TabManager;
+    if (!TM) return null;
+    let doc = (typeof TM.activeDoc === 'function') ? TM.activeDoc() : null;
+    if (!doc && typeof TM.lastActiveDoc === 'function') doc = TM.lastActiveDoc();
+    return doc;
+  }
+
+  function _panelView() {
+    const TM = Rga.TabManager;
+    return (TM && typeof TM._editorView === 'function') ? TM._editorView() : null;
+  }
+
+  function _scriptDirection(doc) {
+    const profile = doc && doc.metadata && doc.metadata.screenplayProfile;
+    return (profile && profile.direction === 'rtl') ? 'rtl' : 'ltr';
+  }
+
+  // Live entities per type — tombstone-filtered via the scoped registry
+  // API; raw-list fallback for environments without the B1 APIs.
+  function _liveList(doc, tagType) {
+    if (doc && Rga.Doc && typeof Rga.Doc.liveEntities === 'function') {
+      return Rga.Doc.liveEntities(doc, tagType);
+    }
+    return _entityList(doc, tagType);
+  }
+
+  // entityId → occurrence count, from the nav-index (mentionCount).
+  function _countLookup(view, tagType) {
+    const counts = {};
+    if (!view || !view.state || !Rga.Nav || typeof Rga.Nav.getIndex !== 'function') return counts;
+    const idx = Rga.Nav.getIndex(view.state);
+    const arr = (idx && idx.tags && Array.isArray(idx.tags[tagType])) ? idx.tags[tagType] : [];
+    for (let i = 0; i < arr.length; i += 1) {
+      if (arr[i] && arr[i].nodeId) counts[arr[i].nodeId] = arr[i].mentionCount || 0;
+    }
+    return counts;
+  }
+
+  // Jump the editor to the first occurrence (first tag mark in document
+  // order) of an entity. Returns false when the entity has no marks —
+  // clicking a curated-but-untagged entity is a safe no-op.
+  function jumpToFirstOccurrence(view, tagType, entityId) {
+    if (!view || !view.state) return false;
+    let foundPos = null;
+    view.state.doc.descendants(function(node, pos) {
+      if (foundPos !== null) return false;
+      if (!node.isText) return;
+      for (let i = 0; i < node.marks.length; i += 1) {
+        const m = node.marks[i];
+        if (m.type.name === 'tag' && m.attrs.tagType === tagType && m.attrs.entityId === entityId) {
+          foundPos = pos;
+          return false;
+        }
+      }
+    });
+    if (foundPos === null) return false;
+    const PM = window.RgaProseMirror;
+    if (!PM || !PM.TextSelection) return false;
+    try {
+      const $pos = view.state.doc.resolve(foundPos);
+      view.dispatch(view.state.tr.setSelection(PM.TextSelection.near($pos)).scrollIntoView());
+      // DOM backup scroll — PM's scrollIntoView is a transaction hint,
+      // not a guarantee (same pattern as SceneNavigator.scrollToScene).
+      try {
+        const ref = (typeof view.domAtPos === 'function') ? view.domAtPos(foundPos) : null;
+        const el = ref && ref.node
+          ? (ref.node.nodeType === 3 ? ref.node.parentElement : ref.node) : null;
+        if (el && typeof el.scrollIntoView === 'function') {
+          el.scrollIntoView({ block: 'center', behavior: 'auto' });
+        }
+      } catch (_) { /* domAtPos can throw on transient states */ }
+      if (typeof view.focus === 'function') view.focus();
+      return true;
+    } catch (err) {
+      console.error('[Rga.Tags] jumpToFirstOccurrence threw:', err);
+      return false;
+    }
+  }
+
+  // Render the full tags-panel content into `container`. Returns the
+  // number of entity rows rendered — 0 tells the hosting panel to show
+  // its empty state instead.
+  function renderTagsPanel(container) {
+    if (!container) return 0;
     container.innerHTML = '';
-    const reg = doc.tagRegistry;
+    const doc = _panelDoc();
+    if (!doc) return 0;
+    const view = _panelView();
 
+    const wrapper = document.createElement('div');
+    wrapper.className = 'tag-groups';
+    wrapper.id = 'tag-groups-container';
+    wrapper.setAttribute('dir', _scriptDirection(doc));
+
+    let total = 0;
     TAG_TYPES.forEach(function(type) {
-      const keyMap = Rga.Doc && Rga.Doc._registryKey;
-      const key = keyMap ? (keyMap[type] || type) : type;
-      const entities = reg[key] || [];
+      const entities = _liveList(doc, type);
       if (!entities.length) return;
+      const counts = _countLookup(view, type);
 
       const group = document.createElement('div');
       group.className = 'tag-group';
 
       const header = document.createElement('div');
       header.className = 'tag-group-header';
-      header.textContent = TAG_LABELS[type] || capitalize(type);
+      const label = document.createElement('span');
+      label.className = 'tag-group-label';
+      label.textContent = TAG_GROUP_LABELS[type] || capitalize(type);
+      header.appendChild(label);
       group.appendChild(header);
+
+      const items = document.createElement('div');
+      items.className = 'tag-group-items';
 
       entities.forEach(function(entity) {
         const row = document.createElement('div');
-        row.className = 'tag-entity-row';
+        row.className = 'tag-item';
+        row.setAttribute('data-entity-id', entity.id);
+        row.setAttribute('role', 'button');
+        row.setAttribute('tabindex', '0');
 
         const dot = document.createElement('span');
-        dot.className = 'tag-entity-dot';
+        dot.className = 'tag-dot';
         dot.style.background = entity.color || 'var(--accent-primary)';
         row.appendChild(dot);
 
         const name = document.createElement('span');
-        name.className = 'tag-entity-name';
-        name.textContent = entity.name;
+        name.className = 'tag-name';
+        name.textContent = entity.name || '';
         row.appendChild(name);
 
-        group.appendChild(row);
+        const count = document.createElement('span');
+        count.className = 'tag-count';
+        count.textContent = String(counts[entity.id] || 0);
+        row.appendChild(count);
+
+        row.addEventListener('click', function() {
+          jumpToFirstOccurrence(_panelView(), type, entity.id);
+        });
+
+        items.appendChild(row);
+        total += 1;
       });
 
-      container.appendChild(group);
+      group.appendChild(items);
+      wrapper.appendChild(group);
     });
+
+    container.appendChild(wrapper);
+    return total;
+  }
+
+  // Legacy entry point — kept for the editor.tagApplied/tagRemoved
+  // document listeners below and any caller still targeting the
+  // #tag-groups-container id directly.
+  function refreshTagsPanel() {
+    const container = document.getElementById('tag-groups-container');
+    if (!container || !container.parentElement) return;
+    renderTagsPanel(container.parentElement);
   }
 
   // Listen for tag events and refresh the panel
@@ -357,6 +495,13 @@
     viewBtn.textContent = 'View Tags';
     viewBtn.addEventListener('click', function() {
       hideInfoPopup();
+      // Tags Panel V1 — open the Characters sidebar panel (the tags
+      // home; the documented Rga.Sidebar→Shell.Sidebar migration).
+      if (Rga.Shell && Rga.Shell.Sidebar && typeof Rga.Shell.Sidebar.activate === 'function') {
+        Rga.Shell.Sidebar.activate('characters');
+        return;
+      }
+      // Legacy fallback (pre-shell builds).
       if (Rga.Sidebar) Rga.Sidebar.switchTo('tags');
     });
 
@@ -427,6 +572,8 @@
     mergeEntities,
     showTagDialog,
     showTagInfo,
+    renderTagsPanel,
+    jumpToFirstOccurrence,
     refreshTagsPanel,
     tagsPlugin,
     TAG_TYPES,
