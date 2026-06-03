@@ -106,6 +106,7 @@
       settings: defaultSettings(),
       tagRegistry: emptyTagRegistry(),
       flagLog: [],
+      mergeLog: [],
       exportSettings: defaultExportSettings(),
       runtime: defaultRuntime(),
       // PM Node — set by tab-manager via emptyDoc() / nodeFromJSON()
@@ -163,6 +164,7 @@
       body: doc.body ? doc.body.toJSON() : null,
       tag_registry: doc.tagRegistry,
       flag_log: doc.flagLog || [],
+      merge_log: doc.mergeLog || [],
       export_settings: doc.exportSettings,
       runtime: doc.runtime,
     };
@@ -279,6 +281,7 @@
       settings: settings,
       tagRegistry: parsed.tag_registry || emptyTagRegistry(),
       flagLog: parsed.flag_log || [],
+      mergeLog: parsed.merge_log || [],
       exportSettings: parsed.export_settings || defaultExportSettings(),
       runtime: parsed.runtime || defaultRuntime(),
       body: pmBody
@@ -329,6 +332,120 @@
     // via Rga.Tags.removeAllMarksForEntity(view, id)
   }
 
+  // ---------------------------------------------------------------
+  // Registry merge operations — Identity Merge Slice B1.
+  // Design: docs/Filmustageation/SCOPED_REGISTRY_MERGE_API_DESIGN.md
+  // Policy: docs/Filmustageation/IDENTITY_MERGE_POLICY_AUDIT.md
+  //
+  // The controlled mutation surface for entity merging. Losers are
+  // tombstoned (`merged_into` = survivor's id), NEVER deleted —
+  // undo/redo can resurrect marks pointing at them, so their ids must
+  // keep resolving. Compaction (final removal) is a separate, future,
+  // separately-reviewed operation.
+  //
+  // Plugin code must never write registry state directly; every
+  // registry mutation goes through these named, validated APIs.
+  // ---------------------------------------------------------------
+
+  // Entity fields the fold understands. Anything else is "unknown":
+  // never copied to the survivor (survivor-wins rule for unknown
+  // semantics), only reported so the merge log can preserve it.
+  const _KNOWN_ENTITY_FIELDS = ['id', 'name', 'color', 'notes', 'merged_into'];
+
+  function markEntityMerged(doc, tagType, loserId, survivorId) {
+    if (!doc || !loserId || !survivorId || loserId === survivorId) return false;
+    const loser = findEntity(doc, tagType, loserId);
+    const survivor = findEntity(doc, tagType, survivorId);
+    if (!loser || !survivor) return false;
+    // The API never creates chains: merging INTO a tombstone is refused.
+    if (survivor.merged_into) return false;
+    // Idempotent re-merge into the same survivor; conflicting re-merge refused.
+    if (loser.merged_into) return loser.merged_into === survivorId;
+    loser.merged_into = survivorId;
+    return true;
+  }
+
+  function foldEntityMetadata(doc, tagType, survivorId, loserId) {
+    if (!doc || !survivorId || !loserId || survivorId === loserId) return null;
+    const survivor = findEntity(doc, tagType, survivorId);
+    const loser = findEntity(doc, tagType, loserId);
+    if (!survivor || !loser) return null;
+    // Tombstones never fold: refusing tombstoned losers is what prevents
+    // double-folding (notes concatenating twice on a crash-recovery
+    // re-run) and forces the documented call order: fold BEFORE mark.
+    if (survivor.merged_into || loser.merged_into) return null;
+
+    // color — survivor's stays if set; else the loser's moves over.
+    let colorMoved = null;
+    if (!survivor.color && loser.color) {
+      survivor.color = loser.color;
+      colorMoved = loser.color;
+    }
+
+    // notes — the loser's notes are never lost: appended with attribution.
+    let notesAppended = false;
+    if (loser.notes) {
+      const attribution = '--- merged from "' + (loser.name || '') + '" (' + loserId + ') ---';
+      survivor.notes = survivor.notes
+        ? survivor.notes + '\n' + attribution + '\n' + loser.notes
+        : attribution + '\n' + loser.notes;
+      notesAppended = true;
+    }
+
+    // unknown loser fields — reported, never copied.
+    let unknownFields = null;
+    Object.keys(loser).forEach(function(key) {
+      if (_KNOWN_ENTITY_FIELDS.indexOf(key) !== -1) return;
+      if (!unknownFields) unknownFields = {};
+      unknownFields[key] = loser[key];
+    });
+
+    return {
+      loser_name:     loser.name || '',
+      color_moved:    colorMoved,
+      notes_appended: notesAppended,
+      unknown_fields: unknownFields
+    };
+  }
+
+  function appendMergeLog(doc, record) {
+    if (!doc || !record || typeof record !== 'object') return null;
+    if (typeof record.tag_type !== 'string' || !record.tag_type) return null;
+    if (!record.survivor || !record.survivor.id) return null;
+    if (!Array.isArray(record.losers) || record.losers.length === 0) return null;
+    if (!record.merged_at) record.merged_at = new Date().toISOString();
+    if (!doc.mergeLog) doc.mergeLog = [];
+    doc.mergeLog.push(record);
+    return record;
+  }
+
+  function isEntityMerged(doc, tagType, entityId) {
+    const ent = findEntity(doc, tagType, entityId);
+    if (!ent) return null;
+    return !!ent.merged_into;
+  }
+
+  function resolveEntityId(doc, tagType, entityId) {
+    let current = findEntity(doc, tagType, entityId);
+    if (!current) return null;
+    // Chains can only come from hand-edited files (the API refuses to
+    // create them) — follow defensively, with a cycle guard.
+    const visited = new Set();
+    while (current.merged_into) {
+      if (visited.has(current.id)) return null;   // cycle: cannot resolve
+      visited.add(current.id);
+      current = findEntity(doc, tagType, current.merged_into);
+      if (!current) return null;                  // dangling target: cannot resolve
+    }
+    return current.id;
+  }
+
+  function liveEntities(doc, tagType) {
+    // The ONLY legal suggestion/listing source for UI surfaces — never
+    // offer tombstones to the user (consumer rule C3).
+    return _registryList(doc, tagType).filter(function(e) { return e && !e.merged_into; });
+  }
+
   function addFlagLogEntry(doc, entry) {
     if (!doc.flagLog) doc.flagLog = [];
     doc.flagLog.push(entry);
@@ -370,6 +487,12 @@
     addEntity,
     findEntity,
     removeEntity,
+    markEntityMerged,
+    foldEntityMetadata,
+    appendMergeLog,
+    isEntityMerged,
+    resolveEntityId,
+    liveEntities,
     addFlagLogEntry,
     _isAcceptedVersion: isAcceptedVersion,
     _isNewerThanSupported: isNewerThanSupported,
