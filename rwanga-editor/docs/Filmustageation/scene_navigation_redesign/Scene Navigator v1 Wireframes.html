@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scene Navigator v1 — Wireframes · Rwanga</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0F0F12; --surface:#17171C; --surface-2:#1E1E26; --surface-3:#26262E;
+  --border:#2C2C38; --text:#EDEAD8; --text-2:#9A98A8; --text-3:#5C5A6A;
+  --amber:#D4A574; --amber-dim:rgba(212,165,116,0.10);
+  --pink:#F72585; --pink-dim:rgba(247,37,133,0.08);
+  --teal:#7DD3C4; --orange:#F4A261;
+  --font:'Inter',system-ui,sans-serif; --mono:'JetBrains Mono','Courier New',monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14px;line-height:1.7;-webkit-font-smoothing:antialiased}
+body{max-width:1100px;margin:0 auto;padding:52px 36px 96px}
+
+/* ── Header ── */
+.dh{border-bottom:1px solid var(--border);padding-bottom:28px;margin-bottom:36px}
+.ov{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--amber);margin-bottom:12px}
+h1{font-size:27px;font-weight:700;letter-spacing:-0.4px;line-height:1.2;margin-bottom:8px}
+.sub{font-size:13.5px;color:var(--text-2);max-width:520px;margin-bottom:16px}
+.success{font-size:12px;font-style:italic;color:var(--text-3);border-left:2px solid var(--border);padding-left:12px;max-width:520px}
+
+/* ── Tabs ── */
+.tabs{display:flex;gap:3px;margin-bottom:24px;flex-wrap:wrap}
+.tab{padding:4px 13px;font-size:11px;font-weight:500;cursor:pointer;border:1px solid var(--border);border-radius:2px;background:transparent;color:var(--text-3);transition:color .1s,background .1s;white-space:nowrap}
+.tab:hover{color:var(--text-2);background:var(--surface)}
+.tab.on{background:var(--surface-2);border-color:var(--amber);color:var(--amber)}
+
+/* ── State panels ── */
+.state{display:none}
+.state.on{display:grid;grid-template-columns:346px 1fr;gap:44px;align-items:start}
+
+/* ── Wireframe shell ── */
+.wf{display:flex;height:560px;border:1px solid var(--border);border-radius:3px;overflow:hidden;background:var(--bg);flex-shrink:0}
+
+/* Activity rail */
+.rail{width:40px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;align-items:center;padding:10px 0;gap:2px;flex-shrink:0}
+.ri{width:30px;height:30px;border-radius:2px;display:flex;align-items:center;justify-content:center;color:var(--text-3);font-size:14px;cursor:pointer;line-height:1}
+.ri.on{background:var(--surface-2);color:var(--amber)}
+.ri-sep{width:18px;height:1px;background:var(--border);margin:4px 0}
+
+/* Sidebar */
+.sb{width:305px;background:var(--surface);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0}
+.sbh{padding:9px 10px 7px;border-bottom:1px solid var(--border);flex-shrink:0}
+.sbh-lbl{font-size:9.5px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;color:var(--text-3);display:flex;justify-content:space-between;align-items:center;margin-bottom:7px}
+.sbh-n{font-weight:400}
+
+/* Search */
+.srch{display:flex;align-items:center;gap:5px;background:var(--surface-2);border:1px solid var(--border);border-radius:2px;padding:4px 7px;font-size:11px;color:var(--text-3)}
+.srch svg{width:11px;height:11px;flex-shrink:0}
+.srch .ph{flex:1}
+.srch .qy{color:var(--text)}
+.srch .hc{font-size:9.5px;margin-left:auto}
+.srch.on{border-color:var(--pink)}
+
+/* Scene list */
+.sl{flex:1;overflow-y:auto;min-height:0}
+.sl::-webkit-scrollbar{width:3px}
+.sl::-webkit-scrollbar-thumb{background:var(--border)}
+
+/* Scene row — grid: 3px · 30px · 1fr · 20px · 30px */
+.sr{display:grid;grid-template-columns:3px 30px 1fr 20px 30px;align-items:stretch;min-height:26px;cursor:pointer}
+.sr:hover{background:var(--surface-2)}
+.sr.sel{background:rgba(255,255,255,0.025);outline:1px solid var(--surface-3);outline-offset:-1px}
+/* current rail */
+.cr{}
+.sr.cur .cr{background:var(--pink)}
+/* number gutter */
+.ng{background:var(--amber-dim);display:flex;align-items:center;padding-right:5px;gap:1px}
+.ng .cv{font-size:7px;color:var(--text-3);opacity:0;width:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sr:hover .ng .cv{opacity:0.45}
+.sr.exp .ng .cv{opacity:1;color:var(--amber)}
+.ng .nm{font-family:var(--mono);font-size:10.5px;color:var(--amber);flex:1;text-align:right}
+/* heading */
+.sh{font-size:11px;padding:0 5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center}
+.sh .i{color:var(--teal)}
+.sh .e{color:var(--orange)}
+/* signal margin — fixed 20px, always reserved */
+.sg{display:flex;align-items:center;justify-content:flex-end;gap:3px;padding-right:2px}
+.sig{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.sig.n{background:var(--amber);opacity:0.65}
+.sig.f{background:var(--pink);opacity:0.75}
+/* page */
+.pg{font-family:var(--mono);font-size:10px;color:var(--text-3);display:flex;align-items:center;justify-content:flex-end;padding-right:8px}
+
+/* Expanded children */
+.kids{background:rgba(0,0,0,0.2);border-bottom:1px solid rgba(44,44,56,0.6)}
+.kg-lbl{font-size:8.5px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-3);padding:5px 8px 2px 32px}
+.ki{display:flex;align-items:center;gap:5px;padding:3px 8px 3px 32px;font-size:10.5px;color:var(--text-2);cursor:pointer}
+.ki:hover{background:var(--surface-2);color:var(--text)}
+.ki .ico{font-size:9px;color:var(--text-3);width:12px;flex-shrink:0;text-align:center}
+.kg-gate{display:flex;align-items:center;gap:5px;padding:5px 8px 5px 32px;font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-3);cursor:pointer;border-top:1px solid var(--border);margin-top:2px}
+.kg-gate:hover{color:var(--amber)}
+
+/* Act group header */
+.grp{padding:9px 8px 3px 10px;font-size:8.5px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;color:var(--text-3);border-top:1px solid var(--border)}
+
+/* Compact row */
+.cmp{min-height:21px}
+.cmp .sh{font-size:10.5px}
+.cmp .pg{font-size:9.5px}
+
+/* Results header */
+.rsh{padding:6px 10px 5px;font-size:10px;color:var(--text-2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.rsh-clr{color:var(--text-3);cursor:pointer;text-decoration:underline;font-size:10px}
+.rsh-clr:hover{color:var(--text-2)}
+
+/* Search result item */
+.ri{border-bottom:1px solid rgba(44,44,56,0.5)}
+.ri-row{display:grid;grid-template-columns:30px 1fr 28px;align-items:center;min-height:21px}
+.ri-num{background:var(--amber-dim);height:100%;display:flex;align-items:center;justify-content:flex-end;padding-right:5px;font-family:var(--mono);font-size:9.5px;color:var(--amber)}
+.ri-slug{font-size:9.5px;color:var(--text-2);padding:0 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ri-pg{font-family:var(--mono);font-size:9px;color:var(--text-3);padding-right:7px;text-align:right}
+.ri-snip{padding:2px 8px 6px 36px;font-family:var(--mono);font-size:10px;color:var(--text-3);line-height:1.55;cursor:pointer}
+.ri-snip:hover{background:var(--surface-2)}
+.ri-snip mark{background:rgba(247,37,133,0.22);color:var(--text);border-radius:1px;font-style:normal}
+.ri-snip.sel mark{background:rgba(247,37,133,0.45);color:#fff}
+
+/* Empty states */
+.ep{flex:1;display:flex;min-height:0}
+.ep-h{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 14px;text-align:center}
+.ep-h+.ep-h{border-left:1px solid var(--border)}
+.ep-tag{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-3);margin-bottom:12px}
+.ep-txt{font-size:11px;color:var(--text-3);line-height:1.6;max-width:148px}
+.ep-act{margin-top:9px;font-size:10.5px;color:var(--text-3);text-decoration:underline;cursor:pointer}
+.ep-act:hover{color:var(--text-2)}
+
+/* ── Annotations ── */
+.ann-hd{font-size:17px;font-weight:700;letter-spacing:-0.3px;margin-bottom:4px}
+.ann-dc{font-size:13px;color:var(--text-2);line-height:1.6;margin-bottom:18px;max-width:480px}
+.ann-ls{display:flex;flex-direction:column;gap:13px}
+.ann-rw{display:flex;gap:10px;align-items:flex-start}
+.ann-num{width:17px;height:17px;border-radius:50%;background:var(--amber-dim);border:1px solid var(--amber);color:var(--amber);font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:3px}
+.ann-bd{font-size:12.5px;color:var(--text-2);line-height:1.6}
+.ann-bd strong{color:var(--text);font-weight:600}
+.ann-bd em{color:var(--text-2)}
+.ann-bd code{font-family:var(--mono);font-size:10.5px;background:var(--surface-2);padding:1px 4px;border-radius:2px;color:var(--amber)}
+
+/* ── Bottom sections ── */
+.section{margin-top:52px;padding-top:26px;border-top:1px solid var(--border)}
+.sec-t{font-size:9.5px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--amber);margin-bottom:18px}
+.s2{display:grid;grid-template-columns:1fr 1fr;gap:28px}
+.s3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px}
+.it{font-size:13.5px;font-weight:600;color:var(--text);margin-bottom:6px}
+.ib{font-size:12.5px;color:var(--text-2);line-height:1.65}
+.ib p{margin-bottom:8px}
+.ib p:last-child{margin:0}
+.ib strong{color:var(--text);font-weight:600}
+
+/* IA diagram */
+.ia{background:var(--surface);border:1px solid var(--border);border-radius:3px;padding:18px 22px;font-family:var(--mono);font-size:11.5px;line-height:1.9;margin-top:16px}
+.ia .l0{color:var(--text)}
+.ia .l1{color:var(--amber);padding-left:14px}
+.ia .l2{color:var(--text-2);padding-left:28px}
+.ia .l3{color:var(--text-3);padding-left:42px}
+.ia .lx{color:var(--text-3);font-size:10px;padding-left:56px}
+.ia mark{background:rgba(247,37,133,0.22);color:var(--text);border-radius:1px;padding:0 2px;font-style:normal}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="dh">
+  <div class="ov">Rwanga Editor · Designer Brief · 2026-06-02</div>
+  <h1>Scene Navigator v1</h1>
+  <p class="sub">Filmustageation-inspired navigation redesign. Full-screenplay search, expandable scene hierarchy with screenplay-native entities, large-script scaling — inside the existing shell. Shell untouched.</p>
+  <p class="success">"I can find any scene, character, or word in the screenplay faster than scrolling — and this still feels like Rwanga."</p>
+</header>
+
+<!-- TABS -->
+<div class="tabs" role="tablist">
+  <button class="tab on" onclick="show(0)">1 · Normal Navigator</button>
+  <button class="tab" onclick="show(1)">2 · Expanded Scene</button>
+  <button class="tab" onclick="show(2)">3 · Search Results</button>
+  <button class="tab" onclick="show(3)">4 · Large Script</button>
+  <button class="tab" onclick="show(4)">5 · Empty States</button>
+</div>
+
+<!-- STATE 1: Normal -->
+<div class="state on" id="s0">
+  <div class="wf">
+    <nav class="rail">
+      <div class="ri on">≡</div><div class="ri">⊞</div>
+      <div class="ri-sep"></div>
+      <div class="ri">⌕</div><div class="ri">◈</div><div class="ri">◷</div>
+      <div class="ri-sep"></div>
+      <div class="ri" style="margin-top:auto">⚙</div>
+    </nav>
+    <div class="sb">
+      <div class="sbh">
+        <div class="sbh-lbl">Scenes <span class="sbh-n">· 5</span></div>
+        <div class="srch">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="7" cy="7" r="4.5"/><line x1="10.5" y1="10.5" x2="14" y2="14"/></svg>
+          <span class="ph">Search screenplay…</span>
+        </div>
+      </div>
+      <div class="sl">
+        <div class="sr cur"><div class="cr"></div><div class="ng"><span class="cv">›</span><span class="nm">1</span></div><div class="sh"><span class="e">EXT.</span>&nbsp;OLD HOUSE — ROSE GARDEN — DAWN</div><div class="sg"></div><div class="pg">p.1</div></div>
+        <div class="sr"><div class="cr"></div><div class="ng"><span class="cv">›</span><span class="nm">2</span></div><div class="sh"><span class="e">EXT.</span>&nbsp;BABAN'S BEDROOM — CONTINUOUS</div><div class="sg"></div><div class="pg">p.1</div></div>
+        <div class="sr"><div class="cr"></div><div class="ng"><span class="cv">›</span><span class="nm">3</span></div><div class="sh"><span class="i">INT.</span>&nbsp;KITCHEN — DAY</div><div class="sg"><div class="sig n"></div></div><div class="pg">p.2</div></div>
+        <div class="sr"><div class="cr"></div><div class="ng"><span class="cv">›</span><span class="nm">4</span></div><div class="sh"><span class="i">INT.</span>&nbsp;BABAN'S BEDROOM — DUSK</div><div class="sg"><div class="sig n"></div><div class="sig f"></div></div><div class="pg">p.2</div></div>
+        <div class="sr"><div class="cr"></div><div class="ng"><span class="cv">›</span><span class="nm">5</span></div><div class="sh"><span class="e">EXT.</span>&nbsp;OLD HOUSE — DRIVEWAY — NIGHT</div><div class="sg"></div><div class="pg">p.3</div></div>
+      </div>
+    </div>
+  </div>
+  <div>
+    <div class="ann-hd">Default Navigator</div>
+    <div class="ann-dc">The resting state. Five collapsed scenes. The panel is glanced at, never worked in — orientation and navigation only. The screenplay page remains the heaviest object in the room.</div>
+    <div class="ann-ls">
+      <div class="ann-rw"><div class="ann-num">1</div><div class="ann-bd"><strong>Row grid: 3px · 30px · 1fr · 20px · 30px.</strong> Current rail · number gutter (amber-tinted, monospace) · heading (load-bearing, ellipsises on overflow) · signal margin (fixed, reserved even when empty) · page. The grid never reflows on any state change.</div></div>
+      <div class="ann-rw"><div class="ann-num">2</div><div class="ann-bd"><strong>Current scene (scene 1) carries the 3px pink rail</strong> — a whisper, not a fill. It tracks the editor cursor passively. Selected state (keyboard navigation intent) would add a soft row fill; they occupy different visual real estate and never compete.</div></div>
+      <div class="ann-rw"><div class="ann-num">3</div><div class="ann-bd"><strong>Signal margin is presence-only.</strong> Scene 3: one amber dot (note). Scene 4: amber + pink (note + revision). No counts. The margin is pre-reserved at 20px so no row reflows when a signal appears or disappears.</div></div>
+      <div class="ann-rw"><div class="ann-num">4</div><div class="ann-bd"><strong>Expand chevron <code>›</code></strong> lives in the number gutter, appears on hover. At rest the list looks identical to the current navigator. Every scene with screenplay content is expandable — the chevron is the only new affordance added to the row.</div></div>
+      <div class="ann-rw"><div class="ann-num">5</div><div class="ann-bd"><strong>"Search screenplay…" — not "Find scene…".</strong> The placeholder announces the shift before the writer types anything: this searches the text of the script, not the navigator's label list.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- STATE 2: Expanded Scene -->
+<div class="state" id="s1">
+  <div class="wf">
+    <nav class="rail">
+      <div class="ri on">≡</div><div class="ri">⊞</div>
+      <div class="ri-sep"></div>
+      <div class="ri">⌕</div><div class="ri">◈</div><div class="ri">◷</div>
+      <div class="ri-sep"></div>
+      <div class="ri" style="margin-top:auto">⚙</div>
+    </nav>
+    <div class="sb">
+      <div class="sbh">
+        <div class="sbh-lbl">Scenes <span class="sbh-n">· 5</span></div>
+        <div class="srch">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="7" cy="7" r="4.5"/><line x1="10.5" y1="10.5" x2="14" y2="14"/></svg>
+          <span class="ph">Search screenplay…</span>
+        </div>
+      </div>
+      <div class="sl">
+        <div class="sr cur"><div class="cr"></div><div class="ng"><span class="cv">›</span><span class="nm">1</span></div><div class="sh"><span class="e">EXT.</span>&nbsp;OLD HOUSE — ROSE GARDEN — DAWN</div><div class="sg"></div><div class="pg">p.1</div></div>
+        <div class="sr"><div class="cr"></div><div class="ng"><span class="cv">›</span><span class="nm">2</span></div><div class="sh"><span class="e">EXT.</span>&nbsp;BABAN'S BEDROOM — CONTINUOUS</div><div class="sg"></div><div class="pg">p.1</div></div>
+        <div class="sr"><div class="cr"></div><div class="ng"><span class="cv">›</span><span class="nm">3</span></div><div class="sh"><span class="i">INT.</span>&nbsp;KITCHEN — DAY</div><div class="sg"><div class="sig n"></div></div><div class="pg">p.2</div></div>
+        <!-- Scene 4 — expanded + selected -->
+        <div class="sr sel exp" style="background:rgba(255,255,255,0.025);outline:1px solid var(--surface-3);outline-offset:-1px">
+          <div class="cr"></div>
+          <div class="ng"><span class="cv" style="opacity:1;color:var(--amber)">▾</span><span class="nm">4</span></div>
+          <div class="sh"><span class="i">INT.</span>&nbsp;BABAN'S BEDROOM — DUSK</div>
+          <div class="sg"><div class="sig n"></div><div class="sig f"></div></div>
+          <div class="pg">p.2</div>
+        </div>
+        <!-- Children zone -->
+        <div class="kids">
+          <div class="kg-lbl">Characters</div>
+          <div class="ki"><span class="ico">›</span>BABAN</div>
+          <div class="ki"><span class="ico">›</span>YOUNG ALIEN GIRL</div>
+          <div class="kg-lbl" style="margin-top:3px">Marks</div>
+          <div class="ki"><span class="ico" style="color:var(--amber)">✎</span>1 note attached</div>
+          <div class="ki"><span class="ico" style="color:var(--pink)">⚑</span>Revision flagged</div>
+          <div class="kg-gate">Breakdown&nbsp;&nbsp;→</div>
+        </div>
+        <div class="sr"><div class="cr"></div><div class="ng"><span class="cv">›</span><span class="nm">5</span></div><div class="sh"><span class="e">EXT.</span>&nbsp;OLD HOUSE — DRIVEWAY — NIGHT</div><div class="sg"></div><div class="pg">p.3</div></div>
+      </div>
+    </div>
+  </div>
+  <div>
+    <div class="ann-hd">Expanded Scene</div>
+    <div class="ann-dc">Scene 4 is open. Two tiers: Characters (screenplay anchors) and Marks (awareness only). No production inventory loads inline — the navigator stays a navigator.</div>
+    <div class="ann-ls">
+      <div class="ann-rw"><div class="ann-num">1</div><div class="ann-bd"><strong>Two tiers only: Characters + Marks.</strong> Characters who speak in the scene become navigation anchors. Marks signal note/flag presence, read-only. No props, SFX, wardrobe, or counts — those are breakdown inventory and belong behind the gateway, not inline in the writing navigator.</div></div>
+      <div class="ann-rw"><div class="ann-num">2</div><div class="ann-bd"><strong>Characters are navigation anchors, not inventory rows.</strong> Clicking BABAN scrolls the screenplay to his first line in scene 4. The list is script-derived from the existing parse — not manually entered, and never shows parenthetical counts.</div></div>
+      <div class="ann-rw"><div class="ann-num">3</div><div class="ann-bd"><strong>Marks are orientation, not action.</strong> "1 note attached" is read-only. "Revision flagged" is status. The inspector holds note content; the navigator holds only <em>"something is there."</em> The division is absolute.</div></div>
+      <div class="ann-rw"><div class="ann-num">4</div><div class="ann-bd"><strong>"Breakdown →" is a gateway, not a panel.</strong> It activates the Breakdown rail mode, pre-filtered to this scene. Production data (CAST, PROPS, SFX, STUNTS) never loads inline here. The gateway acknowledges breakdown data exists and routes to it correctly.</div></div>
+      <div class="ann-rw"><div class="ann-num">5</div><div class="ann-bd"><strong>The scene row stays a label.</strong> Row 4 is visually unchanged — same grid, same signals, same page chip. The children zone renders below it as a separate indented block. No card expansion, no height change in the row itself.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- STATE 3: Search Results -->
+<div class="state" id="s2">
+  <div class="wf">
+    <nav class="rail">
+      <div class="ri on">≡</div><div class="ri">⊞</div>
+      <div class="ri-sep"></div>
+      <div class="ri">⌕</div><div class="ri">◈</div><div class="ri">◷</div>
+      <div class="ri-sep"></div>
+      <div class="ri" style="margin-top:auto">⚙</div>
+    </nav>
+    <div class="sb">
+      <div class="sbh">
+        <div class="sbh-lbl">Scenes <span class="sbh-n">· 5</span></div>
+        <div class="srch on">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="7" cy="7" r="4.5"/><line x1="10.5" y1="10.5" x2="14" y2="14"/></svg>
+          <span class="qy">kitchen</span>
+          <span class="hc" style="color:var(--text-3)">3 hits</span>
+        </div>
+      </div>
+      <div class="rsh"><span>3 results · 3 scenes</span><span class="rsh-clr">Esc to clear</span></div>
+      <div class="sl">
+        <div class="ri">
+          <div class="ri-row"><div class="ri-num">3</div><div class="ri-slug"><span style="color:var(--teal)">INT.</span> KITCHEN — DAY</div><div class="ri-pg">p.2</div></div>
+          <div class="ri-snip sel">…she walked into the <mark>KITCHEN</mark> and paused at the threshold, the overhead light already on…</div>
+        </div>
+        <div class="ri">
+          <div class="ri-row"><div class="ri-num">7</div><div class="ri-slug"><span style="color:var(--teal)">INT.</span> KITCHEN — NIGHT</div><div class="ri-pg">p.6</div></div>
+          <div class="ri-snip">…back in the <mark>KITCHEN</mark> now, the dishes still untouched since morning. She didn't notice…</div>
+        </div>
+        <div class="ri">
+          <div class="ri-row"><div class="ri-num">18</div><div class="ri-slug"><span style="color:var(--orange)">EXT.</span> KITCHEN WINDOW — DAY</div><div class="ri-pg">p.14</div></div>
+          <div class="ri-snip">…the <mark>KITCHEN</mark> window reflected the pale dawn and the silhouette pressed against the glass…</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div>
+    <div class="ann-hd">Search Results</div>
+    <div class="ann-dc">The scene list gives way to context snippets. Three occurrences of "kitchen" across three scenes. The writer sees: where it is, what surrounds it — exactly like an IDE search or Google snippet inside the screenplay.</div>
+    <div class="ann-ls">
+      <div class="ann-rw"><div class="ann-num">1</div><div class="ann-bd"><strong>Scene list replaced, not filtered.</strong> While search is active the panel shows result snippets. Escape restores the scene list at its previous scroll position. Two distinct modes, one panel — the transition is instant, no animation.</div></div>
+      <div class="ann-rw"><div class="ann-num">2</div><div class="ann-bd"><strong>Result anatomy: slug header + context snippet.</strong> The slug row reuses the same number gutter and INT./EXT. color vocabulary. The monospace snippet shows before · <strong>highlighted match</strong> · after. Grouped by scene so multiple hits in one scene stack under one header.</div></div>
+      <div class="ann-rw"><div class="ann-num">3</div><div class="ann-bd"><strong>Two highlight intensities.</strong> The selected result (result 1, stronger pink) vs all other matches in the screenplay (ambient, soft pink). The screenplay shows both simultaneously — selected is the current anchor; ambient shows the full picture.</div></div>
+      <div class="ann-rw"><div class="ann-num">4</div><div class="ann-bd"><strong>Results header: truth + escape.</strong> "3 results · 3 scenes" + "Esc to clear" — one line. No sort, no filter, no faceted controls. Results are ordered by screenplay position, not relevance — writers navigate spatially.</div></div>
+      <div class="ann-rw"><div class="ann-num">5</div><div class="ann-bd"><strong>Clicking a result scrolls and highlights immediately.</strong> Navigation and highlight are one action. The clicked result becomes the strong highlight; the rest become ambient. A brief flash-confirm (~1s) on the screenplay line confirms the jump landed.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- STATE 4: Large Script -->
+<div class="state" id="s3">
+  <div class="wf">
+    <nav class="rail">
+      <div class="ri on">≡</div><div class="ri">⊞</div>
+      <div class="ri-sep"></div>
+      <div class="ri">⌕</div><div class="ri">◈</div><div class="ri">◷</div>
+      <div class="ri-sep"></div>
+      <div class="ri" style="margin-top:auto">⚙</div>
+    </nav>
+    <div class="sb">
+      <div class="sbh">
+        <div class="sbh-lbl">Scenes <span class="sbh-n">· 104</span></div>
+        <div class="srch">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="7" cy="7" r="4.5"/><line x1="10.5" y1="10.5" x2="14" y2="14"/></svg>
+          <span class="ph">Search screenplay…</span>
+        </div>
+      </div>
+      <div class="sl" id="lg"></div>
+    </div>
+  </div>
+  <div>
+    <div class="ann-hd">Large Script — 104 Scenes</div>
+    <div class="ann-dc">At scale, rows step down to compact density (21px). Act group headers give structural orientation. Scene 47 (current) is auto-scrolled into view on load.</div>
+    <div class="ann-ls">
+      <div class="ann-rw"><div class="ann-num">1</div><div class="ann-bd"><strong>Compact density at scale.</strong> Past ~40 scenes, rows step from 26px → 21px. Location text stays legible at 10.5px. The number gutter and signal margin never compress — they are the list's skeleton and must hold at any density.</div></div>
+      <div class="ann-rw"><div class="ann-num">2</div><div class="ann-bd"><strong>Act group headers give structural orientation.</strong> At 104 scenes the writer needs to know which act they're in at a glance. Group headers are derived from the document's structural markers — not manually managed by the writer.</div></div>
+      <div class="ann-rw"><div class="ann-num">3</div><div class="ann-bd"><strong>Auto-scroll to current is the critical behavior at this scale.</strong> Scene 47 (pink rail) is in the viewport — because the navigator scrolls to it whenever the current scene changes. At 104 scenes, "you are here" must be visible without the writer doing anything.</div></div>
+      <div class="ann-rw"><div class="ann-num">4</div><div class="ann-bd"><strong>Search is the primary scale solution.</strong> The compact list gives orientation; search gives precision retrieval. A character name, a location, a line of dialogue — the results panel surfaces the exact moment in under a second. Scrolling 104 rows is never the answer.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- STATE 5: Empty States -->
+<div class="state" id="s4">
+  <div class="wf">
+    <nav class="rail">
+      <div class="ri on">≡</div><div class="ri">⊞</div>
+      <div class="ri-sep"></div>
+      <div class="ri">⌕</div><div class="ri">◈</div><div class="ri">◷</div>
+      <div class="ri-sep"></div>
+      <div class="ri" style="margin-top:auto">⚙</div>
+    </nav>
+    <div class="sb">
+      <div class="sbh">
+        <div class="sbh-lbl">Scenes <span class="sbh-n">· 0</span></div>
+        <div class="srch">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="7" cy="7" r="4.5"/><line x1="10.5" y1="10.5" x2="14" y2="14"/></svg>
+          <span class="ph">Search screenplay…</span>
+        </div>
+      </div>
+      <div class="ep">
+        <div class="ep-h">
+          <div class="ep-tag">No Scenes</div>
+          <div class="ep-txt">Scenes appear here as you write your screenplay.</div>
+        </div>
+        <div class="ep-h">
+          <div class="ep-tag">No Results</div>
+          <div class="ep-txt">No results for <em style="color:var(--text-2)">"umbrella"</em></div>
+          <div class="ep-act">Clear search</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div>
+    <div class="ann-hd">Empty States</div>
+    <div class="ann-dc">Two distinct empties shown side by side. Each is one calm sentence. No illustration, no zero-state hero, no CTA button — the blank page is already the invitation.</div>
+    <div class="ann-ls">
+      <div class="ann-rw"><div class="ann-num">1</div><div class="ann-bd"><strong>No Scenes — blank document.</strong> "Scenes appear here as you write." Describes what the panel will become, not which key to press. Platform-neutral and future-safe: no keystroke instruction that breaks if authoring mechanics change.</div></div>
+      <div class="ann-rw"><div class="ann-num">2</div><div class="ann-bd"><strong>No Results — zero-match search.</strong> Echoes the exact query ("umbrella") so the writer knows precisely what was searched. A single "Clear search" text link is the only affordance. One escape hatch; nothing else.</div></div>
+      <div class="ann-rw"><div class="ann-num">3</div><div class="ann-bd"><strong>No illustration, no CTA, no hero graphic.</strong> A large empty-state graphic or "Add your first scene" button is dashboard onboarding — it reads as admin. Muted text, centered, done. The navigator earns its calm by refusing ornamentation, including in its empties.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- INFORMATION ARCHITECTURE -->
+<section class="section">
+  <div class="sec-t">Information Architecture</div>
+  <div style="font-size:13px;color:var(--text-2)">Two modes, one panel. Scene List is the default; Search Results replaces it while search is active. Breakdown is a gateway — it is never a layer of the navigator.</div>
+  <div class="ia">
+    <div class="l0">Scene Navigator</div>
+    <div class="l1">├── Header (pinned)</div>
+    <div class="l2">│   ├── "Scenes · N" — count label</div>
+    <div class="l2">│   └── Search field — full screenplay text (not slug-only)</div>
+    <div class="l1">├── Mode A · Scene List  [default]</div>
+    <div class="l2">│   ├── Act / Sequence group header  [optional — large scripts only]</div>
+    <div class="l2">│   └── Scene Row (collapsed)</div>
+    <div class="l3">│       ├── Current rail — 3px pink, tracks editor cursor</div>
+    <div class="l3">│       ├── Number gutter — amber, mono + hover expand chevron</div>
+    <div class="l3">│       ├── Heading — EXT./INT. · location · time (ellipsises)</div>
+    <div class="l3">│       ├── Signal margin — note dot · flag dot (presence, no counts)</div>
+    <div class="l3">│       └── Page reference</div>
+    <div class="l2">│   └── Scene Row (expanded)</div>
+    <div class="l3">│       ├── [same row — anatomy unchanged]</div>
+    <div class="l3">│       ├── Characters group</div>
+    <div class="lx">│       │     each name → navigation anchor to first line in this scene</div>
+    <div class="l3">│       ├── Marks group</div>
+    <div class="lx">│       │     note presence (read-only) · revision flag status</div>
+    <div class="l3">│       └── "Breakdown →" gateway</div>
+    <div class="lx">│             activates Breakdown rail mode, pre-filtered to this scene</div>
+    <div class="l1">└── Mode B · Search Results  [search active]</div>
+    <div class="l2">    ├── Results header — "N results · M scenes" · Esc</div>
+    <div class="l2">    └── Result Item  [grouped by scene; ordered by screenplay position]</div>
+    <div class="l3">        ├── Scene slug row — number · INT./EXT. · location · time · page</div>
+    <div class="l3">        └── Context snippet — …before… <mark>match</mark> …after…</div>
+    <div class="lx">              selected result → strong pink · all matches in screenplay → ambient</div>
+  </div>
+</section>
+
+<!-- INTERACTION NOTES -->
+<section class="section">
+  <div class="sec-t">Interaction Notes</div>
+  <div class="s3">
+    <div>
+      <div class="it">Expand / Collapse</div>
+      <div class="ib">
+        <p>Clicking the row navigates to the scene (existing behavior, unchanged). Clicking the expand chevron in the number gutter toggles expansion. Two distinct interaction targets — navigation and expansion never share the same click zone.</p>
+        <p>Expansion is instant — no animation. Multiple scenes may be expanded simultaneously. Keyboard: <strong>Space</strong> or <strong>→</strong> expands the selected row; <strong>←</strong> or <strong>Space</strong> again collapses. <strong>↑/↓</strong> move selection; <strong>Enter</strong> navigates. Existing keyboard contract is unchanged.</p>
+      </div>
+    </div>
+    <div>
+      <div class="it">Search Behavior</div>
+      <div class="ib">
+        <p>Focusing the search field enters search mode; the panel transitions to results immediately. Results update on every keystroke — no Enter required. Live, progressive, no loading state for typical scripts.</p>
+        <p>Results are ordered by screenplay position, not relevance score — writers navigate spatially, not by rank. <strong>Escape (1st press):</strong> clears the search text. <strong>Escape (2nd press):</strong> exits search mode entirely and restores the scene list at its previous scroll position.</p>
+      </div>
+    </div>
+    <div>
+      <div class="it">Highlight + Sync</div>
+      <div class="ib">
+        <p>While search is active, all occurrences in the screenplay receive ambient highlight. The selected result receives the strong highlight. Two intensities; one truth.</p>
+        <p>Clicking any scene row, character anchor, or result item scrolls the screenplay immediately. A brief flash-confirm (~1s) on the target line confirms the jump. The current-scene indicator (pink rail) tracks the editor cursor continuously and independently — navigator and screenplay always share one "where you are," regardless of which mode is active.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MIGRATION NOTES -->
+<section class="section">
+  <div class="sec-t">Migration Notes</div>
+  <div class="s2">
+    <div>
+      <div class="it">What carries forward unchanged</div>
+      <div class="ib">
+        <p>The row anatomy (number · heading · signals · page), the current/selected separation invariant, the brand-pink current rail, the amber monospace number gutter, and the reserved signal margin all carry forward intact. The row grid adds one column (the expand zone) but the visual logic and the separation invariant are untouched.</p>
+        <p>The existing "Find scene…" field is the physical container the new search inherits — same placement, same header, different scope. No removal; only upgrade.</p>
+        <p>The shell, rail, sidebar container, editor area, inspector, timeline, command palette, color system, and typographic system are untouched throughout. This is a navigator subsystem change only.</p>
+      </div>
+    </div>
+    <div>
+      <div class="it">Change order, by priority</div>
+      <div class="ib">
+        <p><strong>1. Auto-scroll current scene into view.</strong> The existing highest-value fix — keeps "you are here" visible. Ships first, independently. Zero schema change.</p>
+        <p><strong>2. Full-text screenplay search.</strong> Replace slug-matching with screenplay-text search and the results panel. Ships independently of expand hierarchy — maximum value, minimum coupling.</p>
+        <p><strong>3. Expandable scenes.</strong> Character anchors come from the existing screenplay parse. Marks from the existing note/flag model. No new per-scene schema fields required for the first cut.</p>
+        <p><strong>4. Compact density + act groups.</strong> A CSS step-down at a scene-count threshold. Act groups need a structural act marker in the document model — gated behind that work, not blocked by it.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+// Tab state
+const tabs = document.querySelectorAll('.tab');
+const states = document.querySelectorAll('.state');
+function show(i) {
+  tabs.forEach((t,j) => t.classList.toggle('on', i===j));
+  states.forEach((s,j) => s.classList.toggle('on', i===j));
+}
+
+// Generate large script list
+const locs = ['OLD HOUSE — ROSE GARDEN','BABAN\'S BEDROOM','KITCHEN','DRIVEWAY — NIGHT','CITY STREET','APARTMENT — LIVING ROOM','DETECTIVE\'S OFFICE','ROOFTOP','HOSPITAL CORRIDOR','UNDERGROUND BUNKER','TRAIN STATION','PARK — EAST SIDE','ALLEY BEHIND MARKET','RESTAURANT','ABANDONED WAREHOUSE','RIVERBANK','HOTEL LOBBY','DESERT HIGHWAY','SCHOOL GYMNASIUM','HARBOUR DOCK'];
+const times = ['DAY','NIGHT','DUSK','DAWN','CONTINUOUS','LATER'];
+const acts = ['ACT ONE','ACT TWO — PART A','ACT TWO — PART B','ACT THREE'];
+const aBreaks = [1,30,58,86];
+const lg = document.getElementById('lg');
+if (lg) {
+  let h = '';
+  for (let i=1; i<=104; i++) {
+    const ai = aBreaks.indexOf(i);
+    if (ai >= 0) {
+      const bt = ai===0 ? 'border-top:none;padding-top:6px' : '';
+      h += `<div class="grp" style="${bt}">${acts[ai]}</div>`;
+    }
+    const isCur = i===47;
+    const hasNote = i%7===0;
+    const hasFlag = i%19===0;
+    const isExt = i%3!==0;
+    const sc = isExt ? 'e' : 'i';
+    const st = isExt ? 'EXT.' : 'INT.';
+    const loc = locs[i % locs.length];
+    const t = times[i % times.length];
+    const p = Math.ceil(i*1.05);
+    h += `<div class="sr cmp${isCur?' cur':''}"><div class="cr"></div><div class="ng"><span class="nm">${i}</span></div><div class="sh"><span class="${sc}">${st}</span>&nbsp;${loc} — ${t}</div><div class="sg">${hasNote?'<div class="sig n"></div>':''}${hasFlag?'<div class="sig f"></div>':''}</div><div class="pg">p.${p}</div></div>`;
+  }
+  lg.innerHTML = h;
+  setTimeout(()=>{
+    const cur = lg.querySelector('.cur');
+    if (cur) { lg.scrollTop = Math.max(0, cur.offsetTop - lg.clientHeight/2 + 10); }
+  }, 80);
+}
+</script>
+</body>
+</html>
