@@ -127,6 +127,33 @@
     return (doc && doc.tagRegistry && doc.tagRegistry[key]) || [];
   }
 
+  // Registry Integrity Slice A — THE single reuse-before-create path.
+  // Every tagging surface (toolbar dropdown, context-menu/Ctrl+Shift+T
+  // dialog, future recognizers) must acquire entity ids through this
+  // function so the lookup logic can never diverge between paths again.
+  //
+  //   - exact case-insensitive name match within the tagType's registry
+  //     list → reuse that entity's id (curation: color/notes survive)
+  //   - no match → register one new entity via Rga.Doc.addEntity
+  //   - identity is type-scoped: Character:NALI ≠ Prop:NALI
+  //
+  // Returns the entityId, or null when name is empty.
+  function findOrCreateEntity(doc, tagType, name) {
+    const trimmed = String(name || '').trim();
+    if (!trimmed) return null;
+
+    const existing = _entityList(doc, tagType).find(function(e) {
+      return String(e.name || '').toLowerCase() === trimmed.toLowerCase();
+    });
+    if (existing) return existing.id;
+
+    const entityId = crypto.randomUUID();
+    if (doc && Rga.Doc && Rga.Doc.addEntity) {
+      Rga.Doc.addEntity(doc, tagType, { id: entityId, name: trimmed, color: null, notes: '' });
+    }
+    return entityId;
+  }
+
   function showTagDialog(view, tagType) {
     if (Rga.ContextMenu) Rga.ContextMenu.hide();
 
@@ -139,21 +166,8 @@
     const activeTab = Rga.TabManager && Rga.TabManager.activeTab && Rga.TabManager.activeTab();
     const doc = activeTab && activeTab.doc;
 
-    // Find existing entity by name (case-insensitive)
-    const list = _entityList(doc, tagType);
-    const existing = list.find(function(e) {
-      return e.name.toLowerCase() === selectedText.toLowerCase();
-    });
-
-    let entityId;
-    if (existing) {
-      entityId = existing.id;
-    } else {
-      entityId = crypto.randomUUID();
-      if (doc && Rga.Doc && Rga.Doc.addEntity) {
-        Rga.Doc.addEntity(doc, tagType, { id: entityId, name: selectedText, color: null, notes: '' });
-      }
-    }
+    const entityId = findOrCreateEntity(doc, tagType, selectedText);
+    if (!entityId) return;
 
     applyTag(view, tagType, entityId);
     view.focus();
@@ -269,6 +283,7 @@
     applyTag,
     removeTag,
     removeAllMarksForEntity,
+    findOrCreateEntity,
     showTagDialog,
     refreshTagsPanel,
     tagsPlugin,

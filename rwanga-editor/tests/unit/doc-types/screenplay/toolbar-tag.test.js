@@ -63,6 +63,9 @@ function boot(opts) {
 
   const files = [
     '../../../../renderer/js/shell/toolbar.js',
+    // Slice A: the toolbar tag path acquires entity ids through the
+    // shared Rga.Tags.findOrCreateEntity helper — tags.js must be loaded.
+    '../../../../renderer/js/doc-types/screenplay/plugins/tags.js',
     '../../../../renderer/js/doc-types/screenplay/toolbar-tag.js'
   ];
   files.forEach(function(p) { delete require.cache[require.resolve(p)]; require(p); });

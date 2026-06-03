@@ -9,10 +9,11 @@
 //   - tag <select> — change to character / prop / wardrobe / location
 //     / sfx / vfx / vehicle / animal / custom. On change the
 //     screenplay tag system applies the selected category to the
-//     current text selection (via Rga.Doc.addEntity into the doc's
-//     tag_registry + the schema's `tag` mark). The select resets to
-//     its placeholder after each application so reselecting the same
-//     category re-fires the handler.
+//     current text selection (entity id via the shared
+//     Rga.Tags.findOrCreateEntity reuse-before-create helper + the
+//     schema's `tag` mark). The select resets to its placeholder
+//     after each application so reselecting the same category
+//     re-fires the handler.
 //
 // Pre-F1A.7 this dropdown + its handler lived in CORE: the static
 // <select id="rga-shell-toolbar-tag"> inside the Writing group of
@@ -59,9 +60,10 @@
   ];
 
   // ==========================================================================
-  // Engine dispatcher — pure function; same engine touch points the
-  // pre-F1A.7 format-toolbar.js used (Rga.Doc.addEntity + the `tag`
-  // mark), simply relocated here.
+  // Engine dispatcher — pure function. Entity identity is acquired
+  // through Rga.Tags.findOrCreateEntity (Registry Integrity Slice A);
+  // the mark application is the same `tag` mark the pre-F1A.7
+  // format-toolbar.js dispatched.
   // ==========================================================================
 
   function _applyTagFromSelection(tagType) {
@@ -77,7 +79,15 @@
     const doc = typeof TM.activeDoc === 'function' ? TM.activeDoc() : null;
     if (!doc || !window.Rga.Doc
         || typeof window.Rga.Doc.addEntity !== 'function') return;
-    const entityId = window.Rga.Doc.addEntity(doc, tagType, { name: text, color: null });
+    // Registry Integrity Slice A — identity goes through the ONE shared
+    // reuse-before-create helper (Rga.Tags.findOrCreateEntity). Never
+    // call Rga.Doc.addEntity directly from a tagging surface: that is
+    // exactly the path divergence that fragmented entity identity
+    // (REGISTRY_IDENTITY_INTEGRITY_AUDIT.md §1.2).
+    if (!window.Rga.Tags
+        || typeof window.Rga.Tags.findOrCreateEntity !== 'function') return;
+    const entityId = window.Rga.Tags.findOrCreateEntity(doc, tagType, text);
+    if (!entityId) return;
     const mt = view.state.schema.marks.tag;
     if (!mt) return;
     view.dispatch(view.state.tr.addMark(sel.from, sel.to, mt.create({
