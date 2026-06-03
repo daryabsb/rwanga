@@ -205,6 +205,25 @@
 
   function _expansionKey(tagType, entityId) { return tagType + ':' + entityId; }
 
+  // V1.3 — the ONE entity whose tagged occurrences are currently lit in the
+  // editor (the "tag focus"). Single value: selecting another entity moves
+  // the highlight. `{ tagType, entityId }` or null. Distinct from
+  // _expandedEntities (which is multi — the V1.2 occurrence browsers).
+  let _selectedEntity = null;
+
+  function _isSelected(tagType, entityId) {
+    return !!_selectedEntity && _selectedEntity.tagType === tagType && _selectedEntity.entityId === entityId;
+  }
+
+  // Clear the focus highlight + selection (panel reset / close / doc swap).
+  function clearFocus() {
+    _selectedEntity = null;
+    const view = _panelView();
+    if (view && Rga.TagFocusHighlight && typeof Rga.TagFocusHighlight.clear === 'function') {
+      Rga.TagFocusHighlight.clear(view);
+    }
+  }
+
   // Per-scene occurrence data for one entity:
   //   [{ sceneNodeId, sceneNumber, headingDisplay, count }]
   // Scene membership comes from the Memory API (the designed read
@@ -364,9 +383,37 @@
         const expansionKey = _expansionKey(type, entity.id);
         const expanded = _expandedEntities.has(expansionKey);
         row.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+
+        // V1.3 — active state: the selected entity's row is visibly focused
+        // (matches the lit occurrences in the editor). One row at a time.
+        if (_isSelected(type, entity.id)) {
+          row.classList.add('tag-item-selected');
+          row.setAttribute('aria-selected', 'true');
+        }
+
         row.addEventListener('click', function() {
-          if (_expandedEntities.has(expansionKey)) _expandedEntities.delete(expansionKey);
+          // V1.2 — toggle the occurrence browser.
+          const wasExpanded = _expandedEntities.has(expansionKey);
+          if (wasExpanded) _expandedEntities.delete(expansionKey);
           else _expandedEntities.add(expansionKey);
+          const nowExpanded = !wasExpanded;
+
+          // V1.3 — tag focus follows the same gesture. Opening an entity
+          // selects it and lights up ALL its tagged occurrences (replacing
+          // any prior focus). Closing the focused entity clears the
+          // highlight. Matched by entityId, so duplicate same-named
+          // entities never bleed into each other; a zero-occurrence entity
+          // simply paints nothing (honest no-op).
+          const view = _panelView();
+          if (nowExpanded) {
+            _selectedEntity = { tagType: type, entityId: entity.id };
+            if (view && Rga.TagFocusHighlight && typeof Rga.TagFocusHighlight.setEntity === 'function') {
+              Rga.TagFocusHighlight.setEntity(view, entity.id);
+            }
+          } else if (_isSelected(type, entity.id)) {
+            clearFocus();
+          }
+
           renderTagsPanel(container);
         });
 
@@ -439,12 +486,17 @@
     renderTagsPanel(container.parentElement);
   }
 
-  // Listen for tag events and refresh the panel
+  // Listen for tag events and refresh the panel. A tag mutation is a
+  // document change, which the transient focus highlight already drops; we
+  // also drop the stale selection so the active row state stays honest
+  // (no "selected" row without lit occurrences).
   document.addEventListener('editor.tagApplied', function() {
+    _selectedEntity = null;
     const activeTab = Rga.TabManager && Rga.TabManager.activeTab && Rga.TabManager.activeTab();
     if (activeTab && activeTab.doc) refreshTagsPanel(activeTab.doc);
   });
   document.addEventListener('editor.tagRemoved', function() {
+    _selectedEntity = null;
     const activeTab = Rga.TabManager && Rga.TabManager.activeTab && Rga.TabManager.activeTab();
     if (activeTab && activeTab.doc) refreshTagsPanel(activeTab.doc);
   });
@@ -774,6 +826,7 @@
     jumpToFirstOccurrence,
     jumpToOccurrenceInScene,
     refreshTagsPanel,
+    clearFocus,
     tagsPlugin,
     TAG_TYPES,
     TAG_LABELS,

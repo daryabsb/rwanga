@@ -72,6 +72,9 @@
         document.removeEventListener('editor.tagRemoved', _tagListener);
         _tagListener = null;
       }
+      // V1.3 — closing/resetting the panel drops the tag-focus highlight so
+      // it never lingers in the editor after the panel is gone.
+      if (Rga.Tags && typeof Rga.Tags.clearFocus === 'function') Rga.Tags.clearFocus();
       _container = null;
     }
   });

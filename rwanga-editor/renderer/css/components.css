@@ -437,6 +437,15 @@
 .tag-item.active {
   background: var(--bg-selected);
 }
+/* V1.3 — the entity whose occurrences are lit in the editor. The same blue
+   interaction accent the editor highlight uses, as an inline-start bar +
+   soft fill, so the panel selection and the editor highlight read as one
+   focus state. Logical border → mirrors correctly in RTL. */
+.tag-item-selected {
+  background: var(--bg-selected);
+  border-inline-start: 2px solid var(--accent-primary);
+  padding-inline-start: 34px;   /* 36px base − 2px bar = no text shift */
+}
 
 .tag-dot {
   width: 6px;

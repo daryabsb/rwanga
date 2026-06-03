@@ -424,3 +424,157 @@ test('Tags Panel V1 — RTL script → panel renders dir="rtl"', async () => {
     await teardown(app, userDataDir);
   }
 });
+
+// =================================================================
+// V1.3 — Tag Focus Highlight: select an entity → its tagged
+// occurrences light up in the editor (decoration only). Screenshots
+// are the visual-verification artifacts for the slice report.
+// =================================================================
+
+test('Tags Panel V1.3 — click entity -> editor highlights its occurrences; jump preserved', async () => {
+  const { app, page, userDataDir } = await launchApp('tags-panel-v13-');
+  try {
+    await seedSceneText(page);   // "NALI ... PHOTOGRAPH. NALI smiles."
+
+    await selectOccurrence(page, 'NALI', 0);
+    await tagSelectionViaToolbar(page, 'character');
+    await selectOccurrence(page, 'NALI', 1);
+    await tagSelectionViaToolbar(page, 'character');
+    await selectOccurrence(page, 'PHOTOGRAPH', 0);
+    await tagSelectionViaToolbar(page, 'prop');
+
+    await page.click('[data-panel-id="characters"]');
+    await page.waitForFunction(() => window.Rga.Shell.Sidebar.current() === 'characters');
+    await page.waitForFunction(() => {
+      const host = window.Rga.Shell.Sidebar.getHost();
+      return host && host.querySelectorAll('.tag-item').length >= 2;
+    });
+
+    // Click the NALI row -> editor lights up ALL NALI occurrences.
+    await page.evaluate(() => {
+      const host = window.Rga.Shell.Sidebar.getHost();
+      const nali = Array.from(host.querySelectorAll('.tag-item'))
+        .find((el) => el.querySelector('.tag-name').textContent === 'NALI');
+      nali.click();
+    });
+    await page.waitForFunction(() => document.querySelectorAll('.rga-tag-focus-active').length > 0);
+
+    const naliFocus = await page.evaluate(() => {
+      const view = window.Rga.TabManager._editorView();
+      const decos = window.Rga.TagFocusHighlight._decorations(view.state);
+      const host = window.Rga.Shell.Sidebar.getHost();
+      return {
+        decoCount: decos.length,
+        domCount: document.querySelectorAll('.rga-tag-focus-active').length,
+        selectedRows: host.querySelectorAll('.tag-item-selected').length
+      };
+    });
+    expect(naliFocus.decoCount).toBe(2);
+    expect(naliFocus.domCount).toBe(2);
+    expect(naliFocus.selectedRows).toBe(1);
+    await page.screenshot({ path: shotPath('11-entity-selected-occurrences-highlighted.png') });
+
+    // Occurrence-row jump still works while focus is active (V1.2 preserved).
+    // NALI is already expanded from the click above, so its occurrence rows
+    // are present — click the first one and confirm the highlight survives
+    // the selection-only jump.
+    await page.waitForFunction(() => {
+      const host = window.Rga.Shell.Sidebar.getHost();
+      return host.querySelectorAll('.tag-occurrence').length > 0;
+    });
+    await page.evaluate(() => {
+      const host = window.Rga.Shell.Sidebar.getHost();
+      host.querySelector('.tag-occurrence').click();
+    });
+    const after = await page.evaluate(() => ({
+      focus: document.querySelectorAll('.rga-tag-focus-active').length
+    }));
+    expect(after.focus).toBe(2);   // highlight survived the selection-only jump
+    await page.screenshot({ path: shotPath('13-jump-with-highlight-active.png') });
+
+    // Select another entity -> highlight MOVES (PHOTOGRAPH, 1 mark).
+    await page.evaluate(() => {
+      const host = window.Rga.Shell.Sidebar.getHost();
+      const photo = Array.from(host.querySelectorAll('.tag-item'))
+        .find((el) => el.querySelector('.tag-name').textContent === 'PHOTOGRAPH');
+      photo.click();
+    });
+    await page.waitForFunction(() => document.querySelectorAll('.rga-tag-focus-active').length === 1);
+    await page.screenshot({ path: shotPath('12-highlight-moved-to-other-entity.png') });
+  } finally {
+    await teardown(app, userDataDir);
+  }
+});
+
+test('Tags Panel V1.3 — duplicate NALI: selecting one highlights only its marks', async () => {
+  const { app, page, userDataDir } = await launchApp('tags-panel-v13-dup-');
+  try {
+    await seedSceneText(page);
+    await page.evaluate(() => {
+      const Doc = window.Rga.Doc;
+      const doc = window.Rga.TabManager.activeDoc();
+      Doc.addEntity(doc, 'character', { id: 'ent-nali-1', name: 'NALI', color: '#4FC1FF', notes: '' });
+      Doc.addEntity(doc, 'character', { id: 'ent-nali-2', name: 'NALI', color: null, notes: '' });
+    });
+    await selectOccurrence(page, 'NALI', 0);
+    await page.evaluate(() => window.Rga.Tags.applyTag(window.Rga.TabManager._editorView(), 'character', 'ent-nali-1'));
+    await selectOccurrence(page, 'NALI', 1);
+    await page.evaluate(() => window.Rga.Tags.applyTag(window.Rga.TabManager._editorView(), 'character', 'ent-nali-2'));
+
+    await page.click('[data-panel-id="characters"]');
+    await page.waitForFunction(() => window.Rga.Shell.Sidebar.current() === 'characters');
+
+    await page.evaluate(() => {
+      const host = window.Rga.Shell.Sidebar.getHost();
+      const row = Array.from(host.querySelectorAll('.tag-item'))
+        .find((el) => el.getAttribute('data-entity-id') === 'ent-nali-1');
+      row.click();
+    });
+    await page.waitForFunction(() => document.querySelectorAll('.rga-tag-focus-active').length > 0);
+    const focus = await page.evaluate(() =>
+      window.Rga.TagFocusHighlight._decorations(window.Rga.TabManager._editorView().state).length);
+    expect(focus).toBe(1);   // only ent-nali-1's mark — the other NALI stays dark
+    await page.screenshot({ path: shotPath('14-duplicate-nali-isolated-highlight.png') });
+  } finally {
+    await teardown(app, userDataDir);
+  }
+});
+
+test('Tags Panel V1.3 — RTL: highlight works on an RTL script', async () => {
+  const { app, page, userDataDir } = await launchApp('tags-panel-v13-rtl-');
+  try {
+    await page.evaluate(() => {
+      const doc = window.Rga.TabManager.activeDoc();
+      doc.metadata.screenplayProfile = { direction: 'rtl' };
+    });
+    await seedSceneText(page);
+    await selectOccurrence(page, 'NALI', 0);
+    await tagSelectionViaToolbar(page, 'character');
+    await selectOccurrence(page, 'NALI', 1);
+    await tagSelectionViaToolbar(page, 'character');
+
+    await page.click('[data-panel-id="characters"]');
+    await page.waitForFunction(() => window.Rga.Shell.Sidebar.current() === 'characters');
+    await page.evaluate(() => {
+      const host = window.Rga.Shell.Sidebar.getHost();
+      Array.from(host.querySelectorAll('.tag-item'))
+        .find((el) => el.querySelector('.tag-name').textContent === 'NALI').click();
+    });
+    await page.waitForFunction(() => document.querySelectorAll('.rga-tag-focus-active').length > 0);
+    const rtl = await page.evaluate(() => {
+      const host = window.Rga.Shell.Sidebar.getHost();
+      const wrapper = host.querySelector('[dir]');
+      return {
+        decoCount: window.Rga.TagFocusHighlight._decorations(window.Rga.TabManager._editorView().state).length,
+        panelDir: wrapper ? wrapper.getAttribute('dir') : null
+      };
+    });
+    // The panel mirrors the RTL script, and the position-based highlight
+    // decoration paints correctly regardless of direction.
+    expect(rtl.panelDir).toBe('rtl');
+    expect(rtl.decoCount).toBe(2);
+    await page.screenshot({ path: shotPath('15-rtl-highlight.png') });
+  } finally {
+    await teardown(app, userDataDir);
+  }
+});

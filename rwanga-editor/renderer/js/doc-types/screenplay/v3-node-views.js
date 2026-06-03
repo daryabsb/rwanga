@@ -248,6 +248,13 @@
       const hl = Rga.SearchHighlight.buildPlugin();
       if (hl) out.push(hl);
     }
+    // Tags Panel v1.3 — tag-focus highlight. Same shape as SearchHighlight:
+    // transient, content-safe decoration; composes additively. Absent → no
+    // focus highlight, no error.
+    if (window.Rga && Rga.TagFocusHighlight && typeof Rga.TagFocusHighlight.buildPlugin === 'function') {
+      const tf = Rga.TagFocusHighlight.buildPlugin();
+      if (tf) out.push(tf);
+    }
     return out;
   }
 

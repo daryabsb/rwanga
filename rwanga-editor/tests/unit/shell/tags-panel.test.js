@@ -56,6 +56,7 @@ function boot(opts) {
     '../../../renderer/js/framework/slug-resolver.js',
     '../../../renderer/js/framework/nav-index.js',
     '../../../renderer/js/doc-types/screenplay/schema-v3.js',
+    '../../../renderer/js/doc-types/screenplay/plugins/tag-focus-highlight.js',
     '../../../renderer/js/doc-types/screenplay/plugins/tags.js',
     '../../../renderer/js/shell/panels/characters.js'
   ];
@@ -101,10 +102,14 @@ function boot(opts) {
   // Real PM state WITH the real nav-index plugin (counts come from it).
   const navPlugin = Rga.Nav && typeof Rga.Nav.buildIndexPlugin === 'function'
     ? Rga.Nav.buildIndexPlugin() : null;
-  let state = PMstate.EditorState.create({
-    schema: schema, doc: docNode,
-    plugins: navPlugin ? [navPlugin] : []
-  });
+  // V1.3 — the tag-focus highlight plugin (additive; empty until an entity
+  // is selected, so it is a no-op for every pre-V1.3 test).
+  const focusPlugin = Rga.TagFocusHighlight && typeof Rga.TagFocusHighlight.buildPlugin === 'function'
+    ? Rga.TagFocusHighlight.buildPlugin() : null;
+  const _plugins = [];
+  if (navPlugin) _plugins.push(navPlugin);
+  if (focusPlugin) _plugins.push(focusPlugin);
+  let state = PMstate.EditorState.create({ schema: schema, doc: docNode, plugins: _plugins });
   let focusCalls = 0;
   const view = {
     get state() { return state; },
@@ -674,4 +679,133 @@ test('TagsPanel V1.2: occurrence rows are read-only navigation — no merge/edit
   assert.ok(expansion);
   assert.equal(expansion.querySelectorAll('button, input, select, textarea').length, 0,
     'the occurrence browser is a lens: no actions, no controls');
+});
+
+// ================================================================
+// V1.3 — Tag Focus Highlight (click an entity → its tagged
+// occurrences light up in the editor). Decorations only; no marks,
+// no content change, no persistence.
+// ================================================================
+
+function focusDecos(h) {
+  return h.Rga.TagFocusHighlight._decorations(h.view.state);
+}
+function rowsByName(h, name) {
+  return Array.from(h.host.querySelectorAll('.tag-item')).filter(function(el) {
+    return el.querySelector('.tag-name').textContent === name;
+  });
+}
+
+test('TagsPanel V1.3 #1: clicking an entity highlights ALL its tagged occurrences in the editor', () => {
+  const h = boot();
+  seedEntities(h);     // NALI (ent-nali) tagged 3× ; PHOTOGRAPH 1×
+  h.activatePanel();
+
+  assert.equal(focusDecos(h).length, 0, 'no highlight before any selection');
+  clickRow(h, rowByName(h, 'NALI'));
+
+  const decos = focusDecos(h);
+  assert.equal(decos.length, 3, 'all three NALI tag marks are highlighted');
+  // They coincide exactly with ent-nali's marks.
+  const expected = h.Rga.TagFocusHighlight.rangesForEntity(h.view.state.doc, 'ent-nali');
+  assert.deepEqual(decos.slice().sort((a, b) => a.from - b.from),
+                   expected.slice().sort((a, b) => a.from - b.from));
+});
+
+test('TagsPanel V1.3: the selected entity row carries an active state', () => {
+  const h = boot();
+  seedEntities(h);
+  h.activatePanel();
+  clickRow(h, rowByName(h, 'NALI'));
+
+  const naliRow = rowByName(h, 'NALI');
+  assert.ok(naliRow.classList.contains('tag-item-selected'), 'selected row has the active class');
+  assert.equal(naliRow.getAttribute('aria-selected'), 'true');
+  // Only one selected at a time.
+  assert.equal(h.host.querySelectorAll('.tag-item-selected').length, 1);
+});
+
+test('TagsPanel V1.3 #5: selecting another entity REPLACES the highlight (and moves the active state)', () => {
+  const h = boot();
+  seedEntities(h);
+  h.activatePanel();
+
+  clickRow(h, rowByName(h, 'NALI'));
+  assert.equal(focusDecos(h).length, 3);
+
+  clickRow(h, rowByName(h, 'PHOTOGRAPH'));
+  const decos = focusDecos(h);
+  assert.equal(decos.length, 1, 'now only PHOTOGRAPH is highlighted — NALI cleared');
+  assert.deepEqual(decos, h.Rga.TagFocusHighlight.rangesForEntity(h.view.state.doc, 'ent-photo'));
+  // Active state moved.
+  assert.ok(rowByName(h, 'PHOTOGRAPH').classList.contains('tag-item-selected'));
+  assert.ok(!rowByName(h, 'NALI').classList.contains('tag-item-selected'));
+});
+
+test('TagsPanel V1.3 #6: clicking the selected entity again clears the highlight', () => {
+  const h = boot();
+  seedEntities(h);
+  h.activatePanel();
+
+  clickRow(h, rowByName(h, 'NALI'));
+  assert.equal(focusDecos(h).length, 3);
+  clickRow(h, rowByName(h, 'NALI'));   // toggle off
+  assert.equal(focusDecos(h).length, 0, 'highlight cleared on deselect');
+  assert.equal(h.host.querySelectorAll('.tag-item-selected').length, 0);
+});
+
+test('TagsPanel V1.3 #4: selecting a zero-occurrence entity shows no highlight and does not crash', () => {
+  const h = boot();
+  seedEntities(h);     // BABAN (ent-baban) is curated but never tagged
+  h.activatePanel();
+
+  clickRow(h, rowByName(h, 'BABAN'));
+  assert.equal(focusDecos(h).length, 0, 'no occurrences → no highlight (honest)');
+});
+
+test('TagsPanel V1.3 #2: duplicate NALI — selecting one highlights only that entity\'s marks', () => {
+  const h = boot();
+  seedEntities(h);
+  // A second, distinct NALI identity tagged on the "Nali" occurrence's neighbours.
+  h.Rga.Doc.addEntity(h.doc, 'character', { id: 'ent-nali-2', name: 'NALI', color: null, notes: '' });
+  // Tag the word "window" against the second NALI just to give it a mark.
+  h.tagOccurrence('window', 0, 'character', 'ent-nali-2');
+  h.activatePanel();
+
+  const naliRows = rowsByName(h, 'NALI');
+  assert.equal(naliRows.length, 2, 'two NALI identities present');
+
+  // Click the FIRST NALI row (ent-nali).
+  const firstNali = naliRows.find(function(r) { return r.getAttribute('data-entity-id') === 'ent-nali'; });
+  clickRow(h, firstNali);
+  const decos = focusDecos(h);
+  assert.equal(decos.length, 3, 'only ent-nali\'s 3 marks — the other NALI is untouched');
+  assert.deepEqual(decos.slice().sort((a, b) => a.from - b.from),
+                   h.Rga.TagFocusHighlight.rangesForEntity(h.view.state.doc, 'ent-nali').slice().sort((a, b) => a.from - b.from));
+});
+
+test('TagsPanel V1.3 #7: occurrence-row jump still works while focus is active (V1.2 preserved)', () => {
+  const h = boot();
+  seedEntities(h);
+  h.activatePanel();
+
+  clickRow(h, rowByName(h, 'NALI'));            // select + expand + highlight
+  assert.equal(focusDecos(h).length, 3);
+
+  const before = h.view._focusCalls();
+  const occ = h.host.querySelector('.tag-occurrence');
+  assert.ok(occ, 'occurrence rows present');
+  occ.dispatchEvent(new h.dom.window.Event('click', { bubbles: true }));
+  assert.ok(h.view._focusCalls() > before, 'jump ran (editor focused) — V1.2 navigation intact');
+  // The jump is selection-only, so the focus highlight survives it.
+  assert.equal(focusDecos(h).length, 3, 'highlight survives the jump');
+});
+
+test('TagsPanel V1.3 #6: selecting an entity does not change document content', () => {
+  const h = boot();
+  seedEntities(h);
+  h.activatePanel();
+  const before = h.view.state.doc;
+  clickRow(h, rowByName(h, 'NALI'));
+  assert.ok(before.eq(h.view.state.doc), 'document byte-identical — highlight is decoration only');
 });

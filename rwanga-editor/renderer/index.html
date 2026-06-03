@@ -765,6 +765,10 @@
 <script src="js/doc-types/screenplay/plugins/tags.js"></script>
 <script src="js/doc-types/screenplay/plugins/revision-flags.js"></script>
 <script src="js/doc-types/screenplay/plugins/search-highlight.js"></script>
+<!-- Tags Panel v1.3 — tag-focus highlight. Sibling of search-highlight;
+     loads before mount.js (registered via buildV3ScenePlugins) and is used
+     by plugins/tags.js when an entity is selected in the Tags Panel. -->
+<script src="js/doc-types/screenplay/plugins/tag-focus-highlight.js"></script>
 <script src="js/editor/mount.js"></script>
 <script src="js/editor/page-surface.js"></script>
 <script src="js/editor/page-setup-dialog.js"></script>

@@ -1740,6 +1740,19 @@ body.view-draft-active .rga-draft-footer {
   border-radius: 2px;
 }
 
+/* Tags Panel v1.3 — tag-focus highlight: every tagged occurrence of the
+   entity selected in the Tags Panel. Deliberately distinct from BOTH the
+   per-type tag underline (a border-bottom color) AND the search-match
+   highlight (Rwanga pink): this uses the editor's blue interaction accent
+   as a soft box + ring, so "this is the entity I'm focusing" never reads as
+   "this is a search hit" or as the tag's own category color. Position-based
+   decoration, so it mirrors correctly in RTL with no extra rules. */
+.ProseMirror .rga-tag-focus-active {
+  background-color: rgba(0, 122, 204, 0.22);
+  box-shadow: 0 0 0 2px rgba(0, 122, 204, 0.45);
+  border-radius: 2px;
+}
+
 .annot-log-divider {
   padding: 6px 4px 3px;
   font-size: 11px;
