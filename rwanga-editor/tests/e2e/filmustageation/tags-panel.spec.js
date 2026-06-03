@@ -238,6 +238,94 @@ test('Tags Panel V1 — the View Tags popup button opens the Characters panel', 
 });
 
 // =================================================================
+// V1.1 — Honest Entity Intelligence: duplicates warned, zero counts
+// hidden, counts mean tagged occurrences
+// =================================================================
+
+test('Tags Panel V1.1 — duplicates warned, unused entities clean, counts honest', async () => {
+  const { app, page, userDataDir } = await launchApp('tags-panel-v11-');
+  try {
+    await seedSceneText(page);
+
+    // The fragmented-script reality: duplicate NALI (one tagged),
+    // duplicate BABAN (both untagged), unused props, one normal entity.
+    await page.evaluate(() => {
+      const Doc = window.Rga.Doc;
+      const doc = window.Rga.TabManager.activeDoc();
+      // Duplicate characters (legacy pre-Slice-A data shape).
+      Doc.addEntity(doc, 'character', { id: 'ent-nali-1', name: 'NALI', color: '#4FC1FF', notes: '' });
+      Doc.addEntity(doc, 'character', { id: 'ent-nali-2', name: 'NALI', color: null, notes: '' });
+      Doc.addEntity(doc, 'character', { id: 'ent-baban-1', name: 'BABAN', color: '#FFB86C', notes: '' });
+      Doc.addEntity(doc, 'character', { id: 'ent-baban-2', name: 'Baban', color: null, notes: '' });
+      // Unused (registered, never tagged) props.
+      Doc.addEntity(doc, 'prop', { id: 'ent-photo', name: 'PHOTOGRAPH', color: null, notes: '' });
+      Doc.addEntity(doc, 'prop', { id: 'ent-tinbox', name: 'TIN BOX', color: null, notes: '' });
+      // A normal, unique, tagged character.
+      Doc.addEntity(doc, 'character', { id: 'ent-hassan', name: 'DR. HASSAN', color: '#A8F0A8', notes: '' });
+    });
+
+    // Tag NALI once (via the first duplicate) and DR. HASSAN once so the
+    // panel shows the full truth spectrum: duplicate+tagged,
+    // duplicate+untagged, unused, normal+tagged.
+    await selectOccurrence(page, 'NALI', 0);
+    await page.evaluate(() => {
+      const view = window.Rga.TabManager._editorView();
+      window.Rga.Tags.applyTag(view, 'character', 'ent-nali-1');
+    });
+    await selectOccurrence(page, 'NALI', 1);
+    await page.evaluate(() => {
+      const view = window.Rga.TabManager._editorView();
+      window.Rga.Tags.applyTag(view, 'character', 'ent-hassan');
+    });
+
+    // Open the panel via the rail.
+    await page.click('[data-panel-id="characters"]');
+    await page.waitForFunction(() => window.Rga.Shell.Sidebar.current() === 'characters');
+
+    const truth = await page.evaluate(() => {
+      const host = window.Rga.Shell.Sidebar.getHost();
+      const rows = Array.from(host.querySelectorAll('.tag-item')).map((el) => ({
+        name:      el.querySelector('.tag-name').textContent,
+        count:     el.querySelector('.tag-count') ? el.querySelector('.tag-count').textContent : null,
+        countWord: el.querySelector('.tag-count') ? el.querySelector('.tag-count').title : null,
+        warned:    !!el.querySelector('.tag-duplicate-warning')
+      }));
+      return rows;
+    });
+
+    // Duplicates: both NALI rows warned; both BABAN rows warned (case variant).
+    const nalis = truth.filter((r) => r.name === 'NALI');
+    expect(nalis.length).toBe(2);
+    expect(nalis.every((r) => r.warned)).toBe(true);
+    const babans = truth.filter((r) => /^baban$/i.test(r.name));
+    expect(babans.length).toBe(2);
+    expect(babans.every((r) => r.warned)).toBe(true);
+
+    // Unused entities: no count element at all.
+    const photo = truth.find((r) => r.name === 'PHOTOGRAPH');
+    expect(photo.count).toBe(null);
+    expect(photo.warned).toBe(false);
+    const tinbox = truth.find((r) => r.name === 'TIN BOX');
+    expect(tinbox.count).toBe(null);
+
+    // Normal entity: counted, honest language, no warning.
+    const hassan = truth.find((r) => r.name === 'DR. HASSAN');
+    expect(hassan.count).toBe('1');
+    expect(hassan.countWord).toMatch(/tagged occurrence/i);
+    expect(hassan.warned).toBe(false);
+
+    // Tagged duplicate: count + warning together.
+    const taggedNali = truth.find((r) => r.name === 'NALI' && r.count === '1');
+    expect(taggedNali).toBeTruthy();
+    expect(taggedNali.warned).toBe(true);
+
+    await page.screenshot({ path: shotPath('07-honest-panel-v1-1.png') });
+  } finally {
+    await teardown(app, userDataDir);
+  }
+});
+
+// =================================================================
 // 3. RTL — the panel mirrors the script direction
 // =================================================================
 

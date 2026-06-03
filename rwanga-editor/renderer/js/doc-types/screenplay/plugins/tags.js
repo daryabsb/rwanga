@@ -180,6 +180,16 @@
       if (!entities.length) return;
       const counts = _countLookup(view, type);
 
+      // V1.1 — duplicate-identity detection: how many LIVE entities in
+      // THIS category share each normalized (trimmed, case-folded) name.
+      // Identity is type-scoped, so the map is per-category; tombstones
+      // never reach here (the list is already live-filtered).
+      const nameTally = {};
+      entities.forEach(function(entity) {
+        const norm = String(entity.name || '').trim().toLowerCase();
+        nameTally[norm] = (nameTally[norm] || 0) + 1;
+      });
+
       const group = document.createElement('div');
       group.className = 'tag-group';
 
@@ -211,10 +221,40 @@
         name.textContent = entity.name || '';
         row.appendChild(name);
 
-        const count = document.createElement('span');
-        count.className = 'tag-count';
-        count.textContent = String(counts[entity.id] || 0);
-        row.appendChild(count);
+        // V1.1 — duplicate-identity warning: this name exists on more
+        // than one live entity in this category. Lucide triangle-alert
+        // with a text fallback; meaning carried on aria + title so the
+        // writer (and assistive tech) knows exactly what is wrong.
+        const norm = String(entity.name || '').trim().toLowerCase();
+        if (nameTally[norm] > 1) {
+          const warn = document.createElement('span');
+          warn.className = 'tag-duplicate-warning';
+          warn.setAttribute('data-icon-name', 'triangle-alert');
+          const svg = (Rga.Icons && Rga.Icons.Lucide && Rga.Icons.Lucide.has('triangle-alert'))
+            ? Rga.Icons.Lucide.svgFor('triangle-alert') : '';
+          if (svg) { warn.innerHTML = svg; } else { warn.textContent = '⚠'; }
+          const warnText = 'Duplicate identity: more than one "' + (entity.name || '')
+            + '" exists in ' + (TAG_GROUP_LABELS[type] || capitalize(type));
+          warn.setAttribute('aria-label', warnText);
+          warn.title = warnText;
+          row.appendChild(warn);
+        }
+
+        // V1.1 — honest zero treatment: the count element exists ONLY
+        // when there are tagged occurrences. An untagged entity shows
+        // just its name — "registered, not yet tagged in the screenplay".
+        const n = counts[entity.id] || 0;
+        if (n > 0) {
+          const count = document.createElement('span');
+          count.className = 'tag-count';
+          count.textContent = String(n);
+          // The number means TAGGED OCCURRENCES — not appearances, not
+          // mentions, not detected references. Say so.
+          const countText = n + ' tagged occurrence' + (n === 1 ? '' : 's');
+          count.title = countText;
+          count.setAttribute('aria-label', countText);
+          row.appendChild(count);
+        }
 
         row.addEventListener('click', function() {
           jumpToFirstOccurrence(_panelView(), type, entity.id);

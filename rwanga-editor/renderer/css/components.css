@@ -459,6 +459,21 @@
   flex-shrink: 0;
 }
 
+/* Tags Panel V1.1 — duplicate-identity warning. Same inline-indicator
+   anatomy as the scene-navigator indicators (shell.css); colored with
+   the existing warning token. */
+.tag-duplicate-warning {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+  flex-shrink: 0;
+  color: var(--accent-warning);
+}
+.tag-duplicate-warning svg {
+  width: 12px;
+  height: 12px;
+}
+
 /* ============================================================
    SIDEBAR — File Explorer Tree
    ============================================================ */

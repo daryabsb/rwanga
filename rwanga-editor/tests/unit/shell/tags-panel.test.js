@@ -229,12 +229,15 @@ test('TagsPanel: each entity row shows name + occurrence count', () => {
   assert.equal(nali.querySelector('.tag-count').textContent, '3',
     'occurrence count = number of tag marks in the document');
 
-  // BABAN: curated, never tagged → count 0 (still listed — curation is real data).
+  // BABAN: curated, never tagged → listed, but NO count element
+  // (V1.1 honest zero-occurrence treatment: a "0" reads as broken;
+  // absence reads as "registered, not yet tagged").
   const baban = Array.from(items).find(function(el) {
     return el.querySelector('.tag-name').textContent === 'BABAN';
   });
   assert.ok(baban, 'curated-but-untagged entity still listed');
-  assert.equal(baban.querySelector('.tag-count').textContent, '0');
+  assert.equal(baban.querySelector('.tag-count'), null,
+    'zero-occurrence entities render no count');
 
   // PHOTOGRAPH: tagged once.
   const photo = Array.from(items).find(function(el) {
@@ -414,4 +417,108 @@ test('TagsPanel: the panel renderer never writes registry state (read-only surfa
     path.resolve(__dirname, '..', '..', '..', 'renderer', 'js', 'shell', 'panels', 'characters.js'), 'utf8');
   assert.equal(/addEntity|markEntityMerged|foldEntityMetadata|removeEntity/.test(src), false,
     'the shell panel never mutates the registry — it is a lens, not a hand');
+});
+
+// ================================================================
+// §8 — V1.1: Honest Entity Intelligence
+// ================================================================
+
+// --- Duplicate identity warning ---------------------------------
+
+test('TagsPanel V1.1: two live entities with the same name in one category both carry a duplicate warning', () => {
+  const h = boot();
+  // The fragmented-script reality (pre-Slice-A legacy data): two NALI entities.
+  h.Rga.Doc.addEntity(h.doc, 'character', { id: 'ent-nali-1', name: 'NALI', color: '#4FC1FF', notes: '' });
+  h.Rga.Doc.addEntity(h.doc, 'character', { id: 'ent-nali-2', name: 'NALI', color: null, notes: '' });
+  h.activatePanel();
+
+  const warned = h.host.querySelectorAll('.tag-item .tag-duplicate-warning');
+  assert.equal(warned.length, 2, 'BOTH duplicate rows carry the warning indicator');
+  // The warning carries accessible meaning.
+  const aria = warned[0].getAttribute('aria-label') || '';
+  assert.ok(/duplicate/i.test(aria), 'warning explains itself: ' + aria);
+});
+
+test('TagsPanel V1.1: case-variant names are duplicates (NALI / Nali — same normalized identity)', () => {
+  const h = boot();
+  h.Rga.Doc.addEntity(h.doc, 'character', { id: 'ent-a', name: 'NALI' });
+  h.Rga.Doc.addEntity(h.doc, 'character', { id: 'ent-b', name: 'Nali' });
+  h.activatePanel();
+
+  assert.equal(h.host.querySelectorAll('.tag-duplicate-warning').length, 2,
+    'case variants are the same identity → both warned');
+});
+
+test('TagsPanel V1.1: the same name in DIFFERENT categories is NOT a duplicate (type-scoped identity)', () => {
+  const h = boot();
+  h.Rga.Doc.addEntity(h.doc, 'character', { id: 'ent-char', name: 'NALI' });
+  h.Rga.Doc.addEntity(h.doc, 'prop',      { id: 'ent-prop', name: 'NALI' });
+  h.activatePanel();
+
+  assert.equal(h.host.querySelectorAll('.tag-duplicate-warning').length, 0,
+    'Character:NALI and Prop:NALI are different identities — no warning');
+});
+
+test('TagsPanel V1.1: a tombstoned duplicate does NOT trigger the warning (only live entities count)', () => {
+  const h = boot();
+  h.Rga.Doc.addEntity(h.doc, 'character', { id: 'ent-live', name: 'NALI' });
+  h.Rga.Doc.addEntity(h.doc, 'character', { id: 'ent-merged', name: 'NALI' });
+  h.Rga.Doc.markEntityMerged(h.doc, 'character', 'ent-merged', 'ent-live');
+  h.activatePanel();
+
+  assert.equal(h.host.querySelectorAll('.tag-item').length, 1, 'only the live entity is listed');
+  assert.equal(h.host.querySelectorAll('.tag-duplicate-warning').length, 0,
+    'a merged-away twin is resolved, not a duplicate — no warning');
+});
+
+test('TagsPanel V1.1: a unique entity carries no warning', () => {
+  const h = boot();
+  seedEntities(h);  // NALI / BABAN / PHOTOGRAPH — all unique names
+  h.activatePanel();
+  assert.equal(h.host.querySelectorAll('.tag-duplicate-warning').length, 0);
+});
+
+// --- Honest zero-occurrence treatment ----------------------------
+
+test('TagsPanel V1.1: zero-occurrence entities render NO count element', () => {
+  const h = boot();
+  h.Rga.Doc.addEntity(h.doc, 'prop', { id: 'ent-photo', name: 'PHOTOGRAPH' });
+  h.Rga.Doc.addEntity(h.doc, 'prop', { id: 'ent-tinbox', name: 'TIN BOX' });
+  h.activatePanel();
+
+  const items = h.host.querySelectorAll('.tag-item');
+  assert.equal(items.length, 2);
+  items.forEach(function(item) {
+    assert.equal(item.querySelector('.tag-count'), null,
+      item.querySelector('.tag-name').textContent + ' has 0 occurrences → no count rendered');
+  });
+});
+
+test('TagsPanel V1.1: tagged entities still show their count', () => {
+  const h = boot();
+  seedEntities(h);  // NALI tagged 3×, PHOTOGRAPH 1×, BABAN 0×
+  h.activatePanel();
+
+  const items = Array.from(h.host.querySelectorAll('.tag-item'));
+  const nali = items.find(function(el) { return el.querySelector('.tag-name').textContent === 'NALI'; });
+  const photo = items.find(function(el) { return el.querySelector('.tag-name').textContent === 'PHOTOGRAPH'; });
+  assert.equal(nali.querySelector('.tag-count').textContent, '3');
+  assert.equal(photo.querySelector('.tag-count').textContent, '1');
+});
+
+// --- Honest count language ---------------------------------------
+
+test('TagsPanel V1.1: the count means TAGGED OCCURRENCES and says so (title + aria)', () => {
+  const h = boot();
+  seedEntities(h);
+  h.activatePanel();
+
+  const nali = Array.from(h.host.querySelectorAll('.tag-item')).find(function(el) {
+    return el.querySelector('.tag-name').textContent === 'NALI';
+  });
+  const count = nali.querySelector('.tag-count');
+  assert.ok(/tagged occurrence/i.test(count.title || ''),
+    'count title is honest about what it counts: "' + count.title + '"');
+  assert.ok(/3 tagged occurrence/i.test(count.getAttribute('aria-label') || ''),
+    'aria carries the same honest meaning');
 });

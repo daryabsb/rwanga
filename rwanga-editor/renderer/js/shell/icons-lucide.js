@@ -72,7 +72,14 @@
       '<path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>' +
       '<path d="M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z"/>',
     'flag-triangle-right':
-      '<path d="M7 22V2l10 5-10 5"/>'
+      '<path d="M7 22V2l10 5-10 5"/>',
+    // Tags Panel V1.1 — duplicate-identity warning indicator. The
+    // standard Lucide warning triangle; colored via --accent-warning
+    // at the consumer (the .tag-duplicate-warning class).
+    'triangle-alert':
+      '<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/>' +
+      '<path d="M12 9v4"/>' +
+      '<path d="M12 17h.01"/>'
   };
 
   function svgFor(name) {
