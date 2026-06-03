@@ -142,7 +142,17 @@
     const trimmed = String(name || '').trim();
     if (!trimmed) return null;
 
-    const existing = _entityList(doc, tagType).find(function(e) {
+    // Registry Integrity Slice B2 (consumer rule C1): the lookup domain
+    // is LIVE entities only. A tombstoned loser and its survivor share
+    // the same name — matching the tombstone would point new marks at a
+    // merged-away identity (the exact bug Slice A fixed, reborn). Falls
+    // back to the raw list when the live-filter API is unavailable
+    // (stubbed Rga.Doc in older harnesses, or no doc at all).
+    const list = (doc && Rga.Doc && typeof Rga.Doc.liveEntities === 'function')
+      ? Rga.Doc.liveEntities(doc, tagType)
+      : _entityList(doc, tagType);
+
+    const existing = list.find(function(e) {
       return String(e.name || '').toLowerCase() === trimmed.toLowerCase();
     });
     if (existing) return existing.id;
@@ -174,6 +184,128 @@
   }
 
   // ---------------------------------------------------------------
+  // Entity merge operation — Registry Integrity Slice B2.
+  // Design: docs/Filmustageation/SCOPED_REGISTRY_MERGE_API_DESIGN.md §1.4
+  // Policy: docs/Filmustageation/IDENTITY_MERGE_POLICY_AUDIT.md §6
+  //
+  // The approved 5-step order:
+  //   1. rewrite loser marks → survivor (ONE PM transaction, undoable)
+  //   2. fold loser metadata into survivor   (Rga.Doc.foldEntityMetadata)
+  //   3. tombstone losers — never delete     (Rga.Doc.markEntityMerged)
+  //   4. append merge log                    (Rga.Doc.appendMergeLog)
+  //   5. mark document dirty
+  //
+  // Preconditions are all-or-nothing: any invalid loser refuses the
+  // whole operation. Re-running a completed merge is a safe no-op.
+  // Registry mutation goes exclusively through the scoped Rga.Doc APIs
+  // — this function never writes registry state directly.
+  // ---------------------------------------------------------------
+
+  function mergeEntities(view, tagType, survivorId, loserIds) {
+    // -- Preconditions: live view + args + B1 APIs present ----------
+    if (!view || !view.state || typeof view.dispatch !== 'function') return null;
+    if (!tagType || !survivorId || !Array.isArray(loserIds) || !loserIds.length) return null;
+    const D = Rga.Doc;
+    if (!D || typeof D.markEntityMerged !== 'function'
+           || typeof D.foldEntityMetadata !== 'function'
+           || typeof D.appendMergeLog !== 'function'
+           || typeof D.isEntityMerged !== 'function'
+           || typeof D.resolveEntityId !== 'function') return null;
+
+    const activeTab = Rga.TabManager && Rga.TabManager.activeTab && Rga.TabManager.activeTab();
+    const doc = activeTab && activeTab.doc;
+    if (!doc) return null;
+
+    // -- Preconditions: survivor exists and is live (no chains) -----
+    const survivor = D.findEntity(doc, tagType, survivorId);
+    if (!survivor) return null;
+    if (D.isEntityMerged(doc, tagType, survivorId)) return null;
+
+    // -- Preconditions: every loser is mergeable (all-or-nothing) ---
+    // Name-duplicate merges only: same case-folded, trimmed name.
+    // Anything looser (abbreviations, aliases) is Slice C territory.
+    const survivorName = String(survivor.name || '').trim().toLowerCase();
+    const newLosers = [];   // live losers to merge in this run
+    for (let i = 0; i < loserIds.length; i += 1) {
+      const loserId = loserIds[i];
+      if (loserId === survivorId) return null;
+      const loser = D.findEntity(doc, tagType, loserId);
+      if (!loser) return null;
+      const loserName = String(loser.name || '').trim().toLowerCase();
+      if (loserName !== survivorName) return null;
+      if (D.isEntityMerged(doc, tagType, loserId)) {
+        // Already tombstoned: into this survivor → already merged, skip.
+        // Into a different survivor → conflict, refuse everything.
+        if (D.resolveEntityId(doc, tagType, loserId) !== survivorId) return null;
+      } else {
+        newLosers.push(loser);
+      }
+    }
+
+    // Re-run with nothing left to do: safe no-op, no duplicate log.
+    if (!newLosers.length) {
+      return { record: null, marksRewritten: 0, alreadyMerged: true };
+    }
+
+    // -- Step 1: mark rewrite — ONE transaction ----------------------
+    const schema = view.state.schema;
+    const tagMarkType = schema.marks.tag;
+    if (!tagMarkType) return null;
+
+    const loserIdSet = {};
+    newLosers.forEach(function(l) { loserIdSet[l.id] = true; });
+    const markCounts = {};
+    let tr = view.state.tr;
+    let rewritten = 0;
+    view.state.doc.descendants(function(node, pos) {
+      if (!node.isText) return;
+      node.marks.forEach(function(m) {
+        if (m.type === tagMarkType
+            && m.attrs.tagType === tagType
+            && loserIdSet[m.attrs.entityId]) {
+          tr = tr.removeMark(pos, pos + node.nodeSize, m);
+          tr = tr.addMark(pos, pos + node.nodeSize,
+            tagMarkType.create({ tagType: tagType, entityId: survivorId }));
+          markCounts[m.attrs.entityId] = (markCounts[m.attrs.entityId] || 0) + 1;
+          rewritten += 1;
+        }
+      });
+    });
+    if (rewritten > 0) view.dispatch(tr);
+
+    // -- Steps 2+3: fold metadata, then tombstone --------------------
+    // Order matters: foldEntityMetadata refuses tombstoned losers, so
+    // the fold must happen before the tombstone is written.
+    const loserRecords = [];
+    const metadataMoved = {};
+    newLosers.forEach(function(loser) {
+      loserRecords.push({
+        id:         loser.id,
+        name:       loser.name || '',
+        color:      loser.color || null,
+        notes:      loser.notes || '',
+        mark_count: markCounts[loser.id] || 0
+      });
+      const summary = D.foldEntityMetadata(doc, tagType, survivorId, loser.id);
+      if (summary) metadataMoved[loser.id] = summary;
+      D.markEntityMerged(doc, tagType, loser.id, survivorId);
+    });
+
+    // -- Step 4: log --------------------------------------------------
+    const record = D.appendMergeLog(doc, {
+      tag_type: tagType,
+      survivor: { id: survivorId, name: survivor.name || '' },
+      losers:   loserRecords,
+      metadata_moved: metadataMoved
+    });
+
+    // -- Step 5: dirty ------------------------------------------------
+    if (typeof D.markDirty === 'function') D.markDirty(doc);
+
+    return { record: record, marksRewritten: rewritten, alreadyMerged: false };
+  }
+
+  // ---------------------------------------------------------------
   // Small info popup on click of tagged text
   // ---------------------------------------------------------------
 
@@ -192,7 +324,15 @@
     const doc = activeTab && activeTab.doc;
     let entityName = mark.attrs.entityId;
     if (doc && Rga.Doc && Rga.Doc.findEntity) {
-      const ent = Rga.Doc.findEntity(doc, mark.attrs.tagType, mark.attrs.entityId);
+      // Slice B2 (consumer rule C7): a mark can point at a tombstoned
+      // entity (undo-restored marks after a merge) — resolve it to the
+      // live survivor so the user never sees a ghost identity.
+      let lookupId = mark.attrs.entityId;
+      if (typeof Rga.Doc.resolveEntityId === 'function') {
+        const resolved = Rga.Doc.resolveEntityId(doc, mark.attrs.tagType, lookupId);
+        if (resolved) lookupId = resolved;
+      }
+      const ent = Rga.Doc.findEntity(doc, mark.attrs.tagType, lookupId);
       if (ent) entityName = ent.name;
     }
 
@@ -284,7 +424,9 @@
     removeTag,
     removeAllMarksForEntity,
     findOrCreateEntity,
+    mergeEntities,
     showTagDialog,
+    showTagInfo,
     refreshTagsPanel,
     tagsPlugin,
     TAG_TYPES,

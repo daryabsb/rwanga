@@ -427,3 +427,69 @@ test('Slice A: fixture — serialize round-trips the registry byte-identically (
   assert.deepEqual(reserialized.tag_registry, parsed.tag_registry,
     'loading + saving a tagged document must not alter its registry');
 });
+
+// ================================================================
+// §7 — Slice B2 (consumer rule C1): lookup domain is LIVE entities only
+// Design: SCOPED_REGISTRY_MERGE_API_DESIGN.md §4 C1, §5.2
+// ================================================================
+
+test('Slice B2: findOrCreateEntity skips tombstones — live entity wins even when the tombstone sits first', () => {
+  const h = boot();
+  // Tombstone FIRST in registry array order, live survivor second —
+  // the exact array-order-roulette case rule C1 exists to prevent.
+  h.Rga.Doc.addEntity(h.doc, 'character', { id: 'ent-old', name: 'NALI' });
+  h.Rga.Doc.addEntity(h.doc, 'character', { id: 'ent-live', name: 'NALI' });
+  assert.equal(h.Rga.Doc.markEntityMerged(h.doc, 'character', 'ent-old', 'ent-live'), true);
+
+  const id = h.Rga.Tags.findOrCreateEntity(h.doc, 'character', 'NALI');
+  assert.equal(id, 'ent-live',
+    'lookup must return the LIVE entity, never the tombstone (even though the tombstone is first in array order)');
+  assert.equal(h.doc.tagRegistry.characters.length, 2, 'no new entity created');
+});
+
+test('Slice B2: findOrCreateEntity creates a fresh live entity when only a tombstone matches the name', () => {
+  const h = boot();
+  // Tombstone "NALI" whose survivor was later renamed — no live "NALI" remains.
+  h.Rga.Doc.addEntity(h.doc, 'character', { id: 'ent-old', name: 'NALI' });
+  h.Rga.Doc.addEntity(h.doc, 'character', { id: 'ent-renamed', name: 'NALI' });
+  h.Rga.Doc.markEntityMerged(h.doc, 'character', 'ent-old', 'ent-renamed');
+  // Simulates a post-merge rename of the survivor (file-loaded state).
+  h.Rga.Doc.findEntity(h.doc, 'character', 'ent-renamed').name = 'NALI YOUNGER';
+
+  const id = h.Rga.Tags.findOrCreateEntity(h.doc, 'character', 'NALI');
+  assert.notEqual(id, 'ent-old', 'a tombstone is never resurrected by tagging');
+  assert.notEqual(id, 'ent-renamed', 'the renamed survivor does not match "NALI"');
+  assert.equal(h.doc.tagRegistry.characters.length, 3, 'a fresh live entity was created');
+  assert.equal(h.Rga.Doc.isEntityMerged(h.doc, 'character', id), false, 'the new entity is live');
+});
+
+test('Slice B2: toolbar tagging after a merge points new marks at the survivor', () => {
+  const h = boot();
+  h.Rga.Doc.addEntity(h.doc, 'character', { id: 'ent-old', name: 'NALI' });
+  h.Rga.Doc.addEntity(h.doc, 'character', { id: 'ent-survivor', name: 'NALI', color: '#4FC1FF' });
+  h.Rga.Doc.markEntityMerged(h.doc, 'character', 'ent-old', 'ent-survivor');
+
+  h.selectOccurrence('NALI', 0);
+  h.tagViaToolbar('character');
+
+  const marks = h.tagMarks('character');
+  assert.equal(marks.length, 1);
+  assert.equal(marks[0].entityId, 'ent-survivor',
+    'the primary tagging UI must point new marks at the live survivor, never at a tombstone');
+  assert.equal(h.doc.tagRegistry.characters.length, 2, 'no third entity minted');
+});
+
+test('Slice B2: showTagDialog after a merge reuses the survivor (shared helper, both paths protected)', () => {
+  const h = boot();
+  h.Rga.Doc.addEntity(h.doc, 'character', { id: 'ent-old', name: 'NALI' });
+  h.Rga.Doc.addEntity(h.doc, 'character', { id: 'ent-survivor', name: 'NALI' });
+  h.Rga.Doc.markEntityMerged(h.doc, 'character', 'ent-old', 'ent-survivor');
+
+  h.selectOccurrence('Nali', 0);
+  h.Rga.Tags.showTagDialog(h.view, 'character');
+
+  const marks = h.tagMarks('character');
+  assert.equal(marks.length, 1);
+  assert.equal(marks[0].entityId, 'ent-survivor');
+  assert.equal(h.doc.tagRegistry.characters.length, 2);
+});
