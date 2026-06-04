@@ -51,6 +51,22 @@
   // multiple scenes may be expanded at once. Cleared only on unmount/_reset.
   const _expanded = new Set();
 
+  // Scene Navigator Tags v1 — canonical category order + display labels for
+  // the scene-local tagged-entity groups. Keys are SceneBundle bundle-keys
+  // (Rga.Screenplay.SceneCatalog), labels mirror the Tags Panel's
+  // TAG_GROUP_LABELS so the two surfaces read identically.
+  const _SCENE_TAG_GROUPS = [
+    { key: 'characters', label: 'Characters' },
+    { key: 'props',      label: 'Props'      },
+    { key: 'wardrobe',   label: 'Wardrobe'   },
+    { key: 'locations',  label: 'Locations'  },
+    { key: 'sfx',        label: 'SFX'        },
+    { key: 'vfx',        label: 'VFX'        },
+    { key: 'vehicles',   label: 'Vehicles'   },
+    { key: 'animals',    label: 'Animals'    },
+    { key: 'custom',     label: 'Custom'     }
+  ];
+
   // ----------------------------------------------------------------
   // Sidebar panel controller
   // ----------------------------------------------------------------
@@ -431,7 +447,12 @@
     // chevron appears ONLY when the scene has at least one mark to reveal —
     // no empty expansions. Clicking it toggles expansion and never navigates
     // (stopPropagation); clicking the rest of the row still jumps to scene.
-    const hasMarks = !!(scene.hasNotes || scene.hasRevisionFlag);
+    // Scene Navigator Tags v1 — the scene-local tagged entities (derived,
+    // read-only). Computed once per row: it also decides whether the row
+    // is expandable, so a scene with tags but no notes/flags still gets a
+    // chevron. Empty for scenes with nothing tagged.
+    const taggedGroups = _sceneTaggedGroups(scene, idx);
+    const hasMarks = !!(scene.hasNotes || scene.hasRevisionFlag || taggedGroups.length);
     const expanded = hasMarks && _expanded.has(scene.nodeId);
     const gutter = document.createElement('span');
     gutter.className = 'rga-shell-scene-navigator-gutter';
@@ -475,8 +496,16 @@
     // Marks-Expansion-v1 — expanded mark detail: presence-only lines for
     // notes / revision flags, as a full-width zone beneath the row. Uses only
     // the existing scene.hasNotes / scene.hasRevisionFlag flags (no counts,
-    // no new derivation, no nav-index/schema change).
-    if (expanded) row.appendChild(_buildMarksZone(scene));
+    // no new derivation, no nav-index/schema change). Notes/flags FIRST.
+    if (expanded && (scene.hasNotes || scene.hasRevisionFlag)) {
+      row.appendChild(_buildMarksZone(scene));
+    }
+    // Scene Navigator Tags v1 — scene-local tagged entities, BENEATH the
+    // notes/flags. Read-only; clicking an entity reuses the existing Tag
+    // Focus Highlight (no new selection system, no editor jump).
+    if (expanded && taggedGroups.length) {
+      row.appendChild(_buildSceneTagsZone(taggedGroups));
+    }
 
     row.addEventListener('click', function() { _activateResult(scene.nodeId); });
     row.setAttribute('role', 'button');
@@ -552,6 +581,135 @@
     line.className = 'rga-shell-scene-navigator-mark';
     line.textContent = text;
     return line;
+  }
+
+  // Scene Navigator Tags v1 — the scene's tagged entities, grouped by
+  // category in canonical order, derived through the preferred read-only
+  // facade (Rga.Screenplay.Memory.scene → SceneCatalog.byScene). Called
+  // WITHOUT a doc so no per-scene cue sub-walk runs — only the already
+  // computed per-entity sceneAppearances projection is consumed. Returns
+  // [{ label, entities: Entity[] }] for non-empty categories only; [] when
+  // Memory is unavailable (load order / boot) or nothing is tagged here.
+  // No nav-index change, no schema change, no registry mutation.
+  function _sceneTaggedGroups(scene, idx) {
+    const Memory = Rga.Screenplay && Rga.Screenplay.Memory;
+    if (!Memory || typeof Memory.scene !== 'function') return [];
+    if (!idx || !scene || !scene.nodeId) return [];
+    const bundle = Memory.scene(scene.nodeId, idx);   // no doc → no cue walk
+    if (!bundle) return [];
+    const out = [];
+    for (let i = 0; i < _SCENE_TAG_GROUPS.length; i += 1) {
+      const g = _SCENE_TAG_GROUPS[i];
+      const arr = bundle[g.key];
+      if (Array.isArray(arr) && arr.length) out.push({ label: g.label, entities: arr });
+    }
+    return out;
+  }
+
+  // Scene Navigator Tags v1 — full-width zone listing the scene's tagged
+  // entities. Honest framing: "Tagged in this scene" (explicit tags only,
+  // never "appears" / "detected" / "referenced"). Compact: a quiet label,
+  // then one small clickable chip per entity, grouped by category. RTL
+  // mirrors via the wrapper dir + logical CSS — no per-direction code here.
+  function _buildSceneTagsZone(groups) {
+    const zone = document.createElement('div');
+    zone.className = 'rga-shell-scene-navigator-scene-tags';
+
+    const label = document.createElement('div');
+    label.className = 'rga-shell-scene-navigator-scene-tags-label';
+    label.textContent = 'Tagged in this scene';
+    zone.appendChild(label);
+
+    for (let i = 0; i < groups.length; i += 1) {
+      zone.appendChild(_buildSceneTagGroup(groups[i]));
+    }
+    return zone;
+  }
+
+  function _buildSceneTagGroup(group) {
+    const g = document.createElement('div');
+    g.className = 'rga-shell-scene-navigator-tag-group';
+
+    const lbl = document.createElement('span');
+    lbl.className = 'rga-shell-scene-navigator-tag-group-label';
+    lbl.textContent = group.label;
+    g.appendChild(lbl);
+
+    // Duplicate-identity tally (req 6): same normalized name appearing on
+    // more than one LIVE entity in this category. Never collapse them —
+    // show both, each flagged, each focusing only its own entityId.
+    const tally = {};
+    group.entities.forEach(function(ent) {
+      const norm = String(ent.name || '').trim().toLowerCase();
+      tally[norm] = (tally[norm] || 0) + 1;
+    });
+
+    const list = document.createElement('span');
+    list.className = 'rga-shell-scene-navigator-tag-entities';
+    group.entities.forEach(function(ent) {
+      const norm = String(ent.name || '').trim().toLowerCase();
+      list.appendChild(_buildSceneTagEntity(ent, group.label, tally[norm] > 1));
+    });
+    g.appendChild(list);
+    return g;
+  }
+
+  // Scene Navigator Tags v1 — one clickable entity chip. A real <button> so
+  // keyboard (Enter/Space) activates it natively; keydown is stopped from
+  // bubbling so the navigator's list-nav Enter handler can't also fire a
+  // scene jump. Click reuses Tag Focus Highlight, matched by entityId.
+  function _buildSceneTagEntity(ent, categoryLabel, isDuplicate) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'rga-shell-scene-navigator-tag-entity';
+    btn.setAttribute('data-entity-id', String(ent.nodeId || ''));
+
+    const dot = document.createElement('span');
+    dot.className = 'rga-shell-scene-navigator-tag-dot';
+    dot.style.background = ent.color || 'var(--accent-primary)';
+    dot.setAttribute('aria-hidden', 'true');
+    btn.appendChild(dot);
+
+    const name = document.createElement('span');
+    name.className = 'rga-shell-scene-navigator-tag-entity-name';
+    name.textContent = ent.name || '';
+    btn.appendChild(name);
+
+    if (isDuplicate) {
+      const warn = document.createElement('span');
+      warn.className = 'rga-shell-scene-navigator-tag-entity-dup';
+      warn.setAttribute('data-icon-name', 'triangle-alert');
+      const svg = (Rga.Icons && Rga.Icons.Lucide && Rga.Icons.Lucide.has('triangle-alert'))
+        ? Rga.Icons.Lucide.svgFor('triangle-alert') : '';
+      if (svg) { warn.innerHTML = svg; } else { warn.textContent = '⚠'; }
+      const warnText = 'Duplicate identity: more than one "' + (ent.name || '')
+        + '" exists in ' + categoryLabel;
+      warn.setAttribute('aria-label', warnText);
+      warn.title = warnText;
+      btn.appendChild(warn);
+    }
+
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation();          // focus the entity — never jump the scene
+      _focusEntity(ent.nodeId);
+    });
+    btn.addEventListener('keydown', function(e) {
+      // The <button> already fires click on Enter/Space; stop it bubbling
+      // to the container so list-nav doesn't ALSO activate a scene jump.
+      if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') e.stopPropagation();
+    });
+    return btn;
+  }
+
+  // Scene Navigator Tags v1 — light up an entity's tagged occurrences in the
+  // editor by reusing the existing Tag Focus Highlight (Tags Panel V1.3). No
+  // new selection state in the navigator; the lit editor IS the witness.
+  function _focusEntity(entityId) {
+    if (!entityId) return;
+    const view = _activeView();
+    if (view && Rga.TagFocusHighlight && typeof Rga.TagFocusHighlight.setEntity === 'function') {
+      Rga.TagFocusHighlight.setEntity(view, entityId);
+    }
   }
 
   // Marks-Expansion-v1 — toggle expansion for one scene. Multiple scenes may

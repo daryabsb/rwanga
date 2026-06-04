@@ -36,6 +36,13 @@ function boot(opts) {
       focus: function() {}
     };
     stub.index = { scenes: opts.scenes, pages: opts.pages || [] };
+    // Scene Navigator Tags v1 — scene-local tagged entities are derived via
+    // Rga.Screenplay.Memory.scene → SceneCatalog.byScene, which read
+    // idx.tags / idx.notes / idx.flags. Pass them through when a test needs
+    // them; additive, so every existing test (no tags) is unchanged.
+    if (opts.tags)  stub.index.tags  = opts.tags;
+    if (opts.notes) stub.index.notes = opts.notes;
+    if (opts.flags) stub.index.flags = opts.flags;
   }
   global.window.Rga.TabManager = {
     activeDoc: function() { return null; },
@@ -60,6 +67,8 @@ function boot(opts) {
    '../../../renderer/js/shell/sidebar.js',
    '../../../renderer/js/shell/script-session.js',
    '../../../renderer/js/shell/icons-lucide.js',
+   '../../../renderer/js/doc-types/screenplay/scene-catalog.js',
+   '../../../renderer/js/doc-types/screenplay/memory.js',
    '../../../renderer/js/shell/panels/scene-navigator.js'
   ].forEach(function(p) { delete require.cache[require.resolve(p)]; require(p); });
 
@@ -1186,4 +1195,167 @@ test('Search-v1.1: clearing the search clears the highlight', () => {
   sh.calls.clear.length = 0;
   fireInput(host.querySelector('.rga-shell-scene-navigator-find-input'), '');   // clear search
   assert.ok(sh.calls.clear.length >= 1, 'clearing the search clears the highlight');
+});
+
+// ================================================================
+// Scene Navigator Tags v1 — scene-local tagged entities
+// ================================================================
+// When a writer expands a scene row, the navigator shows the entities
+// TAGGED in that scene, grouped by category (Characters / Props / …).
+// Read-only, derived via Rga.Screenplay.Memory.scene → SceneCatalog.
+// Clicking an entity reuses the existing Tag Focus Highlight system.
+// ----------------------------------------------------------------
+
+function tagFocusStub() {
+  const calls = { setEntity: [], clear: [] };
+  return {
+    calls: calls,
+    setEntity: function(_view, entityId) { calls.setEntity.push(entityId); return 1; },
+    clear: function() { calls.clear.push(true); }
+  };
+}
+
+// A two-scene index: scene 'a' (scene 12) is richly tagged; scene 'b'
+// (scene 13) has none. NALI + BABAN are tagged characters, PHOTOGRAPH a
+// prop, OLD HOUSE a location — all in scene 'a' only.
+function taggedIndexScenes() {
+  return [
+    { nodeId: 'a', sceneNumber: 12, headingDisplay: 'INT. OLD HOUSE — NIGHT', pmPos: 0,  pmEndPos: 40, hasNotes: true,  hasRevisionFlag: false },
+    { nodeId: 'b', sceneNumber: 13, headingDisplay: 'EXT. STREET — DAY',      pmPos: 40, pmEndPos: 80, hasNotes: false, hasRevisionFlag: false }
+  ];
+}
+function taggedIndexTags() {
+  return {
+    character: [
+      { nodeId: 'nali',  name: 'NALI',  color: '#c2185b', sceneAppearances: ['a'] },
+      { nodeId: 'baban', name: 'BABAN', color: '#1976d2', sceneAppearances: ['a'] }
+    ],
+    prop:     [{ nodeId: 'photo',   name: 'PHOTOGRAPH', color: '#388e3c', sceneAppearances: ['a'] }],
+    location: [{ nodeId: 'oldhouse', name: 'OLD HOUSE', color: '#f57c00', sceneAppearances: ['a'] }]
+  };
+}
+function sceneTagsOf(host, nodeId) {
+  const row = host.querySelector('[data-scene-node-id="' + nodeId + '"]');
+  return row ? row.querySelector('.rga-shell-scene-navigator-scene-tags') : null;
+}
+function tagEntitiesOf(host, nodeId) {
+  const zone = sceneTagsOf(host, nodeId);
+  return zone ? Array.from(zone.querySelectorAll('.rga-shell-scene-navigator-tag-entity')) : [];
+}
+
+test('Scene-Tags-v1: expanding a tagged scene shows category groups + entity names', () => {
+  const { Rga, host } = boot({ scenes: taggedIndexScenes(), tags: taggedIndexTags() });
+  Rga.Shell.Sidebar.activate('sceneNavigator');
+  chevronOf(host, 'a').click();
+  const zone = sceneTagsOf(host, 'a');
+  assert.ok(zone, 'tags zone appears under the expanded scene');
+  const groupLabels = Array.from(zone.querySelectorAll('.rga-shell-scene-navigator-tag-group-label'))
+    .map(function(el) { return el.textContent; });
+  assert.deepEqual(groupLabels, ['Characters', 'Props', 'Locations'],
+    'categories render in canonical order, only the non-empty ones');
+  const names = tagEntitiesOf(host, 'a').map(function(el) { return el.textContent.trim(); });
+  assert.deepEqual(names.sort(), ['BABAN', 'NALI', 'OLD HOUSE', 'PHOTOGRAPH'].sort(),
+    'every tagged entity in the scene is listed');
+});
+
+test('Scene-Tags-v1: honest language — the zone says "Tagged in this scene"', () => {
+  const { Rga, host } = boot({ scenes: taggedIndexScenes(), tags: taggedIndexTags() });
+  Rga.Shell.Sidebar.activate('sceneNavigator');
+  chevronOf(host, 'a').click();
+  const label = sceneTagsOf(host, 'a').querySelector('.rga-shell-scene-navigator-scene-tags-label');
+  assert.ok(label, 'an honest section label is present');
+  assert.equal(label.textContent, 'Tagged in this scene');
+  // Never the dishonest framings.
+  const txt = sceneTagsOf(host, 'a').textContent.toLowerCase();
+  assert.equal(txt.indexOf('appears'), -1, 'never says "appears"');
+  assert.equal(txt.indexOf('detected'), -1, 'never says "detected"');
+  assert.equal(txt.indexOf('referenced'), -1, 'never says "referenced"');
+});
+
+test('Scene-Tags-v1: only entities tagged IN this scene are shown (no leakage across scenes)', () => {
+  const { Rga, host } = boot({ scenes: taggedIndexScenes(), tags: taggedIndexTags() });
+  Rga.Shell.Sidebar.activate('sceneNavigator');
+  // Scene b is tag-free → no chevron, nothing to expand.
+  assert.equal(chevronOf(host, 'b'), null, 'tag-free, mark-free scene has no chevron');
+  // Scene a lists NALI but scene b would never (it is not tagged there).
+  chevronOf(host, 'a').click();
+  const names = tagEntitiesOf(host, 'a').map(function(el) { return el.textContent.trim(); });
+  assert.ok(names.indexOf('NALI') >= 0, 'NALI shows in the scene it is tagged in');
+});
+
+test('Scene-Tags-v1: a scene tagged but with NO notes/flags is still expandable', () => {
+  const scenes = [
+    { nodeId: 'a', sceneNumber: 1, headingDisplay: 'INT. ROOM — DAY', pmPos: 0, pmEndPos: 20, hasNotes: false, hasRevisionFlag: false }
+  ];
+  const tags = { character: [{ nodeId: 'nali', name: 'NALI', color: '#c2185b', sceneAppearances: ['a'] }] };
+  const { Rga, host } = boot({ scenes: scenes, tags: tags });
+  Rga.Shell.Sidebar.activate('sceneNavigator');
+  assert.ok(chevronOf(host, 'a'), 'tag-only scene gets an expand chevron');
+  chevronOf(host, 'a').click();
+  assert.ok(sceneTagsOf(host, 'a'), 'tags zone shows');
+  assert.equal(marksOf(host, 'a'), null, 'no notes/flags zone for a tag-only scene (no empty marks)');
+});
+
+test('Scene-Tags-v1: clicking an entity activates Tag Focus Highlight by entityId and does NOT navigate', () => {
+  const { Rga, host, stub } = boot({ scenes: taggedIndexScenes(), tags: taggedIndexTags() });
+  const tf = tagFocusStub();
+  Rga.TagFocusHighlight = tf;
+  Rga.Shell.Sidebar.activate('sceneNavigator');
+  chevronOf(host, 'a').click();
+  const nali = tagEntitiesOf(host, 'a').filter(function(el) { return el.textContent.trim() === 'NALI'; })[0];
+  assert.ok(nali, 'NALI entity is clickable');
+  nali.click();
+  assert.deepEqual(tf.calls.setEntity, ['nali'], 'Tag Focus Highlight is set for NALI by entityId');
+  assert.equal(stub.findSceneCall, null, 'clicking the entity does NOT jump the editor (no scene nav)');
+});
+
+test('Scene-Tags-v1: duplicate identities are shown (not collapsed), each isolates its own marks', () => {
+  const scenes = [
+    { nodeId: 'a', sceneNumber: 1, headingDisplay: 'INT. ROOM — DAY', pmPos: 0, pmEndPos: 20, hasNotes: false, hasRevisionFlag: false }
+  ];
+  // Two LIVE entities both named NALI, both tagged in scene a — the
+  // duplicate-identity case. They must NOT collapse to one row.
+  const tags = { character: [
+    { nodeId: 'nali-a', name: 'NALI', color: '#c2185b', sceneAppearances: ['a'] },
+    { nodeId: 'nali-b', name: 'NALI', color: '#7b1fa2', sceneAppearances: ['a'] }
+  ] };
+  const { Rga, host } = boot({ scenes: scenes, tags: tags });
+  const tf = tagFocusStub();
+  Rga.TagFocusHighlight = tf;
+  Rga.Shell.Sidebar.activate('sceneNavigator');
+  chevronOf(host, 'a').click();
+  const rows = tagEntitiesOf(host, 'a');
+  assert.equal(rows.length, 2, 'both NALI entities are listed (not collapsed)');
+  const dupMarks = sceneTagsOf(host, 'a').querySelectorAll('.rga-shell-scene-navigator-tag-entity-dup');
+  assert.equal(dupMarks.length, 2, 'each duplicate carries the honest duplicate-identity marker');
+  // Clicking the first NALI focuses only nali-a's marks (entityId match).
+  rows[0].click();
+  assert.deepEqual(tf.calls.setEntity, ['nali-a'], 'first NALI focuses nali-a only');
+});
+
+test('Scene-Tags-v1: notes/flags render first, tagged entities beneath', () => {
+  const { Rga, host } = boot({ scenes: taggedIndexScenes(), tags: taggedIndexTags() });
+  Rga.Shell.Sidebar.activate('sceneNavigator');
+  chevronOf(host, 'a').click();
+  const row = host.querySelector('[data-scene-node-id="a"]');
+  const marks = marksOf(host, 'a');
+  const tagsZone = sceneTagsOf(host, 'a');
+  assert.ok(marks && tagsZone, 'both the marks zone and the tags zone render');
+  // DOM order: the notes/flags zone precedes the tags zone.
+  const pos = marks.compareDocumentPosition(tagsZone);
+  assert.ok(pos & 0x04 /* DOCUMENT_POSITION_FOLLOWING */, 'tags zone follows the marks zone');
+});
+
+test('Scene-Tags-v1 RTL: tagged entities render under an RTL script (wrapper mirrors)', () => {
+  const scenes = [
+    { nodeId: 'a', sceneNumber: 1, headingDisplay: 'مشهد', pmPos: 0, pmEndPos: 20, hasNotes: false, hasRevisionFlag: false }
+  ];
+  const tags = { character: [{ nodeId: 'nali', name: 'نالي', color: '#c2185b', sceneAppearances: ['a'] }] };
+  const { Rga, host } = boot({ scenes: scenes, tags: tags });
+  makeRtl(Rga);
+  Rga.Shell.Sidebar.activate('sceneNavigator');
+  assert.equal(navWrapper(host).getAttribute('dir'), 'rtl', 'navigator mirrors the RTL script');
+  chevronOf(host, 'a').click();
+  const names = tagEntitiesOf(host, 'a').map(function(el) { return el.textContent.trim(); });
+  assert.deepEqual(names, ['نالي'], 'the tagged entity renders in RTL');
 });
