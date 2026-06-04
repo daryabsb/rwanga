@@ -10,6 +10,35 @@
   let _menuEl = null;
   let _cleanup = null;
 
+  // Margin kept between the menu and the viewport edge.
+  const MENU_MARGIN = 8;
+  // Estimated submenu width (min-width 140px + padding/label slack). Used to
+  // decide whether the "Tag as ▶" submenu would overflow the right edge and
+  // therefore needs to flip to the left. The submenu is display:none until
+  // hover, so it cannot be measured up front — this estimate is intentionally
+  // generous so the flip triggers slightly early rather than too late.
+  const SUBMENU_EST_WIDTH = 170;
+
+  // ---------------------------------------------------------------
+  // Pure viewport clamp — keeps the menu fully inside the viewport.
+  // Prefers the click point, then pulls in from the right/bottom by the
+  // menu's *real* dimensions, and never below the top/left margin.
+  // Exposed as Rga.ContextMenu._clampPosition for focused tests.
+  // ---------------------------------------------------------------
+  function clampMenuPosition(clickX, clickY, menuW, menuH, vw, vh, margin) {
+    margin = (margin == null) ? MENU_MARGIN : margin;
+    let x = Math.min(clickX, vw - menuW - margin);
+    let y = Math.min(clickY, vh - menuH - margin);
+    x = Math.max(margin, x);
+    y = Math.max(margin, y);
+    // Submenu opens to the right (CSS left:100%). If that would push it past
+    // the right edge, flip it to the left of the parent menu so "Tag as ▶"
+    // stays reachable. Direction-agnostic — based purely on available space,
+    // so it also covers RTL near the left edge.
+    const flipSubmenu = (x + menuW + SUBMENU_EST_WIDTH + margin) > vw;
+    return { x: x, y: y, flipSubmenu: flipSubmenu };
+  }
+
   function getMenuEl() {
     if (!_menuEl) _menuEl = document.getElementById('context-menu');
     return _menuEl;
@@ -103,12 +132,20 @@
 
     el.appendChild(ul);
 
-    // Position near event
-    const x = Math.min(event.clientX, window.innerWidth - 200);
-    const y = Math.min(event.clientY, window.innerHeight - 200);
-    el.style.left = x + 'px';
-    el.style.top = y + 'px';
+    // Unhide first so the menu can be measured — offsetWidth/Height are 0
+    // while hidden. This is all synchronous within the contextmenu handler,
+    // so the browser only paints after we set the final coordinates: no flash
+    // at the pre-clamp position.
+    el.classList.remove('ctx-flip-submenu');
     el.hidden = false;
+    const pos = clampMenuPosition(
+      event.clientX, event.clientY,
+      el.offsetWidth, el.offsetHeight,
+      window.innerWidth, window.innerHeight
+    );
+    el.classList.toggle('ctx-flip-submenu', pos.flipSubmenu);
+    el.style.left = pos.x + 'px';
+    el.style.top = pos.y + 'px';
 
     // Dismiss on outside click or Escape
     function onOutside(e) {
@@ -180,7 +217,7 @@
     });
   }
 
-  Rga.ContextMenu = { hide: hideMenu };
+  Rga.ContextMenu = { hide: hideMenu, _clampPosition: clampMenuPosition };
   Rga.DocTypes = Rga.DocTypes || {};
   Rga.DocTypes.screenplay = Rga.DocTypes.screenplay || {};
   Rga.DocTypes.screenplay.contextMenuPlugin = contextMenuPlugin;

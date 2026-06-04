@@ -1259,6 +1259,14 @@ body.view-draft-active .rga-draft-footer {
   display: block;
 }
 
+/* When the menu sits near the right edge of the viewport, JS adds
+   .ctx-flip-submenu so the nested submenu opens to the LEFT of its parent
+   instead of overflowing off-screen (keeps "Tag as ▶" reachable). */
+.rga-context-menu.ctx-flip-submenu .ctx-submenu {
+  left: auto;
+  right: 100%;
+}
+
 /* ============================================================
    MARK POPUPS (annotation, tag, revision flag)
    ============================================================ */
