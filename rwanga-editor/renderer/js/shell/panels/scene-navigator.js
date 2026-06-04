@@ -55,6 +55,10 @@
   // independently per scene. Survives navigator re-renders; cleared only on
   // unmount / _reset.
   const _expandedTagEntities = new Set();
+  // Visual Polish v1 (C11) — the entityId whose row is currently the active
+  // focus (its occurrences are lit in the editor). Drives the reciprocal
+  // .is-active cue in the panel; survives re-render, cleared on unmount/_reset.
+  let _activeTagEntity = null;
 
   // Scene Navigator Tags v1 — canonical category order + display labels for
   // the scene-local tagged-entity groups. Keys are SceneBundle bundle-keys
@@ -112,6 +116,7 @@
       _snippets = {};
       _expanded.clear();
       _expandedTagEntities.clear();
+      _activeTagEntity = null;
       _container = null;
     }
   };
@@ -499,19 +504,20 @@
     const snip = _snippets[scene.nodeId];
     if (snip) row.appendChild(_buildSnippetEl(snip));
 
-    // Marks-Expansion-v1 — expanded mark detail: presence-only lines for
-    // notes / revision flags, as a full-width zone beneath the row. Uses only
-    // the existing scene.hasNotes / scene.hasRevisionFlag flags (no counts,
-    // no new derivation, no nav-index/schema change). Notes/flags FIRST.
-    if (expanded && (scene.hasNotes || scene.hasRevisionFlag)) {
-      row.appendChild(_buildMarksZone(scene));
-    }
-    // Scene Navigator Tags v1.1 — scene-local tag intelligence, BENEATH the
-    // notes/flags. Derive occurrences (subtree walk) only for the expanded
-    // scene; render the hybrid model (category → entity + count → snippets).
-    if (expanded && hasTags) {
-      const occGroups = _sceneOccurrenceGroups(scene, idx);
-      if (occGroups.length) row.appendChild(_buildSceneTagsZone(scene, occGroups));
+    // Visual Polish v1 (C10) — marks + tags live inside ONE inset container
+    // so the expanded content visibly hangs off its scene (a soft wash +
+    // start-rule) instead of floating between rows. Notes/flags FIRST, then
+    // the scene-local tag intelligence (hybrid: category → entity + count →
+    // snippets, derived by a subtree walk for the expanded scene only).
+    if (expanded) {
+      const exp = document.createElement('div');
+      exp.className = 'rga-shell-scene-navigator-expansion';
+      if (scene.hasNotes || scene.hasRevisionFlag) exp.appendChild(_buildMarksZone(scene));
+      if (hasTags) {
+        const occGroups = _sceneOccurrenceGroups(scene, idx);
+        if (occGroups.length) exp.appendChild(_buildSceneTagsZone(scene, occGroups));
+      }
+      if (exp.childNodes.length) row.appendChild(exp);
     }
 
     row.addEventListener('click', function() { _activateResult(scene.nodeId); });
@@ -640,9 +646,20 @@
     return zone;
   }
 
+  // Visual Polish v1 (C12) — the category's tag colour as a CSS value. Maps
+  // the tagType to its design token (--tag-character … --tag-animal); 'custom'
+  // and anything unmapped fall back to the neutral accent. Used as the group
+  // tint and as the per-entity colour fallback when an entity has no own colour.
+  function _categoryColor(tagType) {
+    var KNOWN = { character:1, prop:1, wardrobe:1, location:1, sfx:1, vfx:1, vehicle:1, animal:1 };
+    return KNOWN[tagType] ? 'var(--tag-' + tagType + ')' : 'var(--accent-primary)';
+  }
+
   function _buildOccCategoryGroup(scene, group) {
     const g = document.createElement('div');
     g.className = 'rga-shell-scene-navigator-tag-group';
+    // C12 — expose the category colour to CSS (C4 label tint reads --grp-color).
+    g.style.setProperty('--grp-color', _categoryColor(group.tagType));
 
     const lbl = document.createElement('div');
     lbl.className = 'rga-shell-scene-navigator-tag-group-label';
@@ -677,11 +694,22 @@
     const expKey = String(scene.nodeId) + '::' + group.tagType + '::' + ent.entityId;
     const entExpanded = _expandedTagEntities.has(expKey);
 
+    // C12 — the entity's own colour (the same value the dot paints), falling
+    // back to the category colour. Exposed to CSS so the match word (C3) and
+    // the dot halo (C6) thread the one colour through the row.
+    const entColor = ent.color || _categoryColor(group.tagType);
+
     const row = document.createElement('div');
     row.className = 'rga-shell-scene-navigator-tag-entity';
     row.setAttribute('data-entity-id', String(ent.entityId || ''));
     row.setAttribute('role', 'button');
     row.setAttribute('tabindex', '0');
+    row.style.setProperty('--dot-color', entColor);
+    // C11 — reciprocal active cue: the focused entity's row echoes the
+    // editor highlight (wash + start-bar). Persisted across re-renders.
+    if (_activeTagEntity && _activeTagEntity === ent.entityId) {
+      row.classList.add('is-active');
+    }
 
     // Disclosure chevron — only when there is at least one occurrence to
     // reveal (there always is, but guard anyway). Reuses the scene chevron's
@@ -735,13 +763,13 @@
 
     row.addEventListener('click', function(e) {
       e.stopPropagation();          // focus the entity — never jump the scene row
-      _focusEntity(ent.entityId);
+      _activateTagEntity(ent.entityId, row);
     });
     row.addEventListener('keydown', function(e) {
       if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
         e.stopPropagation();
         e.preventDefault();
-        _focusEntity(ent.entityId);
+        _activateTagEntity(ent.entityId, row);
       }
     });
     block.appendChild(row);
@@ -749,6 +777,7 @@
     if (entExpanded) {
       const occList = document.createElement('div');
       occList.className = 'rga-shell-scene-navigator-tag-occurrences';
+      occList.style.setProperty('--occ-color', entColor);   // C12 → C3 match colour
       for (let i = 0; i < ent.occurrences.length; i += 1) {
         occList.appendChild(_buildOccurrence(ent.occurrences[i]));
       }
@@ -800,6 +829,21 @@
     if (view && Rga.TagFocusHighlight && typeof Rga.TagFocusHighlight.setEntity === 'function') {
       Rga.TagFocusHighlight.setEntity(view, entityId);
     }
+  }
+
+  // Visual Polish v1 (C11) — focus the entity AND give the panel a reciprocal
+  // active cue. The DOM class is toggled directly (instant feedback, no forced
+  // re-render); _activeTagEntity persists the choice so the next natural
+  // re-render re-applies .is-active. Behaviour (the focus highlight) is
+  // unchanged — this only adds the panel-side visual echo.
+  function _activateTagEntity(entityId, rowEl) {
+    _activeTagEntity = entityId || null;
+    if (_container) {
+      const rows = _container.querySelectorAll('.rga-shell-scene-navigator-tag-entity.is-active');
+      for (let i = 0; i < rows.length; i += 1) rows[i].classList.remove('is-active');
+    }
+    if (rowEl && rowEl.classList) rowEl.classList.add('is-active');
+    _focusEntity(entityId);
   }
 
   // Scene Navigator Tags v1.1 — jump the editor cursor to a specific tagged
@@ -1110,6 +1154,7 @@
     _snippets = {};
     _expanded.clear();
     _expandedTagEntities.clear();
+    _activeTagEntity = null;
     if (_container) _container.innerHTML = '';
     _container = null;
   }

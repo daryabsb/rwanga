@@ -267,17 +267,44 @@ test('Scene Navigator Tags v1.1 — click entity row → editor lights up its oc
 // 4. RTL — tag intelligence renders + mirrors; counts + snippets work
 // =================================================================
 
-test('Scene Navigator Tags v1.1 — RTL: entity rows + occurrence snippets render and mirror', async () => {
+// Seed an RTL scene with Arabic action text so C8 (Naskh snippet font) and
+// the RTL label/tracking polish are genuinely witnessed — matching the
+// mysterious-guest-rtl.rga profile, not Latin-in-RTL.
+async function seedArabicScene(page) {
+  await page.evaluate(() => {
+    const view = window.Rga.TabManager._editorView();
+    const schema = view.state.schema;
+    const heading = schema.nodes.sceneHeading.create({ setting: 'INT.', time: 'NIGHT', headingStyle: null },
+      schema.text('غرفة المعيشة'));
+    const action = schema.nodes.action.create(null,
+      schema.text('تجلس الأم في زاوية الحمّام، تحمل المخلوق الصغير. تبتسم الأم بهدوء.'));
+    const transition = schema.nodes.transition.create({ presetType: 'CUT' }, schema.text('CUT'));
+    const scene = schema.nodes.scene.create(
+      { id: 'sc-nav-1', notes: '', revisionFlag: null,
+        metadata: { linkedScenes: [], references: [], production: {} } },
+      [heading, action, transition]);
+    let bodyPos = null;
+    view.state.doc.descendants(function(node, pos) {
+      if (node.type.name === 'body') { bodyPos = pos; return false; }
+      return true;
+    });
+    const insertAt = bodyPos + view.state.doc.nodeAt(bodyPos).nodeSize - 1;
+    view.dispatch(view.state.tr.insert(insertAt, scene));
+  });
+}
+
+test('Scene Navigator Tags v1.1 — RTL: Naskh snippets, mirrored layout, active entity', async () => {
   const { app, page, userDataDir } = await launchApp('scene-nav-tags-rtl-');
   try {
     await page.evaluate(() => {
       const doc = window.Rga.TabManager.activeDoc();
       doc.metadata.screenplayProfile = { direction: 'rtl' };
     });
-    await seedSceneText(page);
-    await selectOccurrence(page, 'NALI', 0);
+    await seedArabicScene(page);
+    // Tag both occurrences of الأم (the mother) via the real toolbar.
+    await selectOccurrence(page, 'الأم', 0);
     await tagSelectionViaToolbar(page, 'character');
-    await selectOccurrence(page, 'NALI', 1);
+    await selectOccurrence(page, 'الأم', 1);
     await tagSelectionViaToolbar(page, 'character');
 
     await openNavigatorAndExpandScene(page);
@@ -285,28 +312,45 @@ test('Scene Navigator Tags v1.1 — RTL: entity rows + occurrence snippets rende
     const rtl = await page.evaluate(() => {
       const host = window.Rga.Shell.Sidebar.getHost();
       const wrapper = host.querySelector('.rga-shell-scene-navigator');
-      const nali = Array.from(host.querySelectorAll('[data-scene-node-id="sc-nav-1"] .rga-shell-scene-navigator-tag-entity'))
-        .find((r) => /NALI/.test(r.textContent));
+      const ent = host.querySelector('[data-scene-node-id="sc-nav-1"] .rga-shell-scene-navigator-tag-entity');
       return {
         dir:   wrapper ? wrapper.getAttribute('dir') : null,
-        count: nali ? nali.querySelector('.rga-shell-scene-navigator-tag-entity-count').textContent : null
+        count: ent ? ent.querySelector('.rga-shell-scene-navigator-tag-entity-count').textContent : null
       };
     });
     expect(rtl.dir).toBe('rtl');
     expect(rtl.count).toBe('·2');
 
-    // Expand the entity → snippets render under RTL too.
+    // Expand the entity → Naskh snippets render under RTL.
     await page.evaluate(() => {
       const host = window.Rga.Shell.Sidebar.getHost();
-      const nali = Array.from(host.querySelectorAll('[data-scene-node-id="sc-nav-1"] .rga-shell-scene-navigator-tag-entity'))
-        .find((r) => /NALI/.test(r.textContent));
-      nali.querySelector('.rga-shell-scene-navigator-tag-entity-chevron').click();
+      const ent = host.querySelector('[data-scene-node-id="sc-nav-1"] .rga-shell-scene-navigator-tag-entity');
+      ent.querySelector('.rga-shell-scene-navigator-tag-entity-chevron').click();
     });
     await page.waitForFunction(() => {
       const host = window.Rga.Shell.Sidebar.getHost();
       return host.querySelectorAll('[data-scene-node-id="sc-nav-1"] .rga-shell-scene-navigator-tag-occurrence').length === 2;
     });
-    await page.screenshot({ path: shotPath('05-rtl-entities-snippets.png') });
+    // C8 — the occurrence snippet uses the RTL editor (Naskh) font family.
+    const occFont = await page.evaluate(() => {
+      const host = window.Rga.Shell.Sidebar.getHost();
+      const occ = host.querySelector('[data-scene-node-id="sc-nav-1"] .rga-shell-scene-navigator-tag-occurrence');
+      return getComputedStyle(occ).fontFamily;
+    });
+    expect(occFont).toMatch(/Naskh/i);
+    await page.screenshot({ path: shotPath('05-rtl-scene-expanded.png') });
+
+    // Click the entity row → RTL active-entity cue (washed row + start-bar).
+    await page.evaluate(() => {
+      const host = window.Rga.Shell.Sidebar.getHost();
+      const ent = host.querySelector('[data-scene-node-id="sc-nav-1"] .rga-shell-scene-navigator-tag-entity');
+      ent.querySelector('.rga-shell-scene-navigator-tag-entity-name').click();
+    });
+    await page.waitForFunction(() => {
+      const host = window.Rga.Shell.Sidebar.getHost();
+      return !!host.querySelector('[data-scene-node-id="sc-nav-1"] .rga-shell-scene-navigator-tag-entity.is-active');
+    });
+    await page.screenshot({ path: shotPath('06-rtl-active-entity.png') });
   } finally {
     await teardown(app, userDataDir);
   }

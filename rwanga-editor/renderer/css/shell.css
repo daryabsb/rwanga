@@ -1852,60 +1852,99 @@ body.view-print-preview-active #rga-shell-toolbar { display: none; }
   color: var(--text-tertiary, #6e6e6e);
 }
 
-/* Scene Navigator Tags v1.1 — hybrid occurrence model. Beneath the notes/
-   flags: a quiet "Tagged in this scene" label, then a VERTICAL list grouped
-   by category. Each entity is a collapsed row (chevron + dot + name + count)
-   that expands to its occurrence snippets. Compact — a navigation surface,
-   not a breakdown panel. Aligned under the heading via the same logical
-   inline-start indent as the marks zone, so it mirrors in RTL with no extra
-   rules. */
-.rga-shell-scene-navigator-scene-tags {
+/* ============================================================
+   Scene Navigator Tags — Visual Polish v1 (designer review accepted).
+   Source of truth: docs/Filmustageation/Scene Navigator Tags - Visual
+   Polish Review.html. Change ids (C1–C12) are noted inline. The goal: make
+   the screenplay wording dominate, give Scene → Category → Entity →
+   Occurrence a read hierarchy (size + weight + family, not three greys),
+   and thread one tag colour through dot → match → active row.
+   ============================================================ */
+
+/* C10 — one inset container so the expanded content visibly hangs off its
+   scene (faint wash + logical start-rule + radius), instead of marks/tags
+   floating between rows. Wraps the marks zone + the tags zone. */
+.rga-shell-scene-navigator-expansion {
   grid-column: 1 / -1;
-  margin-top: 3px;
-  padding-inline-start: 34px;              /* align under heading (26px num + 8px gap) */
+  margin-top: 4px;
+  margin-inline-start: 26px;               /* clear the number gutter; hang under the heading */
+  padding: 9px 11px;
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 8px;                                /* marks ↔ tags */
+  background: color-mix(in oklab, var(--text-primary, #dadada) 4%, transparent);
+  border-inline-start: 2px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+  border-start-start-radius: 0;
+  border-end-start-radius: 0;
+  border-start-end-radius: 4px;
+  border-end-end-radius: 4px;
 }
+/* Inside the inset, marks + tags drop their own grid-span and heading indent —
+   the container now owns the inset. */
+.rga-shell-scene-navigator-expansion .rga-shell-scene-navigator-marks,
+.rga-shell-scene-navigator-expansion .rga-shell-scene-navigator-scene-tags {
+  grid-column: auto;
+  margin-top: 0;
+  padding-inline-start: 0;
+}
+
+.rga-shell-scene-navigator-scene-tags {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;                               /* C5 — label ↔ groups, groups ↔ groups */
+}
+/* The honest zone label. Uppercase + tracking only in LTR (C9). */
 .rga-shell-scene-navigator-scene-tags-label {
   font-size: var(--font-size-xs, 10px);
   line-height: 1.3;
-  text-transform: uppercase;
+  text-transform: uppercase;               /* C9 reset under RTL below */
   letter-spacing: 0.04em;
   color: var(--text-tertiary, #6e6e6e);
 }
 .rga-shell-scene-navigator-tag-group {
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: 2px;                                /* C5 — label ↔ entity, entity ↔ entity */
 }
+/* C4 — the category label gains identity: weight + tracking, tinted toward
+   the category's tag colour (--grp-color, set in JS). Uppercase/tracking
+   gated to LTR (C9). */
 .rga-shell-scene-navigator-tag-group-label {
   font-size: var(--font-size-xs, 10px);
   line-height: 1.4;
-  color: var(--text-secondary, #8a8a8a);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: color-mix(in oklab, var(--grp-color, var(--text-secondary, #9e9e9e)) 72%, var(--text-tertiary, #6e6e6e));
 }
 .rga-shell-scene-navigator-tag-entity-block {
   display: flex;
   flex-direction: column;
 }
-/* The entity row — chevron + colour dot + name + per-scene count. Reads as
-   quiet text at rest; lifts on hover/focus to show it is actionable. */
+/* The entity row — chevron + colour dot + name + per-scene count. C5: a real
+   24px tap target with breathing padding. Base transparent start-border so
+   the C11 active state colours it with no layout shift (logical → RTL-safe). */
 .rga-shell-scene-navigator-tag-entity {
   display: flex;
   align-items: center;
-  gap: 5px;
-  padding: 1px 4px;
+  gap: 6px;
+  min-height: 24px;                        /* C5 */
+  padding: 4px 6px;                        /* C5 */
   border-radius: 3px;
-  color: var(--text-secondary, #8a8a8a);
-  font-size: var(--font-size-xs, 10px);
-  line-height: 1.5;
+  border-inline-start: 2px solid transparent;
+  color: var(--text-secondary, #9e9e9e);
   cursor: pointer;
 }
 .rga-shell-scene-navigator-tag-entity:hover,
 .rga-shell-scene-navigator-tag-entity:focus-visible {
   background: var(--bg-hover, rgba(127, 127, 127, 0.18));
-  color: var(--text-primary, #e6e6e6);
   outline: none;
+}
+/* C11 — reciprocal active cue: the focused entity's row echoes the editor
+   highlight — washed in its tag colour + a start-bar in the same colour. */
+.rga-shell-scene-navigator-tag-entity.is-active {
+  background: color-mix(in oklab, var(--dot-color, var(--accent-primary, #007acc)) 14%, transparent);
+  border-inline-start-color: var(--dot-color, var(--accent-primary, #007acc));
 }
 /* Entity disclosure chevron — a CSS caret (no glyph), sized like the scene
    chevron so they read as siblings; rotates down when expanded. */
@@ -1942,49 +1981,64 @@ body.view-print-preview-active #rga-shell-toolbar { display: none; }
 }
 .rga-shell-scene-navigator-tag-entity:hover .rga-shell-scene-navigator-tag-entity-chevron,
 .rga-shell-scene-navigator-tag-entity-chevron[aria-expanded="true"] {
-  color: var(--text-secondary, #8a8a8a);
+  color: var(--text-secondary, #9e9e9e);
 }
+/* C6 — the dot reads as a category swatch, not a speck: 9px + a faint 3px
+   halo in its own tag colour (--dot-color, set in JS; matches the dot fill). */
 .rga-shell-scene-navigator-tag-dot {
   flex: 0 0 auto;
-  width: 7px;
-  height: 7px;
+  width: 9px;
+  height: 9px;
   border-radius: 50%;
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--dot-color, var(--accent-primary, #007acc)) 16%, transparent);
 }
+/* C1 — the entity name is the eye-anchor: largest, heaviest, primary ink. */
 .rga-shell-scene-navigator-tag-entity-name {
+  flex: 0 1 auto;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary, #dadada);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 .rga-shell-scene-navigator-tag-entity-count {
   flex: 0 0 auto;
+  font-size: var(--font-size-xs, 10px);
   color: var(--text-tertiary, #6e6e6e);
   font-variant-numeric: tabular-nums;
 }
-/* Duplicate-identity marker — same honest amber warning as the Tags Panel.
-   Meaning lives on aria-label + title. */
+/* C7 — duplicate-identity marker: sized to 13px on the amber accent, parted
+   from name and count so the glyphs no longer touch. Caution, not error;
+   meaning stays on title / aria-label. */
 .rga-shell-scene-navigator-tag-entity-dup {
   flex: 0 0 auto;
   display: inline-flex;
   align-items: center;
-  color: var(--accent-warning, #d39a00);
+  margin-inline: 2px;
+  color: var(--accent-warning, #FFB347);
 }
 .rga-shell-scene-navigator-tag-entity-dup svg {
-  width: 11px;
-  height: 11px;
+  width: 13px;
+  height: 13px;
 }
-/* Occurrence snippets — the original screenplay wording around each tag,
-   indented under the entity row. Each line jumps to its occurrence. */
+/* Occurrence snippets — the original screenplay wording. C2: lifted out of
+   "disabled" grey into the manuscript voice (secondary, editor font, 11px),
+   on a tree-line under the entity. */
 .rga-shell-scene-navigator-tag-occurrences {
   display: flex;
   flex-direction: column;
-  gap: 1px;
-  padding-inline-start: 17px;              /* under the dot/name, past the chevron */
-  margin-bottom: 2px;
+  gap: 2px;                                /* C5 */
+  margin-block: 2px 2px;
+  margin-inline-start: 8px;
+  padding-inline-start: 10px;
+  border-inline-start: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));   /* tree-line */
 }
 .rga-shell-scene-navigator-tag-occurrence {
-  font-size: var(--font-size-xs, 10px);
-  line-height: 1.4;
-  color: var(--text-tertiary, #6e6e6e);
+  font-family: var(--font-editor, 'Courier Prime', monospace);   /* C2 — manuscript voice */
+  font-size: var(--font-size-sm, 11px);                          /* C2 */
+  line-height: 1.45;
+  color: var(--text-secondary, #9e9e9e);                         /* C2 — not "disabled" */
   padding: 1px 4px;
   border-radius: 3px;
   cursor: pointer;
@@ -1995,12 +2049,28 @@ body.view-print-preview-active #rga-shell-toolbar { display: none; }
 .rga-shell-scene-navigator-tag-occurrence:hover,
 .rga-shell-scene-navigator-tag-occurrence:focus-visible {
   background: var(--bg-hover, rgba(127, 127, 127, 0.18));
-  color: var(--text-secondary, #8a8a8a);
+  color: var(--text-primary, #dadada);                           /* C2 — hover lifts to primary */
   outline: none;
 }
+/* C3 — the matched word carries the entity's tag colour (--occ-color, set in
+   JS), threading dot → match → editor highlight into one colour. */
 .rga-shell-scene-navigator-tag-occurrence-match {
-  color: var(--text-primary, #e6e6e6);
-  font-weight: 500;
+  font-weight: 700;
+  color: var(--occ-color, var(--text-primary, #dadada));
+}
+
+/* C8 — RTL occurrence snippets in Naskh, with leading. Courier has no Arabic
+   glyphs; 1.45 leading clips diacritics. Switch family + open the line. */
+[dir="rtl"] .rga-shell-scene-navigator-tag-occurrence {
+  font-family: var(--font-editor-rtl, 'Noto Naskh Arabic', serif);
+  line-height: 1.85;
+}
+/* C9 — uppercase + tracking are no-ops on Arabic and harm shaping once labels
+   localise. Drop them under RTL; lean on weight + colour. */
+[dir="rtl"] .rga-shell-scene-navigator-scene-tags-label,
+[dir="rtl"] .rga-shell-scene-navigator-tag-group-label {
+  text-transform: none;
+  letter-spacing: normal;
 }
 
 /* ============================================================
