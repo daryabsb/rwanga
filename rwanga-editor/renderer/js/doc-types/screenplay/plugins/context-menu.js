@@ -12,12 +12,6 @@
 
   // Margin kept between the menu and the viewport edge.
   const MENU_MARGIN = 8;
-  // Estimated submenu width (min-width 140px + padding/label slack). Used to
-  // decide whether the "Tag as ▶" submenu would overflow the right edge and
-  // therefore needs to flip to the left. The submenu is display:none until
-  // hover, so it cannot be measured up front — this estimate is intentionally
-  // generous so the flip triggers slightly early rather than too late.
-  const SUBMENU_EST_WIDTH = 170;
 
   // ---------------------------------------------------------------
   // Pure viewport clamp — keeps the menu fully inside the viewport.
@@ -31,12 +25,37 @@
     let y = Math.min(clickY, vh - menuH - margin);
     x = Math.max(margin, x);
     y = Math.max(margin, y);
-    // Submenu opens to the right (CSS left:100%). If that would push it past
-    // the right edge, flip it to the left of the parent menu so "Tag as ▶"
-    // stays reachable. Direction-agnostic — based purely on available space,
-    // so it also covers RTL near the left edge.
-    const flipSubmenu = (x + menuW + SUBMENU_EST_WIDTH + margin) > vw;
-    return { x: x, y: y, flipSubmenu: flipSubmenu };
+    return { x: x, y: y };
+  }
+
+  // ---------------------------------------------------------------
+  // Pure submenu clamp — given the parent item's viewport rect and the
+  // submenu's *measured* size, decide which side it opens on and how far
+  // it must shift vertically to stay inside the viewport. Returns
+  //   openRight: true  -> submenu opens to the right of the parent (left:100%)
+  //   openRight: false -> submenu opens to the left  (right:100%)
+  //   topOffset:       vertical offset in px relative to the parent's top
+  //                    (the submenu is absolutely positioned inside the
+  //                    parent <li>, whose top edge is the 0 reference).
+  // Direction-agnostic: it picks the side with room, so it covers RTL too.
+  // Exposed as Rga.ContextMenu._clampSubmenuPosition for focused tests.
+  // ---------------------------------------------------------------
+  function clampSubmenuPosition(parent, subW, subH, vw, vh, margin) {
+    margin = (margin == null) ? MENU_MARGIN : margin;
+    // Horizontal: prefer the right side; flip left when the right side
+    // overflows. If neither side fully fits, take the side with more room.
+    const fitsRight = (parent.right + subW + margin) <= vw;
+    const fitsLeft = (parent.left - subW - margin) >= 0;
+    let openRight;
+    if (fitsRight) openRight = true;
+    else if (fitsLeft) openRight = false;
+    else openRight = (vw - parent.right) >= parent.left;
+    // Vertical: align the submenu top with the parent (the CSS default is
+    // -4px); clamp so the whole submenu stays inside the viewport.
+    let top = parent.top - 4;
+    if (top + subH + margin > vh) top = vh - margin - subH;
+    if (top < margin) top = margin;
+    return { openRight: openRight, topOffset: top - parent.top };
   }
 
   function getMenuEl() {
@@ -136,14 +155,12 @@
     // while hidden. This is all synchronous within the contextmenu handler,
     // so the browser only paints after we set the final coordinates: no flash
     // at the pre-clamp position.
-    el.classList.remove('ctx-flip-submenu');
     el.hidden = false;
     const pos = clampMenuPosition(
       event.clientX, event.clientY,
       el.offsetWidth, el.offsetHeight,
       window.innerWidth, window.innerHeight
     );
-    el.classList.toggle('ctx-flip-submenu', pos.flipSubmenu);
     el.style.left = pos.x + 'px';
     el.style.top = pos.y + 'px';
 
@@ -181,6 +198,33 @@
     { key: 'custom',    label: 'Custom…' },
   ];
 
+  // Position the submenu when it is revealed, measuring its real size so it
+  // never spills off the right edge (the reported bug) or the bottom. CSS
+  // :hover still controls visibility (display:none → block); we only override
+  // the side and vertical offset via inline styles, which win over the
+  // stylesheet. Recomputed on every hover so it adapts to the menu's spot.
+  function positionSubmenu(parentItem, sub) {
+    // Clear any prior inline placement so the measurement is clean.
+    sub.style.left = '';
+    sub.style.right = '';
+    sub.style.top = '';
+    const parent = parentItem.getBoundingClientRect();
+    const r = sub.getBoundingClientRect();
+    const place = clampSubmenuPosition(
+      { left: parent.left, right: parent.right, top: parent.top },
+      r.width, r.height,
+      window.innerWidth, window.innerHeight
+    );
+    if (place.openRight) {
+      sub.style.left = '100%';
+      sub.style.right = 'auto';
+    } else {
+      sub.style.left = 'auto';
+      sub.style.right = '100%';
+    }
+    sub.style.top = place.topOffset + 'px';
+  }
+
   function buildTagSubmenu(parentItem, view) {
     const sub = document.createElement('ul');
     sub.className = 'ctx-submenu ctx-list';
@@ -196,6 +240,12 @@
     });
 
     parentItem.appendChild(sub);
+
+    // Re-measure and clamp the submenu each time it is hovered open. mouseenter
+    // fires while :hover is already active, so the submenu is laid out and
+    // measurable. pointerenter covers touch/pen.
+    parentItem.addEventListener('mouseenter', function() { positionSubmenu(parentItem, sub); });
+    parentItem.addEventListener('pointerenter', function() { positionSubmenu(parentItem, sub); });
   }
 
   // ---------------------------------------------------------------
@@ -217,7 +267,11 @@
     });
   }
 
-  Rga.ContextMenu = { hide: hideMenu, _clampPosition: clampMenuPosition };
+  Rga.ContextMenu = {
+    hide: hideMenu,
+    _clampPosition: clampMenuPosition,
+    _clampSubmenuPosition: clampSubmenuPosition
+  };
   Rga.DocTypes = Rga.DocTypes || {};
   Rga.DocTypes.screenplay = Rga.DocTypes.screenplay || {};
   Rga.DocTypes.screenplay.contextMenuPlugin = contextMenuPlugin;

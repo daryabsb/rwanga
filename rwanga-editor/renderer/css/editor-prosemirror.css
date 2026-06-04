@@ -1258,14 +1258,10 @@ body.view-draft-active .rga-draft-footer {
 .ctx-has-submenu:hover .ctx-submenu {
   display: block;
 }
-
-/* When the menu sits near the right edge of the viewport, JS adds
-   .ctx-flip-submenu so the nested submenu opens to the LEFT of its parent
-   instead of overflowing off-screen (keeps "Tag as ▶" reachable). */
-.rga-context-menu.ctx-flip-submenu .ctx-submenu {
-  left: auto;
-  right: 100%;
-}
+/* The submenu's side (left:100% vs right:100%) and vertical offset are set
+   inline by JS on hover (positionSubmenu) so it never spills off the right
+   edge or the bottom of the viewport. The left:100%/top:-4px above are just
+   the default first-paint placement before that runs. */
 
 /* ============================================================
    MARK POPUPS (annotation, tag, revision flag)

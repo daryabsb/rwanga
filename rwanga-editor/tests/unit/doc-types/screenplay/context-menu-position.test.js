@@ -13,11 +13,11 @@ const assert = require('node:assert/strict');
 const { JSDOM } = require('jsdom');
 
 // Load the module once. Its IIFE runs on first require and attaches
-// Rga.ContextMenu to the window present at that moment; the clamp helper is
+// Rga.ContextMenu to the window present at that moment; the clamp helpers are
 // pure (no window/layout dependency), so one reference serves every test.
-let _clamp = null;
-function loadClamp() {
-  if (_clamp) return _clamp;
+let _api = null;
+function loadApi() {
+  if (_api) return _api;
   const dom = new JSDOM('<!DOCTYPE html><html><body><div id="context-menu" hidden></div></body></html>');
   global.window = dom.window;
   global.document = dom.window.document;
@@ -25,10 +25,13 @@ function loadClamp() {
   // The plugin factory touches window.RgaProseMirror lazily (only inside
   // contextMenuPlugin), so the module loads fine without it.
   require('../../../../renderer/js/doc-types/screenplay/plugins/context-menu.js');
-  _clamp = global.window.Rga.ContextMenu._clampPosition;
-  assert.equal(typeof _clamp, 'function', 'expected Rga.ContextMenu._clampPosition to be exposed');
-  return _clamp;
+  _api = global.window.Rga.ContextMenu;
+  assert.equal(typeof _api._clampPosition, 'function', 'expected _clampPosition to be exposed');
+  assert.equal(typeof _api._clampSubmenuPosition, 'function', 'expected _clampSubmenuPosition to be exposed');
+  return _api;
 }
+function loadClamp() { return loadApi()._clampPosition; }
+function loadSubmenuClamp() { return loadApi()._clampSubmenuPosition; }
 
 const VW = 1280;
 const VH = 800;
@@ -40,7 +43,6 @@ test('normal middle-of-line click keeps the click point', () => {
   const r = clamp(400, 300, MENU_W, MENU_H, VW, VH);
   assert.equal(r.x, 400);
   assert.equal(r.y, 300);
-  assert.equal(r.flipSubmenu, false);
 });
 
 test('right-edge click pulls the menu fully inside the viewport', () => {
@@ -71,20 +73,54 @@ test('click in extreme corner never produces a negative coordinate', () => {
   assert.ok(r.x + MENU_W <= VW && r.y + MENU_H <= VH);
 });
 
-test('submenu flips to the left when the menu sits near the right edge', () => {
-  const clamp = loadClamp();
-  const r = clamp(VW - 4, 300, MENU_W, MENU_H, VW, VH);
-  assert.equal(r.flipSubmenu, true, 'submenu must flip so "Tag as ▶" stays reachable');
-});
-
-test('submenu does not flip when there is room to the right', () => {
-  const clamp = loadClamp();
-  const r = clamp(100, 300, MENU_W, MENU_H, VW, VH);
-  assert.equal(r.flipSubmenu, false);
-});
-
 test('tiny viewport (RTL/narrow) still clamps to a non-negative margin', () => {
   const clamp = loadClamp();
   const r = clamp(5, 5, MENU_W, MENU_H, 320, 240);
   assert.ok(r.x >= 0 && r.y >= 0);
+});
+
+// ---- submenu clamp (the reported bug: "Tag as" submenu spilled off-screen) ----
+
+const SUB_W = 150;
+const SUB_H = 290;
+
+test('submenu opens to the right when there is room', () => {
+  const sub = loadSubmenuClamp();
+  // parent menu well left of center; plenty of room on the right.
+  const r = sub({ left: 200, right: 380, top: 300 }, SUB_W, SUB_H, VW, VH);
+  assert.equal(r.openRight, true);
+});
+
+test('submenu flips left when opening right would overflow the viewport', () => {
+  const sub = loadSubmenuClamp();
+  // parent menu hugging the right edge — right side cannot fit the submenu.
+  const r = sub({ left: VW - 200, right: VW - 8, top: 300 }, SUB_W, SUB_H, VW, VH);
+  assert.equal(r.openRight, false, 'submenu must open to the LEFT so it stays on-screen');
+});
+
+test('left-opening submenu stays inside the left edge', () => {
+  const sub = loadSubmenuClamp();
+  const parent = { left: VW - 200, right: VW - 8, top: 300 };
+  const r = sub(parent, SUB_W, SUB_H, VW, VH);
+  // openRight=false => submenu right edge sits at parent.left, left edge at parent.left - SUB_W
+  assert.equal(r.openRight, false);
+  assert.ok(parent.left - SUB_W >= 0, 'left-opening submenu must not cross the left edge');
+});
+
+test('submenu near the bottom shifts up so its bottom stays inside', () => {
+  const sub = loadSubmenuClamp();
+  const parentTop = VH - 40; // "Tag as" near the bottom
+  const r = sub({ left: 200, right: 380, top: parentTop }, SUB_W, SUB_H, VW, VH);
+  const submenuTop = parentTop + r.topOffset;
+  assert.ok(submenuTop + SUB_H <= VH, 'submenu bottom must be inside the viewport');
+  assert.ok(submenuTop >= 0, 'submenu top must be inside the viewport');
+});
+
+test('submenu in a tight viewport picks the side with more room', () => {
+  const sub = loadSubmenuClamp();
+  // Narrow viewport where neither side fully fits; parent slightly right of center.
+  const vw = 360;
+  const r = sub({ left: 150, right: 330, top: 100 }, SUB_W, SUB_H, vw, 400);
+  // room right = 360-330 = 30; room left = 150 => open left.
+  assert.equal(r.openRight, false);
 });
