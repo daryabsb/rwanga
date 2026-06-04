@@ -1197,13 +1197,19 @@ test('Search-v1.1: clearing the search clears the highlight', () => {
   assert.ok(sh.calls.clear.length >= 1, 'clearing the search clears the highlight');
 });
 
+
 // ================================================================
-// Scene Navigator Tags v1 — scene-local tagged entities
+// Scene Navigator Tags v1.1 — hybrid occurrence model
 // ================================================================
-// When a writer expands a scene row, the navigator shows the entities
-// TAGGED in that scene, grouped by category (Characters / Props / …).
-// Read-only, derived via Rga.Screenplay.Memory.scene → SceneCatalog.
-// Clicking an entity reuses the existing Tag Focus Highlight system.
+// Expanding a scene shows scene-local tag intelligence: category groups,
+// an entity row per tagged entity with its PER-SCENE count, expandable to
+// occurrence snippets carrying the original screenplay wording. Clicking
+// the entity focus-highlights it; clicking a snippet jumps to it.
+//
+// The occurrence derivation (positions, counts, wording, scene isolation)
+// is proven with real ProseMirror in
+// tests/unit/doc-types/screenplay/scene-tag-occurrences.test.js. Here we
+// verify the navigator's RENDER + CLICK WIRING against a forScene stub.
 // ----------------------------------------------------------------
 
 function tagFocusStub() {
@@ -1215,147 +1221,235 @@ function tagFocusStub() {
   };
 }
 
-// A two-scene index: scene 'a' (scene 12) is richly tagged; scene 'b'
-// (scene 13) has none. NALI + BABAN are tagged characters, PHOTOGRAPH a
-// prop, OLD HOUSE a location — all in scene 'a' only.
+// Scene 'a' is tagged (NALI ×2 + PHOTOGRAPH ×1); scene 'b' is tag-free.
+// idx.tags carries sceneAppearances so the cheap Memory gate lights the
+// chevron; the occurrence DETAIL comes from the forScene stub below.
 function taggedIndexScenes() {
   return [
-    { nodeId: 'a', sceneNumber: 12, headingDisplay: 'INT. OLD HOUSE — NIGHT', pmPos: 0,  pmEndPos: 40, hasNotes: true,  hasRevisionFlag: false },
-    { nodeId: 'b', sceneNumber: 13, headingDisplay: 'EXT. STREET — DAY',      pmPos: 40, pmEndPos: 80, hasNotes: false, hasRevisionFlag: false }
+    { nodeId: 'a', sceneNumber: 12, headingDisplay: 'INT. OLD HOUSE — NIGHT', pmPos: 0,  pmEndPos: 60, hasNotes: true,  hasRevisionFlag: false },
+    { nodeId: 'b', sceneNumber: 13, headingDisplay: 'EXT. STREET — DAY',      pmPos: 60, pmEndPos: 90, hasNotes: false, hasRevisionFlag: false }
   ];
 }
 function taggedIndexTags() {
   return {
-    character: [
-      { nodeId: 'nali',  name: 'NALI',  color: '#c2185b', sceneAppearances: ['a'] },
-      { nodeId: 'baban', name: 'BABAN', color: '#1976d2', sceneAppearances: ['a'] }
-    ],
-    prop:     [{ nodeId: 'photo',   name: 'PHOTOGRAPH', color: '#388e3c', sceneAppearances: ['a'] }],
-    location: [{ nodeId: 'oldhouse', name: 'OLD HOUSE', color: '#f57c00', sceneAppearances: ['a'] }]
+    character: [{ nodeId: 'nali',  name: 'NALI',  color: '#c2185b', sceneAppearances: ['a'] }],
+    prop:      [{ nodeId: 'photo', name: 'PHOTOGRAPH', color: '#388e3c', sceneAppearances: ['a'] }]
   };
 }
+
+// Canned occurrence groups for scene 'a' (pmPos 0), matching the shape
+// Rga.SceneTagOccurrences.forScene produces.
+function naliPhotoGroups() {
+  return [
+    { tagType: 'character', label: 'Characters', entities: [
+      { entityId: 'nali', name: 'NALI', color: '#c2185b', count: 2, occurrences: [
+        { from: 5,  to: 9,  text: 'NALI', snippet: { before: '', match: 'NALI', after: ' stands by the window', truncatedStart: false, truncatedEnd: true } },
+        { from: 41, to: 45, text: 'NALI', snippet: { before: 'the PHOTOGRAPH. ', match: 'NALI', after: ' smiles.', truncatedStart: true, truncatedEnd: false } }
+      ] }
+    ] },
+    { tagType: 'prop', label: 'Props', entities: [
+      { entityId: 'photo', name: 'PHOTOGRAPH', color: '#388e3c', count: 1, occurrences: [
+        { from: 25, to: 35, text: 'PHOTOGRAPH', snippet: { before: 'holding the ', match: 'PHOTOGRAPH', after: '.', truncatedStart: false, truncatedEnd: false } }
+      ] }
+    ] }
+  ];
+}
+
+// forScene stub keyed by scenePos. Records calls so we can assert the
+// subtree walk runs only for the expanded scene.
+function occStub(byPos) {
+  const calls = [];
+  return {
+    calls: calls,
+    forScene: function(_doc, scenePos, _idx) {
+      calls.push(scenePos);
+      return byPos[scenePos] || [];
+    }
+  };
+}
+
 function sceneTagsOf(host, nodeId) {
   const row = host.querySelector('[data-scene-node-id="' + nodeId + '"]');
   return row ? row.querySelector('.rga-shell-scene-navigator-scene-tags') : null;
 }
-function tagEntitiesOf(host, nodeId) {
+function entityRowsOf(host, nodeId) {
   const zone = sceneTagsOf(host, nodeId);
   return zone ? Array.from(zone.querySelectorAll('.rga-shell-scene-navigator-tag-entity')) : [];
 }
+function entityRowByName(host, nodeId, name) {
+  return entityRowsOf(host, nodeId).filter(function(r) {
+    const n = r.querySelector('.rga-shell-scene-navigator-tag-entity-name');
+    return n && n.textContent.trim() === name;
+  })[0] || null;
+}
+function occurrencesOf(host, nodeId) {
+  const zone = sceneTagsOf(host, nodeId);
+  return zone ? Array.from(zone.querySelectorAll('.rga-shell-scene-navigator-tag-occurrence')) : [];
+}
 
-test('Scene-Tags-v1: expanding a tagged scene shows category groups + entity names', () => {
-  const { Rga, host } = boot({ scenes: taggedIndexScenes(), tags: taggedIndexTags() });
+function bootTags() {
+  const ctx = boot({ scenes: taggedIndexScenes(), tags: taggedIndexTags() });
+  ctx.Rga.SceneTagOccurrences = occStub({ 0: naliPhotoGroups() });
+  return ctx;
+}
+
+test('Scene-Tags-v1.1: expanded scene shows category groups + entity rows with per-scene counts', () => {
+  const { Rga, host } = bootTags();
   Rga.Shell.Sidebar.activate('sceneNavigator');
   chevronOf(host, 'a').click();
   const zone = sceneTagsOf(host, 'a');
-  assert.ok(zone, 'tags zone appears under the expanded scene');
-  const groupLabels = Array.from(zone.querySelectorAll('.rga-shell-scene-navigator-tag-group-label'))
-    .map(function(el) { return el.textContent; });
-  assert.deepEqual(groupLabels, ['Characters', 'Props', 'Locations'],
-    'categories render in canonical order, only the non-empty ones');
-  const names = tagEntitiesOf(host, 'a').map(function(el) { return el.textContent.trim(); });
-  assert.deepEqual(names.sort(), ['BABAN', 'NALI', 'OLD HOUSE', 'PHOTOGRAPH'].sort(),
-    'every tagged entity in the scene is listed');
+  assert.ok(zone, 'tags zone appears');
+  assert.equal(zone.querySelector('.rga-shell-scene-navigator-scene-tags-label').textContent, 'Tagged in this scene');
+  const groupLabels = Array.from(zone.querySelectorAll('.rga-shell-scene-navigator-tag-group-label')).map(function(e) { return e.textContent; });
+  assert.deepEqual(groupLabels, ['Characters', 'Props']);
+  const nali = entityRowByName(host, 'a', 'NALI');
+  assert.ok(nali, 'NALI entity row present');
+  assert.equal(nali.querySelector('.rga-shell-scene-navigator-tag-entity-count').textContent, '·2', 'per-scene count is 2');
+  const photo = entityRowByName(host, 'a', 'PHOTOGRAPH');
+  assert.equal(photo.querySelector('.rga-shell-scene-navigator-tag-entity-count').textContent, '·1');
 });
 
-test('Scene-Tags-v1: honest language — the zone says "Tagged in this scene"', () => {
-  const { Rga, host } = boot({ scenes: taggedIndexScenes(), tags: taggedIndexTags() });
+test('Scene-Tags-v1.1: entity row is collapsed by default; chevron expands/collapses occurrence snippets', () => {
+  const { Rga, host } = bootTags();
   Rga.Shell.Sidebar.activate('sceneNavigator');
   chevronOf(host, 'a').click();
-  const label = sceneTagsOf(host, 'a').querySelector('.rga-shell-scene-navigator-scene-tags-label');
-  assert.ok(label, 'an honest section label is present');
-  assert.equal(label.textContent, 'Tagged in this scene');
-  // Never the dishonest framings.
-  const txt = sceneTagsOf(host, 'a').textContent.toLowerCase();
-  assert.equal(txt.indexOf('appears'), -1, 'never says "appears"');
-  assert.equal(txt.indexOf('detected'), -1, 'never says "detected"');
-  assert.equal(txt.indexOf('referenced'), -1, 'never says "referenced"');
+  assert.equal(occurrencesOf(host, 'a').length, 0, 'occurrences hidden by default (entity collapsed)');
+  const nali = entityRowByName(host, 'a', 'NALI');
+  const entChev = nali.querySelector('.rga-shell-scene-navigator-tag-entity-chevron');
+  assert.ok(entChev, 'entity has a disclosure chevron');
+  entChev.click();
+  assert.equal(occurrencesOf(host, 'a').length, 2, 'NALI’s 2 occurrences revealed');
+  // Collapse again.
+  entityRowByName(host, 'a', 'NALI').querySelector('.rga-shell-scene-navigator-tag-entity-chevron').click();
+  assert.equal(occurrencesOf(host, 'a').length, 0, 'occurrences hidden again');
 });
 
-test('Scene-Tags-v1: only entities tagged IN this scene are shown (no leakage across scenes)', () => {
-  const { Rga, host } = boot({ scenes: taggedIndexScenes(), tags: taggedIndexTags() });
+test('Scene-Tags-v1.1: occurrence snippet shows the original screenplay wording', () => {
+  const { Rga, host } = bootTags();
   Rga.Shell.Sidebar.activate('sceneNavigator');
-  // Scene b is tag-free → no chevron, nothing to expand.
-  assert.equal(chevronOf(host, 'b'), null, 'tag-free, mark-free scene has no chevron');
-  // Scene a lists NALI but scene b would never (it is not tagged there).
   chevronOf(host, 'a').click();
-  const names = tagEntitiesOf(host, 'a').map(function(el) { return el.textContent.trim(); });
-  assert.ok(names.indexOf('NALI') >= 0, 'NALI shows in the scene it is tagged in');
+  entityRowByName(host, 'a', 'NALI').querySelector('.rga-shell-scene-navigator-tag-entity-chevron').click();
+  const occ = occurrencesOf(host, 'a');
+  assert.equal(occ.length, 2);
+  const match0 = occ[0].querySelector('.rga-shell-scene-navigator-tag-occurrence-match');
+  assert.equal(match0.textContent, 'NALI', 'tagged wording emphasised, original casing');
+  assert.match(occ[0].textContent, /stands by the window/, 'surrounding screenplay wording present');
+  assert.match(occ[1].textContent, /smiles/, 'second occurrence carries its own wording');
 });
 
-test('Scene-Tags-v1: a scene tagged but with NO notes/flags is still expandable', () => {
-  const scenes = [
-    { nodeId: 'a', sceneNumber: 1, headingDisplay: 'INT. ROOM — DAY', pmPos: 0, pmEndPos: 20, hasNotes: false, hasRevisionFlag: false }
-  ];
-  const tags = { character: [{ nodeId: 'nali', name: 'NALI', color: '#c2185b', sceneAppearances: ['a'] }] };
-  const { Rga, host } = boot({ scenes: scenes, tags: tags });
+test('Scene-Tags-v1.1: clicking an occurrence jumps to that occurrence (selection-only)', () => {
+  const { Rga, host, stub } = bootTags();
+  const resolved = [];
+  stub.view.state.doc.resolve = function(p) { resolved.push(p); return { pos: p }; };
   Rga.Shell.Sidebar.activate('sceneNavigator');
-  assert.ok(chevronOf(host, 'a'), 'tag-only scene gets an expand chevron');
   chevronOf(host, 'a').click();
-  assert.ok(sceneTagsOf(host, 'a'), 'tags zone shows');
-  assert.equal(marksOf(host, 'a'), null, 'no notes/flags zone for a tag-only scene (no empty marks)');
+  entityRowByName(host, 'a', 'NALI').querySelector('.rga-shell-scene-navigator-tag-entity-chevron').click();
+  occurrencesOf(host, 'a')[1].click();   // second NALI occurrence, from = 41
+  assert.ok(resolved.indexOf(41) >= 0, 'jumped to the occurrence PM position (41)');
+  assert.ok(stub.dispatchCall && stub.dispatchCall.kind === 'setSelection', 'a selection was dispatched');
 });
 
-test('Scene-Tags-v1: clicking an entity activates Tag Focus Highlight by entityId and does NOT navigate', () => {
-  const { Rga, host, stub } = boot({ scenes: taggedIndexScenes(), tags: taggedIndexTags() });
+test('Scene-Tags-v1.1: clicking the entity row activates Tag Focus Highlight by entityId (no jump)', () => {
+  const { Rga, host, stub } = bootTags();
   const tf = tagFocusStub();
   Rga.TagFocusHighlight = tf;
   Rga.Shell.Sidebar.activate('sceneNavigator');
   chevronOf(host, 'a').click();
-  const nali = tagEntitiesOf(host, 'a').filter(function(el) { return el.textContent.trim() === 'NALI'; })[0];
-  assert.ok(nali, 'NALI entity is clickable');
-  nali.click();
-  assert.deepEqual(tf.calls.setEntity, ['nali'], 'Tag Focus Highlight is set for NALI by entityId');
-  assert.equal(stub.findSceneCall, null, 'clicking the entity does NOT jump the editor (no scene nav)');
+  entityRowByName(host, 'a', 'NALI').click();
+  assert.deepEqual(tf.calls.setEntity, ['nali'], 'focus-highlight set for NALI by entityId');
+  assert.equal(stub.findSceneCall, null, 'entity click did not jump the scene');
 });
 
-test('Scene-Tags-v1: duplicate identities are shown (not collapsed), each isolates its own marks', () => {
-  const scenes = [
-    { nodeId: 'a', sceneNumber: 1, headingDisplay: 'INT. ROOM — DAY', pmPos: 0, pmEndPos: 20, hasNotes: false, hasRevisionFlag: false }
-  ];
-  // Two LIVE entities both named NALI, both tagged in scene a — the
-  // duplicate-identity case. They must NOT collapse to one row.
-  const tags = { character: [
-    { nodeId: 'nali-a', name: 'NALI', color: '#c2185b', sceneAppearances: ['a'] },
-    { nodeId: 'nali-b', name: 'NALI', color: '#7b1fa2', sceneAppearances: ['a'] }
-  ] };
-  const { Rga, host } = boot({ scenes: scenes, tags: tags });
+test('Scene-Tags-v1.1: entity chevron toggles snippets WITHOUT focusing the entity', () => {
+  const { Rga, host } = bootTags();
   const tf = tagFocusStub();
   Rga.TagFocusHighlight = tf;
   Rga.Shell.Sidebar.activate('sceneNavigator');
   chevronOf(host, 'a').click();
-  const rows = tagEntitiesOf(host, 'a');
-  assert.equal(rows.length, 2, 'both NALI entities are listed (not collapsed)');
-  const dupMarks = sceneTagsOf(host, 'a').querySelectorAll('.rga-shell-scene-navigator-tag-entity-dup');
-  assert.equal(dupMarks.length, 2, 'each duplicate carries the honest duplicate-identity marker');
-  // Clicking the first NALI focuses only nali-a's marks (entityId match).
+  entityRowByName(host, 'a', 'NALI').querySelector('.rga-shell-scene-navigator-tag-entity-chevron').click();
+  assert.equal(occurrencesOf(host, 'a').length, 2, 'chevron revealed snippets');
+  assert.deepEqual(tf.calls.setEntity, [], 'chevron click did NOT focus the entity (stopPropagation)');
+});
+
+test('Scene-Tags-v1.1: duplicate entities are shown separately, each focuses only its own id', () => {
+  const ctx = boot({
+    scenes: [{ nodeId: 'a', sceneNumber: 1, headingDisplay: 'INT. ROOM — DAY', pmPos: 0, pmEndPos: 30, hasNotes: false, hasRevisionFlag: false }],
+    tags: { character: [
+      { nodeId: 'nali-a', name: 'NALI', color: '#c2185b', sceneAppearances: ['a'] },
+      { nodeId: 'nali-b', name: 'NALI', color: '#7b1fa2', sceneAppearances: ['a'] }
+    ] }
+  });
+  ctx.Rga.SceneTagOccurrences = occStub({ 0: [
+    { tagType: 'character', label: 'Characters', entities: [
+      { entityId: 'nali-a', name: 'NALI', color: '#c2185b', count: 1, occurrences: [{ from: 5, to: 9, text: 'NALI', snippet: { before: '', match: 'NALI', after: ' enters', truncatedStart: false, truncatedEnd: false } }] },
+      { entityId: 'nali-b', name: 'NALI', color: '#7b1fa2', count: 1, occurrences: [{ from: 20, to: 24, text: 'NALI', snippet: { before: 'other ', match: 'NALI', after: '.', truncatedStart: false, truncatedEnd: false } }] }
+    ] }
+  ] });
+  const tf = tagFocusStub();
+  ctx.Rga.TagFocusHighlight = tf;
+  ctx.Rga.Shell.Sidebar.activate('sceneNavigator');
+  chevronOf(ctx.host, 'a').click();
+  const rows = entityRowsOf(ctx.host, 'a');
+  assert.equal(rows.length, 2, 'both NALI entities shown (not collapsed)');
+  const dupMarks = sceneTagsOf(ctx.host, 'a').querySelectorAll('.rga-shell-scene-navigator-tag-entity-dup');
+  assert.equal(dupMarks.length, 2, 'each duplicate carries the warning marker');
   rows[0].click();
   assert.deepEqual(tf.calls.setEntity, ['nali-a'], 'first NALI focuses nali-a only');
 });
 
-test('Scene-Tags-v1: notes/flags render first, tagged entities beneath', () => {
-  const { Rga, host } = boot({ scenes: taggedIndexScenes(), tags: taggedIndexTags() });
+test('Scene-Tags-v1.1: the occurrence walk runs only for the expanded scene', () => {
+  const { Rga, host } = bootTags();
+  Rga.Shell.Sidebar.activate('sceneNavigator');
+  // No scene expanded yet → forScene must not have been called.
+  assert.deepEqual(Rga.SceneTagOccurrences.calls, [], 'no subtree walk before any expansion');
+  chevronOf(host, 'a').click();
+  assert.ok(Rga.SceneTagOccurrences.calls.indexOf(0) >= 0, 'walked scene a (pmPos 0) on expand');
+  assert.ok(Rga.SceneTagOccurrences.calls.indexOf(60) < 0, 'never walked the un-expanded scene b');
+});
+
+test('Scene-Tags-v1.1: a scene tagged but with NO notes/flags is still expandable', () => {
+  const ctx = boot({
+    scenes: [{ nodeId: 'a', sceneNumber: 1, headingDisplay: 'INT. ROOM — DAY', pmPos: 0, pmEndPos: 20, hasNotes: false, hasRevisionFlag: false }],
+    tags: { character: [{ nodeId: 'nali', name: 'NALI', color: '#c2185b', sceneAppearances: ['a'] }] }
+  });
+  ctx.Rga.SceneTagOccurrences = occStub({ 0: [
+    { tagType: 'character', label: 'Characters', entities: [
+      { entityId: 'nali', name: 'NALI', color: '#c2185b', count: 1, occurrences: [{ from: 5, to: 9, text: 'NALI', snippet: { before: '', match: 'NALI', after: ' waits.', truncatedStart: false, truncatedEnd: false } }] }
+    ] }
+  ] });
+  ctx.Rga.Shell.Sidebar.activate('sceneNavigator');
+  assert.ok(chevronOf(ctx.host, 'a'), 'tag-only scene gets an expand chevron');
+  chevronOf(ctx.host, 'a').click();
+  assert.ok(sceneTagsOf(ctx.host, 'a'), 'tags zone shows');
+  assert.equal(marksOf(ctx.host, 'a'), null, 'no notes/flags zone (no empty marks)');
+});
+
+test('Scene-Tags-v1.1: notes/flags render first, tag intelligence beneath', () => {
+  const { Rga, host } = bootTags();
   Rga.Shell.Sidebar.activate('sceneNavigator');
   chevronOf(host, 'a').click();
-  const row = host.querySelector('[data-scene-node-id="a"]');
   const marks = marksOf(host, 'a');
   const tagsZone = sceneTagsOf(host, 'a');
-  assert.ok(marks && tagsZone, 'both the marks zone and the tags zone render');
-  // DOM order: the notes/flags zone precedes the tags zone.
+  assert.ok(marks && tagsZone, 'both zones render (scene a has a note + tags)');
   const pos = marks.compareDocumentPosition(tagsZone);
   assert.ok(pos & 0x04 /* DOCUMENT_POSITION_FOLLOWING */, 'tags zone follows the marks zone');
 });
 
-test('Scene-Tags-v1 RTL: tagged entities render under an RTL script (wrapper mirrors)', () => {
-  const scenes = [
-    { nodeId: 'a', sceneNumber: 1, headingDisplay: 'مشهد', pmPos: 0, pmEndPos: 20, hasNotes: false, hasRevisionFlag: false }
-  ];
-  const tags = { character: [{ nodeId: 'nali', name: 'نالي', color: '#c2185b', sceneAppearances: ['a'] }] };
-  const { Rga, host } = boot({ scenes: scenes, tags: tags });
-  makeRtl(Rga);
-  Rga.Shell.Sidebar.activate('sceneNavigator');
-  assert.equal(navWrapper(host).getAttribute('dir'), 'rtl', 'navigator mirrors the RTL script');
-  chevronOf(host, 'a').click();
-  const names = tagEntitiesOf(host, 'a').map(function(el) { return el.textContent.trim(); });
-  assert.deepEqual(names, ['نالي'], 'the tagged entity renders in RTL');
+test('Scene-Tags-v1.1 RTL: tag intelligence renders + mirrors under an RTL script', () => {
+  const ctx = boot({
+    scenes: [{ nodeId: 'a', sceneNumber: 1, headingDisplay: 'مشهد', pmPos: 0, pmEndPos: 20, hasNotes: false, hasRevisionFlag: false }],
+    tags: { character: [{ nodeId: 'nali', name: 'نالي', color: '#c2185b', sceneAppearances: ['a'] }] }
+  });
+  ctx.Rga.SceneTagOccurrences = occStub({ 0: [
+    { tagType: 'character', label: 'Characters', entities: [
+      { entityId: 'nali', name: 'نالي', color: '#c2185b', count: 1, occurrences: [{ from: 5, to: 9, text: 'نالي', snippet: { before: '', match: 'نالي', after: ' يقف', truncatedStart: false, truncatedEnd: true } }] }
+    ] }
+  ] });
+  makeRtl(ctx.Rga);
+  ctx.Rga.Shell.Sidebar.activate('sceneNavigator');
+  assert.equal(navWrapper(ctx.host).getAttribute('dir'), 'rtl', 'navigator mirrors the RTL script');
+  chevronOf(ctx.host, 'a').click();
+  const nali = entityRowByName(ctx.host, 'a', 'نالي');
+  assert.ok(nali, 'RTL entity row renders');
+  assert.equal(nali.querySelector('.rga-shell-scene-navigator-tag-entity-count').textContent, '·1');
 });

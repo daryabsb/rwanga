@@ -1,14 +1,15 @@
 // Copyright (c) 2026 Rwanga. Licensed under Apache 2.0.
-// Scene Navigator Tags v1 — scene-local tagged entities (end-to-end).
+// Scene Navigator Tags v1.1 — hybrid occurrence model (end-to-end).
 //
 // The real writer workflow, in the real Electron app, through real UI:
 //   1. Type screenplay text, tag names with the REAL toolbar Tag dropdown.
-//   2. Open the Scene Navigator with the REAL rail button.
-//   3. Expand the scene row → SEE the entities Tagged in this scene,
-//      grouped by category (Characters / Props), honest label.
-//   4. Click a scene-local entity → the editor lights up its tagged
-//      occurrences (reuses the V1.3 Tag Focus Highlight), no scene jump.
-//   5. RTL mirroring verified.
+//   2. Open the Scene Navigator with the rail; expand the scene row.
+//   3. SEE scene-local tag intelligence: category groups, an entity row per
+//      tagged entity with its PER-SCENE count.
+//   4. Expand an entity → its occurrence snippets (original screenplay
+//      wording). Click a snippet → the editor jumps to that occurrence.
+//   5. Click the entity row → its tagged occurrences light up (V1.3 focus).
+//   6. RTL mirroring verified.
 //
 // Screenshots → test-results/scene-navigator-tags/ are the visual
 // verification artifacts for the slice report.
@@ -35,7 +36,7 @@ async function launchApp(prefix) {
   await page.waitForFunction(() => !!(
     window.Rga && window.Rga.Shell && window.Rga.Shell.Sidebar &&
     window.Rga.Shell.SceneNavigator &&
-    window.Rga.Screenplay && window.Rga.Screenplay.Memory &&
+    window.Rga.SceneTagOccurrences && typeof window.Rga.SceneTagOccurrences.forScene === 'function' &&
     window.Rga.TabManager && typeof window.Rga.TabManager._editorView === 'function' &&
     window.Rga.TabManager._editorView()));
   return { app, page, userDataDir };
@@ -46,9 +47,8 @@ async function teardown(app, userDataDir) {
   try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
 }
 
-// Insert a scene whose action text carries taggable names. Programmatic PM
-// transaction (the typing equivalent); everything downstream goes through
-// real UI surfaces. id matches the nav-index scene nodeId.
+// Insert a scene whose action text carries taggable names; id matches the
+// nav-index scene nodeId.
 async function seedSceneText(page) {
   await page.evaluate(() => {
     const view = window.Rga.TabManager._editorView();
@@ -96,13 +96,11 @@ async function tagSelectionViaToolbar(page, category) {
   await page.selectOption('#rga-shell-toolbar-tag', category);
 }
 
-// Open the Scene Navigator via the REAL rail button + expand scene sc-nav-1.
-async function openNavigatorAndExpand(page) {
-  // Drive the rail's canonical OPEN branch (activity-rail.js _onClick →
-  // activate + sidebar visible). A raw rail click TOGGLES — and the
-  // navigator is the default-open panel, so a click would HIDE it — so we
-  // use the deterministic open path the button itself invokes, guaranteeing
-  // the drawer is both active AND visible for the screenshot.
+// Open the Scene Navigator (rail open-branch) + expand scene sc-nav-1.
+async function openNavigatorAndExpandScene(page) {
+  await page.click('[data-panel-id="sceneNavigator"]');
+  // Drive the rail's canonical OPEN branch — a raw click TOGGLES, and the
+  // navigator is the default-open panel, so we open it deterministically.
   await page.evaluate(() => {
     window.Rga.Shell.Sidebar.activate('sceneNavigator');
     window.Rga.Shell.Layout.set({ sidebar: { visible: true, userOverride: true } });
@@ -123,10 +121,10 @@ async function openNavigatorAndExpand(page) {
 }
 
 // =================================================================
-// 1. Expand a tagged scene → SEE its tagged entities (LTR)
+// 1. Expanded scene → category groups + entity rows with counts
 // =================================================================
 
-test('Scene Navigator Tags v1 — expand scene → tagged entities, grouped, honest label', async () => {
+test('Scene Navigator Tags v1.1 — expanded scene: categories + entity rows with per-scene counts', async () => {
   const { app, page, userDataDir } = await launchApp('scene-nav-tags-');
   try {
     await seedSceneText(page);
@@ -137,39 +135,37 @@ test('Scene Navigator Tags v1 — expand scene → tagged entities, grouped, hon
     await selectOccurrence(page, 'PHOTOGRAPH', 0);
     await tagSelectionViaToolbar(page, 'prop');
 
-    await openNavigatorAndExpand(page);
+    await openNavigatorAndExpandScene(page);
 
     const state = await page.evaluate(() => {
       const host = window.Rga.Shell.Sidebar.getHost();
       const zone = host.querySelector('[data-scene-node-id="sc-nav-1"] .rga-shell-scene-navigator-scene-tags');
+      const rows = Array.from(zone.querySelectorAll('.rga-shell-scene-navigator-tag-entity')).map((r) => ({
+        name:  r.querySelector('.rga-shell-scene-navigator-tag-entity-name').textContent,
+        count: r.querySelector('.rga-shell-scene-navigator-tag-entity-count').textContent
+      }));
       return {
         label:  zone.querySelector('.rga-shell-scene-navigator-scene-tags-label').textContent,
-        groups: Array.from(zone.querySelectorAll('.rga-shell-scene-navigator-tag-group-label')).map((el) => el.textContent),
-        names:  Array.from(zone.querySelectorAll('.rga-shell-scene-navigator-tag-entity-name')).map((el) => el.textContent),
-        text:   zone.textContent.toLowerCase()
+        groups: Array.from(zone.querySelectorAll('.rga-shell-scene-navigator-tag-group-label')).map((e) => e.textContent),
+        rows:   rows
       };
     });
     expect(state.label).toBe('Tagged in this scene');
     expect(state.groups).toEqual(['Characters', 'Props']);
-    expect(state.names).toContain('NALI');
-    expect(state.names).toContain('PHOTOGRAPH');
-    // Honest framing: never the inferred wordings.
-    expect(state.text).not.toContain('appears');
-    expect(state.text).not.toContain('detected');
-    expect(state.text).not.toContain('referenced');
-    await page.screenshot({ path: shotPath('01-scene-expanded-with-tags.png') });
+    expect(state.rows).toContainEqual({ name: 'NALI', count: '·2' });        // counted PER SCENE
+    expect(state.rows).toContainEqual({ name: 'PHOTOGRAPH', count: '·1' });
+    await page.screenshot({ path: shotPath('01-scene-expanded-counts.png') });
   } finally {
     await teardown(app, userDataDir);
   }
 });
 
 // =================================================================
-// 2. Click a scene-local entity → editor highlights its occurrences
-//    (reuses the V1.3 Tag Focus Highlight). No scene jump.
+// 2. Expand an entity → occurrence snippets; click snippet → jump
 // =================================================================
 
-test('Scene Navigator Tags v1 — click entity → editor lights up its tagged occurrences', async () => {
-  const { app, page, userDataDir } = await launchApp('scene-nav-tags-focus-');
+test('Scene Navigator Tags v1.1 — expand entity → snippets with wording; click snippet → jump', async () => {
+  const { app, page, userDataDir } = await launchApp('scene-nav-tags-occ-');
   try {
     await seedSceneText(page);
     await selectOccurrence(page, 'NALI', 0);
@@ -179,50 +175,99 @@ test('Scene Navigator Tags v1 — click entity → editor lights up its tagged o
     await selectOccurrence(page, 'PHOTOGRAPH', 0);
     await tagSelectionViaToolbar(page, 'prop');
 
-    await openNavigatorAndExpand(page);
+    await openNavigatorAndExpandScene(page);
 
-    // Cursor parked far away first, so we can prove no scene-jump happens.
+    // Expand the NALI entity → its 2 occurrence snippets appear.
+    await page.evaluate(() => {
+      const host = window.Rga.Shell.Sidebar.getHost();
+      const nali = Array.from(host.querySelectorAll('[data-scene-node-id="sc-nav-1"] .rga-shell-scene-navigator-tag-entity'))
+        .find((r) => /NALI/.test(r.textContent));
+      nali.querySelector('.rga-shell-scene-navigator-tag-entity-chevron').click();
+    });
+    await page.waitForFunction(() => {
+      const host = window.Rga.Shell.Sidebar.getHost();
+      return host.querySelectorAll('[data-scene-node-id="sc-nav-1"] .rga-shell-scene-navigator-tag-occurrence').length === 2;
+    });
+
+    const occ = await page.evaluate(() => {
+      const host = window.Rga.Shell.Sidebar.getHost();
+      return Array.from(host.querySelectorAll('[data-scene-node-id="sc-nav-1"] .rga-shell-scene-navigator-tag-occurrence'))
+        .map((el) => ({ text: el.textContent, match: el.querySelector('.rga-shell-scene-navigator-tag-occurrence-match').textContent }));
+    });
+    expect(occ.length).toBe(2);
+    expect(occ[0].match).toBe('NALI');
+    expect(occ[0].text).toMatch(/stands by the window/);   // original screenplay wording
+    await page.screenshot({ path: shotPath('02-entity-expanded-snippets.png') });
+
+    // Park the cursor far away, then click the SECOND occurrence snippet →
+    // the editor jumps to that occurrence (second NALI, "NALI smiles").
     await selectOccurrence(page, 'CUT', 0);
-    const before = await page.evaluate(() => window.Rga.TabManager._editorView().state.selection.from);
-
-    // Click the NALI entity chip in the navigator.
+    const cutPos = await page.evaluate(() => window.Rga.TabManager._editorView().state.selection.from);
     await page.evaluate(() => {
       const host = window.Rga.Shell.Sidebar.getHost();
-      const chip = Array.from(host.querySelectorAll('[data-scene-node-id="sc-nav-1"] .rga-shell-scene-navigator-tag-entity'))
-        .find((el) => /NALI/.test(el.textContent));
-      chip.click();
+      const occs = host.querySelectorAll('[data-scene-node-id="sc-nav-1"] .rga-shell-scene-navigator-tag-occurrence');
+      occs[1].click();
     });
-    await page.waitForFunction(() => document.querySelectorAll('.rga-tag-focus-active').length > 0);
-
-    const after = await page.evaluate(() => ({
-      decoCount: window.Rga.TagFocusHighlight._decorations(window.Rga.TabManager._editorView().state).length,
-      domCount:  document.querySelectorAll('.rga-tag-focus-active').length,
-      cursor:    window.Rga.TabManager._editorView().state.selection.from
-    }));
-    expect(after.decoCount).toBe(2);     // both NALI marks lit
-    expect(after.domCount).toBe(2);
-    expect(after.cursor).toBe(before);   // entity click did NOT jump the editor
-    await page.screenshot({ path: shotPath('02-entity-click-highlights-editor.png') });
-
-    // Click PHOTOGRAPH → the highlight MOVES (1 mark).
-    await page.evaluate(() => {
-      const host = window.Rga.Shell.Sidebar.getHost();
-      const chip = Array.from(host.querySelectorAll('[data-scene-node-id="sc-nav-1"] .rga-shell-scene-navigator-tag-entity'))
-        .find((el) => /PHOTOGRAPH/.test(el.textContent));
-      chip.click();
+    const after = await page.evaluate(() => {
+      const view = window.Rga.TabManager._editorView();
+      const from = view.state.selection.from;
+      // The text immediately after the cursor should be the tagged "NALI".
+      return { from: from, near: view.state.doc.textBetween(from, from + 4) };
     });
-    await page.waitForFunction(() => document.querySelectorAll('.rga-tag-focus-active').length === 1);
-    await page.screenshot({ path: shotPath('03-highlight-moved-to-prop.png') });
+    expect(after.from).not.toBe(cutPos);          // cursor moved
+    expect(after.near).toBe('NALI');              // landed on the 2nd NALI occurrence
+    await page.screenshot({ path: shotPath('03-occurrence-jump.png') });
   } finally {
     await teardown(app, userDataDir);
   }
 });
 
 // =================================================================
-// 3. RTL — entities render and highlight works on an RTL script
+// 3. Click entity row → editor highlights its occurrences (V1.3 focus)
 // =================================================================
 
-test('Scene Navigator Tags v1 — RTL script → entities render, highlight works', async () => {
+test('Scene Navigator Tags v1.1 — click entity row → editor lights up its occurrences', async () => {
+  const { app, page, userDataDir } = await launchApp('scene-nav-tags-focus-');
+  try {
+    await seedSceneText(page);
+    await selectOccurrence(page, 'NALI', 0);
+    await tagSelectionViaToolbar(page, 'character');
+    await selectOccurrence(page, 'NALI', 1);
+    await tagSelectionViaToolbar(page, 'character');
+
+    await openNavigatorAndExpandScene(page);
+
+    await selectOccurrence(page, 'CUT', 0);   // park cursor away to prove no jump
+    const before = await page.evaluate(() => window.Rga.TabManager._editorView().state.selection.from);
+
+    await page.evaluate(() => {
+      const host = window.Rga.Shell.Sidebar.getHost();
+      const nali = Array.from(host.querySelectorAll('[data-scene-node-id="sc-nav-1"] .rga-shell-scene-navigator-tag-entity'))
+        .find((r) => /NALI/.test(r.textContent));
+      // Click the NAME (not the chevron) → focus-highlight the entity.
+      nali.querySelector('.rga-shell-scene-navigator-tag-entity-name').click();
+    });
+    await page.waitForFunction(() => document.querySelectorAll('.rga-tag-focus-active').length > 0);
+
+    const result = await page.evaluate(() => ({
+      decoCount: window.Rga.TagFocusHighlight._decorations(window.Rga.TabManager._editorView().state).length,
+      domCount:  document.querySelectorAll('.rga-tag-focus-active').length,
+      cursor:    window.Rga.TabManager._editorView().state.selection.from
+    }));
+    expect(result.decoCount).toBe(2);
+    expect(result.domCount).toBe(2);
+    expect(result.cursor).toBe(before);   // entity focus did NOT jump the editor
+    await page.screenshot({ path: shotPath('04-entity-focus-highlight.png') });
+  } finally {
+    await teardown(app, userDataDir);
+  }
+});
+
+// =================================================================
+// 4. RTL — tag intelligence renders + mirrors; counts + snippets work
+// =================================================================
+
+test('Scene Navigator Tags v1.1 — RTL: entity rows + occurrence snippets render and mirror', async () => {
   const { app, page, userDataDir } = await launchApp('scene-nav-tags-rtl-');
   try {
     await page.evaluate(() => {
@@ -235,31 +280,33 @@ test('Scene Navigator Tags v1 — RTL script → entities render, highlight work
     await selectOccurrence(page, 'NALI', 1);
     await tagSelectionViaToolbar(page, 'character');
 
-    await openNavigatorAndExpand(page);
+    await openNavigatorAndExpandScene(page);
 
     const rtl = await page.evaluate(() => {
       const host = window.Rga.Shell.Sidebar.getHost();
       const wrapper = host.querySelector('.rga-shell-scene-navigator');
-      const zone = host.querySelector('[data-scene-node-id="sc-nav-1"] .rga-shell-scene-navigator-scene-tags');
+      const nali = Array.from(host.querySelectorAll('[data-scene-node-id="sc-nav-1"] .rga-shell-scene-navigator-tag-entity'))
+        .find((r) => /NALI/.test(r.textContent));
       return {
         dir:   wrapper ? wrapper.getAttribute('dir') : null,
-        names: Array.from(zone.querySelectorAll('.rga-shell-scene-navigator-tag-entity-name')).map((el) => el.textContent)
+        count: nali ? nali.querySelector('.rga-shell-scene-navigator-tag-entity-count').textContent : null
       };
     });
     expect(rtl.dir).toBe('rtl');
-    expect(rtl.names).toContain('NALI');
+    expect(rtl.count).toBe('·2');
 
-    // Highlight still fires correctly under RTL (position-based decoration).
+    // Expand the entity → snippets render under RTL too.
     await page.evaluate(() => {
       const host = window.Rga.Shell.Sidebar.getHost();
-      Array.from(host.querySelectorAll('[data-scene-node-id="sc-nav-1"] .rga-shell-scene-navigator-tag-entity'))
-        .find((el) => /NALI/.test(el.textContent)).click();
+      const nali = Array.from(host.querySelectorAll('[data-scene-node-id="sc-nav-1"] .rga-shell-scene-navigator-tag-entity'))
+        .find((r) => /NALI/.test(r.textContent));
+      nali.querySelector('.rga-shell-scene-navigator-tag-entity-chevron').click();
     });
-    await page.waitForFunction(() => document.querySelectorAll('.rga-tag-focus-active').length > 0);
-    const decoCount = await page.evaluate(() =>
-      window.Rga.TagFocusHighlight._decorations(window.Rga.TabManager._editorView().state).length);
-    expect(decoCount).toBe(2);
-    await page.screenshot({ path: shotPath('04-rtl-entities-and-highlight.png') });
+    await page.waitForFunction(() => {
+      const host = window.Rga.Shell.Sidebar.getHost();
+      return host.querySelectorAll('[data-scene-node-id="sc-nav-1"] .rga-shell-scene-navigator-tag-occurrence').length === 2;
+    });
+    await page.screenshot({ path: shotPath('05-rtl-entities-snippets.png') });
   } finally {
     await teardown(app, userDataDir);
   }

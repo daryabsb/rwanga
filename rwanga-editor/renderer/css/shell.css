@@ -1852,18 +1852,20 @@ body.view-print-preview-active #rga-shell-toolbar { display: none; }
   color: var(--text-tertiary, #6e6e6e);
 }
 
-/* Scene Navigator Tags v1 — scene-local tagged entities, beneath the
-   notes/flags. Compact (navigation surface, not a breakdown panel): a quiet
-   label, then small clickable chips grouped by category. Aligned under the
-   heading via the same logical inline-start indent as the marks zone, so it
-   mirrors in RTL with no extra rules. */
+/* Scene Navigator Tags v1.1 — hybrid occurrence model. Beneath the notes/
+   flags: a quiet "Tagged in this scene" label, then a VERTICAL list grouped
+   by category. Each entity is a collapsed row (chevron + dot + name + count)
+   that expands to its occurrence snippets. Compact — a navigation surface,
+   not a breakdown panel. Aligned under the heading via the same logical
+   inline-start indent as the marks zone, so it mirrors in RTL with no extra
+   rules. */
 .rga-shell-scene-navigator-scene-tags {
   grid-column: 1 / -1;
   margin-top: 3px;
   padding-inline-start: 34px;              /* align under heading (26px num + 8px gap) */
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
 }
 .rga-shell-scene-navigator-scene-tags-label {
   font-size: var(--font-size-xs, 10px);
@@ -1874,47 +1876,73 @@ body.view-print-preview-active #rga-shell-toolbar { display: none; }
 }
 .rga-shell-scene-navigator-tag-group {
   display: flex;
-  align-items: baseline;
-  gap: 6px;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 1px;
 }
 .rga-shell-scene-navigator-tag-group-label {
-  flex: 0 0 auto;
-  min-width: 4.5em;
   font-size: var(--font-size-xs, 10px);
   line-height: 1.4;
   color: var(--text-secondary, #8a8a8a);
 }
-.rga-shell-scene-navigator-tag-entities {
-  display: inline-flex;
-  flex-wrap: wrap;
-  gap: 4px;
+.rga-shell-scene-navigator-tag-entity-block {
+  display: flex;
+  flex-direction: column;
 }
-/* The clickable entity chip. Reset native button chrome; the chip reads as
-   quiet text until hovered/focused, then it lifts to show it is actionable. */
+/* The entity row — chevron + colour dot + name + per-scene count. Reads as
+   quiet text at rest; lifts on hover/focus to show it is actionable. */
 .rga-shell-scene-navigator-tag-entity {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 4px;
-  margin: 0;
-  padding: 1px 6px;
-  border: 1px solid transparent;
-  border-radius: 10px;
-  background: var(--bg-subtle, rgba(127, 127, 127, 0.10));
+  gap: 5px;
+  padding: 1px 4px;
+  border-radius: 3px;
   color: var(--text-secondary, #8a8a8a);
   font-size: var(--font-size-xs, 10px);
-  line-height: 1.4;
-  font-family: inherit;
+  line-height: 1.5;
   cursor: pointer;
-  transition: background var(--transition-fast, 0.1s ease),
-              color var(--transition-fast, 0.1s ease);
 }
 .rga-shell-scene-navigator-tag-entity:hover,
 .rga-shell-scene-navigator-tag-entity:focus-visible {
   background: var(--bg-hover, rgba(127, 127, 127, 0.18));
   color: var(--text-primary, #e6e6e6);
   outline: none;
-  border-color: var(--border-subtle, rgba(127, 127, 127, 0.25));
+}
+/* Entity disclosure chevron — a CSS caret (no glyph), sized like the scene
+   chevron so they read as siblings; rotates down when expanded. */
+.rga-shell-scene-navigator-tag-entity-chevron {
+  flex: 0 0 auto;
+  width: 10px;
+  height: 10px;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-tertiary, #6e6e6e);
+}
+.rga-shell-scene-navigator-tag-entity-chevron::before {
+  content: '';
+  display: block;
+  width: 0;
+  height: 0;
+  border-top: 3px solid transparent;
+  border-bottom: 3px solid transparent;
+  border-left: 4px solid currentColor;     /* LTR: points right (toward content) */
+  transition: transform var(--transition-fast, 0.1s ease);
+}
+[dir="rtl"] .rga-shell-scene-navigator-tag-entity-chevron::before {
+  border-left: 0;
+  border-right: 4px solid currentColor;
+}
+.rga-shell-scene-navigator-tag-entity-chevron[aria-expanded="true"]::before {
+  transform: rotate(90deg);
+}
+.rga-shell-scene-navigator-tag-entity:hover .rga-shell-scene-navigator-tag-entity-chevron,
+.rga-shell-scene-navigator-tag-entity-chevron[aria-expanded="true"] {
+  color: var(--text-secondary, #8a8a8a);
 }
 .rga-shell-scene-navigator-tag-dot {
   flex: 0 0 auto;
@@ -1924,9 +1952,16 @@ body.view-print-preview-active #rga-shell-toolbar { display: none; }
 }
 .rga-shell-scene-navigator-tag-entity-name {
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
-/* Duplicate-identity marker — same honest amber warning treatment as the
-   Tags Panel (V1.1). Meaning lives on aria-label + title. */
+.rga-shell-scene-navigator-tag-entity-count {
+  flex: 0 0 auto;
+  color: var(--text-tertiary, #6e6e6e);
+  font-variant-numeric: tabular-nums;
+}
+/* Duplicate-identity marker — same honest amber warning as the Tags Panel.
+   Meaning lives on aria-label + title. */
 .rga-shell-scene-navigator-tag-entity-dup {
   flex: 0 0 auto;
   display: inline-flex;
@@ -1936,6 +1971,36 @@ body.view-print-preview-active #rga-shell-toolbar { display: none; }
 .rga-shell-scene-navigator-tag-entity-dup svg {
   width: 11px;
   height: 11px;
+}
+/* Occurrence snippets — the original screenplay wording around each tag,
+   indented under the entity row. Each line jumps to its occurrence. */
+.rga-shell-scene-navigator-tag-occurrences {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding-inline-start: 17px;              /* under the dot/name, past the chevron */
+  margin-bottom: 2px;
+}
+.rga-shell-scene-navigator-tag-occurrence {
+  font-size: var(--font-size-xs, 10px);
+  line-height: 1.4;
+  color: var(--text-tertiary, #6e6e6e);
+  padding: 1px 4px;
+  border-radius: 3px;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.rga-shell-scene-navigator-tag-occurrence:hover,
+.rga-shell-scene-navigator-tag-occurrence:focus-visible {
+  background: var(--bg-hover, rgba(127, 127, 127, 0.18));
+  color: var(--text-secondary, #8a8a8a);
+  outline: none;
+}
+.rga-shell-scene-navigator-tag-occurrence-match {
+  color: var(--text-primary, #e6e6e6);
+  font-weight: 500;
 }
 
 /* ============================================================
