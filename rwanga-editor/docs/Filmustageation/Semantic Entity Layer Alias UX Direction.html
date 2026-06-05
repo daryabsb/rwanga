@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rwanga Editor — Semantic Entity Layer · Alias UX Direction</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;1,14..32,400&family=JetBrains+Mono:wght@400;500;700&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0F0F12;
+    --surface: #17171C;
+    --surface-2: #1E1E26;
+    --surface-3: #26262E;
+    --border: #2C2C38;
+    --text: #EDEAD8;
+    --text-2: #9A98A8;
+    --text-3: #5C5A6A;
+    --amber: #D4A574;
+    --gold: #FFC107;
+    --pink: #C2185B;
+    --blue: #4FA3E3;
+    --script: #FF6B35;
+    --break: #2D5BE3;
+    --vis: #00A896;
+    --plan: #7C3AED;
+    /* real tag-system per-type colors */
+    --tag-character: #4FC1FF;
+    --tag-prop: #FFB347;
+    --tag-location: #4EC9B0;
+    --font: 'Inter', system-ui, sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+    --screenplay: 'Courier Prime', 'Courier New', monospace;
+    --r: 2px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 15px;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 80px 32px 120px;
+  }
+
+  /* ── Header ─────────────────────────── */
+  .doc-header { border-bottom: 1px solid var(--border); padding-bottom: 40px; margin-bottom: 56px; }
+  .doc-overline { font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--amber); margin-bottom: 16px; }
+  .doc-title { font-size: 38px; font-weight: 700; line-height: 1.12; color: var(--text); margin-bottom: 14px; letter-spacing: -0.6px; }
+  .doc-subtitle { font-size: 16px; color: var(--text-2); line-height: 1.6; max-width: 660px; }
+  .doc-meta { display: flex; flex-wrap: wrap; gap: 10px 22px; margin-top: 26px; font-size: 11.5px; color: var(--text-3); font-family: var(--mono); }
+  .doc-meta span { white-space: nowrap; }
+
+  /* ── Type scale ─────────────────────── */
+  h2 { font-size: 11px; font-weight: 700; letter-spacing: 1.8px; text-transform: uppercase; color: var(--amber); margin-bottom: 6px; }
+  h3 { font-size: 24px; font-weight: 700; color: var(--text); margin-bottom: 18px; letter-spacing: -0.3px; line-height: 1.25; }
+  h4 { font-size: 14px; font-weight: 700; color: var(--text); margin-top: 30px; margin-bottom: 10px; letter-spacing: 0.2px; }
+
+  p { margin-bottom: 16px; color: var(--text-2); text-wrap: pretty; }
+  p strong { color: var(--text); font-weight: 600; }
+  em { color: var(--text); font-style: italic; }
+
+  .section { margin-bottom: 56px; padding-bottom: 56px; border-bottom: 1px solid var(--border); }
+  .section-num { font-family: var(--mono); font-size: 12px; font-weight: 500; color: var(--text-3); }
+
+  /* ── Callouts ───────────────────────── */
+  .callout { background: var(--surface); border-left: 3px solid var(--amber); padding: 18px 22px; margin: 22px 0; font-size: 14px; }
+  .callout.doctrine { border-left-color: var(--plan); background: rgba(124,58,237,0.06); }
+  .callout.observation { border-left-color: var(--script); background: rgba(255,107,53,0.05); }
+  .callout.direction { border-left-color: var(--vis); background: rgba(0,168,150,0.05); }
+  .callout-label { font-size: 9px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 8px; }
+  .callout .callout-label { color: var(--amber); }
+  .callout.doctrine .callout-label { color: var(--plan); }
+  .callout.observation .callout-label { color: var(--script); }
+  .callout.direction .callout-label { color: var(--vis); }
+  .callout p:last-child { margin-bottom: 0; }
+  .callout p { color: var(--text-2); }
+  .callout strong { color: var(--text); }
+
+  /* ── Lists ──────────────────────────── */
+  ul, ol { margin: 12px 0 20px; padding-left: 20px; color: var(--text-2); }
+  li { margin-bottom: 8px; padding-left: 4px; }
+  li strong { color: var(--text); }
+  li code, p code, td code, dd code {
+    font-family: var(--mono); font-size: 12px; background: var(--surface-3);
+    padding: 1px 6px; border-radius: 2px; color: var(--amber);
+  }
+
+  /* ── Tables ─────────────────────────── */
+  .wt { width: 100%; border-collapse: collapse; margin: 22px 0; font-size: 13px; }
+  .wt th { text-align: left; font-size: 9px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text-3); padding: 8px 12px; border-bottom: 1px solid var(--border); }
+  .wt td { padding: 11px 12px; border-bottom: 1px solid rgba(44,44,56,0.5); vertical-align: top; color: var(--text-2); }
+  .wt td:first-child { color: var(--text); font-weight: 600; }
+  .wt td.nowrap:first-child { white-space: nowrap; }
+  .wt .rej { font-family: var(--mono); color: var(--script); font-weight: 700; text-align: center; }
+
+  /* ── Specimen frame ─────────────────── */
+  .specimen { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 26px 26px 24px; margin: 28px 0; }
+  .specimen-label { font-size: 9px; font-weight: 700; letter-spacing: 1.4px; text-transform: uppercase; color: var(--text-3); margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
+  .specimen-label::before { content: ""; width: 6px; height: 6px; background: var(--amber); border-radius: 50%; flex: none; }
+  .spec-grid { display: flex; gap: 28px; flex-wrap: wrap; align-items: flex-start; }
+  .spec-grid .col { flex: 1; min-width: 250px; }
+  .spec-cap { font-size: 11px; color: var(--text-3); margin-top: 12px; line-height: 1.5; }
+  .spec-cap b { color: var(--text-2); font-weight: 600; }
+
+  /* annotation rows */
+  .anno { display: grid; grid-template-columns: 120px 1fr; gap: 8px 16px; margin-top: 20px; font-size: 12px; }
+  .anno dt { font-family: var(--mono); font-size: 9.5px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; color: var(--amber); padding-top: 1px; }
+  .anno dd { color: var(--text-2); line-height: 1.5; }
+  .anno dd strong { color: var(--text); }
+
+  /* ── Model chain (Mention → ID → Entity) ── */
+  .chain { display: flex; align-items: stretch; gap: 0; flex-wrap: wrap; margin: 6px 0 4px; }
+  .chain-node { flex: 1; min-width: 150px; background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--r); padding: 16px 18px; }
+  .chain-node .k { font-family: var(--mono); font-size: 9px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text-3); margin-bottom: 8px; }
+  .chain-node .v { font-size: 14px; color: var(--text); font-weight: 600; }
+  .chain-node .d { font-size: 11px; color: var(--text-2); margin-top: 6px; line-height: 1.45; }
+  .chain-arrow { display: flex; align-items: center; justify-content: center; padding: 0 12px; color: var(--amber); font-size: 18px; font-family: var(--mono); }
+  .chain-node.mid { border-color: rgba(212,165,116,0.4); }
+
+  /* ── Screenplay page (inline mention specimen) ── */
+  .page {
+    background: #14141A; border: 1px solid var(--border); border-radius: var(--r);
+    font-family: var(--screenplay); font-size: 13px; line-height: 1.9; color: #D8D4C4;
+    padding: 22px 26px;
+  }
+  .page .sh { color: var(--text-2); font-weight: 700; letter-spacing: 0.5px; margin-bottom: 10px; }
+  .page .ch { text-align: center; font-weight: 700; color: var(--text); letter-spacing: 1px; margin: 8px 0 2px; }
+  .page .dlg { max-width: 60%; margin: 0 auto 10px; text-align: left; }
+  .page .act { margin-bottom: 10px; }
+
+  /* the two markers — solid (canonical) vs dotted (alias) */
+  .men {
+    background: rgba(79,193,255,0.16);
+    border-radius: 2px; padding: 0 2px;
+    border-bottom: 2px solid var(--tag-character);
+    cursor: default; position: relative;
+  }
+  .men.alias { border-bottom-style: dotted; }
+  .men.prop { background: rgba(255,179,71,0.16); border-bottom-color: var(--tag-prop); }
+  /* hover tooltip */
+  .men[data-tip]:hover::after {
+    content: attr(data-tip);
+    position: absolute; left: 50%; bottom: calc(100% + 8px); transform: translateX(-50%);
+    background: #000; color: var(--text); font-family: var(--font); font-size: 11px; font-weight: 500;
+    white-space: nowrap; padding: 5px 9px; border-radius: 3px; border: 1px solid var(--border);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.5); z-index: 5; letter-spacing: 0.1px;
+  }
+  .men[data-tip]:hover::before {
+    content: ""; position: absolute; left: 50%; bottom: calc(100% + 3px); transform: translateX(-50%);
+    border: 5px solid transparent; border-top-color: #000; z-index: 5;
+  }
+
+  /* ── Context menu mock (real .overlay-menu vocabulary) ── */
+  .menu {
+    background: #1A1A20; border: 1px solid #30303C; border-radius: 4px;
+    padding: 5px; min-width: 210px; font-size: 12.5px;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.55); user-select: none;
+  }
+  .mi { display: flex; align-items: center; gap: 9px; padding: 7px 10px; border-radius: 3px; color: var(--text-2); white-space: nowrap; position: relative; }
+  .mi .lbl { flex: 1; }
+  .mi .arrow { color: var(--text-3); font-size: 10px; }
+  .mi .sc { color: var(--text-3); font-family: var(--mono); font-size: 10px; }
+  .mi.on { background: rgba(212,165,116,0.14); color: var(--text); }
+  .mi.dim { color: var(--text-3); }
+  .mdot { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+  .msep { height: 1px; background: #2A2A34; margin: 5px 8px; }
+  .mhint { font-family: var(--mono); font-size: 8.5px; letter-spacing: 0.5px; text-transform: uppercase; color: var(--text-3); padding: 4px 10px 6px; }
+  .mfilter { display: flex; align-items: center; gap: 7px; padding: 6px 10px; margin: 2px 4px; background: #101015; border: 1px solid #2A2A34; border-radius: 3px; color: var(--text-3); font-size: 11.5px; }
+  .mi .cnt { color: var(--text-3); font-family: var(--mono); font-size: 10.5px; }
+  .mi.new { color: var(--text); }
+  .mi.new .lbl b { color: var(--tag-character); font-weight: 600; }
+  .menu-row { display: flex; gap: 0; align-items: flex-start; flex-wrap: wrap; }
+  .menu-row .level { position: relative; }
+  .menu-row .level::after { content: ""; }
+
+  /* ── Sidebar (Tag Manager) nesting ── */
+  .sb { background: #131318; border: 1px solid #23232C; border-radius: var(--r); width: 280px; max-width: 100%; padding: 8px 0; user-select: none; }
+  .sb-head { display: flex; align-items: center; gap: 8px; padding: 6px 12px 10px; border-bottom: 1px solid #23232C; margin-bottom: 4px; }
+  .sb-head .ttl { font-size: 10px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--text-2); }
+  .sb-grp { font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text-3); display: flex; align-items: center; gap: 7px; padding: 9px 12px 5px; }
+  .sb-grp .gdot { width: 8px; height: 8px; border-radius: 50%; }
+  .sb-grp .badge { margin-left: auto; font-family: var(--mono); font-size: 10px; color: var(--text-3); }
+  .sb-item { padding: 4px 12px 4px 14px; margin: 1px 6px; border-radius: 3px; }
+  .sb-item .row1 { display: flex; align-items: center; gap: 9px; }
+  .sb-item .idot { width: 7px; height: 7px; border-radius: 50%; flex: none; }
+  .sb-item .nm { font-size: 12.5px; color: var(--text); flex: 1; }
+  .sb-item .c { font-family: var(--mono); font-size: 10.5px; color: var(--text-3); }
+  .sb-item .also { font-size: 10.5px; color: var(--text-3); padding-left: 16px; margin-top: 1px; line-height: 1.5; }
+  .sb-item .also b { color: var(--text-2); font-weight: 500; }
+  .sb-item.hov { background: rgba(255,255,255,0.035); }
+
+  /* ── Inspector "Also known as" ── */
+  .insp { background: #131318; border: 1px solid #23232C; border-radius: var(--r); width: 280px; max-width: 100%; padding: 16px 16px 18px; }
+  .insp-type { font-size: 9px; font-weight: 700; letter-spacing: 1.4px; text-transform: uppercase; color: var(--tag-character); margin-bottom: 14px; display: flex; align-items: center; gap: 7px; }
+  .insp-type .idot { width: 7px; height: 7px; border-radius: 50%; }
+  .insp-f { margin-bottom: 14px; }
+  .insp-f label { display: block; font-size: 9px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; color: var(--text-3); margin-bottom: 6px; }
+  .insp-in { background: #0E0E13; border: 1px solid #2A2A34; border-radius: 3px; padding: 7px 9px; font-size: 13px; color: var(--text); }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { display: inline-flex; align-items: center; gap: 7px; background: rgba(79,193,255,0.10); border: 1px solid rgba(79,193,255,0.28); border-radius: 3px; padding: 4px 7px 4px 9px; font-size: 11.5px; color: var(--text); }
+  .chip .cc { font-family: var(--mono); font-size: 9.5px; color: var(--text-3); }
+  .chip .x { color: var(--text-3); font-size: 11px; cursor: pointer; }
+
+  /* ── Toast ── */
+  .toast { display: inline-flex; align-items: center; gap: 10px; background: #1A1A20; border: 1px solid #30303C; border-left: 3px solid var(--vis); border-radius: 4px; padding: 11px 16px; font-size: 13px; color: var(--text-2); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+  .toast .ok { color: var(--vis); font-weight: 700; }
+  .toast b { color: var(--text); font-weight: 600; }
+
+  /* slice cards */
+  .slice { background: var(--surface); border: 1px solid var(--border); border-top: 2px solid var(--vis); padding: 22px 24px; margin: 18px 0; }
+  .slice.s2 { border-top-color: var(--amber); }
+  .slice .sk { font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--vis); margin-bottom: 4px; }
+  .slice.s2 .sk { color: var(--amber); }
+  .slice h4 { margin-top: 0; margin-bottom: 12px; font-size: 18px; }
+  .slice ul { margin: 0; padding-left: 18px; font-size: 13px; }
+  .slice li { margin-bottom: 7px; }
+
+  .lede { font-size: 17px; line-height: 1.6; color: var(--text); font-weight: 500; margin-bottom: 20px; letter-spacing: -0.1px; }
+
+  /* ── Closing / STOP ─────────────────── */
+  .stop { margin-top: 56px; padding-top: 36px; border-top: 1px solid var(--border); text-align: center; }
+  .stop .mark { font-family: var(--mono); font-size: 15px; font-weight: 700; letter-spacing: 6px; color: var(--text-3); }
+  .stop p { font-size: 12.5px; color: var(--text-3); margin-top: 14px; max-width: 560px; margin-left: auto; margin-right: auto; }
+
+  @media (max-width: 720px) {
+    body { padding: 44px 20px 80px; }
+    .doc-title { font-size: 28px; }
+    .spec-grid { gap: 22px; }
+    .chain-arrow { transform: rotate(90deg); padding: 6px 0; }
+  }
+</style>
+</head>
+<body>
+
+<header class="doc-header" data-screen-label="Header">
+  <div class="doc-overline">Semantic Entity Layer — Surface Direction</div>
+  <h1 class="doc-title">Alias UX Direction</h1>
+  <p class="doc-subtitle">
+    The writer's path from a <em>mention</em> to an <em>identity</em>. One thing only: how a writer creates and understands an alias — not Inspector, not Timeline, not AI, not Character Profiles, not a merge tool. Those surfaces <em>read</em> identity. This designs the one place a writer <em>writes</em> it.
+  </p>
+  <div class="doc-meta">
+    <span>status: direction-only</span>
+    <span>grounded-in: tag-system.js · post-f1a-review · sel-doctrine-lock</span>
+    <span>schema: untouched</span>
+    <span>date: 2026-06-05</span>
+  </div>
+</header>
+
+<!-- 0 MODEL -->
+<div class="section">
+  <h2>The model, in the writer's words</h2>
+  <h3>One entity. Many names.</h3>
+  <p>
+    The architecture is already three links long. A <strong>mention</strong> is a tag span in the manuscript — the actual words on the page. An <strong>entity</strong> is a registry record. The <strong>resolver</strong> follows the mention's id to the entity, and is now alias-aware.
+  </p>
+
+  <div class="chain">
+    <div class="chain-node">
+      <div class="k">Mention</div>
+      <div class="v">"The Teacher"</div>
+      <div class="d">A <code>.tag-highlight</code> span carrying <code>data-tag-id</code>. A surface form.</div>
+    </div>
+    <div class="chain-arrow">→</div>
+    <div class="chain-node mid">
+      <div class="k">Entity ID</div>
+      <div class="v">tag_a91f</div>
+      <div class="d">The stable link. Every surface resolves by this, never by the words.</div>
+    </div>
+    <div class="chain-arrow">→</div>
+    <div class="chain-node">
+      <div class="k">Entity</div>
+      <div class="v">Nali</div>
+      <div class="d"><code>{ id, name, type, occurrences, aliases[] }</code></div>
+    </div>
+  </div>
+
+  <p>
+    What is missing is the writer's hand on the middle link. Today <code>tagSelection('character', 'The Teacher')</code> <em>mints a new entity called "The Teacher."</em> There is no way to say <strong>"The Teacher" means Nali.</strong>
+  </p>
+
+  <div class="callout doctrine">
+    <div class="callout-label">Doctrine — Alias ≠ Merge</div>
+    <p>
+      We never create a duplicate entity and then fold it. We tag the mention straight onto the existing entity and remember the surface form. <strong>Nali · The Teacher · The Old Man · The Poet</strong> — one identity, four surface forms. There is nothing to undo, reconcile, or de-duplicate.
+    </p>
+  </div>
+
+  <div class="callout observation">
+    <div class="callout-label">Boundary — pronouns are out of scope</div>
+    <p>
+      <code>He · She · They · Him · Her</code> are <strong>not</strong> part of this work — they are future context-resolution. This package designs <strong>distinctive aliases</strong> only: <em>The Teacher, The Butcher, The Old Man, The Driver, The Doctor.</em>
+    </p>
+  </div>
+</div>
+
+<!-- 1 RECOMMENDED UX -->
+<div class="section">
+  <h2><span class="section-num">01 ·</span> Recommended UX</h2>
+  <h3>"Tag As," deepened — not a second verb</h3>
+  <p class="lede">The writer already knows one move: select text → right-click → <strong>Tag "…" as → [Type]</strong>. We do not add an <code>Alias Of</code> verb. We deepen the verb that exists.</p>
+  <p>
+    Choosing the <strong>type</strong> already narrows the candidates — a writer aliasing "The Teacher" knows they mean a <em>character.</em> So the type submenu is exactly where the candidate list belongs. When the type already has entities <strong>and</strong> the selected text isn't an exact match of one of them, the type opens an <strong>Entity Picker</strong> as its submenu.
+  </p>
+
+  <div class="specimen">
+    <div class="specimen-label">Specimen — the deepened "Tag As" cascade (real overlay-menu tokens)</div>
+    <div class="menu-row">
+      <div class="level">
+        <div class="menu" style="min-width:200px">
+          <div class="mi on"><span class="lbl">Tag "The Teacher" as…</span><span class="arrow">▸</span></div>
+          <div class="msep"></div>
+          <div class="mi"><span class="lbl">Cut</span><span class="sc">Ctrl+X</span></div>
+          <div class="mi"><span class="lbl">Copy</span><span class="sc">Ctrl+C</span></div>
+        </div>
+      </div>
+      <div class="chain-arrow" style="padding:0 6px;align-self:flex-start;margin-top:10px">▸</div>
+      <div class="level">
+        <div class="menu" style="min-width:150px">
+          <div class="mi on"><span class="mdot" style="background:var(--tag-character)"></span><span class="lbl">Character</span><span class="arrow">▸</span></div>
+          <div class="mi"><span class="mdot" style="background:var(--tag-prop)"></span><span class="lbl">Prop</span><span class="arrow">▸</span></div>
+          <div class="mi"><span class="mdot" style="background:var(--tag-location)"></span><span class="lbl">Location</span><span class="arrow">▸</span></div>
+          <div class="mi dim"><span class="lbl">SFX · VFX · …</span></div>
+        </div>
+      </div>
+      <div class="chain-arrow" style="padding:0 6px;align-self:flex-start;margin-top:10px">▸</div>
+      <div class="level">
+        <div class="menu" style="min-width:200px">
+          <div class="mhint">Entity Picker — Character</div>
+          <div class="mi new on"><span class="lbl">New Character — <b>"The Teacher"</b></span></div>
+          <div class="msep"></div>
+          <div class="mfilter">⌕&nbsp;&nbsp;filter…</div>
+          <div class="mi"><span class="mdot" style="background:var(--tag-character)"></span><span class="lbl">Nali</span><span class="cnt">4</span></div>
+          <div class="mi"><span class="mdot" style="background:var(--tag-character)"></span><span class="lbl">Baban</span><span class="cnt">7</span></div>
+          <div class="mi"><span class="mdot" style="background:var(--tag-character)"></span><span class="lbl">Maryam</span><span class="cnt">2</span></div>
+        </div>
+      </div>
+    </div>
+    <dl class="anno">
+      <dt>New Character</dt><dd><strong>Default, focused.</strong> Mints a fresh entity named "The Teacher" — today's <code>tagSelection(type, text)</code> fast path, untouched.</dd>
+      <dt>Nali</dt><dd>Tags the mention with <strong>Nali's</strong> entity id and pushes <code>"The Teacher"</code> into <code>Nali.aliases</code>. One decision, in situ.</dd>
+      <dt>Filter</dt><dd>Appears only past ~7 entities. Full keyboard nav; the picker only opens when a decision is genuinely required.</dd>
+      <dt>Fast path</dt><dd>If the selected text <em>is</em> an exact match of an existing entity, we tag straight to it silently — no picker. The picker appears only for genuinely new surface forms.</dd>
+    </dl>
+  </div>
+
+  <div class="callout direction">
+    <div class="callout-label">Direction</div>
+    <p>
+      The picker turns one decision — <em>"what kind of thing is this?"</em> — into the place a second decision lives — <em>"is it someone I already named?"</em> No new top-level verb, and the writer is never asked to pre-classify <em>new vs. alias</em> before they've seen the options.
+    </p>
+  </div>
+
+  <h4>The toast is the entire lesson</h4>
+  <p>The existing <code>Rga.Toast</code> already confirms every tag. For an alias it narrates the answer in one plain sentence — and that sentence is all the teaching the writer needs.</p>
+  <div class="specimen" style="text-align:center">
+    <div class="specimen-label" style="justify-content:center">Specimen — confirmation toast</div>
+    <div class="toast"><span class="ok">✓</span><span><b>"The Teacher"</b> is now an alias of <b>Nali.</b></span></div>
+    <p class="spec-cap">The writer never opened a manager, never saw an entity id, never made a duplicate.</p>
+  </div>
+</div>
+
+<!-- 2 UNDERSTANDING -->
+<div class="section">
+  <h2><span class="section-num">02 ·</span> How the writer understands an alias</h2>
+  <h3>Three escalating surfaces — page, sidebar, inspector</h3>
+  <p>
+    Color in this system is <strong>per type, not per entity</strong> (<code>Rga.Color.getTagColor(type)</code> — every character is <code>#4FC1FF</code>). Color can never tell two characters apart. Identity has to be carried elsewhere, on three surfaces the writer escalates through only if they go looking.
+  </p>
+
+  <div class="specimen">
+    <div class="specimen-label">Specimen — the alias marker on the page</div>
+    <div class="page">
+      <div class="sh">INT. SCHOOLHOUSE — DAY</div>
+      <div class="act">
+        <span class="men" data-tip="Character: Nali">Nali</span> sets down the chalk. The children wait.
+        Across the room, <span class="men alias" data-tip="Character: Nali · alias">the Teacher</span> says nothing — only watches the door where
+        <span class="men prop" data-tip="Prop: the satchel">the satchel</span> still leans against the wall.
+      </div>
+      <div class="ch">THE OLD MAN</div>
+      <div class="dlg"><span class="men alias" data-tip="Character: Nali · alias">The Old Man</span> was younger than any of them, once.</div>
+    </div>
+    <dl class="anno">
+      <dt>Solid border</dt><dd><strong>Canonical.</strong> "Nali" — the name I gave them. Type-colored highlight, <em>solid</em> bottom border (today's render).</dd>
+      <dt>Dotted border</dt><dd><strong>Alias.</strong> "the Teacher", "The Old Man" — another word for someone I already named. Same color (= character), <em>dotted</em> border.</dd>
+      <dt>Hover</dt><dd>Names the identity: <code>Character: Nali · alias</code>. <em>(Hover any underlined span above.)</em></dd>
+    </dl>
+    <div class="callout direction" style="margin-bottom:0">
+      <div class="callout-label">The rule a writer internalises in one sitting</div>
+      <p><strong>Solid = the name I gave them. Dotted = another word for someone I already named.</strong> Same color says "character"; the marker and tooltip say <em>which</em> character.</p>
+    </div>
+  </div>
+
+  <div class="spec-grid" style="margin-top:10px">
+    <div class="col">
+      <div class="specimen" style="margin:0">
+        <div class="specimen-label">Sidebar — nesting under one entity</div>
+        <div class="sb">
+          <div class="sb-head"><span class="ttl">Tags</span></div>
+          <div class="sb-grp"><span class="gdot" style="background:var(--tag-character)"></span>Characters<span class="badge">3</span></div>
+          <div class="sb-item hov">
+            <div class="row1"><span class="idot" style="background:var(--tag-character)"></span><span class="nm">Nali</span><span class="c">4</span></div>
+            <div class="also">also: <b>The Teacher</b> · <b>The Old Man</b></div>
+          </div>
+          <div class="sb-item">
+            <div class="row1"><span class="idot" style="background:var(--tag-character)"></span><span class="nm">Baban</span><span class="c">7</span></div>
+            <div class="also">also: <b>The Butcher</b></div>
+          </div>
+          <div class="sb-item">
+            <div class="row1"><span class="idot" style="background:var(--tag-character)"></span><span class="nm">Maryam</span><span class="c">2</span></div>
+          </div>
+        </div>
+        <p class="spec-cap">One entity, one row, other names tucked on a muted <b>also:</b> line beneath it — never a second row that could read as a second character.</p>
+      </div>
+    </div>
+    <div class="col">
+      <div class="specimen" style="margin:0">
+        <div class="specimen-label">Inspector — "Also known as"</div>
+        <div class="insp">
+          <div class="insp-type"><span class="idot" style="background:var(--tag-character)"></span>Character</div>
+          <div class="insp-f"><label>Name</label><div class="insp-in">Nali</div></div>
+          <div class="insp-f">
+            <label>Also known as</label>
+            <div class="chips">
+              <span class="chip">The Teacher <span class="cc">3</span><span class="x">×</span></span>
+              <span class="chip">The Old Man <span class="cc">1</span><span class="x">×</span></span>
+            </div>
+          </div>
+          <div class="insp-f" style="margin-bottom:0"><label>Occurrences (8)</label><div class="insp-in" style="color:var(--text-3);font-size:11.5px">Scene 3 — Action · Scene 7 — Dialogue · …</div></div>
+        </div>
+        <p class="spec-cap">One new field below <b>Name</b>: each alias a removable chip with its own occurrence count. The only place an alias is edited after creation — and the seed of the Character Profile.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 3 SMALLEST UI -->
+<div class="section">
+  <h2><span class="section-num">03 ·</span> The smallest UI that teaches identity</h2>
+  <h3>The picker is the teaching surface</h3>
+  <p>
+    At the exact moment the writer tags "The Teacher," seeing <strong>New Character</strong> sitting above <strong>Nali · Baban · Maryam</strong> poses the question — <em>new person, or someone I've met?</em> — in situ, with no screen, no manager, no admin. The toast then narrates the answer in one sentence. Discovery escalates only if the writer goes looking: <strong>page marker → sidebar line → Inspector field.</strong> Nothing is pushed; everything is glanceable.
+  </p>
+  <div class="callout doctrine">
+    <div class="callout-label">What we refuse to build</div>
+    <p>
+      No alias manager. No merge dialog. No duplicate-resolution queue. No entity database table. No admin screen. Filmustageation is writer-first; entity internals stay internal.
+    </p>
+  </div>
+</div>
+
+<!-- 4 REJECTED -->
+<div class="section">
+  <h2><span class="section-num">04 ·</span> Rejected directions</h2>
+  <h3>What we considered and refused</h3>
+  <table class="wt">
+    <thead><tr><th style="width:28px">#</th><th>Option</th><th>Why rejected</th></tr></thead>
+    <tbody>
+      <tr><td class="rej">R1</td><td>A separate <code>Alias Of →</code> verb beside <code>Tag As</code></td><td>Forces the writer to decide <em>new vs. alias</em> before seeing candidates; doubles the menu; leaks the entity/alias internal distinction into the writer's vocabulary.</td></tr>
+      <tr><td class="rej">R2</td><td>A dedicated "Manage Aliases" dialog / screen</td><td>A database manager. Violates writer-first doctrine; exposes entity internals; turns identity into administration.</td></tr>
+      <tr><td class="rej">R3</td><td>Auto-alias by fuzzy / AI name matching</td><td>Silent identity decisions are dangerous — identity is always the writer's call. (Pronoun resolution is explicitly future work.)</td></tr>
+      <tr><td class="rej">R4</td><td>Drag one tag onto another to alias</td><td>Invisible, undiscoverable affordance — and it <em>reads</em> as a merge, exactly the mental model doctrine forbids.</td></tr>
+      <tr><td class="rej">R5</td><td>An "☑ this is an alias of…" checkbox in the create dialog</td><td>Adds modal friction to the most frequent action (tagging) to serve the rarer one (aliasing). Inverts the cost.</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- 5 FUTURE COMPAT -->
+<div class="section">
+  <h2><span class="section-num">05 ·</span> Future compatibility</h2>
+  <h3>Write identity once; every other surface only reads it</h3>
+  <p>
+    The whole design rests on one discipline: <strong>the alias action writes identity to exactly one place</strong> — <code>entity.aliases</code> plus the mention's <code>tagId</code> — and every other surface only ever <em>reads</em> identity by entity id. Because no consumer reads surface strings, none of them needs the alias workflow to change when they ship.
+  </p>
+  <table class="wt">
+    <thead><tr><th>Future surface</th><th>What it inherits for free</th></tr></thead>
+    <tbody>
+      <tr><td class="nowrap">Character Profiles</td><td>The profile is the Inspector entity view grown up. <code>aliases</code> is already populated; "Also known as" is already rendered.</td></tr>
+      <tr><td class="nowrap">Inspector</td><td>Already entity-scoped. Renders <code>aliases</code>; no new contract.</td></tr>
+      <tr><td class="nowrap">Timeline</td><td>Scene presence is computed per entity id. "The Teacher" in scene 12 already counts as Nali present — no alias-specific code.</td></tr>
+      <tr><td class="nowrap">AI</td><td>Reads <code>{ id, canonical, aliases[] }</code> from the resolver, never raw strings. Four phrases are one character with zero prompt engineering.</td></tr>
+      <tr><td class="nowrap">MCP</td><td>Exposes the same entity record. Identity travels across the boundary intact.</td></tr>
+    </tbody>
+  </table>
+  <div class="callout doctrine">
+    <div class="callout-label">The load-bearing restraint</div>
+    <p>
+      This design <strong>does not touch <code>schema.marks.tag</code></strong> — the surface the F1A review flags as <em>dangerous</em> and <em>load-bearing</em> (every saved <code>.rga</code> depends on its shape). Aliases are an <strong>additive field on the registry record</strong>, written through the existing <code>addEntity</code> path. No new mark, no <code>.rga</code> migration for new files.
+    </p>
+  </div>
+</div>
+
+<!-- 6 ENGINEERING -->
+<div class="section">
+  <h2><span class="section-num">06 ·</span> Implementation guidance for engineering</h2>
+  <h3>Eight touch-points in <code>tag-system.js</code> — direction, not code</h3>
+  <table class="wt">
+    <thead><tr><th style="width:30px">#</th><th>Surface</th><th>Change</th></tr></thead>
+    <tbody>
+      <tr><td class="rej" style="color:var(--vis)">1</td><td><code>_createEntity</code></td><td>Add <code>aliases: []</code>. Thread through <code>serializeRegistry</code> / <code>loadRegistry</code>. Default <code>[]</code> on legacy load.</td></tr>
+      <tr><td class="rej" style="color:var(--vis)">2</td><td><code>_buildTagTypeSubmenu</code></td><td>Each type item becomes a <strong>submenu</strong> (the Entity Picker) when entities of that type exist and the text isn't an exact match. First item <code>New {Type}: "{text}"</code>; then existing entities (dot + name + count); filter input past ~7 rows.</td></tr>
+      <tr><td class="rej" style="color:var(--vis)">3</td><td><code>tagSelection(type, text, entityId?)</code></td><td>Add optional <code>entityId</code>. When present and <code>text ≠ entity.name</code> (case-insensitive), <code>entity.aliases.push(text)</code> (dedupe). When absent, today's find-or-create.</td></tr>
+      <tr><td class="rej" style="color:var(--vis)">4</td><td>Resolver</td><td>Already keyed by <code>tagId</code>; make alias lookups read <code>entity.aliases</code> so name→entity resolution finds them. No schema change.</td></tr>
+      <tr><td class="rej" style="color:var(--vis)">5</td><td>Inline render</td><td><code>.tag-highlight[data-alias="true"]</code> → dotted bottom border; tooltip <code>"{TypeLabel}: {entity.name} · alias"</code>.</td></tr>
+      <tr><td class="rej" style="color:var(--vis)">6</td><td><code>updateManagerPanel</code></td><td>Render the <code>also:</code> line when <code>entity.aliases.length</code>.</td></tr>
+      <tr><td class="rej" style="color:var(--vis)">7</td><td><code>_showInInspector</code></td><td>Add the <strong>Also known as</strong> field — removable chips, per-alias counts.</td></tr>
+      <tr><td class="rej" style="color:var(--script)">8</td><td>Do <em>not</em></td><td>Add a mark, a <code>tagRegistry</code> key, or a migration. <code>aliases</code> rides on the existing per-entity record.</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- 7 RISKS -->
+<div class="section">
+  <h2><span class="section-num">07 ·</span> Risks &amp; open questions</h2>
+  <table class="wt">
+    <thead><tr><th>Risk</th><th>Mitigation</th></tr></thead>
+    <tbody>
+      <tr><td class="nowrap">Submenu depth — a third right-click level</td><td>Filter past ~7 entities; full keyboard nav; the picker only opens when a decision is actually needed (fast path otherwise).</td></tr>
+      <tr><td class="nowrap">Accidental alias (wrong entity picked)</td><td>Undo restores prior state; the toast names the entity so the error is caught immediately; the Inspector chip is one click to remove.</td></tr>
+      <tr><td class="nowrap">Per-type color collision</td><td>By design — color means <em>type.</em> Identity lives in the marker, tooltip, and sidebar nesting. Do not introduce per-entity color; it breaks the type-color contract the editor relies on.</td></tr>
+      <tr><td class="nowrap">Pre-existing duplicate entities</td><td>See §08 — a bounded, opt-in <em>reconcile</em> affordance, explicitly <strong>not</strong> the alias-creation flow and not a routine verb.</td></tr>
+      <tr><td class="nowrap">Removing an alias — what about its mentions?</td><td>S2: removing an alias detaches its mentions (they revert to plain text) with undo. Never silently re-points or deletes the entity.</td></tr>
+      <tr><td class="nowrap">Pronoun boundary</td><td><code>He / She / They</code> are out of scope — future context-resolution. This package designs distinctive aliases only.</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- 8 MIGRATION -->
+<div class="section">
+  <h2><span class="section-num">08 ·</span> Migration path toward Character Profiles</h2>
+  <h3>Two things must stay true</h3>
+  <h4>A — Reconcile, not merge (bounded, opt-in)</h4>
+  <p>
+    Files written before this shipped may contain two entities that are really one person (a "The Teacher" character minted because there was no alias path). This is the <em>only</em> place anything merge-shaped is permitted, and it is framed as <strong>repair, not a feature</strong>: from an entity's Inspector, <em>"This is actually… → Nali"</em> re-points that entity's mentions onto Nali and folds its name into <code>Nali.aliases</code>. It is <strong>not</strong> in the right-click tagging flow, <strong>not</strong> a routine writer verb, and <strong>not</strong> surfaced as "merge." It cleans up the pre-alias past, once, and then recedes.
+  </p>
+  <h4>B — The Inspector entity view is the Profile seed</h4>
+  <p>
+    "Also known as" (§02) is the first Profile field. When Profiles ship, they are the same entity record with more fields (description, relationships, arc) — the alias workflow underneath is unchanged, because it only ever wrote identity.
+  </p>
+</div>
+
+<!-- SLICES -->
+<div class="section" style="border-bottom:none;padding-bottom:0;margin-bottom:24px">
+  <h2>Recommended slices</h2>
+  <h3>Ship the loop, then the discovery layer</h3>
+
+  <div class="slice">
+    <div class="sk">S1 — Create an alias (the whole loop)</div>
+    <h4>The complete writer-facing create-an-alias experience</h4>
+    <ul>
+      <li>Entity <code>aliases</code> field + serialize / load</li>
+      <li><code>Tag As → Type</code> deepened into the Entity Picker (New vs. existing)</li>
+      <li><code>tagSelection(type, text, entityId?)</code> writes the alias</li>
+      <li>Resolver alias-aware</li>
+      <li>Inline dotted-underline marker + tooltip</li>
+      <li>Confirmation toast</li>
+    </ul>
+    <p style="margin:14px 0 0;font-size:13px;color:var(--text-3)"><strong style="color:var(--vis)">No schema change. No <code>.rga</code> migration.</strong></p>
+  </div>
+
+  <div class="slice s2">
+    <div class="sk">S2 — See &amp; manage aliases</div>
+    <h4>The discovery layer — and the direct seed of Character Profiles</h4>
+    <ul>
+      <li>Sidebar <code>also:</code> line (expandable to per-alias counts)</li>
+      <li>Inspector <strong>Also known as</strong> field — removable chips, per-alias occurrence counts</li>
+      <li>Remove-alias detaches mentions with undo</li>
+    </ul>
+  </div>
+</div>
+
+<div class="stop">
+  <div class="mark">S T O P</div>
+  <p>This is a design package. No code has been written, no schema touched, no slice authorised. The <code>schema.marks.tag</code> surface is deliberately left alone. Authorising S1 — or rejecting it — belongs to the user, not to this document.</p>
+</div>
+
+</body>
+</html>
