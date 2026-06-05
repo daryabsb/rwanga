@@ -124,14 +124,20 @@ consumer rule C3 / `liveEntities`).
 2. **Authoring (future):** adding an alias that already resolves to a *different*
    live entity is **rejected or prompted** — never silently reassigned. (UX of the
    prompt is deferred — §4.)
-3. **Resolver (S0):** given `(type, text)`, match the normalized string against live
-   entities' name **then** aliases.
-   - exactly one match → reuse that id;
-   - zero matches → create (today's behavior, unchanged);
-   - **two-or-more matches → no confident match.** The resolver must **never
-     silently pick one.** In S0 this branch is unreachable by construction (no
-     authoring ⇒ uniqueness holds), but the code is written defensively so a
-     hand-edited `.rga` cannot trick it into mis-resolving identity.
+3. **Resolver (S0):** the two axes resolve in **precedence order** — name first,
+   then aliases (clarified during S0 implementation; the prior unified-match
+   sketch in the brief was wrong and would have regressed legacy behavior):
+   - **Name axis (precedence):** a canonical-name match reuses the **first**
+     case-insensitive match — **even when the registry holds historical
+     name-duplicates awaiting merge.** Name-duplicates are MERGE territory, not
+     an alias collision (Alias ≠ Merge); pre-S0 behavior (first-match reuse) is
+     preserved exactly.
+   - **Alias axis (fallback, collision-defensive):** consulted only when no name
+     matched. Exactly one alias claimant → reuse; **two-or-more → no confident
+     match**, never silently picked → fall through to create. In S0 the ≥2 branch
+     is unreachable by construction (no authoring ⇒ uniqueness holds), but the
+     code is defensive so a hand-edited `.rga` cannot mis-resolve identity.
+   - zero matches on either axis → create (today's behavior, unchanged).
 
 ---
 

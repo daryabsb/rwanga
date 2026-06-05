@@ -312,6 +312,10 @@
       name: attrs.name || '',
       color: attrs.color || null,
       notes: attrs.notes || '',
+      // Semantic Entity Layer S0: aliases travel on the entity. Initialize an
+      // empty list so every fresh entity carries the field (the resolver still
+      // tolerates a missing one — see Rga.Tags.findOrCreateEntity).
+      aliases: Array.isArray(attrs.aliases) ? attrs.aliases.slice() : [],
     };
     list.push(entity);
     return entity.id;
@@ -350,7 +354,7 @@
   // Entity fields the fold understands. Anything else is "unknown":
   // never copied to the survivor (survivor-wins rule for unknown
   // semantics), only reported so the merge log can preserve it.
-  const _KNOWN_ENTITY_FIELDS = ['id', 'name', 'color', 'notes', 'merged_into'];
+  const _KNOWN_ENTITY_FIELDS = ['id', 'name', 'color', 'notes', 'merged_into', 'aliases'];
 
   function markEntityMerged(doc, tagType, loserId, survivorId) {
     if (!doc || !loserId || !survivorId || loserId === survivorId) return false;
@@ -390,6 +394,23 @@
         ? survivor.notes + '\n' + attribution + '\n' + loser.notes
         : attribution + '\n' + loser.notes;
       notesAppended = true;
+    }
+
+    // aliases — survivor keeps the UNION of both entities' aliases, deduped
+    // case-insensitively. The loser's canonical NAME is NOT promoted to an
+    // alias here (that is a merge-UX decision, deferred — see
+    // SEMANTIC_ENTITY_LAYER_DOCTRINE_LOCK.md §4). Without this, aliases would
+    // be classified "unknown" and silently lost on every merge.
+    const _survAliases = Array.isArray(survivor.aliases) ? survivor.aliases : [];
+    const _loserAliases = Array.isArray(loser.aliases) ? loser.aliases : [];
+    if (_loserAliases.length > 0) {
+      const seen = new Set(_survAliases.map(function(a) { return String(a).trim().toLowerCase(); }));
+      const union = _survAliases.slice();
+      _loserAliases.forEach(function(a) {
+        const key = String(a).trim().toLowerCase();
+        if (!seen.has(key)) { seen.add(key); union.push(a); }
+      });
+      survivor.aliases = union;
     }
 
     // unknown loser fields — reported, never copied.

@@ -134,7 +134,7 @@ test('B1: markEntityMerged — success: tombstone written, survivor + loser othe
   assert.equal(loser.notes, 'from scene 2');
   // Survivor completely untouched.
   const survivor = findIn(doc, 'characters', 'ent-a');
-  assert.deepEqual(survivor, { id: 'ent-a', name: 'NALI', color: '#4FC1FF', notes: 'Protagonist.' });
+  assert.deepEqual(survivor, { id: 'ent-a', name: 'NALI', color: '#4FC1FF', notes: 'Protagonist.', aliases: [] });
   // Nothing deleted.
   assert.equal(doc.tagRegistry.characters.length, 2);
 });
@@ -240,10 +240,13 @@ test('B1: fold — unknown loser fields: reported in summary, NOT copied to surv
 
   const summary = Doc.foldEntityMetadata(doc, 'character', 'ent-a', 'ent-b');
   const survivor = findIn(doc, 'characters', 'ent-a');
-  assert.equal(survivor.aliases, undefined, 'unknown fields never copied (survivor-wins rule)');
+  // aliases is now a KNOWN field (S0): folded (unioned, case-insensitive dedup),
+  // not reported as unknown. 'NALI'/'Nali' collapse to the first form.
+  assert.deepEqual(survivor.aliases, ['NALI'], 'known aliases field folded into survivor');
+  // custom_field is still genuinely unknown — reported, never copied.
   assert.equal(survivor.custom_field, undefined);
-  assert.deepEqual(summary.unknown_fields, { aliases: ['NALI', 'Nali'], custom_field: 42 },
-    'unknown fields preserved in the summary so the log loses nothing');
+  assert.deepEqual(summary.unknown_fields, { custom_field: 42 },
+    'only truly-unknown fields are preserved in the summary so the log loses nothing');
 });
 
 test('B1: fold — no unknown loser fields → unknown_fields is null', () => {
@@ -448,7 +451,7 @@ test('B1: serialize writes merge_log; deserialize restores mergeLog', () => {
 
   const str = Doc.serialize(doc);
   const parsed = JSON.parse(str);
-  assert.equal(parsed.rga_version, '3.0', 'version stays 3.0 — additive fields never bump it');
+  assert.equal(parsed.rga_version, '4.0', 'version is the doc\'s CURRENT (4.0) — merge ops never bump it');
   assert.equal(parsed.merge_log.length, 1);
   assert.equal(parsed.merge_log[0].survivor.id, 'ent-a');
 

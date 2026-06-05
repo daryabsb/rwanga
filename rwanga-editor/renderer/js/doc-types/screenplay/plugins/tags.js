@@ -540,10 +540,31 @@
       ? Rga.Doc.liveEntities(doc, tagType)
       : _entityList(doc, tagType);
 
-    const existing = list.find(function(e) {
-      return String(e.name || '').toLowerCase() === trimmed.toLowerCase();
+    // Semantic Entity Layer S0: the lookup consults the canonical name AND the
+    // entity's aliases (DOCTRINE_LOCK Invariant III — one reuse-before-create
+    // path, taught one new trick; never forked). The two axes resolve in
+    // precedence order ("name then aliases", DOCTRINE_LOCK §3).
+    const norm = trimmed.toLowerCase();
+
+    // 1) Canonical NAME match takes precedence. Reuse the FIRST case-insensitive
+    //    match — preserving the pre-S0 reuse-before-create behavior even when
+    //    the registry holds historical name-duplicates awaiting merge (that is
+    //    MERGE territory, not an alias collision — Alias ≠ Merge).
+    const byName = list.find(function(e) {
+      return String(e.name || '').toLowerCase() === norm;
     });
-    if (existing) return existing.id;
+    if (byName) return byName.id;
+
+    // 2) ALIAS fallback — only when no name matched. Collision-defensive: at
+    //    most one live entity may claim an alias (DOCTRINE_LOCK §3). A hand-
+    //    edited .rga could forge ≥2 claimants; that is NO confident match — never
+    //    silently pick one → fall through to create. `(e.aliases || [])`
+    //    tolerates records that predate the field.
+    const byAlias = list.filter(function(e) {
+      const aliases = Array.isArray(e.aliases) ? e.aliases : [];
+      return aliases.some(function(a) { return String(a || '').trim().toLowerCase() === norm; });
+    });
+    if (byAlias.length === 1) return byAlias[0].id;
 
     const entityId = crypto.randomUUID();
     if (doc && Rga.Doc && Rga.Doc.addEntity) {

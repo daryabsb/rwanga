@@ -700,10 +700,12 @@
 <!-- v3 screenplay schema — single canonical PM doc with structural
      scene nodes. Exposes Rga.DocTypes.screenplay.buildSchemaV3(). -->
 <script src="js/doc-types/screenplay/schema-v3.js"></script>
-<!-- Migration chain — v1.x → v2.x → v3 (pure JSON → JSON). Required to
-     load files saved before v3 became the primary path. -->
+<!-- Migration chain — v1.x → v2.x → v3 → v4 (pure JSON → JSON). Required to
+     load files saved before v4 became the primary path. index.js must load
+     AFTER every step file so the steps are registered before migrate() runs. -->
 <script src="js/doc-types/screenplay/migrations/v1-to-v2.js"></script>
 <script src="js/doc-types/screenplay/migrations/v2-to-v3.js"></script>
+<script src="js/doc-types/screenplay/migrations/v3-to-v4.js"></script>
 <script src="js/doc-types/screenplay/migrations/index.js"></script>
 <!-- v3 editor surface: NodeViews (Scene + SceneHeading), keymap
      (Tab cycle / Enter flow / Mod-Enter spawn / Backspace join),

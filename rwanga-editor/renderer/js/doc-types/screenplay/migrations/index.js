@@ -24,7 +24,7 @@
   const Rga = window.Rga = window.Rga || {};
   Rga.Migrations = Rga.Migrations || {};
 
-  const LATEST_VERSION = '3.0';
+  const LATEST_VERSION = '4.0';
   const MAX_HOPS = 10;
 
   function detectVersion(parsed) {
@@ -38,6 +38,7 @@
   function _isV1(version) { return typeof version === 'string' && version.charAt(0) === '1'; }
   function _isV2(version) { return typeof version === 'string' && version.charAt(0) === '2'; }
   function _isV3(version) { return typeof version === 'string' && version.charAt(0) === '3'; }
+  function _isV4(version) { return typeof version === 'string' && version.charAt(0) === '4'; }
 
   function migrate(parsed) {
     if (!parsed || typeof parsed !== 'object') return parsed;
@@ -46,9 +47,10 @@
     let hops = 0;
     while (hops < MAX_HOPS) {
       const version = detectVersion(current);
-      if (_isV3(version)) return current;          // already at or beyond v3
+      if (_isV4(version)) return current;          // already at or beyond v4 (latest)
       if (_isV1(version) && steps.v1toV2) { current = steps.v1toV2(current); hops += 1; continue; }
       if (_isV2(version) && steps.v2toV3) { current = steps.v2toV3(current); hops += 1; continue; }
+      if (_isV3(version) && steps.v3toV4) { current = steps.v3toV4(current); hops += 1; continue; }
       // Unknown version or missing step — pass through; caller decides.
       return current;
     }

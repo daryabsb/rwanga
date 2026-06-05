@@ -72,7 +72,7 @@ test('hand-authored v3 fixture loads via deserialize', () => {
   const doc = Rga.Doc.deserialize(raw, fixturePath);
 
   assert.equal(doc.documentType, 'screenplay');
-  assert.equal(doc.rgaVersion, '3.0');
+  assert.equal(doc.rgaVersion, '4.0');   // v3 fixture upgraded to v4 on load (S0)
   assert.equal(doc.metadata.title, 'v3 Hand-Authored Sample');
   assert.equal(doc.metadata.screenplayProfile.language, 'en');
 
@@ -120,8 +120,8 @@ test('v2 fixture loads through Migrations chain into the v3 schema', () => {
   const raw = fs.readFileSync(fixturePath, 'utf8');
   const doc = Rga.Doc.deserialize(raw, fixturePath);
 
-  // After migration the file is v3.
-  assert.equal(doc.rgaVersion, '3.0');
+  // After migration the file is v4 (v2 → v3 → v4 chain; S0 adds aliases).
+  assert.equal(doc.rgaVersion, '4.0');
   assert.equal(doc.metadata.screenplayProfile.language, 'en');
   assert.equal(doc.metadata.screenplayProfile.direction, 'ltr');
   assert.equal(doc.metadata.language, undefined, 'flat language replaced by screenplayProfile');

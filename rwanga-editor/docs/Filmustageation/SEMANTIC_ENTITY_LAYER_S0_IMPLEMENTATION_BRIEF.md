@@ -77,29 +77,37 @@ no print/export change.
 
 ## 4. Resolver contract (the heart of S0)
 
-Extend `findOrCreateEntity(doc, tagType, name)` — **do not fork it** (Invariant III):
+Extend `findOrCreateEntity(doc, tagType, name)` — **do not fork it** (Invariant III).
+**Name and alias resolve in PRECEDENCE order** (name first, then aliases — DOCTRINE_LOCK
+§3). *(This corrects the original unified-match sketch, which would have regressed the
+legacy first-match-reuse behavior the fixture tests depend on — see Risks.)*
 
 ```
 trimmed = trim(name); if empty → null
 list = liveEntities(doc, tagType)   // already the lookup domain (tags.js:539)
 norm = lowercase(trimmed)
 
-matches = list where  lowercase(e.name) === norm
-                 OR   (e.aliases || []).some(a => lowercase(trim(a)) === norm)
+// 1) NAME axis (precedence): reuse the FIRST case-insensitive name match —
+//    even with historical name-duplicates awaiting merge (merge territory).
+byName = list.find(e => lowercase(e.name) === norm)
+if byName → return byName.id                          // legacy-preserving
 
-matches.length === 1 → return matches[0].id          // reuse (name or alias)
-matches.length === 0 → addEntity(...) → return new id // unchanged create path
-matches.length  >= 2 → NO confident match            // defensive; see doctrine §3
+// 2) ALIAS axis (fallback, collision-defensive): only when no name matched.
+byAlias = list.filter(e => (e.aliases || []).some(a => lowercase(trim(a)) === norm))
+byAlias.length === 1 → return byAlias[0].id           // reuse via alias
+// byAlias.length >= 2 → NO confident match (defensive) → fall through to create
+
+// 3) no match on either axis → addEntity(...) → return new id (unchanged path)
 ```
 
 - `(e.aliases || [])` — **the missing-field tolerance is mandatory** (entities born
   via `addEntity` and any pre-migration file may lack the field).
-- The `>= 2` branch is unreachable in S0 (no authoring ⇒ uniqueness holds). Decide
-  its S0 behavior conservatively: **fall through to create** (matches today's
-  no-confident-match outcome) — it must **never silently pick `matches[0]`**. A
-  hand-edited `.rga` with a duplicate alias must not be able to corrupt identity.
-- Name-vs-alias precedence is moot: doctrine §3 uniqueness is over names ∪ aliases,
-  so a normalized string can match at most one live entity.
+- **Name-duplicates are NOT a collision.** The pre-S0 `findOrCreateEntity` reused
+  the first name match; S0 keeps that exactly (name-duplicates are merge territory,
+  Alias ≠ Merge). The collision-defensive `>= 2` rule applies to the **alias axis
+  only** — the new surface S0 introduces.
+- The alias `>= 2` branch is unreachable in S0 (no authoring ⇒ uniqueness holds),
+  but is written defensively so a hand-edited `.rga` cannot corrupt identity.
 
 ---
 

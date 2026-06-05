@@ -5,10 +5,11 @@
   const Rga = window.Rga = window.Rga || {};
 
   Rga.Constants = {
-    CURRENT_RGA_VERSION: '3.0',
-    // Older versions (1.x, 2.x) load through the migration chain in
-    // Rga.Migrations.migrate and are saved back as v3.
-    SUPPORTED_RGA_VERSIONS: ['1.0', '1.1', '2.0', '3.0'],
+    CURRENT_RGA_VERSION: '4.0',
+    // Older versions (1.x, 2.x, 3.x) load through the migration chain in
+    // Rga.Migrations.migrate and are saved back as v4. v4 adds entity.aliases
+    // (Semantic Entity Layer S0).
+    SUPPORTED_RGA_VERSIONS: ['1.0', '1.1', '2.0', '3.0', '4.0'],
 
     PRODUCTION_TYPES: [
       { value: 'feature',     label_en: 'Feature',       label_ku: 'فیلمی درێژ' },
