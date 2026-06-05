@@ -230,12 +230,31 @@
     sub.className = 'ctx-submenu ctx-list';
 
     TAG_TYPES.forEach(function(t) {
-      const li = menuItem(t.label, function() {
-        hideMenu();
-        if (Rga.Tags && Rga.Tags.showTagDialog) {
-          Rga.Tags.showTagDialog(view, t.key);
-        }
-      });
+      // Semantic Entity Layer S1 — the type item deepens into an Entity Picker
+      // ONLY when the type already has entities AND the selection is not an
+      // exact (name/alias) match. Otherwise the fast path stays: tag silently
+      // via the shared find-or-create (existing match reuses; no match mints).
+      const data = (Rga.Tags && typeof Rga.Tags.entityPickerData === 'function')
+        ? Rga.Tags.entityPickerData(view, t.key)
+        : null;
+      const hasPicker = !!(data && data.entities.length > 0 && !data.exactMatchId);
+
+      if (!hasPicker) {
+        const li = menuItem(t.label, function() {
+          hideMenu();
+          if (Rga.Tags && Rga.Tags.showTagDialog) Rga.Tags.showTagDialog(view, t.key);
+        });
+        sub.appendChild(li);
+        return;
+      }
+
+      const li = menuItem(t.label + ' ▶', null, { hasSubmenu: true });
+      const picker = buildEntityPicker(view, t, data);
+      li.appendChild(picker);
+      // Clamp the (third-level) picker on hover, same measured viewport-safe
+      // path the type submenu uses — the fix that keeps "Tag as" on-screen.
+      li.addEventListener('mouseenter', function() { positionSubmenu(li, picker); });
+      li.addEventListener('pointerenter', function() { positionSubmenu(li, picker); });
       sub.appendChild(li);
     });
 
@@ -246,6 +265,57 @@
     // measurable. pointerenter covers touch/pen.
     parentItem.addEventListener('mouseenter', function() { positionSubmenu(parentItem, sub); });
     parentItem.addEventListener('pointerenter', function() { positionSubmenu(parentItem, sub); });
+  }
+
+  // The Entity Picker submenu: New {Type} — "{text}" + existing entities (dot +
+  // name + count), with a filter past ~7 rows. New mints a fresh entity; an
+  // existing row tags the selection onto that entity and records the surface
+  // form as an alias (Rga.Tags.tagAsExisting).
+  function buildEntityPicker(view, t, data) {
+    const picker = document.createElement('ul');
+    picker.className = 'ctx-submenu ctx-list ctx-entity-picker';
+
+    const newItem = menuItem('New ' + t.label + ' — "' + data.selectedText + '"', function() {
+      hideMenu();
+      if (Rga.Tags && Rga.Tags.showTagDialog) Rga.Tags.showTagDialog(view, t.key);
+    }, { className: 'ctx-entity-new' });
+    picker.appendChild(newItem);
+    picker.appendChild(menuSeparator());
+
+    let rows = [];
+
+    if (data.entities.length > 7) {
+      const filterLi = document.createElement('li');
+      filterLi.className = 'ctx-filter';
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'ctx-filter-input';
+      input.placeholder = 'filter…';
+      // Keep typing inside the picker — don't let it bubble to the menu's
+      // outside-click / nav handlers.
+      input.addEventListener('mousedown', function(e) { e.stopPropagation(); });
+      input.addEventListener('keydown', function(e) { e.stopPropagation(); });
+      input.addEventListener('input', function() {
+        const q = input.value.trim().toLowerCase();
+        rows.forEach(function(row) {
+          row.el.hidden = !!(q && row.name.toLowerCase().indexOf(q) === -1);
+        });
+      });
+      filterLi.appendChild(input);
+      picker.appendChild(filterLi);
+    }
+
+    rows = data.entities.map(function(ent) {
+      const label = '● ' + ent.name + (ent.count ? '   ' + ent.count : '');
+      const row = menuItem(label, function() {
+        hideMenu();
+        if (Rga.Tags && Rga.Tags.tagAsExisting) Rga.Tags.tagAsExisting(view, t.key, ent.id);
+      }, { className: 'ctx-entity-row' });
+      picker.appendChild(row);
+      return { el: row, name: ent.name };
+    });
+
+    return picker;
   }
 
   // ---------------------------------------------------------------

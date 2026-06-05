@@ -336,6 +336,47 @@
     // via Rga.Tags.removeAllMarksForEntity(view, id)
   }
 
+  // Semantic Entity Layer S1 — record a distinctive alias on a LIVE entity.
+  // Alias ≠ Merge (DOCTRINE_LOCK Invariant IX): this NEVER creates a tombstone
+  // or a second entity, NEVER writes merge_log. Uniqueness is over names ∪
+  // aliases of LIVE entities within the type (DOCTRINE_LOCK §3); normalization
+  // is the existing rule only (trim + case-insensitive) — no new scheme, no
+  // pronoun logic (the caller/UI decides eligibility).
+  // Returns { added: boolean, reason: 'added'|'duplicate'|'is-name'|'collision'
+  //          |'tombstoned'|'no-entity'|'empty' }.
+  function addAlias(doc, tagType, entityId, surface) {
+    const trimmed = String(surface == null ? '' : surface).trim();
+    if (!trimmed) return { added: false, reason: 'empty' };
+    const norm = trimmed.toLowerCase();
+
+    const entity = findEntity(doc, tagType, entityId);
+    if (!entity) return { added: false, reason: 'no-entity' };
+    if (entity.merged_into) return { added: false, reason: 'tombstoned' };
+    if (String(entity.name || '').trim().toLowerCase() === norm) {
+      return { added: false, reason: 'is-name' };
+    }
+
+    // Collision scan over LIVE entities only (tombstones never participate —
+    // consumer rule C3). A hit on THIS entity's own alias is an idempotent
+    // duplicate; a hit on any OTHER entity's name/alias is a collision.
+    const live = liveEntities(doc, tagType);
+    for (let i = 0; i < live.length; i += 1) {
+      const e = live[i];
+      const nameHit = String(e.name || '').trim().toLowerCase() === norm;
+      const aliasHit = (Array.isArray(e.aliases) ? e.aliases : []).some(function(a) {
+        return String(a || '').trim().toLowerCase() === norm;
+      });
+      if (nameHit || aliasHit) {
+        return { added: false, reason: (e.id === entityId ? 'duplicate' : 'collision') };
+      }
+    }
+
+    if (!Array.isArray(entity.aliases)) entity.aliases = [];
+    entity.aliases.push(trimmed);
+    markDirty(doc);
+    return { added: true, reason: 'added' };
+  }
+
   // ---------------------------------------------------------------
   // Registry merge operations — Identity Merge Slice B1.
   // Design: docs/Filmustageation/SCOPED_REGISTRY_MERGE_API_DESIGN.md
@@ -508,6 +549,7 @@
     addEntity,
     findEntity,
     removeEntity,
+    addAlias,
     markEntityMerged,
     foldEntityMetadata,
     appendMergeLog,

@@ -771,6 +771,10 @@
      loads before mount.js (registered via buildV3ScenePlugins) and is used
      by plugins/tags.js when an entity is selected in the Tags Panel. -->
 <script src="js/doc-types/screenplay/plugins/tag-focus-highlight.js"></script>
+<!-- Semantic Entity Layer S1 — derived alias marker (Rga.AliasMarker). Sibling
+     of tag-focus-highlight; registered via buildV3ScenePlugins. Derives the
+     dotted alias underline from doc text + registry; no mark/schema change. -->
+<script src="js/doc-types/screenplay/plugins/alias-marker.js"></script>
 <!-- Scene Navigator Tags v1.1 — scene-subtree occurrence derivation
      (Rga.SceneTagOccurrences). Pure read; consumed by the Scene Navigator
      when a scene row is expanded. Not a PM plugin — no buildV3ScenePlugins

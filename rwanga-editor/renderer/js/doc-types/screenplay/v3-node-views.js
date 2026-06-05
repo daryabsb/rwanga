@@ -255,6 +255,12 @@
       const tf = Rga.TagFocusHighlight.buildPlugin();
       if (tf) out.push(tf);
     }
+    // Semantic Entity Layer S1 — derived alias marker. Same shape: content-safe
+    // decoration, composes additively. Absent → no alias styling, no error.
+    if (window.Rga && Rga.AliasMarker && typeof Rga.AliasMarker.buildPlugin === 'function') {
+      const am = Rga.AliasMarker.buildPlugin();
+      if (am) out.push(am);
+    }
     return out;
   }
 

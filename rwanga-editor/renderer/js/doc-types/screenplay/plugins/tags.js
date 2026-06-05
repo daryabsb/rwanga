@@ -593,6 +593,110 @@
   }
 
   // ---------------------------------------------------------------
+  // Semantic Entity Layer S1 — alias creation through the tag flow.
+  // The Entity Picker (context menu) and the tag-as-existing write path.
+  // ---------------------------------------------------------------
+
+  // Pure: does `selectedText` already resolve to an existing entity (by name OR
+  // alias)? If so it is a fast-path silent tag (no picker). Returns
+  // { exactMatchId, candidates }. Mirrors findOrCreateEntity's name+alias rule.
+  function pickerDecision(selectedText, entities) {
+    const norm = String(selectedText == null ? '' : selectedText).trim().toLowerCase();
+    const list = Array.isArray(entities) ? entities : [];
+    let exactMatchId = null;
+    for (let i = 0; i < list.length; i += 1) {
+      const e = list[i];
+      const nameHit = String(e.name || '').trim().toLowerCase() === norm;
+      const aliasHit = (Array.isArray(e.aliases) ? e.aliases : []).some(function(a) {
+        return String(a || '').trim().toLowerCase() === norm;
+      });
+      if (nameHit || aliasHit) { exactMatchId = e.id; break; }
+    }
+    return { exactMatchId: exactMatchId, candidates: list };
+  }
+
+  // Count tag mentions per entityId in one doc walk (for the picker rows).
+  function _occurrenceCounts(pmDoc) {
+    const counts = {};
+    if (!pmDoc || typeof pmDoc.descendants !== 'function') return counts;
+    pmDoc.descendants(function(node) {
+      if (!node.isText || !Array.isArray(node.marks)) return;
+      node.marks.forEach(function(m) {
+        if (m && m.type && m.type.name === 'tag' && m.attrs && m.attrs.entityId) {
+          counts[m.attrs.entityId] = (counts[m.attrs.entityId] || 0) + 1;
+        }
+      });
+    });
+    return counts;
+  }
+
+  // Read the current selection + live entities (with counts) for the context
+  // menu's Entity Picker. Returns null when there is no usable selection.
+  function entityPickerData(view, tagType) {
+    if (!view || !view.state) return null;
+    const sel = view.state.selection;
+    if (sel.empty) return null;
+    const selectedText = view.state.doc.textBetween(sel.from, sel.to, ' ').trim();
+    if (!selectedText) return null;
+
+    const activeTab = Rga.TabManager && Rga.TabManager.activeTab && Rga.TabManager.activeTab();
+    const doc = activeTab && activeTab.doc;
+    const live = (doc && Rga.Doc && typeof Rga.Doc.liveEntities === 'function')
+      ? Rga.Doc.liveEntities(doc, tagType)
+      : [];
+    const counts = _occurrenceCounts(view.state.doc);
+    const decision = pickerDecision(selectedText, live);
+    const entities = live.map(function(e) {
+      return { id: e.id, name: e.name || '', count: counts[e.id] || 0 };
+    });
+    return { selectedText: selectedText, exactMatchId: decision.exactMatchId, entities: entities };
+  }
+
+  // Tag the current selection as an EXISTING entity, recording the surface form
+  // as an alias when it differs from the canonical name. The single write path
+  // for the picker's "existing entity" choice — reuses applyTag + Rga.Doc.addAlias,
+  // never a second resolver path.
+  function tagAsExisting(view, tagType, entityId) {
+    if (Rga.ContextMenu) Rga.ContextMenu.hide();
+    if (!view || !view.state) return;
+    const sel = view.state.selection;
+    if (sel.empty) return;
+    const selectedText = view.state.doc.textBetween(sel.from, sel.to, ' ').trim();
+    if (!selectedText) return;
+
+    const activeTab = Rga.TabManager && Rga.TabManager.activeTab && Rga.TabManager.activeTab();
+    const doc = activeTab && activeTab.doc;
+    if (!doc || !Rga.Doc) return;
+
+    // A picker row may carry a tombstoned id (undo-restored merge) — resolve to
+    // the live survivor so the mark and the alias both land on the real entity.
+    let lookupId = entityId;
+    if (typeof Rga.Doc.resolveEntityId === 'function') {
+      const resolved = Rga.Doc.resolveEntityId(doc, tagType, entityId);
+      if (resolved) lookupId = resolved;
+    }
+    const ent = Rga.Doc.findEntity ? Rga.Doc.findEntity(doc, tagType, lookupId) : null;
+    if (!ent) return;
+    const canonical = ent.name || '';
+
+    // Record the alias BEFORE applying the mark, so the alias-marker decoration
+    // (recomputed on the resulting doc change) already sees the new alias.
+    let aliasAdded = false;
+    if (String(selectedText).trim().toLowerCase() !== String(canonical).trim().toLowerCase()
+        && typeof Rga.Doc.addAlias === 'function') {
+      const r = Rga.Doc.addAlias(doc, tagType, lookupId, selectedText);
+      aliasAdded = !!(r && r.added);
+    }
+
+    applyTag(view, tagType, lookupId);
+    view.focus();
+
+    if (aliasAdded && Rga.Toast && typeof Rga.Toast.show === 'function') {
+      Rga.Toast.show('"' + selectedText + '" is now an alias of ' + canonical + '.', 'success', 2600);
+    }
+  }
+
+  // ---------------------------------------------------------------
   // Entity merge operation — Registry Integrity Slice B2.
   // Design: docs/Filmustageation/SCOPED_REGISTRY_MERGE_API_DESIGN.md §1.4
   // Policy: docs/Filmustageation/IDENTITY_MERGE_POLICY_AUDIT.md §6
@@ -842,6 +946,9 @@
     findOrCreateEntity,
     mergeEntities,
     showTagDialog,
+    pickerDecision,
+    entityPickerData,
+    tagAsExisting,
     showTagInfo,
     renderTagsPanel,
     jumpToFirstOccurrence,

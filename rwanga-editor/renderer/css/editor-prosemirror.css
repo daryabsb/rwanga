@@ -954,6 +954,14 @@ body.view-draft-active .rga-draft-footer {
 .ProseMirror .rga-tag-animal    { border-bottom-color: var(--tag-animal,     #B5CEA8); }
 .ProseMirror .rga-tag-custom    { border-bottom-color: var(--tag-custom,     #888);    }
 
+/* Semantic Entity Layer S1 — alias mention. Same type color, but a DOTTED
+   underline instead of the canonical solid one. Alias-ness is derived at render
+   time (Rga.AliasMarker) and applied as an inline decoration class — never a
+   mark attribute. ProseMirror renders the decoration span INSIDE the .rga-tag
+   mark span (which carries the border), so we reach the bordered parent with
+   :has() (Chromium 126 / Electron 31). */
+.ProseMirror .rga-tag:has(> .rga-tag-alias) { border-bottom-style: dotted; }
+
 /* Revision flag — color driven by inline style (mark.attrs.color via toDOM) */
 .ProseMirror .rga-revision-flag {
   border-bottom: 2px dashed;   /* color from inline style */
@@ -1255,8 +1263,24 @@ body.view-draft-active .rga-draft-footer {
   min-width: 140px;
   z-index: 9001;
 }
-.ctx-has-submenu:hover .ctx-submenu {
+/* Direct-child so nested submenus (S1 Entity Picker is a third level) each open
+   only under their OWN hovered parent — a descendant selector would reveal every
+   picker at once when "Tag as" is hovered. */
+.ctx-has-submenu:hover > .ctx-submenu {
   display: block;
+}
+
+/* Semantic Entity Layer S1 — Entity Picker filter input (appears past ~7 rows). */
+.ctx-filter { padding: 4px 10px; }
+.ctx-filter-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 3px 6px;
+  font-size: 12px;
+  color: var(--text-primary, #d4d4d4);
+  background: var(--input-bg, #1e1e1e);
+  border: 1px solid var(--border-primary, #454545);
+  border-radius: 4px;
 }
 /* The submenu's side (left:100% vs right:100%) and vertical offset are set
    inline by JS on hover (positionSubmenu) so it never spills off the right
