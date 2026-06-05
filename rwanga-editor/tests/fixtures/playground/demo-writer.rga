@@ -1,0 +1,110 @@
+{
+  "rga_version": "4.0",
+  "document_type": "screenplay",
+  "metadata": {
+    "title": "Writer Demo — The Last Light",
+    "author": "Rwanga Playground",
+    "created": "2026-06-05T00:00:00.000Z",
+    "modified": "2026-06-05T00:00:00.000Z",
+    "version": 1,
+    "revision_notes": "A realistic short screenplay for print-preview and everyday editing demos.",
+    "screenplayProfile": {
+      "language": "en",
+      "direction": "ltr",
+      "screenplayConvention": "hollywood"
+    },
+    "production_type": "short",
+    "genre": "Drama",
+    "logline": "On the night the power fails, a daughter and her father say the thing they never could in the light.",
+    "useSchemaV3": true
+  },
+  "settings": {
+    "theme": "dark",
+    "font_size": 12,
+    "font_family": "Courier Prime",
+    "show_scene_numbers": true,
+    "page_size": "Letter",
+    "pageSetup": { "paperSize": "Letter", "margins": { "top": 1, "right": 1, "bottom": 1, "left": 1.5 } },
+    "vocabulary": {
+      "settings": ["INT.", "EXT.", "INT./EXT.", "EXT./INT."],
+      "times": ["DAY", "NIGHT", "CONTINUOUS", "DUSK", "DAWN"],
+      "sceneWord": "SCENE"
+    },
+    "sceneHeadingStyle": "twoLine",
+    "units": "in"
+  },
+  "tag_registry": {
+    "characters": [
+      { "id": "ent-mira", "name": "MIRA", "color": "#4FC1FF", "notes": "Late twenties. Came back for one night.", "aliases": [] },
+      { "id": "ent-dara", "name": "DARA", "color": "#C586C0", "notes": "Her father. Speaks in fewer words than he means.", "aliases": [] }
+    ],
+    "props": [
+      { "id": "ent-lantern", "name": "LANTERN", "color": "#DCDCAA", "notes": "The only light once the grid fails.", "aliases": [] }
+    ],
+    "wardrobe": [],
+    "locations": [
+      { "id": "ent-kitchen", "name": "KITCHEN", "color": "#4EC9B0", "notes": "", "aliases": [] }
+    ],
+    "sfx": [], "vfx": [], "vehicles": [], "animals": [], "custom": []
+  },
+  "flag_log": [
+    { "id": "flag-001", "scene_id": "scene-wr-002", "note": "Confirm the lantern is established before the blackout beat.", "color": "#F44747", "created": "2026-06-05T00:00:00.000Z" }
+  ],
+  "export_settings": { "branding": "rwanga", "letterhead_url": null, "include_scene_numbers": true, "include_revision_marks": true },
+  "runtime": { "last_cursor": null, "active_scene_id": "scene-wr-001", "ui_state": {} },
+  "body": {
+    "type": "doc",
+    "content": [
+      {
+        "type": "titleStrip",
+        "attrs": { "removable": true },
+        "content": [{ "type": "text", "text": "The Last Light" }]
+      },
+      {
+        "type": "body",
+        "content": [
+          {
+            "type": "scene",
+            "attrs": { "id": "scene-wr-001", "notes": "Open warm and ordinary so the dark lands harder.", "revisionFlag": null, "metadata": { "linkedScenes": [], "references": [], "production": {} } },
+            "content": [
+              { "type": "sceneHeading", "attrs": { "setting": "INT.", "time": "NIGHT", "headingStyle": null }, "content": [{ "type": "text", "text": "KITCHEN" }] },
+              { "type": "action", "content": [{ "type": "text", "text": "Steam off two cups. MIRA sits across from DARA, coat still on, like she might leave again." }] },
+              { "type": "character", "content": [{ "type": "text", "text": "MIRA", "marks": [{ "type": "tag", "attrs": { "tagType": "character", "entityId": "ent-mira" } }] }] },
+              { "type": "dialogue", "content": [{ "type": "text", "text": "I can't stay long." }] },
+              { "type": "character", "content": [{ "type": "text", "text": "DARA", "marks": [{ "type": "tag", "attrs": { "tagType": "character", "entityId": "ent-dara" } }] }] },
+              { "type": "parenthetical", "content": [{ "type": "text", "text": "(not looking up)" }] },
+              { "type": "dialogue", "content": [{ "type": "text", "text": "You never do." }] },
+              { "type": "transition", "attrs": { "presetType": "CUT" }, "content": [{ "type": "text", "text": "CUT" }] }
+            ]
+          },
+          {
+            "type": "scene",
+            "attrs": { "id": "scene-wr-002", "notes": "The blackout. The lantern becomes the whole world.", "revisionFlag": "open", "metadata": { "linkedScenes": [], "references": [], "production": {} } },
+            "content": [
+              { "type": "sceneHeading", "attrs": { "setting": "INT.", "time": "CONTINUOUS", "headingStyle": null }, "content": [{ "type": "text", "text": "KITCHEN" }] },
+              { "type": "action", "content": [{ "type": "text", "text": "The hum of the fridge dies. Dark. DARA strikes a match, lifts the LANTERN. A small circle of gold." }] },
+              { "type": "character", "content": [{ "type": "text", "text": "DARA", "marks": [{ "type": "tag", "attrs": { "tagType": "character", "entityId": "ent-dara" } }] }] },
+              { "type": "dialogue", "content": [{ "type": "text", "text": "Grid's out past the bridge again." }] },
+              { "type": "character", "content": [{ "type": "text", "text": "MIRA", "marks": [{ "type": "tag", "attrs": { "tagType": "character", "entityId": "ent-mira" } }] }] },
+              { "type": "dialogue", "content": [{ "type": "text", "text": "Good. I can't see your face when I say it." }] },
+              { "type": "shot", "content": [{ "type": "text", "text": "CLOSE ON THE LANTERN" }] },
+              { "type": "transition", "attrs": { "presetType": "DISSOLVE" }, "content": [{ "type": "text", "text": "DISSOLVE" }] }
+            ]
+          },
+          {
+            "type": "scene",
+            "attrs": { "id": "scene-wr-003", "notes": "Resolve quietly. No music cue needed.", "revisionFlag": null, "metadata": { "linkedScenes": [], "references": [], "production": {} } },
+            "content": [
+              { "type": "sceneHeading", "attrs": { "setting": "EXT.", "time": "DAWN", "headingStyle": null }, "content": [{ "type": "text", "text": "PORCH" }] },
+              { "type": "action", "content": [{ "type": "text", "text": "First grey light. The lantern still burns, forgotten, beside two empty cups. MIRA's chair is pushed in." }] },
+              { "type": "character", "content": [{ "type": "text", "text": "DARA", "marks": [{ "type": "tag", "attrs": { "tagType": "character", "entityId": "ent-dara" } }] }] },
+              { "type": "parenthetical", "content": [{ "type": "text", "text": "(to the empty chair)" }] },
+              { "type": "dialogue", "content": [{ "type": "text", "text": "Stay long next time." }] },
+              { "type": "transition", "attrs": { "presetType": "FADE OUT" }, "content": [{ "type": "text", "text": "FADE OUT" }] }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
