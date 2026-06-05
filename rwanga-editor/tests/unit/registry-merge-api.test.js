@@ -451,7 +451,7 @@ test('B1: serialize writes merge_log; deserialize restores mergeLog', () => {
 
   const str = Doc.serialize(doc);
   const parsed = JSON.parse(str);
-  assert.equal(parsed.rga_version, '4.0', 'version is the doc\'s CURRENT (4.0) — merge ops never bump it');
+  assert.equal(parsed.rga_version, '5.0', 'version is the doc\'s CURRENT (5.0) — merge ops never bump it');
   assert.equal(parsed.merge_log.length, 1);
   assert.equal(parsed.merge_log[0].survivor.id, 'ent-a');
 

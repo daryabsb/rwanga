@@ -61,7 +61,17 @@
       ? doc.metadata.screenplayProfile
       : null;
     const settings = doc && doc.settings ? doc.settings : null;
-    return Rga.LayoutProfile.compose(screenplayProfile, settings);
+    // Print Contract V1: resolve the document's owned print truth through the
+    // single contract resolver and pass it to compose. Every renderer flows
+    // through resolve(doc), so this is the one place the contract is consumed —
+    // the resolved layoutProfile carries `printContract`. resolveFrom() stays a
+    // pure pass-through (no contract), preserving the resolveFrom === compose
+    // identity rule. The doc-path is doc → contract → geometry; values are
+    // byte-identical because the contract reads the same owned homes.
+    const contract = (Rga.PrintContract && typeof Rga.PrintContract.resolve === 'function')
+      ? Rga.PrintContract.resolve(doc)
+      : null;
+    return Rga.LayoutProfile.compose(screenplayProfile, settings, contract);
   }
 
   // ----------------------------------------------------------------

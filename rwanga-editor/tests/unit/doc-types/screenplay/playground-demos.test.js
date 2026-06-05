@@ -51,13 +51,14 @@ function sceneCount(doc) {
 }
 
 // ----------------------------------------------------------------
-// Every demo loads through the real pipeline and lands at v4.
+// Every demo loads through the real pipeline and lands at the latest
+// version (v5 — Print Contract V1 migrates v4 demos forward on load).
 // ----------------------------------------------------------------
 ['demo-writer.rga', 'demo-semantic-entities.rga', 'demo-rtl.rga'].forEach(function(name) {
-  test('playground demo loads + migrates to v4: ' + name, () => {
+  test('playground demo loads + migrates to v5: ' + name, () => {
     const Rga = boot();
     const doc = loadDemo(Rga, name);
-    assert.equal(doc.rgaVersion, '4.0', name + ' loads at v4');
+    assert.equal(doc.rgaVersion, '5.0', name + ' loads at v5');
     assert.ok(doc.body, name + ' has a PM body');
     assert.ok(sceneCount(doc) >= 1, name + ' has at least one scene');
   });

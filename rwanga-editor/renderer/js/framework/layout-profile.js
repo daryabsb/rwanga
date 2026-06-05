@@ -128,7 +128,22 @@
   // Compose
   // ----------------------------------------------------------------
 
-  function compose(screenplayProfile, settings) {
+  // compose(screenplayProfile, settings, contract?)
+  //
+  // The optional third argument is a resolved Print Contract
+  // (Rga.PrintContract.resolve(doc)). When present, the OWNED enums — paper,
+  // orientation, direction, page numbering — are sourced from the contract
+  // (the single owner of document print truth) instead of being re-read from
+  // the raw scattered fields, and the contract is attached on the output as
+  // `profile.printContract` so every renderer that consumes a layoutProfile
+  // also carries the canonical contract. Geometry math is unchanged.
+  //
+  // When NO contract is passed (resolveFrom, the DEFAULT constant, direct test
+  // calls), behavior is BYTE-IDENTICAL to before — the identity rule
+  // resolveFrom(p,s) === compose(p,s) is preserved. Because the contract reads
+  // the same owned homes these helpers read, the resolved values are identical
+  // either way: this is an ownership change, not a geometry change.
+  function compose(screenplayProfile, settings, contract) {
     // Future hook: non-Hollywood conventions (e.g. Arabic / Kurdish-specific)
     // can branch on screenplayProfile.screenplayConvention. V1 supports
     // "hollywood" only; everything else falls back to defaults.
@@ -136,8 +151,10 @@
     const _settings = settings || {};
 
     // Overrides: settings may carry pageSetup / fontSize. Use defensively.
-    const orientation = _resolveOrientation(_settings);
-    let   pageSize    = _resolvePageSize(_settings) || HOLLYWOOD_DEFAULTS.pageSize;
+    // Paper: a stored explicit sizeIn (legacy v2 raw dims) always wins; otherwise
+    // the contract's paper NAME (when a contract is present) or the settings name.
+    const orientation = contract ? contract.orientation : _resolveOrientation(_settings);
+    let   pageSize    = _resolvePageSizeWithContract(_settings, contract) || HOLLYWOOD_DEFAULTS.pageSize;
     const margins     = _resolveMargins(_settings)  || HOLLYWOOD_DEFAULTS.margins;
     const font        = _resolveFont(_settings)     || HOLLYWOOD_DEFAULTS.font;
 
@@ -163,7 +180,9 @@
     // because it drives the font-aware cpi: the RTL Paper truth surface renders
     // Noto Naskh, the LTR surface Courier. screenplayProfile.direction is the
     // canonical source; default 'ltr'.
-    const direction = (_profile.direction === 'rtl') ? 'rtl' : 'ltr';
+    const direction = contract
+      ? contract.direction
+      : ((_profile.direction === 'rtl') ? 'rtl' : 'ltr');
     const cpi = _charsPerInch(font.sizePt, direction);
 
     const blocks = {};
@@ -203,11 +222,13 @@
     // ONE source of truth. The Single-resolver truth rule forbids the
     // preview from reading Store.effective directly; everything renders
     // off this returned shape.
-    const pageNumbers = _resolvePageNumbers(_settings);
+    const pageNumbers = contract
+      ? { enabled: contract.pageNumbering.enabled, position: contract.pageNumbering.position }
+      : _resolvePageNumbers(_settings);
     const header      = _resolveHeader(_settings);
     const footer      = _resolveFooter(_settings);
 
-    return {
+    const result = {
       linesPerPage:            linesPerPage,
       theoreticalLinesPerPage: theoreticalLinesPerPage,  // pre-reserve; diagnostic + testability
       safetyLines:             SAFETY_LINES,              // applied reserve; explicit not magic
@@ -221,6 +242,13 @@
       header:                  header,
       footer:                  footer
     };
+    // Print Contract V1: when a contract was supplied, carry it on the output so
+    // every renderer that consumes this layoutProfile (Print Preview, PDF Export,
+    // Page Setup preview, Flow paper view — all via ManuscriptGeometry.resolve)
+    // also holds the canonical contract. Omitted entirely when no contract is
+    // passed, so the no-contract output stays byte-identical to pre-V1.
+    if (contract) result.printContract = contract;
+    return result;
   }
 
   // settings.pageSetup may be { sizeIn: { w, h } } or { paperSize: <name> }
@@ -244,28 +272,49 @@
     const sizeName = (typeof ps.paperSize === 'string' ? ps.paperSize : null) ||
                      (typeof ps.size      === 'string' ? ps.size      : null);
     if (sizeName) {
-      // Recovery Step 3: paper dimensions come from Constants.PAPER_SIZES —
-      // the single paper-size table. LayoutProfile no longer keeps its own
-      // Letter/A4/Legal copy. An unrecognised name (or a missing Constants
-      // module) yields null here, and compose() falls back to
-      // HOLLYWOOD_DEFAULTS.pageSize exactly as it did before.
-      const table = (Rga.Constants && Rga.Constants.PAPER_SIZES) || null;
-      let entry = table && table[sizeName];
-      if (!entry && table) {
-        // S8 — case-insensitive fallback. Settings registry feeds
-        // 'letter' / 'a4' / 'custom'; table keys are 'Letter' / 'A4' /
-        // 'Legal'. Walk once to find a case-insensitive match.
-        const lower = sizeName.toLowerCase();
-        const keys = Object.keys(table);
-        for (let i = 0; i < keys.length; i += 1) {
-          if (keys[i].toLowerCase() === lower) { entry = table[keys[i]]; break; }
-        }
-      }
-      if (entry && typeof entry.width === 'number' && typeof entry.height === 'number') {
-        return { w: entry.width, h: entry.height, unit: 'in' };
-      }
+      return _pageSizeFromName(sizeName);
     }
     return null;
+  }
+
+  // Paper NAME → dims, via Constants.PAPER_SIZES (the single paper-size table).
+  // Recovery Step 3: LayoutProfile keeps no Letter/A4/Legal copy of its own. An
+  // unrecognised name (or a missing Constants module) yields null, and compose()
+  // falls back to HOLLYWOOD_DEFAULTS.pageSize exactly as before. Shared by the
+  // settings path (_resolvePageSize) and the Print-Contract path in compose().
+  function _pageSizeFromName(sizeName) {
+    if (typeof sizeName !== 'string' || !sizeName) return null;
+    const table = (Rga.Constants && Rga.Constants.PAPER_SIZES) || null;
+    let entry = table && table[sizeName];
+    if (!entry && table) {
+      // S8 — case-insensitive fallback. Settings registry feeds 'letter' /
+      // 'a4' / 'custom'; table keys are 'Letter' / 'A4' / 'Legal'.
+      const lower = sizeName.toLowerCase();
+      const keys = Object.keys(table);
+      for (let i = 0; i < keys.length; i += 1) {
+        if (keys[i].toLowerCase() === lower) { entry = table[keys[i]]; break; }
+      }
+    }
+    if (entry && typeof entry.width === 'number' && typeof entry.height === 'number') {
+      return { w: entry.width, h: entry.height, unit: 'in' };
+    }
+    return null;
+  }
+
+  // Print Contract V1 — paper resolution that prefers the contract's paper NAME.
+  // A stored explicit `sizeIn` (legacy v2 raw dims) still wins, exactly as in the
+  // no-contract path. Otherwise the contract paper name resolves via the shared
+  // Constants table lookup. Byte-identical to _resolvePageSize(settings) whenever
+  // contract.paperSize mirrors settings.pageSetup.paperSize (which it always does,
+  // since the contract reads that same home). When no contract is passed this is a
+  // pure pass-through to _resolvePageSize(settings).
+  function _resolvePageSizeWithContract(settings, contract) {
+    if (!contract) return _resolvePageSize(settings);
+    const ps = (settings && settings.pageSetup) || {};
+    if (ps.sizeIn && typeof ps.sizeIn.w === 'number' && typeof ps.sizeIn.h === 'number') {
+      return { w: ps.sizeIn.w, h: ps.sizeIn.h, unit: 'in' };
+    }
+    return _pageSizeFromName(contract.paperSize);
   }
 
   // S8 — orientation. Defaults to 'portrait'. The registry option set is

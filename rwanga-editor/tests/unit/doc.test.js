@@ -26,14 +26,35 @@ function buildTestSchema() {
   });
 }
 
-test('Doc.create produces an Untitled doc with dirty=false and rgaVersion=4.0', () => {
+test('Doc.create produces an Untitled doc with dirty=false and rgaVersion=5.0', () => {
   const doc = Doc.create();
   assert.equal(doc.handle, null);
   assert.equal(doc.origin, 'untitled');
   assert.equal(doc.dirty, false);
   assert.match(doc.displayName, /^Untitled/);
-  assert.equal(doc.rgaVersion, '4.0');
+  assert.equal(doc.rgaVersion, '5.0');
   assert.equal(doc.body, null);   // PM Node not set until tab-manager mounts
+});
+
+// Print Contract V1 — a new doc carries its print truth EXPLICITLY.
+test('Doc.create seeds the print contract (version + screenplayProfile)', () => {
+  const doc = Doc.create();
+  assert.equal(doc.metadata.printContractVersion, 1);
+  assert.ok(doc.metadata.screenplayProfile, 'screenplayProfile seeded');
+  assert.equal(doc.metadata.screenplayProfile.direction, 'ltr');   // en → ltr
+  assert.equal(doc.metadata.screenplayProfile.language, 'en');
+});
+
+test('Doc.create derives RTL direction for a Kurdish/Arabic seed language', () => {
+  assert.equal(Doc.create({ seedDefaults: { language: 'ku' } }).metadata.screenplayProfile.direction, 'rtl');
+  assert.equal(Doc.create({ seedDefaults: { language: 'ar' } }).metadata.screenplayProfile.direction, 'rtl');
+});
+
+test('Doc.create seeds the explicit pageSetup contract fields', () => {
+  const ps = Doc.create().settings.pageSetup;
+  assert.equal(ps.orientation, 'portrait');
+  assert.equal(ps.pageNumbers, true);
+  assert.equal(ps.pageNumberPosition, 'top_right');
 });
 
 test('Doc.create seeds metadata defaults from optional seedDefaults', () => {
@@ -60,7 +81,7 @@ test('Doc.serialize then Doc.deserialize round-trips metadata losslessly (v2.0)'
   assert.equal(reloaded.body.type.name, 'doc');
 });
 
-test('Doc.serialize produces valid v4.0 JSON with PM tree in body field', () => {
+test('Doc.serialize produces valid v5.0 JSON with PM tree in body field', () => {
   const schema = buildTestSchema();
   const doc = Doc.create();
   doc.metadata.title = 'Café';
@@ -68,7 +89,7 @@ test('Doc.serialize produces valid v4.0 JSON with PM tree in body field', () => 
     schema.node('body', null, [schema.node('paragraph')])
   ]);
   const parsed = JSON.parse(Doc.serialize(doc));
-  assert.equal(parsed.rga_version, '4.0');
+  assert.equal(parsed.rga_version, '5.0');
   assert.equal(parsed.document_type, 'screenplay');
   assert.equal(parsed.metadata.title, 'Café');
   assert.equal(parsed.body.type, 'doc');
@@ -86,15 +107,15 @@ test('Doc.deserialize accepts v1.x and backfills production_type=untyped; body i
     runtime: {}
   });
   const doc = Doc.deserialize(v11, '/old.rga');
-  assert.equal(doc.rgaVersion, '4.0');          // always upgraded on load
+  assert.equal(doc.rgaVersion, '5.0');          // always upgraded on load
   assert.equal(doc.metadata.production_type, 'untyped');
   assert.equal(doc.body, null);                  // no PM body from v1.x
 });
 
 test('Doc.deserialize rejects a newer rga_version', () => {
-  // v4.0 is now SUPPORTED (Semantic Entity Layer S0 — entity.aliases);
-  // rejection semantics target TRULY-newer formats we don't know how to read yet.
-  const future = JSON.stringify({ rga_version: '5.0', metadata: {}, body: null });
+  // v5.0 is now SUPPORTED (Print Contract V1); rejection semantics target
+  // TRULY-newer formats we don't know how to read yet.
+  const future = JSON.stringify({ rga_version: '6.0', metadata: {}, body: null });
   assert.throws(() => Doc.deserialize(future, '/future.rga'), /newer Rwanga/);
 });
 
@@ -136,6 +157,40 @@ test('Doc.serialize/deserialize round-trips pageSetup', () => {
   const reloaded = Doc.deserialize(Doc.serialize(doc), '/p.rga', { schema });
   assert.equal(reloaded.settings.pageSetup.paperSize, 'A4');
   assert.equal(reloaded.settings.pageSetup.margins.left, 2);
+});
+
+// Print Contract V1 — the contract survives a save + reopen (criterion #3).
+test('Doc.serialize/deserialize round-trips the print contract', () => {
+  const schema = buildTestSchema();
+  const doc = Doc.create({ seedDefaults: { language: 'ku' } });
+  doc.settings.pageSetup.orientation = 'landscape';
+  doc.settings.pageSetup.pageNumbers = false;
+  doc.settings.show_scene_numbers = false;
+  const reloaded = Doc.deserialize(Doc.serialize(doc), '/c.rga', { schema });
+  assert.equal(reloaded.metadata.printContractVersion, 1);
+  assert.equal(reloaded.metadata.screenplayProfile.direction, 'rtl');
+  assert.equal(reloaded.settings.pageSetup.orientation, 'landscape');
+  assert.equal(reloaded.settings.pageSetup.pageNumbers, false);
+  assert.equal(reloaded.settings.show_scene_numbers, false);
+});
+
+// Print Contract V1 — the escape-hatch load path (opts.schema bypasses
+// migration) still backfills a complete contract for a pre-V1 file.
+test('Doc.deserialize backfills the print contract on a pre-V1 file', () => {
+  const schema = buildTestSchema();
+  const pre = JSON.stringify({
+    rga_version: '4.0',
+    metadata: { title: 'X', language: 'ar' },
+    settings: { pageSetup: { paperSize: 'Letter', margins: { top: 1, right: 1, bottom: 1, left: 1.5 } } },
+    body: null
+  });
+  const doc = Doc.deserialize(pre, '/pre.rga', { schema });
+  assert.equal(doc.metadata.printContractVersion, 1);
+  assert.equal(doc.metadata.screenplayProfile.direction, 'rtl');   // ar → rtl
+  assert.equal(doc.settings.pageSetup.orientation, 'portrait');
+  assert.equal(doc.settings.pageSetup.pageNumbers, true);
+  assert.equal(doc.settings.pageSetup.pageNumberPosition, 'top_right');
+  assert.equal(doc.settings.show_scene_numbers, true);
 });
 
 test('Doc.deserialize backfills pageSetup when an older v2.0 file lacks it', () => {

@@ -579,6 +579,11 @@
      (pagemap-engine, nav-index, print-renderer) which call it at runtime. -->
 <script src="js/framework/slug-resolver.js"></script>
 <script src="js/framework/layout-profile.js"></script>
+<!-- Print Contract V1 — the single, named, versioned owner of document print
+     truth (PRINT_CONTRACT_V1.md). Pure projection over the .rga's owned homes;
+     depends only on Rga.Constants. Loads before manuscript-geometry.js, which
+     resolves the contract and threads it into LayoutProfile.compose. -->
+<script src="js/framework/print-contract.js"></script>
 <script src="js/framework/manuscript-geometry.js"></script>
 <script src="js/framework/pagemap-engine.js"></script>
 <script src="js/framework/document-outline.js"></script>
@@ -706,6 +711,7 @@
 <script src="js/doc-types/screenplay/migrations/v1-to-v2.js"></script>
 <script src="js/doc-types/screenplay/migrations/v2-to-v3.js"></script>
 <script src="js/doc-types/screenplay/migrations/v3-to-v4.js"></script>
+<script src="js/doc-types/screenplay/migrations/v4-to-v5.js"></script>
 <script src="js/doc-types/screenplay/migrations/index.js"></script>
 <!-- v3 editor surface: NodeViews (Scene + SceneHeading), keymap
      (Tab cycle / Enter flow / Mod-Enter spawn / Backspace join),

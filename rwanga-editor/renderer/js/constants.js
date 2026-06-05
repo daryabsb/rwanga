@@ -5,11 +5,19 @@
   const Rga = window.Rga = window.Rga || {};
 
   Rga.Constants = {
-    CURRENT_RGA_VERSION: '4.0',
-    // Older versions (1.x, 2.x, 3.x) load through the migration chain in
-    // Rga.Migrations.migrate and are saved back as v4. v4 adds entity.aliases
-    // (Semantic Entity Layer S0).
-    SUPPORTED_RGA_VERSIONS: ['1.0', '1.1', '2.0', '3.0', '4.0'],
+    CURRENT_RGA_VERSION: '5.0',
+    // Older versions (1.x, 2.x, 3.x, 4.x) load through the migration chain in
+    // Rga.Migrations.migrate and are saved back as v5. v4 added entity.aliases
+    // (Semantic Entity Layer S0); v5 adds the Print Contract (an explicit,
+    // versioned document print-truth stamp — see PRINT_CONTRACT_VERSION below
+    // and docs/Filmustageation/PRINT_CONTRACT_V1.md).
+    SUPPORTED_RGA_VERSIONS: ['1.0', '1.1', '2.0', '3.0', '4.0', '5.0'],
+
+    // Print Contract schema version (Print Contract V1). Distinct from
+    // CURRENT_RGA_VERSION (the file format): the contract can evolve without a
+    // file-format bump. Stamped onto new docs as metadata.printContractVersion
+    // and consumed by Rga.PrintContract.resolve.
+    PRINT_CONTRACT_VERSION: 1,
 
     PRODUCTION_TYPES: [
       { value: 'feature',     label_en: 'Feature',       label_ku: 'فیلمی درێژ' },

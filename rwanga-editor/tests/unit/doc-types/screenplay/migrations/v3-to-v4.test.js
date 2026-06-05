@@ -86,13 +86,16 @@ test('S0: migrate() carries a v3 doc all the way to 4.0', () => {
   assert.deepEqual(out.tag_registry.characters[0].aliases, []);
 });
 
-test('S0: migrate() exposes LATEST_VERSION 4.0', () => {
+// LATEST_VERSION is a global dispatcher fact — Print Contract V1 advanced it to
+// 5.0. (This boot intentionally loads only through v3→v4, so migrate() itself
+// stops at 4.0 above; the constant still reports the chain's latest known step.)
+test('S0: migrate() exposes LATEST_VERSION 5.0', () => {
   const Rga = bootChain();
-  assert.equal(Rga.Migrations.LATEST_VERSION, '4.0');
+  assert.equal(Rga.Migrations.LATEST_VERSION, '5.0');
 });
 
-test('S0: constants bumped — CURRENT 4.0, SUPPORTED includes 4.0', () => {
+test('S0: constants bumped — CURRENT 5.0, SUPPORTED includes 4.0', () => {
   const Rga = bootChain();
-  assert.equal(Rga.Constants.CURRENT_RGA_VERSION, '4.0');
+  assert.equal(Rga.Constants.CURRENT_RGA_VERSION, '5.0');
   assert.ok(Rga.Constants.SUPPORTED_RGA_VERSIONS.indexOf('4.0') !== -1);
 });

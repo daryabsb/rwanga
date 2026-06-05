@@ -25,9 +25,17 @@
     };
   }
 
+  // Reading direction derived from language (Kurdish/Arabic read RTL). Same rule
+  // as the v2→v3 and v4→v5 migrations — the single place new docs and migrated
+  // docs agree on direction.
+  function _directionForLanguage(language) {
+    return (language === 'ku' || language === 'ar') ? 'rtl' : 'ltr';
+  }
+
   function defaultMetadata(seed) {
     const now = new Date().toISOString();
     seed = seed || {};
+    const language = seed.language || C.DEFAULT_SCRIPT_LANGUAGE;
     return {
       title: '',
       author: seed.author || '',
@@ -35,7 +43,16 @@
       modified: now,
       version: 1,
       revision_notes: '',
-      language: seed.language || C.DEFAULT_SCRIPT_LANGUAGE,
+      language: language,
+      // Print Contract V1: a new doc carries its print truth EXPLICITLY.
+      // screenplayProfile owns reading direction; printContractVersion stamps
+      // the contract schema. See docs/Filmustageation/PRINT_CONTRACT_V1.md.
+      screenplayProfile: {
+        language: language,
+        direction: _directionForLanguage(language),
+        screenplayConvention: 'hollywood',
+      },
+      printContractVersion: C.PRINT_CONTRACT_VERSION,
       production_type: seed.production_type || C.DEFAULT_PRODUCTION_TYPE,
       genre: '',
       logline: '',
@@ -55,8 +72,14 @@
       show_scene_numbers: true,
       page_size: 'Letter',
       pageSetup: {
+        // Print Contract V1: the owned page-truth set is seeded explicitly so a
+        // new doc stores its full contract (paper + orientation + numbering),
+        // not just what Page Setup happens to have touched.
         paperSize: 'Letter',
+        orientation: 'portrait',
         margins: { top: 1, right: 1, bottom: 1, left: 1.5 },
+        pageNumbers: true,
+        pageNumberPosition: 'top_right',
       },
       vocabulary: {
         settings: ['INT.', 'EXT.', 'INT./EXT.', 'EXT./INT.'],
@@ -268,6 +291,27 @@
     if (!settings.vocabulary)        settings.vocabulary      = defaultSettings().vocabulary;
     if (!settings.sceneHeadingStyle) settings.sceneHeadingStyle = 'twoLine';
     if (!settings.units)             settings.units           = 'in';
+    // Print Contract V1 backfill — the explicit-schema load path (opts.schema)
+    // bypasses the migration chain (tests + future doc-types), so ensure the
+    // owned contract fields are present here too. Mirrors the v4→v5 migration so
+    // every load path yields a complete, explicit print contract.
+    if (typeof metadata.printContractVersion !== 'number') {
+      metadata.printContractVersion = C.PRINT_CONTRACT_VERSION;
+    }
+    if (!metadata.screenplayProfile || typeof metadata.screenplayProfile !== 'object') {
+      metadata.screenplayProfile = {
+        language: typeof metadata.language === 'string' ? metadata.language : C.DEFAULT_SCRIPT_LANGUAGE,
+        direction: _directionForLanguage(metadata.language),
+        screenplayConvention: 'hollywood',
+      };
+    }
+    if (typeof settings.show_scene_numbers !== 'boolean') settings.show_scene_numbers = true;
+    if (settings.pageSetup) {
+      const ps = settings.pageSetup;
+      if (typeof ps.orientation !== 'string')        ps.orientation = 'portrait';
+      if (typeof ps.pageNumbers !== 'boolean')       ps.pageNumbers = true;
+      if (typeof ps.pageNumberPosition !== 'string') ps.pageNumberPosition = 'top_right';
+    }
     return {
       docId: nextDocId(),
       handle: handle || null,

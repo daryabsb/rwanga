@@ -62,6 +62,16 @@
     };
   }
 
+  // Print Contract V1 — the document's canonical owned print truth, resolved
+  // through the single contract resolver. Attached to the export payload so the
+  // exported artifact carries the contract for the main process and (later) the
+  // web Platform, which reads the same .rga and obtains identical print truth
+  // without inventing new print settings.
+  function _printContract() {
+    const PC = Rga.PrintContract;
+    return (PC && typeof PC.resolve === 'function') ? PC.resolve(_activeDoc()) : null;
+  }
+
   // Every stylesheet the live app loads, as absolute file:// URLs. The
   // offscreen export document (a file:// origin) links the same sheets so
   // print-block layout, fonts, and the RTL font chain are reproduced
@@ -185,10 +195,11 @@
     }
 
     const geometry = _geometry();
+    const printContract = _printContract();
     const html = _buildExportHtml({ sheetsHTML: sheets, cssHrefs: _cssHrefs(), geometry: geometry });
     const suggestedName = _suggestedName();
 
-    return Promise.resolve(api.toPDF(html, { suggestedName: suggestedName, geometry: geometry }))
+    return Promise.resolve(api.toPDF(html, { suggestedName: suggestedName, geometry: geometry, printContract: printContract }))
       .then(function(result) {
         if (!result || result.canceled) return false;
         if (result.error) {
@@ -208,6 +219,7 @@
   Rga.PdfExport.run              = run;
   Rga.PdfExport._buildExportHtml = _buildExportHtml;
   Rga.PdfExport._geometry        = _geometry;
+  Rga.PdfExport._printContract   = _printContract;
   Rga.PdfExport._suggestedName   = _suggestedName;
   Rga.PdfExport._cssHrefs        = _cssHrefs;
 })();
