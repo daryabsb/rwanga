@@ -456,42 +456,53 @@ function bootKeyboardPrintPreview() {
   return { Rga, dom };
 }
 
-test('D.5 PageDown: KeyboardRegistry has a PageDown binding for print-preview', () => {
-  const { Rga } = bootKeyboardPrintPreview();
+// The surface nav keys (PageUp/PageDown/Home/End) register LAZILY on show(),
+// NOT at module load. keyboard-registry.js loads after print-preview.js in
+// index.html, so a load-time registration was a silent no-op (the bug Slice C
+// surfaced). These tests pin the corrected lifecycle: absent at load, present
+// while the preview is open, gone after it closes.
+const NAV_COMBOS = ['pagedown', 'pageup', 'home', 'end'];
+
+test('D.5 nav keys are NOT registered at module load (lazy on show)', () => {
+  const { Rga } = bootKeyboardPrintPreview();   // requires modules, no open()
   const all = Rga.KeyboardRegistry._all();
-  // The combo key is 'pagedown' (KeyboardEvent.key lowercased, no modifiers).
-  assert.ok(all['pagedown'], 'KeyboardRegistry must have a "pagedown" binding');
-  assert.ok(all['pagedown'].source.includes('PrintPreview') || all['pagedown'].source.includes('PgDn'),
-    'PageDown binding source must identify Rga.PrintPreview');
+  NAV_COMBOS.forEach(function(combo) {
+    const isPP = all[combo] && all[combo].source.includes('PrintPreview');
+    assert.ok(!isPP, combo + ' must not be registered by PrintPreview before show()');
+  });
 });
 
-test('D.5 PageUp: KeyboardRegistry has a PageUp binding for print-preview', () => {
-  const { Rga } = bootKeyboardPrintPreview();
+test('D.5 show() registers PageDown/PageUp/Home/End for PrintPreview, gated on isActive()', () => {
+  const { Rga, schema, PM } = bootPrintPreview();
+  const view = buildSimpleView(schema, PM);
+  Rga.TabManager._view = view;
+  Rga.PrintPreview.open();
   const all = Rga.KeyboardRegistry._all();
-  assert.ok(all['pageup'], 'KeyboardRegistry must have a "pageup" binding');
-  assert.ok(all['pageup'].source.includes('PrintPreview') || all['pageup'].source.includes('PgUp'),
-    'PageUp binding source must identify Rga.PrintPreview');
+  NAV_COMBOS.forEach(function(combo) {
+    const entry = all[combo];
+    assert.ok(entry, 'KeyboardRegistry must have a "' + combo + '" binding after show()');
+    assert.ok(entry.source.includes('PrintPreview') || /Pg(Up|Dn)|first page|last page/.test(entry.source),
+      combo + ' binding source must identify Rga.PrintPreview');
+    assert.ok(entry.opts && typeof entry.opts.when === 'function', combo + ' must have a when predicate');
+    assert.equal(entry.opts.when(), true, combo + ' when() must be true while the preview is active');
+  });
+  Rga.PrintPreview.hide();
+  view.destroy();
 });
 
-test('D.5 PageDown: when() predicate is false when Print Preview is not active', () => {
-  const { Rga } = bootKeyboardPrintPreview();
+test('D.5 hide() unregisters the nav bindings', () => {
+  const { Rga, schema, PM } = bootPrintPreview();
+  const view = buildSimpleView(schema, PM);
+  Rga.TabManager._view = view;
+  Rga.PrintPreview.open();
+  assert.ok(Rga.KeyboardRegistry._all()['home'], 'home must be registered after show()');
+  Rga.PrintPreview.hide();
   const all = Rga.KeyboardRegistry._all();
-  const entry = all['pagedown'];
-  assert.ok(entry && entry.opts && typeof entry.opts.when === 'function',
-    'PageDown binding must have a when predicate');
-  // isActive() returns false when no preview is shown.
-  assert.equal(entry.opts.when(), false,
-    'PageDown when() must return false when Print Preview is not active');
-});
-
-test('D.5 PageUp: when() predicate is false when Print Preview is not active', () => {
-  const { Rga } = bootKeyboardPrintPreview();
-  const all = Rga.KeyboardRegistry._all();
-  const entry = all['pageup'];
-  assert.ok(entry && entry.opts && typeof entry.opts.when === 'function',
-    'PageUp binding must have a when predicate');
-  assert.equal(entry.opts.when(), false,
-    'PageUp when() must return false when Print Preview is not active');
+  NAV_COMBOS.forEach(function(combo) {
+    const isStillPP = all[combo] && all[combo].source.includes('PrintPreview');
+    assert.ok(!isStillPP, 'PrintPreview ' + combo + ' binding must be removed from KR after hide()');
+  });
+  view.destroy();
 });
 
 test('D.5 Esc: Esc binding is registered by show() and belongs to PrintPreview', () => {

@@ -102,6 +102,33 @@
     return Math.max(1, Math.min(total, n));
   }
 
+  // --- Print Contract whisper (Slice A) — title-case the owned enums for the
+  // package-identity line. The chrome whispers (designer direction): contract
+  // truth is exposed as calm inline text, never as tiles or a metadata panel.
+  function _orientationLabel(o) { return (o === 'landscape') ? 'Landscape' : 'Portrait'; }
+  function _directionLabel(d)   { return (d === 'rtl') ? 'RTL' : 'LTR'; }
+
+  // Export confidence (Slice D) — a single honest signal, NOT a validation
+  // framework. A package with rendered pages is ready to export; an empty
+  // package recommends a review first. Pure so it is unit-testable.
+  function _confidence(total) {
+    return (total > 0)
+      ? { state: 'ready',  label: 'Ready',  title: 'Export ready' }
+      : { state: 'review', label: 'Review', title: 'Review recommended — nothing to export yet' };
+  }
+
+  // Distinct positive scene count from a list of data-scene-number strings
+  // (Slice B). Pure; the DOM read that feeds it lives in _sceneCount().
+  function _distinctSceneCount(values) {
+    const seen = Object.create(null);
+    let n = 0;
+    for (let i = 0; i < values.length; i += 1) {
+      const v = parseInt(values[i], 10);
+      if (isFinite(v) && v > 0 && !seen[v]) { seen[v] = true; n += 1; }
+    }
+    return n;
+  }
+
   // ----------------------------------------------------------------
   // DOM access helpers
   // ----------------------------------------------------------------
@@ -122,6 +149,25 @@
   function _resolveGeometry() {
     const MG = Rga.ManuscriptGeometry;
     return (MG && typeof MG.resolve === 'function') ? MG.resolve(_activeDoc()) : null;
+  }
+
+  // Slice A — the active document's print contract, straight from the resolver
+  // (the named, versioned owner of print truth). Null when the module is absent
+  // (pure-pipeline tests) — callers fall back to the geometry façade.
+  function _resolveContract() {
+    const PC = Rga.PrintContract;
+    return (PC && typeof PC.resolve === 'function') ? PC.resolve(_activeDoc()) : null;
+  }
+
+  // Slice B — scene count from the already-rendered sheets (same DOM-truth
+  // approach the bar uses for the page total). PrintRenderer stamps
+  // data-scene-number on each block; distinct positive values = scene count.
+  function _sceneCount() {
+    if (!_root) return 0;
+    const nodes = _root.querySelectorAll('[data-scene-number]');
+    const vals = [];
+    for (let i = 0; i < nodes.length; i += 1) vals.push(nodes[i].getAttribute('data-scene-number'));
+    return _distinctSceneCount(vals);
   }
 
   function _docTitle() {
@@ -377,11 +423,23 @@
     // ---- Output / Commit (inline-end) ----
     const output = document.createElement('div');
     output.className = 'rga-review-zone rga-review-output';
+    // Slice D — export-confidence whisper: a muted dot + word, read-only, sitting
+    // just before the commit button. A confidence signal, not a validation panel.
+    const confidence = document.createElement('span');
+    confidence.className = 'rga-review-confidence';
+    const confDot = document.createElement('i');
+    confDot.className = 'rga-review-confidence-dot';
+    confDot.setAttribute('aria-hidden', 'true');
+    const confLabel = document.createElement('span');
+    confLabel.className = 'rga-review-confidence-label';
+    confidence.appendChild(confDot);
+    confidence.appendChild(confLabel);
     const exportBtn = _btn('rga-review-export', _svg(ICON.download) + '<span>Export PDF</span>', 'Export PDF');
     // Print: present the slot, defer the wire (UX Direction §5). Shown disabled.
     const printBtn = _btn('rga-review-print', _svg(ICON.printer) + '<span>Print</span>', 'Print (coming soon)');
     printBtn.disabled = true;
     printBtn.setAttribute('title', 'Print — coming soon');
+    output.appendChild(confidence);
     output.appendChild(exportBtn);
     output.appendChild(printBtn);
 
@@ -395,6 +453,7 @@
       bar: bar, done: done, id: id,
       prev: prev, next: next, pageind: pageind, curEl: curEl, totEl: totEl, jumpInput: jumpInput,
       fitPage: fitPage, fitWidth: fitWidth, zoomOut: zoomOut, zoomIn: zoomIn, pct: pct,
+      confidence: confidence, confLabel: confLabel,
       exportBtn: exportBtn, printBtn: printBtn
     };
     _wireControls();
@@ -422,19 +481,58 @@
     });
   }
 
+  // The package-identity whisper (Slices A + B). One calm line in the context
+  // zone — the only place the designer direction sanctions document facts:
+  //   Title · Paper · Orientation · Direction · Page #s on/off · N pp · N scenes
+  // Print-contract values come from Rga.PrintContract.resolve (Slice A — "must
+  // come from resolver"); page/scene counts are the existing DOM truth (Slice
+  // B — "use existing truth sources"). No tiles, no panel, no dashboard.
   function _refreshIdentity() {
     if (!_els) return;
+    const contract = _resolveContract();
     const geo = _resolveGeometry();
-    const paper = _paperLabel(geo && geo.pageSize);
-    const dir = (geo && geo.direction === 'rtl') ? 'rtl' : 'ltr';
+
+    // Paper name + reading direction prefer the contract; fall back to the
+    // geometry façade so the bar still labels when PrintContract is absent.
+    const paper = (contract && contract.paperSize)
+      ? contract.paperSize
+      : _paperLabel(geo && geo.pageSize);
+    const dir = contract
+      ? (contract.direction === 'rtl' ? 'rtl' : 'ltr')
+      : ((geo && geo.direction === 'rtl') ? 'rtl' : 'ltr');
     _bar.setAttribute('dir', dir);
-    const title = _docTitle();
-    const total = _total();
+
+    const total  = _total();
+    const scenes = _sceneCount();
+
     _els.id.innerHTML = '';
     const b = document.createElement('b');
-    b.textContent = title;
+    b.textContent = _docTitle();
     _els.id.appendChild(b);
-    _els.id.appendChild(document.createTextNode(' · ' + paper + ' · ' + total + ' pp'));
+
+    const parts = [paper];
+    if (contract) {
+      parts.push(_orientationLabel(contract.orientation));
+      parts.push(_directionLabel(contract.direction));
+      parts.push('Page #s ' + (contract.pageNumbering && contract.pageNumbering.enabled ? 'on' : 'off'));
+    } else {
+      parts.push(_directionLabel(dir));
+    }
+    parts.push(total + ' pp');
+    parts.push(scenes === 1 ? '1 scene' : scenes + ' scenes');
+    _els.id.appendChild(document.createTextNode(' · ' + parts.join(' · ')));
+
+    _refreshConfidence(total);
+  }
+
+  // Slice D — render the export-confidence whisper beside Export.
+  function _refreshConfidence(total) {
+    if (!_els || !_els.confidence) return;
+    const c = _confidence(typeof total === 'number' ? total : _total());
+    _els.confidence.setAttribute('data-state', c.state);
+    _els.confidence.setAttribute('title', c.title);
+    _els.confidence.setAttribute('aria-label', c.title);
+    _els.confLabel.textContent = c.label;
   }
 
   // ----------------------------------------------------------------
@@ -503,10 +601,14 @@
   Rga.ReviewBar.show = show;
   Rga.ReviewBar.hide = hide;
   // Pure helpers (unit-tested)
-  Rga.ReviewBar._clampZoom  = _clampZoom;
-  Rga.ReviewBar._formatPct  = _formatPct;
-  Rga.ReviewBar._paperLabel = _paperLabel;
-  Rga.ReviewBar._fitScale   = _fitScale;
-  Rga.ReviewBar._parseJump  = _parseJump;
-  Rga.ReviewBar._BAR_ID     = BAR_ID;
+  Rga.ReviewBar._clampZoom         = _clampZoom;
+  Rga.ReviewBar._formatPct         = _formatPct;
+  Rga.ReviewBar._paperLabel        = _paperLabel;
+  Rga.ReviewBar._fitScale          = _fitScale;
+  Rga.ReviewBar._parseJump         = _parseJump;
+  Rga.ReviewBar._orientationLabel  = _orientationLabel;
+  Rga.ReviewBar._directionLabel    = _directionLabel;
+  Rga.ReviewBar._confidence        = _confidence;
+  Rga.ReviewBar._distinctSceneCount = _distinctSceneCount;
+  Rga.ReviewBar._BAR_ID            = BAR_ID;
 })();

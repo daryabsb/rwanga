@@ -65,6 +65,13 @@
       // load print-preview.js without review-bar.js) remain a no-op. All
       // measurement-based fit/zoom logic lives in Rga.ReviewBar, NOT here.
       if (Rga.ReviewBar && typeof Rga.ReviewBar.show === 'function') Rga.ReviewBar.show();
+      // The review surface is read-only; release the (now-hidden) editor's
+      // keyboard focus. Otherwise the focused contenteditable swallows caret
+      // keys — Home/End especially (it preventDefaults them, and the global
+      // dispatcher skips defaultPrevented events) — and surface navigation
+      // never reaches Rga.PrintPreview's PageUp/PageDown/Home/End handlers.
+      const ae = document.activeElement;
+      if (ae && ae.isContentEditable && typeof ae.blur === 'function') ae.blur();
       return true;
     },
     deactivate: function() {
@@ -89,7 +96,8 @@
     const ok = Rga.ViewManager.activate(VIEW_ID, view);
     // D.5 — Register Esc-to-exit on show() so this handler is always
     // last-registered (KR is last-wins) and wins when the preview is open.
-    if (ok) _registerEsc();
+    // Slice C — register the surface nav keys here too (see _registerNav).
+    if (ok) { _registerEsc(); _registerNav(); }
     return ok;
   }
 
@@ -103,6 +111,7 @@
     // absent if init was never called). In practice, the Draft Esc
     // re-registers itself next time it's needed via ViewMode.init().
     _unregEsc();
+    _unregisterNav();
     Rga.ViewManager.deactivate();
     // Restore the prior view if any (so Flow/Draft snap back).
     if (_previousViewId && Rga.ViewManager.registered().indexOf(_previousViewId) !== -1) {
@@ -234,22 +243,44 @@
     }
   }
 
-  // D.5 — Register PageDown / PageUp via KeyboardRegistry, gated on
-  // isActive(). Both are registered at module load time; their `when`
-  // predicates gate them so they only fire while Print Preview is active.
-  if (Rga.KeyboardRegistry && typeof Rga.KeyboardRegistry.register === 'function') {
-    Rga.KeyboardRegistry.register(
-      'PageDown',
-      { when: function() { return isActive(); } },
-      function() { _scrollByOneSheet(1); },
-      'Rga.PrintPreview (PgDn)'
-    );
-    Rga.KeyboardRegistry.register(
-      'PageUp',
-      { when: function() { return isActive(); } },
-      function() { _scrollByOneSheet(-1); },
-      'Rga.PrintPreview (PgUp)'
-    );
+  // Slice C — Home / End jump to the first / last sheet. The review-navigation
+  // audit found prev/next, jump, and a live indicator already present; first/
+  // last was the one genuine gap (UX Direction V2: "Home / End to first / last
+  // sheet. Keyboard-complete, discoverable."). Keyboard-only — no new button,
+  // so the review bar is not redesigned. Uses scrollIntoView only (no measured
+  // geometry), so the integration guard stays green; the indicator updates via
+  // the review bar's scroll listener, exactly as PageUp/PageDown do.
+  function _scrollToEdge(which) {
+    if (!_root || !_root.isConnected) return;
+    const sheets = _root.querySelectorAll('.rga-page-sheet');
+    if (sheets.length === 0) return;
+    const target = (which === 'end') ? sheets[sheets.length - 1] : sheets[0];
+    if (target) target.scrollIntoView({ block: 'start', behavior: 'smooth' });
+  }
+
+  // D.5 / Slice C — surface navigation keys (PageUp/PageDown/Home/End).
+  //
+  // These MUST register lazily on show() — not at module load. keyboard-
+  // registry.js loads AFTER print-preview.js in index.html, so a load-time
+  // Rga.KeyboardRegistry.register() block was a silent no-op (the bug Slice C
+  // surfaced: the keys never fired). Registering on show() — the same lifecycle
+  // Esc already uses — guarantees the dispatcher exists. Unregistered on hide()
+  // so repeated open/close (and Page-Setup refresh) never stack duplicates.
+  let _navUnreg = [];
+
+  function _registerNav() {
+    _unregisterNav();
+    if (!Rga.KeyboardRegistry || typeof Rga.KeyboardRegistry.register !== 'function') return;
+    const gate = { when: function() { return isActive(); } };
+    _navUnreg.push(Rga.KeyboardRegistry.register('PageDown', gate, function() { _scrollByOneSheet(1); }, 'Rga.PrintPreview (PgDn)'));
+    _navUnreg.push(Rga.KeyboardRegistry.register('PageUp', gate, function() { _scrollByOneSheet(-1); }, 'Rga.PrintPreview (PgUp)'));
+    _navUnreg.push(Rga.KeyboardRegistry.register('Home', gate, function() { _scrollToEdge('home'); }, 'Rga.PrintPreview (Home → first page)'));
+    _navUnreg.push(Rga.KeyboardRegistry.register('End', gate, function() { _scrollToEdge('end'); }, 'Rga.PrintPreview (End → last page)'));
+  }
+
+  function _unregisterNav() {
+    _navUnreg.forEach(function(fn) { if (typeof fn === 'function') fn(); });
+    _navUnreg = [];
   }
 
   // D.5 — Esc exits Print Preview. Registered on show() / unregistered

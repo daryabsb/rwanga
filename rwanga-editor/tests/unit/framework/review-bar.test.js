@@ -94,6 +94,34 @@ test('ReviewBar._parseJump clamps to 1..total or returns null', () => {
   assert.equal(J('5', 0), null);
 });
 
+test('ReviewBar._orientationLabel / _directionLabel title-case the owned enums', () => {
+  const Rga = boot();
+  assert.equal(Rga.ReviewBar._orientationLabel('landscape'), 'Landscape');
+  assert.equal(Rga.ReviewBar._orientationLabel('portrait'), 'Portrait');
+  assert.equal(Rga.ReviewBar._orientationLabel(undefined), 'Portrait');   // default
+  assert.equal(Rga.ReviewBar._directionLabel('rtl'), 'RTL');
+  assert.equal(Rga.ReviewBar._directionLabel('ltr'), 'LTR');
+  assert.equal(Rga.ReviewBar._directionLabel(null), 'LTR');               // default
+});
+
+test('ReviewBar._confidence: pages → Ready; empty → Review', () => {
+  const Rga = boot();
+  const C = Rga.ReviewBar._confidence;
+  assert.equal(C(12).state, 'ready');
+  assert.equal(C(1).state, 'ready');
+  assert.equal(C(0).state, 'review');
+  assert.match(C(0).title, /Review/);
+});
+
+test('ReviewBar._distinctSceneCount counts distinct positive scene numbers only', () => {
+  const Rga = boot();
+  const D = Rga.ReviewBar._distinctSceneCount;
+  assert.equal(D(['1', '1', '2', '3', '3', '3']), 3);   // de-duplicated across pages
+  assert.equal(D(['2', '1', '2']), 2);
+  assert.equal(D(['0', '-1', 'x', '']), 0);             // non-positive / NaN ignored
+  assert.equal(D([]), 0);
+});
+
 // ---- DOM contract ----------------------------------------------------------
 
 test('show() builds the bar with all three zones and every directed control', () => {
@@ -152,6 +180,76 @@ test('package identity shows title · paper · N pp', () => {
   assert.match(id.textContent, /The Collector/);
   assert.match(id.textContent, /Letter/);
   assert.match(id.textContent, /12 pp/);
+  Rga.ReviewBar.hide();
+});
+
+test('Slice A — identity sources the print contract: paper · orientation · direction · page #s', () => {
+  const Rga = boot();
+  Rga.TabManager = { activeDoc: function() { return { displayName: 'The Collector.rga', metadata: {} }; } };
+  // PrintContract is the named resolver; the bar must read it (not re-derive).
+  Rga.PrintContract = { resolve: function() {
+    return { paperSize: 'A4', orientation: 'landscape', direction: 'ltr',
+             pageNumbering: { enabled: false }, sceneNumbering: { enabled: true } };
+  } };
+  mountPreview(12);
+  Rga.ReviewBar.show();
+  const id = document.querySelector('.rga-review-id').textContent;
+  assert.match(id, /A4/);
+  assert.match(id, /Landscape/);
+  assert.match(id, /LTR/);
+  assert.match(id, /Page #s off/);
+  assert.match(id, /12 pp/);
+  Rga.ReviewBar.hide();
+});
+
+test('Slice B — identity folds in the scene count from rendered data-scene-number', () => {
+  const Rga = boot();
+  Rga.TabManager = { activeDoc: function() { return { displayName: 'x.rga', metadata: {} }; } };
+  const root = mountPreview(3);
+  // Stamp blocks across the sheets like PrintRenderer does (scenes 1,1,2,3).
+  [1, 1, 2, 3].forEach(function(n) {
+    const blk = document.createElement('div');
+    blk.setAttribute('data-scene-number', String(n));
+    root.appendChild(blk);
+  });
+  Rga.ReviewBar.show();
+  assert.match(document.querySelector('.rga-review-id').textContent, /3 scenes/);
+  Rga.ReviewBar.hide();
+});
+
+test('Slice B — a single scene is rendered in the singular ("1 scene")', () => {
+  const Rga = boot();
+  Rga.TabManager = { activeDoc: function() { return { displayName: 'x.rga', metadata: {} }; } };
+  const root = mountPreview(1);
+  const blk = document.createElement('div');
+  blk.setAttribute('data-scene-number', '1');
+  root.appendChild(blk);
+  Rga.ReviewBar.show();
+  assert.match(document.querySelector('.rga-review-id').textContent, /1 scene\b/);
+  Rga.ReviewBar.hide();
+});
+
+test('Slice D — confidence whisper reads Ready with rendered pages', () => {
+  const Rga = boot();
+  mountPreview(5);
+  Rga.ReviewBar.show();
+  const conf = document.querySelector('.rga-review-confidence');
+  assert.ok(conf, 'confidence whisper must be present in the output zone');
+  assert.equal(conf.getAttribute('data-state'), 'ready');
+  assert.match(conf.querySelector('.rga-review-confidence-label').textContent, /Ready/);
+  Rga.ReviewBar.hide();
+});
+
+test('Slice A — paper falls back to geometry when PrintContract is absent', () => {
+  const Rga = boot();
+  Rga.TabManager = { activeDoc: function() { return { displayName: 'x.rga', metadata: {} }; } };
+  Rga.ManuscriptGeometry = { resolve: function() { return { pageSize: { w: 8.5, h: 11 }, direction: 'rtl' }; } };
+  // No Rga.PrintContract — the bar must still label from the geometry façade.
+  mountPreview(2);
+  Rga.ReviewBar.show();
+  const id = document.querySelector('.rga-review-id').textContent;
+  assert.match(id, /Letter/);
+  assert.equal(document.getElementById('rga-review-bar').getAttribute('dir'), 'rtl');
   Rga.ReviewBar.hide();
 });
 

@@ -248,3 +248,69 @@ test('the preview renders real screenplay formatting (uppercase bold sluglines, 
   expect(parseFloat(styles.dlgPad)).toBeGreaterThan(0);   // dialogue indented
   expect(parseFloat(styles.chPad)).toBeGreaterThan(0);    // character cue indented
 });
+
+// ============================================================================
+// Print Review Surface V1 — Slices A (contract), B (summary), C (Home/End),
+// D (export confidence), E (RTL). Proves the live wire from
+// Rga.PrintContract.resolve(document) → the review surface whisper.
+// ============================================================================
+
+test('Slice A — the identity whisper reflects PrintContract.resolve (live, from the resolver)', async () => {
+  await buildRealScript();
+  // The displayed contract facts must equal what the named resolver returns
+  // for the active document — visible proof Preview renders document truth.
+  const c = await page.evaluate(() =>
+    window.Rga.PrintContract.resolve(window.Rga.TabManager.activeDoc()));
+  const id = await page.locator('.rga-review-id').textContent();
+  expect(id).toContain(c.paperSize);                                            // e.g. Letter
+  expect(id).toContain(c.orientation === 'landscape' ? 'Landscape' : 'Portrait');
+  expect(id).toContain(c.direction === 'rtl' ? 'RTL' : 'LTR');
+  expect(id).toContain('Page #s ' + (c.pageNumbering.enabled ? 'on' : 'off'));
+});
+
+test('Slice B — the review summary folds in pages + the distinct rendered scene count', async () => {
+  await buildRealScript();
+  const total = await page.locator('#rga-print-preview-root .rga-page-sheet').count();
+  const scenes = await page.evaluate(() => {
+    const set = new Set();
+    document.querySelectorAll('#rga-print-preview-root [data-scene-number]')
+      .forEach((n) => set.add(n.getAttribute('data-scene-number')));
+    return set.size;
+  });
+  expect(scenes).toBeGreaterThanOrEqual(2);   // buildRealScript writes 8 scenes
+  const id = page.locator('.rga-review-id');
+  await expect(id).toContainText(total + ' pp');
+  await expect(id).toContainText(scenes + ' scene');
+});
+
+test('Slice C — Home / End jump to the first / last page (the genuine nav gap)', async () => {
+  await buildRealScript();
+  const total = await page.locator('#rga-print-preview-root .rga-page-sheet').count();
+  expect(total).toBeGreaterThanOrEqual(2);
+  await page.keyboard.press('End');
+  await expect(page.locator('.rga-review-pageind')).toHaveText(new RegExp('^\\s*' + total + ' / ' + total));
+  await page.keyboard.press('Home');
+  await expect(page.locator('.rga-review-pageind')).toHaveText(new RegExp('^\\s*1 / ' + total));
+});
+
+test('Slice D — export confidence renders Ready when the package has pages', async () => {
+  await buildRealScript();
+  const conf = page.locator('.rga-review-confidence');
+  await expect(conf).toBeVisible();
+  await expect(conf).toHaveAttribute('data-state', 'ready');
+  await expect(conf.locator('.rga-review-confidence-label')).toHaveText(/Ready/);
+});
+
+test('Slice E — RTL document: the review surface mirrors and the whisper labels RTL', async () => {
+  await buildRealScript();
+  // Flip the active document to RTL through its owned home (the contract's
+  // direction source), then refresh the open preview on the same gesture.
+  await page.evaluate(() => {
+    const doc = window.Rga.TabManager.activeDoc();
+    doc.metadata = doc.metadata || {};
+    doc.metadata.screenplayProfile = Object.assign({}, doc.metadata.screenplayProfile, { direction: 'rtl' });
+    window.Rga.PrintPreview.refresh();
+  });
+  await expect(page.locator('#rga-review-bar')).toHaveAttribute('dir', 'rtl');
+  await expect(page.locator('.rga-review-id')).toContainText('RTL');
+});
