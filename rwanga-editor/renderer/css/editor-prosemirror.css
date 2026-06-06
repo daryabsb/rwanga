@@ -2468,11 +2468,11 @@ body.view-print-preview-active #workspace {
  * deliverable. Rendered only when the writer turns the mark on (off by
  * doctrine default). Minimal, honest defaults; the tag underline color comes
  * inline from the mark. Final visual treatment is a designer call (deferred). */
-/* Tag: a visible brand-pink dotted underline by default so an enabled tag is
- * clearly distinct from a hidden one. (The tag mark schema carries no color, so
- * a default decoration is required; if a future enrichment supplies a per-entity
- * color the renderer writes it inline, overriding this.) */
-.rga-print-mark-tag      { border-bottom: 1px dotted var(--accent-rwanga, #C2185B); }
+/* Tag: a visible brand-pink dotted underline so an enabled tag is clearly
+ * distinct from a hidden one. Uniform marker — no per-entity color. Slightly
+ * thicker (2px) with a clearer offset (padding-bottom) so the underline reads
+ * cleanly below the text; nothing more (no badge, no fill). */
+.rga-print-mark-tag      { border-bottom: 2px dotted var(--accent-rwanga, #C2185B); padding-bottom: 2px; }
 .rga-print-mark-note     { border-bottom: 1px dotted #b58900; }
 /* Revision: bold + a brand-pink asterisk marker after the run (the conventional
  * revision indicator), so an enabled flag is visibly present on the page. */

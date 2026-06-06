@@ -513,7 +513,9 @@ test('PTU-D — marks all on: tag/note/flag decorated; text preserved', () => {
   PR.render(model, container, {});
   const tag = container.querySelector('.rga-print-mark-tag');
   assert.ok(tag, 'tag decorated when on');
-  assert.ok(/dotted/.test(tag.style.borderBottom), 'tag uses its own color as a dotted underline');
+  // Decoration is the CSS brand-pink dotted underline (class only) — no inline
+  // per-entity color. (Computed style of the class is asserted in the e2e.)
+  assert.equal(tag.getAttribute('style'), null, 'tag carries no inline color — uniform CSS marker');
   assert.ok(container.querySelector('.rga-print-mark-note'));
   assert.ok(container.querySelector('.rga-print-mark-revision'));
   // The screenplay text is always present regardless of mark visibility.

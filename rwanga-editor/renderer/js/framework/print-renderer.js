@@ -420,9 +420,10 @@
       // and verifiable; final visual treatment is a designer call (deferred).
       case 'tag': {
         if (!marksVis.tags) return null;
+        // Decoration is the CSS brand-pink dotted underline (.rga-print-mark-tag).
+        // No per-entity color — tags are a simple, uniform print marker.
         const sp = document.createElement('span');
         sp.className = 'rga-print-mark-tag';
-        if (mark.attrs && mark.attrs.color) sp.style.borderBottom = '1px dotted ' + mark.attrs.color;
         return sp;
       }
       case 'annotation': {
