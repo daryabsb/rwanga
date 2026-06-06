@@ -113,7 +113,10 @@ test('S1 aliasRanges: no aliases anywhere → empty', () => {
 });
 
 // ================================================================
-// pickerDecision — exact-match fast path vs picker candidates
+// pickerDecision — identifies the selection's already-resolved identity
+// (exactMatchId) so the picker can mark it "current". The category submenu
+// always lists existing entities now (S1 UX gap fix); exactMatchId no longer
+// suppresses the picker — it flags the row that is the current identity.
 // ================================================================
 
 test('S1 pickerDecision: exact name match (case-insensitive) → exactMatchId set', () => {
@@ -131,10 +134,11 @@ test('S1 pickerDecision: no name match → exactMatchId null, all entities are c
   assert.equal(d.candidates.length, 2);
 });
 
-test('S1 pickerDecision: an existing ALIAS match is also a fast-path exact match', () => {
+test('S1 pickerDecision: an existing ALIAS match also resolves to exactMatchId', () => {
   const Rga = boot();
   const live = [{ id: 'nali', name: 'Nali', aliases: ['The Teacher'] }];
-  // Re-tagging "The Teacher" should resolve to Nali silently, not re-open a picker.
+  // "The Teacher" already resolves to Nali (by alias) → it is flagged the
+  // current identity so the picker can mark Nali, while still listing it.
   const d = Rga.Tags.pickerDecision('the teacher', live);
   assert.equal(d.exactMatchId, 'nali');
 });

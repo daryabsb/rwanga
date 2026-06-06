@@ -132,23 +132,102 @@ test('picker → choose Nali: mention tagged with Nali, "The Teacher" recorded a
   }
 });
 
-test('exact-match fast path: tagging "Nali" stays silent (no picker, no alias)', async () => {
-  const { app, page, userDataDir } = await launchApp('alias-fastpath-');
+test('Tag as → Character lists the existing entities (Nali and Baban)', async () => {
+  // UX gap fix: a category with entities is NEVER a final/empty create action.
+  const { app, page, userDataDir } = await launchApp('alias-list-');
+  try {
+    await seed(page, 'The Stranger');
+    await openMenu(page, 360, 300);
+    await page.locator('#context-menu .ctx-item', { hasText: 'Tag as' }).hover();
+    const charItem = page.locator('#context-menu .ctx-submenu .ctx-has-submenu', { hasText: 'Character' }).first();
+    await expect(charItem).toBeVisible();             // expandable, not a final action
+    await charItem.hover();
+    const rows = page.locator('#context-menu .ctx-entity-picker .ctx-entity-row');
+    await expect(rows.filter({ hasText: 'Nali' })).toHaveCount(1);
+    await expect(rows.filter({ hasText: 'Baban' })).toHaveCount(1);
+  } finally {
+    await teardown(app, userDataDir);
+  }
+});
+
+test('exact match: the entity is still listed (marked current) and choosing it tags with no alias', async () => {
+  // Selecting "Nali" while Nali exists must NOT collapse Character into a final
+  // create action — Tag as → Character → Nali stays reachable; Nali is flagged.
+  const { app, page, userDataDir } = await launchApp('alias-exact-');
   try {
     await seed(page, 'Nali');   // selection exactly matches the existing entity
     await openMenu(page, 360, 300);
     await page.locator('#context-menu .ctx-item', { hasText: 'Tag as' }).hover();
 
-    // The Character type item must be a DIRECT action (no third-level picker)
-    // because the selection is an exact match.
-    const charItem = page.locator('#context-menu .ctx-submenu .ctx-item', { hasText: 'Character' }).first();
-    await expect(charItem).not.toHaveClass(/ctx-has-submenu/);
-    await charItem.click();
+    const charItem = page.locator('#context-menu .ctx-submenu .ctx-has-submenu', { hasText: 'Character' }).first();
+    await expect(charItem).toBeVisible();             // expands even on exact match
+    await charItem.hover();
+    const nali = page.locator('#context-menu .ctx-entity-picker .ctx-entity-row', { hasText: 'Nali' });
+    await expect(nali).toHaveAttribute('aria-current', 'true');   // marked current
+    await nali.click();
 
     const r = await inspect(page, 'Nali');
     expect(r.characterCount).toBe(2);                 // reused, none minted
     expect(r.marks).toContainEqual({ tagType: 'character', entityId: 'nali' });
-    expect(r.aliases).toEqual([]);                    // exact match adds no alias
+    expect(r.aliases).toEqual([]);                    // canonical name → no alias
+  } finally {
+    await teardown(app, userDataDir);
+  }
+});
+
+test('picker → choose Baban: mention tagged with Baban, surface form recorded as an alias', async () => {
+  const { app, page, userDataDir } = await launchApp('alias-baban-');
+  try {
+    await seed(page, 'The Collector');
+    await openMenu(page, 360, 300);
+    await page.locator('#context-menu .ctx-item', { hasText: 'Tag as' }).hover();
+    await page.locator('#context-menu .ctx-submenu .ctx-has-submenu', { hasText: 'Character' }).hover();
+    await page.locator('#context-menu .ctx-entity-picker .ctx-entity-row', { hasText: 'Baban' }).click();
+
+    const r = await page.evaluate(() => {
+      const tab = window.Rga.TabManager.activeTab();
+      const baban = tab.doc.tagRegistry.characters.find(e => e.id === 'baban');
+      const view = window.Rga.TabManager._editorView();
+      const marks = [];
+      view.state.doc.descendants((node) => {
+        if (node.isText && node.text.indexOf('The Collector') !== -1) {
+          node.marks.forEach(m => { if (m.type.name === 'tag') marks.push({ tagType: m.attrs.tagType, entityId: m.attrs.entityId }); });
+        }
+      });
+      return { aliases: baban.aliases, count: tab.doc.tagRegistry.characters.length, marks };
+    });
+    expect(r.count).toBe(2);                          // attached to Baban, none minted
+    expect(r.marks).toContainEqual({ tagType: 'character', entityId: 'baban' });
+    expect(r.aliases).toContain('The Collector');     // surface form aliased onto Baban
+  } finally {
+    await teardown(app, userDataDir);
+  }
+});
+
+test('create-new still works: a type with no entities is a direct create action (first Prop)', async () => {
+  const { app, page, userDataDir } = await launchApp('alias-newtype-');
+  try {
+    await seed(page, 'Crowbar');   // Prop registry is empty (only Characters seeded)
+    await openMenu(page, 360, 300);
+    await page.locator('#context-menu .ctx-item', { hasText: 'Tag as' }).hover();
+    // No props yet → Prop is a DIRECT create action (no third-level picker).
+    const propItem = page.locator('#context-menu .ctx-submenu .ctx-item', { hasText: 'Prop' }).first();
+    await expect(propItem).not.toHaveClass(/ctx-has-submenu/);
+    await propItem.click();
+
+    const r = await page.evaluate(() => {
+      const tab = window.Rga.TabManager.activeTab();
+      const view = window.Rga.TabManager._editorView();
+      const marks = [];
+      view.state.doc.descendants((node) => {
+        if (node.isText && node.text.indexOf('Crowbar') !== -1) {
+          node.marks.forEach(m => { if (m.type.name === 'tag') marks.push(m.attrs.tagType); });
+        }
+      });
+      return { props: tab.doc.tagRegistry.props.map(e => e.name), marks };
+    });
+    expect(r.props).toContain('Crowbar');             // first prop minted
+    expect(r.marks).toContain('prop');                // selection tagged as prop
   } finally {
     await teardown(app, userDataDir);
   }
@@ -201,7 +280,7 @@ test('alias survives a .rga serialize → deserialize round-trip; alias mention 
       const reloadedAlias = back.tagRegistry.characters.find(e => e.id === 'nali').aliases;
       return { version: parsed.rga_version, onDiskAlias, reloadedAlias };
     });
-    expect(reloaded.version).toBe('4.0');
+    expect(reloaded.version).toBe('5.0');   // Print Contract V1 bumped 4.0 → 5.0
     expect(reloaded.onDiskAlias).toContain('The Teacher');
     expect(reloaded.reloadedAlias).toContain('The Teacher');
 

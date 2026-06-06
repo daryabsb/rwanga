@@ -230,14 +230,19 @@
     sub.className = 'ctx-submenu ctx-list';
 
     TAG_TYPES.forEach(function(t) {
-      // Semantic Entity Layer S1 — the type item deepens into an Entity Picker
-      // ONLY when the type already has entities AND the selection is not an
-      // exact (name/alias) match. Otherwise the fast path stays: tag silently
-      // via the shared find-or-create (existing match reuses; no match mints).
+      // Semantic Entity Layer S1 (UX gap fix) — the type item deepens into an
+      // Entity Picker WHENEVER the type already has entities, so the writer can
+      // always attach the selection to an existing identity (Tag as → Character
+      // → Baban). A category with entities is NEVER a final/empty "create"
+      // action — that would force re-tagging a known character as a fresh one.
+      // Exact-name/alias matches still appear in the list (and the data carries
+      // exactMatchId for the picker to mark "current"); choosing them reuses the
+      // entity with no duplicate. Only a type with NO entities yet stays a direct
+      // create action (the first-of-its-kind path).
       const data = (Rga.Tags && typeof Rga.Tags.entityPickerData === 'function')
         ? Rga.Tags.entityPickerData(view, t.key)
         : null;
-      const hasPicker = !!(data && data.entities.length > 0 && !data.exactMatchId);
+      const hasPicker = !!(data && data.entities.length > 0);
 
       if (!hasPicker) {
         const li = menuItem(t.label, function() {
@@ -306,11 +311,16 @@
     }
 
     rows = data.entities.map(function(ent) {
+      const isCurrent = !!(data.exactMatchId && ent.id === data.exactMatchId);
       const label = '● ' + ent.name + (ent.count ? '   ' + ent.count : '');
       const row = menuItem(label, function() {
         hideMenu();
         if (Rga.Tags && Rga.Tags.tagAsExisting) Rga.Tags.tagAsExisting(view, t.key, ent.id);
-      }, { className: 'ctx-entity-row' });
+      }, { className: 'ctx-entity-row' + (isCurrent ? ' ctx-entity-current' : '') });
+      // Semantic-only marker for the selection's already-resolved identity
+      // (exact name/alias match). No engineer-invented visual chrome — design
+      // freeze: designers own any styling of .ctx-entity-current later.
+      if (isCurrent) row.setAttribute('aria-current', 'true');
       picker.appendChild(row);
       return { el: row, name: ent.name };
     });
