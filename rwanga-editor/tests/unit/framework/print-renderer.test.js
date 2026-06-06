@@ -531,3 +531,19 @@ test('PTU-D — highlights off hides the background span (text stays)', () => {
   assert.equal(container.querySelector('span[style*="background"]'), null);
   assert.ok(/word/.test(container.textContent), 'the highlighted text itself is never hidden');
 });
+
+test('PTU-D — per-review opts.marks override wins over the contract marks', () => {
+  const { PR } = boot();
+  const container = document.createElement('div');
+  const model = fakeModel([{ pageNumber: 1, blocks: [
+    markedAction('t', 'tag', { color: '#0a0' }),
+    markedAction('h', 'highlight', { color: '#ff0' })
+  ] }]);
+  // Document contract says tags OFF, highlights ON...
+  model.layoutProfile = profileWithContract({
+    marks: { tags: false, notes: false, flags: false, highlights: true } });
+  // ...but the per-review override flips: tags ON, highlights OFF.
+  PR.render(model, container, { marks: { tags: true, notes: false, flags: false, highlights: false } });
+  assert.ok(container.querySelector('.rga-print-mark-tag'), 'override turns tags on for this render');
+  assert.equal(container.querySelector('span[style*="background"]'), null, 'override turns highlights off');
+});

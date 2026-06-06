@@ -2468,8 +2468,16 @@ body.view-print-preview-active #workspace {
  * deliverable. Rendered only when the writer turns the mark on (off by
  * doctrine default). Minimal, honest defaults; the tag underline color comes
  * inline from the mark. Final visual treatment is a designer call (deferred). */
+/* Tag: a visible brand-pink dotted underline by default so an enabled tag is
+ * clearly distinct from a hidden one. (The tag mark schema carries no color, so
+ * a default decoration is required; if a future enrichment supplies a per-entity
+ * color the renderer writes it inline, overriding this.) */
+.rga-print-mark-tag      { border-bottom: 1px dotted var(--accent-rwanga, #C2185B); }
 .rga-print-mark-note     { border-bottom: 1px dotted #b58900; }
+/* Revision: bold + a brand-pink asterisk marker after the run (the conventional
+ * revision indicator), so an enabled flag is visibly present on the page. */
 .rga-print-mark-revision { font-weight: bold; }
+.rga-print-mark-revision::after { content: '*'; color: var(--accent-rwanga, #C2185B); margin-inline-start: 1px; }
 .rga-print-block-action {
   margin-top: 1em;
 }
@@ -2628,6 +2636,42 @@ body.view-print-preview-active #rga-review-bar {
   color: var(--statusbar-fg-hover, #cccccc);
 }
 .rga-review-zoom-pct { min-width: 40px; text-align: center; color: var(--statusbar-fg, #9e9e9e); }
+
+/* Marks control (Print Truth Unification follow-up) — per-review visibility of
+ * highlights / notes / revision flags / tags. Button matches the fit controls;
+ * the popover opens UPWARD (the review bar sits at the screen bottom). */
+.rga-review-marks { position: relative; display: inline-flex; }
+.rga-review-marks-btn {
+  color: var(--statusbar-fg, #9e9e9e); font-weight: 500;
+  padding: 3px 8px; border: 1px solid var(--border-primary, #3c3c3c); border-radius: 2px;
+}
+.rga-review-marks-btn:hover { color: var(--statusbar-fg-hover, #cccccc); }
+.rga-review-marks-btn[aria-expanded="true"] {
+  color: var(--text-primary, #dadada); border-color: var(--accent-primary, #007acc);
+}
+.rga-review-marks-menu {
+  /* fixed (not absolute) so the review bar's overflow-x:auto — which forces
+   * overflow-y to auto — does not clip the dropdown. Coordinates are written
+   * inline from the button rect by review-bar.js when the popover opens. */
+  position: fixed; z-index: 9200;
+  min-width: 172px; padding: 6px;
+  background: var(--bg-elevated, #252526); border: 1px solid var(--border-primary, #3c3c3c);
+  border-radius: 4px; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+  display: flex; flex-direction: column; gap: 2px;
+}
+.rga-review-marks-menu[hidden] { display: none; }
+.rga-review-marks-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 5px 8px; border-radius: 2px; cursor: pointer;
+  font-size: 12.5px; color: var(--text-secondary, #9e9e9e);
+}
+.rga-review-marks-row:hover {
+  background: var(--statusbar-segment-hover-bg, rgba(255, 255, 255, 0.06));
+  color: var(--text-primary, #dadada);
+}
+.rga-review-marks-cb {
+  width: 14px; height: 14px; accent-color: var(--accent-primary, #007acc); cursor: pointer;
+}
 
 /* Output / commit */
 .rga-review-output { flex-shrink: 0; }

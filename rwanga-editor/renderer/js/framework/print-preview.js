@@ -116,6 +116,10 @@
     // re-registers itself next time it's needed via ViewMode.init().
     _unregEsc();
     _unregisterNav();
+    // SCOPE D — the marks override is per-review: clear it so the next time the
+    // writer opens Print Preview it follows the document default again (Settings
+    // owns the persistent default; the Preview toggle is just for this session).
+    if (_opts.marks) { delete _opts.marks; }
     Rga.ViewManager.deactivate();
     // Restore the prior view if any (so Flow/Draft snap back).
     if (_previousViewId && Rga.ViewManager.registered().indexOf(_previousViewId) !== -1) {
@@ -223,6 +227,32 @@
 
   function getOptions() {
     return Object.assign({}, _opts);
+  }
+
+  // Print Truth Unification V1, SCOPE D — the effective mark visibility for the
+  // CURRENT review/export: a per-review override (_opts.marks, set by the
+  // Print Preview Marks control) if present, else the document's contract
+  // default, else the doctrine default. The review bar seeds its toggles from
+  // this; the renderer consumes the override via opts.marks.
+  function effectiveMarks() {
+    if (_opts.marks && typeof _opts.marks === 'object') return Object.assign({}, _opts.marks);
+    const doc = (Rga.TabManager && typeof Rga.TabManager.activeDoc === 'function')
+      ? Rga.TabManager.activeDoc() : null;
+    const c = (Rga.PrintContract && typeof Rga.PrintContract.resolve === 'function')
+      ? Rga.PrintContract.resolve(doc) : null;
+    return (c && c.marks)
+      ? Object.assign({}, c.marks)
+      : { tags: false, notes: false, flags: false, highlights: true };
+  }
+
+  // Set a single mark's per-review visibility and re-render (override only —
+  // does NOT persist to the .rga; Settings owns the persistent document default).
+  function setMarkVisibility(key, visible) {
+    const next = effectiveMarks();
+    if (!Object.prototype.hasOwnProperty.call(next, key)) return;
+    next[key] = !!visible;
+    setOptions({ marks: next });
+    refresh();
   }
 
   // ----------------------------------------------------------------
@@ -335,6 +365,8 @@
   Rga.PrintPreview.refresh     = refresh;
   Rga.PrintPreview.setOptions  = setOptions;
   Rga.PrintPreview.getOptions  = getOptions;
+  Rga.PrintPreview.effectiveMarks    = effectiveMarks;
+  Rga.PrintPreview.setMarkVisibility = setMarkVisibility;
   Rga.PrintPreview._BODY_CLASS = BODY_CLASS;
   Rga.PrintPreview._ROOT_ID    = ROOT_ID;
   Rga.PrintPreview._VIEW_ID    = VIEW_ID;

@@ -208,3 +208,83 @@ test('PTU — header/footer/marks survive save → reopen byte-identically', asy
     try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
   }
 });
+
+// -----------------------------------------------------------------
+// D2 — the Print Preview Marks control: present, seeded, per-review toggle.
+// -----------------------------------------------------------------
+test('PTU-D2 — Print Preview Marks control is present, seeded from the doc, and toggles per-review', async () => {
+  const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ptu-marksui-'));
+  const { app, page } = await launchAndOpen(userDataDir);
+  try {
+    const obs = await page.evaluate(() => {
+      window.Rga.PrintPreview.open();
+      const bar = document.getElementById('rga-print-preview-review-bar') || document.querySelector('.rga-review-bar');
+      const btn = document.querySelector('.rga-review-marks-btn');
+      const cb = (k) => document.querySelector('.rga-review-marks-cb[data-mark="' + k + '"]');
+      // Open the popover (seeds the checkboxes from the document default).
+      btn.click();
+      const seeded = {
+        highlights: cb('highlights').checked, notes: cb('notes').checked,
+        flags: cb('flags').checked, tags: cb('tags').checked
+      };
+      // Turn TAGS on for this review (checkbox change).
+      const tagsCb = cb('tags');
+      tagsCb.checked = true;
+      tagsCb.dispatchEvent(new Event('change', { bubbles: true }));
+      const doc = window.Rga.TabManager.activeDoc();
+      // Prove a tag mark would now be visibly decorated (CSS is loaded).
+      const root = document.getElementById('rga-print-preview-root');
+      const probe = document.createElement('span');
+      probe.className = 'rga-print-mark-tag'; probe.textContent = 'x';
+      root.appendChild(probe);
+      const border = getComputedStyle(probe).borderBottomStyle;
+      probe.remove();
+      return {
+        hasBar: !!bar, hasBtn: !!btn, seeded,
+        optMarksTags: window.Rga.PrintPreview.getOptions().marks.tags,
+        persistedShowTags: doc.settings.pageSetup.showTags === true,  // must remain false (per-review)
+        tagBorderStyle: border
+      };
+    });
+    expect(obs.hasBar).toBe(true);
+    expect(obs.hasBtn).toBe(true);
+    // Seeded from the doctrine default: highlights on; the rest off.
+    expect(obs.seeded).toEqual({ highlights: true, notes: false, flags: false, tags: false });
+    // The toggle drives the renderer override but does NOT persist to the .rga.
+    expect(obs.optMarksTags).toBe(true);
+    expect(obs.persistedShowTags).toBe(false);
+    // An enabled tag is visibly decorated (dotted underline) — not invisible.
+    expect(obs.tagBorderStyle).toBe('dotted');
+  } finally {
+    await clearDirtyAndClose(app, page);
+    try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
+  }
+});
+
+// -----------------------------------------------------------------
+// D3 — the marks override is per-review: closing + reopening Preview
+//      follows the document default again (Settings owns persistence).
+// -----------------------------------------------------------------
+test('PTU-D3 — marks override resets on exit; Settings default persists', async () => {
+  const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ptu-marksreset-'));
+  const { app, page } = await launchAndOpen(userDataDir);
+  try {
+    const obs = await page.evaluate(() => {
+      window.Rga.PrintPreview.open();
+      window.Rga.PrintPreview.setMarkVisibility('tags', true);   // per-review override
+      const afterToggle = window.Rga.PrintPreview.getOptions().marks.tags;
+      window.Rga.PrintPreview.hide();
+      const afterHide = window.Rga.PrintPreview.getOptions().marks;  // override cleared
+      // The persistent default still says tags off.
+      const doc = window.Rga.TabManager.activeDoc();
+      const contractTags = window.Rga.PrintContract.resolve(doc).marks.tags;
+      return { afterToggle, afterHideHasMarks: !!afterHide, contractTags };
+    });
+    expect(obs.afterToggle).toBe(true);
+    expect(obs.afterHideHasMarks).toBe(false);   // override gone after exit
+    expect(obs.contractTags).toBe(false);        // document default unchanged
+  } finally {
+    await clearDirtyAndClose(app, page);
+    try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
+  }
+});

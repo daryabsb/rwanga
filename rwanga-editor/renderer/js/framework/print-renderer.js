@@ -193,11 +193,19 @@
       sheet.appendChild(runningHeader);
     }
 
+    // Print Truth Unification V1, SCOPE D — effective mark visibility. A
+    // per-review override (opts.marks, set from the Print Preview Marks control)
+    // wins for THIS render/export only; otherwise the document's contract marks;
+    // otherwise the doctrine default. Resolved once per sheet and threaded down.
+    const marksVis = (opts.marks && typeof opts.marks === 'object')
+      ? opts.marks
+      : ((contract && contract.marks) || DEFAULT_MARKS);
+
     const content = document.createElement('div');
     content.className = 'rga-page-sheet-content';
     if (Array.isArray(page.blocks)) {
       for (let i = 0; i < page.blocks.length; i += 1) {
-        content.appendChild(_buildBlockEl(page.blocks[i], i === 0, layoutProfile));
+        content.appendChild(_buildBlockEl(page.blocks[i], i === 0, layoutProfile, marksVis));
       }
     }
     sheet.appendChild(content);
@@ -274,7 +282,7 @@
     }
   }
 
-  function _buildBlockEl(block, isFirstOnPage, layoutProfile) {
+  function _buildBlockEl(block, isFirstOnPage, layoutProfile, marksVis) {
     const el = document.createElement('div');
     el.className = 'rga-print-block rga-print-block-' + block.type;
     if (isFirstOnPage) el.classList.add('rga-print-block-first');
@@ -293,14 +301,13 @@
       const runs = (block.inlineRuns && block.inlineRuns.length > 0)
         ? block.inlineRuns
         : [{ text: block.text || '', marks: [] }];
-      // Print Truth Unification V1, SCOPE D — mark visibility from the Print
-      // Contract. Contract-less renders (pure pipeline tests) use the doctrine
-      // default: highlights survive into the deliverable; tags / notes / flags
-      // do not — byte-identical to the legacy "working marks ignored" behavior.
-      const marksVis = (layoutProfile && layoutProfile.printContract && layoutProfile.printContract.marks)
-        || DEFAULT_MARKS;
+      // Print Truth Unification V1, SCOPE D — mark visibility resolved by the
+      // caller (_buildPageSheet): per-review override → document contract →
+      // doctrine default. Contract-less renders (pure pipeline tests) fall back
+      // to DEFAULT_MARKS here, byte-identical to the legacy behavior.
+      const vis = marksVis || DEFAULT_MARKS;
       for (let r = 0; r < runs.length; r += 1) {
-        el.appendChild(_renderRun(runs[r], marksVis));
+        el.appendChild(_renderRun(runs[r], vis));
       }
     }
     return el;

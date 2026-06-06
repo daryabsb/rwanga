@@ -339,8 +339,20 @@
     fitPage: ['M8 3H5a2 2 0 0 0-2 2v3', 'M21 8V5a2 2 0 0 0-2-2h-3', 'M3 16v3a2 2 0 0 0 2 2h3', 'M16 21h3a2 2 0 0 0 2-2v-3'],
     fitWidth:['M3 12h18', 'M7 8l-4 4 4 4', 'M17 8l4 4-4 4'],
     download:['M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4', 'M7 10l5 5 5-5', 'M12 15V3'],
-    printer: ['M6 9V2h12v7', 'M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2']
+    printer: ['M6 9V2h12v7', 'M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2'],
+    // tag glyph — the Marks control (Print Truth Unification follow-up)
+    marks:   ['M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z', 'M7 7h.01']
   };
+
+  // Print Truth Unification V1, SCOPE D — the four toggle-able marks, in the
+  // doctrine order (the survivor first, the metadata last). Labels are the
+  // writer-facing names; keys match the Print Contract marks.
+  const MARKS_DEF = [
+    { key: 'highlights', label: 'Highlights' },
+    { key: 'notes',      label: 'Notes' },
+    { key: 'flags',      label: 'Revision flags' },
+    { key: 'tags',       label: 'Tags' }
+  ];
 
   function _btn(cls, html, label) {
     const b = document.createElement('button');
@@ -354,6 +366,73 @@
     const s = document.createElement('div');
     s.className = 'rga-review-sep';
     return s;
+  }
+
+  // SCOPE D — the Marks control: a small button that opens a popover of four
+  // checkboxes (Highlights / Notes / Revision flags / Tags). Toggling one sets
+  // the per-review visibility (Rga.PrintPreview.setMarkVisibility) and re-renders
+  // — for THIS review/export only; Settings owns the persistent document default.
+  function _buildMarksControl() {
+    const wrap = document.createElement('div');
+    wrap.className = 'rga-review-marks';
+    const btn = _btn('rga-review-marks-btn', _svg(ICON.marks) + '<span>Marks</span>', 'Show or hide marks in this preview');
+    btn.setAttribute('aria-haspopup', 'true');
+    btn.setAttribute('aria-expanded', 'false');
+    const menu = document.createElement('div');
+    menu.className = 'rga-review-marks-menu';
+    menu.setAttribute('role', 'group');
+    menu.setAttribute('aria-label', 'Marks shown in this preview');
+    menu.hidden = true;
+    const inputs = {};
+    MARKS_DEF.forEach(function(m) {
+      const row = document.createElement('label');
+      row.className = 'rga-review-marks-row';
+      const cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.className = 'rga-review-marks-cb';
+      cb.setAttribute('data-mark', m.key);
+      const txt = document.createElement('span');
+      txt.textContent = m.label;
+      row.appendChild(cb);
+      row.appendChild(txt);
+      menu.appendChild(row);
+      inputs[m.key] = cb;
+    });
+    wrap.appendChild(btn);
+    wrap.appendChild(menu);
+    return { wrap: wrap, btn: btn, menu: menu, inputs: inputs };
+  }
+
+  // Reflect the current effective visibility onto the checkboxes.
+  function _seedMarks() {
+    if (!_els || !_els.marksInputs) return;
+    const eff = (Rga.PrintPreview && typeof Rga.PrintPreview.effectiveMarks === 'function')
+      ? Rga.PrintPreview.effectiveMarks()
+      : { tags: false, notes: false, flags: false, highlights: true };
+    Object.keys(_els.marksInputs).forEach(function(key) {
+      _els.marksInputs[key].checked = !!eff[key];
+    });
+  }
+
+  function _toggleMarksMenu(forceOpen) {
+    if (!_els || !_els.marksMenu) return;
+    const open = (typeof forceOpen === 'boolean') ? forceOpen : _els.marksMenu.hidden;
+    if (open) {
+      _seedMarks();
+      // The menu is position:fixed (to escape the bar's overflow clip), so
+      // anchor it under the button from the live button rect.
+      const r = _els.marksBtn.getBoundingClientRect();
+      _els.marksMenu.style.top  = (r.bottom + 6) + 'px';
+      _els.marksMenu.style.left = r.left + 'px';
+    }
+    _els.marksMenu.hidden = !open;
+    _els.marksBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  }
+
+  function _onDocClickCloseMarks(e) {
+    if (!_els || !_els.marksMenu || _els.marksMenu.hidden) return;
+    if (_els.marks && _els.marks.contains(e.target)) return;
+    _toggleMarksMenu(false);
   }
 
   function _buildBar() {
@@ -416,9 +495,13 @@
     zoom.appendChild(fitWidth);
     zoom.appendChild(stepper);
 
+    const marks = _buildMarksControl();
+
     center.appendChild(nav);
     center.appendChild(_sep());
     center.appendChild(zoom);
+    center.appendChild(_sep());
+    center.appendChild(marks.wrap);
 
     // ---- Output / Commit (inline-end) ----
     const output = document.createElement('div');
@@ -454,7 +537,8 @@
       prev: prev, next: next, pageind: pageind, curEl: curEl, totEl: totEl, jumpInput: jumpInput,
       fitPage: fitPage, fitWidth: fitWidth, zoomOut: zoomOut, zoomIn: zoomIn, pct: pct,
       confidence: confidence, confLabel: confLabel,
-      exportBtn: exportBtn, printBtn: printBtn
+      exportBtn: exportBtn, printBtn: printBtn,
+      marks: marks.wrap, marksBtn: marks.btn, marksMenu: marks.menu, marksInputs: marks.inputs
     };
     _wireControls();
     return bar;
@@ -478,6 +562,18 @@
     _els.zoomIn.addEventListener('click', function() { _stepZoom(ZOOM_STEP); });
     _els.exportBtn.addEventListener('click', function() {
       if (Rga.PdfExport && typeof Rga.PdfExport.run === 'function') Rga.PdfExport.run();
+    });
+    // SCOPE D — Marks popover + per-review visibility toggles.
+    _els.marksBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      _toggleMarksMenu();
+    });
+    Object.keys(_els.marksInputs).forEach(function(key) {
+      _els.marksInputs[key].addEventListener('change', function() {
+        if (Rga.PrintPreview && typeof Rga.PrintPreview.setMarkVisibility === 'function') {
+          Rga.PrintPreview.setMarkVisibility(key, _els.marksInputs[key].checked);
+        }
+      });
     });
   }
 
@@ -552,6 +648,7 @@
 
     _refreshIdentity();
     _updateIndicator();
+    _seedMarks();
 
     if (fresh) {
       // UX Direction §4 — Fit page is the default on entry.
@@ -574,11 +671,14 @@
     _onResize = function() { if (_fitMode) _applyFit(_fitMode); };
     if (_root) _root.addEventListener('scroll', _onScroll);
     window.addEventListener('resize', _onResize);
+    // SCOPE D — close the Marks popover on any outside click.
+    document.addEventListener('click', _onDocClickCloseMarks);
   }
 
   function _unwireSurfaceListeners() {
     if (_root && _onScroll) _root.removeEventListener('scroll', _onScroll);
     if (_onResize) window.removeEventListener('resize', _onResize);
+    document.removeEventListener('click', _onDocClickCloseMarks);
     _onScroll = null;
     _onResize = null;
     _rafPending = false;
