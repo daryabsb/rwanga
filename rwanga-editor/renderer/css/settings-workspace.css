@@ -24,6 +24,20 @@
   font-family: var(--font-ui, system-ui, sans-serif);
 }
 
+/* Title contrast fix. The settings workspace renders inside #editor-container,
+   which — while a document tab sits in Flow underneath — overrides
+   --text-primary to the Flow PAGE ink (white-page #1d1c18 / dark-page #e9e2d0,
+   editor-prosemirror.css). That page ink bled onto chrome text: setting TITLES
+   (.rga-settings-row-label reads --text-primary) turned near-black on the dark
+   settings surface, while descriptions stayed legible (they read
+   --text-secondary, which the Flow scope leaves untouched). Re-assert the chrome
+   text token on the workspace root, per theme, so titles use theme ink — never
+   page ink. Mirrors tokens.css §Text Hierarchy; chrome-only, never reaches Flow.
+   Light rule follows the dark rule so it wins at equal specificity. */
+:root .rga-settings-workspace,
+[data-theme="dark"] .rga-settings-workspace { --text-primary: #dadada; }
+[data-theme="light"] .rga-settings-workspace { --text-primary: #333333; }
+
 .rga-settings-nav {
   display: flex;
   flex-direction: column;
