@@ -86,11 +86,13 @@ test('Slice 3A — registry contains the full settings inventory (~64 entries po
   // Inventory grew from 62 → 64 in S12: `units` (user-tier) and
   // `editor.scriptLanguage` (script-tier) were promoted from legacy
   // localStorage modules into the Settings Store. Filmustageation F7
-  // (2026-05-31) added `editor.pageColor` (Flow paper colour) → 65. If an
-  // entry is added or removed, update this guard explicitly so the count
-  // change is reviewed, not silent.
-  assert.equal(all.length, 65,
-    'Registry size must equal the documented inventory (65 settings post-F7)');
+  // (2026-05-31) added `editor.pageColor` (Flow paper colour) → 65. Print
+  // Truth Unification V1 (2026-06-06) added four print mark-visibility toggles
+  // (pageSetup.showHighlights/showNotes/showFlags/showTags) → 69. If an entry
+  // is added or removed, update this guard explicitly so the count change is
+  // reviewed, not silent.
+  assert.equal(all.length, 69,
+    'Registry size must equal the documented inventory (69 settings post-PTU-V1)');
 });
 
 test('Slice 3A — every registry entry has all 16 required fields', () => {

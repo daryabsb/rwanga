@@ -24,7 +24,9 @@
 // Public API:
 //   Rga.PrintContract.resolve(doc)  → frozen { version, paperSize, orientation,
 //                                       direction, pageNumbering:{enabled,position},
-//                                       sceneNumbering:{enabled} }
+//                                       sceneNumbering:{enabled},
+//                                       header:{text}, footer:{text},
+//                                       marks:{tags,notes,flags,highlights} }
 //   Rga.PrintContract.DEFAULTS      → frozen App-Default contract values
 //   Rga.PrintContract.CONTRACT_VERSION → number (the V1 schema version)
 'use strict';
@@ -42,7 +44,18 @@
     orientation: 'portrait',
     direction:   'ltr',
     pageNumbering:  Object.freeze({ enabled: true, position: 'top_right' }),
-    sceneNumbering: Object.freeze({ enabled: true })
+    sceneNumbering: Object.freeze({ enabled: true }),
+    // Print Truth Unification V1 — additive projections (no CONTRACT_VERSION
+    // bump: every consumer that predates these fields ignores them, and the
+    // resolver defaults them, so V1 readers are unaffected).
+    //   header/footer — the document's owned page-banner text (token-bearing;
+    //     tokens are resolved at render time by Rga.PrintTokens, not here).
+    //   marks — print/export visibility of working-state marks. Defaults honor
+    //     the committed Print Truth Doctrine (Decision 2): highlights survive
+    //     into the deliverable; tags / notes / flags do NOT, unless turned on.
+    header: Object.freeze({ text: '' }),
+    footer: Object.freeze({ text: '' }),
+    marks:  Object.freeze({ tags: false, notes: false, flags: false, highlights: true })
   });
 
   // The contract SCHEMA version (V1 = 1). Distinct from rga_version (the file
@@ -77,8 +90,32 @@
       position: _str(ps.pageNumberPosition) || DEFAULTS.pageNumbering.position
     });
 
-    const sceneNumbering = Object.freeze({
-      enabled: (settings.show_scene_numbers !== false)            // default true
+    // Scene-numbering home unification. The Settings UI toggle persists to the
+    // nested `settings.screenplay.sceneNumbering` (Store dotted-id routing);
+    // older docs carry the flat `settings.show_scene_numbers`. Prefer the UI's
+    // home, fall back to the legacy flat field, then default true — so the one
+    // visible toggle actually drives print truth (no split-brain).
+    const sp = settings.screenplay || {};
+    const sceneOn = (typeof sp.sceneNumbering === 'boolean')
+      ? sp.sceneNumbering
+      : (settings.show_scene_numbers !== false);
+    const sceneNumbering = Object.freeze({ enabled: sceneOn });
+
+    // Header / footer banner text — owned page truth, defaulted to ''.
+    const header = Object.freeze({
+      text: (typeof ps.headerText === 'string') ? ps.headerText : DEFAULTS.header.text
+    });
+    const footer = Object.freeze({
+      text: (typeof ps.footerText === 'string') ? ps.footerText : DEFAULTS.footer.text
+    });
+
+    // Mark visibility in the deliverable. tags/notes/flags must be explicitly
+    // true to appear; highlights survive unless explicitly turned off.
+    const marks = Object.freeze({
+      tags:       (ps.showTags === true),
+      notes:      (ps.showNotes === true),
+      flags:      (ps.showFlags === true),
+      highlights: (ps.showHighlights !== false)
     });
 
     return Object.freeze({
@@ -87,7 +124,10 @@
       orientation:    orientation,
       direction:      direction,
       pageNumbering:  pageNumbering,
-      sceneNumbering: sceneNumbering
+      sceneNumbering: sceneNumbering,
+      header:         header,
+      footer:         footer,
+      marks:          marks
     });
   }
 

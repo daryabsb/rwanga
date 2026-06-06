@@ -54,7 +54,13 @@
       // D.4 — script title for optional running header in PrintRenderer.
       // Sourced from doc.metadata.title; empty string when absent.
       title:         (doc && doc.metadata && typeof doc.metadata.title === 'string')
-                       ? doc.metadata.title : ''
+                       ? doc.metadata.title : '',
+      // Print Truth Unification V1 — draft/revision number for the {{version}}
+      // header/footer token. doc.metadata.version is a number; stringified for
+      // token substitution. Empty string when absent.
+      version:       (doc && doc.metadata && (typeof doc.metadata.version === 'number'
+                       || typeof doc.metadata.version === 'string'))
+                       ? String(doc.metadata.version) : ''
     };
     if (!doc || !Array.isArray(pageMap) || !Array.isArray(normalizedBlocks)) return out;
 

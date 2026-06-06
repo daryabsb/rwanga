@@ -34,7 +34,12 @@ function bootDom(opts) {
       write: async function(partial) { Object.assign(_store, partial); return _store; }
     }
   };
-  dom.window.Rga.TabManager = { activeDoc: function() { return null; } };
+  // Print Truth Unification V1 — editor.lineHeight is now a per-script setting
+  // (persistsTo:'script'), so its Store writes need an active doc to land. A
+  // minimal mutable doc suffices; user-tier settings (fontFamily/fontSize/…)
+  // ignore it, so the other tests are unaffected.
+  const _doc = opts.activeDoc || { settings: {} };
+  dom.window.Rga.TabManager = { activeDoc: function() { return _doc; } };
   return dom;
 }
 

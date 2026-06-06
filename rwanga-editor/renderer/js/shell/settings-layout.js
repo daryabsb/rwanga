@@ -71,7 +71,9 @@
       settingIds: [
         'pageSetup.paperSize', 'pageSetup.orientation', 'pageSetup.margins',
         'pageSetup.pageNumbers', 'pageSetup.pageNumberPosition',
-        'pageSetup.headerText', 'pageSetup.footerText'
+        'pageSetup.headerText', 'pageSetup.footerText',
+        'pageSetup.showHighlights', 'pageSetup.showNotes',
+        'pageSetup.showFlags', 'pageSetup.showTags'
       ]
     },
     {

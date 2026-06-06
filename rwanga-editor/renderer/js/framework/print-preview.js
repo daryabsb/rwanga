@@ -58,7 +58,11 @@
       if (Rga.PrintRenderer && typeof Rga.PrintRenderer.render === 'function') {
         // D.3/D.4 — pass current options to the renderer so optional
         // footer/header slots are populated when the user has opted in.
-        Rga.PrintRenderer.render(model, _root, _opts);
+        // Print Truth Unification V1 — supply the header/footer token context
+        // (title/version) from the Rga document. The RenderModel is built from
+        // the PM node (view.state.doc), which carries no metadata, so the real
+        // title/version must come from the active doc here.
+        Rga.PrintRenderer.render(model, _root, Object.assign({}, _opts, { tokenCtx: _tokenCtx() }));
       }
       // Review Bar v1 — mount/refresh the persistent review chrome over the
       // freshly-rendered sheets. Guarded so the pure-pipeline tests (which
@@ -151,6 +155,21 @@
       ? Rga.TabManager.activeDoc()
       : null;
     return Rga.ManuscriptGeometry.resolve(d);
+  }
+
+  // Print Truth Unification V1 — header/footer token context from the active
+  // Rga document's metadata (title + draft/revision version). Sourced here, not
+  // from the RenderModel, because the model is built from the PM node which
+  // carries no document metadata.
+  function _tokenCtx() {
+    const d = (Rga.TabManager && typeof Rga.TabManager.activeDoc === 'function')
+      ? Rga.TabManager.activeDoc()
+      : null;
+    const md = (d && d.metadata) || {};
+    return {
+      title:   (typeof md.title === 'string') ? md.title : '',
+      version: (md.version !== null && md.version !== undefined) ? String(md.version) : ''
+    };
   }
 
   function _ensureRoot() {

@@ -22,6 +22,7 @@ function boot() {
   global.window.Rga = {};
   const paths = [
     '../../../renderer/js/framework/slug-resolver.js',
+    '../../../renderer/js/framework/print-tokens.js',
     '../../../renderer/js/framework/print-renderer.js'
   ];
   paths.forEach(function(p) { delete require.cache[require.resolve(p)]; require(p); });
@@ -357,4 +358,176 @@ test('RTL Slice1 — page sheet has no rtl direction for an ltr document', () =>
   const sheet = container.querySelector('.rga-page-sheet');
   assert.notEqual(sheet.getAttribute('dir'), 'rtl',
     'an ltr document must not get dir="rtl" on the page sheet');
+});
+
+// ----------------------------------------------------------------
+// Print Truth Unification V1 — contract-driven header / footer / page number
+// ----------------------------------------------------------------
+
+function profileWithContract(contractOverrides) {
+  return {
+    direction: 'ltr',
+    margins: { top: 1, bottom: 1, left: 1.5, right: 1, unit: 'in' },
+    printContract: Object.assign({
+      version: 1, paperSize: 'Letter', orientation: 'portrait', direction: 'ltr',
+      pageNumbering: { enabled: true, position: 'top_right' },
+      sceneNumbering: { enabled: true },
+      header: { text: '' }, footer: { text: '' },
+      marks: { tags: false, notes: false, flags: false, highlights: true }
+    }, contractOverrides || {})
+  };
+}
+
+test('PTU — header banner renders contract.header.text with tokens resolved', () => {
+  const { PR } = boot();
+  const container = document.createElement('div');
+  const model = fakeModel([{ pageNumber: 1, blocks: [textBlock('action', 'x')] }]);
+  model.title = 'The Last Light';
+  model.version = '2';
+  model.layoutProfile = profileWithContract({ header: { text: '{{title}} (v{{version}})' } });
+  PR.render(model, container, { tokenCtx: { date: '2026-06-06' } });
+  const banner = container.querySelector('.rga-page-sheet-running-header');
+  assert.ok(banner, 'header banner element should exist when header text is set');
+  assert.equal(banner.textContent, 'The Last Light (v2)');
+});
+
+test('PTU — footer banner resolves {{page}}/{{pages}} per sheet', () => {
+  const { PR } = boot();
+  const container = document.createElement('div');
+  const model = fakeModel([
+    { pageNumber: 1, blocks: [textBlock('action', 'a')] },
+    { pageNumber: 2, blocks: [textBlock('action', 'b')] }
+  ]);
+  model.layoutProfile = profileWithContract({ footer: { text: 'Page {{page}} of {{pages}}' } });
+  PR.render(model, container, {});
+  const banners = container.querySelectorAll('.rga-page-sheet-footer-banner');
+  assert.equal(banners.length, 2);
+  assert.equal(banners[0].textContent, 'Page 1 of 2');
+  assert.equal(banners[1].textContent, 'Page 2 of 2');
+});
+
+test('PTU — page number hidden when contract.pageNumbering.enabled is false', () => {
+  const { PR } = boot();
+  const container = document.createElement('div');
+  const model = fakeModel([{ pageNumber: 1, blocks: [textBlock('action', 'x')] }]);
+  model.layoutProfile = profileWithContract({ pageNumbering: { enabled: false, position: 'top_right' } });
+  PR.render(model, container, {});
+  assert.equal(container.querySelector('.rga-page-sheet-header'), null);
+});
+
+test('PTU — page number present + positioned bottom_center when configured', () => {
+  const { PR } = boot();
+  const container = document.createElement('div');
+  const model = fakeModel([{ pageNumber: 3, blocks: [textBlock('action', 'x')] }]);
+  model.layoutProfile = profileWithContract({ pageNumbering: { enabled: true, position: 'bottom_center' } });
+  PR.render(model, container, {});
+  const pn = container.querySelector('.rga-page-sheet-header');
+  assert.ok(pn);
+  assert.equal(pn.textContent, '3.');
+  assert.equal(pn.style.bottom, '0.5in');
+  assert.equal(pn.style.textAlign, 'center');
+});
+
+test('PTU — empty header/footer text renders no banner elements', () => {
+  const { PR } = boot();
+  const container = document.createElement('div');
+  const model = fakeModel([{ pageNumber: 1, blocks: [textBlock('action', 'x')] }]);
+  model.layoutProfile = profileWithContract({});
+  PR.render(model, container, {});
+  assert.equal(container.querySelector('.rga-page-sheet-running-header'), null);
+  assert.equal(container.querySelector('.rga-page-sheet-footer-banner'), null);
+});
+
+// ----------------------------------------------------------------
+// Print Truth Unification V1, SCOPE E — SCENE ## in the printed slug
+// ----------------------------------------------------------------
+
+test('PTU-E — scene number marker prefixes the slug when numbering enabled', () => {
+  const { PR } = boot();
+  const container = document.createElement('div');
+  const model = fakeModel([{ pageNumber: 1,
+    blocks: [headingBlock('INT.', 'ROOM', 'DAY', { sceneNumber: 7 })] }]);
+  model.layoutProfile = profileWithContract({ sceneNumbering: { enabled: true } });
+  PR.render(model, container, {});
+  const num = container.querySelector('.rga-print-scene-number');
+  assert.ok(num, 'scene-number marker should render when numbering is enabled');
+  assert.equal(num.textContent, '7');
+  const heading = container.querySelector('.rga-print-block-sceneHeading');
+  assert.ok(/INT\./.test(heading.textContent), 'slug text still present alongside the number');
+});
+
+test('PTU-E — no scene marker when numbering disabled', () => {
+  const { PR } = boot();
+  const container = document.createElement('div');
+  const model = fakeModel([{ pageNumber: 1,
+    blocks: [headingBlock('INT.', 'ROOM', 'DAY', { sceneNumber: 7 })] }]);
+  model.layoutProfile = profileWithContract({ sceneNumbering: { enabled: false } });
+  PR.render(model, container, {});
+  assert.equal(container.querySelector('.rga-print-scene-number'), null);
+});
+
+test('PTU-E — contract-less render keeps the plain slug (no marker)', () => {
+  const { PR } = boot();
+  const container = document.createElement('div');
+  const model = fakeModel([{ pageNumber: 1,
+    blocks: [headingBlock('INT.', 'ROOM', 'DAY', { sceneNumber: 7 })] }]);
+  PR.render(model, container, {});
+  assert.equal(container.querySelector('.rga-print-scene-number'), null);
+});
+
+// ----------------------------------------------------------------
+// Print Truth Unification V1, SCOPE D — mark visibility
+// ----------------------------------------------------------------
+
+function markedAction(text, markType, attrs) {
+  return { type: 'action', pmFrom: 0, pmTo: 0, sceneNodeId: null, sceneNumber: null,
+           text: text, inlineRuns: [{ text: text, marks: [{ type: markType, attrs: attrs || {} }] }] };
+}
+
+test('PTU-D — default (contract-less): highlight shown; tag/note/flag undecorated', () => {
+  const { PR } = boot();
+  const container = document.createElement('div');
+  const model = fakeModel([{ pageNumber: 1, blocks: [
+    markedAction('hi', 'highlight', { color: '#ff0' }),
+    markedAction('t',  'tag', { color: '#0a0' }),
+    markedAction('n',  'annotation'),
+    markedAction('r',  'revisionFlag')
+  ] }]);
+  PR.render(model, container, {});
+  assert.ok(container.querySelector('span[style*="background"]'), 'highlight decorated by default');
+  assert.equal(container.querySelector('.rga-print-mark-tag'), null);
+  assert.equal(container.querySelector('.rga-print-mark-note'), null);
+  assert.equal(container.querySelector('.rga-print-mark-revision'), null);
+});
+
+test('PTU-D — marks all on: tag/note/flag decorated; text preserved', () => {
+  const { PR } = boot();
+  const container = document.createElement('div');
+  const model = fakeModel([{ pageNumber: 1, blocks: [
+    markedAction('t', 'tag', { color: '#0a0' }),
+    markedAction('n', 'annotation'),
+    markedAction('r', 'revisionFlag')
+  ] }]);
+  model.layoutProfile = profileWithContract({
+    marks: { tags: true, notes: true, flags: true, highlights: true } });
+  PR.render(model, container, {});
+  const tag = container.querySelector('.rga-print-mark-tag');
+  assert.ok(tag, 'tag decorated when on');
+  assert.ok(/dotted/.test(tag.style.borderBottom), 'tag uses its own color as a dotted underline');
+  assert.ok(container.querySelector('.rga-print-mark-note'));
+  assert.ok(container.querySelector('.rga-print-mark-revision'));
+  // The screenplay text is always present regardless of mark visibility.
+  assert.ok(/t/.test(container.textContent) && /n/.test(container.textContent));
+});
+
+test('PTU-D — highlights off hides the background span (text stays)', () => {
+  const { PR } = boot();
+  const container = document.createElement('div');
+  const model = fakeModel([{ pageNumber: 1, blocks: [
+    markedAction('word', 'highlight', { color: '#ff0' }) ] }]);
+  model.layoutProfile = profileWithContract({
+    marks: { tags: false, notes: false, flags: false, highlights: false } });
+  PR.render(model, container, {});
+  assert.equal(container.querySelector('span[style*="background"]'), null);
+  assert.ok(/word/.test(container.textContent), 'the highlighted text itself is never hidden');
 });

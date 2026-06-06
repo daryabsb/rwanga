@@ -418,9 +418,13 @@
   function _notifyPageSetupConsumers() {
     const PSP = window.Rga && window.Rga.PageSetupPreview;
     if (PSP && typeof PSP.update === 'function') PSP.update();
-    // Future hook: Rga.PrintRenderer.invalidate() when the print engine
-    // ships. Both consumers route through Rga.LayoutProfile.compose so
-    // they cannot diverge.
+    // Print Truth Unification V1 — the print engine has shipped. An open Print
+    // Preview re-renders from the same LayoutProfile/PrintContract these
+    // settings feed, so a page-setup change (paper, numbering, header/footer,
+    // scene numbering, mark visibility) reaches the preview on the same gesture.
+    // refresh() is a no-op when the preview is closed (no wasted render).
+    const PP = window.Rga && window.Rga.PrintPreview;
+    if (PP && typeof PP.refresh === 'function') PP.refresh();
   }
   [
     'pageSetup.paperSize',
@@ -429,7 +433,14 @@
     'pageSetup.pageNumbers',
     'pageSetup.pageNumberPosition',
     'pageSetup.headerText',
-    'pageSetup.footerText'
+    'pageSetup.footerText',
+    // Print Truth Unification V1 — mark visibility + scene numbering also drive
+    // the print render, so they share the same consumer-notify beat.
+    'pageSetup.showHighlights',
+    'pageSetup.showNotes',
+    'pageSetup.showFlags',
+    'pageSetup.showTags',
+    'screenplay.sceneNumbering'
   ].forEach(function(id) {
     register(id, function() { _notifyPageSetupConsumers(); }, { owner: 'pageSetup' });
   });

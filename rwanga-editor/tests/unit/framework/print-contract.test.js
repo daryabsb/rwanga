@@ -140,3 +140,60 @@ test('[print-contract] exposes DEFAULTS and CONTRACT_VERSION', () => {
   assert.equal(PC.DEFAULTS.direction, 'ltr');
   assert.equal(typeof PC.CONTRACT_VERSION, 'number');
 });
+
+// ================================================================
+// Print Truth Unification V1 — additive projections
+// ================================================================
+
+// 10 — header / footer text default to '' and read pageSetup.headerText/footerText.
+test('[print-contract] header/footer text default empty; read owned homes', () => {
+  const { PC } = boot();
+  const d = PC.resolve(null);
+  assert.deepEqual(d.header, { text: '' });
+  assert.deepEqual(d.footer, { text: '' });
+  const c = PC.resolve({ settings: { pageSetup: {
+    headerText: '{{title}}', footerText: 'Draft {{date}}'
+  } } });
+  assert.equal(c.header.text, '{{title}}');
+  assert.equal(c.footer.text, 'Draft {{date}}');
+});
+
+// 11 — mark defaults honor the Print Truth Doctrine: highlights on; rest off.
+test('[print-contract] mark defaults: highlights on, tags/notes/flags off', () => {
+  const { PC } = boot();
+  assert.deepEqual(PC.resolve(null).marks,
+    { tags: false, notes: false, flags: false, highlights: true });
+});
+
+// 12 — each mark toggles independently from its owned home.
+test('[print-contract] marks read pageSetup.show* homes independently', () => {
+  const { PC } = boot();
+  const c = PC.resolve({ settings: { pageSetup: {
+    showTags: true, showNotes: true, showFlags: true, showHighlights: false
+  } } });
+  assert.deepEqual(c.marks, { tags: true, notes: true, flags: true, highlights: false });
+});
+
+// 13 — scene-numbering home unification: nested UI home wins over legacy flat.
+test('[print-contract] sceneNumbering prefers nested screenplay.sceneNumbering', () => {
+  const { PC } = boot();
+  // UI toggle (nested) OFF overrides a legacy flat true → enabled false.
+  const c = PC.resolve({ settings: {
+    show_scene_numbers: true,
+    screenplay: { sceneNumbering: false }
+  } });
+  assert.deepEqual(c.sceneNumbering, { enabled: false });
+  // Legacy doc with only the flat home still resolves correctly.
+  assert.deepEqual(
+    PC.resolve({ settings: { show_scene_numbers: false } }).sceneNumbering,
+    { enabled: false });
+});
+
+// 14 — the new projections are frozen too.
+test('[print-contract] header/footer/marks are frozen', () => {
+  const { PC } = boot();
+  const c = PC.resolve({});
+  assert.ok(Object.isFrozen(c.header));
+  assert.ok(Object.isFrozen(c.footer));
+  assert.ok(Object.isFrozen(c.marks));
+});

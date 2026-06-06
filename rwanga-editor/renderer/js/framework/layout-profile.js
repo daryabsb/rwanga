@@ -99,6 +99,14 @@
   // future callers can inspect it on the returned profile.
   const SAFETY_LINES = 1;
 
+  // Print Truth Unification V1, SCOPE B — RTL print leading. Arabic-script type
+  // (Noto Naskh) carries tashkeel + a looping baseline that crowd at single
+  // (1.0) leading; ~1.3 is the readability convention (Print Truth Doctrine D4,
+  // RTL_SCREENPLAY_CONVENTION §6). This converges Print with Flow, which already
+  // runs 1.3 for RTL. LTR keeps 1.0 (the Latin-Courier timing convention). The
+  // value feeds linesPerPage AND the rendered sheet line-height from one source.
+  const RTL_PRINT_LEADING = 1.3;
+
   // Per-pt → lines-per-inch table for monospace at single leading.
   // For Courier the on-paper line height = sizePt * leading / 72 (in inches).
   function _linesPerInch(sizePt, leading) {
@@ -168,22 +176,38 @@
       pageSize = { w: pageSize.h, h: pageSize.w, unit: pageSize.unit };
     }
 
+    // Text direction — RTL (Kurdish/Arabic) or LTR (Hollywood). Resolved BEFORE
+    // the line math because it now drives BOTH the font-aware cpi AND the
+    // leading (see below). screenplayProfile.direction is the canonical source;
+    // default 'ltr'. (Moved up from below; value is identical.)
+    const direction = contract
+      ? contract.direction
+      : ((_profile.direction === 'rtl') ? 'rtl' : 'ltr');
+
+    // Print Truth Unification V1, SCOPE B — direction-aware leading, resolved
+    // through this SINGLE source so the rendered sheet line-height and PageMap's
+    // linesPerPage can never diverge (PrintRenderer reads profile.font.leading;
+    // linesPerPage is computed from the same value just below). LTR keeps the
+    // Courier page truth (1.0 — the 1-inch-per-minute timing convention is real
+    // for Latin Courier, so LTR pagination is byte-identical). RTL relaxes to
+    // RTL_PRINT_LEADING so Noto Naskh diacritics don't collide (Print Truth
+    // Doctrine D4 / RTL_SCREENPLAY_CONVENTION §6), and pagination follows the
+    // relaxed leading honestly — fewer lines per page, not a desync.
+    const baseLeading = (font && typeof font.leading === 'number') ? font.leading : 1.0;
+    const effectiveLeading = (direction === 'rtl') ? RTL_PRINT_LEADING : baseLeading;
+    // Effective font carries the resolved leading without mutating the shared
+    // HOLLYWOOD_DEFAULTS.font constant (font may BE that constant on fallback).
+    const effFont = { family: font.family, sizePt: font.sizePt, leading: effectiveLeading };
+
     const usableH  = Math.max(0, pageSize.h - margins.top - margins.bottom);
     const usableW  = Math.max(0, pageSize.w - margins.left - margins.right);
     // theoreticalLinesPerPage: pure-math budget before the safety reserve is applied.
     // linesPerPage: actual budget consumed by PageMap — SAFETY_LINES fewer than
     // theoretical, absorbing browser rendering drift so content never bleeds through
     // the bottom margin. Both values are surfaced on the profile for transparency.
-    const theoreticalLinesPerPage = _round(usableH * _linesPerInch(font.sizePt, font.leading));
+    const theoreticalLinesPerPage = _round(usableH * _linesPerInch(effFont.sizePt, effFont.leading));
     const linesPerPage = Math.max(1, theoreticalLinesPerPage - SAFETY_LINES);
-    // Text direction — RTL (Kurdish/Arabic) or LTR (Hollywood). Resolved here
-    // because it drives the font-aware cpi: the RTL Paper truth surface renders
-    // Noto Naskh, the LTR surface Courier. screenplayProfile.direction is the
-    // canonical source; default 'ltr'.
-    const direction = contract
-      ? contract.direction
-      : ((_profile.direction === 'rtl') ? 'rtl' : 'ltr');
-    const cpi = _charsPerInch(font.sizePt, direction);
+    const cpi = _charsPerInch(effFont.sizePt, direction);
 
     const blocks = {};
     Object.keys(HOLLYWOOD_DEFAULTS.blockWidthsIn).forEach(function(typeName) {
@@ -235,7 +259,7 @@
       pageSize:                pageSize,
       orientation:             orientation,
       margins:                 margins,
-      font:                    font,
+      font:                    effFont,
       blocks:                  blocks,
       direction:               direction,
       pageNumbers:             pageNumbers,

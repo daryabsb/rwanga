@@ -52,14 +52,31 @@
     container.classList.add('rga-print-preview-root');
     const lp = (renderModel && renderModel.layoutProfile) ? renderModel.layoutProfile : null;
     const title = (renderModel && renderModel.title) ? renderModel.title : (opts.title || '');
+    // Print Truth Unification V1 — token context for header/footer banners.
+    // title/version come from the RenderModel (doc metadata); the date is
+    // stamped here at render time. Per-page {{page}}/{{pages}} are merged in
+    // _buildPageSheet. opts.tokenCtx lets a caller/test inject a fixed date.
+    const tokenCtx = Object.assign({
+      title:   title,
+      version: (renderModel && renderModel.version) ? renderModel.version : '',
+      date:    _todayStr()
+    }, opts.tokenCtx || {});
     if (!renderModel || !Array.isArray(renderModel.pages) || renderModel.pages.length === 0) {
       // Empty doc → render a single blank sheet so the writer sees the page.
-      container.appendChild(_buildPageSheet({ pageNumber: 1, blocks: [] }, 1, lp, opts, title));
+      container.appendChild(_buildPageSheet({ pageNumber: 1, blocks: [] }, 1, lp, opts, title, tokenCtx));
       return;
     }
     for (let p = 0; p < renderModel.pages.length; p += 1) {
-      container.appendChild(_buildPageSheet(renderModel.pages[p], renderModel.totalPages, lp, opts, title));
+      container.appendChild(_buildPageSheet(renderModel.pages[p], renderModel.totalPages, lp, opts, title, tokenCtx));
     }
+  }
+
+  // Render-time date string for the {{date}} token. Locale-formatted; the app
+  // runtime permits Date (only workflow scripts forbid it). Callers/tests can
+  // override via opts.tokenCtx.date for determinism.
+  function _todayStr() {
+    try { return new Date().toLocaleDateString(); }
+    catch (e) { return ''; }
   }
 
   function sheetCount(container) {
@@ -71,7 +88,7 @@
   // Sheet builders
   // ----------------------------------------------------------------
 
-  function _buildPageSheet(page, totalPages, layoutProfile, opts, title) {
+  function _buildPageSheet(page, totalPages, layoutProfile, opts, title, tokenCtx) {
     opts = opts || {};
     const sheet = document.createElement('div');
     sheet.className = 'rga-page-sheet';
@@ -96,6 +113,15 @@
       sheet.style.height = layoutProfile.pageSize.h + 'in';
     }
 
+    // Print Truth Unification V1, SCOPE B — sheet leading from the single
+    // resolved source (layoutProfile.font.leading). Overrides the CSS-hardcoded
+    // 1.0 so RTL gets its relaxed leading; because PageMap's linesPerPage was
+    // computed from this exact value, the painted leading and the pagination
+    // agree by construction. LTR resolves to 1.0 → visually unchanged.
+    if (layoutProfile && layoutProfile.font && typeof layoutProfile.font.leading === 'number') {
+      sheet.style.lineHeight = String(layoutProfile.font.leading);
+    }
+
     // D.2 — sheet padding from layoutProfile.margins. Overrides the CSS
     // fallback (padding: 1in 1in 1in 1.5in) which is kept in the CSS file
     // as a safe fallback for the empty/initial render before JS runs.
@@ -109,27 +135,43 @@
       sheet.style.padding = m.top + 'in ' + paddingRight + 'in ' + m.bottom + 'in ' + paddingLeft + 'in';
     }
 
-    // Page header — top-right, traditional screenplay convention "N."
-    // Position is written inline from layoutProfile.margins so any paper
-    // size / margin setting produces a correctly placed page number.
-    //   top:   margins.top * 0.5  — page number sits at half the top margin
-    //          from the sheet top edge (Hollywood: 1in → 0.5in; compact
-    //          0.5in top → 0.25in — always inside the top-margin band).
-    //   right: margins.right      — aligned with the right content edge
-    //          (RTL mirror: use margins.left so the number sits on the
-    //          binding side correctly for Arabic / Kurdish).
-    // CSS fallback values (top: 0.5in; right: 1in) remain for the
-    // empty-doc / preload render path before layoutProfile is available.
-    const header = document.createElement('div');
-    header.className = 'rga-page-sheet-header';
-    header.textContent = page.pageNumber + '.';
-    if (layoutProfile && layoutProfile.margins) {
-      const m = layoutProfile.margins;
-      const isRtl = (layoutProfile.direction === 'rtl');
-      header.style.top   = (m.top * 0.5) + 'in';
-      header.style.right = (isRtl ? m.left : m.right) + 'in';
+    // Print Truth Unification V1 — page number, header banner and footer banner
+    // are now driven by the resolved Print Contract carried on the layout
+    // profile (layoutProfile.printContract). When no contract is attached
+    // (pure-pipeline tests that hand-build a profile), behavior falls back to
+    // the legacy always-on top-right "N." so those tests stay byte-identical.
+    const contract = (layoutProfile && layoutProfile.printContract) || null;
+    const m = (layoutProfile && layoutProfile.margins) || null;
+    const isRtl = !!(layoutProfile && layoutProfile.direction === 'rtl');
+    const pageCtx = Object.assign({}, tokenCtx || {}, {
+      page:  page.pageNumber,
+      pages: totalPages
+    });
+
+    // Page number — honor the contract's enabled flag + position. Legacy
+    // (no contract) → enabled, top_right (the traditional "N.").
+    const pageNumEnabled  = contract ? contract.pageNumbering.enabled  : true;
+    const pageNumPosition = contract ? contract.pageNumbering.position : 'top_right';
+    if (pageNumEnabled) {
+      const header = document.createElement('div');
+      header.className = 'rga-page-sheet-header';
+      header.textContent = page.pageNumber + '.';
+      _positionBanner(header, pageNumPosition, m, isRtl);
+      sheet.appendChild(header);
     }
-    sheet.appendChild(header);
+
+    // Header banner text — owned page truth (contract.header.text), with
+    // {{title}}/{{date}}/{{version}}/{{page}}/{{pages}} tokens resolved. Placed
+    // at the top reading-start side so it does not collide with a top-right
+    // page number. Rendered only when non-empty.
+    const headerText = _resolveBannerText(contract && contract.header && contract.header.text, pageCtx);
+    if (headerText) {
+      const hb = document.createElement('div');
+      hb.className = 'rga-page-sheet-running-header';
+      hb.textContent = headerText;
+      _positionBanner(hb, isRtl ? 'top_right' : 'top_left', m, isRtl);
+      sheet.appendChild(hb);
+    }
 
     // D.4 — optional running header (opt-in only; default off).
     // When opts.headerStyle === 'running', renders the script title
@@ -177,7 +219,59 @@
       sheet.appendChild(footer);
     }
 
+    // Footer banner text — owned page truth (contract.footer.text), tokens
+    // resolved, placed bottom-center. Rendered only when non-empty.
+    const footerText = _resolveBannerText(contract && contract.footer && contract.footer.text, pageCtx);
+    if (footerText) {
+      const fb = document.createElement('div');
+      fb.className = 'rga-page-sheet-footer-banner';
+      fb.textContent = footerText;
+      _positionBanner(fb, 'bottom_center', m, isRtl);
+      sheet.appendChild(fb);
+    }
+
     return sheet;
+  }
+
+  // Resolve header/footer banner text through the token resolver. Returns ''
+  // for empty/missing text so the caller can skip rendering. Guarded so the
+  // renderer still works if print-tokens.js failed to load (returns raw text).
+  function _resolveBannerText(text, ctx) {
+    if (typeof text !== 'string' || text.length === 0) return '';
+    if (Rga.PrintTokens && typeof Rga.PrintTokens.resolve === 'function') {
+      return Rga.PrintTokens.resolve(text, ctx);
+    }
+    return text;
+  }
+
+  // Position an absolutely-positioned banner element inside the page margin
+  // band from a position name ('top_right' | 'top_center' | 'top_left' |
+  // 'bottom_right' | 'bottom_center' | 'bottom_left'). Inline styles only —
+  // no measurement. RTL mirrors the physical left/right edges so 'right'
+  // lands on the binding side, consistent with the sheet padding mirror.
+  // No margins → leave the CSS fallback positions in place.
+  function _positionBanner(el, position, m, isRtl) {
+    if (!m) return;
+    const pos = String(position || 'top_right');
+    const isBottom = pos.indexOf('bottom') === 0;
+    const half = isBottom ? (m.bottom * 0.5) : (m.top * 0.5);
+    // Clear any prior vertical pin (CSS fallback) before setting ours.
+    el.style.top = ''; el.style.bottom = '';
+    if (isBottom) el.style.bottom = half + 'in'; else el.style.top = half + 'in';
+    el.style.left = ''; el.style.right = '';
+    if (pos.indexOf('center') !== -1) {
+      el.style.left  = m.left + 'in';
+      el.style.right = m.right + 'in';
+      el.style.textAlign = 'center';
+    } else if (pos.indexOf('left') !== -1) {
+      // physical left edge: in RTL the binding (wider) margin is on the right,
+      // so the physical-left content edge uses the right margin value.
+      el.style.left = (isRtl ? m.right : m.left) + 'in';
+      el.style.textAlign = 'start';
+    } else { // right (default)
+      el.style.right = (isRtl ? m.left : m.right) + 'in';
+      el.style.textAlign = isBottom ? 'right' : 'end';
+    }
   }
 
   function _buildBlockEl(block, isFirstOnPage, layoutProfile) {
@@ -194,13 +288,19 @@
     if (typeof block.pmTo   === 'number') el.setAttribute('data-pm-to',   String(block.pmTo));
 
     if (block.type === 'sceneHeading') {
-      _appendHeadingDisplay(el, block.heading, layoutProfile);
+      _appendHeadingDisplay(el, block.heading, layoutProfile, block.sceneNumber);
     } else {
       const runs = (block.inlineRuns && block.inlineRuns.length > 0)
         ? block.inlineRuns
         : [{ text: block.text || '', marks: [] }];
+      // Print Truth Unification V1, SCOPE D — mark visibility from the Print
+      // Contract. Contract-less renders (pure pipeline tests) use the doctrine
+      // default: highlights survive into the deliverable; tags / notes / flags
+      // do not — byte-identical to the legacy "working marks ignored" behavior.
+      const marksVis = (layoutProfile && layoutProfile.printContract && layoutProfile.printContract.marks)
+        || DEFAULT_MARKS;
       for (let r = 0; r < runs.length; r += 1) {
-        el.appendChild(_renderRun(runs[r]));
+        el.appendChild(_renderRun(runs[r], marksVis));
       }
     }
     return el;
@@ -213,13 +313,29 @@
   // construction. When no profile is available (empty-doc / preload path) the
   // resolver's default convention is used, which equals the legacy Print
   // composition exactly, keeping output byte-identical.
-  function _appendHeadingDisplay(el, heading, layoutProfile) {
+  function _appendHeadingDisplay(el, heading, layoutProfile, sceneNumber) {
     if (!heading) return;
     const spec = (layoutProfile && layoutProfile.blocks && layoutProfile.blocks.sceneHeading) || null;
     const convention = spec
       ? { order: spec.order, separators: spec.separators }
       : undefined;
-    el.textContent = Rga.SlugResolver.compose(heading, convention).text;
+    const slugText = Rga.SlugResolver.compose(heading, convention).text;
+
+    // Print Truth Unification V1, SCOPE E — when scene numbering is enabled
+    // (Print Contract truth, the same flag Flow honors), prefix the slug with
+    // the scene number as a separable marker. Contract-less renders (pure
+    // pipeline tests) carry no number — byte-identical to the legacy slug.
+    const contract = layoutProfile && layoutProfile.printContract;
+    const showScene = !!(contract && contract.sceneNumbering && contract.sceneNumbering.enabled);
+    if (showScene && sceneNumber !== null && sceneNumber !== undefined) {
+      const num = document.createElement('span');
+      num.className = 'rga-print-scene-number';
+      num.textContent = String(sceneNumber);
+      el.appendChild(num);
+      el.appendChild(document.createTextNode(slugText));
+    } else {
+      el.textContent = slugText;
+    }
   }
 
   // ----------------------------------------------------------------
@@ -230,11 +346,17 @@
   //   annotation/tag/revisionFlag: working-state marks; print-preview
   //     intentionally ignores them so the preview reads like a clean
   //     production script. A future toggle could surface them.
-  function _renderRun(run) {
+  // Doctrine default mark visibility for contract-less renders: highlights
+  // survive into the deliverable; tags / notes / flags do not (Print Truth
+  // Doctrine, Decision 2). Matches the legacy hardcoded behavior exactly.
+  const DEFAULT_MARKS = { tags: false, notes: false, flags: false, highlights: true };
+
+  function _renderRun(run, marksVis) {
+    marksVis = marksVis || DEFAULT_MARKS;
     let node = document.createTextNode(run.text || '');
     if (!run.marks || run.marks.length === 0) return node;
     for (let i = run.marks.length - 1; i >= 0; i -= 1) {
-      const wrap = _markWrapper(run.marks[i]);
+      const wrap = _markWrapper(run.marks[i], marksVis);
       if (wrap) {
         wrap.appendChild(node);
         node = wrap;
@@ -243,8 +365,9 @@
     return node;
   }
 
-  function _markWrapper(mark) {
+  function _markWrapper(mark, marksVis) {
     if (!mark || !mark.type) return null;
+    marksVis = marksVis || DEFAULT_MARKS;
     switch (mark.type) {
       case 'strong':
       case 'bold':
@@ -278,15 +401,35 @@
       }
       case 'highlight':
       case 'backgroundColor': {
+        if (!marksVis.highlights) return null;       // hidden when toggled off
         const sp = document.createElement('span');
         if (mark.attrs && mark.attrs.color) sp.style.backgroundColor = mark.attrs.color;
         return sp;
       }
-      // Working-state marks — no decoration in print preview.
-      case 'annotation':
-      case 'tag':
-      case 'revisionFlag':
-        return null;
+      // Working-state marks — off by default (doctrine), shown only when the
+      // writer turns them on for a marked review/export. The TEXT is always
+      // rendered regardless; these wrappers only add the mark's decoration.
+      // Minimal, class-based + mark-own-color decoration so the wiring is real
+      // and verifiable; final visual treatment is a designer call (deferred).
+      case 'tag': {
+        if (!marksVis.tags) return null;
+        const sp = document.createElement('span');
+        sp.className = 'rga-print-mark-tag';
+        if (mark.attrs && mark.attrs.color) sp.style.borderBottom = '1px dotted ' + mark.attrs.color;
+        return sp;
+      }
+      case 'annotation': {
+        if (!marksVis.notes) return null;
+        const sp = document.createElement('span');
+        sp.className = 'rga-print-mark-note';
+        return sp;
+      }
+      case 'revisionFlag': {
+        if (!marksVis.flags) return null;
+        const sp = document.createElement('span');
+        sp.className = 'rga-print-mark-revision';
+        return sp;
+      }
       default:
         return null;
     }

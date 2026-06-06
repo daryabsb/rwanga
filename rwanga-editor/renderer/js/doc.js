@@ -80,6 +80,16 @@
         margins: { top: 1, right: 1, bottom: 1, left: 1.5 },
         pageNumbers: true,
         pageNumberPosition: 'top_right',
+        // Print Truth Unification V1 — header/footer banner text (token-bearing)
+        // and print/export mark visibility, seeded explicitly so a new doc owns
+        // its full print truth. Mark defaults honor the Print Truth Doctrine:
+        // highlights survive into the deliverable; tags/notes/flags do not.
+        headerText: '',
+        footerText: '',
+        showTags: false,
+        showNotes: false,
+        showFlags: false,
+        showHighlights: true,
       },
       vocabulary: {
         settings: ['INT.', 'EXT.', 'INT./EXT.', 'EXT./INT.'],

@@ -2393,6 +2393,22 @@ body.view-print-preview-active #workspace {
   color: #111;
 }
 
+/* Print Truth Unification V1 — footer banner text (contract.footer.text, with
+ * tokens resolved). Muted, like the running header. FALLBACK positions only;
+ * PrintRenderer writes inline left/right/bottom/text-align from the margins. */
+.rga-page-sheet-footer-banner {
+  position: absolute;
+  bottom: 0.5in;   /* FALLBACK; inline override: margins.bottom * 0.5 */
+  left: 1.5in;
+  right: 1in;
+  text-align: center;
+  font-size: 10pt;
+  font-family: inherit;
+  color: #444;
+  letter-spacing: 0.02em;
+  pointer-events: none;
+}
+
 /* D.4 — optional running header: script title top-left in muted type
  * (opt-in via Rga.PrintPreview.setOptions({ headerStyle: 'running' })).
  * Default behavior is off; this element is absent when not opted in.
@@ -2440,6 +2456,20 @@ body.view-print-preview-active #workspace {
    * (no pipeline change). */
   border-bottom: 3px solid var(--accent-rwanga, #C2185B);
 }
+/* Print Truth Unification V1, SCOPE E — scene-number marker on the printed
+ * slug (rendered only when scene numbering is enabled in the Print Contract,
+ * the same truth Flow shows). Logical spacing so it mirrors correctly in RTL;
+ * no width box that PageMap (pure arithmetic) would need to know about. */
+.rga-print-scene-number {
+  font-weight: bold;
+  margin-inline-end: 1em;
+}
+/* Print Truth Unification V1, SCOPE D — working-mark decorations in the
+ * deliverable. Rendered only when the writer turns the mark on (off by
+ * doctrine default). Minimal, honest defaults; the tag underline color comes
+ * inline from the mark. Final visual treatment is a designer call (deferred). */
+.rga-print-mark-note     { border-bottom: 1px dotted #b58900; }
+.rga-print-mark-revision { font-weight: bold; }
 .rga-print-block-action {
   margin-top: 1em;
 }

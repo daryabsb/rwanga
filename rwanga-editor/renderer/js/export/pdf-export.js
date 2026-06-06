@@ -148,7 +148,16 @@
       const opts = (Rga.PrintPreview && typeof Rga.PrintPreview.getOptions === 'function')
         ? Rga.PrintPreview.getOptions()
         : {};
-      Rga.PrintRenderer.render(model, tmp, opts);
+      // Print Truth Unification V1 — supply the header/footer token context
+      // (title/version) from the active Rga doc so the PDF matches Print Preview
+      // (the RenderModel is built from the PM node, which has no metadata).
+      const doc = _activeDoc();
+      const md  = (doc && doc.metadata) || {};
+      const tokenCtx = {
+        title:   (typeof md.title === 'string') ? md.title : '',
+        version: (md.version !== null && md.version !== undefined) ? String(md.version) : ''
+      };
+      Rga.PrintRenderer.render(model, tmp, Object.assign({}, opts, { tokenCtx: tokenCtx }));
     }
     return tmp.innerHTML;
   }

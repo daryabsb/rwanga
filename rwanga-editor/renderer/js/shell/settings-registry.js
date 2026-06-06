@@ -148,9 +148,16 @@
       keywords: ['font', 'size', 'point', 'pt']
     }),
     entry({
+      // Print Truth Unification V1, SCOPE B — line spacing is a property of the
+      // SCRIPT, so it travels in the .rga (persistsTo: 'script'). The global
+      // (built-in) default still seeds new documents via the tier cascade; once
+      // set it overrides per-document. This drives Flow's drafting leading;
+      // Print/PDF keep their calibrated page-truth leading (LTR 1.0 / RTL ~1.3)
+      // per the Print Truth Doctrine — Flow's draft spacing is not forced onto
+      // the page.
       id: 'editor.lineHeight', label: 'Line Height',
-      description: 'Spacing between lines in the editor. Standard is 1.0 (single-spaced).',
-      type: 'select', default: '1.0', scope: 'flow', owner: 'editor',
+      description: 'Spacing between lines in Flow View. Travels with the script. Standard is 1.0 (single-spaced).',
+      type: 'select', default: '1.0', scope: 'flow', persistsTo: 'script', owner: 'editor',
       options: ['1.0', '1.15', '1.5', '2.0'],
       labels:  { '1.0': '1.0 — Single', '1.15': '1.15 — Compact',
                  '1.5': '1.5', '2.0': '2.0 — Double' },
@@ -335,6 +342,38 @@
       scope: 'print', persistsTo: 'script', owner: 'pageSetup',
       previewKind: 'page',
       keywords: ['footer', 'text', 'bottom', 'copyright']
+    }),
+    // Print Truth Unification V1 — mark visibility in Print Preview / export.
+    // Defaults honor the committed Print Truth Doctrine (Decision 2): the clean
+    // page is the deliverable. Highlights survive; tags / notes / flags are off
+    // until the writer turns them on for a marked review/export.
+    entry({
+      id: 'pageSetup.showHighlights', label: 'Print Highlights',
+      description: 'Show text highlight colors in Print Preview and exports.',
+      type: 'toggle', default: true,
+      scope: 'print', persistsTo: 'script', owner: 'pageSetup',
+      keywords: ['highlight', 'color', 'mark', 'print']
+    }),
+    entry({
+      id: 'pageSetup.showNotes', label: 'Print Notes',
+      description: 'Show writing notes/annotations in Print Preview and exports. Off keeps the deliverable clean.',
+      type: 'toggle', default: false,
+      scope: 'print', persistsTo: 'script', owner: 'pageSetup',
+      keywords: ['note', 'annotation', 'comment', 'print']
+    }),
+    entry({
+      id: 'pageSetup.showFlags', label: 'Print Revision Flags',
+      description: 'Show revision flags in Print Preview and exports.',
+      type: 'toggle', default: false,
+      scope: 'print', persistsTo: 'script', owner: 'pageSetup',
+      keywords: ['flag', 'revision', 'mark', 'print']
+    }),
+    entry({
+      id: 'pageSetup.showTags', label: 'Print Tags',
+      description: 'Show breakdown tags in Print Preview and exports. Off by convention — tags are writing metadata, not page content.',
+      type: 'toggle', default: false,
+      scope: 'print', persistsTo: 'script', owner: 'pageSetup',
+      keywords: ['tag', 'breakdown', 'entity', 'print']
     }),
 
     // ── Print / Export ──
