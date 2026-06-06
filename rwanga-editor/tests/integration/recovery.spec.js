@@ -105,6 +105,36 @@ test('crash recovery — Restore reopens the unsaved work', async () => {
   await expect(win.p.locator('#editor')).toContainText(/recovermarker/i);
 });
 
+test('a renderer reload (dev live-reload) does NOT prompt recovery and preserves the live document', async () => {
+  let win = await launch();
+  app = win.a;
+  // A dirty, never-saved (untitled) document — autosave writes a live snapshot.
+  await typeAndSnapshot(win.p, 'reloadmarker');
+
+  // Reload the SAME window. This is what the dev live-reload watcher does on any
+  // renderer change (and any future in-session reload): it restarts the renderer
+  // WITHOUT a crash and WITHOUT a graceful quit — the main process + the live
+  // autosave snapshot both survive.
+  await win.p.reload();
+  await win.p.waitForLoadState('domcontentloaded');
+  await win.p.waitForFunction(() => !!(window.Rga && window.Rga.FileManager
+    && window.Rga.TabManager && window.Rga.TabManager._editorView
+    && window.Rga.TabManager._editorView()));
+
+  // The live document is silently restored (its unsaved work preserved) —
+  // an untitled doc is NOT recoverable via session restore, so losing it here
+  // would be real data loss. It must come back, still dirty.
+  await expect(win.p.locator('#editor')).toContainText(/reloadmarker/i);
+  const dirty = await win.p.evaluate(() => {
+    const d = window.Rga.FileManager.getActive();
+    return d ? d.dirty : null;
+  });
+  expect(dirty).toBe(true);
+
+  // And NO "Recover unsaved work?" prompt appears mid-session — this is the bug.
+  await expect(win.p.locator('#recovery-modal')).toHaveCount(0);
+});
+
 test('crash recovery — Discard clears the snapshot and opens a clean document', async () => {
   let win = await launch();
   app = win.a;
