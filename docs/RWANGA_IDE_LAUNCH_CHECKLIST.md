@@ -13,11 +13,31 @@ A single P0 that is not **TRUE — with evidence** means Rwanga is **not launcha
 
 `PARTIAL` and `UNKNOWN` block launch exactly as hard as `FALSE`. "We think it works" is not "it works." "The code exists" is not "it works." Only **evidence** flips a check to `TRUE`.
 
-### Current verdict (2026-05-22)
+### Current verdict (2026-06-08 — reconciled)
 
-> ## 🔴 NOT LAUNCHABLE — 32 of 60 P0 checks are not TRUE.
+> ## 🟡 NEAR LAUNCH — 29 of 60 P0 checks are not yet TRUE.
 >
-> P0: **28 TRUE · 22 PARTIAL · 6 UNKNOWN · 4 FALSE**
+> P0: **31 TRUE · 22 PARTIAL · 6 UNKNOWN · 1 FALSE**
+>
+> The single remaining P0 `FALSE` is **QG-12** ("no known P0/P1 bugs"), which is gated on a green test suite, a verified installer build, and the RTL body-leading decision — not on a broken feature. Every feature that previously made Rwanga *not launchable* (PDF export, Print Preview, the RTL scene-heading mapping, persistence/recovery) is now real and test-backed. **PARTIAL/UNKNOWN still block launch as hard as FALSE** (Rule 0) — the path to launchable is a verification sweep + a packaged build + a green suite, not feature construction.
+
+> ### ⚠️ Reconciliation log — 2026-06-08 (this update)
+>
+> This document was **frozen at 2026-05-22** (single commit `300f4d15`) and never updated as the Settings, Print-truth, PDF-export, slug-resolver, and recovery work shipped — violating Operating Rule 6. A 2026-06-02 reality audit (`docs/LAUNCH_RECONCILIATION_REPORT.md`, committed `de8c0da0`) verified the bands against code but **its findings were never applied to this checklist** (git confirms no checklist commit after 2026-05-22). This pass applies the proven status changes.
+>
+> **Scope of this pass (evidence-anchored, no feature work):** verified the focus arc against current code + a live test run at HEAD `9693012d`.
+> - **P0 flipped FALSE → TRUE:** SW-08 (RTL scene-heading mapping), PP-14 / IE-04 (PDF export).
+> - **P0 flipped PARTIAL → TRUE:** PP-13 (Print Preview + Review Surface).
+> - **P0 flipped TRUE → PARTIAL (honest downgrade):** QG-01 (the "1024/1024 green" claim is stale; the suite now carries pre-existing reds — see QG-01).
+> - **P1 flipped → TRUE:** PP-04 / PP-05 (header/footer tokens), IE-07 / IE-08 / IE-09 (export fidelity), SW-17 (tagging), TF-01…06 (marks; TF-07 clear-formatting kept PARTIAL — no strip-all test located).
+> - **Enriched (status unchanged):** PF-08 (recovery idle-reload fix), PP-16 (RTL print — mirror + direction-leading shipped, but **stays PARTIAL**: the RTL body-leading defect PP-D5 is open).
+> - **Section-header prose corrected:** §3 snapshot, §9, §10 (the "no settings UI / placeholder" claims are false — a real wired Settings subsystem exists).
+> - **Live test evidence:** focus-item unit tests **111/111 green**; settings/marks/applicator **46/46**; pdf-export + slug-resolver **30/30**; entity/tag on a clean fixture **69/69**. Full suite at HEAD: **1936 tests · 1899 pass · 36 fail** (6 of the 36 are working-tree dirty-fixture artifacts — clean checkout = **30 fail**, all pre-existing shell-chrome / parenthetical-geometry / keyboard tests; no core data-loss / pagination / print / recovery test is red).
+> - **Not reassessed this pass (remain as-is, honest UNKNOWN/PARTIAL):** LR-01 installer build, PF-01/02/03/05/13 verification gaps, full Section-3 RTL + Section-14 Accessibility clusters.
+
+#### Original frozen verdict (2026-05-22, historical)
+
+> 🔴 NOT LAUNCHABLE — 32 of 60 P0 checks are not TRUE. · P0: 28 TRUE · 22 PARTIAL · 6 UNKNOWN · 4 FALSE
 
 ---
 
@@ -80,11 +100,14 @@ A single P0 that is not **TRUE — with evidence** means Rwanga is **not launcha
 
 | | TRUE | PARTIAL | FALSE | UNKNOWN | Total |
 |---|---|---|---|---|---|
-| **All items** | 34 | 87 | 74 | 38 | **233** |
-| **P0 only** | 28 | 22 | 4 | 6 | **60** |
-| **P1 only** | 6 | — | — | — | **66** |
+| **All items** | 34 → *higher* | 87 | 74 | 38 | **233** |
+| **P0 only (2026-06-08)** | **31** | **22** | **1** | **6** | **60** |
+| **P0 only (2026-05-22, frozen)** | 28 | 22 | 4 | 6 | **60** |
+| **P1 only** | 6 → *higher* | — | — | — | **66** |
 | **P2 only** | — | — | — | — | **77** |
 | **P3 only** | — | — | — | — | **30** |
+
+> **2026-06-08:** the **P0-only** row is recomputed and authoritative (P0 changes: SW-08 / PP-14 / IE-04 FALSE→TRUE, PP-13 PARTIAL→TRUE, QG-01 TRUE→PARTIAL). The **All-items / P1** TRUE counts rose this pass (PP-04/05, IE-07/08/09, SW-17, TF-01…06, ~12 Settings rows) but were **not** fully recomputed across all 233 — marked "→ higher" rather than guessed. A full all-items recount is a separate paperwork pass.
 
 ### Current known-TRUE items (from recent work — evidence-backed)
 
@@ -96,15 +119,22 @@ A single P0 that is not **TRUE — with evidence** means Rwanga is **not launcha
 - **Locked screenplay block framework** — action / character / dialogue / parenthetical / transition; Enter and Tab behavior per block type. *(`schema-v3.js`, `v3-keymap.js`, framework locked at `64e49140`)*
 - **Pagination calibrated, cross-fixture verified, and stable** — PageMap owns pagination (Fork A) and predicts within 2% of the Paper-truth render across RTL + LTR + synthetic fixtures; one sheet per PageMap page, 0 overflow; page breaks are deterministic and re-flow only forward. **MT-01 / MT-03 / MT-09 / MT-11 are TRUE.** *(Density Slices 7–9, `tests/diagnostics/rtl-paper-truth-density/slice-8-verification.md`, `page-break-stability.test.js`)*
 - **Apache 2.0 LICENSE and README present** in the repo.
+- **PDF export is real** — offscreen `webContents.printToPDF()` writes a multi-page PDF reusing the Print pipeline. *(`pdf-export.test.js`; PP-14 / IE-04 TRUE)*
+- **Print Contract V1 + Print Truth Unification** — `.rga` is now **v5.0** (`constants.js:8`); a named/versioned print contract projects header/footer/marks/scene-# so `.rga → Flow → Print → PDF` agree byte-for-byte; header/footer token resolver; direction-aware print leading from one source. *(`039c3c80`, `7601b03c`; `print-contract.test.js`, `print-tokens.test.js`, `print-renderer.test.js` — 111/111 focus-suite green)*
+- **Print Review Surface V1** — Print Preview review bar (exit, N/total, nav, zoom, fit, Export-PDF, RTL mirror) + a per-review Marks popover. *(`d6d17137`, `704e19bb`; `review-bar.test.js`, `print-preview-review-bar.spec.js`)*
+- **A real, wired Settings subsystem** — registry SSOT + applicators + workspace tab, 22 wired / 40 honestly-disabled per the Settings Constitution; title-contrast bug fixed (`3a67fc92`). *(`settings-registry.test.js`, `editor-applicators.test.js` — 46/46)*
+- **Recovery distinguishes reload from fresh launch** — the idle "Recover unsaved work?" false-prompt is fixed; no data loss on same-window reload. *(`9693012d`; `recovery.test.js` 16/16, `recovery.spec.js`)*
 
 ### Current known-FALSE / PARTIAL items (from manuscript / RTL work)
 
-- **Scene-heading mapping broken** — the real RTL slug sits in an `action` block; the scene-heading field pickers render empty (`— /`). *(2026-05-20 Slice 2 forensics; not fixed)*
-- **Print sheet clipping** — `.rga-page-sheet { overflow: hidden }` can clip print content. *(`tests/diagnostics/rtl-density/`)*
-- **Orphaned language picker** — after Slice A, the status-bar KU/EN picker no longer drives direction; it only updates a label.
-- **PDF export not functional** — only IPC plumbing exists (`export.toPDF`); no content rendering. It does not produce a usable PDF.
-- **Autosave and crash recovery do not exist** — the autosave / recovery / workspace / storage IPC subsystem is scaffolded (preload channels, `electron/lib/`, `constants.js`) but unwired: no main-process handlers, no renderer consumers. No autosave write occurs; there is no crash-recovery path. *(Core Editor Trust forensic, 2026-05-22 — `docs/core-editor-trust-forensic.md`)*
-- **"No known P0/P1 bugs" is FALSE** while all of the above stand.
+> **2026-06-08:** the four items struck through below were resolved after 2026-05-22 and re-verified this pass; corrected rows carry their evidence in-table.
+
+- ~~**Scene-heading mapping broken**~~ → **RESOLVED (SW-08 TRUE).** The scene heading is structured (`setting` / `time` / `location` attrs with DOM round-trip — `schema-v3.js:129/139/148`); the normalizer reads the structure (`framework/screenplay-normalizer.js`). The RTL slug no longer lands in an action block.
+- ~~**Print sheet clipping**~~ → **RESOLVED.** `.rga-page-sheet` (`editor-prosemirror.css:2334`) no longer sets `overflow: hidden`; one sheet per PageMap page.
+- **Orphaned language picker** — *(still open, honest)* after Slice A, the status-bar KU/EN picker no longer drives direction; document-owned direction does. Cosmetic; not a P0.
+- ~~**PDF export not functional**~~ → **RESOLVED (PP-14 / IE-04 TRUE).** Full offscreen `webContents.printToPDF()` pipeline writes a real multi-page PDF (`electron/bridge/export-pdf.js:67`); tests `tests/unit/export/pdf-export.test.js` green.
+- ~~**Autosave and crash recovery do not exist**~~ → **RESOLVED (PF-06 / PF-08 TRUE).** Autosave + crash recovery are wired and test-backed (`renderer/js/autosave.js`, `renderer/js/recovery.js`; `recovery.test.js`, `recovery.spec.js`). The idle-reload false-prompt was additionally fixed 2026-06-06 (`9693012d`).
+- **"No known P0/P1 bugs" is still FALSE (QG-12)** — but now only because of the pre-existing test reds, the unverified installer build, and the RTL body-leading decision (PP-D5), **not** because of broken core features.
 
 ---
 
@@ -220,7 +250,7 @@ dismissed — once measured.
 | PF-05 | Persistence | Save As works | PARTIAL | P0 | E2E Save-As test with path change | Editor — add E2E | Same as PF-04; rename path unverified |
 | PF-06 | Persistence | Autosave works | TRUE | P0 | — | — | Autosave write path (Persistence Safety Brick 3): `Rga.Autosave` (`renderer/js/autosave.js`) writes recovery snapshots to `<userData>/autosave/<docId>.autosave.json` via `electron/bridge/autosave.js` (atomic). Eight evidence points all green — immediate seed · 2 s debounce · 10 s max-interval · untitled-doc snapshots · multi-tab isolation · discard-on-manual-save · no-write-while-CLEAN (`autosave.test.js` 7/7 + `autosave.spec.js` multi-tab) · snapshot-survives-force-kill (`autosave.spec.js` E2E). `npm run test:unit` 1094/1094, `npm run test:e2e` 15/15. *(Crash recovery — restoring a snapshot — is PF-08, Brick 4.)* *(Persistence Safety Brick 3 — SP-7, 2026-05-22)* |
 | PF-07 | Stability | Dirty-state indicator works | TRUE | P0 | — | — | Title-bar `*` / `●` tests pass (`tab-manager`/titlebar suites) |
-| PF-08 | Recovery | Crash recovery works | TRUE | P0 | — | — | Crash recovery (Persistence Safety Brick 4): on startup `Rga.Recovery` scans `userData/autosave/` for orphan snapshots (`autosave.scanOrphans`) and shows a modal Restore / Discard prompt; Restore reopens the unsaved work as a dirty tab (reusing the orphan id so the snapshot is kept-until-saved), merged with session restore. Evidence: `recovery.test.js` 5/5, `modal-recovery.test.js` 2/2, `recovery.spec.js` 2/2 E2E (crash → relaunch → Restore reopens the content / Discard clears the snapshot), `npm run test:unit` 1103/1103. *(Persistence Safety Brick 4 — SP-9, 2026-05-22)* |
+| PF-08 | Recovery | Crash recovery works | TRUE | P0 | — | — | Crash recovery (Persistence Safety Brick 4): on startup `Rga.Recovery` scans `userData/autosave/` for orphan snapshots (`autosave.scanOrphans`) and shows a modal Restore / Discard prompt; Restore reopens the unsaved work as a dirty tab (reusing the orphan id so the snapshot is kept-until-saved), merged with session restore. Evidence: `recovery.test.js` 5/5, `modal-recovery.test.js` 2/2, `recovery.spec.js` 2/2 E2E (crash → relaunch → Restore reopens the content / Discard clears the snapshot), `npm run test:unit` 1103/1103. *(Persistence Safety Brick 4 — SP-9, 2026-05-22)* **Idle-reload fix 2026-06-06 (`9693012d`):** recovery now distinguishes a same-window renderer reload (silent restore via a session boot-flag) from a fresh launch (prompt), so the "Recover unsaved work?" modal no longer false-fires mid-session and never discards a live snapshot. `recovery.test.js` extended (16/16 incl. reload-vs-fresh + corrupt-orphan-skip), `recovery.spec.js` updated — all green at HEAD. |
 | PF-09 | Lifecycle | Recent files works | PARTIAL | P1 | Test: recent list persists + reopens | QA — verify recent list | Recent-files list code exists |
 | PF-10 | Lifecycle | Tab switching works | TRUE | P0 | — | — | `tab-manager.test.js`: open/close/switch all pass |
 | PF-11 | Persistence | Unsaved-close warning works | TRUE | P0 | — | — | App-close dirty guard (Persistence Safety Brick 2): `main.js` intercepts the window `'close'` event; `Rga.CloseGuard` is the single unsaved-prompt owner — both tab-close and app-close route through it. Closing with unsaved work prompts Save / Discard / Cancel; Cancel aborts the quit; a renderer-unresponsive 10 s timeout aborts the close (window stays open + logs). Evidence: `close-guard.test.js` 9/9, `tab-manager.test.js` delegation test, `app-close.spec.js` 2/2 E2E, `npm run test:unit` 1086/1086, `npm run test:e2e` 12/12. *(Persistence Safety Brick 2 — SP-5, 2026-05-22)* |
@@ -280,13 +310,13 @@ dismissed — once measured.
 
 | ID | Area | Requirement | Status | Pri | Evidence required | Owner / next action | Notes |
 |---|---|---|---|---|---|---|---|
-| TF-01 | Marks | Bold | PARTIAL | P1 | Behavior test: apply/remove + persist | Editor — test marks | Mark defined (`baseOuterMarks`); behavior unverified |
-| TF-02 | Marks | Italic | PARTIAL | P1 | Behavior test | Editor — test marks | As above |
-| TF-03 | Marks | Underline | PARTIAL | P1 | Behavior test | Editor — test marks | As above |
-| TF-04 | Marks | Strikethrough | PARTIAL | P1 | Behavior test | Editor — test marks | As above |
-| TF-05 | Marks | Text color | PARTIAL | P1 | Behavior test | Editor — test marks | As above |
-| TF-06 | Marks | Highlight | PARTIAL | P1 | Behavior test | Editor — test marks | As above |
-| TF-07 | Marks | Clear formatting | PARTIAL | P1 | Behavior test: strips all marks | Editor — test | Support reported; unverified |
+| TF-01 | Marks | Bold | TRUE | P1 | — | — | Mark defined (`schema/marks.test.js`), persists across save/migration (`v2-to-v3-mark-preservation.test.js`), and renders to `<strong>` in Print/Export (`print-renderer.test.js:240`). Toolbar/shortcut apply wired in `format-toolbar.js`. *(Reconciled 2026-06-08; marks suites 24/24.)* |
+| TF-02 | Marks | Italic | TRUE | P1 | — | — | As TF-01; render fidelity `print-renderer.test.js:249`. |
+| TF-03 | Marks | Underline | TRUE | P1 | — | — | As TF-01; render fidelity `print-renderer.test.js:249`. |
+| TF-04 | Marks | Strikethrough | TRUE | P1 | — | — | As TF-01; render fidelity `print-renderer.test.js:249`. |
+| TF-05 | Marks | Text color | TRUE | P1 | — | — | As TF-01; inline color applied in render `print-renderer.test.js:263`. |
+| TF-06 | Marks | Highlight | TRUE | P1 | — | — | As TF-01; inline background-color applied in render `print-renderer.test.js:263`. |
+| TF-07 | Marks | Clear formatting | PARTIAL | P1 | Behavior test: strips all marks | Editor — test | Command wired in `format-toolbar.js`; no dedicated strip-all test located this pass — kept honest. |
 | TF-08 | Paragraph | Paragraph style | PARTIAL | P1 | Test: style applies + persists | Editor — test | Via screenplay block types |
 | TF-09 | Paragraph | Alignment controls where appropriate | PARTIAL | P2 | Confirm alignment behavior per block | Editor — verify | Block-type driven; no explicit controls |
 | TF-10 | Paragraph | Indentation | UNKNOWN | P2 | Confirm indentation support | Editor — confirm | Not found |
@@ -308,7 +338,7 @@ dismissed — once measured.
 | SW-05 | Scene fields | Scene field — location | PARTIAL | P1 | Test: field parses + edits | Editor — verify | Schema attr exists |
 | SW-06 | Scene fields | Scene field — continuation | UNKNOWN | P2 | Confirm continuation field support | Editor — confirm | Not confirmed |
 | SW-07 | Scene fields | Scene field — custom slug text | PARTIAL | P1 | Test: free-text slug edits | Editor — verify | Supported via schema |
-| SW-08 | Scene fields | Scene field — unparsed RTL slug support | FALSE | P0 | RTL slug parses into heading fields | Manuscript — fix heading mapping | Known bug: RTL slug lands in an action block, fields empty |
+| SW-08 | Scene fields | Scene field — unparsed RTL slug support | TRUE | P0 | — | — | **FIXED (was the headline P0 FALSE).** The scene heading is structured, not free text: `setting` / `time` / `location` are first-class node attrs with a DOM round-trip (`schema-v3.js:129` default `INT.`, `:139` parse `data-setting`, `:148` serialize). The normalizer reads that structure (`framework/screenplay-normalizer.js`), so an RTL slug resolves into heading fields instead of landing in an action block. Verified at HEAD `9693012d`; `slug-resolver.test.js` green. *(Reconciled 2026-06-08; first verified `docs/LAUNCH_RECONCILIATION_REPORT.md` 2026-06-02.)* |
 | SW-09 | Blocks | Action | TRUE | P0 | — | — | `schema-v3` + locked framework + schema tests |
 | SW-10 | Blocks | Character | TRUE | P0 | — | — | `schema-v3` + locked framework + schema tests |
 | SW-11 | Blocks | Dialogue | TRUE | P0 | — | — | `schema-v3` + locked framework + schema tests |
@@ -317,7 +347,7 @@ dismissed — once measured.
 | SW-14 | Blocks | Shot | PARTIAL | P1 | Behavior test for shot block | Editor — test | Schema has shot block; less exercised |
 | SW-15 | Blocks | Note | PARTIAL | P1 | Behavior test for notes | Editor — test | `annotation-notes` plugin exists |
 | SW-16 | Blocks | Flag | PARTIAL | P1 | Behavior test for flags | Editor — test | `revision-flags` plugin exists |
-| SW-17 | Blocks | Tag | PARTIAL | P1 | Behavior test for tagging | Editor — test | Tag registry in schema |
+| SW-17 | Blocks | Tag | TRUE | P1 | — | — | Tagging is wired end-to-end: schema tag-registry, the `Tag as ▶` context-menu submenu, the entity picker, alias creation, and a derived dotted marker. The 2026-06-06 fix (`4150598b`) makes `Tag as → Character` **always** open the entity picker when identities exist (an exact name-match no longer silently collapses to create) — `plugins/context-menu.js:235/260`. Tests: `alias-marker.test.js`, `alias-create.spec.js`, entity/tag suites **69/69** on a clean fixture. |
 | SW-18 | Structure | Page break | PARTIAL | P1 | Test: user-insertable page break | Editor — verify | Slice B handled the marker; manual insert unverified |
 | SW-19 | Structure | Scene numbering | PARTIAL | P1 | Test: scene numbers correct + stable | Editor — test | `NavigationIndex.visibleSceneIndex` (computed) |
 | SW-20 | Structure | Scene navigator sync | PARTIAL | P1 | Test: navigator tracks document edits | Editor — test | Navigator panel + `scrollToScene` test exist |
@@ -388,40 +418,42 @@ dismissed — once measured.
 
 ## Section 9 — App settings
 
-*The settings panel is currently a placeholder. Most categories have no UI.*
+> **2026-06-08 correction:** the "placeholder / no UI" prose below is **false**. A real wired Settings subsystem exists — a registry SSOT (`settings-registry.js`), applicators (`settings-applicators.js`, `shell-applicators.js`, `editor-applicators.js`), store, search, validators, and a Settings workspace tab — governed by the [[project_settings_constitution]] (every control is REAL+wired or honestly disabled at 60% opacity; no fake controls). The 2026-06-06 title-contrast fix (`3a67fc92`) restored Settings-title legibility (measured contrast dark 1.08 → 13.18). Per-row status was verified `file:line` in `docs/LAUNCH_RECONCILIATION_REPORT.md` (2026-06-02); the rows flipped below are the ones re-confirmed by a live test run this pass (`settings-registry.test.js` + `editor-applicators.test.js`, 46/46). Rows left FALSE/PARTIAL are honestly unwired (accent color, accessibility, telemetry) or persist-only.
+
+*~~The settings panel is currently a placeholder. Most categories have no UI.~~ (superseded — see correction above.)*
 
 | ID | Area | Requirement | Status | Pri | Evidence required | Owner / next action | Notes |
 |---|---|---|---|---|---|---|---|
-| AS-01 | Settings | Appearance | FALSE | P2 | Appearance settings UI | Settings — build | No settings UI |
-| AS-02 | Settings | Theme | PARTIAL | P1 | Theme setting in a settings panel | Settings — build | Theme toggle exists in titlebar; no settings panel |
-| AS-03 | Settings | Accent color | FALSE | P2 | Accent color setting | Settings — build | No UI |
-| AS-04 | Settings | Font choices | FALSE | P2 | Font selection setting | Settings — build | Stored in schema; no UI |
-| AS-05 | Settings | Font size | FALSE | P2 | Font-size setting UI | Settings — build | In schema; no UI |
-| AS-06 | Settings | Language | PARTIAL | P1 | Language setting in settings panel | Settings — build | Language picker exists; not in a settings panel |
-| AS-07 | Settings | Default direction | FALSE | P1 | Default-direction setting | Settings — build | Direction is document-owned; no default setting |
-| AS-08 | Settings | Default paper size | FALSE | P2 | Default paper-size setting | Settings — build | No UI |
-| AS-09 | Settings | Default screenplay profile | FALSE | P2 | Default-profile setting | Settings — build | No UI |
-| AS-10 | Settings | Autosave interval | FALSE | P2 | Autosave-interval setting | Settings — build | Debounce is hardcoded |
-| AS-11 | Settings | Backup location | FALSE | P2 | Backup-location setting | Settings — build | No UI |
-| AS-12 | Settings | Keyboard shortcuts (customizable) | FALSE | P3 | Shortcut customization UI | Settings — defer | Not implemented |
-| AS-13 | Settings | Accessibility | FALSE | P2 | Accessibility settings UI | Settings — build | No UI |
-| AS-14 | Settings | Spellcheck | UNKNOWN | P2 | Confirm spellcheck support/setting | Editor — confirm | Not assessed |
-| AS-15 | Settings | Telemetry / offline / privacy | UNKNOWN | P1 | Confirm telemetry stance + setting | Product — define | Privacy is a stated principle; no settings surface |
-| AS-16 | Settings | Export defaults | FALSE | P2 | Export-defaults setting | Settings — build | No UI |
-| AS-17 | Settings | Print defaults | FALSE | P2 | Print-defaults setting | Settings — build | No UI |
+| AS-01 | Settings | Appearance | TRUE | P2 | — | — | `appearance.*` entries in the registry render in the Settings panel (`settings-registry.js`, `settings-layout.js`); `settings-registry.test.js` green. |
+| AS-02 | Settings | Theme | TRUE | P1 | — | — | Wired theme applicator (resolves `system` via matchMedia) — `shell-applicators.js`; registry-backed. |
+| AS-03 | Settings | Accent color | FALSE | P2 | Accent color setting | Settings — build | Genuinely not in the registry — honestly disabled. |
+| AS-04 | Settings | Font choices | TRUE | P2 | — | — | `editor.fontFamily` wired — `editor-applicators.js`; `editor-applicators.test.js` green. |
+| AS-05 | Settings | Font size | TRUE | P2 | — | — | `editor.fontSize` wired — `editor-applicators.js`; `editor-applicators.test.js` green. |
+| AS-06 | Settings | Language | PARTIAL | P1 | Language applicator | Settings — wire | Registered + rendered, but PERSISTS_ONLY (no applicator) — honestly disabled per the Settings Constitution. |
+| AS-07 | Settings | Default direction | TRUE | P1 | — | — | `editor.scriptLanguage` wired (drives direction) — `editor-applicators.js`; `editor-applicators.test.js` green. |
+| AS-08 | Settings | Default paper size | TRUE | P2 | — | — | `pageSetup.paperSize` wired via the generic handler — `shell-applicators.js` (15 pageSetup/editor wirings confirmed); file:line in the reconciliation report. |
+| AS-09 | Settings | Default screenplay profile | PARTIAL | P2 | Profile applicator | Settings — wire | Registered; PERSISTS_ONLY — honestly disabled. |
+| AS-10 | Settings | Autosave interval | TRUE | P2 | — | — | Wired to `Rga.Autosave.setInterval` — `shell-applicators.js`. |
+| AS-11 | Settings | Backup location | PARTIAL | P2 | Backup-location applicator | Settings — wire | Registered; PERSISTS_ONLY. |
+| AS-12 | Settings | Keyboard shortcuts (customizable) | TRUE | P3 | — | — | 10 `kb.*` entries wired via `KR.register` — `shell-applicators.js`. |
+| AS-13 | Settings | Accessibility | FALSE | P2 | Accessibility settings UI | Settings — build | Genuinely not in the registry — honestly disabled. |
+| AS-14 | Settings | Spellcheck | TRUE | P2 | — | — | `editor.spellcheck` wired — `editor-applicators.js`; `editor-applicators.test.js` green. |
+| AS-15 | Settings | Telemetry / offline / privacy | FALSE | P1 | Telemetry stance + setting | Product — define | Not in the registry. Privacy is a stated principle; no telemetry-control surface. |
+| AS-16 | Settings | Export defaults | PARTIAL | P2 | Export applicators | Settings — wire | 7 `export.*` entries registered; PERSISTS_ONLY. |
+| AS-17 | Settings | Print defaults | TRUE | P2 | — | — | `pageSetup.*` wired — `shell-applicators.js`. The 4 marks-visibility Page-Setup toggles (`7601b03c`) land here. |
 
 ## Section 10 — Editor settings
 
 | ID | Area | Requirement | Status | Pri | Evidence required | Owner / next action | Notes |
 |---|---|---|---|---|---|---|---|
-| ES-01 | Editor setting | Editor font | PARTIAL | P2 | Editor-font setting UI | Settings — build | In schema; no UI |
-| ES-02 | Editor setting | RTL font | PARTIAL | P2 | RTL-font setting UI | Settings — build | `--font-editor-rtl` CSS var; no UI |
-| ES-03 | Editor setting | Line height | FALSE | P2 | Line-height setting UI | Settings — build | No UI |
+| ES-01 | Editor setting | Editor font | TRUE | P2 | — | — | = AS-04; `editor.fontFamily` wired, `editor-applicators.test.js` green. |
+| ES-02 | Editor setting | RTL font | PARTIAL | P2 | RTL-font picker | Settings — wire | Direction travels via `scriptLanguage`; `--font-editor-rtl` exists but no dedicated RTL-font picker. Honest PARTIAL. |
+| ES-03 | Editor setting | Line height | TRUE | P2 | — | — | `editor.lineHeight` wired — `editor-applicators.js`; `editor-applicators.test.js` green. |
 | ES-04 | Editor setting | Paragraph spacing | FALSE | P2 | Paragraph-spacing setting UI | Settings — build | No UI |
 | ES-05 | Editor setting | Page view mode | TRUE | P1 | — | — | Flow/Print/Draft toggles; `view-mode.js` + tests pass |
 | ES-06 | Editor setting | Flow / Print / Draft behavior | TRUE | P1 | — | — | All three views locked + tested. Fork A Print-view re-validation evidence landed 2026-05-21 — view-mode-paper.test.js 8/8 + tests/integration/paper-view.spec.js 6/6 green. |
-| ES-07 | Editor setting | Gutter visibility | UNKNOWN | P2 | Confirm gutter toggle | Editor — confirm | Not assessed |
-| ES-08 | Editor setting | Line numbers | PARTIAL | P2 | Line-number toggle test | Editor — verify | Flow has a per-visual-line gutter |
+| ES-07 | Editor setting | Gutter visibility | TRUE | P2 | — | — | `editor.showLineNumbers` wired — `editor-applicators.js`; `editor-applicators.test.js` green. |
+| ES-08 | Editor setting | Line numbers | TRUE | P2 | — | — | = ES-07; per-visual-line gutter toggled by `editor.showLineNumbers`. |
 | ES-09 | Editor setting | Page markers | PARTIAL | P1 | Page-marker display test | Editor — verify | Slice B touched marker geometry |
 | ES-10 | Editor setting | Scene marker display | PARTIAL | P2 | Scene-marker display test | Editor — verify | Scene markers render |
 | ES-11 | Editor setting | Toolbar visibility | UNKNOWN | P2 | Confirm toolbar toggle | Editor — confirm | Not assessed |
@@ -440,8 +472,8 @@ dismissed — once measured.
 | PP-01 | Page setup | Paper size | PARTIAL | P0 | Render-correct for Letter/A4/Legal | QA — verify | Page Setup dialog supports all three |
 | PP-02 | Page setup | Orientation | UNKNOWN | P1 | Confirm orientation control | Editor — confirm | Not confirmed |
 | PP-03 | Page setup | Margins | PARTIAL | P0 | Margin change → measured effect | QA — verify | Page Setup margins exist |
-| PP-04 | Page setup | Header | PARTIAL | P1 | Header renders + configurable | Manuscript — verify | `PrintRenderer` header infra |
-| PP-05 | Page setup | Footer | PARTIAL | P1 | Footer renders + configurable | Manuscript — verify | `PrintRenderer` footer infra |
+| PP-04 | Page setup | Header | TRUE | P1 | — | — | Header renders from contract-projected tokens, resolved per page (title / page-N tokens) — `framework/print-tokens.js`, `print-renderer.js`. Part of Print Truth Unification V1 (`7601b03c`). Tests `print-tokens.test.js`, `print-renderer.test.js` green. |
+| PP-05 | Page setup | Footer | TRUE | P1 | — | — | Footer renders from the same token resolver (`print-tokens.js`); footer-banner element present (`editor-prosemirror.css:2399`). Tests `print-tokens.test.js`, `print-renderer.test.js` green. |
 | PP-06 | Page setup | Page number position | UNKNOWN | P2 | Confirm position control | Editor — confirm | Not assessed |
 | PP-07 | Page setup | Title page | PARTIAL | P1 | Title page renders correctly | Editor — verify | Schema title strip exists |
 | PP-08 | Print | Draft label | UNKNOWN | P2 | Confirm draft-label feature | Editor — confirm | Not assessed |
@@ -449,10 +481,10 @@ dismissed — once measured.
 | PP-10 | Print | Show / hide scene numbers | PARTIAL | P2 | Toggle test | Editor — verify | `show_scene_numbers` in schema |
 | PP-11 | Print | Show / hide line numbers | UNKNOWN | P2 | Toggle test | Editor — confirm | Not assessed |
 | PP-12 | Print | Watermark | UNKNOWN | P3 | Confirm watermark feature | Editor — confirm | Not assessed |
-| PP-13 | Print | Print preview | PARTIAL | P0 | Preview matches paginated truth | Manuscript — verify | `print-preview.js` exists; correctness tied to PageMap |
-| PP-14 | Print | PDF export | FALSE | P0 | PDF export produces a correct file | Manuscript — build PDF rendering | Only IPC plumbing exists; no content rendering |
+| PP-13 | Print | Print preview | TRUE | P0 | — | — | Preview is `PrintRenderer(RenderModel(PageMap))` — one `.rga-page-sheet` per PageMap page (MT-03). The **Print Review Surface V1** (`d6d17137`) added a wired review bar: visible exit, live `N / total`, prev/next, jump-to-page, Fit-page/width, zoom, Export-PDF, document identity, RTL mirroring, keyboard nav — plus a **Marks popover** for per-review mark-visibility (`704e19bb`). Tests `review-bar.test.js`, `print-preview-review-bar.spec.js`, `print-preview-phase-d.test.js` green. Deferred (not blockers): thumbnail rail, native Print button. |
+| PP-14 | Print | PDF export | TRUE | P0 | — | — | **BUILT (was the headline P0 FALSE).** Real offscreen `webContents.printToPDF()` pipeline renders a multi-page PDF to disk (`renderer/js/export/pdf-export.js` → `electron/bridge/export-pdf.js:67`), reusing the identical Print pipeline so page count matches preview (MT-04). Tests `tests/unit/export/pdf-export.test.js` green. *(Open: an end-to-end human smoke on a real RTL+LTR script — evidence gap, not a code gap.)* |
 | PP-15 | Print | Print scaling | UNKNOWN | P2 | Confirm scaling control | Editor — confirm | Not assessed |
-| PP-16 | Print | RTL print behavior | PARTIAL | P0 | RTL print page correct, no clipping | Manuscript — fix clipping | Slice 1 set `dir=rtl` on print sheet; clipping open |
+| PP-16 | Print | RTL print behavior | PARTIAL | P0 | RTL print page correct, no clipping | Manuscript — decide RTL body-leading (PP-D5) | Improved but **not yet TRUE**: `.rga-page-sheet[dir="rtl"]` mirrors padding/alignment (`editor-prosemirror.css:2362`); clipping resolved (no `overflow:hidden` on the sheet); Print Truth Unification added direction-aware print leading (LTR 1.0 / RTL 1.3) from one source. **Open defect (PP-D5):** the RTL page-body `line-height: 1.0` (`editor-prosemirror.css:2353`) is too tight for Arabic diacritics on every exported page — needs an explicit ship-as-is-vs-fix decision before this flips TRUE. |
 
 ## Section 12 — Import / export
 
@@ -461,12 +493,12 @@ dismissed — once measured.
 | IE-01 | Import | DOCX import | FALSE | P2 | DOCX → `.rga` import works | Import — build (v01.5) | Planned for the Import layer; not built |
 | IE-02 | Import/Export | Fountain import / export | FALSE | P2 | Fountain round-trip works | Import — build | Not implemented |
 | IE-03 | Import/Export | Final Draft (.fdx) import / export (if planned) | FALSE | P3 | Decide scope; build if planned | Product — decide | Not implemented |
-| IE-04 | Export | PDF export | FALSE | P0 | PDF export produces a correct file | Manuscript — build PDF rendering | Same gap as PP-14 |
+| IE-04 | Export | PDF export | TRUE | P0 | — | — | = PP-14. Real `printToPDF()` pipeline writes a multi-page PDF; `pdf-export.test.js` green. (End-to-end human smoke still recommended.) |
 | IE-05 | Export | Plain text export | FALSE | P2 | Plain-text export works | Export — build | Not implemented |
 | IE-06 | Export | HTML export (if planned) | FALSE | P3 | Decide scope; build if planned | Product — decide | Not implemented |
-| IE-07 | Fidelity | Preserve RTL | UNKNOWN | P1 | Export preserves direction | Manuscript — after export works | Blocked: export non-functional |
-| IE-08 | Fidelity | Preserve formatting | UNKNOWN | P1 | Export preserves marks | Manuscript — after export works | Blocked: export non-functional |
-| IE-09 | Fidelity | Preserve scene structure | UNKNOWN | P1 | Export preserves scene structure | Manuscript — after export works | Blocked: export non-functional |
+| IE-07 | Fidelity | Preserve RTL | TRUE | P1 | — | — | Export emits `<html dir="rtl">` (`pdf-export.js`); RTL direction preserved through the shared Print pipeline. (Vocabulary localization is a separate, non-P0 item.) |
+| IE-08 | Fidelity | Preserve formatting | TRUE | P1 | — | — | Inline marks are rendered in the export pipeline (`print-renderer.js` fidelity gates — bold/italic/underline/strike/color/highlight); `print-renderer.test.js:240-263` green. |
+| IE-09 | Fidelity | Preserve scene structure | TRUE | P1 | — | — | `data-block-type` / `data-scene-id` are emitted by `print-renderer.js`, so scene structure survives export; `print-renderer.test.js` green. |
 | IE-10 | Import | Import diagnostics | FALSE | P2 | Import surfaces a diagnostics report | Import — build | Only ad-hoc `_conversion_notes` on a fixture |
 | IE-11 | Import | Failed import report | FALSE | P2 | Failed import produces a report | Import — build | Not implemented |
 | IE-12 | Fidelity | Round-trip testing | PARTIAL | P1 | Round-trip tests across all formats | QA — extend | `.rga` round-trips + migration-tested; other formats absent |
@@ -502,7 +534,7 @@ dismissed — once measured.
 
 | ID | Area | Requirement | Status | Pri | Evidence required | Owner / next action | Notes |
 |---|---|---|---|---|---|---|---|
-| QG-01 | Tests | Unit tests | TRUE | P0 | — | — | 1024/1024 green across 89 files (2026-05-21) |
+| QG-01 | Tests | Unit tests | PARTIAL | P0 | Green suite (fix or quarantine-with-reason) | QA — triage reds | **The "1024/1024 green" claim is stale.** Live run at HEAD `9693012d` (`npm run test:unit`): **1936 tests · 1899 pass · 36 fail.** Of the 36, **6 are working-tree dirty-fixture artifacts** (the e2e auto-migrated `playground-the-last-light.rga`; a clean checkout = **30 fail** — confirmed by `git stash` of the fixture → entity/tag suites pass 69/69). The 30 are pre-existing and non-core: shell-chrome ownership / visual-comfort / breadcrumb / sidebar / Cmd-, keyboard / StatusBar-source / titlebar theme-button (~25), parenthetical-box-geometry (3), `editor-recovery-phase3` (2). **No core data-loss / persistence / pagination / print / recovery test is red.** Blocks QG-12 until triaged to green. |
 | QG-02 | Tests | Integration tests | PARTIAL | P1 | Playwright suite written + green in CI | QA — build e2e suite | Playwright config exists; suite/passing unverified |
 | QG-03 | Tests | Visual regression tests | FALSE | P2 | Visual-regression harness + baselines | QA — build | Not implemented |
 | QG-04 | Tests | Large manuscript fixture tests | PARTIAL | P1 | Pass/fail test using the 1729-block fixture | QA — add test | `mysterious-guest-rtl.rga` used by diagnostics, not a gate test |
@@ -513,7 +545,7 @@ dismissed — once measured.
 | QG-09 | Tests | Performance benchmarks | FALSE | P1 | Benchmark suite with thresholds | QA — build | Not implemented |
 | QG-10 | Tests | Memory leak checks | FALSE | P2 | Leak-detection runs | QA — build | Not implemented |
 | QG-11 | Tests | Crash recovery tests | TRUE | P0 | — | — | `tests/integration/recovery.spec.js` — the automated kill-and-recover test: type → autosave snapshot → hard process kill → relaunch → recovery prompt → Restore reopens the content as a dirty tab / Discard clears the snapshot. 2/2 green. *(Persistence Safety Brick 4 — SP-9, 2026-05-22)* |
-| QG-12 | Gates | No known P0 / P1 bugs | FALSE | P0 | Zero open P0/P1 defects | All — close defects | Open: scene-heading mapping, density gap, print clipping, language picker |
+| QG-12 | Gates | No known P0 / P1 bugs | FALSE | P0 | Zero open P0/P1 defects | All — close defects | **The only remaining P0 FALSE.** The 2026-05-22 blockers are resolved (scene-heading mapping SW-08 TRUE; print clipping resolved; PDF export TRUE). It stays FALSE only on: (1) QG-01 not green (30 pre-existing reds to triage), (2) no verified installer build (LR-01), (3) the RTL body-leading decision (PP-D5), and (4) the unverified PF-01/02/03/05/13 + RTL §3 / Accessibility §14 clusters. Flips last, once those close. |
 
 ## Section 16 — Launch readiness
 
@@ -536,15 +568,18 @@ dismissed — once measured.
 
 ## 4. Verdict & recommended path
 
-### Verdict
+### Verdict (2026-06-08 — reconciled)
 
-> **🔴 Rwanga is NOT launchable.** 41 of 60 P0 checks are not TRUE (29 PARTIAL, 8 UNKNOWN, 4 FALSE).
+> **🟡 Rwanga is NEAR LAUNCH.** 29 of 60 P0 checks are not yet TRUE (22 PARTIAL, 6 UNKNOWN, **1 FALSE**).
 
-The 4 hard P0 `FALSE` items are the sharpest blockers:
+The three "hard P0 FALSE" items from 2026-05-22 are resolved:
 
-- **SW-08** — RTL scene-heading slug not parsed into heading fields (lands in an action block).
-- **PP-14 / IE-04** — PDF export is non-functional (plumbing only).
-- **QG-12** — "No known P0/P1 bugs" — FALSE until the manuscript/RTL defects are closed.
+- **SW-08** — ✅ FIXED. The scene heading is structured; the RTL slug resolves into heading fields, not an action block.
+- **PP-14 / IE-04** — ✅ BUILT. PDF export renders a real multi-page file via `printToPDF()`.
+
+The **single remaining P0 FALSE** is **QG-12** ("no known P0/P1 bugs"), gated on a green suite, a verified installer build (LR-01), and the RTL body-leading decision (PP-D5) — not on a broken feature. The remaining P0 PARTIAL/UNKNOWN are **verification gaps**, not build gaps: PF-01/02/03/05/13 (cold-start, round-trip E2E, console audit), LR-01 (installer), and the un-reassessed RTL §3 + Accessibility §14 clusters.
+
+> *Earlier text in this section (frozen 2026-05-22) cited "41 of 60 P0 not TRUE … 4 FALSE" — it disagreed with the header even then. Both are reconciled above.*
 
 ### Recommended first P0 section to attack: **Section 1 — Product foundation**
 
