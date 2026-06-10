@@ -13,13 +13,13 @@ A single P0 that is not **TRUE — with evidence** means Rwanga is **not launcha
 
 `PARTIAL` and `UNKNOWN` block launch exactly as hard as `FALSE`. "We think it works" is not "it works." "The code exists" is not "it works." Only **evidence** flips a check to `TRUE`.
 
-### Current verdict (2026-06-08 — reconciled)
+### Current verdict (2026-06-10 — reconciled)
 
-> ## 🟡 NEAR LAUNCH — 29 of 60 P0 checks are not yet TRUE.
+> ## 🟡 NEAR LAUNCH — 28 of 60 P0 checks are not yet TRUE.
 >
-> P0: **31 TRUE · 22 PARTIAL · 6 UNKNOWN · 1 FALSE**
+> P0: **32 TRUE · 21 PARTIAL · 6 UNKNOWN · 1 FALSE**
 >
-> The single remaining P0 `FALSE` is **QG-12** ("no known P0/P1 bugs"), which is gated on a green test suite, a verified installer build, and the RTL body-leading decision — not on a broken feature. Every feature that previously made Rwanga *not launchable* (PDF export, Print Preview, the RTL scene-heading mapping, persistence/recovery) is now real and test-backed. **PARTIAL/UNKNOWN still block launch as hard as FALSE** (Rule 0) — the path to launchable is a verification sweep + a packaged build + a green suite, not feature construction.
+> The single remaining P0 `FALSE` is **QG-12** ("no known P0/P1 bugs"), which is gated on a green test suite (QG-01) and a verified installer build (LR-01) — **not** on a broken feature. Every feature that previously made Rwanga *not launchable* (PDF export, Print Preview, the RTL scene-heading mapping, persistence/recovery, the RTL body-leading defect PP-D5) is now real and test-backed. **PARTIAL/UNKNOWN still block launch as hard as FALSE** (Rule 0) — the path to launchable is a verification sweep + a packaged build + a green suite, not feature construction.
 
 > ### ⚠️ Reconciliation log — 2026-06-08 (this update)
 >
@@ -30,10 +30,17 @@ A single P0 that is not **TRUE — with evidence** means Rwanga is **not launcha
 > - **P0 flipped PARTIAL → TRUE:** PP-13 (Print Preview + Review Surface).
 > - **P0 flipped TRUE → PARTIAL (honest downgrade):** QG-01 (the "1024/1024 green" claim is stale; the suite now carries pre-existing reds — see QG-01).
 > - **P1 flipped → TRUE:** PP-04 / PP-05 (header/footer tokens), IE-07 / IE-08 / IE-09 (export fidelity), SW-17 (tagging), TF-01…06 (marks; TF-07 clear-formatting kept PARTIAL — no strip-all test located).
-> - **Enriched (status unchanged):** PF-08 (recovery idle-reload fix), PP-16 (RTL print — mirror + direction-leading shipped, but **stays PARTIAL**: the RTL body-leading defect PP-D5 is open).
+> - **Enriched (status unchanged):** PF-08 (recovery idle-reload fix), PP-16 (RTL print — mirror + direction-leading shipped, but **stays PARTIAL**: the RTL body-leading defect PP-D5 is open). *(SUPERSEDED 2026-06-10 — PP-D5 was found already resolved; PP-16 flipped TRUE. See the 2026-06-10 log below.)*
 > - **Section-header prose corrected:** §3 snapshot, §9, §10 (the "no settings UI / placeholder" claims are false — a real wired Settings subsystem exists).
 > - **Live test evidence:** focus-item unit tests **111/111 green**; settings/marks/applicator **46/46**; pdf-export + slug-resolver **30/30**; entity/tag on a clean fixture **69/69**. Full suite at HEAD: **1936 tests · 1899 pass · 36 fail** (6 of the 36 are working-tree dirty-fixture artifacts — clean checkout = **30 fail**, all pre-existing shell-chrome / parenthetical-geometry / keyboard tests; no core data-loss / pagination / print / recovery test is red).
 > - **Not reassessed this pass (remain as-is, honest UNKNOWN/PARTIAL):** LR-01 installer build, PF-01/02/03/05/13 verification gaps, full Section-3 RTL + Section-14 Accessibility clusters.
+
+> ### ⚠️ Reconciliation log — 2026-06-10 (QG-12 blocker audit)
+>
+> **Scope:** audit the single remaining P0 `FALSE` (QG-12, "no known P0/P1 bugs") against current code + a live e2e run. QG-12 is a **roll-up gate**, not a feature — it can only flip TRUE once its named blockers close. The 2026-06-08 pass listed three: QG-01 (test reds), LR-01 (installer), and **PP-D5** (RTL body-leading). This audit found PP-D5 **stale — already resolved** by Print Truth Unification V1 (`7601b03c`).
+> - **PP-16 flipped PARTIAL → TRUE.** The cited defect — "RTL page-body `line-height: 1.0` too tight for Arabic diacritics" — no longer exists at runtime. The `1.0` at `editor-prosemirror.css:2353` is a **fallback only** (the sheet's geometry owner is `layoutProfile` via `print-renderer.js`, per the comment at `editor-prosemirror.css:2341`). At runtime, `layout-profile.js:108,197` resolves RTL print leading to **1.3** (`RTL_PRINT_LEADING`) from a single source that feeds BOTH the rendered sheet line-height (`print-renderer.js:122` → `sheet.style.lineHeight`) AND pagination (`linesPerPage`), so they can never diverge. LTR keeps 1.0 (the Courier timing convention).
+> - **Live evidence:** `tests/e2e/filmustageation/print-truth-unification.spec.js` **7/7 green** (rebuild + run at HEAD `a27e9dce`, 2026-06-10). PTU-B asserts `rtlLeading === 1.3`, the rendered sheet's `line-height === '1.3'`, and that RTL pagination honestly carries fewer lines/page than LTR.
+> - **QG-12 stays FALSE.** With PP-D5 removed, its remaining blockers are **QG-01** (30 pre-existing test reds to triage to green) and **LR-01** (no verified installer build) — both genuine verification/packaging work, neither a code defect, and both **out of scope** for a no-feature-work pass. QG-12 flips TRUE only when those close (plus the PF/RTL/A11y runtime-verification clusters). See QG-12 row for the decision options.
 
 #### Original frozen verdict (2026-05-22, historical)
 
@@ -134,7 +141,7 @@ A single P0 that is not **TRUE — with evidence** means Rwanga is **not launcha
 - **Orphaned language picker** — *(still open, honest)* after Slice A, the status-bar KU/EN picker no longer drives direction; document-owned direction does. Cosmetic; not a P0.
 - ~~**PDF export not functional**~~ → **RESOLVED (PP-14 / IE-04 TRUE).** Full offscreen `webContents.printToPDF()` pipeline writes a real multi-page PDF (`electron/bridge/export-pdf.js:67`); tests `tests/unit/export/pdf-export.test.js` green.
 - ~~**Autosave and crash recovery do not exist**~~ → **RESOLVED (PF-06 / PF-08 TRUE).** Autosave + crash recovery are wired and test-backed (`renderer/js/autosave.js`, `renderer/js/recovery.js`; `recovery.test.js`, `recovery.spec.js`). The idle-reload false-prompt was additionally fixed 2026-06-06 (`9693012d`).
-- **"No known P0/P1 bugs" is still FALSE (QG-12)** — but now only because of the pre-existing test reds, the unverified installer build, and the RTL body-leading decision (PP-D5), **not** because of broken core features.
+- **"No known P0/P1 bugs" is still FALSE (QG-12)** — but now only because of the pre-existing test reds (QG-01) and the unverified installer build (LR-01), **not** because of broken core features. *(The RTL body-leading blocker PP-D5 was closed — see the 2026-06-10 reconciliation log.)*
 
 ---
 
@@ -484,7 +491,7 @@ dismissed — once measured.
 | PP-13 | Print | Print preview | TRUE | P0 | — | — | Preview is `PrintRenderer(RenderModel(PageMap))` — one `.rga-page-sheet` per PageMap page (MT-03). The **Print Review Surface V1** (`d6d17137`) added a wired review bar: visible exit, live `N / total`, prev/next, jump-to-page, Fit-page/width, zoom, Export-PDF, document identity, RTL mirroring, keyboard nav — plus a **Marks popover** for per-review mark-visibility (`704e19bb`). Tests `review-bar.test.js`, `print-preview-review-bar.spec.js`, `print-preview-phase-d.test.js` green. Deferred (not blockers): thumbnail rail, native Print button. |
 | PP-14 | Print | PDF export | TRUE | P0 | — | — | **BUILT (was the headline P0 FALSE).** Real offscreen `webContents.printToPDF()` pipeline renders a multi-page PDF to disk (`renderer/js/export/pdf-export.js` → `electron/bridge/export-pdf.js:67`), reusing the identical Print pipeline so page count matches preview (MT-04). Tests `tests/unit/export/pdf-export.test.js` green. *(Open: an end-to-end human smoke on a real RTL+LTR script — evidence gap, not a code gap.)* |
 | PP-15 | Print | Print scaling | UNKNOWN | P2 | Confirm scaling control | Editor — confirm | Not assessed |
-| PP-16 | Print | RTL print behavior | PARTIAL | P0 | RTL print page correct, no clipping | Manuscript — decide RTL body-leading (PP-D5) | Improved but **not yet TRUE**: `.rga-page-sheet[dir="rtl"]` mirrors padding/alignment (`editor-prosemirror.css:2362`); clipping resolved (no `overflow:hidden` on the sheet); Print Truth Unification added direction-aware print leading (LTR 1.0 / RTL 1.3) from one source. **Open defect (PP-D5):** the RTL page-body `line-height: 1.0` (`editor-prosemirror.css:2353`) is too tight for Arabic diacritics on every exported page — needs an explicit ship-as-is-vs-fix decision before this flips TRUE. |
+| PP-16 | Print | RTL print behavior | TRUE | P0 | — | — | **TRUE (PP-D5 closed 2026-06-10).** `.rga-page-sheet[dir="rtl"]` mirrors padding/alignment (`editor-prosemirror.css:2362`); clipping resolved (no `overflow:hidden` swallows content — sheet height is fixed and overflow flows to the next sheet). Print Truth Unification V1 (`7601b03c`) resolved direction-aware print leading from a **single source**: `layout-profile.js:108,197` sets RTL leading to `1.3` (`RTL_PRINT_LEADING`), feeding BOTH the rendered sheet line-height (`print-renderer.js:122`) AND pagination (`linesPerPage`), so painted leading and page breaks can never desync. The CSS `line-height: 1.0` at `editor-prosemirror.css:2353` is a **fallback only** — overridden inline at runtime (owner comment at `editor-prosemirror.css:2341`). LTR keeps 1.0 (Courier timing). Test `tests/e2e/filmustageation/print-truth-unification.spec.js` PTU-B green (RTL leading 1.3, sheet line-height '1.3', RTL lines/page < LTR). *(Open: human smoke on a printed RTL page — evidence nicety, not a code gap.)* |
 
 ## Section 12 — Import / export
 
@@ -545,7 +552,7 @@ dismissed — once measured.
 | QG-09 | Tests | Performance benchmarks | FALSE | P1 | Benchmark suite with thresholds | QA — build | Not implemented |
 | QG-10 | Tests | Memory leak checks | FALSE | P2 | Leak-detection runs | QA — build | Not implemented |
 | QG-11 | Tests | Crash recovery tests | TRUE | P0 | — | — | `tests/integration/recovery.spec.js` — the automated kill-and-recover test: type → autosave snapshot → hard process kill → relaunch → recovery prompt → Restore reopens the content as a dirty tab / Discard clears the snapshot. 2/2 green. *(Persistence Safety Brick 4 — SP-9, 2026-05-22)* |
-| QG-12 | Gates | No known P0 / P1 bugs | FALSE | P0 | Zero open P0/P1 defects | All — close defects | **The only remaining P0 FALSE.** The 2026-05-22 blockers are resolved (scene-heading mapping SW-08 TRUE; print clipping resolved; PDF export TRUE). It stays FALSE only on: (1) QG-01 not green (30 pre-existing reds to triage), (2) no verified installer build (LR-01), (3) the RTL body-leading decision (PP-D5), and (4) the unverified PF-01/02/03/05/13 + RTL §3 / Accessibility §14 clusters. Flips last, once those close. |
+| QG-12 | Gates | No known P0 / P1 bugs | FALSE | P0 | Zero open P0/P1 defects | All — close defects | **The only remaining P0 FALSE. Roll-up gate — not a feature; flips TRUE only when its blockers close.** The 2026-05-22 feature blockers are resolved (scene-heading mapping SW-08 TRUE; print clipping resolved; PDF export TRUE); the RTL body-leading decision (PP-D5) was **closed 2026-06-10** (PP-16 TRUE — RTL leading 1.3 from a single source, PTU-B green). It stays FALSE only on: (1) **QG-01** not green (30 pre-existing reds to triage), (2) no verified installer build (**LR-01**), and (3) the unverified PF-01/02/03/05/13 + RTL §3 / Accessibility §14 verification clusters. **None is a code defect** — all three are verification/packaging work. Flips last, once those close. *(QG-12 audit + PP-D5 closure: 2026-06-10 reconciliation log.)* |
 
 ## Section 16 — Launch readiness
 
@@ -577,7 +584,7 @@ The three "hard P0 FALSE" items from 2026-05-22 are resolved:
 - **SW-08** — ✅ FIXED. The scene heading is structured; the RTL slug resolves into heading fields, not an action block.
 - **PP-14 / IE-04** — ✅ BUILT. PDF export renders a real multi-page file via `printToPDF()`.
 
-The **single remaining P0 FALSE** is **QG-12** ("no known P0/P1 bugs"), gated on a green suite, a verified installer build (LR-01), and the RTL body-leading decision (PP-D5) — not on a broken feature. The remaining P0 PARTIAL/UNKNOWN are **verification gaps**, not build gaps: PF-01/02/03/05/13 (cold-start, round-trip E2E, console audit), LR-01 (installer), and the un-reassessed RTL §3 + Accessibility §14 clusters.
+The **single remaining P0 FALSE** is **QG-12** ("no known P0/P1 bugs"), gated on a green suite (QG-01) and a verified installer build (LR-01) — not on a broken feature. (The RTL body-leading decision PP-D5 was closed 2026-06-10; PP-16 is now TRUE.) The remaining P0 PARTIAL/UNKNOWN are **verification gaps**, not build gaps: PF-01/02/03/05/13 (cold-start, round-trip E2E, console audit), LR-01 (installer), and the un-reassessed RTL §3 + Accessibility §14 clusters.
 
 > *Earlier text in this section (frozen 2026-05-22) cited "41 of 60 P0 not TRUE … 4 FALSE" — it disagreed with the header even then. Both are reconciled above.*
 
