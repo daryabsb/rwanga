@@ -46,3 +46,8 @@ Each update = **two edits**:
 4. **Never rewrite `CHECKPOINTS.md` history.** Correct a mistake with a new checkpoint that says so.
 5. **Two masters stay in sync.** `RWANGA_IDE_LAUNCH_CHECKLIST.md` remains the P0 status of record; the handoff *points* to it, and both must agree. If you flip a checklist item, note it in the checkpoint's Status deltas.
 6. **Respect the gates.** No AI/agent-harness feature work until the launch gate + Alive-App Phase 2 gate are closed (see HANDOFF).
+7. **Masterplan doctrine.** While HANDOFF's NEXT ACTION points into
+   `docs/plans/2026-07-02-stage1-launch-gate-masterplan.md`, the 10-rule MASTERPLAN EXECUTION
+   DOCTRINE in the root `CLAUDE.md` is binding: one slice at a time in ledger order, tick boxes in
+   the plan file, close every slice with the plan's §0.3 ritual, and **push every slice-close
+   commit**. A checkpoint that closes a slice must name the slice ID (e.g. "S1.2") in its title.

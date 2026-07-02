@@ -56,6 +56,8 @@ electron-builder (`npm run pack:win`), PowerShell/Windows 11.
 4. Verify no stray fixture edits: `git status` from `E:\api\rwanga\`.
 5. Commit everything (plan ticks + evidence + checklist flips + handoff) with the slice's commit
    message given in the slice text.
+6. **Push:** `git -C E:\api\rwanga push`. A slice-close commit that isn't pushed doesn't survive
+   this machine — pushing is part of the ritual, not optional.
 
 ### §0.4 Evidence conventions
 

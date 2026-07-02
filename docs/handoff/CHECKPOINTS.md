@@ -5,6 +5,19 @@ Template & rules: `PROTOCOL.md`.
 
 ---
 
+## 2026-07-02 · Binding execution doctrine codified · HEAD `2f20ae2f`
+- **Did:** Codified a strict, session-independent MASTERPLAN EXECUTION DOCTRINE (10 rules) in the
+  root `CLAUDE.md`, mirrored in `rwanga-editor/CLAUDE.md`, added as PROTOCOL.md Rule 7, and extended
+  the plan's §0.3 SLICE CLOSE RITUAL with a mandatory `git push` step. Any agent in any future
+  session is now bound to: masterplan-only Stage-1 work, one slice at a time in ledger order,
+  tick-as-you-go in the plan file, close ritual + push per slice, evidence before flips, escalate
+  (never paper over), never commit fixture .rga files, end cleanly when blocked on the user.
+- **Evidence:** this commit (doctrine text in CLAUDE.md ×2, PROTOCOL.md Rule 7, plan §0.3 step 6).
+- **Status deltas:** none (process hardening only).
+- **Gaps/risks surfaced:** none.
+- **Next action:** execute masterplan slice S0.1 (revert fixtures, record clean 30-red baseline) —
+  user will start this in a fresh session.
+
 ## 2026-07-02 · Stage-1 launch-gate masterplan authored · HEAD `829faa74`
 - **Did:** Converted GO_LIVE Part A/D into an executable, cross-session masterplan:
   `docs/plans/2026-07-02-stage1-launch-gate-masterplan.md` — 6 phases · 21 slices · checkbox tasks,

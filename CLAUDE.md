@@ -36,6 +36,39 @@ linked from the handoff.
 
 ---
 
+## ⚖️ MASTERPLAN EXECUTION DOCTRINE — strict, binding on EVERY agent, EVERY session
+
+While `docs/handoff/HANDOFF.md` names the Stage-1 masterplan as the active work, these rules are
+**non-negotiable**. They outrank convenience, initiative, and "better ideas."
+
+1. **The masterplan is the ONLY route for Stage-1 work.**
+   `docs/plans/2026-07-02-stage1-launch-gate-masterplan.md`. Read its **§0 survival protocol**
+   before touching anything. Do not invent parallel plans, do not restructure the campaign,
+   do not "quickly fix" launch items outside a slice.
+2. **One slice at a time, in ledger order.** Your next step is the first unchecked `- [ ]` box of
+   the slice named in HANDOFF's NEXT ACTION. Never skip, reorder, or open slice N+1 while slice N's
+   close ritual is unfinished.
+3. **Tick as you go, in the plan file itself.** The checkboxes + State Ledger ARE the campaign
+   state. Work that isn't ticked and committed does not exist.
+4. **Every slice ends with the SLICE CLOSE RITUAL** (plan §0.3): ledger tick → HANDOFF update →
+   CHECKPOINTS append → fixture check → commit → **push**. If you find a slice half-done without
+   its ritual, finish the ritual FIRST — before any new work.
+5. **Evidence before flips.** No launch-checklist row changes status without a test name, commit
+   SHA, or a file under `docs/plans/evidence/`.
+6. **Escalate, never paper over.** A real defect found during QA becomes a gap row in the plan's
+   §0.5 ledger + a HANDOFF Open case. Weakening/deleting a test to get green is forbidden.
+7. **Never commit `rwanga-editor/tests/fixtures/*.rga`.** The app auto-migrates opened fixtures;
+   check `git status` before every commit and revert stray fixture edits.
+8. **Blocked ≠ stuck.** If a step needs the user (a decision, an elevated shell), end the session
+   CLEANLY via the close ritual with NEXT ACTION naming the exact blocking step. That is a valid
+   handoff; improvising around the block is not.
+9. **Push every slice-close commit** (`git push` from `E:\api\rwanga\`). Cross-session survival
+   includes surviving this machine.
+10. **The gates stay shut** (below). Track SP.1 of the plan is *design writing only* — an agent
+    writing `Rga.Contribution` **code** during Stage 1 is violating doctrine, full stop.
+
+---
+
 ## Ground rules that outrank convenience
 
 - **Launch gate:** the editor cannot launch while any launch-checklist **P0** is FALSE / PARTIAL / UNKNOWN.
