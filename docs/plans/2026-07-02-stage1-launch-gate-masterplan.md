@@ -1,0 +1,722 @@
+# Rwanga Stage 1 — Launch-Gate Masterplan
+
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended)
+> or superpowers:executing-plans to implement this plan slice-by-slice. Steps use checkbox (`- [ ]`)
+> syntax for tracking. **Tick boxes in THIS file as you complete them and commit the tick** — the
+> checkboxes ARE the cross-session state.
+
+**Goal:** Flip all 28 open launch-checklist P0s to TRUE so QG-12 ("no known P0/P1 bugs") closes and
+Rwanga can launch as a trustworthy RTL screenplay editor.
+
+**Architecture:** This is a *verification + packaging campaign*, not feature construction. Six phases,
+strictly ordered on the critical path (test hygiene → installer → three QA sweeps → roll-up), plus one
+parallel design-only track. Every slice ends with recorded evidence, a checklist flip, and a handoff
+update — so any agent can resume from any point with zero re-discovery.
+
+**Tech stack:** Node 20+ `node --test` (unit), Playwright + Electron (`npm run test:e2e`),
+electron-builder (`npm run pack:win`), PowerShell/Windows 11.
+
+---
+
+## §0 CROSS-SESSION SURVIVAL PROTOCOL — read before doing anything
+
+### §0.1 How to resume (any agent, any session)
+
+1. Read `docs/handoff/HANDOFF.md`. Its **NEXT ACTION** names the active slice of this plan (e.g. "S1.2").
+2. Open this file. Find that slice. The first unchecked `- [ ]` box is your next step.
+3. Work the steps **in order**. Tick each box in this file as you complete it.
+4. When the slice's last box is ticked, run the **SLICE CLOSE RITUAL** (§0.3). Then either continue
+   to the next slice or end the session — the ritual guarantees the next agent resumes cleanly.
+
+### §0.2 Hard rules (violating these corrupts the campaign state)
+
+- **One slice at a time.** Never start slice N+1 with slice N's ritual unfinished.
+- **Evidence, not assertion** (PROTOCOL.md Rule 2). Every flip of a checklist row needs a test name,
+  commit SHA, or a recorded evidence file under `docs/plans/evidence/`.
+- **Escalate, don't paper over.** If a QA step finds real product breakage (not a stale test), do NOT
+  silently fix or skip it. Record it as a new gap `GAP-<phase>-<n>` in the ledger (§0.5), add it to
+  HANDOFF.md Open cases, and — only if it blocks the slice — open a fix-slice using
+  superpowers:systematic-debugging + test-driven-development.
+- **Never commit `tests/fixtures/*.rga` changes.** Opening fixtures in the running app auto-migrates
+  them and dirties the tree (this is exactly what inflated 30 reds to 36). Before every commit:
+  `git status` must show no fixture modifications; if it does, `git checkout -- rwanga-editor/tests/fixtures/*.rga`.
+- **Respect the gates** (PROTOCOL.md Rule 6): no AI/agent-harness feature code anywhere in this
+  campaign. Track P is *design writing only*.
+- **Run all npm commands from `rwanga-editor/`.** Git commands run from the repo root `E:\api\rwanga\`.
+- **Two masters stay in sync** (PROTOCOL.md Rule 5): when you flip a P0, edit the row in
+  `docs/RWANGA_IDE_LAUNCH_CHECKLIST.md` (status + evidence note) in the same commit.
+
+### §0.3 SLICE CLOSE RITUAL (run at the end of every slice — no exceptions)
+
+1. Tick the slice's row in the **State Ledger** (§0.5): `⬜ → ✅`, fill the Evidence column.
+2. Edit `docs/handoff/HANDOFF.md`: set **NEXT ACTION** to the next slice ID + one-line description;
+   update the Open-cases table if any status changed.
+3. Append a checkpoint to `docs/handoff/CHECKPOINTS.md` (newest at top) using PROTOCOL.md's template —
+   Did / Evidence / Status deltas / Gaps surfaced / Next action.
+4. Verify no stray fixture edits: `git status` from `E:\api\rwanga\`.
+5. Commit everything (plan ticks + evidence + checklist flips + handoff) with the slice's commit
+   message given in the slice text.
+
+### §0.4 Evidence conventions
+
+- Directory: `docs/plans/evidence/` (create on first use).
+- Naming: `S<slice>-<short-name>.<ext>` — e.g. `S0.1-baseline-run.txt`, `S4.2-rtl-dialogue.png`.
+- QA observations go in a per-slice markdown file (`S3.1-launch-matrix.md`) with: date, HEAD SHA,
+  app version, steps performed, observed result, verdict per checklist ID.
+
+### §0.5 State Ledger — THE campaign dashboard (update via §0.3 step 1)
+
+| Slice | Phase | What | Status | Evidence |
+|---|---|---|---|---|
+| S0.1 | 0 Baseline | Revert fixtures, record clean 30-red baseline | ⬜ | |
+| S1.1 | 1 QG-01 | Enumerate + classify all 30 reds into triage table | ⬜ | |
+| S1.2 | 1 QG-01 | Re-point the ~24 stale shell/ownership snapshot tests | ⬜ | |
+| S1.3 | 1 QG-01 | Quarantine-with-reason the parenthetical cosmetic (3 tests) | ⬜ | |
+| S1.4 | 1 QG-01 | Triage + resolve the 2 recovery-phase3 reds | ⬜ | |
+| S1.5 | 1 QG-01 | Full green unit run → flip QG-01 TRUE | ⬜ | |
+| S2.1 | 2 LR-01 | Enable Dev Mode / elevated shell → `pack:win` succeeds | ⬜ | |
+| S2.2 | 2 LR-01 | Install + smoke the built `.exe` → flip LR-01 TRUE | ⬜ | |
+| S3.1 | 3 Lifecycle | PF-01 cold-start launch matrix (Windows) | ⬜ | |
+| S3.2 | 3 Lifecycle | PF-02/03/05 lifecycle E2E specs (new/open/save-as) | ⬜ | |
+| S3.3 | 3 Lifecycle | PF-13 clean-console audit across core flows | ⬜ | |
+| S4.1 | 4 RTL ⭐ | RTL QA fixture + convention checklist prep | ⬜ | |
+| S4.2 | 4 RTL ⭐ | Editor alignment sweep RTL-04…RTL-09 | ⬜ | |
+| S4.3 | 4 RTL ⭐ | RTL Print Preview + PDF export (RTL-10, RTL-11) | ⬜ | |
+| S4.4 | 4 RTL ⭐ | Bidi audit — mixed script + punctuation (RTL-12, RTL-13) | ⬜ | |
+| S4.5 | 4 RTL ⭐ | SW-23 profile-convention verdict + flip all RTL rows | ⬜ | |
+| S5.1 | 5 Geometry | Paper sizes + margins (MT-05, MT-06, PP-01, PP-03) | ⬜ | |
+| S5.2 | 5 Geometry | Bottom-margin overflow + empty-line budget (MT-07, MT-10) | ⬜ | |
+| S5.3 | 5 Geometry | Marker stability, heading edit, PDF page count (MT-02, SW-01, MT-04) | ⬜ | |
+| S6.1 | 6 Roll-up | Reconcile checklist, flip QG-12, declare launch-gate closed | ⬜ | |
+| SP.1 | P Design | `Rga.Contribution` write-API design brief (no code) | ⬜ | |
+
+**Open gaps found during the campaign** (append rows; mirror in HANDOFF.md):
+
+| Gap ID | Found in | Description | Status |
+|---|---|---|---|
+| — | — | none yet | — |
+
+---
+
+## Global constraints
+
+- **Repo root:** `E:\api\rwanga\` (git root). **Editor:** `E:\api\rwanga\rwanga-editor\`.
+- **Status of record:** `docs/RWANGA_IDE_LAUNCH_CHECKLIST.md`. Plan of record: `docs/RWANGA_GO_LIVE_2026-07-02.md`.
+- **Baseline truth (verified 2026-07-02, HEAD `829faa74`):** clean checkout unit suite =
+  **1936 tests · 30 fail · 1 skip**; every red is non-core (~24 stale shell/ownership snapshots +
+  3 parenthetical print-cosmetic + 2 recovery-phase3).
+- **Unit tests:** `npm run test:unit` (node --test over `tests/unit/**/*.test.js`).
+- **E2E:** `npm run test:e2e` (Playwright, launches real Electron; build renderer first with
+  `npm run build:renderer`).
+- **Ratified RTL truth:** `rwanga-editor/docs/Filmustageation/redesign_campaign/RTL_SCREENPLAY_CONVENTION.md`
+  (the Kurdish/RTL profile, "Rule 10" in checklist rows) — geometry/alignment verdicts are judged
+  against it, not against taste.
+- **Known-stale checklist notes:** MT-04 and RTL-11 rows still say "Blocked: PDF export non-functional".
+  That is outdated — PDF export is TRUE and test-backed (GO_LIVE §A). Treat those two as runnable QA.
+- **Commit style:** match repo history — `test(editor): …`, `fix(editor): …`, `build(editor): …`,
+  `docs(editor): …`, `qa(editor): …`.
+
+### Decisions the user must make (ask when the slice is reached, not before)
+
+1. **macOS scope (S3.1, S6.1):** PF-01 says "Win/macOS". No Mac hardware is in evidence. Options:
+   descope macOS from v1 launch (edit checklist row wording, note the decision) or provide a Mac.
+2. **Code signing (S2.2):** `pack:win` without a certificate produces an unsigned installer.
+   GO_LIVE already says "(+ signing later)" — confirm unsigned is acceptable for LR-01 TRUE.
+
+---
+
+## Phase 0 — Baseline reset
+
+### Slice S0.1: Revert fixtures, record the clean 30-red baseline
+
+**Files:**
+- Revert: `rwanga-editor/tests/fixtures/mysterious-guest-rtl.rga`, `rwanga-editor/tests/fixtures/playground-the-last-light.rga`
+- Create: `docs/plans/evidence/S0.1-baseline-run.txt`
+
+**Interfaces:** Produces the red-count baseline (30) that S1.x slices burn down to 0.
+
+- [ ] **Step 1: Confirm the dirty fixtures are the only tree noise**
+
+Run from `E:\api\rwanga\`: `git status --short`
+Expected: `M rwanga-editor/tests/fixtures/mysterious-guest-rtl.rga` and
+`M rwanga-editor/tests/fixtures/playground-the-last-light.rga` (plus untracked docs). If OTHER tracked
+files are modified, STOP — record a gap in §0.5 and put it in HANDOFF before proceeding.
+
+- [ ] **Step 2: Revert the two fixtures**
+
+```powershell
+git -C E:\api\rwanga checkout -- rwanga-editor/tests/fixtures/mysterious-guest-rtl.rga rwanga-editor/tests/fixtures/playground-the-last-light.rga
+git -C E:\api\rwanga status --short   # expect: no modified .rga files
+```
+
+- [ ] **Step 3: Run the unit suite and capture the baseline**
+
+```powershell
+cmd /c "cd /d E:\api\rwanga\rwanga-editor && npm run test:unit > E:\api\rwanga\docs\plans\evidence\S0.1-baseline-run.txt 2>&1"
+```
+Expected in the tail of the file: `tests 1936 … fail 30 … skipped 1` (numbers must match; if fail ≠ 30,
+STOP — the baseline moved; record actual numbers as a gap and update GO_LIVE assumptions in HANDOFF).
+
+- [ ] **Step 4: SLICE CLOSE RITUAL (§0.3)**
+
+Commit message: `test(editor): restore clean fixture baseline; record 30-red QG-01 baseline (S0.1)`
+
+---
+
+## Phase 1 — QG-01 test hygiene (unblocks QG-12)
+
+**Nature (from GO_LIVE A.1 #1):** test *maintenance*, not feature work. The ~30 reds are stale
+expectations about ownership/DOM that moved during the v3 shell redesign, plus one deliberate
+print-cosmetic deferral, plus 2 recovery-phase3 stragglers.
+
+### Slice S1.1: Enumerate and classify every red
+
+**Files:**
+- Create: `docs/plans/evidence/S1.1-qg01-triage.md`
+
+**Interfaces:** Produces the triage table that S1.2/S1.3/S1.4 execute against. Later slices trust its
+classification; misclassification here is the campaign's biggest correctness risk — be rigorous.
+
+- [ ] **Step 1: Extract the failing test list from the S0.1 baseline capture**
+
+Read `docs/plans/evidence/S0.1-baseline-run.txt`; grep for `✖` / `not ok` lines (node --test reporter).
+List every failing test with its file path (`tests/unit/...`).
+
+- [ ] **Step 2: Classify each red into exactly one class**
+
+For each failing test, read the test AND the code it exercises, then assign:
+
+- **Class A — stale expectation:** the test asserts pre-redesign ownership/DOM (e.g. expects a
+  selector, module boundary, or panel owner that the v3 shell moved). The *current product behavior is
+  the documented intent* (check `rwanga-editor/docs/Filmustageation/redesign_campaign/` docs). → re-point in S1.2.
+- **Class B — deliberate cosmetic deferral:** the parenthetical print-cosmetic trio. → quarantine in S1.3.
+- **Class C — recovery-phase3:** the 2 recovery reds. → triage in S1.4.
+- **Class D — real defect:** the test is right and the product is wrong. → gap row in §0.5 +
+  HANDOFF Open cases; do NOT re-point or quarantine it.
+
+Write `S1.1-qg01-triage.md` as a table: `| test name | file | class | current owner/behavior | action |`.
+Expected totals: ~24 A · 3 B · 2 C · 0 D (if D > 0, that's a finding — escalate per §0.2 but continue
+the slice; the gap is handled in its own fix-slice later).
+
+- [ ] **Step 3: SLICE CLOSE RITUAL (§0.3)**
+
+Commit message: `test(editor): triage all QG-01 reds into re-point/quarantine/defect classes (S1.1)`
+
+### Slice S1.2: Re-point the stale shell/ownership snapshot tests (Class A)
+
+**Files:**
+- Modify: every Class-A test file listed in `docs/plans/evidence/S1.1-qg01-triage.md`
+
+**Interfaces:** Consumes S1.1's triage table. Produces a suite where the only reds left are Class B + C.
+
+- [ ] **Step 1: Fix Class-A tests in batches of one suite (file) at a time**
+
+For each file: update the assertion to the *current, documented* ownership/DOM. The new expected value
+must be traceable to a redesign doc or the live module (cite it in a one-line comment above the
+assertion, e.g. `// ownership per redesign_campaign/IMPLEMENTATION_MAP_PHASE1.md — settings panel owns page-setup rows`).
+Never loosen an assertion to make it pass (no `toBeTruthy`-style weakening, no deleting the test).
+
+- [ ] **Step 2: Verify each batch as you go**
+
+```powershell
+cmd /c "cd /d E:\api\rwanga\rwanga-editor && node --test tests/unit/<the-suite>.test.js"
+```
+Expected: that file 100% pass.
+
+- [ ] **Step 3: Full-suite check**
+
+Run `npm run test:unit`. Expected: fail count = 30 − (number of Class-A tests fixed) ≈ 5–6
+(only Class B + C remain red).
+
+- [ ] **Step 4: SLICE CLOSE RITUAL (§0.3)**
+
+Commit message: `test(editor): re-point stale shell/ownership snapshots to current owners (QG-01, S1.2)`
+
+### Slice S1.3: Quarantine the parenthetical print-cosmetic trio (Class B)
+
+**Files:**
+- Modify: the Class-B test file(s) from the triage table
+
+**Interfaces:** Consumes S1.1's triage. Produces: those 3 tests reported as `skipped` with a reason.
+
+- [ ] **Step 1: Skip each of the 3 tests with an auditable reason**
+
+node --test syntax — put the reason IN the skip so the runner output carries it:
+
+```js
+test('parenthetical print cosmetic — wrapped indent', {
+  skip: 'QUARANTINE(QG-01, 2026-07-02): deliberate cosmetic deferral — parenthetical print polish. ' +
+        'Tracked in docs/plans/2026-07-02-stage1-launch-gate-masterplan.md §0.5. Un-skip when the cosmetic lands.'
+}, () => { /* body unchanged */ });
+```
+
+Do NOT delete the test bodies. Add the same three tests to a gap row `GAP-1-1` in §0.5 (status:
+DEFERRED-COSMETIC) so they cannot be forgotten.
+
+- [ ] **Step 2: Verify**
+
+```powershell
+cmd /c "cd /d E:\api\rwanga\rwanga-editor && node --test tests/unit/<the-parenthetical-suite>.test.js"
+```
+Expected: 0 fail, 3 skipped (reason visible in output).
+
+- [ ] **Step 3: SLICE CLOSE RITUAL (§0.3)**
+
+Commit message: `test(editor): quarantine parenthetical print-cosmetic trio with tracked reason (QG-01, S1.3)`
+
+### Slice S1.4: Resolve the 2 recovery-phase3 reds (Class C)
+
+**Files:**
+- Modify: the Class-C test file(s) from the triage table
+
+**Interfaces:** Consumes S1.1's triage. Produces: 0 unexplained reds in the suite.
+
+- [ ] **Step 1: Determine what recovery-phase3 asserts vs what shipped**
+
+Read the 2 failing tests and `renderer/js/` recovery code they exercise. Note: commit `9693012d`
+recently changed recovery-prompt behavior (same-session renderer reload) — check
+`git log --oneline -5 -- rwanga-editor/renderer/js/*recovery*` for context. Decide: stale expectation
+(→ re-point like S1.2) or unshipped phase-3 behavior (→ quarantine like S1.3 with reason
+`QUARANTINE(QG-01, 2026-07-02): recovery phase-3 behavior not yet shipped — tracked as GAP-1-2`)
+or real defect (→ Class D escalation per §0.2).
+
+- [ ] **Step 2: Apply the decided action and verify the suite file passes (0 fail)**
+
+- [ ] **Step 3: SLICE CLOSE RITUAL (§0.3)**
+
+Commit message: `test(editor): resolve recovery-phase3 reds (QG-01, S1.4)`
+
+### Slice S1.5: Green run → flip QG-01
+
+**Files:**
+- Modify: `docs/RWANGA_IDE_LAUNCH_CHECKLIST.md` (QG-01 row)
+- Create: `docs/plans/evidence/S1.5-green-run.txt`
+
+- [ ] **Step 1: Full clean run, captured**
+
+```powershell
+cmd /c "cd /d E:\api\rwanga\rwanga-editor && npm run test:unit > E:\api\rwanga\docs\plans\evidence\S1.5-green-run.txt 2>&1"
+```
+Expected: **fail 0** (skips = 1 pre-existing + the quarantined ones, each with a reason string).
+
+- [ ] **Step 2: Flip QG-01 in the launch checklist**
+
+Edit the QG-01 row: status → TRUE; evidence note → `0 failing / 1936 tests at <new HEAD SHA>; quarantines carry QUARANTINE(QG-01) reasons; see docs/plans/evidence/S1.5-green-run.txt`.
+
+- [ ] **Step 3: SLICE CLOSE RITUAL (§0.3)** — status delta: `QG-01 PARTIAL→TRUE`
+
+Commit message: `test(editor): QG-01 green — unit suite 0 reds, checklist flipped (S1.5)`
+
+---
+
+## Phase 2 — LR-01 installer build
+
+**Nature (GO_LIVE A.1 #2):** environment, not code. `npm run pack:win` fails on a `winCodeSign`
+symlink-privilege error; Windows Developer Mode (or an elevated shell) grants symlink rights.
+
+### Slice S2.1: Unblock the environment and build
+
+**Files:**
+- Create: `docs/plans/evidence/S2.1-pack-win.txt`
+
+- [ ] **Step 1: Check whether Developer Mode is enabled**
+
+```powershell
+Get-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\AppModelUnlock' -Name AllowDevelopmentWithoutDevLicense -ErrorAction SilentlyContinue
+```
+`AllowDevelopmentWithoutDevLicense = 1` → enabled, go to Step 3. Otherwise Step 2.
+
+- [ ] **Step 2 (BLOCKING — needs the user or an elevated shell):** Enable Developer Mode
+
+This cannot be done from an unelevated agent shell. Ask the user to either run
+`start ms-settings:developers` and toggle **Developer Mode** on, or provide an elevated
+(Run-as-Administrator) terminal for the build. Record which path was taken in the evidence file.
+If the user is unavailable, END THE SESSION cleanly via §0.3 with NEXT ACTION = "S2.1 Step 2 (user
+action required: enable Windows Developer Mode)". That is a valid handoff.
+
+- [ ] **Step 3: Build**
+
+```powershell
+cmd /c "cd /d E:\api\rwanga\rwanga-editor && npm run pack:win > E:\api\rwanga\docs\plans\evidence\S2.1-pack-win.txt 2>&1"
+```
+Expected: exit 0; a `.exe` installer under `rwanga-editor\dist\` (electron-builder default output).
+If it still fails on winCodeSign after Dev Mode: delete the stale cache
+`Remove-Item -Recurse -Force "$env:LOCALAPPDATA\electron-builder\Cache\winCodeSign"` and retry once;
+a different error class = new gap row + escalate.
+
+- [ ] **Step 4: SLICE CLOSE RITUAL (§0.3)**
+
+Commit message: `build(editor): pack:win succeeds under Dev Mode — installer produced (LR-01, S2.1)`
+(Note: `dist/` output itself is NOT committed.)
+
+### Slice S2.2: Install, smoke, flip LR-01
+
+**Files:**
+- Create: `docs/plans/evidence/S2.2-installer-smoke.md`
+- Modify: `docs/RWANGA_IDE_LAUNCH_CHECKLIST.md` (LR-01 row)
+
+- [ ] **Step 1: Confirm the signing decision with the user** (Decision #2 in Global Constraints — unsigned OK for now?)
+
+- [ ] **Step 2: Install and smoke the packaged app (the .exe, NOT `npm start`)**
+
+Run the installer from `rwanga-editor\dist\`. Launch the installed app. Perform and record in
+`S2.2-installer-smoke.md`: (a) app opens to a usable editor; (b) File → New, type a scene heading +
+action + dialogue; (c) Save to `%USERPROFILE%\Documents\smoke.rga`; (d) close app, relaunch, File →
+Open recent `smoke.rga` → content intact; (e) Print Preview opens. Verdict per item: PASS/FAIL.
+Any FAIL → gap row + escalate per §0.2 (packaged-app-only failures are exactly what this smoke exists to catch).
+
+- [ ] **Step 3: Flip LR-01** — status → TRUE; evidence note → `installer built (Dev Mode) + installed-app smoke 5/5 PASS, see docs/plans/evidence/S2.2-installer-smoke.md; signing deferred by decision <date>`.
+
+- [ ] **Step 4: SLICE CLOSE RITUAL (§0.3)** — status delta: `LR-01 FALSE/PARTIAL→TRUE`
+
+Commit message: `build(editor): installed-app smoke passes — LR-01 flipped TRUE (S2.2)`
+
+---
+
+## Phase 3 — Lifecycle QA (PF-01, PF-02, PF-03, PF-05, PF-13)
+
+### Slice S3.1: PF-01 cold-start launch matrix
+
+**Files:**
+- Create: `docs/plans/evidence/S3.1-launch-matrix.md`
+- Modify: `docs/RWANGA_IDE_LAUNCH_CHECKLIST.md` (PF-01 row)
+
+- [ ] **Step 1: Resolve Decision #1 (macOS scope) with the user.** If descoped: edit the PF-01 row
+      remedy text to say `Windows (macOS descoped from v1 launch, decision <date>)` in the same commit.
+
+- [ ] **Step 2: Run the Windows launch matrix on the INSTALLED app** — record each in the evidence file:
+      10 consecutive cold starts (close fully between launches; measure roughly time-to-editor);
+      1 launch immediately after reboot; 1 launch with a `.rga` double-clicked from Explorer (file
+      association) if registered — if no association, note it as observed behavior, not a failure;
+      1 launch while another instance is already running (expect: no data corruption — second instance
+      or focus-existing are both acceptable, record which).
+      Expected: 13/13 reach a usable editor with no error dialog.
+
+- [ ] **Step 3: Flip PF-01** (TRUE with evidence pointer, or PARTIAL + gap row if any launch failed).
+
+- [ ] **Step 4: SLICE CLOSE RITUAL (§0.3)**
+
+Commit message: `qa(editor): PF-01 cold-start launch matrix recorded — <verdict> (S3.1)`
+
+### Slice S3.2: PF-02/03/05 lifecycle E2E specs
+
+**Files:**
+- Create: `rwanga-editor/tests/e2e/lifecycle/new-save-reopen.spec.js`
+- Create: `rwanga-editor/tests/e2e/lifecycle/open-from-disk.spec.js`
+- Create: `rwanga-editor/tests/e2e/lifecycle/save-as-path-change.spec.js`
+- Modify: `docs/RWANGA_IDE_LAUNCH_CHECKLIST.md` (PF-02, PF-03, PF-05 rows)
+
+**Interfaces:**
+- Consumes: `Rga.FileManager = { newScript, openFromDialog, openFromContent, openRecent, getRecent, save, saveAs, setActive, getActive, notifyTitle }` (`renderer/js/file-manager.js:154`); `Rga.Doc.serialize(doc)`; `Rga.TabManager.activeDoc()`. The Playwright-Electron launch harness pattern lives in `tests/e2e/filmustageation/print-contract.spec.js:21-46` (`launchAndOpen`, `clearDirtyAndClose`) — copy it, don't re-invent it.
+- Produces: three green specs cited as PF-02/03/05 evidence.
+
+- [ ] **Step 1: Discover the dialog-free save path**
+
+Native dialogs can't be driven by Playwright. Read `renderer/js/file-manager.js` (whole file) and the
+preload/IPC bridge it calls (grep `electron/` for the channel names you find). Identify how to give a
+doc a handle without a dialog — candidates visible in code: `openFromContent(handle, content)` sets a
+handle on open; `save()` writes via IPC when `activeDoc.handle` exists (`file-manager.js:72-87`).
+Record the chosen seam as a comment block at the top of each spec.
+
+- [ ] **Step 2: Write the three specs (failing first is satisfied by writing against the real app — run to see them fail only if the flow is actually broken; these are verification tests)**
+
+`new-save-reopen.spec.js` — the skeleton (adapt the launch helper verbatim from print-contract.spec.js):
+
+```js
+// PF-02: new → type → save → reopen — content survives the round trip.
+'use strict';
+const { test, expect, _electron: electron } = require('@playwright/test');
+const path = require('path'); const os = require('os'); const fs = require('fs');
+const APP_ROOT = path.resolve(__dirname, '..', '..', '..');
+
+test('PF-02 — new document round-trips through disk', async () => {
+  const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'pf02-'));
+  const savePath = path.join(userDataDir, 'pf02-roundtrip.rga');
+  const app = await electron.launch({ args: ['--user-data-dir=' + userDataDir, APP_ROOT] });
+  const page = await app.firstWindow();
+  await page.waitForFunction(() => !!(window.Rga && window.Rga.FileManager && window.Rga.TabManager
+    && window.Rga.TabManager.activeDoc && window.Rga.TabManager.activeDoc()));
+  // 1. new script + type into it via the editor view (real key events, not doc mutation)
+  await page.evaluate(() => window.Rga.FileManager.newScript());
+  await page.keyboard.type('INT. KITCHEN - NIGHT');
+  await page.keyboard.press('Enter');
+  await page.keyboard.type('A kettle whistles.');
+  // 2. give the doc a handle, save without a dialog (seam confirmed in Step 1)
+  const written = await page.evaluate(async (p) => {
+    const doc = window.Rga.TabManager.activeDoc();
+    doc.handle = p;                        // adjust to the Step-1 seam if handle is set differently
+    return await window.Rga.FileManager.save();
+  }, savePath);
+  expect(fs.existsSync(savePath)).toBe(true);
+  // 3. reopen from disk content and compare
+  const content = fs.readFileSync(savePath, 'utf8');
+  const roundTripped = await page.evaluate((args) => {
+    window.Rga.FileManager.openFromContent(args.p, args.c);
+    const doc = window.Rga.TabManager.activeDoc();
+    return window.Rga.Doc.serialize(doc);
+  }, { p: savePath, c: content });
+  expect(roundTripped).toContain('KITCHEN');
+  expect(roundTripped).toContain('kettle');
+  await app.close();
+});
+```
+
+`open-from-disk.spec.js` (PF-03): launch → `openFromContent(fixturePath, fs.readFileSync(fixture))`
+with `tests/fixtures/mysterious-guest-rtl.rga` → assert `activeDoc()` scene count > 0 via
+`window.Rga.Screenplay.Memory` and title bar/tab reflects the file name (`getActive()`), and that the
+fixture file on disk is byte-identical after the session (no auto-migration write-back).
+
+`save-as-path-change.spec.js` (PF-05): open fixture content under handle A (temp copy) → change one
+line → set handle B (different directory) via the Step-1 seam → `save()` → assert file B exists with
+the edit, file A unchanged, and `getActive()`/recent list now point at B.
+
+- [ ] **Step 3: Run them**
+
+```powershell
+cmd /c "cd /d E:\api\rwanga\rwanga-editor && npm run build:renderer && npx playwright test tests/e2e/lifecycle --config=tests/integration/playwright.config.js"
+```
+Expected: 3/3 pass. A failure here is potentially a REAL lifecycle defect → §0.2 escalation.
+
+- [ ] **Step 4: Full e2e regression** — `npm run test:e2e`; expected: no new failures vs before this slice.
+
+- [ ] **Step 5: Flip PF-02, PF-03, PF-05** (evidence: the three spec names + green run).
+
+- [ ] **Step 6: SLICE CLOSE RITUAL (§0.3)** — status deltas: `PF-02/03/05 PARTIAL→TRUE`
+
+Commit message: `test(editor): lifecycle E2E — new/open/save-as round-trips proven (PF-02/03/05, S3.2)`
+
+### Slice S3.3: PF-13 clean-console audit
+
+**Files:**
+- Create: `docs/plans/evidence/S3.3-console-audit.md`
+- Modify: `docs/RWANGA_IDE_LAUNCH_CHECKLIST.md` (PF-13 row)
+
+- [ ] **Step 1: Scripted audit via Playwright console capture** — write a throwaway audit spec (do not
+      commit it into the suite; keep it under `docs/plans/evidence/` as `S3.3-audit.spec.js` and point
+      Playwright at it explicitly). It launches the app, subscribes `page.on('console')` +
+      `page.on('pageerror')`, then walks the core flows: new → type all 6 block types → save →
+      reopen → Print Preview open/close → Page Setup change → undo/redo ×5 → close. Assert zero
+      `error`-level console messages; record every `warning` verbatim in the evidence file.
+- [ ] **Step 2: Verdict** — 0 errors → flip PF-13 TRUE (UNKNOWN→TRUE). Any error → gap row per §0.2,
+      PF-13 stays open, evidence file documents each error with its trigger.
+- [ ] **Step 3: SLICE CLOSE RITUAL (§0.3)**
+
+Commit message: `qa(editor): PF-13 console audit across core flows — <verdict> (S3.3)`
+
+---
+
+## Phase 4 — RTL visual + bidi QA ⭐ (RTL-04…13, SW-23) — highest product value
+
+**Judging standard for every verdict in this phase:**
+`rwanga-editor/docs/Filmustageation/redesign_campaign/RTL_SCREENPLAY_CONVENTION.md` (the ratified
+Kurdish/RTL profile). Supporting audits already exist — read before starting:
+`rwanga-editor/docs/Filmustageation/RTL_PRINT_PREVIEW_FORENSIC_AUDIT.md`,
+`rwanga-editor/docs/Filmustageation/RTL_SCREENPLAY_DESIGNER_BRIEF.md`.
+
+### Slice S4.1: Fixture + checklist prep
+
+**Files:**
+- Create: `docs/plans/evidence/S4.1-rtl-qa-protocol.md`
+
+- [ ] **Step 1: Build the QA protocol document.** From RTL_SCREENPLAY_CONVENTION.md, extract into
+      `S4.1-rtl-qa-protocol.md` one table row per checklist ID (RTL-04…RTL-13, SW-23) with: the exact
+      convention rule (quoted), the fixture/scene that exercises it, and the pass criterion (measurable —
+      e.g. "dialogue block right edge at X from page right edge ±1mm", not "looks right").
+      Primary fixture: `tests/fixtures/mysterious-guest-rtl.rga` (open a COPY under `%TEMP%` — never the
+      tracked fixture, see §0.2). Where the fixture lacks a case (mixed-script line, bidi punctuation,
+      all 6 block types in RTL), script the additions to type during QA and list them in the protocol.
+- [ ] **Step 2: SLICE CLOSE RITUAL (§0.3)**
+
+Commit message: `qa(editor): RTL QA protocol — per-ID criteria extracted from ratified profile (S4.1)`
+
+### Slice S4.2: Editor alignment sweep (RTL-04…RTL-09)
+
+**Files:**
+- Create: `docs/plans/evidence/S4.2-rtl-alignment.md` + one screenshot per ID (`S4.2-rtl-0X-<element>.png`)
+- Modify: `docs/RWANGA_IDE_LAUNCH_CHECKLIST.md` (rows RTL-04…RTL-09)
+
+- [ ] **Step 1:** In the installed app, open the temp copy of the RTL fixture. For each of: action
+      (RTL-04), dialogue (RTL-05), character (RTL-06), parenthetical (RTL-07), transition (RTL-08),
+      scene heading (RTL-09) — verify against the S4.1 criterion, screenshot, record verdict.
+      RTL-09 note: checklist cites a known slug-in-action-block mapping bug via SW-08, but the handoff
+      lists "RTL scene-heading map" as TRUE/test-backed — verify visually and trust what you see; if
+      correct, note the stale cross-reference in the evidence file.
+- [ ] **Step 2:** Flip each ID that passes (PARTIAL→TRUE, evidence = screenshot + protocol row).
+      Failures → gap rows; the ID stays PARTIAL with the gap cited.
+- [ ] **Step 3: SLICE CLOSE RITUAL (§0.3)**
+
+Commit message: `qa(editor): RTL alignment sweep RTL-04..09 — <n>/6 TRUE (S4.2)`
+
+### Slice S4.3: RTL Print Preview + PDF export (RTL-10, RTL-11)
+
+**Files:**
+- Create: `docs/plans/evidence/S4.3-rtl-print-pdf.md` + screenshots + the exported PDF
+- Modify: `docs/RWANGA_IDE_LAUNCH_CHECKLIST.md` (RTL-10, RTL-11)
+
+- [ ] **Step 1 (RTL-10):** Print Preview on the RTL fixture: every page visually correct, RTL block
+      mirror per convention, **no clipped glyphs** (the checklist's known `overflow:hidden` concern —
+      inspect line ends and page edges specifically; the Print-Truth-Unification work may have already
+      fixed this: cross-check `rwanga-editor/docs/Filmustageation/redesign_campaign/PRINT_TRUTH_DOCTRINE_V1.md`).
+- [ ] **Step 2 (RTL-11):** Export the fixture to PDF (checklist note "blocked" is stale — export works).
+      Open the PDF: direction preserved, glyph shaping correct (no disconnected Arabic-script letters),
+      page count matches Print Preview. Keep the PDF as evidence.
+- [ ] **Step 3:** Flip / gap per verdict. **Step 4: SLICE CLOSE RITUAL (§0.3)**
+
+Commit message: `qa(editor): RTL print preview + PDF export verified — <verdict> (RTL-10/11, S4.3)`
+
+### Slice S4.4: Bidi audit (RTL-12, RTL-13)
+
+**Files:**
+- Create: `docs/plans/evidence/S4.4-bidi-audit.md` + screenshots
+- Modify: `docs/RWANGA_IDE_LAUNCH_CHECKLIST.md` (RTL-12, RTL-13)
+
+- [ ] **Step 1:** Using the S4.1 protocol's mixed-script cases, type into an RTL doc: a Kurdish action
+      line containing a Latin name; a dialogue line with an English phrase mid-sentence; lines ending
+      in `.` `!` `?` `:` and quotes around Latin runs; numbers (digits) inside RTL sentences. Verify in
+      editor AND Print Preview: reading order sane, punctuation sits at the correct visual end, no
+      mirrored/jumping brackets. Screenshot each case.
+- [ ] **Step 2:** Flip RTL-12/13 (UNKNOWN→TRUE) or gap rows. **Step 3: SLICE CLOSE RITUAL (§0.3)**
+
+Commit message: `qa(editor): bidi audit — mixed-script + punctuation <verdict> (RTL-12/13, S4.4)`
+
+### Slice S4.5: SW-23 roll-up + phase close
+
+**Files:**
+- Create: `docs/plans/evidence/S4.5-sw23-verdict.md`
+- Modify: `docs/RWANGA_IDE_LAUNCH_CHECKLIST.md` (SW-23)
+
+- [ ] **Step 1:** SW-23 = "RTL profile drives correct RTL conventions" — it is the conjunction of
+      S4.2–S4.4. Write the one-page verdict: table of RTL-04…13 outcomes, plus one check that the
+      *profile switch itself* drives it (create a NEW doc with the Kurdish/RTL profile → confirm
+      direction + conventions apply without manual tweaking).
+- [ ] **Step 2:** Flip SW-23 if all inputs TRUE; else it stays PARTIAL citing the open gap rows.
+- [ ] **Step 3: SLICE CLOSE RITUAL (§0.3)** — this checkpoint should list every RTL status delta.
+
+Commit message: `qa(editor): SW-23 RTL convention verdict — phase 4 closed (S4.5)`
+
+---
+
+## Phase 5 — Page-geometry QA (MT-02/04/05/06/07/10, PP-01/03, SW-01)
+
+**Risk note:** unlike phases 3–4, two rows here carry *measured* adverse evidence
+(MT-07 "overflow 5 of 6", MT-10 "budget ~0.74× off"). Expect S5.2 to surface fix work. That does not
+break the "no features" doctrine — bounded correctness fixes to make a P0 TRUE are launch work; follow
+superpowers:systematic-debugging + TDD for any fix, in its own gap-slice.
+
+### Slice S5.1: Paper sizes + margins (MT-05, MT-06, PP-01, PP-03)
+
+**Files:**
+- Create: `docs/plans/evidence/S5.1-sizes-margins.md` + screenshots
+- Modify: checklist rows MT-05, MT-06, PP-01, PP-03
+
+- [ ] **Step 1:** For each size (A4, Letter, Legal): set it in Page Setup → measure in Print Preview
+      that the page box matches the physical ratio (A4 210:297, Letter 8.5:11, Legal 8.5:14 — measure
+      the rendered px box) and that content reflows. Export one PDF per size and check the PDF page
+      dimensions (open PDF properties, or `npx` a one-liner with the repo's `pdf-parse` dependency).
+- [ ] **Step 2:** Margins: change top/bottom/left/right one at a time by a large delta (e.g. +20mm) →
+      measure the rendered content-box shift in Print Preview matches the delta direction and rough
+      magnitude; restore defaults after.
+- [ ] **Step 3:** Flip the four rows per verdicts. **Step 4: SLICE CLOSE RITUAL (§0.3)**
+
+Commit message: `qa(editor): paper sizes + margins verified render-correct — <verdict> (S5.1)`
+
+### Slice S5.2: Bottom-margin overflow + empty-line budget (MT-07, MT-10)
+
+**Files:**
+- Create: `docs/plans/evidence/S5.2-overflow-budget.md`
+- Modify: checklist rows MT-07, MT-10 (and possibly fix slices spawned)
+
+- [ ] **Step 1: Re-run the density probe honestly.** Find the prior probe (grep
+      `rwanga-editor/tests` and `docs/` for `density probe` / `overflow`) and re-execute the same
+      scenario at today's HEAD: a page filled to the boundary — does the last line cross the bottom
+      margin? Repeat with the 6 historical cases if documented. Record per-case PASS/FAIL.
+- [ ] **Step 2: Empty-line budget check (MT-10):** page with N empty paragraphs interleaved — compare
+      budgeted vs rendered height (the historical figure was 0.74×). Record the measured ratio.
+- [ ] **Step 3: Verdict fork.** Both clean → flip TRUE. Defects reproduce → gap rows `GAP-5-*` with the
+      measured numbers; each gets its own fix-slice (systematic-debugging + a failing unit test first —
+      the pagination suites under `tests/unit/` are the home); after the fix lands green, re-run Step 1/2
+      and flip.
+- [ ] **Step 4: SLICE CLOSE RITUAL (§0.3)**
+
+Commit message: `qa(editor): bottom-margin + empty-line budget probes — <verdict> (MT-07/10, S5.2)`
+
+### Slice S5.3: Marker stability, heading edit, PDF page count (MT-02, SW-01, MT-04)
+
+**Files:**
+- Create: `docs/plans/evidence/S5.3-stability.md`
+- Modify: checklist rows MT-02, SW-01, MT-04
+
+- [ ] **Step 1 (MT-02):** In a multi-page doc: note every page-marker position → insert a paragraph
+      mid-page-1 → delete it → undo ×2 → redo ×2 → markers must return to the noted positions with no
+      drift/duplication. Repeat across a save/reopen.
+- [ ] **Step 2 (SW-01):** Insert a scene heading mid-document (LTR and RTL docs); edit its text;
+      confirm it stays a heading block, navigator updates, numbering stays consistent.
+- [ ] **Step 3 (MT-04):** Export the multi-page doc to PDF → PDF page count == Print Preview page
+      count == paper-size-appropriate. (Checklist "blocked" note is stale.)
+- [ ] **Step 4:** Flip per verdicts. **Step 5: SLICE CLOSE RITUAL (§0.3)**
+
+Commit message: `qa(editor): marker stability + heading edit + PDF page count — <verdict> (S5.3)`
+
+---
+
+## Phase 6 — Roll-up
+
+### Slice S6.1: Reconcile, flip QG-12, declare the launch gate closed
+
+**Files:**
+- Modify: `docs/RWANGA_IDE_LAUNCH_CHECKLIST.md` (QG-12 + final count line)
+- Modify: `docs/handoff/HANDOFF.md` (phase change: Stage 1 → Stage 2)
+- Create: `docs/plans/evidence/S6.1-launch-gate-closed.md`
+
+- [ ] **Step 1: Full reconciliation pass.** Walk every P0 row in the checklist: each must be TRUE with
+      an evidence pointer, or explicitly descoped by a recorded user decision, or carried by an open
+      gap row (in which case the gate is NOT closed — the gap's fix-slice is the NEXT ACTION instead).
+- [ ] **Step 2: Fresh full verification run** — `npm run test:unit` (0 fail) + `npm run test:e2e`
+      (0 fail) at final HEAD, captured to the evidence file, plus the P0 tally (target: 60 TRUE −
+      descopes).
+- [ ] **Step 3: Flip QG-12** TRUE with the tally as evidence.
+- [ ] **Step 4: Rewrite HANDOFF.md for Stage 2:** phase → "Stage 2 — Make the memory writable + visible";
+      NEXT ACTION → "Design review of the Rga.Contribution write-API brief (SP.1 output) → then
+      VISION-1 breakdown-sheet render"; move launch items to Recently solved.
+- [ ] **Step 5: SLICE CLOSE RITUAL (§0.3)** — the checkpoint here is the campaign's closing entry.
+
+Commit message: `docs(editor): LAUNCH GATE CLOSED — QG-12 TRUE, Stage 1 complete (S6.1)`
+
+---
+
+## Track P (parallel, design-only — may run alongside any phase ≥ 1)
+
+### Slice SP.1: `Rga.Contribution` write-API design brief
+
+**Constraint:** WRITING ONLY. No code, no stubs, no schema edits — the gates forbid implementation
+(GO_LIVE Part C). This is explicitly sanctioned by GO_LIVE Part D #5.
+
+**Files:**
+- Create: `rwanga-editor/docs/Filmustageation/RGA_CONTRIBUTION_API_BRIEF.md`
+
+- [ ] **Step 1: Ground the brief in the audited seams.** Read: `renderer/js/doc-types/screenplay/memory.js`
+      (the read-side to mirror), `renderer/js/scene-catalog.js`, the tag-write seams GO_LIVE B.3 #2
+      names (`tags.applyTag`, `doc.addEntity`, `scene.attrs.metadata.references[]`), and
+      `renderer/js/platform.js` (the boundary it must live behind).
+- [ ] **Step 2: Write the brief** covering, at minimum: namespace + method surface
+      (`Rga.Contribution.*` — proposed signatures with param/return types); write-kinds (tag, alias,
+      confirmed reference, insight, scene note/flag) and their `.rga` v5.x persistence; provenance model
+      (who wrote it: user vs agent vs tier, confidence); undo/history integration (ProseMirror
+      transactions vs registry writes); conflict rules (agent write vs concurrent user edit); validation
+      + rejection semantics; versioning/migration; what Stage 3's harness consumes. Include a "explicitly
+      NOT in v1" list (YAGNI).
+- [ ] **Step 3: SLICE CLOSE RITUAL (§0.3)** — HANDOFF Open cases: VISION-2 gains "design brief written,
+      pending review".
+
+Commit message: `docs(editor): Rga.Contribution write-API design brief (VISION-2 prerequisite, SP.1)`
+
+---
+
+## Execution order summary
+
+```
+S0.1 → S1.1 → S1.2 → S1.3 → S1.4 → S1.5 → S2.1 → S2.2 → S3.1 → S3.2 → S3.3
+     → S4.1 → S4.2 → S4.3 → S4.4 → S4.5 → S5.1 → S5.2 → S5.3 → S6.1
+SP.1 may interleave anywhere after S0.1 (it is pure writing, zero code risk).
+Gap fix-slices are inserted immediately after the slice that surfaced them, before the next phase.
+```
