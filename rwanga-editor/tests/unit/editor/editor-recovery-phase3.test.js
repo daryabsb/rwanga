@@ -57,17 +57,27 @@ test('Phase 3 / C4: .flow-line-gutter is visible in Flow view (display: block ov
     'Flow override must set display: block (un-hides the default display: none base rule)');
 });
 
-test('Phase 3 / C4: gutter visibility recovery — opacity raised so existing numbers are readable', () => {
+test('Phase 3 / C4: gutter visibility recovery — F1 rail tokens keep existing numbers readable', () => {
   const css = readText(EDITOR_CSS);
   const baseRule = ruleBody(css, '.flow-line-gutter');
   assert.ok(baseRule);
+  // Phase 3's opacity mechanism (0.55 → ≥0.7) was superseded by
+  // Filmustageation F1/F6 (commit fd198a49, LOCKED): the rail is a
+  // first-class surface — full-opacity numerals on their own band
+  // (editor-prosemirror.css .flow-line-gutter; FLOW_VIEW_UX_DIRECTION_V2.md).
+  // The GOAL (readable numbers) is now guarded via the token pair:
+  assert.ok(/color\s*:\s*var\(--flow-rail-num\b/.test(baseRule),
+    '.flow-line-gutter must color numerals with var(--flow-rail-num) (F1 rail token — full-opacity readable)');
+  assert.ok(/background\s*:\s*var\(--flow-rail-bg\b/.test(baseRule),
+    '.flow-line-gutter must sit on its own var(--flow-rail-bg) band (F1 — numbers never dissolve into desk/paper)');
+  // Regression guard: the pre-Phase-3 failure mode was a dimming
+  // opacity on the gutter. F1 removed opacity entirely — a
+  // reintroduced dimmer (< 0.7) would recreate the invisible-gutter bug.
   const opacityMatch = baseRule.match(/opacity\s*:\s*([\d.]+)/);
-  assert.ok(opacityMatch, '.flow-line-gutter must declare opacity');
-  const opacity = parseFloat(opacityMatch[1]);
-  // Pre-Phase-3 opacity was 0.55 — invisible against editor bg.
-  // Recovery target: >= 0.7 so numbers are readable but still subtle.
-  assert.ok(opacity >= 0.7,
-    '.flow-line-gutter opacity must be ≥ 0.7 (Phase 3 visibility recovery — was 0.55, invisible). Got: ' + opacity);
+  if (opacityMatch) {
+    assert.ok(parseFloat(opacityMatch[1]) >= 0.7,
+      'if .flow-line-gutter declares opacity it must stay ≥ 0.7 (dimming below that recreates the pre-Phase-3 invisible gutter). Got: ' + opacityMatch[1]);
+  }
 });
 
 test('Phase 3 / C4: gutter recovery did NOT touch FlowChrome.js (no engine / no implementation rewrite)', () => {
@@ -219,7 +229,20 @@ test('Phase 3: no new ownership introduced — no new shell module file', () => 
     // distinct owner of the workspace-kind registration map; consumed
     // by TabManager.openWorkspace; not Phase 3 ownership creep).
     'workspaces.js',
-    'workspace-state.js'
+    'workspace-state.js',
+    // Inspector registry (added F1A.3, commit 9413f19b — distinct owner
+    // of the Inspector contribution surface per redesign_campaign/
+    // IMPLEMENTATION_MAP_PHASE1.md; not Phase 3 ownership creep).
+    'inspector.js',
+    // Toolbar contribution registry (added F1A.6, commit 9ee4c7a6 —
+    // distinct owner of plugin toolbar groups; not Phase 3 ownership creep).
+    'toolbar.js',
+    // Page-setup live preview (added S8, commit 03f5b427 — distinct
+    // owner of the page-truth preview pane; not Phase 3 ownership creep).
+    'page-setup-preview.js',
+    // Settings boot migrations (added H2, commit 9ae980af — distinct
+    // owner of persisted-settings shape upgrades; not Phase 3 ownership creep).
+    'settings-migrations.js'
   ];
   const unexpected = files.filter(function(f) { return EXPECTED.indexOf(f) < 0; });
   assert.deepEqual(unexpected, [],

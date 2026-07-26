@@ -5,6 +5,24 @@ Template & rules: `PROTOCOL.md`.
 
 ---
 
+## 2026-07-26 · S1.4 — recovery-phase3 reds resolved (both stale, re-pointed)
+- **Did:** Verdict = stale expectations (sub-case i), both tests in
+  `tests/unit/editor/editor-recovery-phase3.test.js` (the file guards UX-recovery — Flow gutter +
+  Draft footer — NOT crash recovery; `9693012d` unrelated). Gutter test re-pointed from the retired
+  opacity mechanism to the F1/F6 rail tokens (`--flow-rail-num` + `--flow-rail-bg`,
+  editor-prosemirror.css:146-158, commit `fd198a49` LOCKED), keeping a conditional ≥0.7 guard so a
+  reintroduced dimmer still fails. Whitelist test gained the 4 authorized modules (inspector.js
+  F1A.3 · toolbar.js F1A.6 · page-setup-preview.js S8 · settings-migrations.js H2) with provenance
+  comments in the file's established pattern.
+- **Evidence:** suite file **12/12 pass** (was 10/12).
+- **Status deltas:** ledger S1.4 ⬜→✅. Unit suite now **1936 · 1 fail · 1 skipped** — the only red
+  is GAP-1-1's source-audit "audit (b)".
+- **Gaps/risks surfaced:** root cause of the recurring fixture dirt identified: a RUNNING Electron
+  instance (started 22:03 local) keeps auto-migrating `playground-the-last-light.rga`. Reverted
+  again this session; user advised to close the app. Check fixture state before every commit.
+- **Next action:** GAP-1-1 fix-slice — replace the `classList.contains('is-disabled')` gate at
+  `settings-workspace.js:522` with `entry.requiresPro`; the red source-audit test is the TDD test.
+
 ## 2026-07-26 · S1.3 — closed as verification no-op (nothing to quarantine)
 - **Did:** Verified the S1.1 reclassification held: the parenthetical print-cosmetic trio needs no
   quarantine because the cosmetic shipped (Density Slice 6) and S1.2's `declIn()` logical-property

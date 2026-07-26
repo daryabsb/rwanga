@@ -4,7 +4,7 @@
 > archive to find the next action — it's here. Update this file at the end of every unit of work
 > (see `PROTOCOL.md`). Keep it short; link detail, don't inline it.
 
-- **Last updated:** 2026-07-26 · by: S1.3 close (verification no-op)
+- **Last updated:** 2026-07-26 · by: S1.4 execution (recovery-phase3 reds resolved)
 - **Binding doctrine:** every agent MUST follow the 10-rule MASTERPLAN EXECUTION DOCTRINE in the
   root `CLAUDE.md` (one slice at a time · tick-as-you-go · §0.3 close ritual · push every slice commit).
 - **HEAD:** see latest commit on `main` (S0.1 slice-close) · **Branch:** `main`
@@ -14,11 +14,13 @@
 
 ## ⭐ NEXT ACTION
 
-**Execute masterplan slice S1.4** — re-point the 2 recovery-phase3 reds per triage rows 29–30
-(F1 rail tokens replace the opacity mechanism; 4 authorized modules join the whitelist). Then the
-GAP-1-1 fix-slice (DOM-read-as-truth at `settings-workspace.js:522`) before S1.5.
-Suite state: **1936 · 3 fail · 1 skipped**. S1.3 closed as a verification no-op (nothing quarantined;
-parenthetical suite 4/4 · 0 skipped).
+**Execute the GAP-1-1 fix-slice** — one-line product fix: `settings-workspace.js:522` `_enterRebind()`
+must gate on `entry.requiresPro` (closure state; correct idiom already at :584/:588) instead of
+`classList.contains('is-disabled')`. TDD: the failing `source-audit.test.js` "audit (b)" IS the test —
+fix the product, suite goes green. Then S1.5 (full green run → flip QG-01).
+Suite state: **1936 · 1 fail · 1 skipped** (only the GAP-1-1 red remains).
+⚠ A running Electron instance keeps auto-migrating `playground-the-last-light.rga` — check
+`git status` for fixture dirt before every commit (it recurred twice on 2026-07-26).
 
 The whole launch-gate campaign is now a slice-by-slice executable plan with cross-session state:
 **`../plans/2026-07-02-stage1-launch-gate-masterplan.md`** — read its §0 (survival protocol) first,
@@ -58,7 +60,7 @@ contribution/write API. That write API is the true technical prerequisite for th
 
 | ID | Case | Status | Pointer |
 |---|---|---|---|
-| QG-01 | 27/30 reds fixed (S1.2); remaining 3 = 2 Class-C re-points (S1.4) + GAP-1-1 | OPEN — S1.3/S1.4 | `docs/plans/evidence/S1.1-qg01-triage.md` |
+| QG-01 | 29/30 reds resolved (S1.2+S1.4); only GAP-1-1 red remains | OPEN — GAP-1-1 fix next | `docs/plans/evidence/S1.1-qg01-triage.md` |
 | GAP-1-1 | DOM-read-as-truth: `settings-workspace.js:522` gates rebind on `classList.contains('is-disabled')` instead of `entry.requiresPro` (H6 regression, low severity) | OPEN — fix-slice before S1.5 | Masterplan §0.5 |
 | LR-01 | Installer build fails (winCodeSign symlink privilege) — needs Win Dev Mode / elevated shell | OPEN | GO_LIVE Part A.1 #2 |
 | PF-01/02/03/05/13 | Core lifecycle unverified (launch matrix, new/open/save-as E2E, console audit) | OPEN — QA | GO_LIVE Part A.1 #3 |

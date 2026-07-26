@@ -74,7 +74,7 @@ electron-builder (`npm run pack:win`), PowerShell/Windows 11.
 | S1.1 | 1 QG-01 | Enumerate + classify all 30 reds into triage table | ✅ | `docs/plans/evidence/S1.1-qg01-triage.md` — 27 A · 0 B · 2 C(i) · 1 D (GAP-1-1); parenthetical trio reclassified B→A (fix already shipped; stale helper regex) |
 | S1.2 | 1 QG-01 | Re-point the ~24 stale shell/ownership snapshot tests | ✅ | All 27 Class-A tests re-pointed (15 files); full suite 1936 · **3 fail** (= 2 Class C + 1 Class D exactly) · 1 skipped; no assertion weakened, every re-point cites its doc/code source |
 | S1.3 | 1 QG-01 | Quarantine-with-reason the parenthetical cosmetic (3 tests) | ✅ | NO-OP by S1.1 triage: trio was Class A, fixed in S1.2 (`declIn` logical-prop helper); suite 4/4 pass · 0 skipped — nothing quarantined, no GAP-1-1 reserved-name used for cosmetics |
-| S1.4 | 1 QG-01 | Triage + resolve the 2 recovery-phase3 reds | ⬜ | |
+| S1.4 | 1 QG-01 | Triage + resolve the 2 recovery-phase3 reds | ✅ | Both stale (triage rows 29–30): gutter test re-pointed to F1 rail tokens (+ dimmer regression guard kept); whitelist gained the 4 authorized modules w/ provenance. Suite file 12/12 pass |
 | S1.5 | 1 QG-01 | Full green unit run → flip QG-01 TRUE | ⬜ | |
 | S2.1 | 2 LR-01 | Enable Dev Mode / elevated shell → `pack:win` succeeds | ⬜ | |
 | S2.2 | 2 LR-01 | Install + smoke the built `.exe` → flip LR-01 TRUE | ⬜ | |
@@ -289,7 +289,7 @@ Commit message: `test(editor): quarantine parenthetical print-cosmetic trio with
 
 **Interfaces:** Consumes S1.1's triage. Produces: 0 unexplained reds in the suite.
 
-- [ ] **Step 1: Determine what recovery-phase3 asserts vs what shipped**
+- [x] **Step 1: Determine what recovery-phase3 asserts vs what shipped**
 
 Read the 2 failing tests and `renderer/js/` recovery code they exercise. Note: commit `9693012d`
 recently changed recovery-prompt behavior (same-session renderer reload) — check
@@ -298,11 +298,18 @@ recently changed recovery-prompt behavior (same-session renderer reload) — che
 `QUARANTINE(QG-01, 2026-07-02): recovery phase-3 behavior not yet shipped — tracked as GAP-1-2`)
 or real defect (→ Class D escalation per §0.2).
 
-- [ ] **Step 2: Apply the decided action and verify the suite file passes (0 fail)**
+- [x] **Step 2: Apply the decided action and verify the suite file passes (0 fail)**
 
-- [ ] **Step 3: SLICE CLOSE RITUAL (§0.3)**
+- [x] **Step 3: SLICE CLOSE RITUAL (§0.3)**
 
 Commit message: `test(editor): resolve recovery-phase3 reds (QG-01, S1.4)`
+
+> **S1.4 outcome (2026-07-26):** decision = stale expectation (S1.2-style re-point), both tests.
+> The file guards UX-recovery (Flow gutter + Draft footer), not crash recovery — `9693012d` unrelated.
+> Gutter: opacity mechanism superseded by F1/F6 rail tokens (`fd198a49`, LOCKED); test now asserts
+> `--flow-rail-num`/`--flow-rail-bg` and keeps a conditional ≥0.7 guard against a reintroduced dimmer.
+> Whitelist: added inspector.js (F1A.3), toolbar.js (F1A.6), page-setup-preview.js (S8),
+> settings-migrations.js (H2) with provenance comments.
 
 ### Slice S1.5: Green run → flip QG-01
 
