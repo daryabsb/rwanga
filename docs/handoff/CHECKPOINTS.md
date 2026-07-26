@@ -5,6 +5,16 @@ Template & rules: `PROTOCOL.md`.
 
 ---
 
+## 2026-07-26 · S1.3 — closed as verification no-op (nothing to quarantine)
+- **Did:** Verified the S1.1 reclassification held: the parenthetical print-cosmetic trio needs no
+  quarantine because the cosmetic shipped (Density Slice 6) and S1.2's `declIn()` logical-property
+  helper fix made the tests green on the real values.
+- **Evidence:** `node --test tests/unit/framework/parenthetical-box-geometry.test.js` = **4/4 pass ·
+  0 skipped** (no QUARANTINE strings introduced anywhere).
+- **Status deltas:** ledger S1.3 ⬜→✅ (NO-OP annotation; slice's original steps intentionally unticked).
+- **Gaps/risks surfaced:** none.
+- **Next action:** S1.4 — re-point the 2 recovery-phase3 reds (triage rows 29–30).
+
 ## 2026-07-26 · S1.2 — all 27 Class-A stale tests re-pointed; suite down to 3 known reds
 - **Did:** Re-pointed every Class-A red from the S1.1 triage across 15 test files (4 parallel edit
   passes, disjoint files): F1A.6 scene-tools → screenplay plugin, Slice-5A Cmd-,/Settings-workspace

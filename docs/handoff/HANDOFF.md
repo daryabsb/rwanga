@@ -4,7 +4,7 @@
 > archive to find the next action — it's here. Update this file at the end of every unit of work
 > (see `PROTOCOL.md`). Keep it short; link detail, don't inline it.
 
-- **Last updated:** 2026-07-26 · by: S1.2 execution (27 stale tests re-pointed)
+- **Last updated:** 2026-07-26 · by: S1.3 close (verification no-op)
 - **Binding doctrine:** every agent MUST follow the 10-rule MASTERPLAN EXECUTION DOCTRINE in the
   root `CLAUDE.md` (one slice at a time · tick-as-you-go · §0.3 close ritual · push every slice commit).
 - **HEAD:** see latest commit on `main` (S0.1 slice-close) · **Branch:** `main`
@@ -14,11 +14,11 @@
 
 ## ⭐ NEXT ACTION
 
-**Execute masterplan slice S1.3** — per the S1.1 triage this is now a verification no-op (Class B = 0;
-the parenthetical trio was fixed in S1.2 via the `declIn()` logical-property helper). Close it by
-recording that nothing needs quarantining, then proceed S1.4 (re-point the 2 Class-C recovery-phase3
-reds) and the GAP-1-1 fix-slice (DOM-read-as-truth at `settings-workspace.js:522`) before S1.5.
-Suite state after S1.2: **1936 · 3 fail · 1 skipped** (the 2 C + 1 D exactly).
+**Execute masterplan slice S1.4** — re-point the 2 recovery-phase3 reds per triage rows 29–30
+(F1 rail tokens replace the opacity mechanism; 4 authorized modules join the whitelist). Then the
+GAP-1-1 fix-slice (DOM-read-as-truth at `settings-workspace.js:522`) before S1.5.
+Suite state: **1936 · 3 fail · 1 skipped**. S1.3 closed as a verification no-op (nothing quarantined;
+parenthetical suite 4/4 · 0 skipped).
 
 The whole launch-gate campaign is now a slice-by-slice executable plan with cross-session state:
 **`../plans/2026-07-02-stage1-launch-gate-masterplan.md`** — read its §0 (survival protocol) first,

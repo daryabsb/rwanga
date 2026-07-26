@@ -73,7 +73,7 @@ electron-builder (`npm run pack:win`), PowerShell/Windows 11.
 | S0.1 | 0 Baseline | Revert fixtures, record clean 30-red baseline | ✅ | `docs/plans/evidence/S0.1-baseline-run.txt` — 1936 tests · 30 fail · 1 skipped (matches §Global-constraints baseline exactly) |
 | S1.1 | 1 QG-01 | Enumerate + classify all 30 reds into triage table | ✅ | `docs/plans/evidence/S1.1-qg01-triage.md` — 27 A · 0 B · 2 C(i) · 1 D (GAP-1-1); parenthetical trio reclassified B→A (fix already shipped; stale helper regex) |
 | S1.2 | 1 QG-01 | Re-point the ~24 stale shell/ownership snapshot tests | ✅ | All 27 Class-A tests re-pointed (15 files); full suite 1936 · **3 fail** (= 2 Class C + 1 Class D exactly) · 1 skipped; no assertion weakened, every re-point cites its doc/code source |
-| S1.3 | 1 QG-01 | Quarantine-with-reason the parenthetical cosmetic (3 tests) | ⬜ | |
+| S1.3 | 1 QG-01 | Quarantine-with-reason the parenthetical cosmetic (3 tests) | ✅ | NO-OP by S1.1 triage: trio was Class A, fixed in S1.2 (`declIn` logical-prop helper); suite 4/4 pass · 0 skipped — nothing quarantined, no GAP-1-1 reserved-name used for cosmetics |
 | S1.4 | 1 QG-01 | Triage + resolve the 2 recovery-phase3 reds | ⬜ | |
 | S1.5 | 1 QG-01 | Full green unit run → flip QG-01 TRUE | ⬜ | |
 | S2.1 | 2 LR-01 | Enable Dev Mode / elevated shell → `pack:win` succeeds | ⬜ | |
@@ -251,6 +251,11 @@ Commit message: `test(editor): re-point stale shell/ownership snapshots to curre
 - Modify: the Class-B test file(s) from the triage table
 
 **Interfaces:** Consumes S1.1's triage. Produces: those 3 tests reported as `skipped` with a reason.
+
+> **CLOSED AS VERIFICATION NO-OP (2026-07-26).** S1.1 reclassified the trio B→A: the cosmetic shipped
+> in Density Slice 6; the reds were a stale `declIn()` helper predating R1's logical-property rename,
+> fixed in S1.2. Verified this slice: parenthetical-box-geometry suite **4/4 pass · 0 skipped**.
+> Nothing quarantined; no gap row needed. Steps below are intentionally unticked — they never ran.
 
 - [ ] **Step 1: Skip each of the 3 tests with an auditable reason**
 
