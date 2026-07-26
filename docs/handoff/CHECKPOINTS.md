@@ -5,6 +5,19 @@ Template & rules: `PROTOCOL.md`.
 
 ---
 
+## 2026-07-26 · S2.1 — pack:win succeeds under Dev Mode; installer produced
+- **Did:** User enabled Windows Developer Mode (via `ms-settings:developers`; verified
+  `AllowDevelopmentWithoutDevLicense = 1`). `npm run pack:win` then completed with exit 0 — the
+  winCodeSign symlink-privilege blocker is gone, no elevated shell needed, no cache purge needed.
+- **Evidence:** `docs/plans/evidence/S2.1-pack-win.txt` (env note + full log).
+  Artifact: `rwanga-editor\build\output\Rwanga Editor-Setup-0.1.0-alpha.0.exe` (76 MB, NSIS x64,
+  oneClick, **unsigned** — no cscInfo). NOTE: output dir is `build\output\` per project config,
+  not the plan-assumed `dist\` (plan annotated).
+- **Status deltas:** ledger S2.1 ⬜→✅. LR-01 still open pending S2.2 (install + smoke + flip).
+- **Gaps/risks surfaced:** none. (dist/ artifacts not committed, per plan.)
+- **Next action:** S2.2 — Step 1 is a user decision: accept unsigned installer for LR-01
+  (Decision #2), then install + 5-item smoke.
+
 ## 2026-07-26 · S1.5 — QG-01 GREEN: unit suite 0 reds, checklist flipped TRUE (Phase 1 complete)
 - **Did:** Full clean unit run captured to `docs/plans/evidence/S1.5-green-run.txt`; flipped QG-01
   PARTIAL→TRUE in `docs/RWANGA_IDE_LAUNCH_CHECKLIST.md` (old 2026-06-10 triage note kept for the

@@ -76,7 +76,7 @@ electron-builder (`npm run pack:win`), PowerShell/Windows 11.
 | S1.3 | 1 QG-01 | Quarantine-with-reason the parenthetical cosmetic (3 tests) | ✅ | NO-OP by S1.1 triage: trio was Class A, fixed in S1.2 (`declIn` logical-prop helper); suite 4/4 pass · 0 skipped — nothing quarantined, no GAP-1-1 reserved-name used for cosmetics |
 | S1.4 | 1 QG-01 | Triage + resolve the 2 recovery-phase3 reds | ✅ | Both stale (triage rows 29–30): gutter test re-pointed to F1 rail tokens (+ dimmer regression guard kept); whitelist gained the 4 authorized modules w/ provenance. Suite file 12/12 pass |
 | S1.5 | 1 QG-01 | Full green unit run → flip QG-01 TRUE | ✅ | `docs/plans/evidence/S1.5-green-run.txt`: **1936 · 1935 pass · 0 fail · 1 skipped** (exit 0, zero quarantines) at `90485776`; checklist QG-01 PARTIAL→TRUE |
-| S2.1 | 2 LR-01 | Enable Dev Mode / elevated shell → `pack:win` succeeds | ⬜ | |
+| S2.1 | 2 LR-01 | Enable Dev Mode / elevated shell → `pack:win` succeeds | ✅ | User enabled Dev Mode (2026-07-26); `pack:win` exit 0 → `build\output\Rwanga Editor-Setup-0.1.0-alpha.0.exe` (76 MB, NSIS x64, unsigned). `docs/plans/evidence/S2.1-pack-win.txt` |
 | S2.2 | 2 LR-01 | Install + smoke the built `.exe` → flip LR-01 TRUE | ⬜ | |
 | S3.1 | 3 Lifecycle | PF-01 cold-start launch matrix (Windows) | ⬜ | |
 | S3.2 | 3 Lifecycle | PF-02/03/05 lifecycle E2E specs (new/open/save-as) | ⬜ | |
@@ -344,14 +344,14 @@ symlink-privilege error; Windows Developer Mode (or an elevated shell) grants sy
 **Files:**
 - Create: `docs/plans/evidence/S2.1-pack-win.txt`
 
-- [ ] **Step 1: Check whether Developer Mode is enabled**
+- [x] **Step 1: Check whether Developer Mode is enabled**
 
 ```powershell
 Get-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\AppModelUnlock' -Name AllowDevelopmentWithoutDevLicense -ErrorAction SilentlyContinue
 ```
 `AllowDevelopmentWithoutDevLicense = 1` → enabled, go to Step 3. Otherwise Step 2.
 
-- [ ] **Step 2 (BLOCKING — needs the user or an elevated shell):** Enable Developer Mode
+- [x] **Step 2 (BLOCKING — needs the user or an elevated shell):** Enable Developer Mode — user toggled it via `ms-settings:developers` 2026-07-26 (recorded in evidence file)
 
 This cannot be done from an unelevated agent shell. Ask the user to either run
 `start ms-settings:developers` and toggle **Developer Mode** on, or provide an elevated
@@ -359,7 +359,7 @@ This cannot be done from an unelevated agent shell. Ask the user to either run
 If the user is unavailable, END THE SESSION cleanly via §0.3 with NEXT ACTION = "S2.1 Step 2 (user
 action required: enable Windows Developer Mode)". That is a valid handoff.
 
-- [ ] **Step 3: Build**
+- [x] **Step 3: Build** *(actual output dir: `build\output\`, per project config — not `dist\`)*
 
 ```powershell
 cmd /c "cd /d E:\api\rwanga\rwanga-editor && npm run pack:win > E:\api\rwanga\docs\plans\evidence\S2.1-pack-win.txt 2>&1"
@@ -369,7 +369,7 @@ If it still fails on winCodeSign after Dev Mode: delete the stale cache
 `Remove-Item -Recurse -Force "$env:LOCALAPPDATA\electron-builder\Cache\winCodeSign"` and retry once;
 a different error class = new gap row + escalate.
 
-- [ ] **Step 4: SLICE CLOSE RITUAL (§0.3)**
+- [x] **Step 4: SLICE CLOSE RITUAL (§0.3)**
 
 Commit message: `build(editor): pack:win succeeds under Dev Mode — installer produced (LR-01, S2.1)`
 (Note: `dist/` output itself is NOT committed.)

@@ -1,0 +1,37 @@
+﻿S2.1 evidence — pack:win build log (2026-07-26)
+Environment unblock path: USER enabled Windows Developer Mode via ms-settings:developers
+(verified AllowDevelopmentWithoutDevLicense = 1 in HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\AppModelUnlock).
+No elevated shell needed. Build exit code: 0.
+Artifact: rwanga-editor\build\output\Rwanga Editor-Setup-0.1.0-alpha.0.exe (76 MB, NSIS, x64, oneClick)
+NOTE: output dir is build\output\ (project config), not the plan-assumed dist\.
+Unsigned (no cscInfo) — signing decision pending at S2.2 Step 1 (plan Decision #2).
+================================================================
+
+> rwanga-editor@0.1.0-alpha.0 pack:win
+> electron-builder --win --x64
+
+  â€¢ electron-builder  version=25.1.8 os=10.0.26200
+  â€¢ loaded configuration  file=E:\api\rwanga\rwanga-editor\electron-builder.yml
+  â€¢ executing @electron/rebuild  electronVersion=31.7.7 arch=x64 buildFromSource=false appDir=./
+  â€¢ installing native dependencies  arch=x64
+  â€¢ completed installing native dependencies
+  â€¢ packaging       platform=win32 arch=x64 electron=31.7.7 appOutDir=build\output\win-unpacked
+  â€¢ updating asar integrity executable resource  executablePath=build\output\win-unpacked\Rwanga Editor.exe
+  â€¢ default Electron icon is used  reason=application icon is not set
+  â€¢ downloading     url=https://github.com/electron-userland/electron-builder-binaries/releases/download/winCodeSign-2.6.0/winCodeSign-2.6.0.7z size=5.6 MB parts=1
+  â€¢ downloaded      url=https://github.com/electron-userland/electron-builder-binaries/releases/download/winCodeSign-2.6.0/winCodeSign-2.6.0.7z duration=1.989s
+  â€¢ signing with signtool.exe  path=build\output\win-unpacked\Rwanga Editor.exe
+  â€¢ no signing info identified, signing is skipped  signHook=false cscInfo=null
+  â€¢ building        target=nsis file=build\output\Rwanga Editor-Setup-0.1.0-alpha.0.exe archs=x64 oneClick=true perMachine=false
+  â€¢ downloading     url=https://github.com/electron-userland/electron-builder-binaries/releases/download/nsis-3.0.4.1/nsis-3.0.4.1.7z size=1.3 MB parts=1
+  â€¢ downloaded      url=https://github.com/electron-userland/electron-builder-binaries/releases/download/nsis-3.0.4.1/nsis-3.0.4.1.7z duration=1.32s
+  â€¢ signing with signtool.exe  path=build\output\win-unpacked\resources\elevate.exe
+  â€¢ no signing info identified, signing is skipped  signHook=false cscInfo=null
+  â€¢ downloading     url=https://github.com/electron-userland/electron-builder-binaries/releases/download/nsis-resources-3.4.1/nsis-resources-3.4.1.7z size=731 kB parts=1
+  â€¢ downloaded      url=https://github.com/electron-userland/electron-builder-binaries/releases/download/nsis-resources-3.4.1/nsis-resources-3.4.1.7z duration=1.155s
+  â€¢ signing with signtool.exe  path=build\output\__uninstaller-nsis-rwanga-editor.exe
+  â€¢ no signing info identified, signing is skipped  signHook=false cscInfo=null
+  â€¢ signing with signtool.exe  path=build\output\Rwanga Editor-Setup-0.1.0-alpha.0.exe
+  â€¢ no signing info identified, signing is skipped  signHook=false cscInfo=null
+  â€¢ building block map  blockMapFile=build\output\Rwanga Editor-Setup-0.1.0-alpha.0.exe.blockmap
+

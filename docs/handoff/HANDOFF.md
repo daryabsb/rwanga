@@ -4,7 +4,7 @@
 > archive to find the next action — it's here. Update this file at the end of every unit of work
 > (see `PROTOCOL.md`). Keep it short; link detail, don't inline it.
 
-- **Last updated:** 2026-07-26 · by: S1.5 close — **QG-01 GREEN + flipped TRUE** (Phase 1 complete)
+- **Last updated:** 2026-07-26 · by: S2.1 close — installer builds under Dev Mode
 - **Binding doctrine:** every agent MUST follow the 10-rule MASTERPLAN EXECUTION DOCTRINE in the
   root `CLAUDE.md` (one slice at a time · tick-as-you-go · §0.3 close ritual · push every slice commit).
 - **HEAD:** see latest commit on `main` (S0.1 slice-close) · **Branch:** `main`
@@ -14,10 +14,12 @@
 
 ## ⭐ NEXT ACTION
 
-**Execute masterplan slice S2.1** — LR-01 installer build. Step 1: check Windows Developer Mode
-(`Get-ItemProperty HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\AppModelUnlock`); if off, Step 2
-is a **user action** (enable Dev Mode or provide an elevated shell) — end cleanly if blocked.
-Phase 1 is COMPLETE: unit suite fully green (1936 · 0 fail · 1 skipped), QG-01 flipped TRUE.
+**Execute masterplan slice S2.2** — install + smoke the packaged app. Step 1 is a **user decision**:
+confirm unsigned installer is acceptable for LR-01 (plan Decision #2; GO_LIVE already says
+"+ signing later"). Then install `rwanga-editor\build\output\Rwanga Editor-Setup-0.1.0-alpha.0.exe`,
+run the 5-item smoke (open→new→type→save→reopen→print preview), record in
+`docs/plans/evidence/S2.2-installer-smoke.md`, flip LR-01.
+Phase 1 COMPLETE (QG-01 TRUE); S2.1 done (build exit 0 under Dev Mode).
 ⚠ A running Electron instance keeps auto-migrating `playground-the-last-light.rga` — check
 `git status` for fixture dirt before every commit (it recurred twice on 2026-07-26).
 
@@ -59,7 +61,7 @@ contribution/write API. That write API is the true technical prerequisite for th
 
 | ID | Case | Status | Pointer |
 |---|---|---|---|
-| LR-01 | Installer build fails (winCodeSign symlink privilege) — needs Win Dev Mode / elevated shell | OPEN | GO_LIVE Part A.1 #2 |
+| LR-01 | Build UNBLOCKED (Dev Mode on, installer produced 2026-07-26); remaining: install+smoke (S2.2) | OPEN — S2.2 | `docs/plans/evidence/S2.1-pack-win.txt` |
 | PF-01/02/03/05/13 | Core lifecycle unverified (launch matrix, new/open/save-as E2E, console audit) | OPEN — QA | GO_LIVE Part A.1 #3 |
 | RTL-04…13, SW-23 | RTL visual + bidi QA vs ratified Kurdish/RTL profile (**highest product value**) | OPEN — QA | GO_LIVE Part A.1 #4 |
 | MT-02/04/05/06/07/10, PP-01/03, SW-01 | Page-geometry QA (sizes/margins/overflow) | OPEN — QA | GO_LIVE Part A.1 #5 |
