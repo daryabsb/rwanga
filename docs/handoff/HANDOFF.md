@@ -4,7 +4,7 @@
 > archive to find the next action — it's here. Update this file at the end of every unit of work
 > (see `PROTOCOL.md`). Keep it short; link detail, don't inline it.
 
-- **Last updated:** 2026-07-26 · by: GAP-1-1 fix-slice (DOM-read-as-truth resolved)
+- **Last updated:** 2026-07-26 · by: S1.5 close — **QG-01 GREEN + flipped TRUE** (Phase 1 complete)
 - **Binding doctrine:** every agent MUST follow the 10-rule MASTERPLAN EXECUTION DOCTRINE in the
   root `CLAUDE.md` (one slice at a time · tick-as-you-go · §0.3 close ritual · push every slice commit).
 - **HEAD:** see latest commit on `main` (S0.1 slice-close) · **Branch:** `main`
@@ -14,10 +14,10 @@
 
 ## ⭐ NEXT ACTION
 
-**Execute masterplan slice S1.5** — full clean unit run captured to
-`docs/plans/evidence/S1.5-green-run.txt` (expect **fail 0**), then flip QG-01 TRUE in the launch
-checklist. GAP-1-1 is FIXED (`_enterRebind` gates on `entry.requiresPro || _isPersistsOnly(entry)`;
-source-audit 19/19, settings neighbors 67/67).
+**Execute masterplan slice S2.1** — LR-01 installer build. Step 1: check Windows Developer Mode
+(`Get-ItemProperty HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\AppModelUnlock`); if off, Step 2
+is a **user action** (enable Dev Mode or provide an elevated shell) — end cleanly if blocked.
+Phase 1 is COMPLETE: unit suite fully green (1936 · 0 fail · 1 skipped), QG-01 flipped TRUE.
 ⚠ A running Electron instance keeps auto-migrating `playground-the-last-light.rga` — check
 `git status` for fixture dirt before every commit (it recurred twice on 2026-07-26).
 
@@ -48,7 +48,7 @@ contribution/write API. That write API is the true technical prerequisite for th
 ## 🚦 Gates (why the AI/Agent harness cannot start yet)
 
 1. **Launch gate** — no invention features until every launch-checklist **P0** is TRUE.
-   Status: **32 TRUE · 21 PARTIAL · 6 UNKNOWN · 1 FALSE** (28 open). See `../RWANGA_IDE_LAUNCH_CHECKLIST.md`.
+   Status: **33 TRUE · 20 PARTIAL · 6 UNKNOWN · 1 FALSE** (27 open; QG-01 flipped TRUE 2026-07-26). See `../RWANGA_IDE_LAUNCH_CHECKLIST.md`.
 2. **Alive-App Phase 2 gate** — "No AI feature implementation may start before this phase is visually
    verified." Status: **every box unchecked.** See `../RWANGA_IDE_ALIVE_APP_CHECKLIST.md`.
 3. **Technical prerequisite** — `.rga` agent-write API does not exist (Vision Gap #2).
@@ -59,7 +59,6 @@ contribution/write API. That write API is the true technical prerequisite for th
 
 | ID | Case | Status | Pointer |
 |---|---|---|---|
-| QG-01 | 30/30 reds resolved (S1.2+S1.4+GAP-1-1 fix); awaiting S1.5 green-run flip | OPEN — S1.5 next | `docs/plans/evidence/S1.1-qg01-triage.md` |
 | LR-01 | Installer build fails (winCodeSign symlink privilege) — needs Win Dev Mode / elevated shell | OPEN | GO_LIVE Part A.1 #2 |
 | PF-01/02/03/05/13 | Core lifecycle unverified (launch matrix, new/open/save-as E2E, console audit) | OPEN — QA | GO_LIVE Part A.1 #3 |
 | RTL-04…13, SW-23 | RTL visual + bidi QA vs ratified Kurdish/RTL profile (**highest product value**) | OPEN — QA | GO_LIVE Part A.1 #4 |
@@ -75,6 +74,7 @@ contribution/write API. That write API is the true technical prerequisite for th
 
 | Case | Result | Evidence |
 |---|---|---|
+| QG-01 (30 test reds) | **TRUE — suite fully green** (1936 · 0 fail · 1 skip; zero quarantines; 1 real defect GAP-1-1 found & fixed) | `docs/plans/evidence/S1.1-qg01-triage.md` + `S1.5-green-run.txt`; commits `09382fd6`→`90485776` |
 | Is the launch checklist honest/current? | **Yes — verified** | 3 latest commits are checklist-only; QG-01 = 1936/1899/36 reproduces; clean-fixture rerun = 40/40 → 30 reds all non-core |
 | PP-D5 (RTL body-leading) | Closed (PP-16 TRUE) | Print-Truth-Unification; PTU-B 7/7 green (prior agent, 2026-06-10) |
 | PDF export, RTL scene-heading map, persistence/recovery | TRUE, test-backed | in the 1899-pass unit set |

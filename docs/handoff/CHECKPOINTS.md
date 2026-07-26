@@ -5,6 +5,19 @@ Template & rules: `PROTOCOL.md`.
 
 ---
 
+## 2026-07-26 · S1.5 — QG-01 GREEN: unit suite 0 reds, checklist flipped TRUE (Phase 1 complete)
+- **Did:** Full clean unit run captured to `docs/plans/evidence/S1.5-green-run.txt`; flipped QG-01
+  PARTIAL→TRUE in `docs/RWANGA_IDE_LAUNCH_CHECKLIST.md` (old 2026-06-10 triage note kept for the
+  record). Phase 1 of the masterplan (S0.1→S1.5 + GAP-1-1 fix-slice) is complete in one session.
+- **Evidence:** **1936 tests · 1935 pass · 0 fail · 1 skipped** (exit 0) at HEAD `90485776`.
+  Zero quarantines added — the suite is green on real assertions.
+- **Status deltas:** ledger S1.5 ⬜→✅; **QG-01 PARTIAL→TRUE** (launch P0s now 33 TRUE · 20 PARTIAL ·
+  6 UNKNOWN · 1 FALSE; QG-12's remaining named blockers: LR-01 + QA sweeps).
+- **Gaps/risks surfaced:** none new. Standing: the running Electron instance auto-migrates
+  `playground-the-last-light.rga` — keep the pre-commit fixture check.
+- **Next action:** S2.1 — LR-01 installer: check Dev Mode; if disabled, blocked on user
+  (enable Dev Mode or elevated shell).
+
 ## 2026-07-26 · GAP-1-1 fix-slice — DOM-read-as-truth violation resolved
 - **Did:** Fixed the one real defect from the QG-01 triage. `_enterRebind()` in
   `renderer/js/shell/workspaces/settings-workspace.js` no longer reads

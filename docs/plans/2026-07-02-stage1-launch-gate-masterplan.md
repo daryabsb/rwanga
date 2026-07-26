@@ -75,7 +75,7 @@ electron-builder (`npm run pack:win`), PowerShell/Windows 11.
 | S1.2 | 1 QG-01 | Re-point the ~24 stale shell/ownership snapshot tests | ✅ | All 27 Class-A tests re-pointed (15 files); full suite 1936 · **3 fail** (= 2 Class C + 1 Class D exactly) · 1 skipped; no assertion weakened, every re-point cites its doc/code source |
 | S1.3 | 1 QG-01 | Quarantine-with-reason the parenthetical cosmetic (3 tests) | ✅ | NO-OP by S1.1 triage: trio was Class A, fixed in S1.2 (`declIn` logical-prop helper); suite 4/4 pass · 0 skipped — nothing quarantined, no GAP-1-1 reserved-name used for cosmetics |
 | S1.4 | 1 QG-01 | Triage + resolve the 2 recovery-phase3 reds | ✅ | Both stale (triage rows 29–30): gutter test re-pointed to F1 rail tokens (+ dimmer regression guard kept); whitelist gained the 4 authorized modules w/ provenance. Suite file 12/12 pass |
-| S1.5 | 1 QG-01 | Full green unit run → flip QG-01 TRUE | ⬜ | |
+| S1.5 | 1 QG-01 | Full green unit run → flip QG-01 TRUE | ✅ | `docs/plans/evidence/S1.5-green-run.txt`: **1936 · 1935 pass · 0 fail · 1 skipped** (exit 0, zero quarantines) at `90485776`; checklist QG-01 PARTIAL→TRUE |
 | S2.1 | 2 LR-01 | Enable Dev Mode / elevated shell → `pack:win` succeeds | ⬜ | |
 | S2.2 | 2 LR-01 | Install + smoke the built `.exe` → flip LR-01 TRUE | ⬜ | |
 | S3.1 | 3 Lifecycle | PF-01 cold-start launch matrix (Windows) | ⬜ | |
@@ -317,18 +317,18 @@ Commit message: `test(editor): resolve recovery-phase3 reds (QG-01, S1.4)`
 - Modify: `docs/RWANGA_IDE_LAUNCH_CHECKLIST.md` (QG-01 row)
 - Create: `docs/plans/evidence/S1.5-green-run.txt`
 
-- [ ] **Step 1: Full clean run, captured**
+- [x] **Step 1: Full clean run, captured**
 
 ```powershell
 cmd /c "cd /d E:\api\rwanga\rwanga-editor && npm run test:unit > E:\api\rwanga\docs\plans\evidence\S1.5-green-run.txt 2>&1"
 ```
 Expected: **fail 0** (skips = 1 pre-existing + the quarantined ones, each with a reason string).
 
-- [ ] **Step 2: Flip QG-01 in the launch checklist**
+- [x] **Step 2: Flip QG-01 in the launch checklist**
 
 Edit the QG-01 row: status → TRUE; evidence note → `0 failing / 1936 tests at <new HEAD SHA>; quarantines carry QUARANTINE(QG-01) reasons; see docs/plans/evidence/S1.5-green-run.txt`.
 
-- [ ] **Step 3: SLICE CLOSE RITUAL (§0.3)** — status delta: `QG-01 PARTIAL→TRUE`
+- [x] **Step 3: SLICE CLOSE RITUAL (§0.3)** — status delta: `QG-01 PARTIAL→TRUE`
 
 Commit message: `test(editor): QG-01 green — unit suite 0 reds, checklist flipped (S1.5)`
 
