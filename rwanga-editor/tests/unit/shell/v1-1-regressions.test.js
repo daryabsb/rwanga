@@ -38,9 +38,12 @@ test('V1.1 fix 2: titlebar exposes a theme-toggle button with click affordance',
     /Rga\.\$\(['"]#rga-shell-titlebar-theme['"]\)/.test(html),
     'titlebar theme button must be wired in the init script (looked for Rga.$ selector)'
   );
+  // H2B: settings.store is the theme SSOT — all togglers route through
+  // Rga.SettingsTheme.toggle() (renderer/index.html:1054-1055;
+  // renderer/js/shell/shell-applicators.js:212-228).
   assert.ok(
-    /Rga\.Theme\.toggle\s*\(\)/.test(html),
-    'titlebar theme button wiring must call Rga.Theme.toggle()'
+    /Rga\.SettingsTheme\.toggle\s*\(\)/.test(html),
+    'titlebar theme button wiring must call Rga.SettingsTheme.toggle() (H2B constitutional path)'
   );
 });
 

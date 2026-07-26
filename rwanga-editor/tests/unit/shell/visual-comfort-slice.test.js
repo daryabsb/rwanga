@@ -125,29 +125,43 @@ test('C: Slice 4 — page-transition mask band RETIRED; no ::before rule on the 
     'the Flow .rga-page-marker::before mask rule must be removed — it was painting page-colour over manuscript text adjacent to each page break');
 });
 
-test('C: Visual Comfort CLOSED (Option A) — the "Page N" label sits as a quiet hint in the page inline-end chrome, NOT as a deliberate break marker', () => {
+test('C: Visual Comfort CLOSED (Option A) — the "Page N" label sits as a rail-side P## ambient hint, NOT as a deliberate break marker', () => {
+  // Filmustageation F1/F6 (fd198a49, LOCKED): the marker moved from the
+  // inline-END chrome to the line-number rail as a styled P## tab —
+  // editor-prosemirror.css:2217-2232, per FLOW_VIEW_UX_DIRECTION_V2.md
+  // §Page Number. Still an ambient coordinate, never a page seam (Law 4;
+  // Flow continuous-drafting doctrine bans seams).
   const css = read(EDITOR_PM_CSS);
   const body = ruleBody(css, '#editor-container.view-flow .rga-page-marker .rga-page-marker-begin');
   assert.ok(body, 'the Flow .rga-page-marker-begin rule must exist');
-  // Placement: still in the chrome zone, opposite the line gutter.
-  assert.ok(/inset-inline-end\s*:\s*-0\.5in/.test(body),
-    'the label must be tucked into the page inline-end chrome via inset-inline-end');
-  assert.ok(/inset-inline-start\s*:\s*auto/.test(body),
-    'the label must override the base rule\'s `left: 50%`');
+  // Placement (F6): rail-side chrome zone — inline-START, opposite the
+  // old placement (editor-prosemirror.css:2221).
+  assert.ok(/inset-inline-start\s*:\s*-0\.5in/.test(body),
+    'the label must be tucked into the rail-side chrome via inset-inline-start (F6 moved it off the inline-end, which collided with transitions)');
+  // editor-prosemirror.css:2222 — override the base rule's `left: 50%`.
+  assert.ok(/inset-inline-end\s*:\s*auto/.test(body),
+    'the label must override the base rule\'s `left: 50%` via inset-inline-end: auto');
   assert.ok(/translateY\s*\(\s*-50%\s*\)/.test(body),
     'the label must translateY(-50%) — vertically aligned on the boundary');
-  // Hint, not chrome: no capsule signals.
-  assert.ok(/background\s*:\s*transparent/.test(body),
-    'the label must be transparent — no background fill (capsule retired per Option A doctrine)');
+  // Styled P## accent tab (F6): rail-marker tint, NOT a seam signal —
+  // editor-prosemirror.css:2224-2226.
+  assert.ok(/background\s*:\s*var\(\s*--flow-rail-marker-bg\s*\)/.test(body),
+    'the P## tab must paint with var(--flow-rail-marker-bg) (F6 rail-tab tint)');
+  assert.ok(/border-radius\s*:\s*4px/.test(body),
+    'the P## tab must carry the F6 4px border-radius (accent tab shape)');
   assert.ok(!/border\s*:\s*\d+px/.test(body),
-    'the label must declare no border (capsule retired per Option A doctrine)');
-  assert.ok(!/border-radius\s*:/.test(body),
-    'the label must declare no border-radius (capsule retired per Option A doctrine)');
+    'the label must declare no border (no outlined capsule — ambient tab only)');
   assert.ok(!/text-transform\s*:\s*uppercase/.test(body),
-    'the label must NOT be uppercase (uppercase reads as chrome assertion — Option A demands hint voice)');
-  // No editor-page-bg mask (the Slice 3 rule that hid text).
+    'the label must NOT be uppercase (uppercase reads as chrome assertion — hint voice preserved through F6)');
+  // Seam guards: no editor-page-bg mask (the Slice 3 rule that hid text).
   assert.ok(!/background\s*:\s*var\(\s*--editor-page-bg/.test(body),
     'the label must NOT paint with --editor-page-bg (that was the Slice 3 mask colour that hid manuscript text)');
+  // Seam guard: the marker parent stays a zero-height ambient anchor
+  // (editor-prosemirror.css F6 comment — "parent stays height:0, zero
+  // PageMap budget (Flow continuous, Law 4)").
+  const parent = ruleBody(css, '#editor-container.view-flow .rga-page-marker');
+  assert.ok(parent && /height\s*:\s*0\s*;/.test(parent),
+    'the Flow .rga-page-marker parent must declare height: 0 — a non-zero height would reintroduce a page seam (Law 4)');
 });
 
 test('C: Visual Comfort CLOSED (Option A) — no horizontal hairline crosses the manuscript in Flow', () => {

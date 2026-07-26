@@ -80,8 +80,10 @@ test('Bundle 1 §B: Rga.Shell.Sidebar.renderEmpty is the single owner of the emp
 
 test('Bundle 1 §B: every panel call site uses Rga.Shell.Sidebar.renderEmpty (no inline duplication)', () => {
   // Panels that have an empty/unavailable/error path.
+  // settings.js dropped per Slice 5A — it is a registration-only shim (panels/settings.js:2-20);
+  // Settings is a workspace tab (Shell Doctrine) and deliberately never calls renderEmpty.
   const PANELS_WITH_EMPTY = [
-    'search.js', 'characters.js', 'revisions.js', 'settings.js',
+    'search.js', 'characters.js', 'revisions.js',
     'scene-navigator.js', 'script-workspace.js'
   ];
   PANELS_WITH_EMPTY.forEach(function(file) {
@@ -159,11 +161,12 @@ test('Bundle 1 §B: removed cross-references — "Breakdown tab in the Bottom Pa
 });
 
 test('Bundle 1 §B: writer-voice copy adopted per the plan table', () => {
+  // settings.js dropped per Slice 5A — "Settings will live here" copy removed with the panel UI
+  // (panels/settings.js:19-20); mount() redirects to Rga.SettingsWorkspace.open() (settings.js:38-39).
   const expected = {
     'search.js':     /Search across your scripts will live here/,
     'characters.js': /Your characters will appear here as you write/,
-    'revisions.js':  /Revisions will let you see every change you made/,
-    'settings.js':   /Settings will live here/
+    'revisions.js':  /Revisions will let you see every change you made/
   };
   Object.keys(expected).forEach(function(file) {
     const src = read(path.join(PANELS_DIR, file));

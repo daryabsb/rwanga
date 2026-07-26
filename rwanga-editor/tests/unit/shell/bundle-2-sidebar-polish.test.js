@@ -73,15 +73,21 @@ test('Bundle 2 §C: row min-height is consistent across Scene Navigator / Outlin
   const snMin = pxValue((sn.match(/min-height\s*:\s*([^;]+);/) || [, ''])[1]);
   const olMin = pxValue((ol.match(/min-height\s*:\s*([^;]+);/) || [, ''])[1]);
   const wsMin = pxValue((ws.match(/min-height\s*:\s*([^;]+);/) || [, ''])[1]);
-  assert.equal(snMin, 28, 'Scene Navigator row baseline min-height: 28px');
-  assert.equal(olMin, 28, 'Outline scene row min-height must match Scene Navigator (28px)');
-  assert.equal(wsMin, 28, 'Workspace file row min-height must match Scene Navigator (28px)');
+  // Scene Navigator row deliberately 28→30px per commit 16273947 (shell.css:1583 "+2px breathing room").
+  assert.equal(snMin, 30, 'Scene Navigator row min-height: 30px (commit 16273947 breathing-room polish)');
+  assert.equal(olMin, 28, 'Outline scene row min-height stays the 28px baseline');
+  assert.equal(wsMin, 28, 'Workspace file row min-height stays the 28px baseline');
 });
 
 test('Bundle 2 §C: row padding is consistent (4px 8px) across the three panels', () => {
   const css = read(SHELL_CSS);
-  ['.rga-shell-scene-navigator-row',
-   '.rga-shell-outline-scene-row',
+  // Scene Navigator row padding deliberately 4px 8px → 5px 8px per commit 16273947 (shell.css:1584);
+  // Outline/Workspace stay 4px 8px by design.
+  const sn = ruleBody(css, '.rga-shell-scene-navigator-row');
+  assert.ok(sn);
+  assert.ok(/padding\s*:\s*5px\s+8px/.test(sn),
+    '.rga-shell-scene-navigator-row row padding must be 5px 8px (commit 16273947 breathing-room polish)');
+  ['.rga-shell-outline-scene-row',
    '.rga-shell-workspace-file'].forEach(function(sel) {
     const body = ruleBody(css, sel);
     assert.ok(body);

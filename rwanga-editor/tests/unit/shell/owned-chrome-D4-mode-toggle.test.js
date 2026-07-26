@@ -59,11 +59,27 @@ test('§D4: Mode segmented-control group exists inside .rga-shell-toolbar-inner,
 
 test('§D4: a group separator sits between Writing-tools and Mode', () => {
   const html = read(INDEX_HTML);
-  // D2 added 1 group-sep (Text|Scene); D3 added 1 (Scene|Writing);
-  // D4 adds the third (Writing|Mode).
+  // F1A.6 moved the Scene group (and its adjacent seps) into the
+  // screenplay plugin: static index.html now carries exactly 2
+  // group-seps — Slot|Writing (index.html:158) and Writing|Mode
+  // (index.html:177). The scene-adjacent seps are plugin-mounted by
+  // the contribution API (shell/toolbar.js:157-163).
   const seps = (html.match(/class="rga-shell-toolbar-group-sep"/g) || []).length;
-  assert.ok(seps >= 3,
-    'at least 3 .rga-shell-toolbar-group-sep elements expected (Text|Scene + Scene|Writing + Writing|Mode); got ' + seps);
+  assert.equal(seps, 2,
+    'exactly 2 static .rga-shell-toolbar-group-sep elements expected post-F1A.6 (Slot|Writing + Writing|Mode; scene seps are plugin-mounted); got ' + seps);
+  // The Writing|Mode separator (the §D4 invariant) must still sit
+  // directly between the Writing group and the Mode group.
+  assert.ok(/data-group="writing"[\s\S]*?class="rga-shell-toolbar-group-sep"[\s\S]*?data-group="mode"/.test(html),
+    'a group separator must still sit between the Writing-tools group and the Mode group');
+  // The plugin mount slot must exist for the scene-adjacent seps
+  // (index.html:142, F1A.6).
+  assert.ok(/data-toolbar-slot="content"/.test(html),
+    'the plugin toolbar content slot must exist (scene group + its seps mount there)');
+  // The contribution API builds the leading group-sep per plugin
+  // group (shell/toolbar.js:157-163).
+  const toolbarApi = read(path.join(REPO, 'renderer/js/shell/toolbar.js'));
+  assert.ok(/rga-shell-toolbar-group-sep/.test(toolbarApi),
+    'shell/toolbar.js must mount the plugin groups\' leading group-seps');
 });
 
 test('§D4: Mode group uses role="radiogroup" with the Screenplay role="radio" button (a11y per G-OC-8)', () => {
@@ -258,20 +274,28 @@ test('§D4: D1.1 alignment + D2 scene tools + D3 writing tools all intact', () =
     '.rga-shell-toolbar-inner must still consume var(--page-width) — D1.1 alignment preserved');
   assert.ok(/grid-column\s*:\s*4/.test(innerRule[0]),
     '.rga-shell-toolbar-inner must still declare grid-column: 4 — D1.1 preserved');
-  // D2 — block-type + + Scene still wired.
-  assert.ok(/<select[^>]*id="rga-shell-toolbar-blocktype"/.test(html),
-    'D2 block-type dropdown must still exist');
-  assert.ok(/<button[^>]*data-command="scene\.insert"/.test(html),
-    'D2 + Scene button must still exist');
-  assert.ok(/registerCommand\(\{[^}]*command:\s*['"]scene\.insert['"]/.test(src),
-    'D2 scene.insert command must still be registered');
+  // D2 — block-type + + Scene still wired. Moved to the screenplay
+  // plugin per F1A.6 — DOM is plugin-built (doc-types/screenplay/
+  // toolbar.js:105-106 select, :144 button) into the index.html:142
+  // slot, so the sub-checks read the plugin source.
+  const sceneSrc = read(path.join(REPO, 'renderer/js/doc-types/screenplay/toolbar.js'));
+  assert.ok(/select\.id = ['"]rga-shell-toolbar-blocktype['"]/.test(sceneSrc),
+    'D2 block-type dropdown must still exist (plugin-built, doc-types/screenplay/toolbar.js)');
+  assert.ok(/setAttribute\(\s*['"]data-command['"]\s*,\s*['"]scene\.insert['"]\s*\)/.test(sceneSrc),
+    'D2 + Scene button must still exist (plugin-built, doc-types/screenplay/toolbar.js)');
+  // scene.insert registered by the plugin (doc-types/screenplay/toolbar.js:90-94, F1A.6).
+  assert.ok(/registerCommand\(\{[^}]*command:\s*['"]scene\.insert['"]/.test(sceneSrc),
+    'D2 scene.insert command must still be registered (doc-types/screenplay/toolbar.js)');
   // D3 — Note/Flag/Tag/Undo/Redo still wired.
   assert.ok(/<button[^>]*data-command="writing\.note"/.test(html),
     'D3 Note button must still exist');
   assert.ok(/<button[^>]*data-command="writing\.flag"/.test(html),
     'D3 Flag button must still exist');
-  assert.ok(/<select[^>]*id="rga-shell-toolbar-tag"/.test(html),
-    'D3 Tag dropdown must still exist');
+  // Tag dropdown moved to the screenplay plugin per F1A.7 —
+  // doc-types/screenplay/toolbar-tag.js:111-112 builds the select.
+  const tagSrc = read(path.join(REPO, 'renderer/js/doc-types/screenplay/toolbar-tag.js'));
+  assert.ok(/select\.id = ['"]rga-shell-toolbar-tag['"]/.test(tagSrc),
+    'D3 Tag dropdown must still exist (plugin-built, doc-types/screenplay/toolbar-tag.js)');
   assert.ok(/<button[^>]*data-command="edit\.undo"/.test(html),
     'D3 Undo button must still exist');
   assert.ok(/<button[^>]*data-command="edit\.redo"/.test(html),

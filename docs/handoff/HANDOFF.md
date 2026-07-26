@@ -4,7 +4,7 @@
 > archive to find the next action — it's here. Update this file at the end of every unit of work
 > (see `PROTOCOL.md`). Keep it short; link detail, don't inline it.
 
-- **Last updated:** 2026-07-26 · by: S1.1 execution (QG-01 triage)
+- **Last updated:** 2026-07-26 · by: S1.2 execution (27 stale tests re-pointed)
 - **Binding doctrine:** every agent MUST follow the 10-rule MASTERPLAN EXECUTION DOCTRINE in the
   root `CLAUDE.md` (one slice at a time · tick-as-you-go · §0.3 close ritual · push every slice commit).
 - **HEAD:** see latest commit on `main` (S0.1 slice-close) · **Branch:** `main`
@@ -14,11 +14,11 @@
 
 ## ⭐ NEXT ACTION
 
-**Execute masterplan slice S1.2** — re-point the 27 Class-A stale tests per the triage table
-(`docs/plans/evidence/S1.1-qg01-triage.md`). S1.1 verdict: **27 A · 0 B · 2 C(i) · 1 D**.
-Notable: the parenthetical trio is A, not B (fix shipped in Density Slice 6; only the `declIn()`
-test-helper regex predates R1's logical-property rename) → S1.3 closes as a no-op. The 1 Class D
-is **GAP-1-1** (DOM-read-as-truth at `settings-workspace.js:522`) — fix-slice before S1.5.
+**Execute masterplan slice S1.3** — per the S1.1 triage this is now a verification no-op (Class B = 0;
+the parenthetical trio was fixed in S1.2 via the `declIn()` logical-property helper). Close it by
+recording that nothing needs quarantining, then proceed S1.4 (re-point the 2 Class-C recovery-phase3
+reds) and the GAP-1-1 fix-slice (DOM-read-as-truth at `settings-workspace.js:522`) before S1.5.
+Suite state after S1.2: **1936 · 3 fail · 1 skipped** (the 2 C + 1 D exactly).
 
 The whole launch-gate campaign is now a slice-by-slice executable plan with cross-session state:
 **`../plans/2026-07-02-stage1-launch-gate-masterplan.md`** — read its §0 (survival protocol) first,
@@ -58,7 +58,7 @@ contribution/write API. That write API is the true technical prerequisite for th
 
 | ID | Case | Status | Pointer |
 |---|---|---|---|
-| QG-01 | 30 reds fully triaged: 27 stale-A + 2 stale-C + 1 real defect (GAP-1-1) | OPEN — S1.2 next | `docs/plans/evidence/S1.1-qg01-triage.md` |
+| QG-01 | 27/30 reds fixed (S1.2); remaining 3 = 2 Class-C re-points (S1.4) + GAP-1-1 | OPEN — S1.3/S1.4 | `docs/plans/evidence/S1.1-qg01-triage.md` |
 | GAP-1-1 | DOM-read-as-truth: `settings-workspace.js:522` gates rebind on `classList.contains('is-disabled')` instead of `entry.requiresPro` (H6 regression, low severity) | OPEN — fix-slice before S1.5 | Masterplan §0.5 |
 | LR-01 | Installer build fails (winCodeSign symlink privilege) — needs Win Dev Mode / elevated shell | OPEN | GO_LIVE Part A.1 #2 |
 | PF-01/02/03/05/13 | Core lifecycle unverified (launch matrix, new/open/save-as E2E, console audit) | OPEN — QA | GO_LIVE Part A.1 #3 |

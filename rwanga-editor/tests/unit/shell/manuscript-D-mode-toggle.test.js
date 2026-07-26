@@ -19,6 +19,8 @@ const path = require('node:path');
 const REPO = path.resolve(__dirname, '../../..');
 const INDEX_HTML      = path.join(REPO, 'renderer/index.html');
 const FORMAT_TOOLBAR  = path.join(REPO, 'renderer/js/format-toolbar.js');
+// F1A.6 moved the Scene group to the screenplay plugin (scene.insert lives here now).
+const SCREENPLAY_TOOLBAR = path.join(REPO, 'renderer/js/doc-types/screenplay/toolbar.js');
 
 function read(p) { return fs.readFileSync(p, 'utf8'); }
 
@@ -107,11 +109,13 @@ test('§D bundle: TOOLBAR_MODES in format-toolbar.js still includes "screenplay"
 // 5. No new command added, no scene/writing commands removed
 // ----------------------------------------------------------------
 
-test('§D bundle: scene.insert command is still registered in format-toolbar.js', () => {
-  const src = read(FORMAT_TOOLBAR);
+test('§D bundle: scene.insert command is still registered (moved to the screenplay plugin, F1A.6)', () => {
+  // ownership per F1A.6 — scene.insert registration migrated to
+  // doc-types/screenplay/toolbar.js:82-94 (format-toolbar.js:406 documents the move)
+  const src = read(SCREENPLAY_TOOLBAR);
   assert.ok(
     /command:\s*['"]scene\.insert['"]/.test(src),
-    'format-toolbar.js must still register scene.insert command'
+    'doc-types/screenplay/toolbar.js must register the scene.insert command'
   );
 });
 

@@ -5,6 +5,24 @@ Template & rules: `PROTOCOL.md`.
 
 ---
 
+## 2026-07-26 · S1.2 — all 27 Class-A stale tests re-pointed; suite down to 3 known reds
+- **Did:** Re-pointed every Class-A red from the S1.1 triage across 15 test files (4 parallel edit
+  passes, disjoint files): F1A.6 scene-tools → screenplay plugin, Slice-5A Cmd-,/Settings-workspace
+  moves, F1A.4 status-bar split, H2B theme-SSOT reroute, F1/F6 rail-side P## marker, 4 authorized
+  module-whitelist amendments (×3 guards), scene-navigator density values (`16273947`), and the
+  parenthetical `declIn()` logical-property fix (R1). Every changed assertion carries a one-line
+  citation; several guards came out stronger (exact seam guard `height: 0`, cross-boundary negative
+  checks in slice5/slice7, exactly-once command registration).
+- **Evidence:** full unit suite from clean fixtures: **1936 · 1932 pass · 3 fail · 1 skipped**;
+  the 3 = exactly the 2 Class-C recovery-phase3 reds + the 1 Class-D source-audit red (GAP-1-1).
+- **Status deltas:** ledger S1.2 ⬜→✅.
+- **Gaps/risks surfaced:** one transient 4th red appeared mid-session when
+  `playground-the-last-light.rga` got dirtied (known §0.2 hazard; reverted; clean rerun = 3 fails,
+  fixture stays clean through a full run — no test writes it; keep checking `git status` per ritual).
+  Observation: `memory.test.js` "full-bundle" test fails under `--test-name-pattern` isolation —
+  possible in-file order dependence; benign in normal runs, noted for a future hygiene pass.
+- **Next action:** S1.3 — verification no-op close (Class B = 0, nothing to quarantine), then S1.4.
+
 ## 2026-07-26 · S1.1 — all 30 QG-01 reds triaged; 1 real defect surfaced (GAP-1-1)
 - **Did:** Classified every red from the S0.1 baseline via 4 parallel research passes (each failing
   test read against the renderer code + redesign docs it references). Wrote the binding triage table

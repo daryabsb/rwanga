@@ -72,7 +72,7 @@ electron-builder (`npm run pack:win`), PowerShell/Windows 11.
 |---|---|---|---|---|
 | S0.1 | 0 Baseline | Revert fixtures, record clean 30-red baseline | ✅ | `docs/plans/evidence/S0.1-baseline-run.txt` — 1936 tests · 30 fail · 1 skipped (matches §Global-constraints baseline exactly) |
 | S1.1 | 1 QG-01 | Enumerate + classify all 30 reds into triage table | ✅ | `docs/plans/evidence/S1.1-qg01-triage.md` — 27 A · 0 B · 2 C(i) · 1 D (GAP-1-1); parenthetical trio reclassified B→A (fix already shipped; stale helper regex) |
-| S1.2 | 1 QG-01 | Re-point the ~24 stale shell/ownership snapshot tests | ⬜ | |
+| S1.2 | 1 QG-01 | Re-point the ~24 stale shell/ownership snapshot tests | ✅ | All 27 Class-A tests re-pointed (15 files); full suite 1936 · **3 fail** (= 2 Class C + 1 Class D exactly) · 1 skipped; no assertion weakened, every re-point cites its doc/code source |
 | S1.3 | 1 QG-01 | Quarantine-with-reason the parenthetical cosmetic (3 tests) | ⬜ | |
 | S1.4 | 1 QG-01 | Triage + resolve the 2 recovery-phase3 reds | ⬜ | |
 | S1.5 | 1 QG-01 | Full green unit run → flip QG-01 TRUE | ⬜ | |
@@ -217,26 +217,31 @@ Commit message: `test(editor): triage all QG-01 reds into re-point/quarantine/de
 
 **Interfaces:** Consumes S1.1's triage table. Produces a suite where the only reds left are Class B + C.
 
-- [ ] **Step 1: Fix Class-A tests in batches of one suite (file) at a time**
+- [x] **Step 1: Fix Class-A tests in batches of one suite (file) at a time**
 
 For each file: update the assertion to the *current, documented* ownership/DOM. The new expected value
 must be traceable to a redesign doc or the live module (cite it in a one-line comment above the
 assertion, e.g. `// ownership per redesign_campaign/IMPLEMENTATION_MAP_PHASE1.md — settings panel owns page-setup rows`).
 Never loosen an assertion to make it pass (no `toBeTruthy`-style weakening, no deleting the test).
 
-- [ ] **Step 2: Verify each batch as you go**
+- [x] **Step 2: Verify each batch as you go**
 
 ```powershell
 cmd /c "cd /d E:\api\rwanga\rwanga-editor && node --test tests/unit/<the-suite>.test.js"
 ```
 Expected: that file 100% pass.
 
-- [ ] **Step 3: Full-suite check**
+- [x] **Step 3: Full-suite check**
 
 Run `npm run test:unit`. Expected: fail count = 30 − (number of Class-A tests fixed) ≈ 5–6
 (only Class B + C remain red).
 
-- [ ] **Step 4: SLICE CLOSE RITUAL (§0.3)**
+> Actual (2026-07-26): fail = **3** (2 Class C + 1 Class D/GAP-1-1), since all 27 A-class reds — including
+> the reclassified parenthetical trio — were fixed here. One transient 4th red appeared when
+> `playground-the-last-light.rga` got dirtied mid-session (§0.2 known hazard); reverted, clean rerun
+> confirms 3.
+
+- [x] **Step 4: SLICE CLOSE RITUAL (§0.3)**
 
 Commit message: `test(editor): re-point stale shell/ownership snapshots to current owners (QG-01, S1.2)`
 

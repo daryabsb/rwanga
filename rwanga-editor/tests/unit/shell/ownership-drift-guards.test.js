@@ -161,15 +161,20 @@ test('G2: visibility-state setters list per concern stays singleton', () => {
   //   - renderer/js/shell/activity-rail.js (rail click toggles visibility)
   //   - renderer/js/shell/responsive.js (auto-collapse on narrow window;
   //     engine-initiated path bypasses userOverride)
+  //   - renderer/js/shell/panels/settings.js (documented Slice-5A
+  //     redirect shim — panels/settings.js:8-20; mount() redirects to
+  //     the Settings workspace tab and collapses the sidebar at :45
+  //     so no empty Settings panel lingers, per Shell Doctrine)
   const sidebarVisWriters = findWriters(
     /Rga\.Shell\.Layout\.set\s*\(\s*\{\s*sidebar\s*:\s*\{\s*visible/,
     ['renderer/js/shell/layout.js',
      'renderer/js/shell/index.js',
      'renderer/js/shell/activity-rail.js',
-     'renderer/js/shell/responsive.js']
+     'renderer/js/shell/responsive.js',
+     'renderer/js/shell/panels/settings.js']
   );
   assert.deepEqual(sidebarVisWriters, [],
-    'G2 — only Layout / shell/index.js / activity-rail.js / responsive.js may write Layout.sidebar.visible. ' +
+    'G2 — only Layout / shell/index.js / activity-rail.js / responsive.js / panels/settings.js (Slice-5A shim) may write Layout.sidebar.visible. ' +
     'Unexpected writers: ' + sidebarVisWriters.join(', '));
 
   // Layout.set({ sidebar: { activePanel: ... } }) — allowed:

@@ -33,11 +33,19 @@ function readCss(file) {
 
 // Extract a numeric `in` declaration from one CSS rule body. An absent
 // property returns 0 — reset.css + `.rga-print-block` zero all padding.
+// R1 (Filmustageation) migrated the print-block CSS to logical properties
+// (RTL_SCREENPLAY_CONVENTION.md), so a physical prop also resolves via its
+// logical equivalent (padding-left → padding-inline-start, LTR-identical).
+const LOGICAL = {
+  'padding-left': 'padding-inline-start',
+  'padding-right': 'padding-inline-end',
+};
 function declIn(css, selector, prop) {
   const esc = selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const rule = css.match(new RegExp(esc + '\\s*\\{([^}]*)\\}'));
   if (!rule) return null;
-  const d = rule[1].match(new RegExp(prop + '\\s*:\\s*([\\d.]+)in'));
+  const names = LOGICAL[prop] ? prop + '|' + LOGICAL[prop] : prop;
+  const d = rule[1].match(new RegExp('(?:' + names + ')\\s*:\\s*([\\d.]+)in'));
   return d ? parseFloat(d[1]) : 0;
 }
 

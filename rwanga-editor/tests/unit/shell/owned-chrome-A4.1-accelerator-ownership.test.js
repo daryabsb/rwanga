@@ -206,10 +206,14 @@ test('G-OC-A4.1-4: every command id referenced in MENU_DEFS is registered (no da
   let m;
   while ((m = re.exec(block)) !== null) ids.push(m[1]);
   // Every id must also appear in a KR.registerCommand call somewhere
-  // (renderer/index.html OR shell/index.js OR studio-panel.js).
+  // (renderer/index.html OR shell/index.js OR studio-panel.js OR
+  // settings-workspace.js).
   const studioSrc = read(path.join(REPO, 'renderer/js/shell/studio-panel.js'));
   const shellSrc  = read(SHELL_INDEX);
-  const combined = html + '\n' + studioSrc + '\n' + shellSrc;
+  // view.openSettings registered by the Settings workspace (Slice 5A) —
+  // workspaces/settings-workspace.js:1534, loaded via index.html:702.
+  const settingsWorkspaceSrc = read(path.join(REPO, 'renderer/js/shell/workspaces/settings-workspace.js'));
+  const combined = html + '\n' + studioSrc + '\n' + shellSrc + '\n' + settingsWorkspaceSrc;
   ids.forEach(function(id) {
     const re2 = new RegExp("registerCommand\\s*\\(\\s*\\{[^}]*command\\s*:\\s*['\"]" + id.replace('.', '\\.') + "['\"]");
     assert.ok(re2.test(combined),

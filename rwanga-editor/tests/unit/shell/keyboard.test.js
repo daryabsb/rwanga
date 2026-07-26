@@ -108,10 +108,25 @@ test('Cmd-B toggles sidebar visibility without changing the active panel', () =>
   assert.equal(Rga.Shell.Sidebar.current(), 'sceneNavigator');
 });
 
-test('Cmd-, activates the Settings panel', () => {
+test('Cmd-, opens the Settings workspace tab', () => {
+  // ownership per Slice 5A — settings-workspace.js owns Cmd-, (shell/index.js:166-171
+  // documents the move); view.openSettings routes through the canonical opener
+  // Rga.SettingsWorkspace.open() → TabManager.openWorkspace('settings')
+  // (workspaces/settings-workspace.js:1522-1542), NOT a sidebar panel.
   const { Rga } = boot();
+  const opened = [];
+  Rga.TabManager.openWorkspace = function(kind) { opened.push(kind); return { kind: kind }; };
+  // settings-workspace.js registers view.openSettings at load; it gates on
+  // Rga.Workspaces.register existing (settings-workspace.js:36).
+  Rga.Workspaces = Rga.Workspaces || { register: function() {} };
+  const p = '../../../renderer/js/shell/workspaces/settings-workspace.js';
+  delete require.cache[require.resolve(p)];
+  require(p);
   fireKey({ key: ',', metaKey: true });
-  assert.equal(Rga.Shell.Sidebar.current(), 'settings');
+  assert.deepEqual(opened, ['settings'],
+    'Cmd-, must open the Settings WORKSPACE tab via TabManager.openWorkspace("settings")');
+  // The old sidebar-panel activation is gone: active panel unchanged.
+  assert.equal(Rga.Shell.Sidebar.current(), 'sceneNavigator');
 });
 
 test('REGRESSION GUARD: bare Tab is NOT consumed by the shell keyboard handler', () => {

@@ -253,18 +253,49 @@ test('§A: Rga.ScriptMetrics.subscribe fires when wordCount changes (independent
 // ================================================================
 
 test('§A: source audit — StatusBar reads writer-context from ScriptSession and analytics from ScriptMetrics', () => {
+  // F1A.4 split the status-bar into a contribution API. CORE keeps
+  // viewMode (writer-context via SS.get(), status-bar.js:151-153) and
+  // wordCount (analytics via window.Rga.ScriptMetrics.get(),
+  // status-bar.js:96-99); the screenplay plugin's segments keep
+  // scene/page on ScriptSession and blockType on ScriptMetrics
+  // (doc-types/screenplay/status-bar.js:8-15,83). The boundary —
+  // writer-context from ScriptSession, analytics from ScriptMetrics —
+  // holds at both owners; the audit covers both files.
   const fs = require('node:fs');
   const path = require('node:path');
   const src = fs.readFileSync(
     path.resolve(__dirname, '../../../renderer/js/shell/status-bar.js'), 'utf8');
-  assert.ok(/Rga\.ScriptSession\.get\s*\(/.test(src),
-    'status-bar.js must read writer-context via Rga.ScriptSession.get()');
-  assert.ok(/Rga\.ScriptMetrics\.get\s*\(/.test(src),
-    'status-bar.js must read analytics via Rga.ScriptMetrics.get()');
-  // Source-level boundary: _renderBlockType and _renderWordCount
-  // must be CALLED with the ScriptMetrics snapshot.
-  assert.ok(/_renderBlockType\s*\(\s*sm\s*\)/.test(src),
-    '_renderBlockType must be called with the ScriptMetrics snapshot (sm)');
-  assert.ok(/_renderWordCount\s*\(\s*sm\s*\)/.test(src),
-    '_renderWordCount must be called with the ScriptMetrics snapshot (sm)');
+  // viewMode — writer-context via the SS alias (status-bar.js:151-153).
+  const vmBody = src.match(/function _renderViewModeSelect\(select\) \{[\s\S]*?\n  \}/);
+  assert.ok(vmBody, '_renderViewModeSelect must exist in shell/status-bar.js');
+  assert.ok(/window\.Rga\.ScriptSession/.test(vmBody[0]) && /SS\.get\s*\(\)/.test(vmBody[0]),
+    'viewMode must read writer-context via Rga.ScriptSession.get()');
+  assert.equal(/ScriptMetrics/.test(vmBody[0]), false,
+    'viewMode must NOT read ScriptMetrics (writer-context stays on ScriptSession)');
+  // wordCount — analytics via window.Rga.ScriptMetrics.get() (status-bar.js:96-99).
+  const wcBody = src.match(/function _renderWordCount\(spanEl\) \{[\s\S]*?\n  \}/);
+  assert.ok(wcBody, '_renderWordCount must exist in shell/status-bar.js');
+  assert.ok(/window\.Rga\.ScriptMetrics\.get\s*\(/.test(wcBody[0]),
+    'wordCount must read analytics via window.Rga.ScriptMetrics.get()');
+  assert.equal(/ScriptSession/.test(wcBody[0]), false,
+    'wordCount must NOT read ScriptSession (analytics stay on ScriptMetrics)');
+  // Plugin segments — scene/page on ScriptSession, blockType on
+  // ScriptMetrics (doc-types/screenplay/status-bar.js, F1A.4).
+  const pluginSrc = fs.readFileSync(
+    path.resolve(__dirname, '../../../renderer/js/doc-types/screenplay/status-bar.js'), 'utf8');
+  const sceneBody = pluginSrc.match(/function _renderScene\(spanEl\) \{[\s\S]*?\n  \}/);
+  assert.ok(sceneBody && /window\.Rga\.ScriptSession/.test(sceneBody[0]) && /SS\.get\s*\(\)/.test(sceneBody[0]),
+    'scene segment must read writer-context via Rga.ScriptSession.get()');
+  assert.ok(sceneBody && !/ScriptMetrics/.test(sceneBody[0]),
+    'scene segment must NOT read ScriptMetrics');
+  const pageBody = pluginSrc.match(/function _renderPage\(spanEl\) \{[\s\S]*?\n  \}/);
+  assert.ok(pageBody && /window\.Rga\.ScriptSession/.test(pageBody[0]) && /SS\.get\s*\(\)/.test(pageBody[0]),
+    'page segment must read writer-context via Rga.ScriptSession.get()');
+  assert.ok(pageBody && !/ScriptMetrics/.test(pageBody[0]),
+    'page segment must NOT read ScriptMetrics');
+  const btBody = pluginSrc.match(/function _renderBlockType\(spanEl\) \{[\s\S]*?\n  \}/);
+  assert.ok(btBody && /window\.Rga\.ScriptMetrics/.test(btBody[0]) && /SM\.get\s*\(\)/.test(btBody[0]),
+    'blockType segment must read analytics via Rga.ScriptMetrics.get()');
+  assert.ok(btBody && !/ScriptSession/.test(btBody[0]),
+    'blockType segment must NOT read ScriptSession (analytics stay on ScriptMetrics)');
 });

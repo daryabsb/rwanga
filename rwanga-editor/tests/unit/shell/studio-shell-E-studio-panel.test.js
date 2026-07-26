@@ -381,7 +381,26 @@ test('§E: no new shell module file (StudioPanel is and remains the single owner
     // (Settings, Welcome, …). TabManager.openWorkspace queries it.
     // No overlap with StudioPanel (which owns bottom-panel + inspector).
     'workspaces.js',
-    'workspace-state.js'
+    'workspace-state.js',
+    // 'inspector.js' — Inspector home (Filmustageation F1A.3).
+    // Distinct owner: Inspector content per
+    // docs/Filmustageation/redesign_campaign/IMPLEMENTATION_MAP_PHASE1.md:37.
+    // StudioPanel keeps ownership of the inspector-collapsed shell state;
+    // inspector.js owns what renders inside. No overlap.
+    'inspector.js',
+    // 'toolbar.js' — Toolbar contribution registry (Filmustageation
+    // F1A.6). Distinct owner: declarative toolbar contributions per
+    // surface. No overlap with StudioPanel.
+    'toolbar.js',
+    // 'page-setup-preview.js' — Page Setup live preview (Slice S8).
+    // Distinct owner: the miniature page preview inside the Page Setup
+    // dialog. No overlap with StudioPanel.
+    'page-setup-preview.js',
+    // 'settings-migrations.js' — Settings migrations (Slice H2).
+    // Distinct owner: versioned migration of persisted settings
+    // payloads consumed by the store at load. No overlap with
+    // StudioPanel.
+    'settings-migrations.js'
   ];
   const unexpected = files.filter(function(f) { return EXPECTED.indexOf(f) < 0; });
   assert.deepEqual(unexpected, [],

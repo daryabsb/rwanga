@@ -138,7 +138,20 @@ test('Bundle 2 §B: no new shell module file (boot-script wiring only — preser
     // distinct owner of workspace registration map; consumed by
     // TabManager.openWorkspace; not Bundle 2 ownership creep).
     'workspaces.js',
-    'workspace-state.js'
+    'workspace-state.js',
+    // Inspector panel (added F1A.3 — distinct owner of the Inspector
+    // surface per IMPLEMENTATION_MAP_PHASE1.md; not Bundle 2 ownership creep).
+    'inspector.js',
+    // Shell toolbar host (added F1A.6 — distinct owner of the plugin
+    // toolbar slot; screenplay tools migrated to doc-types/screenplay/;
+    // not Bundle 2 ownership creep).
+    'toolbar.js',
+    // Settings migrations (added H2 — distinct owner of stored-settings
+    // schema migration; not Bundle 2 ownership creep).
+    'settings-migrations.js',
+    // Page Setup preview (added S8 — distinct owner of the Page Setup
+    // live preview; not Bundle 2 ownership creep).
+    'page-setup-preview.js'
   ];
   const unexpected = files.filter(function(f) { return EXPECTED.indexOf(f) < 0; });
   assert.deepEqual(unexpected, [],

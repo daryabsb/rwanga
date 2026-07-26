@@ -102,20 +102,40 @@ test('§A: ScriptMetrics.subscribe fires ONLY when an analytics field changes', 
 });
 
 test('§A: StatusBar reads wordCount + currentBlockType via ScriptMetrics (not ScriptSession)', () => {
-  // Source audit — narrow read-the-file check: refresh() must call
-  // ScriptMetrics.get for the analytics fields.
+  // Source audit — narrow read-the-file check. F1A.4 split the
+  // status-bar into a contribution API: wordCount stays a CORE
+  // segment (shell/status-bar.js:95-103 reads
+  // window.Rga.ScriptMetrics.get()); the blockType segment moved to
+  // the screenplay plugin (doc-types/screenplay/status-bar.js:82-87,
+  // also reading ScriptMetrics). The boundary being asserted —
+  // analytics come from ScriptMetrics, never ScriptSession — is
+  // unchanged, just enforced at both owners.
   const fs = require('node:fs');
   const path = require('node:path');
   const src = fs.readFileSync(
     path.resolve(__dirname, '../../../renderer/js/shell/status-bar.js'), 'utf8');
-  assert.ok(/Rga\.ScriptMetrics\s*&&\s*typeof\s+Rga\.ScriptMetrics\.get\s*===\s*['"]function['"]/.test(src),
-    'status-bar.js must consult Rga.ScriptMetrics in refresh()');
-  // _renderBlockType / _renderWordCount must be called with the
-  // ScriptMetrics snapshot.
-  assert.ok(/_renderBlockType\(sm\)/.test(src),
-    '_renderBlockType must receive the ScriptMetrics snapshot, not ScriptSession');
-  assert.ok(/_renderWordCount\(sm\)/.test(src),
-    '_renderWordCount must receive the ScriptMetrics snapshot, not ScriptSession');
+  // wordCount — window.Rga.ScriptMetrics guard+read, status-bar.js:96-98.
+  assert.ok(/window\.Rga\.ScriptMetrics\s*&&\s*typeof\s+window\.Rga\.ScriptMetrics\.get\s*===\s*['"]function['"]/.test(src),
+    'status-bar.js must consult window.Rga.ScriptMetrics for wordCount');
+  // _renderWordCount derives the value from the ScriptMetrics snapshot
+  // ONLY — ScriptSession may appear solely as the subscribe trigger
+  // (documented at status-bar.js:83-90), never as the value source.
+  const wcBody = src.match(/function _renderWordCount\(spanEl\) \{[\s\S]*?\n  \}/);
+  assert.ok(wcBody, '_renderWordCount must exist in shell/status-bar.js');
+  assert.ok(/ScriptMetrics\.get/.test(wcBody[0]),
+    '_renderWordCount must read the ScriptMetrics snapshot');
+  assert.equal(/ScriptSession/.test(wcBody[0]), false,
+    '_renderWordCount must NOT read ScriptSession (analytics stay on ScriptMetrics)');
+  // blockType — moved to the screenplay plugin per F1A.4
+  // (doc-types/screenplay/status-bar.js:82-87).
+  const pluginSrc = fs.readFileSync(
+    path.resolve(__dirname, '../../../renderer/js/doc-types/screenplay/status-bar.js'), 'utf8');
+  const btBody = pluginSrc.match(/function _renderBlockType\(spanEl\) \{[\s\S]*?\n  \}/);
+  assert.ok(btBody, '_renderBlockType must exist in doc-types/screenplay/status-bar.js');
+  assert.ok(/ScriptMetrics/.test(btBody[0]) && /currentBlockType/.test(btBody[0]),
+    '_renderBlockType must read currentBlockType from the ScriptMetrics snapshot, not ScriptSession');
+  assert.equal(/ScriptSession/.test(btBody[0]), false,
+    '_renderBlockType must NOT read ScriptSession (analytics stay on ScriptMetrics)');
 });
 
 // ================================================================
