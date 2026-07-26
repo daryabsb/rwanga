@@ -5,6 +5,24 @@ Template & rules: `PROTOCOL.md`.
 
 ---
 
+## 2026-07-26 · S1.1 — all 30 QG-01 reds triaged; 1 real defect surfaced (GAP-1-1)
+- **Did:** Classified every red from the S0.1 baseline via 4 parallel research passes (each failing
+  test read against the renderer code + redesign docs it references). Wrote the binding triage table
+  `docs/plans/evidence/S1.1-qg01-triage.md` (30 rows, per-test citation + action).
+- **Evidence:** the triage file. Verdict: **27 Class A · 0 B · 2 C(i) · 1 D.**
+- **Status deltas:** ledger S1.1 ⬜→✅; gap row **GAP-1-1** added to §0.5 + HANDOFF Open cases.
+- **Gaps/risks surfaced:**
+  - **GAP-1-1 (real defect, low severity):** `settings-workspace.js:522` reads
+    `classList.contains('is-disabled')` as state truth (H6 regression); fix = read
+    `entry.requiresPro` from closure. Fix-slice due before S1.5.
+  - **Plan deviation:** parenthetical trio is A, not B — the cosmetic shipped in Density Slice 6;
+    tests red only because `declIn()` predates R1's `padding-left`→`padding-inline-start` rename.
+    S1.3 therefore closes as a verification no-op (nothing to quarantine).
+  - Class C duo is stale (F1 Flow-rail tokens + 4 legitimate post-Phase-3 modules) → re-point in S1.4.
+  - pdf-export.test.js + settings-applicators.test.js appear in the capture incidentally (0 fails).
+- **Next action:** slice S1.2 — re-point the 27 Class-A tests (batch per suite, verify per file,
+  full-suite check expects fail = 3: the 2 Class C + 1 Class D).
+
 ## 2026-07-26 · S0.1 — clean fixture baseline restored + 30-red baseline recorded
 - **Did:** Executed masterplan slice S0.1. Verified the only tracked-tree noise was the 2 dirty
   fixtures; reverted `mysterious-guest-rtl.rga` + `playground-the-last-light.rga`; ran the full unit

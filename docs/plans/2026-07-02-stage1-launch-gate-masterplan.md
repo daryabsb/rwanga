@@ -71,7 +71,7 @@ electron-builder (`npm run pack:win`), PowerShell/Windows 11.
 | Slice | Phase | What | Status | Evidence |
 |---|---|---|---|---|
 | S0.1 | 0 Baseline | Revert fixtures, record clean 30-red baseline | ✅ | `docs/plans/evidence/S0.1-baseline-run.txt` — 1936 tests · 30 fail · 1 skipped (matches §Global-constraints baseline exactly) |
-| S1.1 | 1 QG-01 | Enumerate + classify all 30 reds into triage table | ⬜ | |
+| S1.1 | 1 QG-01 | Enumerate + classify all 30 reds into triage table | ✅ | `docs/plans/evidence/S1.1-qg01-triage.md` — 27 A · 0 B · 2 C(i) · 1 D (GAP-1-1); parenthetical trio reclassified B→A (fix already shipped; stale helper regex) |
 | S1.2 | 1 QG-01 | Re-point the ~24 stale shell/ownership snapshot tests | ⬜ | |
 | S1.3 | 1 QG-01 | Quarantine-with-reason the parenthetical cosmetic (3 tests) | ⬜ | |
 | S1.4 | 1 QG-01 | Triage + resolve the 2 recovery-phase3 reds | ⬜ | |
@@ -96,7 +96,7 @@ electron-builder (`npm run pack:win`), PowerShell/Windows 11.
 
 | Gap ID | Found in | Description | Status |
 |---|---|---|---|
-| — | — | none yet | — |
+| GAP-1-1 | S1.1 | DOM-read-as-truth violation (H6, `0b024e24`): `settings-workspace.js:522` `_enterRebind()` gates on `classList.contains('is-disabled')` instead of `entry.requiresPro` (available in closure; correct idiom used at :584/:588). Caught by `source-audit.test.js` "audit (b)" — a standing guard, NOT stale. Low severity, one-line fix. Fix-slice due before S1.5 green run. | OPEN |
 
 ---
 
@@ -179,12 +179,12 @@ print-cosmetic deferral, plus 2 recovery-phase3 stragglers.
 **Interfaces:** Produces the triage table that S1.2/S1.3/S1.4 execute against. Later slices trust its
 classification; misclassification here is the campaign's biggest correctness risk — be rigorous.
 
-- [ ] **Step 1: Extract the failing test list from the S0.1 baseline capture**
+- [x] **Step 1: Extract the failing test list from the S0.1 baseline capture**
 
 Read `docs/plans/evidence/S0.1-baseline-run.txt`; grep for `✖` / `not ok` lines (node --test reporter).
 List every failing test with its file path (`tests/unit/...`).
 
-- [ ] **Step 2: Classify each red into exactly one class**
+- [x] **Step 2: Classify each red into exactly one class**
 
 For each failing test, read the test AND the code it exercises, then assign:
 
@@ -200,9 +200,15 @@ Write `S1.1-qg01-triage.md` as a table: `| test name | file | class | current ow
 Expected totals: ~24 A · 3 B · 2 C · 0 D (if D > 0, that's a finding — escalate per §0.2 but continue
 the slice; the gap is handled in its own fix-slice later).
 
-- [ ] **Step 3: SLICE CLOSE RITUAL (§0.3)**
+- [x] **Step 3: SLICE CLOSE RITUAL (§0.3)**
 
 Commit message: `test(editor): triage all QG-01 reds into re-point/quarantine/defect classes (S1.1)`
+
+> **S1.1 outcome note (2026-07-26):** actual totals 27 A · 0 B · 2 C(i) · 1 D. The parenthetical trio
+> is Class A (Density Slice 6 already shipped the cosmetic; only the test's `declIn()` regex predates
+> the R1 logical-property rename) — so **S1.3 has nothing to quarantine** and closes as a verification
+> no-op. Both Class C reds are stale (re-point in S1.4). The 1 Class D is GAP-1-1 (§0.5) and gets a
+> fix-slice before S1.5.
 
 ### Slice S1.2: Re-point the stale shell/ownership snapshot tests (Class A)
 

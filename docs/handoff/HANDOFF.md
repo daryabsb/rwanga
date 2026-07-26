@@ -4,7 +4,7 @@
 > archive to find the next action — it's here. Update this file at the end of every unit of work
 > (see `PROTOCOL.md`). Keep it short; link detail, don't inline it.
 
-- **Last updated:** 2026-07-26 · by: S0.1 execution (baseline reset)
+- **Last updated:** 2026-07-26 · by: S1.1 execution (QG-01 triage)
 - **Binding doctrine:** every agent MUST follow the 10-rule MASTERPLAN EXECUTION DOCTRINE in the
   root `CLAUDE.md` (one slice at a time · tick-as-you-go · §0.3 close ritual · push every slice commit).
 - **HEAD:** see latest commit on `main` (S0.1 slice-close) · **Branch:** `main`
@@ -14,9 +14,11 @@
 
 ## ⭐ NEXT ACTION
 
-**Execute masterplan slice S1.1** — enumerate + classify all 30 reds into the QG-01 triage table
-(`docs/plans/evidence/S1.1-qg01-triage.md`). S0.1 is done: fixtures reverted, clean baseline recorded
-at `docs/plans/evidence/S0.1-baseline-run.txt` (1936 tests · 30 fail · 1 skipped — matches plan).
+**Execute masterplan slice S1.2** — re-point the 27 Class-A stale tests per the triage table
+(`docs/plans/evidence/S1.1-qg01-triage.md`). S1.1 verdict: **27 A · 0 B · 2 C(i) · 1 D**.
+Notable: the parenthetical trio is A, not B (fix shipped in Density Slice 6; only the `declIn()`
+test-helper regex predates R1's logical-property rename) → S1.3 closes as a no-op. The 1 Class D
+is **GAP-1-1** (DOM-read-as-truth at `settings-workspace.js:522`) — fix-slice before S1.5.
 
 The whole launch-gate campaign is now a slice-by-slice executable plan with cross-session state:
 **`../plans/2026-07-02-stage1-launch-gate-masterplan.md`** — read its §0 (survival protocol) first,
@@ -56,7 +58,8 @@ contribution/write API. That write API is the true technical prerequisite for th
 
 | ID | Case | Status | Pointer |
 |---|---|---|---|
-| QG-01 | ~30 pre-existing test reds (stale shell snapshots + parenthetical cosmetic) | OPEN — next action | GO_LIVE Part A.1 #1 |
+| QG-01 | 30 reds fully triaged: 27 stale-A + 2 stale-C + 1 real defect (GAP-1-1) | OPEN — S1.2 next | `docs/plans/evidence/S1.1-qg01-triage.md` |
+| GAP-1-1 | DOM-read-as-truth: `settings-workspace.js:522` gates rebind on `classList.contains('is-disabled')` instead of `entry.requiresPro` (H6 regression, low severity) | OPEN — fix-slice before S1.5 | Masterplan §0.5 |
 | LR-01 | Installer build fails (winCodeSign symlink privilege) — needs Win Dev Mode / elevated shell | OPEN | GO_LIVE Part A.1 #2 |
 | PF-01/02/03/05/13 | Core lifecycle unverified (launch matrix, new/open/save-as E2E, console audit) | OPEN — QA | GO_LIVE Part A.1 #3 |
 | RTL-04…13, SW-23 | RTL visual + bidi QA vs ratified Kurdish/RTL profile (**highest product value**) | OPEN — QA | GO_LIVE Part A.1 #4 |
