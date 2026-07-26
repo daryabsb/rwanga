@@ -5,6 +5,22 @@ Template & rules: `PROTOCOL.md`.
 
 ---
 
+## 2026-07-26 · Two user-reported Settings defects root-caused/ticketed (GAP-3-1, GAP-3-2)
+- **Did:** Investigated the user's report "Settings is gone from the menu + the Settings area has
+  never-fixed problems." (1) **GAP-3-1 root-caused:** the Settings menu entry lives ONLY in the
+  Tools menu, and `#app.mode-compact` (shell.css:2357-2362) hides Tags/Tools/Export/Help outright —
+  compact starts below ~1412 CSS px (responsive.js derived thresholds), which under Windows display
+  scaling is virtually every laptop; no overflow "…" menu exists. Gear icon + Ctrl+, remain the only
+  routes. (2) **GAP-3-2 ticketed:** user screenshot shows the Settings workspace's sticky search
+  band failing — a row paints above the band, rows clip mid-control; suspects documented
+  (settings-workspace.css:279-346); diagnosis plan = Playwright DOM-geometry spec.
+- **Evidence:** code citations in the §0.5 gap rows; user screenshots in-session.
+- **Status deltas:** §0.5 + HANDOFF gain GAP-3-1, GAP-3-2 (both OPEN). No checklist rows changed.
+- **Gaps/risks surfaced:** the launch-checklist Settings band + responsive-shell rows likely
+  overstate health — the S5/S6 reconciliation should re-check them against these gaps.
+- **Next action:** unchanged — finish S3.1 item 13 (user reboot + one launch), then fix-slices for
+  the open gaps can be inserted before S3.2 per the plan's gap rule.
+
 ## 2026-07-26 · S3.1 (in progress) — Windows launch matrix 12/13, blocked on user reboot
 - **Did:** Decision #1 resolved by user: **macOS stays in scope, Mac provided when needed** (plan
   annotated; PF-01 will sit PARTIAL until the macOS matrix). Ran the scripted Windows matrix on the
