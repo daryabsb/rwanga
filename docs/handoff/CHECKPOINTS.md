@@ -5,6 +5,17 @@ Template & rules: `PROTOCOL.md`.
 
 ---
 
+## 2026-07-26 · S0.1 — clean fixture baseline restored + 30-red baseline recorded
+- **Did:** Executed masterplan slice S0.1. Verified the only tracked-tree noise was the 2 dirty
+  fixtures; reverted `mysterious-guest-rtl.rga` + `playground-the-last-light.rga`; ran the full unit
+  suite and captured it to `docs/plans/evidence/S0.1-baseline-run.txt`.
+- **Evidence:** `S0.1-baseline-run.txt` tail: **1936 tests · 1905 pass · 30 fail · 1 skipped** —
+  exactly the plan's predicted clean baseline (30 reds, all non-core).
+- **Status deltas:** ledger S0.1 ⬜→✅. No checklist rows flipped (baseline slice).
+- **Gaps/risks surfaced:** none — numbers matched prediction exactly.
+- **Next action:** slice S1.1 — enumerate + classify all 30 reds into
+  `docs/plans/evidence/S1.1-qg01-triage.md` (expected ~24 Class A · 3 B · 2 C · 0 D).
+
 ## 2026-07-02 · Binding execution doctrine codified · HEAD `2f20ae2f`
 - **Did:** Codified a strict, session-independent MASTERPLAN EXECUTION DOCTRINE (10 rules) in the
   root `CLAUDE.md`, mirrored in `rwanga-editor/CLAUDE.md`, added as PROTOCOL.md Rule 7, and extended

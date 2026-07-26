@@ -4,18 +4,19 @@
 > archive to find the next action — it's here. Update this file at the end of every unit of work
 > (see `PROTOCOL.md`). Keep it short; link detail, don't inline it.
 
-- **Last updated:** 2026-07-02 · by: masterplan authoring pass (+ binding execution doctrine)
+- **Last updated:** 2026-07-26 · by: S0.1 execution (baseline reset)
 - **Binding doctrine:** every agent MUST follow the 10-rule MASTERPLAN EXECUTION DOCTRINE in the
   root `CLAUDE.md` (one slice at a time · tick-as-you-go · §0.3 close ritual · push every slice commit).
-- **HEAD:** `829faa74` · **Branch:** `main` (in sync with origin)
+- **HEAD:** see latest commit on `main` (S0.1 slice-close) · **Branch:** `main`
 - **Phase:** Stage 1 — Foundation (closing launch P0s). AI/Agent phase is **gated** (see Gates).
 
 ---
 
 ## ⭐ NEXT ACTION
 
-**Execute the Stage-1 masterplan, starting at slice S0.1** (revert the 2 dirty fixtures + record the
-clean 30-red baseline).
+**Execute masterplan slice S1.1** — enumerate + classify all 30 reds into the QG-01 triage table
+(`docs/plans/evidence/S1.1-qg01-triage.md`). S0.1 is done: fixtures reverted, clean baseline recorded
+at `docs/plans/evidence/S0.1-baseline-run.txt` (1936 tests · 30 fail · 1 skipped — matches plan).
 
 The whole launch-gate campaign is now a slice-by-slice executable plan with cross-session state:
 **`../plans/2026-07-02-stage1-launch-gate-masterplan.md`** — read its §0 (survival protocol) first,

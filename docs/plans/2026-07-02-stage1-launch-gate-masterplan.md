@@ -70,7 +70,7 @@ electron-builder (`npm run pack:win`), PowerShell/Windows 11.
 
 | Slice | Phase | What | Status | Evidence |
 |---|---|---|---|---|
-| S0.1 | 0 Baseline | Revert fixtures, record clean 30-red baseline | ⬜ | |
+| S0.1 | 0 Baseline | Revert fixtures, record clean 30-red baseline | ✅ | `docs/plans/evidence/S0.1-baseline-run.txt` — 1936 tests · 30 fail · 1 skipped (matches §Global-constraints baseline exactly) |
 | S1.1 | 1 QG-01 | Enumerate + classify all 30 reds into triage table | ⬜ | |
 | S1.2 | 1 QG-01 | Re-point the ~24 stale shell/ownership snapshot tests | ⬜ | |
 | S1.3 | 1 QG-01 | Quarantine-with-reason the parenthetical cosmetic (3 tests) | ⬜ | |
@@ -137,21 +137,21 @@ electron-builder (`npm run pack:win`), PowerShell/Windows 11.
 
 **Interfaces:** Produces the red-count baseline (30) that S1.x slices burn down to 0.
 
-- [ ] **Step 1: Confirm the dirty fixtures are the only tree noise**
+- [x] **Step 1: Confirm the dirty fixtures are the only tree noise**
 
 Run from `E:\api\rwanga\`: `git status --short`
 Expected: `M rwanga-editor/tests/fixtures/mysterious-guest-rtl.rga` and
 `M rwanga-editor/tests/fixtures/playground-the-last-light.rga` (plus untracked docs). If OTHER tracked
 files are modified, STOP — record a gap in §0.5 and put it in HANDOFF before proceeding.
 
-- [ ] **Step 2: Revert the two fixtures**
+- [x] **Step 2: Revert the two fixtures**
 
 ```powershell
 git -C E:\api\rwanga checkout -- rwanga-editor/tests/fixtures/mysterious-guest-rtl.rga rwanga-editor/tests/fixtures/playground-the-last-light.rga
 git -C E:\api\rwanga status --short   # expect: no modified .rga files
 ```
 
-- [ ] **Step 3: Run the unit suite and capture the baseline**
+- [x] **Step 3: Run the unit suite and capture the baseline**
 
 ```powershell
 cmd /c "cd /d E:\api\rwanga\rwanga-editor && npm run test:unit > E:\api\rwanga\docs\plans\evidence\S0.1-baseline-run.txt 2>&1"
@@ -159,7 +159,7 @@ cmd /c "cd /d E:\api\rwanga\rwanga-editor && npm run test:unit > E:\api\rwanga\d
 Expected in the tail of the file: `tests 1936 … fail 30 … skipped 1` (numbers must match; if fail ≠ 30,
 STOP — the baseline moved; record actual numbers as a gap and update GO_LIVE assumptions in HANDOFF).
 
-- [ ] **Step 4: SLICE CLOSE RITUAL (§0.3)**
+- [x] **Step 4: SLICE CLOSE RITUAL (§0.3)**
 
 Commit message: `test(editor): restore clean fixture baseline; record 30-red QG-01 baseline (S0.1)`
 
