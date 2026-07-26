@@ -519,7 +519,10 @@
 
     function _enterRebind() {
       if (rebinding) return;
-      if (wrap.classList.contains('is-disabled')) return;
+      // Gate on state truth, not the DOM: is-disabled is a CSS render
+      // hook (see _disableControlElement), applied when the row is
+      // PERSISTS_ONLY; requiresPro is the other non-interactive case.
+      if (entry.requiresPro || _isPersistsOnly(entry)) return;
       rebinding = true;
       _renderRebindPrompt();
 

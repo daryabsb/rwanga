@@ -5,6 +5,20 @@ Template & rules: `PROTOCOL.md`.
 
 ---
 
+## 2026-07-26 · GAP-1-1 fix-slice — DOM-read-as-truth violation resolved
+- **Did:** Fixed the one real defect from the QG-01 triage. `_enterRebind()` in
+  `renderer/js/shell/workspaces/settings-workspace.js` no longer reads
+  `classList.contains('is-disabled')` as state truth; it gates on
+  `entry.requiresPro || _isPersistsOnly(entry)` — exactly the states the CSS hook proxied
+  (`is-disabled` is applied by `_disableControlElement` for PERSISTS_ONLY rows; requiresPro was the
+  other non-interactive case, previously guarded only at the click/keydown call sites). Behavior
+  identical; the belt-and-suspenders guard is now sourced from state.
+- **Evidence:** TDD red→green: `source-audit.test.js` **19/19** (was 18/19); neighbors
+  `settings-workspace` + `settings-applicators` + `settings-reachability` **67/67**.
+- **Status deltas:** §0.5 GAP-1-1 OPEN→**CLOSED**.
+- **Gaps/risks surfaced:** none.
+- **Next action:** S1.5 — full clean run captured to evidence, flip QG-01 TRUE.
+
 ## 2026-07-26 · S1.4 — recovery-phase3 reds resolved (both stale, re-pointed)
 - **Did:** Verdict = stale expectations (sub-case i), both tests in
   `tests/unit/editor/editor-recovery-phase3.test.js` (the file guards UX-recovery — Flow gutter +

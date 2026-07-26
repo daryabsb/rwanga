@@ -4,7 +4,7 @@
 > archive to find the next action — it's here. Update this file at the end of every unit of work
 > (see `PROTOCOL.md`). Keep it short; link detail, don't inline it.
 
-- **Last updated:** 2026-07-26 · by: S1.4 execution (recovery-phase3 reds resolved)
+- **Last updated:** 2026-07-26 · by: GAP-1-1 fix-slice (DOM-read-as-truth resolved)
 - **Binding doctrine:** every agent MUST follow the 10-rule MASTERPLAN EXECUTION DOCTRINE in the
   root `CLAUDE.md` (one slice at a time · tick-as-you-go · §0.3 close ritual · push every slice commit).
 - **HEAD:** see latest commit on `main` (S0.1 slice-close) · **Branch:** `main`
@@ -14,11 +14,10 @@
 
 ## ⭐ NEXT ACTION
 
-**Execute the GAP-1-1 fix-slice** — one-line product fix: `settings-workspace.js:522` `_enterRebind()`
-must gate on `entry.requiresPro` (closure state; correct idiom already at :584/:588) instead of
-`classList.contains('is-disabled')`. TDD: the failing `source-audit.test.js` "audit (b)" IS the test —
-fix the product, suite goes green. Then S1.5 (full green run → flip QG-01).
-Suite state: **1936 · 1 fail · 1 skipped** (only the GAP-1-1 red remains).
+**Execute masterplan slice S1.5** — full clean unit run captured to
+`docs/plans/evidence/S1.5-green-run.txt` (expect **fail 0**), then flip QG-01 TRUE in the launch
+checklist. GAP-1-1 is FIXED (`_enterRebind` gates on `entry.requiresPro || _isPersistsOnly(entry)`;
+source-audit 19/19, settings neighbors 67/67).
 ⚠ A running Electron instance keeps auto-migrating `playground-the-last-light.rga` — check
 `git status` for fixture dirt before every commit (it recurred twice on 2026-07-26).
 
@@ -60,8 +59,7 @@ contribution/write API. That write API is the true technical prerequisite for th
 
 | ID | Case | Status | Pointer |
 |---|---|---|---|
-| QG-01 | 29/30 reds resolved (S1.2+S1.4); only GAP-1-1 red remains | OPEN — GAP-1-1 fix next | `docs/plans/evidence/S1.1-qg01-triage.md` |
-| GAP-1-1 | DOM-read-as-truth: `settings-workspace.js:522` gates rebind on `classList.contains('is-disabled')` instead of `entry.requiresPro` (H6 regression, low severity) | OPEN — fix-slice before S1.5 | Masterplan §0.5 |
+| QG-01 | 30/30 reds resolved (S1.2+S1.4+GAP-1-1 fix); awaiting S1.5 green-run flip | OPEN — S1.5 next | `docs/plans/evidence/S1.1-qg01-triage.md` |
 | LR-01 | Installer build fails (winCodeSign symlink privilege) — needs Win Dev Mode / elevated shell | OPEN | GO_LIVE Part A.1 #2 |
 | PF-01/02/03/05/13 | Core lifecycle unverified (launch matrix, new/open/save-as E2E, console audit) | OPEN — QA | GO_LIVE Part A.1 #3 |
 | RTL-04…13, SW-23 | RTL visual + bidi QA vs ratified Kurdish/RTL profile (**highest product value**) | OPEN — QA | GO_LIVE Part A.1 #4 |

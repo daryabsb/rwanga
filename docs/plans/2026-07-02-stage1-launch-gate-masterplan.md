@@ -96,7 +96,7 @@ electron-builder (`npm run pack:win`), PowerShell/Windows 11.
 
 | Gap ID | Found in | Description | Status |
 |---|---|---|---|
-| GAP-1-1 | S1.1 | DOM-read-as-truth violation (H6, `0b024e24`): `settings-workspace.js:522` `_enterRebind()` gates on `classList.contains('is-disabled')` instead of `entry.requiresPro` (available in closure; correct idiom used at :584/:588). Caught by `source-audit.test.js` "audit (b)" — a standing guard, NOT stale. Low severity, one-line fix. Fix-slice due before S1.5 green run. | OPEN |
+| GAP-1-1 | S1.1 | DOM-read-as-truth violation (H6, `0b024e24`): `settings-workspace.js:522` `_enterRebind()` gates on `classList.contains('is-disabled')` instead of `entry.requiresPro` (available in closure; correct idiom used at :584/:588). Caught by `source-audit.test.js` "audit (b)" — a standing guard, NOT stale. Fixed 2026-07-26: `_enterRebind` now gates on `entry.requiresPro \|\| _isPersistsOnly(entry)` — the exact states the CSS hook proxied (is-disabled applied for PERSISTS_ONLY via `_disableControlElement`). Evidence: source-audit 19/19; settings-workspace/applicators/reachability 67/67. | **CLOSED** |
 
 ---
 
