@@ -4,7 +4,7 @@
 > archive to find the next action — it's here. Update this file at the end of every unit of work
 > (see `PROTOCOL.md`). Keep it short; link detail, don't inline it.
 
-- **Last updated:** 2026-07-26 · by: S2.2 close — **LR-01 TRUE** (Phase 2 complete)
+- **Last updated:** 2026-07-26 · by: S3.1 in progress (12/13; blocked on user reboot)
 - **Binding doctrine:** every agent MUST follow the 10-rule MASTERPLAN EXECUTION DOCTRINE in the
   root `CLAUDE.md` (one slice at a time · tick-as-you-go · §0.3 close ritual · push every slice commit).
 - **HEAD:** see latest commit on `main` (S0.1 slice-close) · **Branch:** `main`
@@ -14,10 +14,12 @@
 
 ## ⭐ NEXT ACTION
 
-**Execute masterplan slice S3.1** — PF-01 cold-start launch matrix on the INSTALLED app. Step 1 is a
-**user decision** (plan Decision #1): descope macOS from the v1 launch (no Mac hardware in evidence)
-or provide a Mac. Then the Windows matrix: 10 cold starts + post-reboot + double-click `.rga` +
-second-instance, recorded in `docs/plans/evidence/S3.1-launch-matrix.md`.
+**Finish S3.1 item 13 (user action): reboot the machine, launch the installed Rwanga Editor once
+from the Start menu, confirm it reaches a usable editor with no error dialog.** Then record the
+verdict in `docs/plans/evidence/S3.1-launch-matrix.md`, run the S3.1 close ritual, and continue to
+S3.2. Matrix so far: 12/13, 0 failures (10/10 cold starts 1.1–1.6 s; focus-existing single-instance;
+no `.rga` assoc — observed, not a failure). Decision #1: macOS IN scope, Mac arrives later → PF-01
+stays PARTIAL (Windows-verified) until the macOS matrix.
 Phases 1 & 2 COMPLETE (QG-01 TRUE, LR-01 TRUE — installer smoke 5/5).
 ⚠ A running Electron instance keeps auto-migrating `playground-the-last-light.rga` — check
 `git status` for fixture dirt before every commit (it recurred twice on 2026-07-26).

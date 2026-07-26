@@ -78,7 +78,7 @@ electron-builder (`npm run pack:win`), PowerShell/Windows 11.
 | S1.5 | 1 QG-01 | Full green unit run → flip QG-01 TRUE | ✅ | `docs/plans/evidence/S1.5-green-run.txt`: **1936 · 1935 pass · 0 fail · 1 skipped** (exit 0, zero quarantines) at `90485776`; checklist QG-01 PARTIAL→TRUE |
 | S2.1 | 2 LR-01 | Enable Dev Mode / elevated shell → `pack:win` succeeds | ✅ | User enabled Dev Mode (2026-07-26); `pack:win` exit 0 → `build\output\Rwanga Editor-Setup-0.1.0-alpha.0.exe` (76 MB, NSIS x64, unsigned). `docs/plans/evidence/S2.1-pack-win.txt` |
 | S2.2 | 2 LR-01 | Install + smoke the built `.exe` → flip LR-01 TRUE | ✅ | `docs/plans/evidence/S2.2-installer-smoke.md` — user-performed smoke on installed app **5/5 PASS**; unsigned accepted (Decision #2, 2026-07-26); LR-01 UNKNOWN→TRUE; gaps GAP-2-1/GAP-2-2 opened (non-blocking) |
-| S3.1 | 3 Lifecycle | PF-01 cold-start launch matrix (Windows) | ⬜ | |
+| S3.1 | 3 Lifecycle | PF-01 cold-start launch matrix (Windows) | 🟡 12/13 | `docs/plans/evidence/S3.1-launch-matrix.md`: 10/10 cold starts (1.1–1.6 s) + focus-existing single-instance PASS; no `.rga` assoc (observed, not failure); **pending: post-reboot launch (user)** + macOS matrix (Decision #1: Mac later) |
 | S3.2 | 3 Lifecycle | PF-02/03/05 lifecycle E2E specs (new/open/save-as) | ⬜ | |
 | S3.3 | 3 Lifecycle | PF-13 clean-console audit across core flows | ⬜ | |
 | S4.1 | 4 RTL ⭐ | RTL QA fixture + convention checklist prep | ⬜ | |
@@ -124,6 +124,10 @@ electron-builder (`npm run pack:win`), PowerShell/Windows 11.
 
 1. **macOS scope (S3.1, S6.1):** PF-01 says "Win/macOS". No Mac hardware is in evidence. Options:
    descope macOS from v1 launch (edit checklist row wording, note the decision) or provide a Mac.
+   **DECIDED 2026-07-26 (user):** macOS stays IN scope — user will provide a Mac when needed.
+   Windows matrix runs now; the macOS matrix is a deferred sub-task of PF-01 (and a `pack:mac` +
+   smoke sub-task of LR-01's follow-up) executed when the Mac arrives. PF-01 may sit at
+   PARTIAL (Windows-verified) until then.
 2. **Code signing (S2.2):** `pack:win` without a certificate produces an unsigned installer.
    GO_LIVE already says "(+ signing later)" — confirm unsigned is acceptable for LR-01 TRUE.
 
@@ -408,8 +412,9 @@ Commit message: `build(editor): installed-app smoke passes — LR-01 flipped TRU
 - Create: `docs/plans/evidence/S3.1-launch-matrix.md`
 - Modify: `docs/RWANGA_IDE_LAUNCH_CHECKLIST.md` (PF-01 row)
 
-- [ ] **Step 1: Resolve Decision #1 (macOS scope) with the user.** If descoped: edit the PF-01 row
-      remedy text to say `Windows (macOS descoped from v1 launch, decision <date>)` in the same commit.
+- [x] **Step 1: Resolve Decision #1 (macOS scope) with the user.** DECIDED 2026-07-26: macOS stays in
+      scope; user provides a Mac when needed (see Global Constraints Decision #1). PF-01 sits at
+      PARTIAL until the macOS matrix runs.
 
 - [ ] **Step 2: Run the Windows launch matrix on the INSTALLED app** — record each in the evidence file:
       10 consecutive cold starts (close fully between launches; measure roughly time-to-editor);

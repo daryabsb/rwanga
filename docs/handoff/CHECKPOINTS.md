@@ -5,6 +5,19 @@ Template & rules: `PROTOCOL.md`.
 
 ---
 
+## 2026-07-26 · S3.1 (in progress) — Windows launch matrix 12/13, blocked on user reboot
+- **Did:** Decision #1 resolved by user: **macOS stays in scope, Mac provided when needed** (plan
+  annotated; PF-01 will sit PARTIAL until the macOS matrix). Ran the scripted Windows matrix on the
+  installed app: **10/10 cold starts** reach a window in 1.1–1.6 s (user observing, no error
+  dialogs); **second-instance launch** → single-instance lock, focus-existing, no corruption;
+  **`.rga` association**: none registered by the installer (plan: observed behavior, not a failure;
+  candidate `fileAssociations` config improvement).
+- **Evidence:** `docs/plans/evidence/S3.1-launch-matrix.md` (12/13, 0 failures).
+- **Status deltas:** ledger S3.1 → 🟡 12/13. PF-01 not yet flipped (pending reboot item + macOS).
+- **Gaps/risks surfaced:** none (the no-association note is an observation, not a gap).
+- **Next action:** USER: reboot → launch installed app once → report. Then close S3.1 and open S3.2
+  (lifecycle E2E specs — agent-only work, no user needed).
+
 ## 2026-07-26 · S2.2 — installed-app smoke 5/5 PASS; LR-01 flipped TRUE (Phase 2 complete)
 - **Did:** User accepted the unsigned installer (Decision #2). Silent-installed the packaged build
   (`%LOCALAPPDATA%\Programs\rwanga-editor`); the USER performed the 5-item smoke by hand on the
