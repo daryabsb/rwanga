@@ -5,6 +5,24 @@ Template & rules: `PROTOCOL.md`.
 
 ---
 
+## 2026-07-26 · S2.2 — installed-app smoke 5/5 PASS; LR-01 flipped TRUE (Phase 2 complete)
+- **Did:** User accepted the unsigned installer (Decision #2). Silent-installed the packaged build
+  (`%LOCALAPPDATA%\Programs\rwanga-editor`); the USER performed the 5-item smoke by hand on the
+  installed app: open / new+type / save / close+reopen / print preview — **5/5 PASS**. Flipped LR-01
+  UNKNOWN→TRUE in the launch checklist.
+- **Evidence:** `docs/plans/evidence/S2.2-installer-smoke.md` (+ user screenshots in-session).
+- **Status deltas:** ledger S2.2 ⬜→✅; **LR-01 UNKNOWN→TRUE**. Launch P0s: 34 TRUE · 20 PARTIAL ·
+  5 UNKNOWN · 1 FALSE. QG-12's remaining blockers = the QA sweep clusters only.
+- **Gaps/risks surfaced (both ticketed in §0.5, non-blocking for LR-01):**
+  - **GAP-2-1:** New doc renders a dead band above a shrunken page that grows as content arrives;
+    user-ratified expected behavior = full configured page size from first paint. Long-standing,
+    user-reported repeatedly, now formally tracked.
+  - **GAP-2-2:** packaged app shares userData with the dev app (restored dev session; auto-opened
+    the playground fixture). Decide appId/userData split before launch.
+  - Print Preview: user notes "needs improvement later, but pass as feature" (no new gap row;
+    existing print-polish backlog).
+- **Next action:** S3.1 — PF-01 launch matrix; Step 1 = user Decision #1 (macOS scope).
+
 ## 2026-07-26 · S2.1 — pack:win succeeds under Dev Mode; installer produced
 - **Did:** User enabled Windows Developer Mode (via `ms-settings:developers`; verified
   `AllowDevelopmentWithoutDevLicense = 1`). `npm run pack:win` then completed with exit 0 — the

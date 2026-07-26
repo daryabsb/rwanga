@@ -77,7 +77,7 @@ electron-builder (`npm run pack:win`), PowerShell/Windows 11.
 | S1.4 | 1 QG-01 | Triage + resolve the 2 recovery-phase3 reds | ✅ | Both stale (triage rows 29–30): gutter test re-pointed to F1 rail tokens (+ dimmer regression guard kept); whitelist gained the 4 authorized modules w/ provenance. Suite file 12/12 pass |
 | S1.5 | 1 QG-01 | Full green unit run → flip QG-01 TRUE | ✅ | `docs/plans/evidence/S1.5-green-run.txt`: **1936 · 1935 pass · 0 fail · 1 skipped** (exit 0, zero quarantines) at `90485776`; checklist QG-01 PARTIAL→TRUE |
 | S2.1 | 2 LR-01 | Enable Dev Mode / elevated shell → `pack:win` succeeds | ✅ | User enabled Dev Mode (2026-07-26); `pack:win` exit 0 → `build\output\Rwanga Editor-Setup-0.1.0-alpha.0.exe` (76 MB, NSIS x64, unsigned). `docs/plans/evidence/S2.1-pack-win.txt` |
-| S2.2 | 2 LR-01 | Install + smoke the built `.exe` → flip LR-01 TRUE | ⬜ | |
+| S2.2 | 2 LR-01 | Install + smoke the built `.exe` → flip LR-01 TRUE | ✅ | `docs/plans/evidence/S2.2-installer-smoke.md` — user-performed smoke on installed app **5/5 PASS**; unsigned accepted (Decision #2, 2026-07-26); LR-01 UNKNOWN→TRUE; gaps GAP-2-1/GAP-2-2 opened (non-blocking) |
 | S3.1 | 3 Lifecycle | PF-01 cold-start launch matrix (Windows) | ⬜ | |
 | S3.2 | 3 Lifecycle | PF-02/03/05 lifecycle E2E specs (new/open/save-as) | ⬜ | |
 | S3.3 | 3 Lifecycle | PF-13 clean-console audit across core flows | ⬜ | |
@@ -97,6 +97,8 @@ electron-builder (`npm run pack:win`), PowerShell/Windows 11.
 | Gap ID | Found in | Description | Status |
 |---|---|---|---|
 | GAP-1-1 | S1.1 | DOM-read-as-truth violation (H6, `0b024e24`): `settings-workspace.js:522` `_enterRebind()` gates on `classList.contains('is-disabled')` instead of `entry.requiresPro` (available in closure; correct idiom used at :584/:588). Caught by `source-audit.test.js` "audit (b)" — a standing guard, NOT stale. Fixed 2026-07-26: `_enterRebind` now gates on `entry.requiresPro \|\| _isPersistsOnly(entry)` — the exact states the CSS hook proxied (is-disabled applied for PERSISTS_ONLY via `_disableControlElement`). Evidence: source-audit 19/19; settings-workspace/applicators/reachability 67/67. | **CLOSED** |
+| GAP-2-1 | S2.2 smoke | **Flow view opens a New doc with a large dead band** between top chrome and the page; it shrinks gradually as content is typed until the layout reaches its correct height. USER-REPORTED, long-standing, previously never ticketed (user has raised it before). Visual/layout defect in Flow initial geometry, packaged + dev alike. Screenshots in user report 2026-07-26. Does not block typing/structure. **Expected behavior (user-ratified):** a New doc's page renders at its FULL configured page size (A4/Letter per Page Setup) from the first paint — never a shrunken page that grows as content arrives. Needs its own fix-slice (systematic-debugging + failing test first). | OPEN |
+| GAP-2-2 | S2.2 smoke | **Installed app shares userData/workspace state with the dev app** (same app identity): first launch of the packaged build restored the dev session and auto-opened `tests/fixtures/playground-the-last-light.rga` — making the installed app another fixture-dirtier. Harmless for end users (no dev state), but decide before launch whether packaged builds should use a distinct appId/userData dir. | OPEN |
 
 ---
 
@@ -380,9 +382,9 @@ Commit message: `build(editor): pack:win succeeds under Dev Mode — installer p
 - Create: `docs/plans/evidence/S2.2-installer-smoke.md`
 - Modify: `docs/RWANGA_IDE_LAUNCH_CHECKLIST.md` (LR-01 row)
 
-- [ ] **Step 1: Confirm the signing decision with the user** (Decision #2 in Global Constraints — unsigned OK for now?)
+- [x] **Step 1: Confirm the signing decision with the user** (Decision #2 in Global Constraints — unsigned OK for now?) — user accepted unsigned, 2026-07-26
 
-- [ ] **Step 2: Install and smoke the packaged app (the .exe, NOT `npm start`)**
+- [x] **Step 2: Install and smoke the packaged app (the .exe, NOT `npm start`)** — silent install; user ran the 5-item smoke by hand: 5/5 PASS (GAP-2-1 + GAP-2-2 ticketed, non-blocking)
 
 Run the installer from `rwanga-editor\dist\`. Launch the installed app. Perform and record in
 `S2.2-installer-smoke.md`: (a) app opens to a usable editor; (b) File → New, type a scene heading +
@@ -390,9 +392,9 @@ action + dialogue; (c) Save to `%USERPROFILE%\Documents\smoke.rga`; (d) close ap
 Open recent `smoke.rga` → content intact; (e) Print Preview opens. Verdict per item: PASS/FAIL.
 Any FAIL → gap row + escalate per §0.2 (packaged-app-only failures are exactly what this smoke exists to catch).
 
-- [ ] **Step 3: Flip LR-01** — status → TRUE; evidence note → `installer built (Dev Mode) + installed-app smoke 5/5 PASS, see docs/plans/evidence/S2.2-installer-smoke.md; signing deferred by decision <date>`.
+- [x] **Step 3: Flip LR-01** — status → TRUE; evidence note → `installer built (Dev Mode) + installed-app smoke 5/5 PASS, see docs/plans/evidence/S2.2-installer-smoke.md; signing deferred by decision <date>`.
 
-- [ ] **Step 4: SLICE CLOSE RITUAL (§0.3)** — status delta: `LR-01 FALSE/PARTIAL→TRUE`
+- [x] **Step 4: SLICE CLOSE RITUAL (§0.3)** — status delta: `LR-01 UNKNOWN→TRUE`
 
 Commit message: `build(editor): installed-app smoke passes — LR-01 flipped TRUE (S2.2)`
 

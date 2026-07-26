@@ -4,7 +4,7 @@
 > archive to find the next action — it's here. Update this file at the end of every unit of work
 > (see `PROTOCOL.md`). Keep it short; link detail, don't inline it.
 
-- **Last updated:** 2026-07-26 · by: S2.1 close — installer builds under Dev Mode
+- **Last updated:** 2026-07-26 · by: S2.2 close — **LR-01 TRUE** (Phase 2 complete)
 - **Binding doctrine:** every agent MUST follow the 10-rule MASTERPLAN EXECUTION DOCTRINE in the
   root `CLAUDE.md` (one slice at a time · tick-as-you-go · §0.3 close ritual · push every slice commit).
 - **HEAD:** see latest commit on `main` (S0.1 slice-close) · **Branch:** `main`
@@ -14,12 +14,11 @@
 
 ## ⭐ NEXT ACTION
 
-**Execute masterplan slice S2.2** — install + smoke the packaged app. Step 1 is a **user decision**:
-confirm unsigned installer is acceptable for LR-01 (plan Decision #2; GO_LIVE already says
-"+ signing later"). Then install `rwanga-editor\build\output\Rwanga Editor-Setup-0.1.0-alpha.0.exe`,
-run the 5-item smoke (open→new→type→save→reopen→print preview), record in
-`docs/plans/evidence/S2.2-installer-smoke.md`, flip LR-01.
-Phase 1 COMPLETE (QG-01 TRUE); S2.1 done (build exit 0 under Dev Mode).
+**Execute masterplan slice S3.1** — PF-01 cold-start launch matrix on the INSTALLED app. Step 1 is a
+**user decision** (plan Decision #1): descope macOS from the v1 launch (no Mac hardware in evidence)
+or provide a Mac. Then the Windows matrix: 10 cold starts + post-reboot + double-click `.rga` +
+second-instance, recorded in `docs/plans/evidence/S3.1-launch-matrix.md`.
+Phases 1 & 2 COMPLETE (QG-01 TRUE, LR-01 TRUE — installer smoke 5/5).
 ⚠ A running Electron instance keeps auto-migrating `playground-the-last-light.rga` — check
 `git status` for fixture dirt before every commit (it recurred twice on 2026-07-26).
 
@@ -50,7 +49,7 @@ contribution/write API. That write API is the true technical prerequisite for th
 ## 🚦 Gates (why the AI/Agent harness cannot start yet)
 
 1. **Launch gate** — no invention features until every launch-checklist **P0** is TRUE.
-   Status: **33 TRUE · 20 PARTIAL · 6 UNKNOWN · 1 FALSE** (27 open; QG-01 flipped TRUE 2026-07-26). See `../RWANGA_IDE_LAUNCH_CHECKLIST.md`.
+   Status: **34 TRUE · 20 PARTIAL · 5 UNKNOWN · 1 FALSE** (26 open; QG-01 + LR-01 flipped TRUE 2026-07-26). See `../RWANGA_IDE_LAUNCH_CHECKLIST.md`.
 2. **Alive-App Phase 2 gate** — "No AI feature implementation may start before this phase is visually
    verified." Status: **every box unchecked.** See `../RWANGA_IDE_ALIVE_APP_CHECKLIST.md`.
 3. **Technical prerequisite** — `.rga` agent-write API does not exist (Vision Gap #2).
@@ -61,7 +60,8 @@ contribution/write API. That write API is the true technical prerequisite for th
 
 | ID | Case | Status | Pointer |
 |---|---|---|---|
-| LR-01 | Build UNBLOCKED (Dev Mode on, installer produced 2026-07-26); remaining: install+smoke (S2.2) | OPEN — S2.2 | `docs/plans/evidence/S2.1-pack-win.txt` |
+| GAP-2-1 | Flow view: New doc opens with a dead band above the page that only shrinks as you type (user-reported, long-standing, finally ticketed 2026-07-26) | OPEN — needs fix-slice | Masterplan §0.5 |
+| GAP-2-2 | Packaged app shares userData with dev app → restored dev session, auto-opened the playground fixture on first launch | OPEN — decide appId split before launch | Masterplan §0.5 |
 | PF-01/02/03/05/13 | Core lifecycle unverified (launch matrix, new/open/save-as E2E, console audit) | OPEN — QA | GO_LIVE Part A.1 #3 |
 | RTL-04…13, SW-23 | RTL visual + bidi QA vs ratified Kurdish/RTL profile (**highest product value**) | OPEN — QA | GO_LIVE Part A.1 #4 |
 | MT-02/04/05/06/07/10, PP-01/03, SW-01 | Page-geometry QA (sizes/margins/overflow) | OPEN — QA | GO_LIVE Part A.1 #5 |
@@ -77,6 +77,7 @@ contribution/write API. That write API is the true technical prerequisite for th
 | Case | Result | Evidence |
 |---|---|---|
 | QG-01 (30 test reds) | **TRUE — suite fully green** (1936 · 0 fail · 1 skip; zero quarantines; 1 real defect GAP-1-1 found & fixed) | `docs/plans/evidence/S1.1-qg01-triage.md` + `S1.5-green-run.txt`; commits `09382fd6`→`90485776` |
+| LR-01 (installer) | **TRUE — built under Dev Mode + installed-app smoke 5/5 PASS** (unsigned accepted; signing deferred) | `docs/plans/evidence/S2.1-pack-win.txt` + `S2.2-installer-smoke.md` |
 | Is the launch checklist honest/current? | **Yes — verified** | 3 latest commits are checklist-only; QG-01 = 1936/1899/36 reproduces; clean-fixture rerun = 40/40 → 30 reds all non-core |
 | PP-D5 (RTL body-leading) | Closed (PP-16 TRUE) | Print-Truth-Unification; PTU-B 7/7 green (prior agent, 2026-06-10) |
 | PDF export, RTL scene-heading map, persistence/recovery | TRUE, test-backed | in the 1899-pass unit set |
