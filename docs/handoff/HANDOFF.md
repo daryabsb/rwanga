@@ -4,10 +4,11 @@
 > archive to find the next action — it's here. Update this file at the end of every unit of work
 > (see `PROTOCOL.md`). Keep it short; link detail, don't inline it.
 
-- **Last updated:** 2026-07-26 · by: S3.1 in progress (12/13; blocked on user reboot)
+- **Last updated:** 2026-07-27 · by: S3.1 in progress (12/13; blocked on user reboot)
 - **Binding doctrine:** every agent MUST follow the 10-rule MASTERPLAN EXECUTION DOCTRINE in the
   root `CLAUDE.md` (one slice at a time · tick-as-you-go · §0.3 close ritual · push every slice commit).
-- **HEAD:** see latest commit on `main` (S0.1 slice-close) · **Branch:** `main`
+- **HEAD:** `9e6c82cb` (tooling: `/rwanga` case command) · **last slice-close:** `f17b4730` (S3.1 WIP,
+  12/13) · **Branch:** `main` · pushed. *(Update both SHAs at every §0.3 close.)*
 - **Phase:** Stage 1 — Foundation (closing launch P0s). AI/Agent phase is **gated** (see Gates).
 
 ---
@@ -21,8 +22,10 @@ S3.2. Matrix so far: 12/13, 0 failures (10/10 cold starts 1.1–1.6 s; focus-exi
 no `.rga` assoc — observed, not a failure). Decision #1: macOS IN scope, Mac arrives later → PF-01
 stays PARTIAL (Windows-verified) until the macOS matrix.
 Phases 1 & 2 COMPLETE (QG-01 TRUE, LR-01 TRUE — installer smoke 5/5).
-⚠ A running Electron instance keeps auto-migrating `playground-the-last-light.rga` — check
-`git status` for fixture dirt before every commit (it recurred twice on 2026-07-26).
+⚠ A running Electron instance auto-migrates **any** fixture it opens — seen on
+`playground-the-last-light.rga` (2026-07-26, twice) and `mysterious-guest-rtl.rga` (2026-07-27).
+Check `git status` for fixture dirt before every commit; revert with
+`git checkout -- rwanga-editor/tests/fixtures/`.
 
 The whole launch-gate campaign is now a slice-by-slice executable plan with cross-session state:
 **`../plans/2026-07-02-stage1-launch-gate-masterplan.md`** — read its §0 (survival protocol) first,
@@ -38,7 +41,7 @@ Background & rationale: **`../RWANGA_GO_LIVE_2026-07-02.md`** (Part A + Part D).
 ## Where we are (2-minute brief)
 
 The editor is **~1–2 focused weeks of verification + packaging** away from being a launchable
-RTL screenplay editor. **None** of the 28 open launch P0s is a feature to build — they are test
+RTL screenplay editor. **None** of the 26 open launch P0s is a feature to build — they are test
 hygiene, an installer build, and QA sweeps. The launch checklist was **forensically verified honest
 on 2026-07-02** (test numbers reproduce exactly; the "30 vs 36 reds" spin proven true).
 
