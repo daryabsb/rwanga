@@ -219,6 +219,11 @@ rwanga-mcp/
 
 # Local Claude Code state (per-machine, not source)
 .claude/
+# …except the case commands — version-controlled tooling, must live on main
+!.claude/
+.claude/*
+!.claude/commands/
+!.claude/commands/*.md
 
 # Local debug/test databases — keep only db.sqlite3 if it's tracked
 *.sqlite3
