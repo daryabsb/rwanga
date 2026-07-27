@@ -87,16 +87,26 @@ agent writing `Rga.Contribution` code during Stage 1 is violating doctrine, full
 
 ## START
 
-1. **Focus lock:** `git -C E:\api\rwanga branch --show-current` must print `main`, and
-   `git -C E:\api\rwanga status --short` must show **no `rwanga-editor/tests/fixtures/*.rga`
-   modifications** (Rule 8 — revert them before anything else). If the branch is wrong, STOP and tell
-   Darya before touching anything.
+1. **Focus lock:** `git -C E:\api\rwanga status -sb` must show branch `main` and **no
+   `rwanga-editor/tests/fixtures/*.rga` modifications**. If the branch is wrong, STOP and tell Darya
+   before touching anything. If fixtures are dirty, revert them first (Rule 8) and **say so in your
+   announcement** — never silently. If the line reads `[ahead N]`, a previous slice-close skipped
+   §0.3 step 6: push it now and note it (Rule 7 — an unpushed slice-close doesn't survive this machine).
 2. **Read, IN ORDER, and NOTHING else to orient** (the LEAN READ LIST):
    1. `E:\api\rwanga\docs\handoff\HANDOFF.md` — the board: NEXT ACTION · Gates · Open cases.
-   2. `E:\api\rwanga\docs\plans\2026-07-02-stage1-launch-gate-masterplan.md` **§0 only**
-      (survival protocol §0.1–0.4 + the §0.5 State Ledger + gap ledger) — lines 1–140.
+   2. `E:\api\rwanga\docs\plans\2026-07-02-stage1-launch-gate-masterplan.md` — the **head of the
+      file through the Decisions block**: §0 survival protocol (§0.1–0.4) + the §0.5 State Ledger +
+      gap ledger + Global constraints + "Decisions the user must make" (currently ~lines 1–135; if
+      the head has grown, read to the first `## Phase` heading and stop).
    3. The **active slice's section** of that same file, named by HANDOFF's NEXT ACTION (e.g.
-      "### Slice S3.2"). Its first unchecked `- [ ]` box is your next step.
+      "### Slice S3.2"). Its first unchecked `- [ ]` box is your next step. **To locate it you MAY
+      run exactly one in-file heading search** (`Grep` for `^### Slice ` in that file) — that is not
+      "exploring", it is an index lookup, and it is cheaper than reading the 756-line plan whole.
+      Read that ONE section, not its neighbours.
+   **Reconcile box vs prose before you act:** HANDOFF's NEXT ACTION may describe finer granularity
+   than the checkboxes carry (e.g. "S3.1 item 13" when the slice has 4 boxes and the 13 items live
+   inside one box's prose + the §0.5 Evidence column). The **ledger row + evidence file are the
+   truth for partial progress**; never re-run work the Evidence column says is already recorded.
    Everything else — `RWANGA_GO_LIVE_2026-07-02.md`, `RWANGA_IDE_LAUNCH_CHECKLIST.md`,
    `PROTOCOL.md`, `CHECKPOINTS.md`, the `Filmustageation/` docs — is REFERENCE, opened per-task,
    never whole at START.
