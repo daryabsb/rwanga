@@ -79,7 +79,7 @@ electron-builder (`npm run pack:win`), PowerShell/Windows 11.
 | S2.1 | 2 LR-01 | Enable Dev Mode / elevated shell → `pack:win` succeeds | ✅ | User enabled Dev Mode (2026-07-26); `pack:win` exit 0 → `build\output\Rwanga Editor-Setup-0.1.0-alpha.0.exe` (76 MB, NSIS x64, unsigned). `docs/plans/evidence/S2.1-pack-win.txt` |
 | S2.2 | 2 LR-01 | Install + smoke the built `.exe` → flip LR-01 TRUE | ✅ | `docs/plans/evidence/S2.2-installer-smoke.md` — user-performed smoke on installed app **5/5 PASS**; unsigned accepted (Decision #2, 2026-07-26); LR-01 UNKNOWN→TRUE; gaps GAP-2-1/GAP-2-2 opened (non-blocking) |
 | S3.1 | 3 Lifecycle | PF-01 cold-start launch matrix (Windows) | ✅ | `docs/plans/evidence/S3.1-launch-matrix.md`: **Windows 13/13 PASS · 0 failures** — 10/10 cold starts (1.1–1.6 s), post-reboot launch PASS (user, 2026-07-27), focus-existing single-instance, no `.rga` assoc (observed, not failure). PF-01 → PARTIAL **(Windows-verified)**; macOS matrix deferred by Decision #1 (Mac later), tracked on the PF-01 row |
-| S3.2 | 3 Lifecycle | PF-02/03/05 lifecycle E2E specs (new/open/save-as) | ⬜ | |
+| S3.2 | 3 Lifecycle | PF-02/03/05 lifecycle E2E specs (new/open/save-as) | ✅ | `docs/plans/evidence/S3.2-lifecycle-e2e.md` — three specs under `rwanga-editor/tests/e2e/lifecycle/`, **3/3 PASS** (and green inside the full suite). Seam: main-process dialog stubs (real IPC path), not the `doc.handle` shortcut. PF-02/03/05 PARTIAL→TRUE. Full-suite run 326 pass/37 fail → all sampled failures proven PRE-EXISTING (**GAP-3-3**) |
 | S3.3 | 3 Lifecycle | PF-13 clean-console audit across core flows | ⬜ | |
 | S4.1 | 4 RTL ⭐ | RTL QA fixture + convention checklist prep | ⬜ | |
 | S4.2 | 4 RTL ⭐ | Editor alignment sweep RTL-04…RTL-09 | ⬜ | |
@@ -100,6 +100,7 @@ electron-builder (`npm run pack:win`), PowerShell/Windows 11.
 | GAP-2-1 | S2.2 smoke | **Flow view opens a New doc with a large dead band** between top chrome and the page; it shrinks gradually as content is typed until the layout reaches its correct height. USER-REPORTED, long-standing, previously never ticketed (user has raised it before). Visual/layout defect in Flow initial geometry, packaged + dev alike. Screenshots in user report 2026-07-26. Does not block typing/structure. **Expected behavior (user-ratified):** a New doc's page renders at its FULL configured page size (A4/Letter per Page Setup) from the first paint — never a shrunken page that grows as content arrives. Needs its own fix-slice (systematic-debugging + failing test first). | OPEN |
 | GAP-3-1 | user report post-S3.1 | **Compact mode amputates half the menubar with no overflow.** `shell.css:2357-2362` hides the Tags / Tools / Export / Help menus whenever `#app.mode-compact` (window < ~1412 CSS px = virtually every laptop under Windows display scaling; user's 1440px @ ~125% ≈ 1152px). Settings' only menu entry lives in Tools → **Settings disappears from the menu**, as do all Export/Help items; no "…" overflow, no relocation. Gear icon + Ctrl+, still reach Settings (why tests stay green — they assert command registration, not menu visibility). Root-caused 2026-07-26 (responsive.js `_decideMode` + compact CSS). Fix direction (own slice): overflow "…" menu or move Settings to a never-hidden menu; never hide a menu's ONLY route to a feature. | OPEN |
 | GAP-3-2 | user report post-S3.1 | **Settings workspace scroll/sticky layering broken.** User screenshot 2026-07-26 (installed app, Page Setup section): a row (Orientation, segmented control) paints ABOVE the sticky search band; section title/description scroll out of sync with the band; first row clipped mid-control. Suspects: `.rga-settings-content` is the scroll container (`overflow-y:auto`, 24px top padding — settings-workspace.css:279-294) with the sticky `.rga-settings-content-header` (top:0, z-index:10, bg-mask — :321-346) pinning inside it; masking/pinning fails under real content. User states Settings area has had unfixed visual problems for a while. Diagnosis plan (own fix-slice): Playwright DOM-geometry spec over the Settings workspace scroll (per project rule "Playwright > screenshots for layout work"), then fix + regression test. | OPEN |
+| GAP-3-3 | S3.2 Step 4 | **E2E suite: 37 reds, all sampled ones caused by `app.close()` hanging in `afterEach` — the app will not quit.** Full run 2026-07-27: **326 pass · 37 fail** (1.2 h). Signature on every sampled failure: `Test timeout of 60000ms exceeded while running "afterEach" hook` at `app.close()` — **the test bodies pass**; recovery/autosave/paper-view assert green and only teardown fails. Proven PRE-EXISTING and independent of S3.2: the same specs fail identically when run alone with S3.2's files absent (7 fail / 6 pass), and again after clearing 17 orphaned Electron processes (each hung close leaks a process tree). Working hypothesis for the fix-slice: specs that leave the doc **dirty** hit the unsaved-changes prompt on quit, which blocks `close()` under automation — consistent with `print-contract.spec.js` (`clearDirtyAndClose`) and the three new lifecycle specs (which clear dirty) passing, while `app-close.spec.js` ("closing with unsaved changes prompts") is itself failing. **Also surfaced: no e2e baseline has ever been recorded** (the campaign's baseline truth is the UNIT suite only) — record one the way S0.1 did, since QG-12 cannot honestly roll up over an unmeasured suite. Needs its own fix-slice (systematic-debugging; decide per-spec whether it is test hygiene or a real quit-path defect). | OPEN |
 | GAP-2-2 | S2.2 smoke | **Installed app shares userData/workspace state with the dev app** (same app identity): first launch of the packaged build restored the dev session and auto-opened `tests/fixtures/playground-the-last-light.rga` — making the installed app another fixture-dirtier. Harmless for end users (no dev state), but decide before launch whether packaged builds should use a distinct appId/userData dir. | OPEN |
 
 ---
@@ -447,7 +448,16 @@ Commit message: `qa(editor): PF-01 cold-start launch matrix recorded — <verdic
 - Consumes: `Rga.FileManager = { newScript, openFromDialog, openFromContent, openRecent, getRecent, save, saveAs, setActive, getActive, notifyTitle }` (`renderer/js/file-manager.js:154`); `Rga.Doc.serialize(doc)`; `Rga.TabManager.activeDoc()`. The Playwright-Electron launch harness pattern lives in `tests/e2e/filmustageation/print-contract.spec.js:21-46` (`launchAndOpen`, `clearDirtyAndClose`) — copy it, don't re-invent it.
 - Produces: three green specs cited as PF-02/03/05 evidence.
 
-- [ ] **Step 1: Discover the dialog-free save path**
+- [x] **Step 1: Discover the dialog-free save path** — SEAM CHOSEN (2026-07-27): stub
+      `dialog.showSaveDialog` / `dialog.showOpenDialog` in the MAIN process via
+      `app.evaluate(({ dialog }) => …)`, the idiom already used by
+      `tests/integration/atomic-save.spec.js`. This is stronger than the skeleton's
+      `doc.handle = p`: the REAL user path runs end to end (`saveAs()` → IPC
+      `files.pickSaveAs` → `writeFileAtomic` → `Doc.rebindHandle` → `Doc.clearDirty`;
+      `openFromDialog()` → IPC `files.pickOpen` → `Doc.deserialize`). Handle-bound
+      `save()` is dialog-free by nature (`file-manager.js:66-91`). Gotcha recorded in
+      each spec: `save()` reads the module-local `activeDoc` set by TabManager on tab
+      activation (`tab-manager.js:148`), so specs wait on `FileManager.getActive()` first.
 
 Native dialogs can't be driven by Playwright. Read `renderer/js/file-manager.js` (whole file) and the
 preload/IPC bridge it calls (grep `electron/` for the channel names you find). Identify how to give a
@@ -455,7 +465,12 @@ doc a handle without a dialog — candidates visible in code: `openFromContent(h
 handle on open; `save()` writes via IPC when `activeDoc.handle` exists (`file-manager.js:72-87`).
 Record the chosen seam as a comment block at the top of each spec.
 
-- [ ] **Step 2: Write the three specs (failing first is satisfied by writing against the real app — run to see them fail only if the flow is actually broken; these are verification tests)**
+- [x] **Step 2: Write the three specs (failing first is satisfied by writing against the real app — run to see them fail only if the flow is actually broken; these are verification tests)**
+      Written 2026-07-27 against the Step-1 seam (dialogs stubbed, real IPC path), not the
+      `doc.handle` shortcut in the skeleton below. PF-02 reopens in a SECOND app instance with a
+      fresh userData dir, so the assertion proves the bytes on disk — not renderer memory.
+      PF-03/PF-05 use a temp COPY of `mysterious-guest-rtl.rga` instead of the repo fixture
+      (§0.2 fixture law — that fixture is `rga_version` 3.0 and would auto-migrate on open).
 
 `new-save-reopen.spec.js` — the skeleton (adapt the launch helper verbatim from print-contract.spec.js):
 
@@ -507,18 +522,28 @@ fixture file on disk is byte-identical after the session (no auto-migration writ
 line → set handle B (different directory) via the Step-1 seam → `save()` → assert file B exists with
 the edit, file A unchanged, and `getActive()`/recent list now point at B.
 
-- [ ] **Step 3: Run them**
+- [x] **Step 3: Run them** — **3/3 PASS** first run (22.0 s / 4.8 s / 5.6 s); re-confirmed 3/3 on a
+      cleaned machine. Evidence: `docs/plans/evidence/S3.2-lifecycle-e2e.md`.
 
 ```powershell
 cmd /c "cd /d E:\api\rwanga\rwanga-editor && npm run build:renderer && npx playwright test tests/e2e/lifecycle --config=tests/integration/playwright.config.js"
 ```
 Expected: 3/3 pass. A failure here is potentially a REAL lifecycle defect → §0.2 escalation.
 
-- [ ] **Step 4: Full e2e regression** — `npm run test:e2e`; expected: no new failures vs before this slice.
+- [x] **Step 4: Full e2e regression** — `npm run test:e2e`; expected: no new failures vs before this slice.
+      RAN: **326 passed · 37 failed** (1.2 h); the three new specs are NOT among the failures.
+      **No e2e baseline has ever been recorded** (the campaign's baseline is the UNIT suite), so
+      "no new failures" was proven by measurement instead: (a) the failing specs run **alone**, with
+      this slice's files absent, fail identically (7 failed / 6 passed); (b) after clearing 17
+      orphaned Electron processes, lifecycle is 3/3 and the same specs still fail. Signature:
+      `afterEach` `app.close()` 60 s timeout — **test bodies pass, the app will not quit**.
+      Pre-existing and out of frozen scope → **GAP-3-3**. Full analysis in
+      `docs/plans/evidence/S3.2-lifecycle-e2e.md`.
 
-- [ ] **Step 5: Flip PF-02, PF-03, PF-05** (evidence: the three spec names + green run).
+- [x] **Step 5: Flip PF-02, PF-03, PF-05** (evidence: the three spec names + green run). Done — all
+      three PARTIAL→TRUE with per-row evidence notes in `docs/RWANGA_IDE_LAUNCH_CHECKLIST.md`.
 
-- [ ] **Step 6: SLICE CLOSE RITUAL (§0.3)** — status deltas: `PF-02/03/05 PARTIAL→TRUE`
+- [x] **Step 6: SLICE CLOSE RITUAL (§0.3)** — status deltas: `PF-02/03/05 PARTIAL→TRUE`
 
 Commit message: `test(editor): lifecycle E2E — new/open/save-as round-trips proven (PF-02/03/05, S3.2)`
 

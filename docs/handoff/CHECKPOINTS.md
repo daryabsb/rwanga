@@ -5,6 +5,27 @@ Template & rules: `PROTOCOL.md`.
 
 ---
 
+## 2026-07-27 · S3.2 CLOSED — PF-02/03/05 TRUE (lifecycle E2E 3/3) · GAP-3-3 opened
+- **Did:** Wrote the three lifecycle specs under `rwanga-editor/tests/e2e/lifecycle/`. Step-1 seam
+  chosen by reading the code: stub `dialog.showSaveDialog`/`showOpenDialog` in the MAIN process
+  (the `atomic-save.spec.js` idiom) instead of the plan's `doc.handle = p` shortcut — the real
+  path then runs end to end (`saveAs()` → IPC `files.pickSaveAs` → atomic write → `rebindHandle` →
+  `clearDirty`). PF-02 reopens in a SECOND app instance with a fresh userData dir, so content is
+  proven on disk. PF-03/05 use a temp COPY of the RTL fixture (§0.2 fixture law — it is v3.0 and
+  would auto-migrate). Ran the full e2e suite and then proved the failures are not ours.
+- **Evidence:** `docs/plans/evidence/S3.2-lifecycle-e2e.md` — lifecycle **3/3 PASS** (first run and
+  again on a cleaned machine); full suite **326 pass · 37 fail**, new specs not among the failures;
+  isolation run with our files absent fails identically (7 fail / 6 pass).
+- **Status deltas:** S3.2 ⬜ → ✅. **PF-02, PF-03, PF-05 PARTIAL → TRUE** (per-row evidence in the
+  checklist). Gate counts 34/20/5/1 → **37 TRUE · 17 PARTIAL · 5 UNKNOWN · 1 FALSE** (23 open).
+- **Gaps/risks surfaced:** **GAP-3-3** — e2e suite 37 reds, every sampled one an `app.close()` hang
+  in `afterEach` (test bodies pass; the app will not quit; 17 orphaned Electron processes were
+  cleared). Pre-existing, out of frozen scope. Hypothesis: dirty-doc quit prompt blocks close.
+  Second finding: **no e2e baseline has ever been recorded** — QG-12 cannot honestly roll up over an
+  unmeasured suite.
+- **Next action:** S3.3 (PF-13 clean-console audit) — but first decide with the user whether GAP-3-3
+  is fixed before it, since the audit runs over the same flows.
+
 ## 2026-07-27 · S3.1 CLOSED — PF-01 Windows launch matrix 13/13 · `/rwanga` case command built
 - **Did:** (1) Built the missing artifact-4 of the master-plan process: the `/rwanga` case command
   (START / END / STATUS over this ledger), deployed to `~/.claude/commands/` + version-controlled at
