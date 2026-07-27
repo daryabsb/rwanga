@@ -15,12 +15,14 @@
 
 ## ⭐ NEXT ACTION
 
-**Finish S3.1 item 13 (user action): reboot the machine, launch the installed Rwanga Editor once
-from the Start menu, confirm it reaches a usable editor with no error dialog.** Then record the
-verdict in `docs/plans/evidence/S3.1-launch-matrix.md`, run the S3.1 close ritual, and continue to
-S3.2. Matrix so far: 12/13, 0 failures (10/10 cold starts 1.1–1.6 s; focus-existing single-instance;
-no `.rga` assoc — observed, not a failure). Decision #1: macOS IN scope, Mac arrives later → PF-01
-stays PARTIAL (Windows-verified) until the macOS matrix.
+**Start S3.2 — PF-02/03/05 lifecycle E2E specs.** Step 1: discover the dialog-free save seam in
+`renderer/js/file-manager.js` + its IPC bridge (native dialogs can't be driven by Playwright);
+then write three specs under `rwanga-editor/tests/e2e/lifecycle/` (new-save-reopen · open-from-disk ·
+save-as-path-change), copying the launch harness from
+`tests/e2e/filmustageation/print-contract.spec.js:21-46` rather than re-inventing it.
+S3.1 is CLOSED: Windows launch matrix **13/13 PASS, 0 failures** (post-reboot launch confirmed by
+user 2026-07-27) → PF-01 PARTIAL **(Windows-verified)**; the macOS matrix is deferred by Decision #1
+(Mac arrives later), tracked on the PF-01 row.
 Phases 1 & 2 COMPLETE (QG-01 TRUE, LR-01 TRUE — installer smoke 5/5).
 ⚠ A running Electron instance auto-migrates **any** fixture it opens — seen on
 `playground-the-last-light.rga` (2026-07-26, twice) and `mysterious-guest-rtl.rga` (2026-07-27).
@@ -69,7 +71,8 @@ contribution/write API. That write API is the true technical prerequisite for th
 | GAP-3-2 | Settings workspace sticky-search band layering broken (row paints above band; rows clipped) — user-reported with screenshot; needs Playwright geometry diagnostic + fix | OPEN — needs fix-slice | Masterplan §0.5 |
 | GAP-2-1 | Flow view: New doc opens with a dead band above the page that only shrinks as you type (user-reported, long-standing, finally ticketed 2026-07-26) | OPEN — needs fix-slice | Masterplan §0.5 |
 | GAP-2-2 | Packaged app shares userData with dev app → restored dev session, auto-opened the playground fixture on first launch | OPEN — decide appId split before launch | Masterplan §0.5 |
-| PF-01/02/03/05/13 | Core lifecycle unverified (launch matrix, new/open/save-as E2E, console audit) | OPEN — QA | GO_LIVE Part A.1 #3 |
+| PF-02/03/05/13 | Core lifecycle unverified (new/open/save-as E2E, console audit) — PF-01 now Windows-verified | OPEN — QA (S3.2, S3.3) | GO_LIVE Part A.1 #3 |
+| PF-01 (macOS) | macOS launch matrix + `pack:mac` + smoke — the only half of PF-01 still open (Decision #1: Mac arrives later) | DEFERRED — needs hardware | Masterplan §0.5 / PF-01 row |
 | RTL-04…13, SW-23 | RTL visual + bidi QA vs ratified Kurdish/RTL profile (**highest product value**) | OPEN — QA | GO_LIVE Part A.1 #4 |
 | MT-02/04/05/06/07/10, PP-01/03, SW-01 | Page-geometry QA (sizes/margins/overflow) | OPEN — QA | GO_LIVE Part A.1 #5 |
 | QG-12 | Roll-up "no known P0/P1 bugs" — flips when the above close | OPEN (auto) | Launch checklist §15 |
@@ -85,6 +88,7 @@ contribution/write API. That write API is the true technical prerequisite for th
 |---|---|---|
 | QG-01 (30 test reds) | **TRUE — suite fully green** (1936 · 0 fail · 1 skip; zero quarantines; 1 real defect GAP-1-1 found & fixed) | `docs/plans/evidence/S1.1-qg01-triage.md` + `S1.5-green-run.txt`; commits `09382fd6`→`90485776` |
 | LR-01 (installer) | **TRUE — built under Dev Mode + installed-app smoke 5/5 PASS** (unsigned accepted; signing deferred) | `docs/plans/evidence/S2.1-pack-win.txt` + `S2.2-installer-smoke.md` |
+| PF-01 Windows launch matrix (S3.1) | **13/13 PASS · 0 failures** — 10/10 cold starts 1.1–1.6 s, post-reboot PASS, single-instance focus-existing, no `.rga` assoc (observed) | `docs/plans/evidence/S3.1-launch-matrix.md` |
 | Is the launch checklist honest/current? | **Yes — verified** | 3 latest commits are checklist-only; QG-01 = 1936/1899/36 reproduces; clean-fixture rerun = 40/40 → 30 reds all non-core |
 | PP-D5 (RTL body-leading) | Closed (PP-16 TRUE) | Print-Truth-Unification; PTU-B 7/7 green (prior agent, 2026-06-10) |
 | PDF export, RTL scene-heading map, persistence/recovery | TRUE, test-backed | in the 1899-pass unit set |

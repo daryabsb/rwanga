@@ -78,7 +78,7 @@ electron-builder (`npm run pack:win`), PowerShell/Windows 11.
 | S1.5 | 1 QG-01 | Full green unit run → flip QG-01 TRUE | ✅ | `docs/plans/evidence/S1.5-green-run.txt`: **1936 · 1935 pass · 0 fail · 1 skipped** (exit 0, zero quarantines) at `90485776`; checklist QG-01 PARTIAL→TRUE |
 | S2.1 | 2 LR-01 | Enable Dev Mode / elevated shell → `pack:win` succeeds | ✅ | User enabled Dev Mode (2026-07-26); `pack:win` exit 0 → `build\output\Rwanga Editor-Setup-0.1.0-alpha.0.exe` (76 MB, NSIS x64, unsigned). `docs/plans/evidence/S2.1-pack-win.txt` |
 | S2.2 | 2 LR-01 | Install + smoke the built `.exe` → flip LR-01 TRUE | ✅ | `docs/plans/evidence/S2.2-installer-smoke.md` — user-performed smoke on installed app **5/5 PASS**; unsigned accepted (Decision #2, 2026-07-26); LR-01 UNKNOWN→TRUE; gaps GAP-2-1/GAP-2-2 opened (non-blocking) |
-| S3.1 | 3 Lifecycle | PF-01 cold-start launch matrix (Windows) | 🟡 12/13 | `docs/plans/evidence/S3.1-launch-matrix.md`: 10/10 cold starts (1.1–1.6 s) + focus-existing single-instance PASS; no `.rga` assoc (observed, not failure); **pending: post-reboot launch (user)** + macOS matrix (Decision #1: Mac later) |
+| S3.1 | 3 Lifecycle | PF-01 cold-start launch matrix (Windows) | ✅ | `docs/plans/evidence/S3.1-launch-matrix.md`: **Windows 13/13 PASS · 0 failures** — 10/10 cold starts (1.1–1.6 s), post-reboot launch PASS (user, 2026-07-27), focus-existing single-instance, no `.rga` assoc (observed, not failure). PF-01 → PARTIAL **(Windows-verified)**; macOS matrix deferred by Decision #1 (Mac later), tracked on the PF-01 row |
 | S3.2 | 3 Lifecycle | PF-02/03/05 lifecycle E2E specs (new/open/save-as) | ⬜ | |
 | S3.3 | 3 Lifecycle | PF-13 clean-console audit across core flows | ⬜ | |
 | S4.1 | 4 RTL ⭐ | RTL QA fixture + convention checklist prep | ⬜ | |
@@ -418,7 +418,7 @@ Commit message: `build(editor): installed-app smoke passes — LR-01 flipped TRU
       scope; user provides a Mac when needed (see Global Constraints Decision #1). PF-01 sits at
       PARTIAL until the macOS matrix runs.
 
-- [ ] **Step 2: Run the Windows launch matrix on the INSTALLED app** — record each in the evidence file:
+- [x] **Step 2: Run the Windows launch matrix on the INSTALLED app** — record each in the evidence file:
       10 consecutive cold starts (close fully between launches; measure roughly time-to-editor);
       1 launch immediately after reboot; 1 launch with a `.rga` double-clicked from Explorer (file
       association) if registered — if no association, note it as observed behavior, not a failure;
@@ -426,9 +426,12 @@ Commit message: `build(editor): installed-app smoke passes — LR-01 flipped TRU
       or focus-existing are both acceptable, record which).
       Expected: 13/13 reach a usable editor with no error dialog.
 
-- [ ] **Step 3: Flip PF-01** (TRUE with evidence pointer, or PARTIAL + gap row if any launch failed).
+- [x] **Step 3: Flip PF-01** (TRUE with evidence pointer, or PARTIAL + gap row if any launch failed).
+      Done 2026-07-27: **13/13 PASS, 0 failures** → PF-01 row updated to PARTIAL **(Windows-verified)**
+      with the evidence pointer. Not TRUE only because the row spans macOS (Decision #1 keeps it in
+      scope, Mac arrives later); no gap row — nothing failed.
 
-- [ ] **Step 4: SLICE CLOSE RITUAL (§0.3)**
+- [x] **Step 4: SLICE CLOSE RITUAL (§0.3)**
 
 Commit message: `qa(editor): PF-01 cold-start launch matrix recorded — <verdict> (S3.1)`
 

@@ -5,6 +5,26 @@ Template & rules: `PROTOCOL.md`.
 
 ---
 
+## 2026-07-27 · S3.1 CLOSED — PF-01 Windows launch matrix 13/13 · `/rwanga` case command built
+- **Did:** (1) Built the missing artifact-4 of the master-plan process: the `/rwanga` case command
+  (START / END / STATUS over this ledger), deployed to `~/.claude/commands/` + version-controlled at
+  `.claude/commands/rwanga.md` on `main` (`.gitignore` negated for `.claude/commands/*.md`).
+  Tested cold with two fresh subagents: END passed; START failed (no way to locate the active slice's
+  section in a 756-line plan) → fixed (one permitted `^### Slice ` lookup, self-healing head-read,
+  box-vs-prose reconcile rule, `status -sb` focus lock) → re-tested PASS. (2) Corrected three stale
+  HANDOFF lines the tests surfaced (HEAD SHA, "28"→26 open P0s, fixture warning generalised).
+  (3) Recorded S3.1 matrix row 13 (post-reboot launch, user-performed 2026-07-27) → slice closed.
+- **Evidence:** `docs/plans/evidence/S3.1-launch-matrix.md` — Windows **13/13 PASS · 0 failures**
+  (10/10 cold starts 1.1–1.6 s · post-reboot PASS · single-instance focus-existing · no `.rga`
+  association, observed not failure). Commands: `9e6c82cb`; HANDOFF fixes pushed same day.
+- **Status deltas:** S3.1 ⬜/🟡 → ✅. PF-01 PARTIAL → PARTIAL **(Windows-verified, evidence-backed)**
+  — not TRUE because the row spans macOS. Gate counts unchanged (34 TRUE · 20 PARTIAL · 5 UNKNOWN ·
+  1 FALSE).
+- **Gaps/risks surfaced:** none new. Standing: PF-01's macOS half is deferred on hardware
+  (Decision #1); GAP-2-1/2-2/3-1/3-2 remain OPEN, owned by future fix-slices.
+- **Next action:** Start S3.2 — PF-02/03/05 lifecycle E2E specs; Step 1 is discovering the
+  dialog-free save seam in `renderer/js/file-manager.js` + its IPC bridge.
+
 ## 2026-07-26 · Two user-reported Settings defects root-caused/ticketed (GAP-3-1, GAP-3-2)
 - **Did:** Investigated the user's report "Settings is gone from the menu + the Settings area has
   never-fixed problems." (1) **GAP-3-1 root-caused:** the Settings menu entry lives ONLY in the
