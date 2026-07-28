@@ -78,7 +78,38 @@ fixture it opens and dirties the tree (this is what inflated 30 reds to 36). **B
 run `git -C E:\api\rwanga status`; if fixtures are modified:
 `git -C E:\api\rwanga checkout -- rwanga-editor/tests/fixtures/*.rga`.
 
-### Rule 9 — THE GATES STAY SHUT
+### Rule 9 — THE HUMAN REPORT LAW (Darya, 2026-07-28 — reports are for a human, not the ledger)
+Every message to Darya — the START announce, mid-session notes, and above all the END report — is
+**3–4 lines MAXIMUM, plain human language, ZERO internal codes**: no slice/task IDs, no gate tallies,
+no baseline counts, no case jargon (seam / ratchet / ledger / rung / gap). Say what the product can
+now do that it couldn't, what broke or was found (in product terms), and — only if a decision is
+needed — ONE question answerable yes/no or A/B, WITH a recommendation. All machine state (IDs,
+counts, evidence) goes in the board files, never the chat. The test: if Darya must open a doc or ask
+a question to understand the report, it failed.
+
+### Rule 10 — NO MICRO-WALKS (Darya, 2026-07-28 — never stop the shop for a button)
+Never halt the session to ask Darya to walk/verify a SMALL change (a one-line fix, one button, one
+page tweak). Verify it yourself with tests, mark it `[w]`, and KEEP MOVING — `[w]` items batch up and
+are walked TOGETHER at milestone close. A live walk is requested only at milestone close, before a
+production-facing step, or when Darya asks.
+
+### Rule 11 — THE MOMENTUM LAW (Darya, 2026-07-28 — these cases are DAYS, not months)
+A session is measured by PRODUCT progress — boxes that moved because the app does something new — not
+bookkeeping. Ceremony (board edits, logs, reports) is a small fixed tax, never the session's output;
+a session that moved only process artifacts must say "no product progress today" in its close report,
+in those words. Don't stop for approval between tasks the board already ordered — the plan IS the
+approval; chain related tasks in one session. Never spend a second session grinding the same blocker
+the same way: change the approach or hand Darya a one-line A/B decision.
+
+### Rule 12 — THE WORKER CONTRACT (Darya, 2026-07-28 — no aimless workers)
+A worker is dispatched ONLY with all three: (1) one concrete goal, (2) the exact expected deliverable
+(files / test names / artifact), (3) what DONE means. No vague scouting. If the orchestrator can do
+the task in less effort than writing the brief, do it directly. SANITY FIRST: before dispatching
+build/test workers, prove the environment works with one fast smoke command; if it's broken, fixing
+it IS the session's task, announced in one line. Two failed attempts at the same blocker = STOP
+retrying (never leave a worker grinding at a dead end), file it, move to independent work.
+
+### Rule 13 — THE GATES STAY SHUT
 No AI / Agent-harness **code** anywhere in this campaign — the launch gate (every launch-checklist P0
 TRUE) and the Alive-App Phase 2 gate are both still open. Track SP.1 is **design writing only**; an
 agent writing `Rga.Contribution` code during Stage 1 is violating doctrine, full stop.
@@ -110,9 +141,9 @@ agent writing `Rga.Contribution` code during Stage 1 is violating doctrine, full
    Everything else — `RWANGA_GO_LIVE_2026-07-02.md`, `RWANGA_IDE_LAUNCH_CHECKLIST.md`,
    `PROTOCOL.md`, `CHECKPOINTS.md`, the `Filmustageation/` docs — is REFERENCE, opened per-task,
    never whole at START.
-3. **ANNOUNCE position to Darya** in plain words: active phase · active slice ID · the exact next
-   unchecked box and what you will do this session · any `🟡`/blocked row waiting on him. Then work
-   the board.
+3. **ANNOUNCE to Darya per Rule 9 (2–3 plain lines):** what part of the product this session works
+   on and what will exist by close, plus anything waiting on him — no slice IDs, no box quotes.
+   Then work the board.
 4. **Work the slice, in order, one slice at a time.** Tick each `- [ ]` box **in the masterplan file
    itself** as you complete it — the checkboxes ARE the cross-session state. Never skip, reorder, or
    open slice N+1 while slice N's close ritual is unfinished. If you find a slice half-done without
@@ -164,8 +195,10 @@ any red is a regression, not baseline noise. Commit style: `test(editor):` · `f
       checkpoint — with the slice's commit message, **explicit paths only, never `git add -A`**.
    6. **Push:** `git -C E:\api\rwanga push`. A slice-close commit that isn't pushed doesn't survive
       this machine.
-4. **Report to Darya in plain words** — what shipped, what flipped (with evidence), what's blocked on
-   him and why, and the exact next step. Failures said plainly, nothing buried.
+4. **Report to Darya per Rule 9 (THE HUMAN REPORT LAW): 3–4 lines, plain human language, zero
+   codes.** What the editor can now do, what was found (in product terms), failures said plainly,
+   and at most ONE yes/no-or-A/B question with a recommendation. Every ID, tally and piece of
+   evidence lives in the files just committed — never in the chat.
 
 ## STATUS
 
