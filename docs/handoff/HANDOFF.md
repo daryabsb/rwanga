@@ -7,8 +7,8 @@
 - **Last updated:** 2026-07-28 · by: S3.2F closed (GAP-3-3 fixed; first e2e baseline recorded)
 - **Binding doctrine:** every agent MUST follow the 10-rule MASTERPLAN EXECUTION DOCTRINE in the
   root `CLAUDE.md` (one slice at a time · tick-as-you-go · §0.3 close ritual · push every slice commit).
-- **HEAD:** `9e6c82cb` (tooling: `/rwanga` case command) · **last slice-close:** `f17b4730` (S3.1 WIP,
-  12/13) · **Branch:** `main` · pushed. *(Update both SHAs at every §0.3 close.)*
+- **HEAD:** `0e257f0d` (S3.2F — e2e quit-path fix + first e2e baseline) · **last slice-close:**
+  `0e257f0d` · **Branch:** `main` · pushed. *(Update both SHAs at every §0.3 close.)*
 - **Phase:** Stage 1 — Foundation (closing launch P0s). AI/Agent phase is **gated** (see Gates).
 
 ---
