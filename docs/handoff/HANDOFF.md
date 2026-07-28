@@ -48,7 +48,7 @@ Background & rationale: **`../RWANGA_GO_LIVE_2026-07-02.md`** (Part A + Part D).
 ## Where we are (2-minute brief)
 
 The editor is **~1–2 focused weeks of verification + packaging** away from being a launchable
-RTL screenplay editor. **None** of the 23 open launch P0s is a feature to build — they are test
+RTL screenplay editor. **None** of the 22 open launch P0s is a feature to build — they are test
 hygiene, an installer build, and QA sweeps. The launch checklist was **forensically verified honest
 on 2026-07-02** (test numbers reproduce exactly; the "30 vs 36 reds" spin proven true).
 
