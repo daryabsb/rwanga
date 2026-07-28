@@ -15,13 +15,19 @@
 
 ## ⭐ NEXT ACTION
 
-**Start S3.3 — PF-13 clean-console audit across core flows.** The harness is now trustworthy: the
-console audit walks the same flows the e2e suite does, and those flows no longer hang.
-S3.1 + S3.2 + S3.2F are CLOSED. **GAP-3-3 is CLOSED** — the e2e quit path is fixed and the campaign
+**Start S4.1 — Phase 4 RTL QA prep (fixture + convention checklist).** Phase 4 is the highest-value
+QA phase; judge every verdict against
+`rwanga-editor/docs/Filmustageation/redesign_campaign/RTL_SCREENPLAY_CONVENTION.md`.
+⚠ Two of GAP-3-4's reds are RTL scene-navigator failures — fold them into the Phase-4 sweep rather
+than opening a separate slice.
+
+**Phase 3 is COMPLETE** (S3.1 → S3.2 → S3.2F → S3.3 all closed):
+launch matrix **13/13** · lifecycle specs **3/3** (PF-02/03/05 **TRUE**) · console audit **0 errors /
+0 page errors** (PF-13 **TRUE**) · **GAP-3-3 CLOSED** — the e2e quit path is fixed and the campaign
 has its **first recorded e2e baseline: 363 tests · 357 pass · 6 fail · 11.7 min** (was 326 pass /
-37 fail / 1.2 h), zero teardown hangs, zero orphaned Electron processes
-(`docs/plans/evidence/S3.2F-quit-path.md`). The 5 stable reds left are triaged as **GAP-3-4**.
-Launch matrix **13/13** (PF-01 Windows-verified); lifecycle specs **3/3** (PF-02/03/05 → **TRUE**).
+37 fail / 1.2 h), zero teardown hangs, zero orphaned Electron processes.
+Two new open cases came out of it: **GAP-3-4** (the 5 stable reds the baseline made visible) and
+**GAP-3-5** (Ctrl+Shift+S claimed by both Save As and Scene Navigator — needs a user ruling).
 Phases 1 & 2 COMPLETE (QG-01 TRUE, LR-01 TRUE — installer smoke 5/5).
 ⚠ A running Electron instance auto-migrates **any** fixture it opens — seen on
 `playground-the-last-light.rga` (2026-07-26, twice) and `mysterious-guest-rtl.rga` (2026-07-27).
@@ -55,8 +61,8 @@ contribution/write API. That write API is the true technical prerequisite for th
 ## 🚦 Gates (why the AI/Agent harness cannot start yet)
 
 1. **Launch gate** — no invention features until every launch-checklist **P0** is TRUE.
-   Status: **37 TRUE · 17 PARTIAL · 5 UNKNOWN · 1 FALSE** (23 open; QG-01 + LR-01 TRUE 2026-07-26;
-   PF-02/03/05 TRUE 2026-07-27). See `../RWANGA_IDE_LAUNCH_CHECKLIST.md`.
+   Status: **38 TRUE · 17 PARTIAL · 4 UNKNOWN · 1 FALSE** (22 open; QG-01 + LR-01 TRUE 2026-07-26;
+   PF-02/03/05 TRUE 2026-07-27; PF-13 TRUE 2026-07-28). See `../RWANGA_IDE_LAUNCH_CHECKLIST.md`.
 2. **Alive-App Phase 2 gate** — "No AI feature implementation may start before this phase is visually
    verified." Status: **every box unchecked.** See `../RWANGA_IDE_ALIVE_APP_CHECKLIST.md`.
 3. **Technical prerequisite** — `.rga` agent-write API does not exist (Vision Gap #2).
@@ -72,7 +78,7 @@ contribution/write API. That write API is the true technical prerequisite for th
 | GAP-2-1 | Flow view: New doc opens with a dead band above the page that only shrinks as you type (user-reported, long-standing, finally ticketed 2026-07-26) | OPEN — needs fix-slice | Masterplan §0.5 |
 | GAP-2-2 | Packaged app shares userData with dev app → restored dev session, auto-opened the playground fixture on first launch | OPEN — decide appId split before launch | Masterplan §0.5 |
 | GAP-3-4 | The **5 stable e2e reds** left standing by the first recorded baseline, now that no teardown noise hides them: scene-navigator marks report zero directional indent (RTL *and* LTR control); Settings tab doesn't hide the toolbar; Settings nav rail `overflow:hidden` (same family as GAP-3-2 — fix together); Settings General rows drifted from the registry. Plus 2 load-flakes recorded, not adjusted | OPEN — needs triage slice (stale-test vs real defect) | Masterplan §0.5 |
-| PF-13 | Clean-console audit across core flows — the last open lifecycle row (PF-02/03/05 now TRUE) | OPEN — QA (S3.3) | GO_LIVE Part A.1 #3 |
+| GAP-3-5 | **`Ctrl+Shift+S` is shipped as the default for BOTH "Save As" and "Scene Navigator"** — the registry is last-wins, so Scene Navigator takes the key and Save As has no working shortcut, while Settings still displays it. Two lesser collisions: Ctrl+Shift+E, Ctrl+Shift+F. Plus Electron's insecure-CSP warning to settle before launch | OPEN — needs a user ruling (which feature keeps which key) + a duplicate-defaults guard test | Masterplan §0.5 / `docs/plans/evidence/S3.3-console-audit.md` |
 | PF-01 (macOS) | macOS launch matrix + `pack:mac` + smoke — the only half of PF-01 still open (Decision #1: Mac arrives later) | DEFERRED — needs hardware | Masterplan §0.5 / PF-01 row |
 | RTL-04…13, SW-23 | RTL visual + bidi QA vs ratified Kurdish/RTL profile (**highest product value**) | OPEN — QA | GO_LIVE Part A.1 #4 |
 | MT-02/04/05/06/07/10, PP-01/03, SW-01 | Page-geometry QA (sizes/margins/overflow) | OPEN — QA | GO_LIVE Part A.1 #5 |
@@ -90,6 +96,7 @@ contribution/write API. That write API is the true technical prerequisite for th
 | QG-01 (30 test reds) | **TRUE — suite fully green** (1936 · 0 fail · 1 skip; zero quarantines; 1 real defect GAP-1-1 found & fixed) | `docs/plans/evidence/S1.1-qg01-triage.md` + `S1.5-green-run.txt`; commits `09382fd6`→`90485776` |
 | LR-01 (installer) | **TRUE — built under Dev Mode + installed-app smoke 5/5 PASS** (unsigned accepted; signing deferred) | `docs/plans/evidence/S2.1-pack-win.txt` + `S2.2-installer-smoke.md` |
 | PF-01 Windows launch matrix (S3.1) | **13/13 PASS · 0 failures** — 10/10 cold starts 1.1–1.6 s, post-reboot PASS, single-instance focus-existing, no `.rga` assoc (observed) | `docs/plans/evidence/S3.1-launch-matrix.md` |
+| PF-13 clean console (S3.3) | **TRUE — 0 error-level console messages · 0 uncaught page errors** across 8 core flows (launch → new → all block types → save → reopen → Print Preview → Page Setup → undo/redo ×5). Typing, saving, reopening, page-setup and undo/redo are completely silent. Re-runnable audit spec, not a one-off observation | `docs/plans/evidence/S3.3-console-audit.md` + `S3.3-console-capture.json` |
 | GAP-3-3 (e2e quit-path hangs) | **CLOSED — suite 1.2 h → 11.7 min, 37 reds → 6.** Two causes, both test hygiene, no product code touched: (a) the quit guard correctly waits for a human at the unsaved-changes modal, so `app.close()` never resolved — one shared `closeApp()` teardown across 60 specs / 124 sites; (b) force-kill specs killed only the main process, leaving Windows children holding Playwright's pipe — now kills the process tree. First e2e baseline recorded | `docs/plans/evidence/S3.2F-quit-path.md` + `S3.2F-e2e-baseline.txt` |
 | PF-02/03/05 lifecycle round-trips (S3.2) | **TRUE — 3/3 specs green.** New→save→reopen proven across a second app instance; open-from-disk proven not to write the file back; Save As proven to re-point handle/name/origin/Recent | `docs/plans/evidence/S3.2-lifecycle-e2e.md` + `rwanga-editor/tests/e2e/lifecycle/*.spec.js` |
 | Is the launch checklist honest/current? | **Yes — verified** | 3 latest commits are checklist-only; QG-01 = 1936/1899/36 reproduces; clean-fixture rerun = 40/40 → 30 reds all non-core |

@@ -1,0 +1,315 @@
+{
+  "capturedAt": "2026-07-28T10:09:42.574Z",
+  "totals": {
+    "all": 13,
+    "errors": 0,
+    "warnings": 12,
+    "pageErrors": 0
+  },
+  "errors": [],
+  "warnings": [
+    {
+      "flow": "launch",
+      "type": "warning",
+      "text": "[Rga.KeyboardRegistry] duplicate registration for cmd+shift+f — previous source: Rga.Shell (panel toggle: search), new source: Rga.Keyboard.register (legacy shim). The new registration replaces the previous one (last-wins).",
+      "location": {
+        "url": "file:///E:/api/rwanga/rwanga-editor/renderer/js/shell/keyboard-registry.js",
+        "line": 101,
+        "column": 14,
+        "lineNumber": 101,
+        "columnNumber": 14
+      }
+    },
+    {
+      "flow": "launch",
+      "type": "warning",
+      "text": "[Rga.KeyboardRegistry] duplicate registration for cmd+shift+t — previous source: Rga.Keyboard.register (legacy shim), new source: A4.1 menu (Tools → Toggle Theme). The new registration replaces the previous one (last-wins).",
+      "location": {
+        "url": "file:///E:/api/rwanga/rwanga-editor/renderer/js/shell/keyboard-registry.js",
+        "line": 101,
+        "column": 14,
+        "lineNumber": 101,
+        "columnNumber": 14
+      }
+    },
+    {
+      "flow": "launch",
+      "type": "warning",
+      "text": "[Rga.KeyboardRegistry] duplicate registration for escape — previous source: Rga.ViewMode (Esc exits Draft), new source: A4 menubar (Esc closes dropdown). The new registration replaces the previous one (last-wins).",
+      "location": {
+        "url": "file:///E:/api/rwanga/rwanga-editor/renderer/js/shell/keyboard-registry.js",
+        "line": 101,
+        "column": 14,
+        "lineNumber": 101,
+        "columnNumber": 14
+      }
+    },
+    {
+      "flow": "launch",
+      "type": "warning",
+      "text": "[Rga.KeyboardRegistry] duplicate registration for cmd+shift+p — previous source: A4.1 menu (Tools → Command Palette), new source: kb-applicator:kb.commandPalette. The new registration replaces the previous one (last-wins).",
+      "location": {
+        "url": "file:///E:/api/rwanga/rwanga-editor/renderer/js/shell/keyboard-registry.js",
+        "line": 101,
+        "column": 14,
+        "lineNumber": 101,
+        "columnNumber": 14
+      }
+    },
+    {
+      "flow": "launch",
+      "type": "warning",
+      "text": "[Rga.KeyboardRegistry] duplicate registration for cmd+s — previous source: A4.1 menu (File → Save), new source: kb-applicator:kb.save. The new registration replaces the previous one (last-wins).",
+      "location": {
+        "url": "file:///E:/api/rwanga/rwanga-editor/renderer/js/shell/keyboard-registry.js",
+        "line": 101,
+        "column": 14,
+        "lineNumber": 101,
+        "columnNumber": 14
+      }
+    },
+    {
+      "flow": "launch",
+      "type": "warning",
+      "text": "[Rga.KeyboardRegistry] duplicate registration for cmd+shift+s — previous source: A4.1 menu (File → Save As), new source: kb-applicator:kb.saveAs. The new registration replaces the previous one (last-wins).",
+      "location": {
+        "url": "file:///E:/api/rwanga/rwanga-editor/renderer/js/shell/keyboard-registry.js",
+        "line": 101,
+        "column": 14,
+        "lineNumber": 101,
+        "columnNumber": 14
+      }
+    },
+    {
+      "flow": "launch",
+      "type": "warning",
+      "text": "[Rga.KeyboardRegistry] duplicate registration for cmd+b — previous source: Rga.Shell (sidebar visibility toggle), new source: kb-applicator:kb.toggleSidebar. The new registration replaces the previous one (last-wins).",
+      "location": {
+        "url": "file:///E:/api/rwanga/rwanga-editor/renderer/js/shell/keyboard-registry.js",
+        "line": 101,
+        "column": 14,
+        "lineNumber": 101,
+        "columnNumber": 14
+      }
+    },
+    {
+      "flow": "launch",
+      "type": "warning",
+      "text": "[Rga.KeyboardRegistry] duplicate registration for cmd+shift+t — previous source: A4.1 menu (Tools → Toggle Theme), new source: kb-applicator:kb.toggleTheme. The new registration replaces the previous one (last-wins).",
+      "location": {
+        "url": "file:///E:/api/rwanga/rwanga-editor/renderer/js/shell/keyboard-registry.js",
+        "line": 101,
+        "column": 14,
+        "lineNumber": 101,
+        "columnNumber": 14
+      }
+    },
+    {
+      "flow": "launch",
+      "type": "warning",
+      "text": "[Rga.KeyboardRegistry] duplicate registration for cmd+shift+e — previous source: Rga.Shell (panel toggle: scriptWorkspace), new source: kb-applicator:kb.exportPdf. The new registration replaces the previous one (last-wins).",
+      "location": {
+        "url": "file:///E:/api/rwanga/rwanga-editor/renderer/js/shell/keyboard-registry.js",
+        "line": 101,
+        "column": 14,
+        "lineNumber": 101,
+        "columnNumber": 14
+      }
+    },
+    {
+      "flow": "launch",
+      "type": "warning",
+      "text": "[Rga.KeyboardRegistry] duplicate registration for cmd+shift+s — previous source: kb-applicator:kb.saveAs, new source: kb-applicator:kb.sceneNavigator. The new registration replaces the previous one (last-wins).",
+      "location": {
+        "url": "file:///E:/api/rwanga/rwanga-editor/renderer/js/shell/keyboard-registry.js",
+        "line": 101,
+        "column": 14,
+        "lineNumber": 101,
+        "columnNumber": 14
+      }
+    },
+    {
+      "flow": "launch",
+      "type": "warning",
+      "text": "%cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security\n  Policy set or a policy with \"unsafe-eval\" enabled. This exposes users of\n  this app to unnecessary security risks.\n\nFor more information and help, consult\nhttps://electronjs.org/docs/tutorial/security.\nThis warning will not show up\nonce the app is packaged.",
+      "location": {
+        "url": "node:electron/js2c/renderer_init",
+        "line": 1,
+        "column": 13387,
+        "lineNumber": 1,
+        "columnNumber": 13387
+      }
+    },
+    {
+      "flow": "print-preview",
+      "type": "warning",
+      "text": "[Rga.KeyboardRegistry] duplicate registration for escape — previous source: A4 menubar (Esc closes dropdown), new source: Rga.PrintPreview (Esc exits preview). The new registration replaces the previous one (last-wins).",
+      "location": {
+        "url": "file:///E:/api/rwanga/rwanga-editor/renderer/js/shell/keyboard-registry.js",
+        "line": 101,
+        "column": 14,
+        "lineNumber": 101,
+        "columnNumber": 14
+      }
+    }
+  ],
+  "pageErrors": [],
+  "all": [
+    {
+      "flow": "launch",
+      "type": "warning",
+      "text": "[Rga.KeyboardRegistry] duplicate registration for cmd+shift+f — previous source: Rga.Shell (panel toggle: search), new source: Rga.Keyboard.register (legacy shim). The new registration replaces the previous one (last-wins).",
+      "location": {
+        "url": "file:///E:/api/rwanga/rwanga-editor/renderer/js/shell/keyboard-registry.js",
+        "line": 101,
+        "column": 14,
+        "lineNumber": 101,
+        "columnNumber": 14
+      }
+    },
+    {
+      "flow": "launch",
+      "type": "warning",
+      "text": "[Rga.KeyboardRegistry] duplicate registration for cmd+shift+t — previous source: Rga.Keyboard.register (legacy shim), new source: A4.1 menu (Tools → Toggle Theme). The new registration replaces the previous one (last-wins).",
+      "location": {
+        "url": "file:///E:/api/rwanga/rwanga-editor/renderer/js/shell/keyboard-registry.js",
+        "line": 101,
+        "column": 14,
+        "lineNumber": 101,
+        "columnNumber": 14
+      }
+    },
+    {
+      "flow": "launch",
+      "type": "warning",
+      "text": "[Rga.KeyboardRegistry] duplicate registration for escape — previous source: Rga.ViewMode (Esc exits Draft), new source: A4 menubar (Esc closes dropdown). The new registration replaces the previous one (last-wins).",
+      "location": {
+        "url": "file:///E:/api/rwanga/rwanga-editor/renderer/js/shell/keyboard-registry.js",
+        "line": 101,
+        "column": 14,
+        "lineNumber": 101,
+        "columnNumber": 14
+      }
+    },
+    {
+      "flow": "launch",
+      "type": "log",
+      "text": "[Rwanga] Script Editor initialized — Phase 0 (no editor mounted).",
+      "location": {
+        "url": "file:///E:/api/rwanga/rwanga-editor/renderer/index.html",
+        "line": 1591,
+        "column": 12,
+        "lineNumber": 1591,
+        "columnNumber": 12
+      }
+    },
+    {
+      "flow": "launch",
+      "type": "warning",
+      "text": "[Rga.KeyboardRegistry] duplicate registration for cmd+shift+p — previous source: A4.1 menu (Tools → Command Palette), new source: kb-applicator:kb.commandPalette. The new registration replaces the previous one (last-wins).",
+      "location": {
+        "url": "file:///E:/api/rwanga/rwanga-editor/renderer/js/shell/keyboard-registry.js",
+        "line": 101,
+        "column": 14,
+        "lineNumber": 101,
+        "columnNumber": 14
+      }
+    },
+    {
+      "flow": "launch",
+      "type": "warning",
+      "text": "[Rga.KeyboardRegistry] duplicate registration for cmd+s — previous source: A4.1 menu (File → Save), new source: kb-applicator:kb.save. The new registration replaces the previous one (last-wins).",
+      "location": {
+        "url": "file:///E:/api/rwanga/rwanga-editor/renderer/js/shell/keyboard-registry.js",
+        "line": 101,
+        "column": 14,
+        "lineNumber": 101,
+        "columnNumber": 14
+      }
+    },
+    {
+      "flow": "launch",
+      "type": "warning",
+      "text": "[Rga.KeyboardRegistry] duplicate registration for cmd+shift+s — previous source: A4.1 menu (File → Save As), new source: kb-applicator:kb.saveAs. The new registration replaces the previous one (last-wins).",
+      "location": {
+        "url": "file:///E:/api/rwanga/rwanga-editor/renderer/js/shell/keyboard-registry.js",
+        "line": 101,
+        "column": 14,
+        "lineNumber": 101,
+        "columnNumber": 14
+      }
+    },
+    {
+      "flow": "launch",
+      "type": "warning",
+      "text": "[Rga.KeyboardRegistry] duplicate registration for cmd+b — previous source: Rga.Shell (sidebar visibility toggle), new source: kb-applicator:kb.toggleSidebar. The new registration replaces the previous one (last-wins).",
+      "location": {
+        "url": "file:///E:/api/rwanga/rwanga-editor/renderer/js/shell/keyboard-registry.js",
+        "line": 101,
+        "column": 14,
+        "lineNumber": 101,
+        "columnNumber": 14
+      }
+    },
+    {
+      "flow": "launch",
+      "type": "warning",
+      "text": "[Rga.KeyboardRegistry] duplicate registration for cmd+shift+t — previous source: A4.1 menu (Tools → Toggle Theme), new source: kb-applicator:kb.toggleTheme. The new registration replaces the previous one (last-wins).",
+      "location": {
+        "url": "file:///E:/api/rwanga/rwanga-editor/renderer/js/shell/keyboard-registry.js",
+        "line": 101,
+        "column": 14,
+        "lineNumber": 101,
+        "columnNumber": 14
+      }
+    },
+    {
+      "flow": "launch",
+      "type": "warning",
+      "text": "[Rga.KeyboardRegistry] duplicate registration for cmd+shift+e — previous source: Rga.Shell (panel toggle: scriptWorkspace), new source: kb-applicator:kb.exportPdf. The new registration replaces the previous one (last-wins).",
+      "location": {
+        "url": "file:///E:/api/rwanga/rwanga-editor/renderer/js/shell/keyboard-registry.js",
+        "line": 101,
+        "column": 14,
+        "lineNumber": 101,
+        "columnNumber": 14
+      }
+    },
+    {
+      "flow": "launch",
+      "type": "warning",
+      "text": "[Rga.KeyboardRegistry] duplicate registration for cmd+shift+s — previous source: kb-applicator:kb.saveAs, new source: kb-applicator:kb.sceneNavigator. The new registration replaces the previous one (last-wins).",
+      "location": {
+        "url": "file:///E:/api/rwanga/rwanga-editor/renderer/js/shell/keyboard-registry.js",
+        "line": 101,
+        "column": 14,
+        "lineNumber": 101,
+        "columnNumber": 14
+      }
+    },
+    {
+      "flow": "launch",
+      "type": "warning",
+      "text": "%cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security\n  Policy set or a policy with \"unsafe-eval\" enabled. This exposes users of\n  this app to unnecessary security risks.\n\nFor more information and help, consult\nhttps://electronjs.org/docs/tutorial/security.\nThis warning will not show up\nonce the app is packaged.",
+      "location": {
+        "url": "node:electron/js2c/renderer_init",
+        "line": 1,
+        "column": 13387,
+        "lineNumber": 1,
+        "columnNumber": 13387
+      }
+    },
+    {
+      "flow": "print-preview",
+      "type": "warning",
+      "text": "[Rga.KeyboardRegistry] duplicate registration for escape — previous source: A4 menubar (Esc closes dropdown), new source: Rga.PrintPreview (Esc exits preview). The new registration replaces the previous one (last-wins).",
+      "location": {
+        "url": "file:///E:/api/rwanga/rwanga-editor/renderer/js/shell/keyboard-registry.js",
+        "line": 101,
+        "column": 14,
+        "lineNumber": 101,
+        "columnNumber": 14
+      }
+    }
+  ]
+}

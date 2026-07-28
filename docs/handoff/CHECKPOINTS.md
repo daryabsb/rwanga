@@ -5,6 +5,39 @@ Template & rules: `PROTOCOL.md`.
 
 ---
 
+## 2026-07-28 · S3.3 CLOSED — PF-13 TRUE (console audit 0 errors) · PHASE 3 COMPLETE · GAP-3-5 opened
+- **Did:** Built a re-runnable console audit
+  (`rwanga-editor/tests/diagnostics/s3.3-console-audit/console-audit.spec.js` + its own config,
+  deliberately outside the e2e suite) that subscribes `console` + `pageerror` for a whole session
+  and walks 8 core flows: launch → new script → every screenplay block type typed through the real
+  key flow (slug/action/character/dialogue/shot) → Save As (real path, dialog stubbed in main) →
+  reopen from disk → Print Preview open/hide → Page Setup (A4, landscape, portrait, Letter) →
+  undo/redo ×5 → close. Every message is captured tagged with the flow that produced it.
+  Deviation from the plan text: the spec lives under `tests/diagnostics/` rather than
+  `docs/plans/evidence/`, because a spec outside `rwanga-editor/` cannot resolve `@playwright/test`.
+- **Evidence:** `docs/plans/evidence/S3.3-console-audit.md` + raw `S3.3-console-capture.json`.
+  **0 error-level console messages · 0 uncaught page errors · 12 warnings · 13 messages total.**
+  Messages by flow: launch 12, Print Preview 1 — typing, saving, reopening, page-setup and
+  undo/redo were completely silent.
+- **Status deltas:** S3.3 ⬜ → ✅. **PF-13 UNKNOWN → TRUE** (checklist row edited in the same
+  commit). Gate counts 37/17/5/1 → **38 TRUE · 17 PARTIAL · 4 UNKNOWN · 1 FALSE** (22 open).
+  **Phase 3 is COMPLETE** — S3.1, S3.2, S3.2F, S3.3 all closed. Next phase is 4 (RTL ⭐).
+- **Gaps/risks surfaced:** **GAP-3-5** — the warnings were read, not swept, and one is a shipped
+  defect: `settings-registry.js:549` gives `kb.saveAs` the default `Ctrl+Shift+S` and `:585` gives
+  `kb.sceneNavigator` the **same** default. The keyboard registry is last-wins, Scene Navigator
+  registers second, so **Ctrl+Shift+S opens the Scene Navigator and Save As has no working
+  shortcut** — while Settings still displays `Ctrl+Shift+S` next to "Save As" (a Settings-honesty
+  violation too). Two lesser collisions: `Ctrl+Shift+E` (scriptWorkspace toggle vs Export PDF) and
+  `Ctrl+Shift+F` (search toggle vs a legacy shim). Needs a **user ruling** on which feature keeps
+  which key, plus a guard test that fails on any duplicate default in the registry. Also noted:
+  Electron's insecure-CSP development warning (no CSP / `unsafe-eval`) — a hardening item for
+  before launch, not a console-cleanliness failure. Not fixed here (S3.3's scope froze when it
+  opened, §0.2).
+- **Next action:** S4.1 — Phase 4 RTL QA prep. Fold GAP-3-4's two RTL scene-navigator reds into
+  that sweep instead of opening a separate slice.
+
+---
+
 ## 2026-07-28 · S3.2F CLOSED — GAP-3-3 fixed (e2e quit path) · FIRST e2e baseline recorded
 - **Did:** Root-caused and fixed the hanging app-close, on the user's instruction to do it before
   S3.3. Two distinct causes, **both test hygiene — no product code was touched**:
