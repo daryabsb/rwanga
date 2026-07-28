@@ -82,7 +82,7 @@ electron-builder (`npm run pack:win`), PowerShell/Windows 11.
 | S3.2 | 3 Lifecycle | PF-02/03/05 lifecycle E2E specs (new/open/save-as) | ✅ | `docs/plans/evidence/S3.2-lifecycle-e2e.md` — three specs under `rwanga-editor/tests/e2e/lifecycle/`, **3/3 PASS** (and green inside the full suite). Seam: main-process dialog stubs (real IPC path), not the `doc.handle` shortcut. PF-02/03/05 PARTIAL→TRUE. Full-suite run 326 pass/37 fail → all sampled failures proven PRE-EXISTING (**GAP-3-3**) |
 | S3.2F | 3 Lifecycle | GAP-3-3 fix — e2e quit path + FIRST recorded e2e baseline | ✅ | `docs/plans/evidence/S3.2F-quit-path.md` + `S3.2F-e2e-baseline.txt`. **E2E BASELINE: 363 tests · 357 pass · 6 fail · 11.7 min · 0 teardown hangs · 0 orphaned processes** (was 326 pass · 37 fail · 1.2 h). Two causes, both test hygiene, zero product code touched: shared `closeApp()` teardown swept over 60 specs / 124 call sites, and process-TREE kill for the force-kill specs. 5 stable reds + 1 load-flake remain → **GAP-3-4** |
 | S3.3 | 3 Lifecycle | PF-13 clean-console audit across core flows | ✅ | `docs/plans/evidence/S3.3-console-audit.md` + raw `S3.3-console-capture.json`. **0 errors · 0 page errors · 12 warnings** across 8 core flows; typing/save/reopen/page-setup/undo-redo completely silent. **PF-13 UNKNOWN→TRUE.** Re-runnable spec at `rwanga-editor/tests/diagnostics/s3.3-console-audit/` (outside the e2e suite by design). The warnings surfaced **GAP-3-5** (Ctrl+Shift+S claimed by both Save As and Scene Navigator) |
-| S4.1 | 4 RTL ⭐ | RTL QA fixture + convention checklist prep | ⬜ | |
+| S4.1 | 4 RTL ⭐ | RTL QA fixture + convention checklist prep | ✅ | `docs/plans/evidence/S4.1-rtl-qa-protocol.md` — per-ID measurable criteria for RTL-04…13 + SW-23 (convention rule quoted · fixture blocks · inch offsets to ±1mm · FAIL signature). Records the **two-surfaces ruling** (Flow = direction only, Print/PDF = the full magnitudes) that stops Phase 4 manufacturing false reds against the Flow doctrine; surveys the fixture (114 mixed-script blocks already present; `shot` + bidi battery must be typed); folds GAP-3-4's two RTL reds into S4.2 |
 | S4.2 | 4 RTL ⭐ | Editor alignment sweep RTL-04…RTL-09 | ⬜ | |
 | S4.3 | 4 RTL ⭐ | RTL Print Preview + PDF export (RTL-10, RTL-11) | ⬜ | |
 | S4.4 | 4 RTL ⭐ | Bidi audit — mixed script + punctuation (RTL-12, RTL-13) | ⬜ | |
@@ -650,14 +650,26 @@ Kurdish/RTL profile). Supporting audits already exist — read before starting:
 **Files:**
 - Create: `docs/plans/evidence/S4.1-rtl-qa-protocol.md`
 
-- [ ] **Step 1: Build the QA protocol document.** From RTL_SCREENPLAY_CONVENTION.md, extract into
+- [x] **Step 1: Build the QA protocol document.** From RTL_SCREENPLAY_CONVENTION.md, extract into
       `S4.1-rtl-qa-protocol.md` one table row per checklist ID (RTL-04…RTL-13, SW-23) with: the exact
       convention rule (quoted), the fixture/scene that exercises it, and the pass criterion (measurable —
       e.g. "dialogue block right edge at X from page right edge ±1mm", not "looks right").
       Primary fixture: `tests/fixtures/mysterious-guest-rtl.rga` (open a COPY under `%TEMP%` — never the
       tracked fixture, see §0.2). Where the fixture lacks a case (mixed-script line, bidi punctuation,
       all 6 block types in RTL), script the additions to type during QA and list them in the protocol.
-- [ ] **Step 2: SLICE CLOSE RITUAL (§0.3)**
+      DONE — `docs/plans/evidence/S4.1-rtl-qa-protocol.md`: one section per ID (RTL-04…13, SW-23)
+      with the convention rule quoted, the fixture blocks that exercise it, a measurable PASS
+      criterion (inch offsets to ±1mm, with the px-per-inch recipe), and the FAIL signature to watch.
+      **Key protocol ruling recorded up front (§0): Flow and Print are two surfaces with two
+      truths.** The convention's 2.0/1.5/1.0in magnitudes are PAGE truth and bind Print Preview +
+      PDF; Flow is a continuous drafting surface by locked doctrine and deliberately CENTRES
+      character/dialogue/parenthetical (`editor-prosemirror.css:1145-1162`). Judging Flow against
+      print indents would manufacture false reds and invite a "fix" that breaks the Flow doctrine —
+      so every Phase-4 spec must declare which surface it measures. Fixture survey: 47 scenes /
+      634 action / 434 character / 436 dialogue / 84 parenthetical / 44 transition, **114 blocks
+      already mix Latin + Arabic script** (RTL-12 needs no authoring); MISSING and therefore scripted
+      during QA — `shot` blocks (zero present) and an adversarial bidi-punctuation battery (RTL-13).
+- [x] **Step 2: SLICE CLOSE RITUAL (§0.3)**
 
 Commit message: `qa(editor): RTL QA protocol — per-ID criteria extracted from ratified profile (S4.1)`
 

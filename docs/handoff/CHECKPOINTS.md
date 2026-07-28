@@ -5,6 +5,35 @@ Template & rules: `PROTOCOL.md`.
 
 ---
 
+## 2026-07-28 · S4.1 CLOSED — RTL QA protocol written (Phase 4 open)
+- **Did:** Turned RTL-04…RTL-13 + SW-23 from "visual QA vs the profile" into measurable criteria:
+  `docs/plans/evidence/S4.1-rtl-qa-protocol.md`. One section per ID with the convention rule quoted
+  verbatim, the fixture blocks that exercise it, a numeric PASS criterion (inch offsets to ±1 mm,
+  with the px-per-inch recipe), and the FAIL signature to watch for. Read the ratified convention,
+  the print-block CSS, the layout profile, and surveyed the fixture directly.
+- **Evidence:** the protocol document. Reference magnitudes reconciled from source, not memory:
+  character 2.0in / parenthetical 1.5in (box 3.5in → 2.0in text) / dialogue 1.0in (box 3.5in →
+  2.5in text) / transition flush reading-end / heading + action + shot flush start at 6.0in
+  (`editor-prosemirror.css:2484-2518`, `layout-profile.js:68-78`).
+- **Status deltas:** S4.1 ⬜ → ✅. No checklist row flipped (protocol slice). Gate counts unchanged
+  (38 TRUE · 17 PARTIAL · 4 UNKNOWN · 1 FALSE).
+- **Gaps/risks surfaced:** none new — but one **ruling recorded that prevents a whole class of false
+  verdicts**: Flow and Print are two surfaces with two truths. The convention's 2.0/1.5/1.0in
+  magnitudes are PAGE truth binding Print Preview + PDF; Flow is a continuous drafting surface by
+  locked doctrine and deliberately CENTRES character/dialogue/parenthetical
+  (`editor-prosemirror.css:1145-1162`). Judging Flow against print indents would have produced false
+  reds in S4.2 and invited a "fix" that breaks the Flow doctrine — so every Phase-4 spec must declare
+  which surface it measures. Also surveyed: the fixture already carries **114 mixed Latin+Arabic
+  blocks** (RTL-12 needs no authoring), but has **zero `shot` blocks** and no adversarial bidi
+  punctuation — both scripted into the protocol as typed additions. RTL-09 carries a known
+  slug-in-action-block bug that must be characterised (mis-typed in the fixture vs mis-mapped by the
+  parser — different defects, different owners) before its alignment is judged. RTL-11's "Blocked:
+  PDF export non-functional" note is stale and must be corrected when flipped.
+- **Next action:** S4.2 — RTL editor alignment sweep (RTL-04…RTL-09), folding GAP-3-4's two RTL
+  scene-navigator reds into it.
+
+---
+
 ## 2026-07-28 · S3.3 CLOSED — PF-13 TRUE (console audit 0 errors) · PHASE 3 COMPLETE · GAP-3-5 opened
 - **Did:** Built a re-runnable console audit
   (`rwanga-editor/tests/diagnostics/s3.3-console-audit/console-audit.spec.js` + its own config,

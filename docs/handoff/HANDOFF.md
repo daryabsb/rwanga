@@ -4,7 +4,7 @@
 > archive to find the next action — it's here. Update this file at the end of every unit of work
 > (see `PROTOCOL.md`). Keep it short; link detail, don't inline it.
 
-- **Last updated:** 2026-07-28 · by: S3.3 closed (PF-13 TRUE) — Phase 3 COMPLETE
+- **Last updated:** 2026-07-28 · by: S4.1 closed (RTL QA protocol written) — Phase 4 open
 - **Binding doctrine:** every agent MUST follow the 10-rule MASTERPLAN EXECUTION DOCTRINE in the
   root `CLAUDE.md` (one slice at a time · tick-as-you-go · §0.3 close ritual · push every slice commit).
 - **HEAD:** `5a49e094` (S3.3 — PF-13 console audit clean) · **last slice-close:**
@@ -15,19 +15,19 @@
 
 ## ⭐ NEXT ACTION
 
-**Start S4.1 — Phase 4 RTL QA prep (fixture + convention checklist).** Phase 4 is the highest-value
-QA phase; judge every verdict against
-`rwanga-editor/docs/Filmustageation/redesign_campaign/RTL_SCREENPLAY_CONVENTION.md`.
-⚠ Two of GAP-3-4's reds are RTL scene-navigator failures — fold them into the Phase-4 sweep rather
-than opening a separate slice.
+**Start S4.2 — RTL editor alignment sweep (RTL-04…RTL-09).** The measurable criteria are written:
+`../plans/evidence/S4.1-rtl-qa-protocol.md` — read its **§0 first**: Flow and Print are two surfaces
+with two truths (Flow = direction only, Print/PDF = the 2.0/1.5/1.0in magnitudes), and judging Flow
+against print indents would manufacture false reds. Open a `%TEMP%` COPY of the RTL fixture, never
+the tracked one. Fold GAP-3-4's two RTL scene-navigator reds into this slice.
 
 **Phase 3 is COMPLETE** (S3.1 → S3.2 → S3.2F → S3.3 all closed):
 launch matrix **13/13** · lifecycle specs **3/3** (PF-02/03/05 **TRUE**) · console audit **0 errors /
 0 page errors** (PF-13 **TRUE**) · **GAP-3-3 CLOSED** — the e2e quit path is fixed and the campaign
 has its **first recorded e2e baseline: 363 tests · 357 pass · 6 fail · 11.7 min** (was 326 pass /
 37 fail / 1.2 h), zero teardown hangs, zero orphaned Electron processes.
-Two new open cases came out of it: **GAP-3-4** (the 5 stable reds the baseline made visible) and
-**GAP-3-5** (Ctrl+Shift+S claimed by both Save As and Scene Navigator — needs a user ruling).
+Two open cases came out of it: **GAP-3-4** (the 5 stable reds the baseline made visible) and
+**GAP-3-5** (Ctrl+Shift+S claimed by both Save As and Scene Navigator — **needs a user ruling**).
 Phases 1 & 2 COMPLETE (QG-01 TRUE, LR-01 TRUE — installer smoke 5/5).
 ⚠ A running Electron instance auto-migrates **any** fixture it opens — seen on
 `playground-the-last-light.rga` (2026-07-26, twice) and `mysterious-guest-rtl.rga` (2026-07-27).
