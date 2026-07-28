@@ -7,8 +7,8 @@
 - **Last updated:** 2026-07-28 · by: S4.1 closed (RTL QA protocol written) — Phase 4 open
 - **Binding doctrine:** every agent MUST follow the 10-rule MASTERPLAN EXECUTION DOCTRINE in the
   root `CLAUDE.md` (one slice at a time · tick-as-you-go · §0.3 close ritual · push every slice commit).
-- **HEAD:** `5a49e094` (S3.3 — PF-13 console audit clean) · **last slice-close:**
-  `5a49e094` · **Branch:** `main` · pushed. *(Update both SHAs at every §0.3 close.)*
+- **HEAD:** `d93d7f8a` (S4.1 — RTL QA protocol) · **last slice-close:**
+  `d93d7f8a` · **Branch:** `main` · pushed. *(Update both SHAs at every §0.3 close.)*
 - **Phase:** Stage 1 — Foundation (closing launch P0s). AI/Agent phase is **gated** (see Gates).
 
 ---
