@@ -5,6 +5,39 @@ Template & rules: `PROTOCOL.md`.
 
 ---
 
+## 2026-07-28 · S4.3 CLOSED — RTL-10 TRUE · RTL-11 held open by GAP-4-1 (PDF text layer)
+- **Did:** Measured the RTL OUTPUT, not just the blocks: `rwanga-editor/tests/e2e/rtl/rtl-print-export.spec.js`
+  (new, permanent, 2/2 PASS) over a `%TEMP%` copy of the 85-page Kurdish fixture. RTL-10 checks every
+  page rather than a sample; RTL-11 exports a real PDF and reads its text layer with `pdf-parse`.
+- **Evidence:** `docs/plans/evidence/S4.3-rtl-print-pdf.md` + `S4.3-rtl-print-preview.png` +
+  `S4.3-rtl-export.pdf`. RTL-10 across all 85 pages: **0** element boxes escape the page content
+  area, **0** pages have content exceeding the sheet (`scrollWidth 794 === clientWidth 794`),
+  binding margin **1.5in reading-start / 1.0in end identical on page 0 and page 84**, page number on
+  the reading-start side, RTL body leading **exactly 1.30** (the convention's 1.2–1.3 relaxation).
+  RTL-11: export returns true, **592 KB, 85 pages == 85 preview pages**, Arabic script present,
+  **0** U+FFFD.
+- **Status deltas:** S4.3 ✅. **RTL-10 PARTIAL → TRUE.** RTL-11 UNKNOWN → **PARTIAL** (its "Blocked:
+  PDF export non-functional" note was indeed stale and is rewritten). Gate counts 44/11/4/1 →
+  **45 TRUE · 11 PARTIAL · 3 UNKNOWN · 1 FALSE** (15 open of 60), recounted from the checklist file.
+  **The long-standing `overflow:hidden` clipping worry on RTL-10 is CLOSED by measurement** — the
+  sheet does hide overflow, but nothing exceeds it, so it cuts nothing.
+- **Gaps/risks surfaced:** **GAP-4-1 — the exported PDF's Kurdish text layer is ~40% unreadable.**
+  35,749 NUL (U+0000) characters = **40.2% of all script characters** come back from the text layer:
+  the embedded font subset's `ToUnicode` CMap has no mapping for a large share of *shaped* Kurdish
+  forms. The glyphs DRAW correctly — the printed page is right — but the exported script is **not
+  searchable**, **cannot be copied out**, gives screen readers nothing, and reaches downstream
+  production tooling as garbage. LTR exports are unaffected, so it is also an equity gap between the
+  two directions the app claims to serve equally. **RTL-11 therefore stays PARTIAL** rather than
+  flipping "RTL export correct" over it (§0.2). The spec logs `nulShareOfScriptChars` on every run but
+  deliberately does not assert it: `=== 0` would leave the suite knowingly red, and asserting today's
+  40% would make the defect permanent — the assertion belongs to the fix-slice.
+  Also recorded, not failed: 12 blocks of ~2,300 show 2–4px of glyph INK overhang (side bearings) with
+  **zero** box escape — inside the S4.1 protocol's ±1mm tolerance, which is why the protocol set one.
+- **Next action:** S4.4 — bidi audit (RTL-12, RTL-13). GAP-4-1 needs a user decision; it does not
+  block S4.4/S4.5, but it does block RTL-11 and therefore the launch gate.
+
+---
+
 ## 2026-07-28 · S4.2 CLOSED — RTL-04…RTL-09 TRUE (6/6 measured) · RTL page geometry is correct
 - **Did:** Ran the RTL alignment sweep as a **measurement, not an eyeball**:
   `rwanga-editor/tests/e2e/rtl/rtl-alignment.spec.js` (new, permanent, in the e2e suite) drives the

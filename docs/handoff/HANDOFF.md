@@ -4,7 +4,7 @@
 > archive to find the next action — it's here. Update this file at the end of every unit of work
 > (see `PROTOCOL.md`). Keep it short; link detail, don't inline it.
 
-- **Last updated:** 2026-07-28 · by: S4.2 closed — RTL-04…09 TRUE (6/6 measured)
+- **Last updated:** 2026-07-28 · by: S4.3 closed — RTL-10 TRUE, RTL-11 blocked by GAP-4-1
 - **Binding doctrine:** every agent MUST follow the 10-rule MASTERPLAN EXECUTION DOCTRINE in the
   root `CLAUDE.md` (one slice at a time · tick-as-you-go · §0.3 close ritual · push every slice commit).
 - **HEAD:** `4a6c6b6c` (S4.2 — RTL-04…09 TRUE) · **last slice-close:**
@@ -15,15 +15,17 @@
 
 ## ⭐ NEXT ACTION
 
-**Start S4.3 — RTL Print Preview + PDF export (RTL-10, RTL-11).** Most of RTL-10's groundwork is
-already measured in S4.2 (0/200 blocks escape the page content box; margins 1.0in left / 1.5in
-binding right; A4/Portrait/RTL/85pp). RTL-11's row still says "Blocked: PDF export non-functional" —
-that is **stale**, PDF export is TRUE and test-backed; correct the wording when flipping.
-Criteria: `../plans/evidence/S4.1-rtl-qa-protocol.md`. Always open a `%TEMP%` COPY of the fixture.
+**Start S4.4 — RTL bidi audit (RTL-12, RTL-13).** Criteria in
+`../plans/evidence/S4.1-rtl-qa-protocol.md`; the fixture already carries 114 mixed Latin+Arabic
+blocks, but the bidi-punctuation battery must be typed. Always open a `%TEMP%` COPY.
+⚠ **Decision waiting on Darya: GAP-4-1** — the exported PDF's Kurdish text layer is ~40% unreadable.
+It does not block S4.4/S4.5, but it does block RTL-11, and therefore the launch gate.
 
-**Phase 4 so far: RTL-04…RTL-09 are TRUE** — the RTL page geometry measured correct on the first
-run against the real Kurdish fixture (`../plans/evidence/S4.2-rtl-alignment.md`; permanent spec
-`rwanga-editor/tests/e2e/rtl/rtl-alignment.spec.js`).
+**Phase 4 so far:** RTL-04…RTL-09 **TRUE** (page geometry measured correct) and RTL-10 **TRUE**
+(all 85 pages clean; the long-standing `overflow:hidden` clipping worry closed by measurement;
+leading exactly 1.30). **RTL-11 stays PARTIAL** — the PDF draws correctly but its text layer is
+40% NUL, so the exported script is not searchable or copyable (**GAP-4-1**).
+Evidence: `../plans/evidence/S4.2-rtl-alignment.md`, `S4.3-rtl-print-pdf.md`.
 
 **Phase 3 is COMPLETE** (S3.1 → S3.2 → S3.2F → S3.3 all closed):
 launch matrix **13/13** · lifecycle specs **3/3** (PF-02/03/05 **TRUE**) · console audit **0 errors /
@@ -52,7 +54,7 @@ Background & rationale: **`../RWANGA_GO_LIVE_2026-07-02.md`** (Part A + Part D).
 ## Where we are (2-minute brief)
 
 The editor is **~1–2 focused weeks of verification + packaging** away from being a launchable
-RTL screenplay editor. **None** of the 16 open launch P0s is a feature to build — they are test
+RTL screenplay editor. **None** of the 15 open launch P0s is a feature to build — they are test
 hygiene, an installer build, and QA sweeps. The launch checklist was **forensically verified honest
 on 2026-07-02** (test numbers reproduce exactly; the "30 vs 36 reds" spin proven true).
 
@@ -65,8 +67,8 @@ contribution/write API. That write API is the true technical prerequisite for th
 ## 🚦 Gates (why the AI/Agent harness cannot start yet)
 
 1. **Launch gate** — no invention features until every launch-checklist **P0** is TRUE.
-   Status: **44 TRUE · 11 PARTIAL · 4 UNKNOWN · 1 FALSE** (16 open; QG-01 + LR-01 TRUE 2026-07-26;
-   PF-02/03/05 TRUE 2026-07-27; PF-13 + RTL-04…09 TRUE 2026-07-28). See `../RWANGA_IDE_LAUNCH_CHECKLIST.md`.
+   Status: **45 TRUE · 11 PARTIAL · 3 UNKNOWN · 1 FALSE** (15 open; QG-01 + LR-01 TRUE 2026-07-26;
+   PF-02/03/05 TRUE 2026-07-27; PF-13 + RTL-04…10 TRUE 2026-07-28). See `../RWANGA_IDE_LAUNCH_CHECKLIST.md`.
 2. **Alive-App Phase 2 gate** — "No AI feature implementation may start before this phase is visually
    verified." Status: **every box unchecked.** See `../RWANGA_IDE_ALIVE_APP_CHECKLIST.md`.
 3. **Technical prerequisite** — `.rga` agent-write API does not exist (Vision Gap #2).
@@ -82,9 +84,10 @@ contribution/write API. That write API is the true technical prerequisite for th
 | GAP-2-1 | Flow view: New doc opens with a dead band above the page that only shrinks as you type (user-reported, long-standing, finally ticketed 2026-07-26) | OPEN — needs fix-slice | Masterplan §0.5 |
 | GAP-2-2 | Packaged app shares userData with dev app → restored dev session, auto-opened the playground fixture on first launch | OPEN — decide appId split before launch | Masterplan §0.5 |
 | GAP-3-4 | The **5 stable e2e reds** left standing by the first recorded baseline, now that no teardown noise hides them: scene-navigator marks report zero directional indent (RTL *and* LTR control); Settings tab doesn't hide the toolbar; Settings nav rail `overflow:hidden` (same family as GAP-3-2 — fix together); Settings General rows drifted from the registry. Plus 2 load-flakes recorded, not adjusted | OPEN — needs triage slice (stale-test vs real defect) | Masterplan §0.5 |
+| GAP-4-1 | **The exported PDF's Kurdish text layer is ~40% unreadable** — 40.2% of script characters extract as NUL because the embedded font subset's ToUnicode CMap misses most shaped Kurdish forms. The page DRAWS correctly; the script is not searchable, not copyable, and reaches downstream tooling as garbage. LTR exports are unaffected. **Blocks RTL-11 and therefore the launch gate** | OPEN — needs a fix-slice; isolate font-vs-pipeline first | Masterplan §0.5 / `docs/plans/evidence/S4.3-rtl-print-pdf.md` |
 | GAP-3-5 | **`Ctrl+Shift+S` is shipped as the default for BOTH "Save As" and "Scene Navigator"** — the registry is last-wins, so Scene Navigator takes the key and Save As has no working shortcut, while Settings still displays it. Two lesser collisions: Ctrl+Shift+E, Ctrl+Shift+F. Plus Electron's insecure-CSP warning to settle before launch | OPEN — needs a user ruling (which feature keeps which key) + a duplicate-defaults guard test | Masterplan §0.5 / `docs/plans/evidence/S3.3-console-audit.md` |
 | PF-01 (macOS) | macOS launch matrix + `pack:mac` + smoke — the only half of PF-01 still open (Decision #1: Mac arrives later) | DEFERRED — needs hardware | Masterplan §0.5 / PF-01 row |
-| RTL-10…13, SW-23 | RTL Print/PDF output + bidi QA vs the ratified Kurdish/RTL profile (**highest product value**). RTL-04…09 are now TRUE (S4.2) | OPEN — QA (S4.3→S4.5) | GO_LIVE Part A.1 #4 |
+| RTL-12/13, SW-23 | RTL bidi QA + the profile-drives-convention roll-up. RTL-04…09 TRUE (S4.2), RTL-10 TRUE (S4.3) | OPEN — QA (S4.4→S4.5) | GO_LIVE Part A.1 #4 |
 | MT-02/04/05/06/07/10, PP-01/03, SW-01 | Page-geometry QA (sizes/margins/overflow) | OPEN — QA | GO_LIVE Part A.1 #5 |
 | QG-12 | Roll-up "no known P0/P1 bugs" — flips when the above close | OPEN (auto) | Launch checklist §15 |
 | VISION-1 | Breakdown sheets: data + UI stub exist, no JS renders them (~1–2 days) | OPEN (Stage 2) | GO_LIVE Part B.3 #1 |
