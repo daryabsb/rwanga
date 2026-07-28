@@ -5,6 +5,37 @@ Template & rules: `PROTOCOL.md`.
 
 ---
 
+## 2026-07-28 · GAP-4-2 OPENED — the application's own RTL/localisation does not exist (audit)
+- **Did:** The user asked why RTL is missing from *the system* — explicitly not the scripts, which
+  render correctly. Audited the app chrome rather than the document pipeline.
+- **Evidence:** `docs/plans/evidence/GAP-4-2-ui-localization-audit.md`. Kurdish and Arabic **are**
+  declared (`settings-registry.js:83-91`, `options: ['en','ku','ar']`, restart-required) — so the
+  languages are not missing, everything behind them is. Live probe: `hasApplicator: false` (44
+  applicators registered, `language` not among them — which is why the row renders greyed with
+  "Behavior not wired yet.", the Settings Constitution being honest); `documentElement` computes
+  **`direction: ltr`** and `<html lang>` is **`en`**. No i18n module or string catalogue exists
+  anywhere; ~17 hardcoded English `textContent` literals in the shell modules plus ~34 in
+  `index.html`. Every `dir` in the running app comes from the OPEN DOCUMENT's profile
+  (`tab-manager.js:110`, `print-renderer.js:103`, `scene-navigator.js:150`, `tags.js:295`,
+  `review-bar.js:599`) — content only, never chrome. The chrome CSS could not mirror even if flipped:
+  `shell.css` 25 physical / 12 logical, `settings-workspace.css` **13 physical / 0 logical** (R1's
+  logical-property conversion covered print blocks only).
+- **The finding behind the finding:** searching all **123 checklist rows** for interface language,
+  translation, localisation or UI direction returns **nothing**. RTL-01…RTL-15 are all
+  document-scoped. So this never surfaced as a red because **nothing was ever measuring it** — the
+  launch constitution has a hole, not just the code. Net effect on the product: a Kurdish writer uses
+  a left-to-right ENGLISH application to write a right-to-left Kurdish script.
+- **Status deltas:** **GAP-4-2 opened.** No checklist row flipped, no code written — this is an audit.
+  Gate counts unchanged (45 TRUE · 11 PARTIAL · 3 UNKNOWN · 1 FALSE).
+- **Blocked on the user:** is UI localisation **in the v1 launch gate or a post-launch chapter?**
+  Either answer is legitimate, but the checklist must be amended to say which, or "all P0s TRUE" will
+  be declared over a hole. Scoping is in the evidence doc; direction-first (app-level `dir` + a
+  logical-property sweep of the chrome, exactly as R1 did for print blocks) is the cheaper,
+  higher-value half and is testable while the UI is still English.
+- **Next action:** user ruling on GAP-4-2 scope. Board work otherwise resumes at S4.4 (bidi audit).
+
+---
+
 ## 2026-07-28 · S3.1F — GAP-3-1 FIXED: the Tools menu is reachable again on laptops
 - **Did:** The user asked why the Tools menu was still missing "after we fixed it yesterday". It had
   **never been fixed** — commit `6656610e` (2026-07-26) changed three documentation files and zero
