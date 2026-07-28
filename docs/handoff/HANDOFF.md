@@ -4,7 +4,7 @@
 > archive to find the next action — it's here. Update this file at the end of every unit of work
 > (see `PROTOCOL.md`). Keep it short; link detail, don't inline it.
 
-- **Last updated:** 2026-07-28 · by: S4.3 closed — RTL-10 TRUE, RTL-11 blocked by GAP-4-1
+- **Last updated:** 2026-07-28 · by: S3.1F — GAP-3-1 fixed (menubar overflow; Tools menu restored)
 - **Binding doctrine:** every agent MUST follow the 10-rule MASTERPLAN EXECUTION DOCTRINE in the
   root `CLAUDE.md` (one slice at a time · tick-as-you-go · §0.3 close ritual · push every slice commit).
 - **HEAD:** `f54ea0c6` (S4.3 — RTL-10 TRUE, RTL-11 blocked by GAP-4-1) · **last slice-close:**
@@ -79,7 +79,6 @@ contribution/write API. That write API is the true technical prerequisite for th
 
 | ID | Case | Status | Pointer |
 |---|---|---|---|
-| GAP-3-1 | Compact mode hides Tags/Tools/Export/Help menus with no overflow → Settings has no menu route on laptops (root-caused: responsive thresholds + shell.css:2357) | OPEN — needs fix-slice | Masterplan §0.5 |
 | GAP-3-2 | Settings workspace sticky-search band layering broken (row paints above band; rows clipped) — user-reported with screenshot; needs Playwright geometry diagnostic + fix | OPEN — needs fix-slice | Masterplan §0.5 |
 | GAP-2-1 | Flow view: New doc opens with a dead band above the page that only shrinks as you type (user-reported, long-standing, finally ticketed 2026-07-26) | OPEN — needs fix-slice | Masterplan §0.5 |
 | GAP-2-2 | Packaged app shares userData with dev app → restored dev session, auto-opened the playground fixture on first launch | OPEN — decide appId split before launch | Masterplan §0.5 |
@@ -103,6 +102,7 @@ contribution/write API. That write API is the true technical prerequisite for th
 | QG-01 (30 test reds) | **TRUE — suite fully green** (1936 · 0 fail · 1 skip; zero quarantines; 1 real defect GAP-1-1 found & fixed) | `docs/plans/evidence/S1.1-qg01-triage.md` + `S1.5-green-run.txt`; commits `09382fd6`→`90485776` |
 | LR-01 (installer) | **TRUE — built under Dev Mode + installed-app smoke 5/5 PASS** (unsigned accepted; signing deferred) | `docs/plans/evidence/S2.1-pack-win.txt` + `S2.2-installer-smoke.md` |
 | PF-01 Windows launch matrix (S3.1) | **13/13 PASS · 0 failures** — 10/10 cold starts 1.1–1.6 s, post-reboot PASS, single-instance focus-existing, no `.rga` assoc (observed) | `docs/plans/evidence/S3.1-launch-matrix.md` |
+| GAP-3-1 (menus amputated on laptops) | **CLOSED — the Tools menu is back.** A `⋯` overflow item appears exactly when the responsive rules hide menus and carries their contents, grouped under headings; the narrow-mode rule no longer hides the overflow itself. At 1150px (the real laptop case) Settings, Export and Help are reachable again. Guard test asserts menu REACHABILITY at 1600/1150/900px — the thing the old tests missed by asserting command registration instead | `rwanga-editor/tests/e2e/settings/menubar-overflow.spec.js` (4/4) + `docs/plans/evidence/GAP-3-1-overflow-menu.png` |
 | PF-13 clean console (S3.3) | **TRUE — 0 error-level console messages · 0 uncaught page errors** across 8 core flows (launch → new → all block types → save → reopen → Print Preview → Page Setup → undo/redo ×5). Typing, saving, reopening, page-setup and undo/redo are completely silent. Re-runnable audit spec, not a one-off observation | `docs/plans/evidence/S3.3-console-audit.md` + `S3.3-console-capture.json` |
 | GAP-3-3 (e2e quit-path hangs) | **CLOSED — suite 1.2 h → 11.7 min, 37 reds → 6.** Two causes, both test hygiene, no product code touched: (a) the quit guard correctly waits for a human at the unsaved-changes modal, so `app.close()` never resolved — one shared `closeApp()` teardown across 60 specs / 124 sites; (b) force-kill specs killed only the main process, leaving Windows children holding Playwright's pipe — now kills the process tree. First e2e baseline recorded | `docs/plans/evidence/S3.2F-quit-path.md` + `S3.2F-e2e-baseline.txt` |
 | PF-02/03/05 lifecycle round-trips (S3.2) | **TRUE — 3/3 specs green.** New→save→reopen proven across a second app instance; open-from-disk proven not to write the file back; Save As proven to re-point handle/name/origin/Recent | `docs/plans/evidence/S3.2-lifecycle-e2e.md` + `rwanga-editor/tests/e2e/lifecycle/*.spec.js` |

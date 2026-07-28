@@ -1007,6 +1007,24 @@ body.window-maximized #rga-shell-titlebar {
   margin: 4px 8px;
   background: var(--border-subtle, rgba(128, 128, 128, 0.18));
 }
+/* GAP-3-1 — group heading inside the overflow menu: names the menu the
+   following items came from. Presentation only, never focusable. */
+.rga-shell-menubar-dropdown-header {
+  padding: 6px 12px 2px;
+  color: var(--text-tertiary, #888);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+/* The overflow button itself is a normal menubar item; it is shown/hidden by
+   the `hidden` attribute from wireMenubar(), which tracks what the responsive
+   rules are actually hiding. Never hide it by mode — it IS the escape hatch. */
+.rga-shell-menubar-item-overflow {
+  font-size: 15px;
+  line-height: 1;
+}
 
 /* ============================================================
    Studio Shell Recovery — Workstream D1: owned toolbar (Row 3).
@@ -2370,7 +2388,9 @@ body.view-print-preview-active #rga-shell-toolbar { display: none; }
 #app.mode-narrow .rga-shell-toolbar-group:not([data-group="text"]) {
   display: none;
 }
-#app.mode-narrow .rga-shell-menubar-item:not([data-menu="file"]):not([data-menu="edit"]):not([data-menu="view"]) {
+/* GAP-3-1 — the overflow item is excluded: it is the route to everything this
+   rule hides, so hiding it would recreate the amputation it exists to fix. */
+#app.mode-narrow .rga-shell-menubar-item:not([data-menu="file"]):not([data-menu="edit"]):not([data-menu="view"]):not([data-menu="overflow"]) {
   display: none;
 }
 

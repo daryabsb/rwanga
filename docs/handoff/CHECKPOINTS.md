@@ -5,6 +5,37 @@ Template & rules: `PROTOCOL.md`.
 
 ---
 
+## 2026-07-28 · S3.1F — GAP-3-1 FIXED: the Tools menu is reachable again on laptops
+- **Did:** The user asked why the Tools menu was still missing "after we fixed it yesterday". It had
+  **never been fixed** — commit `6656610e` (2026-07-26) changed three documentation files and zero
+  code; the defect was root-caused and ticketed, and that was reported as if it were resolved. Fixed
+  for real now: a `⋯` overflow item in the menubar (`renderer/index.html`) that appears exactly when
+  the responsive rules hide menus, and carries those menus' items grouped under headings. Which menus
+  are hidden is read from the DOM rather than by duplicating the breakpoint logic, so the overflow
+  tracks whatever the CSS hides in any mode. The narrow-mode rule
+  (`shell.css`) was amended to exclude the overflow item itself — hiding the escape hatch would
+  recreate the amputation it exists to fix.
+- **Evidence:** `rwanga-editor/tests/e2e/settings/menubar-overflow.spec.js` — **4/4 PASS**. It
+  asserts the real invariant at 1600 / 1150 / 900px: **all 8 menus stay reachable**, the overflow is
+  non-empty whenever something is hidden, and Settings specifically opens from the overflow at
+  1150px (the user's 1440px @ ~125% scaling case). Screenshot:
+  `docs/plans/evidence/GAP-3-1-overflow-menu.png` — File/Edit/View/Script/`⋯`, with TAGS · TOOLS
+  (Command Palette, Toggle Theme, **Settings Ctrl+,**) · EXPORT · HELP inside.
+  Neighbours: `source-audit` 19/19, `responsive-shell` green. `workspace-chrome-policy` has its 2
+  pre-existing reds (already in the recorded e2e baseline, GAP-3-4) — unchanged by this fix.
+- **Status deltas:** **GAP-3-1 OPEN → CLOSED.** New ledger row S3.1F. No launch-checklist row
+  flipped (the gap was never a checklist row). Gate counts unchanged.
+- **Why the old tests stayed green:** they assert command REGISTRATION, not menu REACHABILITY. A
+  feature can be registered, keyboard-bound, and completely unreachable from the UI at the same time.
+  The new spec closes exactly that gap, which is why it is written as "can the user still get there
+  at this window size" rather than "is the command defined".
+- **Process note:** the previous report treated "root-caused and ticketed" as done. A gap row is not
+  a fix, and it must not be reported as one.
+- **Next action:** S4.4 — bidi audit (RTL-12, RTL-13). Still waiting on the user: GAP-4-1 (PDF text
+  layer) and GAP-3-5 (which feature keeps Ctrl+Shift+S).
+
+---
+
 ## 2026-07-28 · S4.3 CLOSED — RTL-10 TRUE · RTL-11 held open by GAP-4-1 (PDF text layer)
 - **Did:** Measured the RTL OUTPUT, not just the blocks: `rwanga-editor/tests/e2e/rtl/rtl-print-export.spec.js`
   (new, permanent, 2/2 PASS) over a `%TEMP%` copy of the 85-page Kurdish fixture. RTL-10 checks every

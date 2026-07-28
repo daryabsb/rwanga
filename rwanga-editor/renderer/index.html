@@ -96,6 +96,15 @@
     <button class="rga-shell-menubar-item" data-menu="tools"  type="button">Tools</button>
     <button class="rga-shell-menubar-item" data-menu="export" type="button">Export</button>
     <button class="rga-shell-menubar-item" data-menu="help"   type="button">Help</button>
+    <!-- GAP-3-1 — overflow. The responsive rules hide trailing menus on narrow
+         windows (compact hides Tags/Tools/Export/Help; narrow keeps only
+         File/Edit/View). Without this button, Settings — whose ONLY menu route
+         is Tools — simply vanishes on any laptop, and so do all Export and Help
+         entries. This item appears exactly when something is hidden and carries
+         the hidden menus' contents, so no feature ever loses its only route. -->
+    <button class="rga-shell-menubar-item rga-shell-menubar-item-overflow"
+            data-menu="overflow" type="button" hidden
+            aria-label="More menus" title="More menus">&#8943;</button>
   </nav>
   <div id="rga-shell-menubar-dropdown" class="rga-shell-menubar-dropdown" hidden role="menu" aria-hidden="true"></div>
 
@@ -1301,9 +1310,55 @@
         'A4 menubar (Esc closes dropdown)');
     }
 
+    // GAP-3-1 — which top-level menus are currently hidden by the responsive
+    // rules? Read the DOM rather than duplicating the breakpoint logic, so the
+    // overflow stays correct no matter which mode hides what.
+    function hiddenMenuKeys() {
+      return Array.prototype.slice
+        .call(menubar.querySelectorAll('.rga-shell-menubar-item[data-menu]'))
+        .filter(function(btn) {
+          if (btn.dataset.menu === 'overflow') return false;
+          return getComputedStyle(btn).display === 'none';
+        })
+        .map(function(btn) { return btn.dataset.menu; });
+    }
+
+    // Build the overflow menu: every hidden menu's items, grouped under a
+    // heading, in menubar order. Reachability is the invariant — a hidden menu
+    // must still be openable, or the feature behind it is gone.
+    function overflowDef() {
+      var def = [];
+      hiddenMenuKeys().forEach(function(key) {
+        var items = MENU_DEFS[key];
+        if (!items || !items.length) return;
+        var btn = menubar.querySelector('.rga-shell-menubar-item[data-menu="' + key + '"]');
+        if (def.length) def.push({ type: 'separator' });
+        def.push({ type: 'header', label: (btn && btn.textContent) || key });
+        items.forEach(function(item) { def.push(item); });
+      });
+      return def;
+    }
+
+    // Show the overflow button only while something is actually hidden.
+    function syncOverflowVisibility() {
+      var btn = menubar.querySelector('.rga-shell-menubar-item[data-menu="overflow"]');
+      if (!btn) return;
+      btn.hidden = hiddenMenuKeys().length === 0;
+    }
+    Rga.Shell = Rga.Shell || {};
+    Rga.Shell.Menubar = Rga.Shell.Menubar || {};
+    Rga.Shell.Menubar.syncOverflow = syncOverflowVisibility;
+    Rga.Shell.Menubar._hiddenMenuKeys = hiddenMenuKeys;
+    Rga.Shell.Menubar._overflowDef = overflowDef;
+    syncOverflowVisibility();
+    // The responsive engine swaps #app's mode class; re-sync when it does.
+    if (window.ResizeObserver) {
+      try { new ResizeObserver(syncOverflowVisibility).observe(document.documentElement); } catch (_) {}
+    }
+
     function openMenu(menuKey, anchorBtn) {
-      var def = MENU_DEFS[menuKey];
-      if (!def) return;
+      var def = (menuKey === 'overflow') ? overflowDef() : MENU_DEFS[menuKey];
+      if (!def || !def.length) return;
       // Build dropdown content.
       dropdown.innerHTML = '';
       def.forEach(function(item) {
@@ -1312,6 +1367,17 @@
           sep.className = 'rga-shell-menubar-dropdown-sep';
           sep.setAttribute('role', 'separator');
           dropdown.appendChild(sep);
+          return;
+        }
+        // GAP-3-1 — overflow group heading. Non-interactive: it names which
+        // menu the following items came from, so the overflow reads as the
+        // menus it stands in for rather than one long anonymous list.
+        if (item.type === 'header') {
+          var hd = document.createElement('div');
+          hd.className = 'rga-shell-menubar-dropdown-header';
+          hd.setAttribute('role', 'presentation');
+          hd.textContent = item.label;
+          dropdown.appendChild(hd);
           return;
         }
         var row = document.createElement('button');
