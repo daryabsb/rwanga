@@ -83,7 +83,7 @@ electron-builder (`npm run pack:win`), PowerShell/Windows 11.
 | S3.2F | 3 Lifecycle | GAP-3-3 fix — e2e quit path + FIRST recorded e2e baseline | ✅ | `docs/plans/evidence/S3.2F-quit-path.md` + `S3.2F-e2e-baseline.txt`. **E2E BASELINE: 363 tests · 357 pass · 6 fail · 11.7 min · 0 teardown hangs · 0 orphaned processes** (was 326 pass · 37 fail · 1.2 h). Two causes, both test hygiene, zero product code touched: shared `closeApp()` teardown swept over 60 specs / 124 call sites, and process-TREE kill for the force-kill specs. 5 stable reds + 1 load-flake remain → **GAP-3-4** |
 | S3.3 | 3 Lifecycle | PF-13 clean-console audit across core flows | ✅ | `docs/plans/evidence/S3.3-console-audit.md` + raw `S3.3-console-capture.json`. **0 errors · 0 page errors · 12 warnings** across 8 core flows; typing/save/reopen/page-setup/undo-redo completely silent. **PF-13 UNKNOWN→TRUE.** Re-runnable spec at `rwanga-editor/tests/diagnostics/s3.3-console-audit/` (outside the e2e suite by design). The warnings surfaced **GAP-3-5** (Ctrl+Shift+S claimed by both Save As and Scene Navigator) |
 | S4.1 | 4 RTL ⭐ | RTL QA fixture + convention checklist prep | ✅ | `docs/plans/evidence/S4.1-rtl-qa-protocol.md` — per-ID measurable criteria for RTL-04…13 + SW-23 (convention rule quoted · fixture blocks · inch offsets to ±1mm · FAIL signature). Records the **two-surfaces ruling** (Flow = direction only, Print/PDF = the full magnitudes) that stops Phase 4 manufacturing false reds against the Flow doctrine; surveys the fixture (114 mixed-script blocks already present; `shot` + bidi battery must be typed); folds GAP-3-4's two RTL reds into S4.2 |
-| S4.2 | 4 RTL ⭐ | Editor alignment sweep RTL-04…RTL-09 | ⬜ | |
+| S4.2 | 4 RTL ⭐ | Editor alignment sweep RTL-04…RTL-09 | ✅ | `docs/plans/evidence/S4.2-rtl-alignment.md` + `S4.2-rtl-print-page.png` / `S4.2-rtl-flow-blocks.png`; spec `rwanga-editor/tests/e2e/rtl/rtl-alignment.spec.js` **2/2**. **6/6 measured PASS → RTL-04…09 PARTIAL→TRUE.** Print: character **192px=2.0in**, parenthetical **144px=1.5in** (box 336px=3.5in), dialogue **96px=1.0in**, action+heading flush start, transition mirrored to the LEFT (gapLeft 0), padding-left 0 everywhere; 0/200 blocks escape the content box; margins 1.0in left / **1.5in binding right**. Flow: direction correct, centred blocks stay symmetric (drafting doctrine). RTL-09's slug-in-action-block note verified **STALE** and removed |
 | S4.3 | 4 RTL ⭐ | RTL Print Preview + PDF export (RTL-10, RTL-11) | ⬜ | |
 | S4.4 | 4 RTL ⭐ | Bidi audit — mixed script + punctuation (RTL-12, RTL-13) | ⬜ | |
 | S4.5 | 4 RTL ⭐ | SW-23 profile-convention verdict + flip all RTL rows | ⬜ | |
@@ -679,15 +679,27 @@ Commit message: `qa(editor): RTL QA protocol — per-ID criteria extracted from 
 - Create: `docs/plans/evidence/S4.2-rtl-alignment.md` + one screenshot per ID (`S4.2-rtl-0X-<element>.png`)
 - Modify: `docs/RWANGA_IDE_LAUNCH_CHECKLIST.md` (rows RTL-04…RTL-09)
 
-- [ ] **Step 1:** In the installed app, open the temp copy of the RTL fixture. For each of: action
+- [x] **Step 1:** In the installed app, open the temp copy of the RTL fixture. For each of: action
       (RTL-04), dialogue (RTL-05), character (RTL-06), parenthetical (RTL-07), transition (RTL-08),
       scene heading (RTL-09) — verify against the S4.1 criterion, screenshot, record verdict.
       RTL-09 note: checklist cites a known slug-in-action-block mapping bug via SW-08, but the handoff
       lists "RTL scene-heading map" as TRUE/test-backed — verify visually and trust what you see; if
       correct, note the stale cross-reference in the evidence file.
-- [ ] **Step 2:** Flip each ID that passes (PARTIAL→TRUE, evidence = screenshot + protocol row).
+      DONE — but as a **measurement, not an eyeball**: `rwanga-editor/tests/e2e/rtl/rtl-alignment.spec.js`
+      (2/2 PASS, now a permanent suite spec) drives the real render pipeline over a `%TEMP%` copy of
+      the fixture and reads DOM geometry, per the standing "Playwright > screenshots" rule. All six
+      IDs measured PASS on the first run — the RTL page geometry is genuinely correct.
+      Worth recording: the first evidence screenshot was an ELEMENT capture of a page sheet wider
+      than its scroll container; it came back cropped and looked exactly like text clipped at the
+      left margin. Containment measurement showed **0 of 200 blocks** escaping the content box, and
+      margins measuring 1.0in left / **1.5in binding right** (correctly mirrored). The capture was
+      switched to a viewport screenshot. The rule earned its keep.
+- [x] **Step 2:** Flip each ID that passes (PARTIAL→TRUE, evidence = screenshot + protocol row).
       Failures → gap rows; the ID stays PARTIAL with the gap cited.
-- [ ] **Step 3: SLICE CLOSE RITUAL (§0.3)**
+      **6/6 flipped PARTIAL→TRUE**; no failures, so no gap rows. RTL-09's "real slug sits in an
+      action block" note was verified **STALE** and removed (47 sceneHeading nodes for 47 scenes,
+      rendering as sceneHeading with localized `INT.` = `ناوەوە`).
+- [x] **Step 3: SLICE CLOSE RITUAL (§0.3)**
 
 Commit message: `qa(editor): RTL alignment sweep RTL-04..09 — <n>/6 TRUE (S4.2)`
 

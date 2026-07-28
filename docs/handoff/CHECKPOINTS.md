@@ -5,6 +5,46 @@ Template & rules: `PROTOCOL.md`.
 
 ---
 
+## 2026-07-28 · S4.2 CLOSED — RTL-04…RTL-09 TRUE (6/6 measured) · RTL page geometry is correct
+- **Did:** Ran the RTL alignment sweep as a **measurement, not an eyeball**:
+  `rwanga-editor/tests/e2e/rtl/rtl-alignment.spec.js` (new, permanent, in the e2e suite) drives the
+  real render pipeline over a `%TEMP%` copy of `mysterious-guest-rtl.rga` — a real Kurdish feature,
+  47 scenes, 85 rendered pages — and reads DOM geometry for both surfaces separately, per S4.1's
+  two-surfaces ruling. **2/2 PASS, and all six IDs passed on the first run.**
+- **Evidence:** `docs/plans/evidence/S4.2-rtl-alignment.md` + `S4.2-rtl-print-page.png` /
+  `S4.2-rtl-flow-blocks.png`. Print Preview: character **192px = 2.0in**, parenthetical **144px =
+  1.5in** (box 336px = 3.5in), dialogue **96px = 1.0in**, action + scene heading flush to the
+  reading-start edge, transition mirrored to the **LEFT** (gapLeft 0 / gapRight 519), and
+  `padding-left` **0 on every indented block** — the indents mirrored rather than being duplicated
+  onto the wrong edge. Sampled 12 blocks per type, not just the first. Containment: **0 of 200**
+  blocks escape the page content box; margins measure 1.0in left / **1.5in binding right** (the
+  wider binding margin on the reading-start side, as the convention requires); review bar agrees:
+  `A4 · Portrait · RTL · Page #s on · 85 pp · 47 scenes`. Flow: direction rtl, action hugs right,
+  transition hugs left, character/dialogue/parenthetical stay symmetric (drafting doctrine).
+- **Status deltas:** S4.2 ⬜ → ✅. **RTL-04, RTL-05, RTL-06, RTL-07, RTL-08, RTL-09 PARTIAL → TRUE.**
+  Gate counts 38/17/4/1 → **44 TRUE · 11 PARTIAL · 4 UNKNOWN · 1 FALSE** (16 open of 60 P0s) —
+  recounted from the checklist file itself, not incremented by hand.
+  **RTL-09's "real slug sits in an action block" note verified STALE and removed**: the fixture holds
+  47 sceneHeading nodes for 47 scenes and they render as sceneHeading, bold, flush start, with the
+  scene number, the recognition underline, and the localized `INT.` (`ناوەوە`).
+- **Gaps/risks surfaced:** none — no failures, so no gap rows. Two observations carried to SW-23
+  (S4.5) rather than failed here, per the protocol: transitions still render the English `CUT`
+  (vocabulary, not geometry), and the document renders Eastern-Arabic numerals while the convention's
+  default is Western-Arabic with Eastern as a locale option (the document's own content chose them).
+  GAP-3-4's two RTL scene-navigator reds were deliberately **not** folded in: they concern the
+  sidebar's mark indentation, and both the RTL test *and its LTR control* report zero indent — that
+  points at the marks losing their indent entirely, not a direction bug. Mixing them would muddy both
+  verdicts.
+- **Method note worth keeping:** the first evidence screenshot was an ELEMENT capture of a page sheet
+  wider than its scroll container. It came back cropped and looked exactly like text clipped at the
+  left margin — a defect that does not exist. The containment measurement disproved it and the
+  capture was switched to a viewport screenshot. The standing "Playwright > screenshots for layout"
+  rule earned its keep in both directions.
+- **Next action:** S4.3 — RTL Print Preview + PDF export (RTL-10, RTL-11). RTL-11's "Blocked: PDF
+  export non-functional" note is stale; correct it when flipping.
+
+---
+
 ## 2026-07-28 · S4.1 CLOSED — RTL QA protocol written (Phase 4 open)
 - **Did:** Turned RTL-04…RTL-13 + SW-23 from "visual QA vs the profile" into measurable criteria:
   `docs/plans/evidence/S4.1-rtl-qa-protocol.md`. One section per ID with the convention rule quoted
