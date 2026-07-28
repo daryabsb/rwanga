@@ -15,6 +15,7 @@ const { test, expect, _electron: electron } = require('@playwright/test');
 const path = require('path');
 const os   = require('os');
 const fs   = require('fs');
+const { closeApp } = require('../../helpers/app-teardown');
 
 const APP_ROOT = path.resolve(__dirname, '..', '..', '..');
 
@@ -29,20 +30,6 @@ async function launchAndOpen(userDataDir) {
     window.Rga.TabManager && typeof window.Rga.TabManager.activeDoc === 'function'));
   await page.waitForFunction(() => !!window.Rga.TabManager.activeDoc());
   return { app, page };
-}
-
-async function clearDirtyAndClose(app, page) {
-  try {
-    await page.evaluate(() => {
-      const TM = window.Rga && window.Rga.TabManager;
-      const docs = TM ? [TM.activeDoc()].filter(Boolean) : [];
-      docs.forEach((d) => {
-        if (window.Rga.Doc && window.Rga.Doc.clearDirty) window.Rga.Doc.clearDirty(d);
-        else d.dirty = false;
-      });
-    });
-  } catch (_) {}
-  await app.close();
 }
 
 // -----------------------------------------------------------------
@@ -72,7 +59,7 @@ test('PC-V1 — a screenplay created today stores its print contract in the .rga
       pageNumbers: true, pageNumberPosition: 'top_right', sceneNumbers: true
     });
   } finally {
-    await clearDirtyAndClose(app, page);
+    await closeApp(app);
     try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
   }
 });
@@ -105,7 +92,7 @@ test('PC-V1 — Print Preview geometry and PDF Export both consume the contract 
     expect(obs.layoutDirection).toBe(obs.contract.direction);
     expect(obs.layoutOrientation).toBe(obs.contract.orientation);
   } finally {
-    await clearDirtyAndClose(app, page);
+    await closeApp(app);
     try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
   }
 });
@@ -158,7 +145,7 @@ test('PC-V1 — contract and page geometry are identical after a save + reopen',
     // Landscape actually swapped the page (w > h).
     expect(result.beforePage.w).toBeGreaterThan(result.beforePage.h);
   } finally {
-    await clearDirtyAndClose(app, page);
+    await closeApp(app);
     try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
   }
 });

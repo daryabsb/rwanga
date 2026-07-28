@@ -10,6 +10,7 @@ const { test, expect, _electron: electron } = require('@playwright/test');
 const path = require('path');
 const os = require('os');
 const fs = require('fs');
+const { closeApp } = require('../helpers/app-teardown');
 
 const APP_ROOT = path.resolve(__dirname, '..', '..');
 const WS_SEL   = '[data-renderer="workspace"][data-workspace-kind="settings"]';
@@ -62,7 +63,7 @@ test('Slice 5B — General section rows render with current effective values', a
       (el) => el.value);
     expect(themeVal).toBe('dark');
   } finally {
-    await app.close();
+    await closeApp(app);
     try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
   }
 });
@@ -78,7 +79,7 @@ test('Slice 5B — search "paper" surfaces pageSetup.paperSize', async () => {
     const ids = await rowIds(page);
     expect(ids).toContain('pageSetup.paperSize');
   } finally {
-    await app.close();
+    await closeApp(app);
     try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
   }
 });
@@ -94,7 +95,7 @@ test('Slice 5B — search "dark" surfaces theme', async () => {
     const ids = await rowIds(page);
     expect(ids).toContain('theme');
   } finally {
-    await app.close();
+    await closeApp(app);
     try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
   }
 });
@@ -110,7 +111,7 @@ test('Slice 5B — search "font size" surfaces editor.fontSize', async () => {
     const ids = await rowIds(page);
     expect(ids).toContain('editor.fontSize');
   } finally {
-    await app.close();
+    await closeApp(app);
     try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
   }
 });
@@ -130,7 +131,7 @@ test('Slice 5B — no-result search shows the empty state', async () => {
     });
     expect(emptyVisible).toBe(true);
   } finally {
-    await app.close();
+    await closeApp(app);
     try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
   }
 });

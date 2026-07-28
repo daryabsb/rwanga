@@ -25,6 +25,7 @@ const { test, expect, _electron: electron } = require('@playwright/test');
 const path = require('path');
 const os   = require('os');
 const fs   = require('fs');
+const { closeApp } = require('../../helpers/app-teardown');
 
 const APP_ROOT = path.resolve(__dirname, '..', '..', '..');
 
@@ -56,7 +57,7 @@ async function clearDirtyAndClose(app, page) {
       });
     });
   } catch (_) {}
-  await app.close();
+  await closeApp(app);
 }
 
 async function fillModal(page, vals) {
@@ -292,7 +293,7 @@ test('S7 — modal-set margins survive a script save + reload (document tier per
         return JSON.stringify({ settings: doc.settings, metadata: doc.metadata || {} });
       });
       expect(savedContent).toBeTruthy();
-      await app.close();
+      await closeApp(app);
     }
     // Second launch — verify the document tier reads the same margins.
     {
@@ -318,7 +319,7 @@ test('S7 — modal-set margins survive a script save + reload (document tier per
         });
         expect(restored).toEqual({ top: 0.6, right: 0.7, bottom: 0.8, left: 0.9 });
       } finally {
-        await app.close();
+        await closeApp(app);
       }
     }
   } finally {

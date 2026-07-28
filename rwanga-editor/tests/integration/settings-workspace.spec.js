@@ -9,6 +9,7 @@ const { test, expect, _electron: electron } = require('@playwright/test');
 const path = require('path');
 const os = require('os');
 const fs = require('fs');
+const { closeApp } = require('../helpers/app-teardown');
 
 const APP_ROOT = path.resolve(__dirname, '..', '..');
 
@@ -54,7 +55,7 @@ test('Slice 5A — Ctrl+, opens the Settings workspace tab', async () => {
     });
     expect(title).toBe('General');
   } finally {
-    await app.close();
+    await closeApp(app);
     try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
   }
 });
@@ -79,7 +80,7 @@ test('Slice 5A — pressing Ctrl+, twice does NOT create a second Settings tab (
         '[data-renderer="workspace"][data-workspace-kind="settings"]').length);
     expect(count).toBe(1);
   } finally {
-    await app.close();
+    await closeApp(app);
     try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
   }
 });

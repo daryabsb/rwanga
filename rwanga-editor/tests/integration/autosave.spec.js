@@ -8,6 +8,7 @@ const { test, expect, _electron: electron } = require('@playwright/test');
 const path = require('path');
 const os = require('os');
 const fs = require('fs');
+const { closeApp, killApp } = require('../helpers/app-teardown');
 
 const APP_ROOT = path.resolve(__dirname, '..', '..');
 
@@ -16,17 +17,6 @@ function listSnapshots(udd) {
   try {
     return fs.readdirSync(snapshotDir(udd)).filter((f) => f.endsWith('.autosave.json'));
   } catch (_) { return []; }
-}
-
-// Hard-kill the app (a crash) and wait until the OS process is fully gone.
-async function killApp(a) {
-  const proc = a.process();
-  const exited = new Promise((resolve) => {
-    if (proc.exitCode !== null) { resolve(); return; }
-    proc.once('exit', () => resolve());
-  });
-  proc.kill('SIGKILL');
-  await exited;
 }
 
 let app, page, userDataDir;
@@ -45,7 +35,7 @@ test.beforeEach(async () => {
 });
 
 test.afterEach(async () => {
-  if (app) { try { await app.close(); } catch (_) {} app = null; }
+  if (app) { await closeApp(app); app = null; }
   if (userDataDir) {
     try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
     userDataDir = null;

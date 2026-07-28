@@ -13,6 +13,7 @@ const { test, expect, _electron: electron } = require('@playwright/test');
 const path = require('path');
 const os = require('os');
 const fs = require('fs');
+const { closeApp } = require('../helpers/app-teardown');
 
 const APP_ROOT = path.resolve(__dirname, '..', '..');
 
@@ -49,7 +50,7 @@ test('Slice 4B — editorDeskColor applies through the applicator at runtime; no
       document.documentElement.style.getPropertyValue('--editor-bg'));
     expect(after).toBe('#1a1a2e');
   } finally {
-    await app.close();
+    await closeApp(app);
     try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
   }
 });
@@ -65,7 +66,7 @@ test('Slice 4B — persisted appearance.editorDeskColor rehydrates across a clos
         window.Rga.Settings.Store.set('appearance.editorDeskColor', '#2d2520'));
       await page.waitForFunction(() =>
         window.rwanga.prefs.read().then((p) => p['appearance.editorDeskColor'] === '#2d2520'));
-      await app.close();
+      await closeApp(app);
     }
     // Second launch: prefs restores the value, applyAll() applies it.
     {
@@ -78,7 +79,7 @@ test('Slice 4B — persisted appearance.editorDeskColor rehydrates across a clos
           document.documentElement.style.getPropertyValue('--editor-bg'));
         expect(styleVar).toBe('#2d2520');
       } finally {
-        await app.close();
+        await closeApp(app);
       }
     }
   } finally {

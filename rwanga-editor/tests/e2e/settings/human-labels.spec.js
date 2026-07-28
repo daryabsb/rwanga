@@ -14,6 +14,7 @@ const { test, expect, _electron: electron } = require('@playwright/test');
 const path = require('path');
 const os   = require('os');
 const fs   = require('fs');
+const { closeApp } = require('../../helpers/app-teardown');
 
 const APP_ROOT = path.resolve(__dirname, '..', '..', '..');
 
@@ -118,7 +119,7 @@ test('H4 — no raw enum value appears as user-facing option text', async () => 
       expect(labels).not.toContain(tok);
     }
   } finally {
-    await app.close();
+    await closeApp(app);
     try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
   }
 });
@@ -142,7 +143,7 @@ test('H4 — no internal setting id (dot-notation or camelCase) appears anywhere
       expect(visibleText).not.toContain(id);
     }
   } finally {
-    await app.close();
+    await closeApp(app);
     try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
   }
 });
@@ -161,7 +162,7 @@ test('H4 — Language options render as "English", "Kurdish", "Arabic"', async (
       (els) => els.map((e) => e.textContent.trim()));
     expect(labels).toEqual(['English', 'Kurdish', 'Arabic']);
   } finally {
-    await app.close();
+    await closeApp(app);
     try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
   }
 });
@@ -180,7 +181,7 @@ test('H4 — human labels persist across a close + reopen (labels live in regist
         '.rga-settings-row[data-setting-id="language"] select option',
         (els) => els.map((e) => e.textContent.trim()));
       expect(labels1).toEqual(['English', 'Kurdish', 'Arabic']);
-      await app.close();
+      await closeApp(app);
     }
     {
       const { app, page } = await launchAndOpen(userDataDir);
@@ -191,7 +192,7 @@ test('H4 — human labels persist across a close + reopen (labels live in regist
           (els) => els.map((e) => e.textContent.trim()));
         expect(labels2).toEqual(['English', 'Kurdish', 'Arabic']);
       } finally {
-        await app.close();
+        await closeApp(app);
       }
     }
   } finally {
@@ -260,7 +261,7 @@ test('H4 — unsupported-control rows do not expose control-type words or settin
       }
     }
   } finally {
-    await app.close();
+    await closeApp(app);
     try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
   }
 });

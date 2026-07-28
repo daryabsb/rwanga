@@ -25,6 +25,7 @@ const { test, expect, _electron: electron } = require('@playwright/test');
 const path = require('path');
 const os = require('os');
 const fs = require('fs');
+const { closeApp } = require('../helpers/app-teardown');
 
 const APP_ROOT = path.resolve(__dirname, '..', '..');
 const FIXTURE  = path.resolve(__dirname, '..', 'fixtures', 'mysterious-guest-rtl.rga');
@@ -53,7 +54,7 @@ test.beforeEach(async () => {
 });
 
 test.afterEach(async () => {
-  if (app) { await app.close(); app = null; }
+  if (app) { await closeApp(app); app = null; }
   if (userDataDir) {
     try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
     userDataDir = null;

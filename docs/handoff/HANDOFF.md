@@ -4,7 +4,7 @@
 > archive to find the next action — it's here. Update this file at the end of every unit of work
 > (see `PROTOCOL.md`). Keep it short; link detail, don't inline it.
 
-- **Last updated:** 2026-07-27 · by: S3.1 in progress (12/13; blocked on user reboot)
+- **Last updated:** 2026-07-28 · by: S3.2F closed (GAP-3-3 fixed; first e2e baseline recorded)
 - **Binding doctrine:** every agent MUST follow the 10-rule MASTERPLAN EXECUTION DOCTRINE in the
   root `CLAUDE.md` (one slice at a time · tick-as-you-go · §0.3 close ritual · push every slice commit).
 - **HEAD:** `9e6c82cb` (tooling: `/rwanga` case command) · **last slice-close:** `f17b4730` (S3.1 WIP,
@@ -15,11 +15,13 @@
 
 ## ⭐ NEXT ACTION
 
-**Start S3.3 — PF-13 clean-console audit across core flows.** ⚠ Decide first, with the user, whether
-**GAP-3-3** (below) is fixed BEFORE S3.3: the e2e suite is 326 pass / 37 fail, and every sampled
-failure is `app.close()` hanging in teardown — a console audit runs over those same flows.
-S3.1 + S3.2 are CLOSED: launch matrix **13/13** (PF-01 Windows-verified) and lifecycle specs **3/3**
-(PF-02/03/05 → **TRUE**, `docs/plans/evidence/S3.2-lifecycle-e2e.md`).
+**Start S3.3 — PF-13 clean-console audit across core flows.** The harness is now trustworthy: the
+console audit walks the same flows the e2e suite does, and those flows no longer hang.
+S3.1 + S3.2 + S3.2F are CLOSED. **GAP-3-3 is CLOSED** — the e2e quit path is fixed and the campaign
+has its **first recorded e2e baseline: 363 tests · 357 pass · 6 fail · 11.7 min** (was 326 pass /
+37 fail / 1.2 h), zero teardown hangs, zero orphaned Electron processes
+(`docs/plans/evidence/S3.2F-quit-path.md`). The 5 stable reds left are triaged as **GAP-3-4**.
+Launch matrix **13/13** (PF-01 Windows-verified); lifecycle specs **3/3** (PF-02/03/05 → **TRUE**).
 Phases 1 & 2 COMPLETE (QG-01 TRUE, LR-01 TRUE — installer smoke 5/5).
 ⚠ A running Electron instance auto-migrates **any** fixture it opens — seen on
 `playground-the-last-light.rga` (2026-07-26, twice) and `mysterious-guest-rtl.rga` (2026-07-27).
@@ -69,7 +71,7 @@ contribution/write API. That write API is the true technical prerequisite for th
 | GAP-3-2 | Settings workspace sticky-search band layering broken (row paints above band; rows clipped) — user-reported with screenshot; needs Playwright geometry diagnostic + fix | OPEN — needs fix-slice | Masterplan §0.5 |
 | GAP-2-1 | Flow view: New doc opens with a dead band above the page that only shrinks as you type (user-reported, long-standing, finally ticketed 2026-07-26) | OPEN — needs fix-slice | Masterplan §0.5 |
 | GAP-2-2 | Packaged app shares userData with dev app → restored dev session, auto-opened the playground fixture on first launch | OPEN — decide appId split before launch | Masterplan §0.5 |
-| GAP-3-3 | E2E suite 326 pass / **37 fail** — every sampled failure is `app.close()` hanging in `afterEach` (test bodies pass; app won't quit; leaks Electron processes). Proven pre-existing, independent of S3.2. No e2e baseline has ever been recorded | OPEN — needs fix-slice + a recorded e2e baseline | Masterplan §0.5 |
+| GAP-3-4 | The **5 stable e2e reds** left standing by the first recorded baseline, now that no teardown noise hides them: scene-navigator marks report zero directional indent (RTL *and* LTR control); Settings tab doesn't hide the toolbar; Settings nav rail `overflow:hidden` (same family as GAP-3-2 — fix together); Settings General rows drifted from the registry. Plus 2 load-flakes recorded, not adjusted | OPEN — needs triage slice (stale-test vs real defect) | Masterplan §0.5 |
 | PF-13 | Clean-console audit across core flows — the last open lifecycle row (PF-02/03/05 now TRUE) | OPEN — QA (S3.3) | GO_LIVE Part A.1 #3 |
 | PF-01 (macOS) | macOS launch matrix + `pack:mac` + smoke — the only half of PF-01 still open (Decision #1: Mac arrives later) | DEFERRED — needs hardware | Masterplan §0.5 / PF-01 row |
 | RTL-04…13, SW-23 | RTL visual + bidi QA vs ratified Kurdish/RTL profile (**highest product value**) | OPEN — QA | GO_LIVE Part A.1 #4 |
@@ -88,6 +90,7 @@ contribution/write API. That write API is the true technical prerequisite for th
 | QG-01 (30 test reds) | **TRUE — suite fully green** (1936 · 0 fail · 1 skip; zero quarantines; 1 real defect GAP-1-1 found & fixed) | `docs/plans/evidence/S1.1-qg01-triage.md` + `S1.5-green-run.txt`; commits `09382fd6`→`90485776` |
 | LR-01 (installer) | **TRUE — built under Dev Mode + installed-app smoke 5/5 PASS** (unsigned accepted; signing deferred) | `docs/plans/evidence/S2.1-pack-win.txt` + `S2.2-installer-smoke.md` |
 | PF-01 Windows launch matrix (S3.1) | **13/13 PASS · 0 failures** — 10/10 cold starts 1.1–1.6 s, post-reboot PASS, single-instance focus-existing, no `.rga` assoc (observed) | `docs/plans/evidence/S3.1-launch-matrix.md` |
+| GAP-3-3 (e2e quit-path hangs) | **CLOSED — suite 1.2 h → 11.7 min, 37 reds → 6.** Two causes, both test hygiene, no product code touched: (a) the quit guard correctly waits for a human at the unsaved-changes modal, so `app.close()` never resolved — one shared `closeApp()` teardown across 60 specs / 124 sites; (b) force-kill specs killed only the main process, leaving Windows children holding Playwright's pipe — now kills the process tree. First e2e baseline recorded | `docs/plans/evidence/S3.2F-quit-path.md` + `S3.2F-e2e-baseline.txt` |
 | PF-02/03/05 lifecycle round-trips (S3.2) | **TRUE — 3/3 specs green.** New→save→reopen proven across a second app instance; open-from-disk proven not to write the file back; Save As proven to re-point handle/name/origin/Recent | `docs/plans/evidence/S3.2-lifecycle-e2e.md` + `rwanga-editor/tests/e2e/lifecycle/*.spec.js` |
 | Is the launch checklist honest/current? | **Yes — verified** | 3 latest commits are checklist-only; QG-01 = 1936/1899/36 reproduces; clean-fixture rerun = 40/40 → 30 reds all non-core |
 | PP-D5 (RTL body-leading) | Closed (PP-16 TRUE) | Print-Truth-Unification; PTU-B 7/7 green (prior agent, 2026-06-10) |

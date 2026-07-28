@@ -18,6 +18,7 @@ const { test, expect, _electron: electron } = require('@playwright/test');
 const path = require('path');
 const os   = require('os');
 const fs   = require('fs');
+const { closeApp } = require('../helpers/app-teardown');
 
 const APP_ROOT = path.resolve(__dirname, '..', '..');
 const WS_SEL   = '[data-renderer="workspace"][data-workspace-kind="settings"]';
@@ -96,7 +97,7 @@ test('chrome — document tab keeps toolbar/bottomPanel/inspector visible', asyn
     expect(v.bottomPanel.computedDisplay).not.toBe('none');
     expect(v.inspector.computedDisplay).not.toBe('none');
   } finally {
-    await app.close();
+    await closeApp(app);
     try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
   }
 });
@@ -115,7 +116,7 @@ test('chrome — Settings tab hides toolbar + bottom panel + inspector', async (
     expect(v.bottomPanel.computedDisplay).toBe('none');
     expect(v.inspector.computedDisplay).toBe('none');
   } finally {
-    await app.close();
+    await closeApp(app);
     try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
   }
 });
@@ -140,7 +141,7 @@ test('chrome — switching back to the document tab restores all three', async (
     expect(after.bottomPanel.hiddenByPolicy).toBe(false);
     expect(after.inspector.hiddenByPolicy).toBe(false);
   } finally {
-    await app.close();
+    await closeApp(app);
     try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
   }
 });
@@ -179,7 +180,7 @@ test('chrome (freeze) — tab-bar Y position is identical across doc → Setting
     expect(c.tabBarY).toBe(a.tabBarY);
     expect(c.toolbarVisibility).toBe('visible');
   } finally {
-    await app.close();
+    await closeApp(app);
     try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
   }
 });
@@ -231,7 +232,7 @@ test('chrome (scroll) — Settings nav rail is independent of content scroll; se
     // Search stayed put — sticky at top of content column.
     expect(after.searchY).toBe(containers.searchY0);
   } finally {
-    await app.close();
+    await closeApp(app);
     try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
   }
 });
@@ -256,7 +257,7 @@ test('chrome (layout) — tab-content-host grows when Settings hides the inspect
     //    grew because the inspector column collapsed).
     expect(settingsState.tabContentHost.width).toBeGreaterThan(docState.tabContentHost.width);
   } finally {
-    await app.close();
+    await closeApp(app);
     try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
   }
 });
@@ -276,7 +277,7 @@ test('chrome — opening Settings twice does not stack tabs (singleton preserved
         '[data-renderer="workspace"][data-workspace-kind="settings"]').length);
     expect(settingsCount).toBe(1);
   } finally {
-    await app.close();
+    await closeApp(app);
     try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
   }
 });

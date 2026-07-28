@@ -15,6 +15,7 @@ const { test, expect, _electron: electron } = require('@playwright/test');
 const path = require('path');
 const os   = require('os');
 const fs   = require('fs');
+const { closeApp } = require('../../helpers/app-teardown');
 
 const APP_ROOT = path.resolve(__dirname, '..', '..', '..');
 
@@ -38,7 +39,7 @@ async function clearDirtyAndClose(app, page) {
       if (window.Rga.PrintPreview.isActive()) window.Rga.PrintPreview.hide();
     });
   } catch (_) {}
-  await app.close();
+  await closeApp(app);
 }
 
 // -----------------------------------------------------------------

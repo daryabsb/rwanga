@@ -11,6 +11,7 @@ const { test, expect, _electron: electron } = require('@playwright/test');
 const path = require('path');
 const os = require('os');
 const fs = require('fs');
+const { closeApp } = require('../helpers/app-teardown');
 
 const APP_ROOT = path.resolve(__dirname, '..', '..');
 
@@ -59,7 +60,7 @@ test('Slice 2 — changing editor.highlightCurrentLine flips the #editor class',
     });
     expect(reapplied).toBe(true);
   } finally {
-    await app.close();
+    await closeApp(app);
     try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
   }
 });
@@ -82,7 +83,7 @@ test('Slice 2 — user-tier value persists across a close + reopen', async () =>
         // and confirm the value before closing.
         return window.rwanga.prefs.read().then((p) => p['editor.highlightCurrentLine'] === false);
       });
-      await app.close();
+      await closeApp(app);
     }
     // Second launch with the SAME userDataDir: prefs should restore.
     {
@@ -98,7 +99,7 @@ test('Slice 2 — user-tier value persists across a close + reopen', async () =>
         });
         expect(hasClass).toBe(false);
       } finally {
-        await app.close();
+        await closeApp(app);
       }
     }
   } finally {

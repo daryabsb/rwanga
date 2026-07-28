@@ -1,0 +1,495 @@
+
+Running 363 tests using 1 worker
+
+  ✓    1 tests\e2e\filmustageation\alias-create.spec.js:113:1 › picker → choose Nali: mention tagged with Nali, "The Teacher" recorded as an alias (2.8s)
+  ✓    2 tests\e2e\filmustageation\alias-create.spec.js:136:1 › Tag as → Character lists the existing entities (Nali and Baban) (2.8s)
+  ✓    3 tests\e2e\filmustageation\alias-create.spec.js:154:1 › exact match: the entity is still listed (marked current) and choosing it tags with no alias (2.4s)
+  ✓    4 tests\e2e\filmustageation\alias-create.spec.js:179:1 › picker → choose Baban: mention tagged with Baban, surface form recorded as an alias (2.1s)
+  ✓    5 tests\e2e\filmustageation\alias-create.spec.js:208:1 › create-new still works: a type with no entities is a direct create action (first Prop) (2.0s)
+  ✓    6 tests\e2e\filmustageation\alias-create.spec.js:237:1 › nested Entity Picker stays inside the viewport near the right edge (2.2s)
+  ✓    7 tests\e2e\filmustageation\alias-create.spec.js:265:1 › alias survives a .rga serialize → deserialize round-trip; alias mention renders dotted (2.5s)
+  ✓    8 tests\e2e\filmustageation\context-menu-viewport.spec.js:137:1 › normal middle-of-line right-click places the menu at the click point; submenu opens right (2.3s)
+  ✓    9 tests\e2e\filmustageation\context-menu-viewport.spec.js:154:1 › right-edge right-click keeps BOTH the menu and the "Tag as" submenu inside the viewport (2.7s)
+  ✓   10 tests\e2e\filmustageation\context-menu-viewport.spec.js:172:1 › bottom-edge right-click keeps the menu inside the viewport (2.0s)
+  ✓   11 tests\e2e\filmustageation\context-menu-viewport.spec.js:185:1 › bottom-right corner right-click keeps the whole menu inside the viewport (2.3s)
+  ✓   12 tests\e2e\filmustageation\context-menu-viewport.spec.js:201:1 › RTL: left-edge right-click keeps the menu inside the viewport (2.3s)
+  ✓   13 tests\e2e\filmustageation\flow-page-presence.spec.js:107:1 › F2/F3 — dark: the page has a soft shadow and is distinct from the recessive desk (2.2s)
+  ✓   14 tests\e2e\filmustageation\flow-page-presence.spec.js:120:1 › F2/F3 — light: the white page has a shadow and is distinct from the recessive desk (2.1s)
+  ✓   15 tests\e2e\filmustageation\flow-page-presence.spec.js:135:1 › F3 — rail, page, and desk are three distinct surfaces (dark) (2.2s)
+  ✓   16 tests\e2e\filmustageation\flow-page-presence.spec.js:143:1 › F3 — rail, page, and desk are three distinct surfaces (light) (2.4s)
+  ✓   17 tests\e2e\filmustageation\flow-page-presence.spec.js:155:1 › F3 — the Flow desk token is deeper than the shared --editor-bg (recessive desk) (2.2s)
+  ✓   18 tests\e2e\filmustageation\flow-page-presence.spec.js:174:1 › doctrine — Print Preview sheet shadow is its own value, unaffected by the Flow page shadow (2.0s)
+  ✓   19 tests\e2e\filmustageation\flow-page-presence.spec.js:203:1 › doctrine — Flow stays continuous: one page element, no sheet stack (Law 4) (1.8s)
+  ✓   20 tests\e2e\filmustageation\flow-rail-and-marker.spec.js:118:1 › F1 — the line-number rail has its own background band, page-facing edge, and numerals (dark) (2.2s)
+  ✓   21 tests\e2e\filmustageation\flow-rail-and-marker.spec.js:132:1 › F1 — the rail band is also present and visible in the light theme (2.7s)
+  ✓   22 tests\e2e\filmustageation\flow-rail-and-marker.spec.js:149:1 › F1 — the rail background is theme-aware (light band != dark band) (2.3s)
+  ✓   23 tests\e2e\filmustageation\flow-rail-and-marker.spec.js:216:1 › F6 — the marker is a styled P## tab on the inline-start side (LTR) (2.6s)
+  ✓   24 tests\e2e\filmustageation\flow-rail-and-marker.spec.js:233:1 › F6 — the P## tab mirrors to the inline-start side in RTL (3.0s)
+  ✓   25 tests\e2e\filmustageation\flow-rail-and-marker.spec.js:248:1 › F6/F1 — in RTL the rail sits on the inline-start (right) edge of the page (2.8s)
+  ✓   26 tests\e2e\filmustageation\flow-rail-and-marker.spec.js:268:1 › doctrine — the Flow page marker parent has zero height (no page seam, Law 4) (2.5s)
+  ✓   27 tests\e2e\filmustageation\flow-settings-page-color-line-numbers.spec.js:109:1 › F7 Page Color — DEFAULT is a literally WHITE page in DARK theme (setting untouched) (2.7s)
+  ✓   28 tests\e2e\filmustageation\flow-settings-page-color-line-numbers.spec.js:121:1 › F7 Page Color — White is a literally WHITE page in LIGHT theme (2.7s)
+  ✓   29 tests\e2e\filmustageation\flow-settings-page-color-line-numbers.spec.js:130:1 › F7 Page Color — Dark gives the designer dark page with warm off-white ink (dark theme) (2.9s)
+  ✓   30 tests\e2e\filmustageation\flow-settings-page-color-line-numbers.spec.js:140:1 › F7 Page Color — Dark works in the light theme too; White restores white (2.8s)
+  ✓   31 tests\e2e\filmustageation\flow-settings-page-color-line-numbers.spec.js:154:1 › F7 Page Color — Dark does NOT affect Print Preview (page truth stays white) (2.3s)
+  ✓   32 tests\e2e\filmustageation\flow-settings-page-color-line-numbers.spec.js:171:1 › F7 Show Line Numbers — Off hides the rail and re-centres the page; On restores it (2.5s)
+  ✓   33 tests\e2e\filmustageation\flow-settings-page-color-line-numbers.spec.js:209:1 › F7 Show Line Numbers — Off: the P## marker is NOT lost (it lives in #editor, not the hidden gutter) (2.2s)
+  ✓   34 tests\e2e\filmustageation\flow-settings-page-color-line-numbers.spec.js:264:1 › F7 — both settings persist to the user tier and the prefs store (2.2s)
+  ✓   35 tests\e2e\filmustageation\flow-settings-page-color-line-numbers.spec.js:286:1 › F7 — editor.pageColor is reachable in the Settings layout (not orphaned) (1.9s)
+  ✓   36 tests\e2e\filmustageation\inspector-host.spec.js:40:1 › F1A.3 — Rga.Shell.Inspector exposes the F1A.3 public API at boot (1.9s)
+  ✓   37 tests\e2e\filmustageation\inspector-host.spec.js:61:1 › F1A.3 — inspector host boots with no panel ACTIVE (no auto-open) (2.0s)
+  ✓   38 tests\e2e\filmustageation\inspector-host.spec.js:86:1 › F1A.3 — the static .inspector-empty markup remains visible after F1A.3 wiring (1.9s)
+  ✓   39 tests\e2e\filmustageation\inspector-host.spec.js:112:1 › F1A.3 — Rga.Shell.Inspector.getHost() returns the .inspector-body element (1.6s)
+  ✓   40 tests\e2e\filmustageation\inspector-host.spec.js:137:1 › F1A.3 — register / activate / deactivate round-trips and restores the empty state (2.0s)
+  ✓   41 tests\e2e\filmustageation\inspector-host.spec.js:178:1 › F1A.3 — invalid panel registrations return false without throwing or polluting the registry (2.1s)
+  ✓   42 tests\e2e\filmustageation\inspector-host.spec.js:226:1 › F1A.3 — inspector collapse/expand toggle still routes through StudioPanel (no regression) (1.7s)
+  ✓   43 tests\e2e\filmustageation\print-contract.spec.js:38:1 › PC-V1 — a screenplay created today stores its print contract in the .rga (1.7s)
+  ✓   44 tests\e2e\filmustageation\print-contract.spec.js:70:1 › PC-V1 — Print Preview geometry and PDF Export both consume the contract resolver (1.7s)
+  ✓   45 tests\e2e\filmustageation\print-contract.spec.js:106:1 › PC-V1 — contract and page geometry are identical after a save + reopen (1.7s)
+  ✓   46 tests\e2e\filmustageation\print-preview-review-bar.spec.js:71:1 › entering Print Preview mounts the review bar with all directed controls (1.7s)
+  ✓   47 tests\e2e\filmustageation\print-preview-review-bar.spec.js:87:1 › Fit page is the default on entry; the percent readout is populated (1.7s)
+  ✓   48 tests\e2e\filmustageation\print-preview-review-bar.spec.js:93:1 › the page indicator reports current / total from the real sheet stack (1.9s)
+  ✓   49 tests\e2e\filmustageation\print-preview-review-bar.spec.js:99:1 › Done returns to the editor and removes the bar (1.9s)
+  ✓   50 tests\e2e\filmustageation\print-preview-review-bar.spec.js:107:1 › Esc still exits the surface (keyboard path) and removes the bar (1.7s)
+  ✓   51 tests\e2e\filmustageation\print-preview-review-bar.spec.js:114:1 › Fit width toggles the active fit control; zoom stepper changes the readout and clears fit (2.0s)
+  ✓   52 tests\e2e\filmustageation\print-preview-review-bar.spec.js:127:1 › zoom is presentation-only — it sets root.style.zoom and never the sheet inch geometry (1.7s)
+  ✓   53 tests\e2e\filmustageation\print-preview-review-bar.spec.js:140:1 › Export PDF routes through the review surface to Rga.PdfExport.run() (1.9s)
+  ✓   54 tests\e2e\filmustageation\print-preview-review-bar.spec.js:152:1 › next / prev navigate the package — the page VISIBLY scrolls, not just the indicator (2.1s)
+  ✓   55 tests\e2e\filmustageation\print-preview-review-bar.spec.js:168:1 › jump-to-page: click the indicator, type a page, Enter scrolls there (1.8s)
+  ✓   56 tests\e2e\filmustageation\print-preview-review-bar.spec.js:179:1 › FIX: Export PDF never changes the zoom (no re-zoom side-effect) (1.9s)
+  ✓   57 tests\e2e\filmustageation\print-preview-review-bar.spec.js:192:1 › FIX: Fit page is stable across a preview refresh (Page Setup-style) (1.9s)
+  ✓   58 tests\e2e\filmustageation\print-preview-review-bar.spec.js:200:1 › FIX: the writing-chrome menubar recedes while the review surface is active (1.8s)
+  ✓   59 tests\e2e\filmustageation\print-preview-review-bar.spec.js:209:1 › FIX: the export carries the real screenplay formatting (export matches preview) (1.8s)
+  ✓   60 tests\e2e\filmustageation\print-preview-review-bar.spec.js:233:1 › the preview renders real screenplay formatting (uppercase bold sluglines, indented dialogue) (1.8s)
+  ✓   61 tests\e2e\filmustageation\print-preview-review-bar.spec.js:259:1 › Slice A — the identity whisper reflects PrintContract.resolve (live, from the resolver) (1.8s)
+  ✓   62 tests\e2e\filmustageation\print-preview-review-bar.spec.js:272:1 › Slice B — the review summary folds in pages + the distinct rendered scene count (1.8s)
+  ✓   63 tests\e2e\filmustageation\print-preview-review-bar.spec.js:287:1 › Slice C — Home / End jump to the first / last page (the genuine nav gap) (3.6s)
+  ✓   64 tests\e2e\filmustageation\print-preview-review-bar.spec.js:297:1 › Slice D — export confidence renders Ready when the package has pages (1.7s)
+  ✓   65 tests\e2e\filmustageation\print-preview-review-bar.spec.js:305:1 › Slice E — RTL document: the review surface mirrors and the whisper labels RTL (2.0s)
+  ✓   66 tests\e2e\filmustageation\print-recognition-underline.spec.js:144:1 › Package A — Print scene heading carries the 3px brand-pink underline (2.0s)
+  ✓   67 tests\e2e\filmustageation\print-recognition-underline.spec.js:163:1 › Package A — NO geometry change: font-size / line-height / letter-spacing / margin match the body block (1.7s)
+  ✓   68 tests\e2e\filmustageation\print-recognition-underline.spec.js:185:1 › Package A — RTL: the brand underline is present identically (direction-agnostic) (2.0s)
+  ✓   69 tests\e2e\filmustageation\print-truth-unification.spec.js:48:1 › PTU-C — header/footer banners render with {{tokens}} resolved in Print Preview (1.7s)
+  ✓   70 tests\e2e\filmustageation\print-truth-unification.spec.js:74:1 › PTU-E — scene numbers appear in the printed slug and respect the toggle (1.7s)
+  ✓   71 tests\e2e\filmustageation\print-truth-unification.spec.js:112:1 › PTU-D — mark visibility defaults + document-level toggle reach the contract (1.6s)
+  ✓   72 tests\e2e\filmustageation\print-truth-unification.spec.js:142:1 › PTU-B — sheet leading is LTR 1.0 / RTL 1.3 from the single resolved source (1.8s)
+  ✓   73 tests\e2e\filmustageation\print-truth-unification.spec.js:182:1 › PTU — header/footer/marks survive save → reopen byte-identically (1.6s)
+  ✓   74 tests\e2e\filmustageation\print-truth-unification.spec.js:216:1 › PTU-D2 — Print Preview Marks control is present, seeded from the doc, and toggles per-review (1.8s)
+  ✓   75 tests\e2e\filmustageation\print-truth-unification.spec.js:269:1 › PTU-D3 — marks override resets on exit; Settings default persists (1.7s)
+  ✓   76 tests\e2e\filmustageation\rtl-print-block-mirror.spec.js:159:1 › R1 — LTR: indents resolve to the LEFT at the exact Hollywood magnitudes (pixel parity) (1.8s)
+  ✓   77 tests\e2e\filmustageation\rtl-print-block-mirror.spec.js:188:1 › R1 — RTL: indents mirror to the RIGHT edge; transition moves to the LEFT (1.9s)
+  ✓   78 tests\e2e\filmustageation\rtl-print-block-mirror.spec.js:217:1 › R1 — the indent magnitudes are identical in both directions (single geometry, mirrored) (1.8s)
+  ✓   79 tests\e2e\filmustageation\scene-navigator-autoscroll.spec.js:129:1 › SN.1 — current row scrolls into view when ScriptSession transitions to a new scene (1.6s)
+  ✓   80 tests\e2e\filmustageation\scene-navigator-autoscroll.spec.js:150:1 › SN.1 — no auto-scroll when re-render fires but current scene is unchanged (1.6s)
+  ✓   81 tests\e2e\filmustageation\scene-navigator-autoscroll.spec.js:173:1 › SN.1 — separation invariant holds across an auto-scroll transition (1.5s)
+  ✓   82 tests\e2e\filmustageation\scene-navigator-autoscroll.spec.js:219:1 › SN.1 — click-to-jump still routes through Rga.Shell.SceneNavigator.scrollToScene (1.5s)
+  ✓   83 tests\e2e\filmustageation\scene-navigator-bundle1.spec.js:91:1 › SN-Bundle-1 — header renders "Scenes" + count when scenes exist (1.7s)
+  ✓   84 tests\e2e\filmustageation\scene-navigator-bundle1.spec.js:110:1 › SN-Bundle-1 — true-empty state renders refreshed doc-neutral copy without header or find (1.8s)
+  ✓   85 tests\e2e\filmustageation\scene-navigator-bundle1.spec.js:131:1 › SN-Bundle-1 — find filters by heading substring, case-insensitive (1.8s)
+  ✓   86 tests\e2e\filmustageation\scene-navigator-bundle1.spec.js:161:1 › SN-Bundle-1 — find filters by scene number string (1.7s)
+  ✓   87 tests\e2e\filmustageation\scene-navigator-bundle1.spec.js:180:1 › SN-Bundle-1 — no-results surface renders with query echo + Clear button (1.8s)
+  ✓   88 tests\e2e\filmustageation\scene-navigator-bundle1.spec.js:210:1 › SN-Bundle-1 — Clear button restores full list and clears find input (2.0s)
+  ✓   89 tests\e2e\filmustageation\scene-navigator-bundle1.spec.js:229:1 › SN-Bundle-1 — Escape precedence: filter has text → first Escape clears filter, not selection (1.9s)
+  ✓   90 tests\e2e\filmustageation\scene-navigator-bundle1.spec.js:266:1 › SN-Bundle-1 — current vs selected separation invariant survives a filter (1.8s)
+  ✓   91 tests\e2e\filmustageation\scene-navigator-bundle1.spec.js:313:1 › SN-Bundle-1 — SN.1 auto-scroll re-fires after a Clear when current was filtered out (1.7s)
+  ✓   92 tests\e2e\filmustageation\scene-navigator-bundle1.spec.js:369:1 › SN-Bundle-1 — SN.2 Lucide indicators still render on rows with hasNotes / hasRevisionFlag (1.6s)
+  ✓   93 tests\e2e\filmustageation\scene-navigator-indicators.spec.js:78:1 › SN.2 — notes indicator renders as Lucide square-pen SVG (not emoji text) (2.0s)
+  ✓   94 tests\e2e\filmustageation\scene-navigator-indicators.spec.js:102:1 › SN.2 — revision indicator renders as Lucide flag-triangle-right SVG (not emoji text) (2.8s)
+  ✓   95 tests\e2e\filmustageation\scene-navigator-indicators.spec.js:124:1 › SN.2 — notes and revision indicators are shape-distinct (path-count differs) (2.1s)
+  ✓   96 tests\e2e\filmustageation\scene-navigator-indicators.spec.js:148:1 › SN.2 — indicator aria-labels survive the emoji→SVG migration (1.8s)
+  ✓   97 tests\e2e\filmustageation\scene-navigator-indicators.spec.js:167:1 › SN.2 — row height remains the plan-anchored 28px minimum across indicator states (1.6s)
+  ✓   98 tests\e2e\filmustageation\scene-navigator-indicators.spec.js:198:1 › SN.2 — signal track reserves width; heading does not reflow on indicator presence/absence (1.7s)
+  ✓   99 tests\e2e\filmustageation\scene-navigator-indicators.spec.js:251:1 › SN.2 — current vs selected separation invariant holds with SVG indicators (2.0s)
+  ✓  100 tests\e2e\filmustageation\scene-navigator-indicators.spec.js:297:1 › SN.2 — SN.1 auto-scroll behaviour is unaffected by the SVG indicator change (2.0s)
+  ✘  101 tests\e2e\filmustageation\scene-navigator-rtl-expansion.spec.js:69:1 › SN RTL — navigator mirrors the script; chevron on inline-start, caret points left, marks indent from start (2.1s)
+  ✘  102 tests\e2e\filmustageation\scene-navigator-rtl-expansion.spec.js:117:1 › SN LTR — control: chevron on inline-start (left), caret points right, marks indent from left (unchanged) (1.9s)
+  ✓  103 tests\e2e\filmustageation\scene-navigator-tags.spec.js:128:1 › Scene Navigator Tags v1.1 — expanded scene: categories + entity rows with per-scene counts (2.4s)
+  ✓  104 tests\e2e\filmustageation\scene-navigator-tags.spec.js:168:1 › Scene Navigator Tags v1.1 — expand entity → snippets with wording; click snippet → jump (2.6s)
+  ✓  105 tests\e2e\filmustageation\scene-navigator-tags.spec.js:230:1 › Scene Navigator Tags v1.1 — click entity row → editor lights up its occurrences (2.4s)
+  ✓  106 tests\e2e\filmustageation\scene-navigator-tags.spec.js:297:1 › Scene Navigator Tags v1.1 — RTL: Naskh snippets, mirrored layout, active entity (2.5s)
+  ✓  107 tests\e2e\filmustageation\scene-navigator-visual-weight.spec.js:50:1 › SN visual-weight — chevron visible at rest, titles heavier, rows separated, marks italic, density kept (2.2s)
+  ✓  108 tests\e2e\filmustageation\scene-notes-shared-source.spec.js:46:1 › F1A.5 — Rga.SceneNotes is exposed at boot with the documented API (1.7s)
+  ✓  109 tests\e2e\filmustageation\scene-notes-shared-source.spec.js:61:1 › F1A.5 — inspector "scene-notes" panel is registered but NOT active at boot (1.7s)
+  ✓  110 tests\e2e\filmustageation\scene-notes-shared-source.spec.js:85:1 › F1A.5 — bottom-panel textarea writes flow through Rga.SceneNotes (round-trip) (1.8s)
+  ✓  111 tests\e2e\filmustageation\scene-notes-shared-source.spec.js:119:1 › F1A.5 — bottom-panel writes reflect in the inspector when activated (1.6s)
+  ✓  112 tests\e2e\filmustageation\scene-notes-shared-source.spec.js:141:1 › F1A.5 — inspector writes reflect in the bottom-panel textarea (1.6s)
+  ✓  113 tests\e2e\filmustageation\scene-notes-shared-source.spec.js:168:1 › F1A.5 — switching scenes updates both bottom panel and inspector (1.7s)
+  ✓  114 tests\e2e\filmustageation\scene-notes-shared-source.spec.js:205:1 › F1A.5 — deactivating the panel restores the inspector empty state (1.7s)
+  ✓  115 tests\e2e\filmustageation\scene-notes-shared-source.spec.js:234:1 › F1A.5 — setting a current scene does NOT auto-open the inspector panel (1.7s)
+  ✓  116 tests\e2e\filmustageation\sidebar-default-per-doctype.spec.js:47:1 › F1A.2 — Rga.Shell.Layout._DEFAULTS.sidebar.activePanel is null (no screenplay name in CORE Layout) (1.6s)
+  ✓  117 tests\e2e\filmustageation\sidebar-default-per-doctype.spec.js:63:1 › F1A.2 — DocTypes.bootDefaultSidebarPanel returns screenplay's declared default (1.6s)
+  ✓  118 tests\e2e\filmustageation\sidebar-default-per-doctype.spec.js:92:1 › F1A.2 — sidebar boots with Scene Navigator active (screenplay behaviour preserved) (2.2s)
+  ✓  119 tests\e2e\filmustageation\sidebar-default-per-doctype.spec.js:119:1 › F1A.2 — activity-rail items still render in doctrine order (no rail-grouping regression) (2.0s)
+  ✓  120 tests\e2e\filmustageation\sidebar-default-per-doctype.spec.js:142:1 › F1A.2 — Rga.Shell exposes no screenplay-specific default-panel constant (1.8s)
+  ✓  121 tests\e2e\filmustageation\status-bar-contributions.spec.js:48:1 › F1A.4 — Rga.Shell.StatusBar exposes the contribution API at boot (2.2s)
+  ✓  122 tests\e2e\filmustageation\status-bar-contributions.spec.js:68:1 › F1A.4 — all 8 segments render in correct (section, order) layout (2.1s)
+  ✓  123 tests\e2e\filmustageation\status-bar-contributions.spec.js:98:1 › F1A.4 — registered() returns all 8 ids at boot (1.7s)
+  ✓  124 tests\e2e\filmustageation\status-bar-contributions.spec.js:114:1 › F1A.4 — theme segment still toggles via the H2B constitutional path (1.8s)
+  ✓  125 tests\e2e\filmustageation\status-bar-contributions.spec.js:135:1 › F1A.4 — viewMode segment still exposes its select + four options (1.7s)
+  ✓  126 tests\e2e\filmustageation\status-bar-contributions.spec.js:155:1 › F1A.4 — late-registered plugin segment mounts in the correct slot and unregister removes it (1.9s)
+  ✓  127 tests\e2e\filmustageation\status-bar-contributions.spec.js:196:1 › F1A.4 — invalid registrations return false without throwing or corrupting state (1.9s)
+  ✓  128 tests\e2e\filmustageation\tag-plugin-ownership.spec.js:55:1 › F1A.7 — tag <select> is mounted inside the plugin slot (not in the static Writing group) (2.3s)
+  ✓  129 tests\e2e\filmustageation\tag-plugin-ownership.spec.js:82:1 › F1A.7 — Rga.Shell.Toolbar registers a "tag" group at order 300 (2.3s)
+  ✓  130 tests\e2e\filmustageation\tag-plugin-ownership.spec.js:104:1 › F1A.7 — tag <select> exposes the 9 production categories + placeholder (2.0s)
+  ✓  131 tests\e2e\filmustageation\tag-plugin-ownership.spec.js:132:1 › F1A.7 — group order in the toolbar row is text → scene → tag → writing → mode (1.9s)
+  ✓  132 tests\e2e\filmustageation\tag-plugin-ownership.spec.js:159:1 › F1A.7 — toolbar groups share a vertical center (align-items: center holds) (2.0s)
+  ✓  133 tests\e2e\filmustageation\tag-plugin-ownership.spec.js:191:1 › F1A.7 — toolbar row stays at 36px design geometry (no vertical growth) (2.1s)
+  ✓  134 tests\e2e\filmustageation\tag-plugin-ownership.spec.js:209:1 › F1A.7 — F1A.6A slot fix continues to hold (.rga-shell-toolbar-content-slot is display: contents) (2.1s)
+  ✓  135 tests\e2e\filmustageation\tag-plugin-ownership.spec.js:226:1 › F1A.7 — tag group has meaningful inline width and no overlap with neighbors (1.8s)
+  ✓  136 tests\e2e\filmustageation\tag-plugin-ownership.spec.js:254:1 › F1A.7 — CORE format-toolbar.js no longer references the tag dropdown (3ms)
+  ✓  137 tests\e2e\filmustageation\tag-plugin-ownership.spec.js:268:1 › F1A.7 — CORE index.html no longer carries the tag dropdown in the static Writing group (10ms)
+  ✓  138 tests\e2e\filmustageation\tags-panel.spec.js:113:1 › Tags Panel V1 — type → tag via toolbar → open panel → see entity → click → jump (2.5s)
+  ✓  139 tests\e2e\filmustageation\tags-panel.spec.js:211:1 › Tags Panel V1 — the View Tags popup button opens the Characters panel (2.1s)
+  ✓  140 tests\e2e\filmustageation\tags-panel.spec.js:259:1 › Tags Panel V1.1 — duplicates warned, unused entities clean, counts honest (2.5s)
+  ✓  141 tests\e2e\filmustageation\tags-panel.spec.js:403:1 › Tags Panel V1 — RTL script → panel renders dir="rtl" (2.2s)
+  ✓  142 tests\e2e\filmustageation\tags-panel.spec.js:435:1 › Tags Panel V1.3 — click entity -> editor highlights its occurrences; jump preserved (2.5s)
+  ✓  143 tests\e2e\filmustageation\tags-panel.spec.js:510:1 › Tags Panel V1.3 — duplicate NALI: selecting one highlights only its marks (2.1s)
+  ✓  144 tests\e2e\filmustageation\tags-panel.spec.js:544:1 › Tags Panel V1.3 — RTL: highlight works on an RTL script (2.0s)
+  ✓  145 tests\e2e\filmustageation\toolbar-contributions.spec.js:51:1 › F1A.6 — Rga.Shell.Toolbar exposes the contribution API at boot (1.6s)
+  ✓  146 tests\e2e\filmustageation\toolbar-contributions.spec.js:66:1 › F1A.6 — screenplay plugin registers the Scene group at boot (1.7s)
+  ✓  147 tests\e2e\filmustageation\toolbar-contributions.spec.js:88:1 › F1A.6 — Row 3 visible group order matches pre-F1A.6 chrome (1.6s)
+  ✓  148 tests\e2e\filmustageation\toolbar-contributions.spec.js:136:1 › F1A.6 — Scene group exposes the block-type select + Insert Scene button (1.7s)
+  ✓  149 tests\e2e\filmustageation\toolbar-contributions.spec.js:169:1 › F1A.6 — clicking +Scene flows through KR → scene.insert → insertSceneSmart (1.6s)
+  ✓  150 tests\e2e\filmustageation\toolbar-contributions.spec.js:212:1 › F1A.6 — changing block-type select calls PM.setBlockType through the active view (1.6s)
+  ✓  151 tests\e2e\filmustageation\toolbar-contributions.spec.js:257:1 › F1A.6 — invalid group registrations are rejected without throwing or polluting the registry (1.7s)
+  ✓  152 tests\e2e\filmustageation\toolbar-contributions.spec.js:289:1 › F1A.6 — unregistering Scene group removes only its DOM; static CORE groups remain (1.6s)
+  ✓  153 tests\e2e\filmustageation\toolbar-contributions.spec.js:325:1 › F1A.6 — CORE format-toolbar.js no longer DEFINES or CALLS the screenplay dispatchers (3ms)
+  ✓  154 tests\e2e\filmustageation\toolbar-layout-fidelity.spec.js:66:1 › F1A.6A — .rga-shell-toolbar-content-slot resolves to display: contents (1.6s)
+  ✓  155 tests\e2e\filmustageation\toolbar-layout-fidelity.spec.js:85:1 › F1A.6A — every toolbar group renders on a single horizontal line (vertical centers aligned) (1.6s)
+  ✓  156 tests\e2e\filmustageation\toolbar-layout-fidelity.spec.js:128:1 › F1A.6A — toolbar groups flow left-to-right without overlap (1.7s)
+  ✓  157 tests\e2e\filmustageation\toolbar-layout-fidelity.spec.js:160:1 › F1A.6A — Scene group has a leading separator between it and the text group (1.6s)
+  ✓  158 tests\e2e\filmustageation\toolbar-layout-fidelity.spec.js:196:1 › F1A.6A — Scene group has a meaningful horizontal width on the toolbar row (1.5s)
+  ✓  159 tests\e2e\filmustageation\toolbar-layout-fidelity.spec.js:224:1 › F1A.6A — Scene group select + Insert Scene button render inline on the toolbar row (1.5s)
+  ✓  160 tests\e2e\filmustageation\toolbar-layout-fidelity.spec.js:267:1 › F1A.6A — toolbar row height stays at the 36px design geometry (no vertical stacking) (1.5s)
+  ✓  161 tests\e2e\lifecycle\new-save-reopen.spec.js:57:1 › PF-02 — a new document round-trips through disk (new → type → save → reopen) (3.4s)
+  ✓  162 tests\e2e\lifecycle\open-from-disk.spec.js:28:1 › PF-03 — an existing .rga opens from disk and is not written back (2.3s)
+  ✓  163 tests\e2e\lifecycle\save-as-path-change.spec.js:24:1 › PF-05 — Save As writes a new file and re-points the document at it (3.2s)
+  ✓  164 tests\e2e\platform-boundary\no-platform-globals.spec.js:58:1 › F1A.1 — window.rwanga.platform is undefined in standalone Electron (1.4s)
+  ✓  165 tests\e2e\platform-boundary\no-platform-globals.spec.js:89:1 › F1A.1 — Rga.Platform.has() returns false for any probe in standalone mode (1.5s)
+  ✓  166 tests\e2e\platform-boundary\no-platform-globals.spec.js:134:1 › F1A.1 — every CORE shell + settings module initializes in standalone mode (1.4s)
+  ✓  167 tests\e2e\platform-boundary\no-platform-globals.spec.js:201:1 › F1A.1 — every protected DOM region declared in the boundary contract is present at boot (1.5s)
+  ✓  168 tests\e2e\platform-boundary\no-platform-globals.spec.js:246:1 › F1A.1 — renderer-side assignment to window.rwanga.platform is silently rejected (contextBridge invariant) (1.4s)
+  ✓  169 tests\e2e\settings\control-fidelity.spec.js:65:1 › S3 §1 — toggle renders as the RC1 switch (label + hidden input + thumb) (1.6s)
+  ✓  170 tests\e2e\settings\control-fidelity.spec.js:126:1 › S3 §2 — clicking the toggle changes the Store value and the visual state (1.8s)
+  ✓  171 tests\e2e\settings\control-fidelity.spec.js:177:1 › S3 §3 — radio renders as a segmented control with no visible native dot (1.5s)
+  ✓  172 tests\e2e\settings\control-fidelity.spec.js:232:1 › S3 §4 — radio active option uses var(--accent-primary) background and white text (1.5s)
+  ✓  173 tests\e2e\settings\control-fidelity.spec.js:273:1 › S3 §5 — clicking a radio segment changes the Store value and lights up the new segment (1.6s)
+  ✓  174 tests\e2e\settings\control-fidelity.spec.js:316:1 › S3 §6 — number control wraps a [- input +] structure with the input 56px wide (1.6s)
+  ✓  175 tests\e2e\settings\control-fidelity.spec.js:377:1 › S3 §7 — number buttons increment / decrement, and clamp when entry carries min/max (1.8s)
+  ✓  176 tests\e2e\settings\control-fidelity.spec.js:453:1 › S3 §8 — direct typing into the number input clamps on blur when min/max are present (1.5s)
+  ✓  177 tests\e2e\settings\control-fidelity.spec.js:503:1 › S3 §9 — S4/S6/S1/S2 invariants still hold after the control fidelity changes (1.5s)
+  ✓  178 tests\e2e\settings\control-fidelity.spec.js:555:1 › S3 §10 — existing behavior still works (theme radio + editor.spellcheck toggle round-trip) (1.7s)
+  ✓  179 tests\e2e\settings\honest-controls.spec.js:55:1 › H3 + H3A — PERSISTS_ONLY row carries the class and aria-disabled, retains full opacity (visual contract) (1.6s)
+  ✓  180 tests\e2e\settings\honest-controls.spec.js:74:1 › H3 — PERSISTS_ONLY control has the disabled attribute (RC1 §8.1.2) (1.6s)
+  ✓  181 tests\e2e\settings\honest-controls.spec.js:92:1 › H3 — PERSISTS_ONLY row helper text ends with "Behavior not wired yet." (RC1 §8.1.2) (1.5s)
+  ✓  182 tests\e2e\settings\honest-controls.spec.js:112:1 › H3 — attempting to interact with a PERSISTS_ONLY control does NOT call Store.set (1.6s)
+  ✓  183 tests\e2e\settings\honest-controls.spec.js:165:1 › H3 — REAL row (theme) renders fully interactive without the PERSISTS_ONLY treatment (1.7s)
+  ✓  184 tests\e2e\settings\honest-controls.spec.js:196:1 › H3 — no row renders the forbidden control-type chip (RC1 §7.3) (2.2s)
+  ✓  185 tests\e2e\settings\human-labels.spec.js:109:1 › H4 — no raw enum value appears as user-facing option text (2.3s)
+  ✓  186 tests\e2e\settings\human-labels.spec.js:131:1 › H4 — no internal setting id (dot-notation or camelCase) appears anywhere in the Settings UI text (2.2s)
+  ✓  187 tests\e2e\settings\human-labels.spec.js:155:1 › H4 — Language options render as "English", "Kurdish", "Arabic" (1.6s)
+  ✓  188 tests\e2e\settings\human-labels.spec.js:174:1 › H4 — human labels persist across a close + reopen (labels live in registry, no localStorage round-trip) (3.3s)
+  ✓  189 tests\e2e\settings\human-labels.spec.js:207:1 › H4 — UNSUPPORTED_CONTROL_INVENTORY.md exists and references every shipped control slice (post-H7) (7ms)
+  ✓  190 tests\e2e\settings\human-labels.spec.js:228:1 › H4 — unsupported-control rows do not expose control-type words or setting IDs in their visible value (1.6s)
+  ✓  191 tests\e2e\settings\margins-and-color.spec.js:89:1 › H7 — pageSetup.margins row renders the constitutional 2×2 margin-group control (1.9s)
+  ✓  192 tests\e2e\settings\margins-and-color.spec.js:136:1 › H7 — editing a margin field writes the whole {top, right, bottom, left} object through Settings.Store (1.9s)
+  ✓  193 tests\e2e\settings\margins-and-color.spec.js:159:1 › H7 — pageSetup.margins persists into document tier and rehydrates the inputs after re-mount (1.9s)
+  ✓  194 tests\e2e\settings\margins-and-color.spec.js:214:1 › H7 — Store.set(default) restores the registry default margins object (1.7s)
+  ✓  195 tests\e2e\settings\margins-and-color.spec.js:248:1 › H7 — typing an out-of-range margin clamps both the visible value and the stored value (1.7s)
+  ✓  196 tests\e2e\settings\margins-and-color.spec.js:282:1 › H7 — appearance.editorDeskColor row renders one swatch per palette option (no free-form picker) (1.7s)
+  ✓  197 tests\e2e\settings\margins-and-color.spec.js:321:1 › H7 — clicking a color swatch writes through Store and the --editor-bg custom property repaints immediately (1.7s)
+  ✓  198 tests\e2e\settings\margins-and-color.spec.js:357:1 › H7 — chosen desk color survives a close + reopen and reapplies at boot (3.2s)
+  ✓  199 tests\e2e\settings\margins-and-color.spec.js:401:1 › H7 — Store.set(default) restores the original desk color and the --editor-bg falls back to the theme token (1.7s)
+  ✓  200 tests\e2e\settings\margins-and-color.spec.js:440:1 › H7 — UNSUPPORTED_CONTROL_INVENTORY.md lists zero deferred entries; margins and color appear under Shipped Slices (5ms)
+  ✓  201 tests\e2e\settings\navigation-fidelity.spec.js:58:1 › S5 §1 — every nav item renders an SVG icon inside .rga-settings-nav-item-icon (1.6s)
+  ✓  202 tests\e2e\settings\navigation-fidelity.spec.js:90:1 › S5 §2 — every nav item shows its section label as the title (1.5s)
+  ✓  203 tests\e2e\settings\navigation-fidelity.spec.js:119:1 › S5 §3 — every nav item shows the section description (1.6s)
+  ✓  204 tests\e2e\settings\navigation-fidelity.spec.js:157:1 › S5 §4 — the active nav item carries a 2px accent left border (indicator bar) (1.5s)
+  ✓  205 tests\e2e\settings\navigation-fidelity.spec.js:192:1 › S5 §5 — the active nav item has a distinct background (1.5s)
+  ✓  206 tests\e2e\settings\navigation-fidelity.spec.js:221:1 › S5 §6 — hovering a non-active nav item changes its background (1.6s)
+  ✓  207 tests\e2e\settings\navigation-fidelity.spec.js:258:1 › S5 §7 — the nav footer carries a working Reset All button (1.6s)
+  ✓  208 tests\e2e\settings\navigation-fidelity.spec.js:301:1 › S5 §8 — no Save button exists anywhere in the Settings workspace (1.5s)
+  ✓  209 tests\e2e\settings\navigation-fidelity.spec.js:327:1 › S5 §9 — responsive layout survives narrow viewport widths (1.6s)
+  ✓  210 tests\e2e\settings\navigation-fidelity.spec.js:385:1 › S5 §10 — all prior Phase-2 invariants (S1/S2/S3/S4/S6) still hold (1.5s)
+  ✓  211 tests\e2e\settings\page-setup-ownership.spec.js:83:1 › S7 — Ctrl+Shift+G still opens the Page Setup modal (1.6s)
+  ✓  212 tests\e2e\settings\page-setup-ownership.spec.js:116:1 › S7 — modal Apply routes through Settings.Store (no direct doc.settings.pageSetup writes during Apply) (1.7s)
+  ✓  213 tests\e2e\settings\page-setup-ownership.spec.js:188:1 › S8 — modal Apply propagates through Store → LayoutProfile.compose reflects new margins (1.8s)
+  ✓  214 tests\e2e\settings\page-setup-ownership.spec.js:231:1 › S7 — modal Apply updates document truth and every reader observes the same value (1.8s)
+  ✓  215 tests\e2e\settings\page-setup-ownership.spec.js:270:1 › S7 — modal-set margins survive a script save + reload (document tier persistence) (3.1s)
+  ✓  216 tests\e2e\settings\page-setup-preview.spec.js:78:1 › S8 §1 — opening Page Setup mounts a live preview reflecting the active doc geometry (1.7s)
+  ✓  217 tests\e2e\settings\page-setup-preview.spec.js:108:1 › S8 §2 — preview and any other consumer derive geometry from Rga.LayoutProfile.compose (single resolver) (1.7s)
+  ✓  218 tests\e2e\settings\page-setup-preview.spec.js:150:1 › S8 §3 — margin change reflects in the preview within 100ms (1.8s)
+  ✓  219 tests\e2e\settings\page-setup-preview.spec.js:183:1 › S8 §4 — portrait → landscape swaps pageSize w/h in the preview (1.8s)
+  ✓  220 tests\e2e\settings\page-setup-preview.spec.js:226:1 › S8 §5 — paper size change letter → a4 re-renders the preview with A4 dims (1.8s)
+  ✓  221 tests\e2e\settings\page-setup-preview.spec.js:259:1 › S8 §6 — preview never reads Settings.Store.effective for geometry (single-source contract) (1.8s)
+  ✓  222 tests\e2e\settings\page-setup-preview.spec.js:334:1 › S8 §7 — no --page-margin-* inline CSS variables are written after a margin change (1.8s)
+  ✓  223 tests\e2e\settings\persists-only-visual-contract.spec.js:91:1 › H3A — label opacity is unchanged between REAL and PERSISTS_ONLY rows (1.6s)
+  ✓  224 tests\e2e\settings\persists-only-visual-contract.spec.js:110:1 › H3A — helper text opacity is unchanged between REAL and PERSISTS_ONLY rows (1.5s)
+  ✓  225 tests\e2e\settings\persists-only-visual-contract.spec.js:132:1 › H3A — PERSISTS_ONLY control is disabled (interaction layer signal) (1.6s)
+  ✓  226 tests\e2e\settings\persists-only-visual-contract.spec.js:149:1 › H3A — row padding/margin metrics are identical between REAL and PERSISTS_ONLY rows (1.6s)
+  ✓  227 tests\e2e\settings\persists-only-visual-contract.spec.js:170:1 › H3A — inter-row spacing is identical between REAL and PERSISTS_ONLY rows (1.6s)
+  ✓  228 tests\e2e\settings\persists-only-visual-contract.spec.js:204:1 › H3A — label and helper typography (size, weight, line-height) are identical across row states (1.5s)
+  ✓  229 tests\e2e\settings\persists-only-visual-contract.spec.js:229:1 › H3A — PERSISTS_ONLY row container opacity is 1.0 (no row-level fade) (1.6s)
+  ✓  230 tests\e2e\settings\row-layout-fidelity.spec.js:127:1 › S4 §1 — every Settings row uses CSS grid (display:grid) (1.6s)
+  ✓  231 tests\e2e\settings\row-layout-fidelity.spec.js:147:1 › S4 §2 — grid-template-columns resolves to 1fr auto equivalent (2 tracks, label column wider) (1.5s)
+  ✓  232 tests\e2e\settings\row-layout-fidelity.spec.js:165:1 › S4 §3 — row column gap is 8px (1.5s)
+  ✓  233 tests\e2e\settings\row-layout-fidelity.spec.js:182:1 › S4 §4 — row has no card background (transparent surface) (1.5s)
+  ✓  234 tests\e2e\settings\row-layout-fidelity.spec.js:200:1 › S4 §5 — row has no border-radius on any corner (1.7s)
+  ✓  235 tests\e2e\settings\row-layout-fidelity.spec.js:220:1 › S4 §6 — row has no full card border (only bottom is non-zero) (1.7s)
+  ✓  236 tests\e2e\settings\row-layout-fidelity.spec.js:239:1 › S4 §7 — row carries a 1px solid bottom separator (1.6s)
+  ✓  237 tests\e2e\settings\row-layout-fidelity.spec.js:260:1 › S4 §8 — control column hugs the right edge of the row (1.8s)
+  ✓  238 tests\e2e\settings\row-layout-fidelity.spec.js:283:1 › S4 §9 — label/helper column hugs the left edge of the row (1.7s)
+  ✓  239 tests\e2e\settings\row-layout-fidelity.spec.js:303:1 › S4 §10 — existing controls still function after the layout change (toggle round-trip) (1.7s)
+  ✓  240 tests\e2e\settings\row-reset-fidelity.spec.js:87:1 › S2 §1 — reset button hidden when the row value is at the registry default (1.5s)
+  ✓  241 tests\e2e\settings\row-reset-fidelity.spec.js:107:1 › S2 §2 — changing a user-tier setting (theme: dark -> light) reveals the reset button (1.6s)
+  ✓  242 tests\e2e\settings\row-reset-fidelity.spec.js:132:1 › S2 §3 — clicking the reset button restores the registry default value (1.6s)
+  ✓  243 tests\e2e\settings\row-reset-fidelity.spec.js:159:1 › S2 §4 — reset button hides again after the restore brings the value back to default (1.6s)
+  ✓  244 tests\e2e\settings\row-reset-fidelity.spec.js:185:1 › S2 §5 — script-tier reset works (editor.scriptLanguage en -> ku -> reset back to en) (1.7s)
+  ✓  245 tests\e2e\settings\row-reset-fidelity.spec.js:220:1 › S2 §6 — object setting reset works for pageSetup.margins (full object restore) (1.7s)
+  ✓  246 tests\e2e\settings\row-reset-fidelity.spec.js:263:1 › S2 §7 — reset button computed style matches RC1 (color text-tertiary, font 11px, padding 2px 4px, radius radius-sm) (1.6s)
+  ✓  247 tests\e2e\settings\row-reset-fidelity.spec.js:322:1 › S2 §8 — reset button sits after the control with a 6px gap in the value cell (1.6s)
+  ✓  248 tests\e2e\settings\row-reset-fidelity.spec.js:371:1 › S2 §9 — S4 row grid + S6 typography + S1 scope-badge invariants still hold after S2 (1.6s)
+  ✓  249 tests\e2e\settings\row-reset-fidelity.spec.js:418:1 › S2 §10 — controls still function after S2 (editor.spellcheck toggle round-trip) (1.6s)
+  ✓  250 tests\e2e\settings\s9-1-saturation-reduction.spec.js:84:1 › S9.1 — editor.wordWrap drives body[data-word-wrap] across all three modes (1.5s)
+  ✓  251 tests\e2e\settings\s9-1-saturation-reduction.spec.js:104:1 › S9.1 — editor.autocomplete drives body[data-autocomplete] (1.5s)
+  ✓  252 tests\e2e\settings\s9-1-saturation-reduction.spec.js:123:1 › S9.1 — editor.showLineNumbers toggles body.rga-no-line-numbers + hides .flow-line-gutter when OFF (1.6s)
+  ✓  253 tests\e2e\settings\s9-1-saturation-reduction.spec.js:156:1 › S9.1 — appearance.editorPageShadow drives body[data-page-shadow] (1.5s)
+  ✓  254 tests\e2e\settings\s9-1-saturation-reduction.spec.js:172:1 › S9.1 — appearance.sidebarPosition flips the workspace grid (left ↔ right) (1.6s)
+  ✓  255 tests\e2e\settings\s9-1-saturation-reduction.spec.js:203:1 › S9.1 — appearance.activityBar hides #activity-bar when OFF (1.5s)
+  ✓  256 tests\e2e\settings\s9-1-saturation-reduction.spec.js:229:1 › S9.1 — appearance.formatToolbar hides #rga-shell-toolbar when OFF (1.5s)
+  ✓  257 tests\e2e\settings\s9-1-saturation-reduction.spec.js:255:1 › S9.1 — autosave.enabled drives body[data-autosave] + Rga.Autosave._isEnabled() (1.5s)
+  ✓  258 tests\e2e\settings\s9-1-saturation-reduction.spec.js:277:1 › S9.1 — autosave.interval drives body[data-autosave-interval-seconds] + Rga.Autosave._maxIntervalMs() (1.5s)
+  ✓  259 tests\e2e\settings\s9-1-saturation-reduction.spec.js:300:1 › S9.1 — confirmBeforeClose drives body[data-confirm-close] + Rga.CloseGuard._isConfirmEnabled() (1.5s)
+  ✓  260 tests\e2e\settings\s9-1-saturation-reduction.spec.js:324:1 › S9.1 — boot-time applyAll pushes every S9.1 applicator default to <body> (1.4s)
+  ✓  261 tests\e2e\settings\scope-badges-fidelity.spec.js:96:1 › S1 §1 — every row has exactly one scope badge (1.6s)
+  ✓  262 tests\e2e\settings\scope-badges-fidelity.spec.js:115:1 › S1 §2 — badge label matches the registry scope value (1.5s)
+  ✓  263 tests\e2e\settings\scope-badges-fidelity.spec.js:136:1 › S1 §3 — every badge has a leading dot element (1.6s)
+  ✓  264 tests\e2e\settings\scope-badges-fidelity.spec.js:154:1 › S1 §4 — badge dot is 6×6 px (1.5s)
+  ✓  265 tests\e2e\settings\scope-badges-fidelity.spec.js:183:1 › S1 §5 — badge font-size is 10px (1.5s)
+  ✓  266 tests\e2e\settings\scope-badges-fidelity.spec.js:200:1 › S1 §6 — badge font-weight is 600 (1.5s)
+  ✓  267 tests\e2e\settings\scope-badges-fidelity.spec.js:221:1 › S1 §7 — badge letter-spacing is 0.04em (~0.4px at 10px font) (1.6s)
+  ✓  268 tests\e2e\settings\scope-badges-fidelity.spec.js:244:1 › S1 §8 — badge padding is 2px top/bottom, 7px left/right (1.6s)
+  ✓  269 tests\e2e\settings\scope-badges-fidelity.spec.js:271:1 › S1 §9 — badge sits inline as the next sibling after the row label (1.5s)
+  ✓  270 tests\e2e\settings\scope-badges-fidelity.spec.js:310:1 › S1 §10 — S4 row grid + S6 typography invariants still hold after the badge lands (1.6s)
+  ✓  271 tests\e2e\settings\settings-form-control-styling.spec.js:134:1 › Settings select: OPAQUE surface (not the old translucent fallback), readable ink (1.7s)
+  ✓  272 tests\e2e\settings\settings-form-control-styling.spec.js:147:1 › Settings select dropdown <option>: opaque surface + readable text (1.5s)
+  ✓  273 tests\e2e\settings\settings-form-control-styling.spec.js:154:1 › Settings disabled control: intentional (recessed opaque surface + --text-disabled ink), not washed out (1.6s)
+  ✓  274 tests\e2e\settings\settings-form-control-styling.spec.js:162:1 › Settings text input: opaque surface; focused control shows a polished accent ring (1.5s)
+  ✓  275 tests\e2e\settings\shortcut-controls.spec.js:49:1 › H6 — every kb.* row renders the constitutional shortcut control (key caps, no read-only fallback) (1.9s)
+  ✓  276 tests\e2e\settings\shortcut-controls.spec.js:97:1 › H6 — clicking a shortcut row enters rebind mode with the accent-coloured prompt (1.7s)
+  ✓  277 tests\e2e\settings\shortcut-controls.spec.js:124:1 › H6 — key capture writes the new combo through Settings.Store and re-renders the caps (1.7s)
+  ✓  278 tests\e2e\settings\shortcut-controls.spec.js:160:1 › H6 — rebinding kb.toggleSidebar takes effect immediately (no restart) via Rga.KeyboardRegistry (1.6s)
+  ✓  279 tests\e2e\settings\shortcut-controls.spec.js:203:1 › H6 — capturing a combo already used by another kb.* setting is rejected; original value unchanged (1.7s)
+  ✓  280 tests\e2e\settings\shortcut-controls.spec.js:242:1 › H6 — a rebound shortcut survives a close + reopen and reapplies at boot (3.1s)
+  ✓  281 tests\e2e\settings\shortcut-controls.spec.js:283:1 › H6 — Store.set(default) restores the original shortcut and re-binds the original combo (1.7s)
+  ✓  282 tests\e2e\settings\typography-fidelity.spec.js:73:1 › S6 §1 — section title font-size is 16px (1.7s)
+  ✓  283 tests\e2e\settings\typography-fidelity.spec.js:87:1 › S6 §2 — section title font-weight is 600 (1.6s)
+  ✓  284 tests\e2e\settings\typography-fidelity.spec.js:105:1 › S6 §3 — row label font-size is 13px (1.5s)
+  ✓  285 tests\e2e\settings\typography-fidelity.spec.js:119:1 › S6 §4 — row label font-weight is 500 (1.6s)
+  ✓  286 tests\e2e\settings\typography-fidelity.spec.js:137:1 › S6 §5 — helper text font-size is 11px (1.5s)
+  ✓  287 tests\e2e\settings\typography-fidelity.spec.js:151:1 › S6 §6 — helper text font-weight is 400 (1.5s)
+  ✓  288 tests\e2e\settings\typography-fidelity.spec.js:169:1 › S6 §7 — content padding is 24px top/bottom, 32px left/right (1.5s)
+  ✓  289 tests\e2e\settings\typography-fidelity.spec.js:190:1 › S6 §8 — content max-width is 680px (1.5s)
+  ✓  290 tests\e2e\settings\typography-fidelity.spec.js:208:1 › S6 §9 — S4 row grid invariant still holds (display:grid, two tracks, 8px column gap) (1.5s)
+  ✓  291 tests\e2e\settings\typography-fidelity.spec.js:235:1 › S6 §10 — controls still function after typography change (editor.spellcheck toggle round-trip) (1.7s)
+  ✓  292 tests\e2e\settings\window-zoom.spec.js:60:1 › H5 — windowZoom row renders the constitutional slider control (1.6s)
+  ✓  293 tests\e2e\settings\window-zoom.spec.js:97:1 › H5 — slider interaction updates the value label and writes through Settings.Store (1.6s)
+  ✓  294 tests\e2e\settings\window-zoom.spec.js:137:1 › H5 — windowZoom persists across a close + reopen and reapplies at boot (3.3s)
+  ✓  295 tests\e2e\settings\window-zoom.spec.js:177:1 › H5 — Store.set(default) returns the slider to 100% and resets the renderer zoom (1.8s)
+  ✓  296 tests\e2e\settings\window-zoom.spec.js:220:1 › H5 — Store.set propagates through the applicator into webFrame.setZoomFactor (visible UI change) (1.9s)
+  ✓  297 tests\integration\a2-killer.spec.js:56:1 › A2-killer — repeated Enter grows the page COUNT, never an existing leaf (6.2s)
+  ✓  298 tests\integration\app-close.spec.js:39:1 › closing with unsaved changes prompts, and Cancel keeps the app open (2.1s)
+  ✓  299 tests\integration\app-close.spec.js:60:1 › closing with unsaved changes and choosing Discard closes the app (2.0s)
+  ✓  300 tests\integration\atomic-save.spec.js:37:1 › atomic Save As writes the .rga, and a later Save rolls a .bak (2.1s)
+  ✓  301 tests\integration\atomic-save.spec.js:70:1 › a failed .bak backup is non-fatal — the save still succeeds (Amendment 1) (1.9s)
+  ✓  302 tests\integration\autosave.spec.js:45:1 › autosave writes a snapshot to userData/autosave while typing (4.7s)
+  ✓  303 tests\integration\autosave.spec.js:68:1 › multiple tabs keep separate snapshots (1.8s)
+  ✓  304 tests\integration\autosave.spec.js:84:1 › a snapshot survives a force-kill and is present after reopen (no restore) (3.1s)
+  ✓  305 tests\integration\editor-applicators.spec.js:32:1 › Slice 4A — editor.fontSize applicator updates --editor-font-size on #editor at runtime (1.6s)
+  ✓  306 tests\integration\editor-applicators.spec.js:53:1 › Slice 4A — persisted editor.fontSize rehydrates across a close + reopen (2.9s)
+  ✓  307 tests\integration\paper-view.spec.js:52:1 › Flow -> Print -> Flow round trip switches the active mode (1.5s)
+  ✓  308 tests\integration\paper-view.spec.js:61:1 › the live #editor visually disappears in Print and returns in Flow (1.6s)
+  ✓  309 tests\integration\paper-view.spec.js:70:1 › Paper page leaves appear in Print mode (1.5s)
+  ✓  310 tests\integration\paper-view.spec.js:76:1 › returning to Flow restores the editing caret (1.6s)
+  ✓  311 tests\integration\paper-view.spec.js:88:1 › Enter and typing work after a Print round trip (1.9s)
+  ✓  312 tests\integration\paper-view.spec.js:99:1 › the undo stack survives a Print round trip (1.8s)
+  ✓  313 tests\integration\paper-view.spec.js:110:1 › clicking a block in Paper view returns to Flow with a working caret (1.9s)
+  ✓  314 tests\integration\recovery.spec.js:78:1 › crash recovery — Restore reopens the unsaved work (6.3s)
+  ✓  315 tests\integration\recovery.spec.js:98:1 › a renderer reload (dev live-reload) does NOT prompt recovery and preserves the live document (4.9s)
+  ✓  316 tests\integration\recovery.spec.js:128:1 › crash recovery — Discard clears the snapshot and opens a clean document (7.0s)
+  ✓  317 tests\integration\responsive-shell.spec.js:94:1 › wide mode: all panels expanded, mode-wide on #app, no collapse classes (2.1s)
+  ✓  318 tests\integration\responsive-shell.spec.js:112:1 › compact mode: inspector rail is 32px wide and reopen button is visible (2.2s)
+  ✓  319 tests\integration\responsive-shell.spec.js:131:1 › compact mode: clicking the reopen button restores the inspector (within-mode toggle holds; mode change still wins) (2.1s)
+  ✓  320 tests\integration\responsive-shell.spec.js:154:1 › narrow mode: editor area fills the window minus chrome (no all-white empty area) (2.1s)
+  ✓  321 tests\integration\responsive-shell.spec.js:178:1 › narrow mode: toolbar shows only the Text group; menubar shows File/Edit/View only (2.4s)
+  ✓  322 tests\integration\responsive-shell.spec.js:207:1 › inspector first-class: drag cannot close the panel; clamps at 240 minimum (2.6s)
+  ✓  323 tests\integration\responsive-shell.spec.js:235:1 › inspector first-class: stuck width:0 recovers to default 280 on next open (1.9s)
+  ✓  324 tests\integration\responsive-shell.spec.js:257:1 › inspector first-class: toggle button is visible in BOTH states and collapses/expands on click (2.1s)
+  ✓  325 tests\integration\responsive-shell.spec.js:273:1 › inspector first-class: View → Toggle Inspector is collapse/uncollapse, never close (1.9s)
+  ✓  326 tests\integration\responsive-shell.spec.js:291:1 › hysteresis: small width changes around a threshold do not flap the mode (2.2s)
+  ✓  327 tests\integration\scene-chrome.spec.js:96:1 › scene chrome (LTR): num→heading gap is tight without gluing (2.0s)
+  ✓  328 tests\integration\scene-chrome.spec.js:106:1 › scene chrome (RTL): num→heading gap is tight without gluing, num is larger than LTR (3.0s)
+  ✓  329 tests\integration\settings-store.spec.js:32:1 › Slice 2 — changing editor.highlightCurrentLine flips the #editor class (1.7s)
+  ✓  330 tests\integration\settings-store.spec.js:68:1 › Slice 2 — user-tier value persists across a close + reopen (3.3s)
+  ✘  331 tests\integration\settings-workspace-5b.spec.js:47:1 › Slice 5B — General section rows render with current effective values (1.7s)
+  ✓  332 tests\integration\settings-workspace-5b.spec.js:71:1 › Slice 5B — search "paper" surfaces pageSetup.paperSize (1.8s)
+  ✓  333 tests\integration\settings-workspace-5b.spec.js:87:1 › Slice 5B — search "dark" surfaces theme (1.7s)
+  ✓  334 tests\integration\settings-workspace-5b.spec.js:103:1 › Slice 5B — search "font size" surfaces editor.fontSize (1.6s)
+  ✓  335 tests\integration\settings-workspace-5b.spec.js:119:1 › Slice 5B — no-result search shows the empty state (1.5s)
+  ✓  336 tests\integration\settings-workspace-5c.spec.js:50:1 › Slice 5C — toggling a boolean control updates Store.effective immediately (1.6s)
+  ✓  337 tests\integration\settings-workspace-5c.spec.js:79:1 › Slice 5C — an edit persists across app restart (prefs.write → prefs.read) (3.0s)
+  ✓  338 tests\integration\settings-workspace.spec.js:27:1 › Slice 5A — Ctrl+, opens the Settings workspace tab (1.5s)
+  ✓  339 tests\integration\settings-workspace.spec.js:63:1 › Slice 5A — pressing Ctrl+, twice does NOT create a second Settings tab (singleton) (1.5s)
+  ✓  340 tests\integration\shell-applicators.spec.js:35:1 › Slice 4B — editorDeskColor applies through the applicator at runtime; no inline at boot (1.5s)
+  ✓  341 tests\integration\shell-applicators.spec.js:58:1 › Slice 4B — persisted appearance.editorDeskColor rehydrates across a close + reopen (2.7s)
+  ✓  342 tests\integration\theme-applicator.spec.js:46:1 › H2 — theme radio displays human labels (Dark / Light / System), not raw codes (1.4s)
+  ✓  343 tests\integration\theme-applicator.spec.js:70:1 › H2 — color-scheme: dark light is declared on :root for native select readability (1.4s)
+  ✓  344 tests\integration\theme-applicator.spec.js:88:1 › H2 — selecting Light via Store flips data-theme to light synchronously (1.5s)
+  ✓  345 tests\integration\theme-applicator.spec.js:111:1 › H2 — 'system' resolves via matchMedia and re-resolves when the OS scheme flips (1.4s)
+  ✘  346 tests\integration\theme-applicator.spec.js:142:1 › H2 — chosen theme persists across a close + reopen (2.7s)
+  ✓  347 tests\integration\theme-applicator.spec.js:170:1 › H2 — Ctrl+Shift+T inverse-syncs Rga.Theme back into the Settings store (1.6s)
+  ✓  348 tests\integration\theme-applicator.spec.js:201:1 › H2B — legacy doc.settings.theme MUST NOT shadow the user's Settings choice across close + reopen (2.8s)
+  ✓  349 tests\integration\theme-applicator.spec.js:248:1 › H2B — Rga.SettingsTheme.toggle is the production helper and writes through Settings.Store (1.4s)
+  ✓  350 tests\integration\theme-applicator.spec.js:268:1 › H2B — the status bar theme instrument click routes through Settings.Store, not Rga.Theme directly (1.6s)
+  ✓  351 tests\integration\theme-applicator.spec.js:293:1 › H2 — legacy localStorage rga-theme migrates into prefs.theme exactly once (1.4s)
+  ✓  352 tests\integration\workspace-chrome-policy.spec.js:88:1 › chrome — document tab keeps toolbar/bottomPanel/inspector visible (1.4s)
+  ✘  353 tests\integration\workspace-chrome-policy.spec.js:105:1 › chrome — Settings tab hides toolbar + bottom panel + inspector (1.5s)
+  ✓  354 tests\integration\workspace-chrome-policy.spec.js:124:1 › chrome — switching back to the document tab restores all three (1.6s)
+  ✓  355 tests\integration\workspace-chrome-policy.spec.js:149:1 › chrome (freeze) — tab-bar Y position is identical across doc → Settings → doc (1.6s)
+  ✘  356 tests\integration\workspace-chrome-policy.spec.js:188:1 › chrome (scroll) — Settings nav rail is independent of content scroll; search stays sticky (1.7s)
+  ✓  357 tests\integration\workspace-chrome-policy.spec.js:240:1 › chrome (layout) — tab-content-host grows when Settings hides the inspector + bottom-panel tracks (1.6s)
+  ✓  358 tests\integration\workspace-chrome-policy.spec.js:265:1 › chrome — opening Settings twice does not stack tabs (singleton preserved) (1.6s)
+  ✓  359 tests\integration\workspace-tab.spec.js:47:1 › Slice 1 — Rga.Workspaces registry exists and hello-world is registered at boot (1.5s)
+  ✓  360 tests\integration\workspace-tab.spec.js:54:1 › Slice 1 — openWorkspace("hello-world") mounts the proof div into #tab-content-host (1.6s)
+  ✓  361 tests\integration\workspace-tab.spec.js:72:1 › Slice 1 — opening workspace hides document renderer; opening document re-shows it (1.6s)
+  ✓  362 tests\integration\workspace-tab.spec.js:115:1 › Slice 1 — activeDoc returns null while workspace tab active; restores after switching back (1.7s)
+  ✓  363 tests\integration\workspace-tab.spec.js:143:1 › Slice 1 — closing the workspace tab does not prompt CloseGuard and the doc tab stays (1.6s)
+
+
+  1) tests\e2e\filmustageation\scene-navigator-rtl-expansion.spec.js:69:1 › SN RTL — navigator mirrors the script; chevron on inline-start, caret points left, marks indent from start 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeGreaterThan[2m([22m[32mexpected[39m[2m)[22m
+
+    Expected: > [32m0[39m
+    Received:   [31m0[39m
+
+      109 |     // 5. Marks render, indented from inline-start (→ padding-right in RTL).
+      110 |     expect(m.marksPresent).toBe(true);
+    > 111 |     expect(m.marksPadRight).toBeGreaterThan(m.marksPadLeft);
+          |                             ^
+      112 |   } finally {
+      113 |     await teardown(app, userDataDir);
+      114 |   }
+        at E:\api\rwanga\rwanga-editor\tests\e2e\filmustageation\scene-navigator-rtl-expansion.spec.js:111:29
+
+    Error Context: test-results\e2e-filmustageation-scene--a9751-eft-marks-indent-from-start\error-context.md
+
+  2) tests\e2e\filmustageation\scene-navigator-rtl-expansion.spec.js:117:1 › SN LTR — control: chevron on inline-start (left), caret points right, marks indent from left (unchanged) 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeGreaterThan[2m([22m[32mexpected[39m[2m)[22m
+
+    Expected: > [32m0[39m
+    Received:   [31m0[39m
+
+      152 |     // Marks indent from the left.
+      153 |     expect(m.marksPresent).toBe(true);
+    > 154 |     expect(m.marksPadLeft).toBeGreaterThan(m.marksPadRight);
+          |                            ^
+      155 |   } finally {
+      156 |     await teardown(app, userDataDir);
+      157 |   }
+        at E:\api\rwanga\rwanga-editor\tests\e2e\filmustageation\scene-navigator-rtl-expansion.spec.js:154:28
+
+    Error Context: test-results\e2e-filmustageation-scene--dfac2-indent-from-left-unchanged-\error-context.md
+
+  3) tests\integration\settings-workspace-5b.spec.js:47:1 › Slice 5B — General section rows render with current effective values 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoEqual[2m([22m[32mexpected[39m[2m) // deep equality[22m
+
+    [32m- Expected  - 0[39m
+    [31m+ Received  + 1[39m
+
+    [2m  Array [[22m
+    [2m    "language",[22m
+    [2m    "theme",[22m
+    [2m    "windowZoom",[22m
+    [31m+   "units",[39m
+    [2m    "recentFilesLimit",[22m
+    [2m    "confirmBeforeClose",[22m
+    [2m    "restoreLastSession",[22m
+    [2m  ][22m
+
+      50 |   try {
+      51 |     const ids = await rowIds(page);
+    > 52 |     expect(ids).toEqual([
+         |                 ^
+      53 |       'language', 'theme', 'windowZoom',
+      54 |       'recentFilesLimit', 'confirmBeforeClose', 'restoreLastSession'
+      55 |     ]);
+        at E:\api\rwanga\rwanga-editor\tests\integration\settings-workspace-5b.spec.js:52:17
+
+    Error Context: test-results\integration-settings-works-7964e-th-current-effective-values\error-context.md
+
+  4) tests\integration\theme-applicator.spec.js:142:1 › H2 — chosen theme persists across a close + reopen 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBe[2m([22m[32mexpected[39m[2m) // Object.is equality[22m
+
+    Expected: [32m"light"[39m
+    Received: [31m"dark"[39m
+
+      155 |         const effective = await page.evaluate(() =>
+      156 |           window.Rga.Settings.Store.effective('theme'));
+    > 157 |         expect(effective).toBe('light');
+          |                           ^
+      158 |         const domTheme = await page.evaluate(() =>
+      159 |           document.documentElement.getAttribute('data-theme'));
+      160 |         expect(domTheme).toBe('light');
+        at E:\api\rwanga\rwanga-editor\tests\integration\theme-applicator.spec.js:157:27
+
+    Error Context: test-results\integration-theme-applicat-e9dfe-sists-across-a-close-reopen\error-context.md
+
+  5) tests\integration\workspace-chrome-policy.spec.js:105:1 › chrome — Settings tab hides toolbar + bottom panel + inspector 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBe[2m([22m[32mexpected[39m[2m) // Object.is equality[22m
+
+    Expected: [32m"none"[39m
+    Received: [31m"grid"[39m
+
+      113 |     expect(v.bottomPanel.hiddenByPolicy).toBe(true);
+      114 |     expect(v.inspector.hiddenByPolicy).toBe(true);
+    > 115 |     expect(v.toolbar.computedDisplay).toBe('none');
+          |                                       ^
+      116 |     expect(v.bottomPanel.computedDisplay).toBe('none');
+      117 |     expect(v.inspector.computedDisplay).toBe('none');
+      118 |   } finally {
+        at E:\api\rwanga\rwanga-editor\tests\integration\workspace-chrome-policy.spec.js:115:39
+
+    Error Context: test-results\integration-workspace-chro-9547b-lbar-bottom-panel-inspector\error-context.md
+
+  6) tests\integration\workspace-chrome-policy.spec.js:188:1 › chrome (scroll) — Settings nav rail is independent of content scroll; search stays sticky 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBe[2m([22m[32mexpected[39m[2m) // Object.is equality[22m
+
+    Expected: [32m"auto"[39m
+    Received: [31m"hidden"[39m
+
+      205 |       };
+      206 |     }, WS_SEL);
+    > 207 |     expect(containers.navOverflow).toBe('auto');
+          |                                    ^
+      208 |     expect(containers.contentOverflow).toBe('auto');
+      209 |
+      210 |     // 2. Scroll the content area to the bottom. Nav and search must not move.
+        at E:\api\rwanga\rwanga-editor\tests\integration\workspace-chrome-policy.spec.js:207:36
+
+    Error Context: test-results\integration-workspace-chro-11620--scroll-search-stays-sticky\error-context.md
+
+  6 failed
+    tests\e2e\filmustageation\scene-navigator-rtl-expansion.spec.js:69:1 › SN RTL — navigator mirrors the script; chevron on inline-start, caret points left, marks indent from start 
+    tests\e2e\filmustageation\scene-navigator-rtl-expansion.spec.js:117:1 › SN LTR — control: chevron on inline-start (left), caret points right, marks indent from left (unchanged) 
+    tests\integration\settings-workspace-5b.spec.js:47:1 › Slice 5B — General section rows render with current effective values 
+    tests\integration\theme-applicator.spec.js:142:1 › H2 — chosen theme persists across a close + reopen 
+    tests\integration\workspace-chrome-policy.spec.js:105:1 › chrome — Settings tab hides toolbar + bottom panel + inspector 
+    tests\integration\workspace-chrome-policy.spec.js:188:1 › chrome (scroll) — Settings nav rail is independent of content scroll; search stays sticky 
+  357 passed (11.7m)
+EXIT=1

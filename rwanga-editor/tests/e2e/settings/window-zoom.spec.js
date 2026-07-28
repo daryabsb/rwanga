@@ -20,6 +20,7 @@ const { test, expect, _electron: electron } = require('@playwright/test');
 const path = require('path');
 const os   = require('os');
 const fs   = require('fs');
+const { closeApp } = require('../../helpers/app-teardown');
 
 const APP_ROOT = path.resolve(__dirname, '..', '..', '..');
 
@@ -83,7 +84,7 @@ test('H5 — windowZoom row renders the constitutional slider control', async ()
     await expect(label).toBeVisible();
     expect((await label.textContent()).trim()).toBe('100%');
   } finally {
-    await app.close();
+    await closeApp(app);
     try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
   }
 });
@@ -124,7 +125,7 @@ test('H5 — slider interaction updates the value label and writes through Setti
     expect(calls.length).toBeGreaterThan(0);
     expect(calls[calls.length - 1]).toBe(150);
   } finally {
-    await app.close();
+    await closeApp(app);
     try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
   }
 });
@@ -142,7 +143,7 @@ test('H5 — windowZoom persists across a close + reopen and reapplies at boot',
       await setSliderValue(page, 130);
       await page.waitForFunction(() =>
         window.rwanga.prefs.read().then((p) => p['windowZoom'] === 130));
-      await app.close();
+      await closeApp(app);
     }
     // Second launch: Store.effective is 130, applicator has reapplied.
     {
@@ -161,7 +162,7 @@ test('H5 — windowZoom persists across a close + reopen and reapplies at boot',
           window.rwanga.window.getZoomFactor());
         expect(factor).toBeCloseTo(1.3, 2);
       } finally {
-        await app.close();
+        await closeApp(app);
       }
     }
   } finally {
@@ -207,7 +208,7 @@ test('H5 — Store.set(default) returns the slider to 100% and resets the render
       window.rwanga.window.getZoomFactor());
     expect(afterFactor).toBeCloseTo(1.0, 2);
   } finally {
-    await app.close();
+    await closeApp(app);
     try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
   }
 });
@@ -248,7 +249,7 @@ test('H5 — Store.set propagates through the applicator into webFrame.setZoomFa
       window.rwanga.window.getZoomFactor());
     expect(clampedLow).toBeCloseTo(0.5, 2);
   } finally {
-    await app.close();
+    await closeApp(app);
     try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
   }
 });

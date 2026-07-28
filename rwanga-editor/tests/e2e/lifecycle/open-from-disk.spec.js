@@ -20,6 +20,7 @@ const { test, expect, _electron: electron } = require('@playwright/test');
 const path = require('path');
 const os = require('os');
 const fs = require('fs');
+const { closeApp } = require('../../helpers/app-teardown');
 
 const APP_ROOT = path.resolve(__dirname, '..', '..', '..');
 const FIXTURE = path.resolve(APP_ROOT, 'tests', 'fixtures', 'mysterious-guest-rtl.rga');
@@ -88,7 +89,7 @@ test('PF-03 — an existing .rga opens from disk and is not written back', async
         if (doc) doc.dirty = false;
       });
     } catch (_) {}
-    await app.close();
+    await closeApp(app);
   }
 
   // Opening must never write to the file — no migration write-back, no .bak, no .tmp.

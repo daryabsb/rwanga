@@ -13,6 +13,7 @@ const { test, expect, _electron: electron } = require('@playwright/test');
 const path = require('path');
 const os = require('os');
 const fs = require('fs');
+const { closeApp } = require('../helpers/app-teardown');
 
 const APP_ROOT = path.resolve(__dirname, '..', '..');
 
@@ -44,7 +45,7 @@ test('Slice 4A — editor.fontSize applicator updates --editor-font-size on #edi
       document.getElementById('editor').style.getPropertyValue('--editor-font-size'));
     expect(after).toBe('14pt');
   } finally {
-    await app.close();
+    await closeApp(app);
     try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
   }
 });
@@ -60,7 +61,7 @@ test('Slice 4A — persisted editor.fontSize rehydrates across a close + reopen'
       await page.evaluate(() => window.Rga.Settings.Store.set('editor.fontSize', 18));
       await page.waitForFunction(() =>
         window.rwanga.prefs.read().then((p) => p['editor.fontSize'] === 18));
-      await app.close();
+      await closeApp(app);
     }
     // Second launch with the SAME userDataDir: prefs should restore
     // 18, applyAll() should push it onto #editor before the test
@@ -75,7 +76,7 @@ test('Slice 4A — persisted editor.fontSize rehydrates across a close + reopen'
           document.getElementById('editor').style.getPropertyValue('--editor-font-size'));
         expect(styleVar).toBe('18pt');
       } finally {
-        await app.close();
+        await closeApp(app);
       }
     }
   } finally {

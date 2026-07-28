@@ -17,6 +17,7 @@ const { test, expect, _electron: electron } = require('@playwright/test');
 const path = require('path');
 const os   = require('os');
 const fs   = require('fs');
+const { closeApp } = require('../../helpers/app-teardown');
 
 const APP_ROOT = path.resolve(__dirname, '..', '..', '..');
 
@@ -65,7 +66,7 @@ test('H3 + H3A — PERSISTS_ONLY row carries the class and aria-disabled, retain
     const opacity = await row.evaluate((el) => getComputedStyle(el).opacity);
     expect(parseFloat(opacity)).toBeCloseTo(1.0, 2);
   } finally {
-    await app.close();
+    await closeApp(app);
     try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
   }
 });
@@ -79,7 +80,7 @@ test('H3 — PERSISTS_ONLY control has the disabled attribute (RC1 §8.1.2)', as
       '.rga-settings-row[data-setting-id="' + PERSISTS_ONLY_ID + '"] input[type="checkbox"]');
     await expect(ctrl).toBeDisabled();
   } finally {
-    await app.close();
+    await closeApp(app);
     try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
   }
 });
@@ -98,7 +99,7 @@ test('H3 — PERSISTS_ONLY row helper text ends with "Behavior not wired yet." (
       (el) => el.textContent.trim());
     expect(desc.endsWith('Behavior not wired yet.')).toBe(true);
   } finally {
-    await app.close();
+    await closeApp(app);
     try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
   }
 });
@@ -151,7 +152,7 @@ test('H3 — attempting to interact with a PERSISTS_ONLY control does NOT call S
     expect(setCalls.length).toBe(0);   // no Store.set for this id
     expect(after).toBe(before);         // user tier unchanged
   } finally {
-    await app.close();
+    await closeApp(app);
     try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
   }
 });
@@ -183,7 +184,7 @@ test('H3 — REAL row (theme) renders fully interactive without the PERSISTS_ONL
       await expect(radios.nth(i)).not.toBeDisabled();
     }
   } finally {
-    await app.close();
+    await closeApp(app);
     try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
   }
 });
@@ -208,7 +209,7 @@ test('H3 — no row renders the forbidden control-type chip (RC1 §7.3)', async 
       expect(chipCount).toBe(0);
     }
   } finally {
-    await app.close();
+    await closeApp(app);
     try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
   }
 });

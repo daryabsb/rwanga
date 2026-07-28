@@ -9,6 +9,8 @@ const path = require('path');
 const os = require('os');
 const fs = require('fs');
 
+const { closeApp } = require('../helpers/app-teardown');
+
 const APP_ROOT = path.resolve(__dirname, '..', '..');
 
 let app, page, userDataDir;
@@ -27,7 +29,7 @@ test.beforeEach(async () => {
 });
 
 test.afterEach(async () => {
-  if (app) { try { await app.close(); } catch (_) {} app = null; }
+  if (app) { await closeApp(app, page); app = null; page = null; }
   if (userDataDir) {
     try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
     userDataDir = null;

@@ -28,6 +28,7 @@ const { test, expect, _electron: electron } = require('@playwright/test');
 const path = require('path');
 const os = require('os');
 const fs = require('fs');
+const { closeApp } = require('../../helpers/app-teardown');
 
 const APP_ROOT = path.resolve(__dirname, '..', '..', '..');
 
@@ -50,7 +51,7 @@ async function clearDirtyAndClose(app, page) {
       else if (doc) doc.dirty = false;
     });
   } catch (_) {}
-  await app.close();
+  await closeApp(app);
 }
 
 test('PF-02 — a new document round-trips through disk (new → type → save → reopen)', async () => {

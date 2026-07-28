@@ -34,6 +34,7 @@ const { test, expect, _electron: electron } = require('@playwright/test');
 const path = require('path');
 const os   = require('os');
 const fs   = require('fs');
+const { closeApp } = require('../../helpers/app-teardown');
 
 const APP_ROOT = path.resolve(__dirname, '..', '..', '..');
 
@@ -97,7 +98,7 @@ test('H3A — label opacity is unchanged between REAL and PERSISTS_ONLY rows', a
     expect(parseFloat(persists.label.opacity)).toBe(1);
     expect(persists.label.opacity).toBe(real.label.opacity);
   } finally {
-    await app.close();
+    await closeApp(app);
     try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
   }
 });
@@ -119,7 +120,7 @@ test('H3A — helper text opacity is unchanged between REAL and PERSISTS_ONLY ro
     // imposed by an ancestor).
     expect(persists.desc.color).toBe(real.desc.color);
   } finally {
-    await app.close();
+    await closeApp(app);
     try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
   }
 });
@@ -136,7 +137,7 @@ test('H3A — PERSISTS_ONLY control is disabled (interaction layer signal)', asy
       '.rga-settings-row[data-setting-id="' + PERSISTS_ID + '"] select');
     await expect(ctrl).toBeDisabled();
   } finally {
-    await app.close();
+    await closeApp(app);
     try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
   }
 });
@@ -157,7 +158,7 @@ test('H3A — row padding/margin metrics are identical between REAL and PERSISTS
     expect(persists.row.marginTop).toBe(real.row.marginTop);
     expect(persists.row.marginBottom).toBe(real.row.marginBottom);
   } finally {
-    await app.close();
+    await closeApp(app);
     try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
   }
 });
@@ -191,7 +192,7 @@ test('H3A — inter-row spacing is identical between REAL and PERSISTS_ONLY rows
     }, { real: REAL_ID, persists: PERSISTS_ID });
     expect(spacing.persists).toEqual(spacing.real);
   } finally {
-    await app.close();
+    await closeApp(app);
     try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
   }
 });
@@ -216,7 +217,7 @@ test('H3A — label and helper typography (size, weight, line-height) are identi
     expect(persists.desc.fontWeight).toBe(real.desc.fontWeight);
     expect(persists.desc.lineHeight).toBe(real.desc.lineHeight);
   } finally {
-    await app.close();
+    await closeApp(app);
     try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
   }
 });
@@ -232,7 +233,7 @@ test('H3A — PERSISTS_ONLY row container opacity is 1.0 (no row-level fade)', a
     const persists = await probe(page, PERSISTS_ID);
     expect(parseFloat(persists.row.opacity)).toBe(1);
   } finally {
-    await app.close();
+    await closeApp(app);
     try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
   }
 });

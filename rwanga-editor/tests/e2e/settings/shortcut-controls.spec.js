@@ -20,6 +20,7 @@ const { test, expect, _electron: electron } = require('@playwright/test');
 const path = require('path');
 const os   = require('os');
 const fs   = require('fs');
+const { closeApp } = require('../../helpers/app-teardown');
 
 const APP_ROOT = path.resolve(__dirname, '..', '..', '..');
 
@@ -84,7 +85,7 @@ test('H6 — every kb.* row renders the constitutional shortcut control (key cap
       .allTextContents();
     expect(caps).toEqual(['Ctrl', 'Shift', 'P']);
   } finally {
-    await app.close();
+    await closeApp(app);
     try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
   }
 });
@@ -111,7 +112,7 @@ test('H6 — clicking a shortcut row enters rebind mode with the accent-coloured
       window.Rga.Settings.Store.effective('kb.find'));
     expect(afterEscape).toBe('Ctrl+F');
   } finally {
-    await app.close();
+    await closeApp(app);
     try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
   }
 });
@@ -144,7 +145,7 @@ test('H6 — key capture writes the new combo through Settings.Store and re-rend
       window.Rga.Settings.Store.effective('kb.find'));
     expect(stored).toBe('Ctrl+Alt+G');
   } finally {
-    await app.close();
+    await closeApp(app);
     try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
   }
 });
@@ -190,7 +191,7 @@ test('H6 — rebinding kb.toggleSidebar takes effect immediately (no restart) vi
       window.Rga.Shell.Layout.get().sidebar.visible);
     expect(after).toBe(!before);
   } finally {
-    await app.close();
+    await closeApp(app);
     try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
   }
 });
@@ -229,7 +230,7 @@ test('H6 — capturing a combo already used by another kb.* setting is rejected;
     expect(toastMsg).toContain('Ctrl+F');
     expect(toastMsg.toLowerCase()).toContain('already bound');
   } finally {
-    await app.close();
+    await closeApp(app);
     try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
   }
 });
@@ -247,7 +248,7 @@ test('H6 — a rebound shortcut survives a close + reopen and reapplies at boot'
         window.Rga.Settings.Store.set('kb.toggleSidebar', 'Ctrl+Alt+K'));
       await page.waitForFunction(() =>
         window.rwanga.prefs.read().then((p) => p['kb.toggleSidebar'] === 'Ctrl+Alt+K'));
-      await app.close();
+      await closeApp(app);
     }
     {
       const { app, page } = await launchAndOpen(userDataDir);
@@ -267,7 +268,7 @@ test('H6 — a rebound shortcut survives a close + reopen and reapplies at boot'
         });
         expect(bound).toBe(true);
       } finally {
-        await app.close();
+        await closeApp(app);
       }
     }
   } finally {
@@ -313,7 +314,7 @@ test('H6 — Store.set(default) restores the original shortcut and re-binds the 
     });
     expect(bound).toBe(true);
   } finally {
-    await app.close();
+    await closeApp(app);
     try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
   }
 });

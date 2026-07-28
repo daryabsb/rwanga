@@ -18,6 +18,7 @@ const { test, expect, _electron: electron } = require('@playwright/test');
 const path = require('path');
 const os   = require('os');
 const fs   = require('fs');
+const { closeApp } = require('../../helpers/app-teardown');
 
 const APP_ROOT = path.resolve(__dirname, '..', '..', '..');
 const SHOT_DIR = path.join(APP_ROOT, 'test-results', 'tags-panel');
@@ -41,7 +42,7 @@ async function launchApp(prefix) {
 }
 
 async function teardown(app, userDataDir) {
-  try { await app.close(); } catch (_) {}
+  await closeApp(app);
   try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
 }
 

@@ -18,6 +18,7 @@ const { test, expect, _electron: electron } = require('@playwright/test');
 const path = require('path');
 const os = require('os');
 const fs = require('fs');
+const { closeApp } = require('../helpers/app-teardown');
 
 const APP_ROOT = path.resolve(__dirname, '..', '..');
 const WS_SEL   = '[data-renderer="workspace"][data-workspace-kind="settings"]';
@@ -70,7 +71,7 @@ test('Slice 5C — toggling a boolean control updates Store.effective immediatel
       window.Rga.Settings.Store.effective('editor.highlightCurrentLine'));
     expect(after).toBe(false);
   } finally {
-    await app.close();
+    await closeApp(app);
     try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
   }
 });
@@ -100,7 +101,7 @@ test('Slice 5C — an edit persists across app restart (prefs.write → prefs.re
           return stored && stored['editor.highlightCurrentLine'] === false;
         }, null, { timeout: 5000 });
       } finally {
-        await app.close();
+        await closeApp(app);
       }
     }
 
@@ -119,7 +120,7 @@ test('Slice 5C — an edit persists across app restart (prefs.write → prefs.re
           window.Rga.Settings.Store.effective('editor.highlightCurrentLine'));
         expect(eff).toBe(false);
       } finally {
-        await app.close();
+        await closeApp(app);
       }
     }
   } finally {

@@ -5,6 +5,41 @@ Template & rules: `PROTOCOL.md`.
 
 ---
 
+## 2026-07-28 · S3.2F CLOSED — GAP-3-3 fixed (e2e quit path) · FIRST e2e baseline recorded
+- **Did:** Root-caused and fixed the hanging app-close, on the user's instruction to do it before
+  S3.3. Two distinct causes, **both test hygiene — no product code was touched**:
+  (a) the quit guard is correct and deliberate (`electron/main.js:99` intercepts the close →
+  `renderer/index.html:1577` → `Rga.CloseGuard.confirmAppClose()` → `#unsaved-modal`), and it waits
+  for a **human**; under Playwright nobody clicks, the verdict never arrives, and main aborts the
+  close rather than force-quit over unsaved work — so `app.close()` never resolved. Fixed with one
+  shared teardown helper (`tests/helpers/app-teardown.js` → `closeApp`), generalising the repo's
+  existing `clearDirtyAndClose` idiom to ALL tabs and sweeping it across **60 spec files / 124 call
+  sites**. (b) The force-kill specs (`autosave`, `recovery`) SIGKILLed only the Electron **main**
+  process; on Windows the surviving GPU/renderer children keep Playwright's pipe open, so Playwright
+  never saw the app die — it blocked 60 s at WORKER teardown and orphaned the children. Fixed by
+  killing the process **tree** (`taskkill /T /F`); `killApp` now lives beside `closeApp`.
+  Then recorded the campaign's first e2e baseline.
+- **Evidence:** `docs/plans/evidence/S3.2F-quit-path.md` + `S3.2F-e2e-baseline.txt`.
+  **E2E BASELINE: 363 tests · 357 pass · 6 fail · 11.7 min · 0 teardown hangs · 0 orphans**
+  (before: 326 pass · 37 fail · 1.2 h). Spot proofs: `app-close.spec.js` 1.4 min hang → 2/2 in 7.9 s;
+  `autosave.spec.js` 1.3 min → 3/3 in 13.3 s; `autosave` + `recovery` 6/6 in 33.1 s.
+- **Status deltas:** S3.2F ✅ (new slice, authorized by the user 2026-07-28). GAP-3-3 OPEN →
+  **CLOSED**. No launch-checklist row flipped — this slice fixed the measuring instrument, not a P0.
+  Gate counts unchanged (37 TRUE · 17 PARTIAL · 5 UNKNOWN · 1 FALSE).
+- **Gaps/risks surfaced:** **GAP-3-4** — the 5 stable reds the fix left visible, all assertion
+  failures in test bodies with no teardown noise to hide behind, none yet triaged: scene-navigator
+  marks report zero directional indent (RTL **and** its LTR control); Settings tab fails to hide the
+  toolbar (`display:grid`, expected `none`); Settings nav rail `overflow:hidden` expected `auto`
+  — **same family as GAP-3-2**, fix together; Settings General rows drifted from the registry. Two
+  load-dependent flakes recorded rather than adjusted (`page-setup-preview` 116.7 ms vs a 100 ms
+  budget; `theme-applicator` theme-across-reopen, 3/3 green in isolation). Nothing was weakened,
+  skipped, quarantined, or deleted. Also self-caught: the sweep first appended a `require` at the
+  bottom of `tag-plugin-ownership.spec.js`, producing 8 `ReferenceError` reds in the very first
+  baseline run — fixed, with a placement check now green 60/60.
+- **Next action:** S3.3 — PF-13 clean-console audit across core flows.
+
+---
+
 ## 2026-07-27 · S3.2 CLOSED — PF-02/03/05 TRUE (lifecycle E2E 3/3) · GAP-3-3 opened
 - **Did:** Wrote the three lifecycle specs under `rwanga-editor/tests/e2e/lifecycle/`. Step-1 seam
   chosen by reading the code: stub `dialog.showSaveDialog`/`showOpenDialog` in the MAIN process

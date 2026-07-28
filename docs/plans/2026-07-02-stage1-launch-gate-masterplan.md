@@ -80,6 +80,7 @@ electron-builder (`npm run pack:win`), PowerShell/Windows 11.
 | S2.2 | 2 LR-01 | Install + smoke the built `.exe` → flip LR-01 TRUE | ✅ | `docs/plans/evidence/S2.2-installer-smoke.md` — user-performed smoke on installed app **5/5 PASS**; unsigned accepted (Decision #2, 2026-07-26); LR-01 UNKNOWN→TRUE; gaps GAP-2-1/GAP-2-2 opened (non-blocking) |
 | S3.1 | 3 Lifecycle | PF-01 cold-start launch matrix (Windows) | ✅ | `docs/plans/evidence/S3.1-launch-matrix.md`: **Windows 13/13 PASS · 0 failures** — 10/10 cold starts (1.1–1.6 s), post-reboot launch PASS (user, 2026-07-27), focus-existing single-instance, no `.rga` assoc (observed, not failure). PF-01 → PARTIAL **(Windows-verified)**; macOS matrix deferred by Decision #1 (Mac later), tracked on the PF-01 row |
 | S3.2 | 3 Lifecycle | PF-02/03/05 lifecycle E2E specs (new/open/save-as) | ✅ | `docs/plans/evidence/S3.2-lifecycle-e2e.md` — three specs under `rwanga-editor/tests/e2e/lifecycle/`, **3/3 PASS** (and green inside the full suite). Seam: main-process dialog stubs (real IPC path), not the `doc.handle` shortcut. PF-02/03/05 PARTIAL→TRUE. Full-suite run 326 pass/37 fail → all sampled failures proven PRE-EXISTING (**GAP-3-3**) |
+| S3.2F | 3 Lifecycle | GAP-3-3 fix — e2e quit path + FIRST recorded e2e baseline | ✅ | `docs/plans/evidence/S3.2F-quit-path.md` + `S3.2F-e2e-baseline.txt`. **E2E BASELINE: 363 tests · 357 pass · 6 fail · 11.7 min · 0 teardown hangs · 0 orphaned processes** (was 326 pass · 37 fail · 1.2 h). Two causes, both test hygiene, zero product code touched: shared `closeApp()` teardown swept over 60 specs / 124 call sites, and process-TREE kill for the force-kill specs. 5 stable reds + 1 load-flake remain → **GAP-3-4** |
 | S3.3 | 3 Lifecycle | PF-13 clean-console audit across core flows | ⬜ | |
 | S4.1 | 4 RTL ⭐ | RTL QA fixture + convention checklist prep | ⬜ | |
 | S4.2 | 4 RTL ⭐ | Editor alignment sweep RTL-04…RTL-09 | ⬜ | |
@@ -100,7 +101,8 @@ electron-builder (`npm run pack:win`), PowerShell/Windows 11.
 | GAP-2-1 | S2.2 smoke | **Flow view opens a New doc with a large dead band** between top chrome and the page; it shrinks gradually as content is typed until the layout reaches its correct height. USER-REPORTED, long-standing, previously never ticketed (user has raised it before). Visual/layout defect in Flow initial geometry, packaged + dev alike. Screenshots in user report 2026-07-26. Does not block typing/structure. **Expected behavior (user-ratified):** a New doc's page renders at its FULL configured page size (A4/Letter per Page Setup) from the first paint — never a shrunken page that grows as content arrives. Needs its own fix-slice (systematic-debugging + failing test first). | OPEN |
 | GAP-3-1 | user report post-S3.1 | **Compact mode amputates half the menubar with no overflow.** `shell.css:2357-2362` hides the Tags / Tools / Export / Help menus whenever `#app.mode-compact` (window < ~1412 CSS px = virtually every laptop under Windows display scaling; user's 1440px @ ~125% ≈ 1152px). Settings' only menu entry lives in Tools → **Settings disappears from the menu**, as do all Export/Help items; no "…" overflow, no relocation. Gear icon + Ctrl+, still reach Settings (why tests stay green — they assert command registration, not menu visibility). Root-caused 2026-07-26 (responsive.js `_decideMode` + compact CSS). Fix direction (own slice): overflow "…" menu or move Settings to a never-hidden menu; never hide a menu's ONLY route to a feature. | OPEN |
 | GAP-3-2 | user report post-S3.1 | **Settings workspace scroll/sticky layering broken.** User screenshot 2026-07-26 (installed app, Page Setup section): a row (Orientation, segmented control) paints ABOVE the sticky search band; section title/description scroll out of sync with the band; first row clipped mid-control. Suspects: `.rga-settings-content` is the scroll container (`overflow-y:auto`, 24px top padding — settings-workspace.css:279-294) with the sticky `.rga-settings-content-header` (top:0, z-index:10, bg-mask — :321-346) pinning inside it; masking/pinning fails under real content. User states Settings area has had unfixed visual problems for a while. Diagnosis plan (own fix-slice): Playwright DOM-geometry spec over the Settings workspace scroll (per project rule "Playwright > screenshots for layout work"), then fix + regression test. | OPEN |
-| GAP-3-3 | S3.2 Step 4 | **E2E suite: 37 reds, all sampled ones caused by `app.close()` hanging in `afterEach` — the app will not quit.** Full run 2026-07-27: **326 pass · 37 fail** (1.2 h). Signature on every sampled failure: `Test timeout of 60000ms exceeded while running "afterEach" hook` at `app.close()` — **the test bodies pass**; recovery/autosave/paper-view assert green and only teardown fails. Proven PRE-EXISTING and independent of S3.2: the same specs fail identically when run alone with S3.2's files absent (7 fail / 6 pass), and again after clearing 17 orphaned Electron processes (each hung close leaks a process tree). Working hypothesis for the fix-slice: specs that leave the doc **dirty** hit the unsaved-changes prompt on quit, which blocks `close()` under automation — consistent with `print-contract.spec.js` (`clearDirtyAndClose`) and the three new lifecycle specs (which clear dirty) passing, while `app-close.spec.js` ("closing with unsaved changes prompts") is itself failing. **Also surfaced: no e2e baseline has ever been recorded** (the campaign's baseline truth is the UNIT suite only) — record one the way S0.1 did, since QG-12 cannot honestly roll up over an unmeasured suite. Needs its own fix-slice (systematic-debugging; decide per-spec whether it is test hygiene or a real quit-path defect). | OPEN |
+| GAP-3-3 | S3.2 Step 4 | **E2E suite: 37 reds, all sampled ones caused by `app.close()` hanging in `afterEach` — the app will not quit.** Full run 2026-07-27: **326 pass · 37 fail** (1.2 h). Signature on every sampled failure: `Test timeout of 60000ms exceeded while running "afterEach" hook` at `app.close()` — **the test bodies pass**; recovery/autosave/paper-view assert green and only teardown fails. Proven PRE-EXISTING and independent of S3.2: the same specs fail identically when run alone with S3.2's files absent (7 fail / 6 pass), and again after clearing 17 orphaned Electron processes (each hung close leaks a process tree). Working hypothesis for the fix-slice: specs that leave the doc **dirty** hit the unsaved-changes prompt on quit, which blocks `close()` under automation — consistent with `print-contract.spec.js` (`clearDirtyAndClose`) and the three new lifecycle specs (which clear dirty) passing, while `app-close.spec.js` ("closing with unsaved changes prompts") is itself failing. **Also surfaced: no e2e baseline has ever been recorded** (the campaign's baseline truth is the UNIT suite only) — record one the way S0.1 did, since QG-12 cannot honestly roll up over an unmeasured suite. Needs its own fix-slice (systematic-debugging; decide per-spec whether it is test hygiene or a real quit-path defect). **CLOSED 2026-07-28 by slice S3.2F.** The working hypothesis was right, and a second cause sat behind it. (a) The quit guard (`main.js:99` → `index.html:1577` → `CloseGuard.confirmAppClose` → `#unsaved-modal`) correctly waits for a human, so under automation the verdict never arrives and main deliberately ABORTS the close — test hygiene, not a product defect. Fixed by one shared `closeApp()` teardown helper swept across 60 specs / 124 call sites. (b) The force-kill specs (`autosave`, `recovery`) SIGKILLed only the Electron main process; on Windows the surviving child processes hold Playwright's pipe open, so Playwright blocked 60 s at WORKER teardown and orphaned the children — fixed by killing the process tree. No test, assertion, or expectation was weakened. Evidence: `docs/plans/evidence/S3.2F-quit-path.md`. | **CLOSED** |
+| GAP-3-4 | S3.2F baseline | **The 5 stable e2e reds left standing by the first recorded baseline** — all assertion failures inside test bodies (no teardown noise left to hide behind), so each is either a real product defect or a stale test, and none has been triaged yet. (1–2) `scene-navigator-rtl-expansion.spec.js` — scene-navigator marks report **zero** directional indent in BOTH the RTL test and its LTR control (`marksPadRight/Left` = 0); belongs with the Phase-4 RTL sweep. (3) `workspace-chrome-policy.spec.js:105` — the Settings tab must hide the toolbar; `computedDisplay` is `grid`, expected `none`. (4) `workspace-chrome-policy.spec.js:188` — Settings nav rail `overflow` is `hidden`, expected `auto`: **the same family as GAP-3-2** (Settings sticky/scroll layering) and probably the same defect as the user's screenshot — fix them together. (5) `settings-workspace-5b.spec.js:47` — General section row ids drifted from the expected registry list. PLUS two load-dependent flakes recorded, not adjusted: `page-setup-preview.spec.js:150` (116.7 ms vs a 100 ms budget) and `theme-applicator.spec.js:142` (theme across close+reopen; 3/3 green in isolation). Needs a triage slice per §0.2 — classify each as stale-test vs real defect BEFORE touching it. | OPEN |
 | GAP-2-2 | S2.2 smoke | **Installed app shares userData/workspace state with the dev app** (same app identity): first launch of the packaged build restored the dev session and auto-opened `tests/fixtures/playground-the-last-light.rga` — making the installed app another fixture-dirtier. Harmless for end users (no dev state), but decide before launch whether packaged builds should use a distinct appId/userData dir. | OPEN |
 
 ---
@@ -546,6 +548,60 @@ Expected: 3/3 pass. A failure here is potentially a REAL lifecycle defect → §
 - [x] **Step 6: SLICE CLOSE RITUAL (§0.3)** — status deltas: `PF-02/03/05 PARTIAL→TRUE`
 
 Commit message: `test(editor): lifecycle E2E — new/open/save-as round-trips proven (PF-02/03/05, S3.2)`
+
+### Slice S3.2F: GAP-3-3 fix — the e2e quit path, and the first recorded e2e baseline
+
+**Authorized by the user 2026-07-28** ("fix the hanging-close bug first, record the missing test
+baseline, then continue in order") — this is the fix-slice GAP-3-3 called for. It runs BEFORE S3.3,
+because the console audit walks the same flows over the same harness.
+
+**Files:**
+- Create: `rwanga-editor/tests/helpers/app-teardown.js`
+- Modify: every Playwright-Electron spec under `rwanga-editor/tests/e2e/**` + `tests/integration/**`
+- Create: `docs/plans/evidence/S3.2F-e2e-baseline.txt`, `docs/plans/evidence/S3.2F-quit-path.md`
+
+- [x] **Step 1: Root cause** (systematic-debugging Phase 1–3, reproduced then proven).
+      `electron/main.js:99-117` intercepts the window `close` and asks the renderer
+      (`app.closeRequested`); `renderer/index.html:1577-1590` runs
+      `Rga.CloseGuard.confirmAppClose()`, which shows `#unsaved-modal` for every dirty document and
+      **waits for a human**. Under Playwright there is no human, so the renderer never replies;
+      main's `CLOSE_RESPONSE_TIMEOUT_MS` elapses and the close is deliberately ABORTED (never
+      force-quit over unsaved work). `app.close()` therefore never resolves → 60 s `afterEach`
+      timeout → leaked Electron process tree. **Verdict: test hygiene, not a product defect** — the
+      guard is correct for a real user (proven by `app-close.spec.js` test 2, which answers the
+      modal and quits cleanly). Reproduced on `app-close.spec.js` test 1: **1.4 min hang**.
+- [x] **Step 2: One shared teardown helper, no assertion weakened.** `tests/helpers/app-teardown.js`
+      exports `closeApp(app)` — marks every open document clean (all tabs, not just the active one:
+      the guard iterates them all), dismisses a modal the test body left open, then closes. It is
+      the repo's existing `clearDirtyAndClose` idiom (print-contract.spec.js) generalised; that
+      local wrapper was deleted so there is one helper, not two. Teardown asserts nothing; specs
+      that prove the guard keep their own assertions untouched.
+- [x] **Step 3: Sweep the suite** — 60 spec files, 124 teardown call sites routed through
+      `closeApp`. Deliberately left alone: `app-close.spec.js:65` (`app.waitForEvent('close')` — the
+      close IS the assertion there).
+- [x] **Step 4: Second defect — the force-kill specs leaked their process tree.**
+      `autosave.spec.js` / `recovery.spec.js` simulate a crash with `proc.kill('SIGKILL')` on the
+      Electron **main** process only. On Windows the GPU/renderer/utility children survive and keep
+      the pipe Playwright talks to open, so Playwright never observes the app dying: it blocked the
+      full 60 s at **worker** teardown and orphaned the children (16 stray processes were cleared
+      during this slice — the same leak the S3.2 evidence noted). Fixed by killing the process TREE
+      (`taskkill /T /F` on win32, `SIGKILL` elsewhere) and disposing the Playwright handle; `killApp`
+      now lives beside `closeApp` in the shared helper. `autosave.spec.js` alone: **1.3 min → 13 s**.
+- [x] **Step 5: Record the first e2e baseline** (`docs/plans/evidence/S3.2F-e2e-baseline.txt`) the
+      way S0.1 recorded the unit baseline. Until now the campaign's only baseline truth was the UNIT
+      suite; QG-12 cannot honestly roll up over an unmeasured suite. Pre-fix reference figure
+      (S3.2, 2026-07-27): **326 pass · 37 fail · 1.2 h**.
+      **RECORDED: 363 tests · 357 pass · 6 fail · 11.7 min · 0 teardown hangs · 0 orphans.**
+      The first measurement caught a mistake in the sweep itself — 8 reds reading `ReferenceError:
+      closeApp is not defined`, because the require had been appended at the BOTTOM of
+      `tag-plugin-ownership.spec.js` instead of its require block. Fixed, and a placement check
+      (require line < first `closeApp(` call) now passes 60/60. The baseline above is the re-run
+      after that fix.
+- [x] **Step 6: SLICE CLOSE RITUAL (§0.3)** — GAP-3-3 CLOSED in the gap ledger; the 5 stable reds
+      still standing are triaged into **GAP-3-4** for a future slice (§0.2 — none weakened, skipped,
+      quarantined, or deleted).
+
+Commit message: `test(editor): fix e2e quit-path hangs + record first e2e baseline (GAP-3-3, S3.2F)`
 
 ### Slice S3.3: PF-13 clean-console audit
 

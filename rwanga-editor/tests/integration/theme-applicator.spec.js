@@ -16,6 +16,7 @@ const { test, expect, _electron: electron } = require('@playwright/test');
 const path = require('path');
 const os   = require('os');
 const fs   = require('fs');
+const { closeApp } = require('../helpers/app-teardown');
 
 const APP_ROOT = path.resolve(__dirname, '..', '..');
 
@@ -57,7 +58,7 @@ test('H2 — theme radio displays human labels (Dark / Light / System), not raw 
     });
     expect(labelText).toEqual(['Dark', 'Light', 'System']);
   } finally {
-    await app.close();
+    await closeApp(app);
     try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
   }
 });
@@ -75,7 +76,7 @@ test('H2 — color-scheme: dark light is declared on :root for native select rea
     expect(colorScheme).toMatch(/dark/);
     expect(colorScheme).toMatch(/light/);
   } finally {
-    await app.close();
+    await closeApp(app);
     try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
   }
 });
@@ -102,7 +103,7 @@ test('H2 — selecting Light via Store flips data-theme to light synchronously',
       document.documentElement.getAttribute('data-theme'));
     expect(back).toBe('dark');
   } finally {
-    await app.close();
+    await closeApp(app);
     try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
   }
 });
@@ -133,7 +134,7 @@ test("H2 — 'system' resolves via matchMedia and re-resolves when the OS scheme
       window.Rga.Settings.Store.get('theme', 'user'));
     expect(stored).toBe('system');
   } finally {
-    await app.close();
+    await closeApp(app);
     try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
   }
 });
@@ -146,7 +147,7 @@ test('H2 — chosen theme persists across a close + reopen', async () => {
       await page.evaluate(() => window.Rga.Settings.Store.set('theme', 'light'));
       await page.waitForFunction(() =>
         window.rwanga.prefs.read().then((p) => p['theme'] === 'light'));
-      await app.close();
+      await closeApp(app);
     }
     {
       const { app, page } = await launch(userDataDir);
@@ -158,7 +159,7 @@ test('H2 — chosen theme persists across a close + reopen', async () => {
           document.documentElement.getAttribute('data-theme'));
         expect(domTheme).toBe('light');
       } finally {
-        await app.close();
+        await closeApp(app);
       }
     }
   } finally {
@@ -188,7 +189,7 @@ test('H2 — Ctrl+Shift+T inverse-syncs Rga.Theme back into the Settings store',
     expect(await page.evaluate(() =>
       document.documentElement.getAttribute('data-theme'))).toBe('light');
   } finally {
-    await app.close();
+    await closeApp(app);
     try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
   }
 });
@@ -224,7 +225,7 @@ test("H2B — legacy doc.settings.theme MUST NOT shadow the user's Settings choi
       const dom = await page.evaluate(() =>
         document.documentElement.getAttribute('data-theme'));
       expect(dom).toBe('light');
-      await app.close();
+      await closeApp(app);
     }
     {
       const { app, page } = await launch(userDataDir);
@@ -236,7 +237,7 @@ test("H2B — legacy doc.settings.theme MUST NOT shadow the user's Settings choi
           document.documentElement.getAttribute('data-theme'));
         expect(dom).toBe('light');
       } finally {
-        await app.close();
+        await closeApp(app);
       }
     }
   } finally {
@@ -259,7 +260,7 @@ test('H2B — Rga.SettingsTheme.toggle is the production helper and writes throu
     expect(await page.evaluate(() =>
       document.documentElement.getAttribute('data-theme'))).toBe('light');
   } finally {
-    await app.close();
+    await closeApp(app);
     try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
   }
 });
@@ -284,7 +285,7 @@ test('H2B — the status bar theme instrument click routes through Settings.Stor
     expect(await page.evaluate(() =>
       document.documentElement.getAttribute('data-theme'))).toBe('light');
   } finally {
-    await app.close();
+    await closeApp(app);
     try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
   }
 });
@@ -319,7 +320,7 @@ test('H2 — legacy localStorage rga-theme migrates into prefs.theme exactly onc
       window.Rga.Settings.Store.get('theme', 'user'));
     expect(second).toBe('light');  // unchanged — prefs already populated.
   } finally {
-    await app.close();
+    await closeApp(app);
     try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (_) {}
   }
 });

@@ -27,6 +27,7 @@ const { test, expect, _electron: electron } = require('@playwright/test');
 const path = require('path');
 const os   = require('os');
 const fs   = require('fs');
+const { closeApp } = require('../../helpers/app-teardown');
 
 const APP_ROOT = path.resolve(__dirname, '..', '..', '..');
 
@@ -73,7 +74,7 @@ async function clearDirtyAndClose(app, page) {
       });
     });
   } catch (_) {}
-  await app.close();
+  await closeApp(app);
 }
 
 async function openAppearanceSection(page) {
@@ -365,7 +366,7 @@ test('H7 — chosen desk color survives a close + reopen and reapplies at boot',
       await page.waitForFunction(() =>
         window.rwanga.prefs.read().then((p) =>
           p['appearance.editorDeskColor'] === '#2d2520'));
-      await app.close();
+      await closeApp(app);
     }
     {
       const { app, page } = await launchAndOpen(userDataDir);
@@ -385,7 +386,7 @@ test('H7 — chosen desk color survives a close + reopen and reapplies at boot',
           .getAttribute('data-color-value');
         expect(activeValue).toBe('#2d2520');
       } finally {
-        await app.close();
+        await closeApp(app);
       }
     }
   } finally {
