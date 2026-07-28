@@ -7,8 +7,8 @@
 - **Last updated:** 2026-07-28 · by: S3.1F — GAP-3-1 fixed (menubar overflow; Tools menu restored)
 - **Binding doctrine:** every agent MUST follow the 10-rule MASTERPLAN EXECUTION DOCTRINE in the
   root `CLAUDE.md` (one slice at a time · tick-as-you-go · §0.3 close ritual · push every slice commit).
-- **HEAD:** `f54ea0c6` (S4.3 — RTL-10 TRUE, RTL-11 blocked by GAP-4-1) · **last slice-close:**
-  `f54ea0c6` · **Branch:** `main` · pushed. *(Update both SHAs at every §0.3 close.)*
+- **HEAD:** `65b52f19` (S3.1F — menubar overflow, GAP-3-1 fixed) · **last slice-close:**
+  `65b52f19` · **Branch:** `main` · pushed. *(Update both SHAs at every §0.3 close.)*
 - **Phase:** Stage 1 — Foundation (closing launch P0s). AI/Agent phase is **gated** (see Gates).
 
 ---
