@@ -5,6 +5,41 @@ Template & rules: `PROTOCOL.md`.
 
 ---
 
+## 2026-07-28 · PHASE 7 OPENED — UI localisation ruled LAUNCH-BLOCKING by the user
+- **Did:** Acted on the user's ruling in response to the GAP-4-2 audit: *"yes and it is an essential
+  part of the launch, this system will not be launched without them."* Amended the launch
+  constitution and planned the work; **no code written**.
+- **Checklist amended:** six new **P0** rows in Section 3 (RTL / multilingual), all FALSE:
+  **RTL-16** Interface Language setting actually wired · **RTL-17** app chrome mirrors to RTL
+  independently of document direction · **RTL-18** shell CSS uses logical properties ·
+  **RTL-19** a translation layer exists (strings are keys) · **RTL-20** Kurdish (Sorani) UI
+  translation, native-reviewed · **RTL-21** Arabic UI translation, native-reviewed. Each row carries
+  its measured evidence-required and the audit's findings as notes.
+- **Masterplan amended:** new **Phase 7 — UI localisation + application RTL**, seven slices
+  S7.1…S7.7, placed **after Phase 4 and before Phase 5** (a BUILD phase with a long external lead
+  time goes before a short QA sweep; S6.1 roll-up stays last). Order within the phase is
+  **direction-first, translation-second**: S7.2 + S7.3 deliver a fully mirrored UI *while it is still
+  English* — independently valuable, immediately testable, and most of what a Kurdish user feels.
+- **The phase's central rule, recorded so no slice violates it:** **UI direction and DOCUMENT
+  direction are two separate axes.** An English UI must hold an RTL script and a Kurdish UI must hold
+  an LTR script. Every existing `dir` assignment (`tab-manager.js:110`, `print-renderer.js:103`,
+  `scene-navigator.js:150`, `tags.js:295`, `review-bar.js:599`) is document-owned and stays that way.
+  S7.2's spec must cover all four combinations, because conflating the axes is the regression this
+  work can most easily cause — it would undo what S4.2 just measured correct.
+- **Status deltas:** gate counts 45/11/3/**1** → 45 TRUE · 11 PARTIAL · 3 UNKNOWN · **7 FALSE**;
+  open P0s **15 → 21**, total P0s **60 → 66**. GAP-4-2 OPEN → **RULED, owned by Phase 7**.
+  The open count going UP is the honest outcome: the work always existed, nothing was measuring it.
+- **Hard stops recorded in the plan (outside an agent's power — START rule 6):** S7.5 and S7.6 each
+  require a **named native reviewer** with a recorded sign-off. An agent may not self-approve or
+  fabricate a translation review. Sourcing a Kurdish reviewer is the longest lead item in the phase
+  and should start immediately, in parallel with S4.4/S4.5.
+- **Still needing the user:** the Kurdish reviewer; whether Arabic may ship post-launch (P1) if no
+  reviewer is available — Kurdish is non-negotiable, Arabic's status is a decision not an
+  assumption; plus the two carried-over calls, GAP-4-1 (PDF text layer) and GAP-3-5 (Ctrl+Shift+S).
+- **Next action:** S4.4 (bidi audit), S4.5, then S7.1.
+
+---
+
 ## 2026-07-28 · GAP-4-2 OPENED — the application's own RTL/localisation does not exist (audit)
 - **Did:** The user asked why RTL is missing from *the system* — explicitly not the scripts, which
   render correctly. Audited the app chrome rather than the document pipeline.

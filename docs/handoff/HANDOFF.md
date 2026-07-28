@@ -4,7 +4,7 @@
 > archive to find the next action — it's here. Update this file at the end of every unit of work
 > (see `PROTOCOL.md`). Keep it short; link detail, don't inline it.
 
-- **Last updated:** 2026-07-28 · by: GAP-4-2 audit — the app's own RTL/localisation is absent and untracked
+- **Last updated:** 2026-07-28 · by: Phase 7 opened — UI localisation ruled launch-blocking
 - **Binding doctrine:** every agent MUST follow the 10-rule MASTERPLAN EXECUTION DOCTRINE in the
   root `CLAUDE.md` (one slice at a time · tick-as-you-go · §0.3 close ritual · push every slice commit).
 - **HEAD:** `65b52f19` (S3.1F — menubar overflow, GAP-3-1 fixed) · **last slice-close:**
@@ -15,11 +15,17 @@
 
 ## ⭐ NEXT ACTION
 
-**Start S4.4 — RTL bidi audit (RTL-12, RTL-13).** Criteria in
-`../plans/evidence/S4.1-rtl-qa-protocol.md`; the fixture already carries 114 mixed Latin+Arabic
-blocks, but the bidi-punctuation battery must be typed. Always open a `%TEMP%` COPY.
-⚠ **Decision waiting on Darya: GAP-4-1** — the exported PDF's Kurdish text layer is ~40% unreadable.
-It does not block S4.4/S4.5, but it does block RTL-11, and therefore the launch gate.
+**Start S4.4 — RTL bidi audit (RTL-12, RTL-13)**, then S4.5, then **Phase 7**.
+Criteria: `../plans/evidence/S4.1-rtl-qa-protocol.md`. Open a `%TEMP%` COPY of the fixture.
+
+⚠ **NEW AND LAUNCH-BLOCKING — Phase 7: UI localisation + application RTL.** The user ruled
+2026-07-28 that a Kurdish/Arabic *interface* is essential to launch ("this system will not be launched
+without them"). Six P0 rows added (RTL-16…RTL-21); seven slices S7.1…S7.7 in the masterplan, placed
+after Phase 4 and before Phase 5. Central rule of that phase: **UI direction and DOCUMENT direction are
+two separate axes** — an English UI must hold an RTL script and vice versa.
+⚠ **Waiting on the user (long lead, start now):** a named **Kurdish (Sorani) native reviewer** for
+S7.5 — an external dependency that must not become the last blocker. Also open: GAP-4-1 (PDF text
+layer), GAP-3-5 (Ctrl+Shift+S owner), and whether Arabic may ship post-launch if no reviewer is found.
 
 **Phase 4 so far:** RTL-04…RTL-09 **TRUE** (page geometry measured correct) and RTL-10 **TRUE**
 (all 85 pages clean; the long-standing `overflow:hidden` clipping worry closed by measurement;
@@ -54,7 +60,7 @@ Background & rationale: **`../RWANGA_GO_LIVE_2026-07-02.md`** (Part A + Part D).
 ## Where we are (2-minute brief)
 
 The editor is **~1–2 focused weeks of verification + packaging** away from being a launchable
-RTL screenplay editor. **None** of the 15 open launch P0s is a feature to build — they are test
+RTL screenplay editor. **19** of the 21 open launch P0s are not features to build — they are test
 hygiene, an installer build, and QA sweeps. The launch checklist was **forensically verified honest
 on 2026-07-02** (test numbers reproduce exactly; the "30 vs 36 reds" spin proven true).
 
@@ -67,8 +73,9 @@ contribution/write API. That write API is the true technical prerequisite for th
 ## 🚦 Gates (why the AI/Agent harness cannot start yet)
 
 1. **Launch gate** — no invention features until every launch-checklist **P0** is TRUE.
-   Status: **45 TRUE · 11 PARTIAL · 3 UNKNOWN · 1 FALSE** (15 open; QG-01 + LR-01 TRUE 2026-07-26;
-   PF-02/03/05 TRUE 2026-07-27; PF-13 + RTL-04…10 TRUE 2026-07-28). See `../RWANGA_IDE_LAUNCH_CHECKLIST.md`.
+   Status: **45 TRUE · 11 PARTIAL · 3 UNKNOWN · 7 FALSE** (21 open of **66**; QG-01 + LR-01 TRUE
+   2026-07-26; PF-02/03/05 TRUE 2026-07-27; PF-13 + RTL-04…10 TRUE 2026-07-28). **+6 P0s added 2026-07-28**
+   (RTL-16…RTL-21, UI localisation — user ruled launch-blocking). See `../RWANGA_IDE_LAUNCH_CHECKLIST.md`.
 2. **Alive-App Phase 2 gate** — "No AI feature implementation may start before this phase is visually
    verified." Status: **every box unchecked.** See `../RWANGA_IDE_ALIVE_APP_CHECKLIST.md`.
 3. **Technical prerequisite** — `.rga` agent-write API does not exist (Vision Gap #2).
@@ -83,7 +90,7 @@ contribution/write API. That write API is the true technical prerequisite for th
 | GAP-2-1 | Flow view: New doc opens with a dead band above the page that only shrinks as you type (user-reported, long-standing, finally ticketed 2026-07-26) | OPEN — needs fix-slice | Masterplan §0.5 |
 | GAP-2-2 | Packaged app shares userData with dev app → restored dev session, auto-opened the playground fixture on first launch | OPEN — decide appId split before launch | Masterplan §0.5 |
 | GAP-3-4 | The **5 stable e2e reds** left standing by the first recorded baseline, now that no teardown noise hides them: scene-navigator marks report zero directional indent (RTL *and* LTR control); Settings tab doesn't hide the toolbar; Settings nav rail `overflow:hidden` (same family as GAP-3-2 — fix together); Settings General rows drifted from the registry. Plus 2 load-flakes recorded, not adjusted | OPEN — needs triage slice (stale-test vs real defect) | Masterplan §0.5 |
-| GAP-4-2 | **The app's own interface has no RTL and no translations** — Kurdish/Arabic are declared in Settings but nothing behind the setting exists (no applicator, no translation layer, no app-level direction, chrome CSS still physical-first). The SCRIPT side is fine; this is the application around it. **No checklist row has ever tracked it** — 123 rows, zero for UI language/direction | OPEN — **needs a user scope ruling: v1 or post-launch?** | Masterplan §0.5 / `docs/plans/evidence/GAP-4-2-ui-localization-audit.md` |
+| GAP-4-2 | **The app's own interface has no RTL and no translations.** **USER RULED 2026-07-28: launch-blocking** — checklist amended with six new P0 rows (RTL-16…RTL-21) and a new **Phase 7** in the masterplan owns the work | RULED — build queued as Phase 7 (after Phase 4) | Masterplan Phase 7 / `docs/plans/evidence/GAP-4-2-ui-localization-audit.md` |
 | GAP-4-1 | **The exported PDF's Kurdish text layer is ~40% unreadable** — 40.2% of script characters extract as NUL because the embedded font subset's ToUnicode CMap misses most shaped Kurdish forms. The page DRAWS correctly; the script is not searchable, not copyable, and reaches downstream tooling as garbage. LTR exports are unaffected. **Blocks RTL-11 and therefore the launch gate** | OPEN — needs a fix-slice; isolate font-vs-pipeline first | Masterplan §0.5 / `docs/plans/evidence/S4.3-rtl-print-pdf.md` |
 | GAP-3-5 | **`Ctrl+Shift+S` is shipped as the default for BOTH "Save As" and "Scene Navigator"** — the registry is last-wins, so Scene Navigator takes the key and Save As has no working shortcut, while Settings still displays it. Two lesser collisions: Ctrl+Shift+E, Ctrl+Shift+F. Plus Electron's insecure-CSP warning to settle before launch | OPEN — needs a user ruling (which feature keeps which key) + a duplicate-defaults guard test | Masterplan §0.5 / `docs/plans/evidence/S3.3-console-audit.md` |
 | PF-01 (macOS) | macOS launch matrix + `pack:mac` + smoke — the only half of PF-01 still open (Decision #1: Mac arrives later) | DEFERRED — needs hardware | Masterplan §0.5 / PF-01 row |

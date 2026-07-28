@@ -91,6 +91,13 @@ electron-builder (`npm run pack:win`), PowerShell/Windows 11.
 | S5.1 | 5 Geometry | Paper sizes + margins (MT-05, MT-06, PP-01, PP-03) | ⬜ | |
 | S5.2 | 5 Geometry | Bottom-margin overflow + empty-line budget (MT-07, MT-10) | ⬜ | |
 | S5.3 | 5 Geometry | Marker stability, heading edit, PDF page count (MT-02, SW-01, MT-04) | ⬜ | |
+| S7.1 | 7 UI L10n | UI-localisation architecture brief (writing only) | ⬜ | |
+| S7.2 | 7 UI L10n | Wire Interface Language + app-level UI direction (RTL-16, RTL-17) | ⬜ | |
+| S7.3 | 7 UI L10n | Mirror the chrome - logical-properties sweep (RTL-18) | ⬜ | |
+| S7.4 | 7 UI L10n | Translation layer - UI strings become keys (RTL-19) | ⬜ | |
+| S7.5 | 7 UI L10n | Kurdish (Sorani) UI translation + native review (RTL-20) | ⬜ | |
+| S7.6 | 7 UI L10n | Arabic UI translation + native review (RTL-21) | ⬜ | |
+| S7.7 | 7 UI L10n | Full-app localisation walk - phase close | ⬜ | |
 | S6.1 | 6 Roll-up | Reconcile checklist, flip QG-12, declare launch-gate closed | ⬜ | |
 | SP.1 | P Design | `Rga.Contribution` write-API design brief (no code) | ⬜ | |
 
@@ -104,7 +111,7 @@ electron-builder (`npm run pack:win`), PowerShell/Windows 11.
 | GAP-3-2 | user report post-S3.1 | **Settings workspace scroll/sticky layering broken.** User screenshot 2026-07-26 (installed app, Page Setup section): a row (Orientation, segmented control) paints ABOVE the sticky search band; section title/description scroll out of sync with the band; first row clipped mid-control. Suspects: `.rga-settings-content` is the scroll container (`overflow-y:auto`, 24px top padding — settings-workspace.css:279-294) with the sticky `.rga-settings-content-header` (top:0, z-index:10, bg-mask — :321-346) pinning inside it; masking/pinning fails under real content. User states Settings area has had unfixed visual problems for a while. Diagnosis plan (own fix-slice): Playwright DOM-geometry spec over the Settings workspace scroll (per project rule "Playwright > screenshots for layout work"), then fix + regression test. | OPEN |
 | GAP-3-3 | S3.2 Step 4 | **E2E suite: 37 reds, all sampled ones caused by `app.close()` hanging in `afterEach` — the app will not quit.** Full run 2026-07-27: **326 pass · 37 fail** (1.2 h). Signature on every sampled failure: `Test timeout of 60000ms exceeded while running "afterEach" hook` at `app.close()` — **the test bodies pass**; recovery/autosave/paper-view assert green and only teardown fails. Proven PRE-EXISTING and independent of S3.2: the same specs fail identically when run alone with S3.2's files absent (7 fail / 6 pass), and again after clearing 17 orphaned Electron processes (each hung close leaks a process tree). Working hypothesis for the fix-slice: specs that leave the doc **dirty** hit the unsaved-changes prompt on quit, which blocks `close()` under automation — consistent with `print-contract.spec.js` (`clearDirtyAndClose`) and the three new lifecycle specs (which clear dirty) passing, while `app-close.spec.js` ("closing with unsaved changes prompts") is itself failing. **Also surfaced: no e2e baseline has ever been recorded** (the campaign's baseline truth is the UNIT suite only) — record one the way S0.1 did, since QG-12 cannot honestly roll up over an unmeasured suite. Needs its own fix-slice (systematic-debugging; decide per-spec whether it is test hygiene or a real quit-path defect). **CLOSED 2026-07-28 by slice S3.2F.** The working hypothesis was right, and a second cause sat behind it. (a) The quit guard (`main.js:99` → `index.html:1577` → `CloseGuard.confirmAppClose` → `#unsaved-modal`) correctly waits for a human, so under automation the verdict never arrives and main deliberately ABORTS the close — test hygiene, not a product defect. Fixed by one shared `closeApp()` teardown helper swept across 60 specs / 124 call sites. (b) The force-kill specs (`autosave`, `recovery`) SIGKILLed only the Electron main process; on Windows the surviving child processes hold Playwright's pipe open, so Playwright blocked 60 s at WORKER teardown and orphaned the children — fixed by killing the process tree. No test, assertion, or expectation was weakened. Evidence: `docs/plans/evidence/S3.2F-quit-path.md`. | **CLOSED** |
 | GAP-3-4 | S3.2F baseline | **The 5 stable e2e reds left standing by the first recorded baseline** — all assertion failures inside test bodies (no teardown noise left to hide behind), so each is either a real product defect or a stale test, and none has been triaged yet. (1–2) `scene-navigator-rtl-expansion.spec.js` — scene-navigator marks report **zero** directional indent in BOTH the RTL test and its LTR control (`marksPadRight/Left` = 0); belongs with the Phase-4 RTL sweep. (3) `workspace-chrome-policy.spec.js:105` — the Settings tab must hide the toolbar; `computedDisplay` is `grid`, expected `none`. (4) `workspace-chrome-policy.spec.js:188` — Settings nav rail `overflow` is `hidden`, expected `auto`: **the same family as GAP-3-2** (Settings sticky/scroll layering) and probably the same defect as the user's screenshot — fix them together. (5) `settings-workspace-5b.spec.js:47` — General section row ids drifted from the expected registry list. PLUS two load-dependent flakes recorded, not adjusted: `page-setup-preview.spec.js:150` (116.7 ms vs a 100 ms budget) and `theme-applicator.spec.js:142` (theme across close+reopen; 3/3 green in isolation). Needs a triage slice per §0.2 — classify each as stale-test vs real defect BEFORE touching it. | OPEN |
-| GAP-4-2 | user report 2026-07-28 | **The APPLICATION's own RTL/localisation does not exist — and no checklist row has ever tracked it.** The *document* side is fine (RTL-01…15, measured correct in S4.2/S4.3); this is the app chrome. Kurdish and Arabic ARE declared (`settings-registry.js:83-91`, options en/ku/ar) but nothing behind the setting was built: **no applicator** (44 registered, `language` not among them, hence the honest greyed "Behavior not wired yet" row), **no translation layer at all** (no i18n module or catalogue; ~17 hardcoded English `textContent` literals in the shell modules plus ~34 in `index.html`), and **no app-level direction** — `documentElement` computes `direction: ltr` and `<html lang>` is `en` always; every `dir` in the app comes from the OPEN DOCUMENT's profile (tab-manager:110, print-renderer:103, scene-navigator:150, tags:295, review-bar:599). The chrome CSS is also physical-first and could not mirror if flipped today (`shell.css` 25 physical/12 logical; `settings-workspace.css` **13 physical/0 logical**) — the R1 logical-property conversion covered print blocks only. Net effect: a Kurdish writer uses a left-to-right ENGLISH application to write a right-to-left Kurdish script. Searching all 123 checklist rows for interface language / translation / localisation / UI direction returns **nothing**, so this never showed up as a red — nothing measured it. **Needs a USER DECISION first: is UI localisation in the v1 launch gate or a post-launch chapter?** Either answer is legitimate, but the checklist must be amended to say which, or "all P0s TRUE" gets declared over a hole. Scoping (no work started) in `docs/plans/evidence/GAP-4-2-ui-localization-audit.md`; direction-first (app `dir` + logical-property sweep of the chrome) is the cheaper, higher-value half and is testable while the UI is still English. | OPEN — awaiting user scope ruling |
+| GAP-4-2 | user report 2026-07-28 | **The APPLICATION's own RTL/localisation does not exist — and no checklist row has ever tracked it.** The *document* side is fine (RTL-01…15, measured correct in S4.2/S4.3); this is the app chrome. Kurdish and Arabic ARE declared (`settings-registry.js:83-91`, options en/ku/ar) but nothing behind the setting was built: **no applicator** (44 registered, `language` not among them, hence the honest greyed "Behavior not wired yet" row), **no translation layer at all** (no i18n module or catalogue; ~17 hardcoded English `textContent` literals in the shell modules plus ~34 in `index.html`), and **no app-level direction** — `documentElement` computes `direction: ltr` and `<html lang>` is `en` always; every `dir` in the app comes from the OPEN DOCUMENT's profile (tab-manager:110, print-renderer:103, scene-navigator:150, tags:295, review-bar:599). The chrome CSS is also physical-first and could not mirror if flipped today (`shell.css` 25 physical/12 logical; `settings-workspace.css` **13 physical/0 logical**) — the R1 logical-property conversion covered print blocks only. Net effect: a Kurdish writer uses a left-to-right ENGLISH application to write a right-to-left Kurdish script. Searching all 123 checklist rows for interface language / translation / localisation / UI direction returns **nothing**, so this never showed up as a red — nothing measured it. **Needs a USER DECISION first: is UI localisation in the v1 launch gate or a post-launch chapter?** Either answer is legitimate, but the checklist must be amended to say which, or "all P0s TRUE" gets declared over a hole. Scoping (no work started) in `docs/plans/evidence/GAP-4-2-ui-localization-audit.md`; direction-first (app `dir` + logical-property sweep of the chrome) is the cheaper, higher-value half and is testable while the UI is still English. **USER RULED 2026-07-28: LAUNCH-BLOCKING** - "an essential part of the launch, this system will not be launched without them." Checklist amended: six new P0 rows **RTL-16...RTL-21** in Section 3 (open P0s 15 -> 21, total 60 -> 66). Owned by the new **Phase 7 - UI localisation + application RTL**, placed after Phase 4 and before Phase 5 because it is a BUILD phase with a long lead time (native reviewers are an external dependency) while Phase 5 is a short QA sweep. | OPEN - owned by Phase 7 |
 | GAP-4-1 | S4.3 | **The exported PDF's text layer is ~40% unreadable for Kurdish.** Measured 2026-07-28 on the 85-page RTL fixture: the PDF renders correctly (85 pp == Print Preview, 0 U+FFFD) but **35,749 NUL (U+0000) characters = 40.2% of all script characters** come back from the text layer. The embedded font subset's `ToUnicode` CMap has no mapping for a large share of *shaped* Kurdish forms (initial/medial/final/ligature variants), so the glyphs DRAW right while anything reading the PDF as text gets NUL. Consequences: the exported script is **not searchable**, text **cannot be copied out**, screen readers get nothing, and downstream production tooling (breakdown software, festival portals, archive indexing) receives garbage. LTR exports do not have this problem, so it is also an equity gap between the two directions the app claims to serve equally. **This is why RTL-11 stays PARTIAL.** Fix direction (own slice): export renders HTML in a hidden window and calls `webContents.printToPDF` (`electron/bridge/export-pdf.js:67`); Chromium's subsetting writes the CMap, so the levers are the embedded font (a Noto Naskh Arabic build whose cmap survives subsetting) or the printToPDF options — isolate font-vs-pipeline on one paragraph first. The spec logs `nulShareOfScriptChars` every run but deliberately does NOT assert it: `=== 0` would leave the suite knowingly red, and asserting today's 40% would make the defect permanent. Evidence: `docs/plans/evidence/S4.3-rtl-print-pdf.md`. | OPEN |
 | GAP-3-5 | S3.3 console audit | **`Ctrl+Shift+S` is claimed by two different features — Save As has no working keyboard shortcut.** `settings-registry.js:549` gives `kb.saveAs` the default `Ctrl+Shift+S`; `:585` gives `kb.sceneNavigator` the **same** default. `Rga.KeyboardRegistry` is last-wins, Scene Navigator registers second, so out of the box Ctrl+Shift+S opens the Scene Navigator while the Settings screen still displays `Ctrl+Shift+S` next to "Save As" — a lost shortcut **and** a Settings-honesty violation (Settings Constitution: every visible setting is REAL or honestly disabled). Two lesser collisions from the same audit: `Ctrl+Shift+E` (shell scriptWorkspace panel toggle overridden by Export PDF) and `Ctrl+Shift+F` (search panel toggle overridden by a legacy-shim registration). Fix direction (own slice, and it needs a user ruling on which feature keeps which key): change the defaults so no two commands ship the same binding, and add a startup guard test that FAILS on any duplicate default in the registry — the registry, not the console, should be the place a collision is caught. Also noted from the same capture: Electron's **insecure-CSP** development warning (no CSP / `unsafe-eval`) — a hardening item to settle before launch, not a console-cleanliness failure. Evidence: `docs/plans/evidence/S3.3-console-audit.md`. | OPEN |
 | GAP-2-2 | S2.2 smoke | **Installed app shares userData/workspace state with the dev app** (same app identity): first launch of the packaged build restored the dev session and auto-opened `tests/fixtures/playground-the-last-light.rga` — making the installed app another fixture-dirtier. Harmless for end users (no dev state), but decide before launch whether packaged builds should use a distinct appId/userData dir. | OPEN |
@@ -764,6 +771,141 @@ Commit message: `qa(editor): bidi audit — mixed-script + punctuation <verdict>
 Commit message: `qa(editor): SW-23 RTL convention verdict — phase 4 closed (S4.5)`
 
 ---
+
+## Phase 7 - UI localisation + application RTL (RTL-16...RTL-21) LAUNCH-BLOCKING
+
+**Opened 2026-07-28 by the user's scope ruling:** *"yes and it is an essential part of the launch,
+this system will not be launched without them."* Origin: **GAP-4-2**
+(`docs/plans/evidence/GAP-4-2-ui-localization-audit.md`).
+
+**What this phase is, in one line:** the *document* speaks Kurdish; the *application around it* does
+not. Today a Kurdish writer uses a left-to-right ENGLISH program to write a right-to-left Kurdish
+script. Phase 4 fixed the page; this phase fixes the tool.
+
+**Two independent axes - do not conflate them (this is the phase's central rule):**
+- **UI direction** - which way the *chrome* lays out. Owned by the Interface Language setting.
+- **Document direction** - which way the *script* reads. Owned by the document profile (RTL-01).
+
+An English UI must be able to hold an RTL script, and a Kurdish UI must be able to hold an LTR
+script. Every slice below is judged against that. The existing `dir` assignments
+(`tab-manager.js:110`, `print-renderer.js:103`, `scene-navigator.js:150`, `tags.js:295`,
+`review-bar.js:599`) are all **document**-owned and must stay that way.
+
+**Ordering rationale:** direction-first, translation-second. Slices S7.2 + S7.3 deliver a fully
+mirrored UI **while it is still in English** - independently valuable, immediately testable, and
+most of what a Kurdish user actually feels. Translation (S7.4 to S7.6) carries an **external
+dependency** (native reviewers) and so is started early in parallel: sourcing a reviewer must not
+become the last thing standing between the product and launch.
+
+**Placement:** runs after Phase 4 and before Phase 5, because it is a BUILD phase with a long lead
+time while Phase 5 is a short QA sweep. S6.1 (roll-up) stays last regardless.
+
+### Slice S7.1: UI-localisation architecture brief (writing only, no code)
+
+**Files:** Create `docs/plans/evidence/S7.1-ui-localisation-brief.md`
+
+- [ ] **Step 1: Decide and record the architecture**, with a rationale per decision:
+      catalogue format and where it lives; key naming convention; lookup API surface and how a
+      missing key behaves (must be *visible*, never a silent English fallback that hides gaps);
+      whether the language change applies live or requires restart (the registry currently says
+      `restartRequired: true` - confirm or change it deliberately); who owns UI direction and how it
+      stays separate from document direction; how plurals and interpolation work; how the Settings
+      *registry's own* labels/descriptions get translated (they are data, not markup - a distinct
+      problem worth naming now).
+- [ ] **Step 2: Enumerate the surface.** Produce the full inventory of strings to convert
+      (`renderer/js/**` literals + `index.html` markup + settings-registry labels/descriptions),
+      with a count per file - the translation volume must be known before a reviewer is asked.
+- [ ] **Step 3: SLICE CLOSE RITUAL (0.3)**
+
+Commit message: `docs(editor): UI-localisation architecture brief (S7.1)`
+
+### Slice S7.2: Wire the setting + app-level direction (RTL-16, RTL-17)
+
+**Files:** Modify `renderer/js/shell/shell-applicators.js`, `renderer/index.html`;
+Create `rwanga-editor/tests/e2e/localisation/ui-direction.spec.js`
+
+- [ ] **Step 1: Register a `language` applicator** so the setting stops being PERSISTS_ONLY. It sets
+      `lang` and `dir` on the shell root from the chosen language, and nothing else.
+- [ ] **Step 2: Prove the two axes stay separate** - the spec must cover all four combinations:
+      {UI ltr, UI rtl} x {document ltr, document rtl}. An RTL script inside an English UI must still
+      render exactly as S4.2 measured it; that is the regression this slice can most easily cause.
+- [ ] **Step 3: Verify the setting row is no longer greyed** (`_isPersistsOnly` returns false, the
+      "Behavior not wired yet." helper is gone) and that the choice survives a restart.
+- [ ] **Step 4: Flip RTL-16 + RTL-17. SLICE CLOSE RITUAL (0.3)**
+
+Commit message: `feat(editor): wire Interface Language + app-level UI direction (RTL-16/17, S7.2)`
+
+### Slice S7.3: Mirror the chrome - logical properties sweep (RTL-18)
+
+**Files:** Modify `renderer/css/shell.css`, `settings-workspace.css`, `components.css`,
+`overlays.css`; Create `rwanga-editor/tests/e2e/localisation/chrome-mirror.spec.js`
+
+- [ ] **Step 1: Convert physical to logical** exactly as R1 did for the print blocks: same
+      magnitudes, expressed against the start/end axis. Baseline to beat: `shell.css` 25 physical /
+      12 logical, `settings-workspace.css` **13 physical / 0 logical**, `components.css` 3/4.
+      Physical values that are genuinely physical (window controls that must track the OS title-bar
+      side) stay physical **and get a comment saying why** - the sweep is not blind.
+- [ ] **Step 2: Playwright geometry at both UI directions** - sidebar, activity rail, toolbar, tab
+      bar, panels, Settings workspace, dropdowns and modals all mirror; nothing overlaps; nothing
+      escapes the viewport.
+- [ ] **Step 3: Source guard** - a test that fails when new physical left/right appears in chrome
+      CSS without the documented exemption comment, so the sweep cannot silently rot.
+- [ ] **Step 4: Pick up RTL-CHROME-01** (deferred observation): line numbers and the drafting-guide
+      line stay on the LTR side regardless of DOCUMENT direction. Adjacent but a different axis -
+      judge it against document direction, not UI direction, and record the verdict.
+- [ ] **Step 5: Flip RTL-18. SLICE CLOSE RITUAL (0.3)**
+
+Commit message: `feat(editor): mirror app chrome via logical properties (RTL-18, S7.3)`
+
+### Slice S7.4: The translation layer (RTL-19)
+
+**Files:** Create `renderer/js/shell/i18n.js` + `renderer/locales/en.json`;
+Modify every module holding a UI literal; Create `tests/unit/shell/i18n.test.js` +
+`tests/unit/shell/no-hardcoded-ui-strings.test.js`
+
+- [ ] **Step 1: Ship the lookup + the English catalogue** per the S7.1 brief. English is authored as
+      a real catalogue, not as a fallback - if English is not a translation like any other, the
+      other languages will always be second-class.
+- [ ] **Step 2: Convert the inventory from S7.1** - `renderer/js/**` literals, `index.html` markup,
+      and the settings-registry labels/descriptions.
+- [ ] **Step 3: Guard test** that fails on a new hardcoded UI string literal. Without it the
+      catalogue rots the first time someone is in a hurry.
+- [ ] **Step 4: Missing keys must be loud** (per the S7.1 decision), never a silent English fallback.
+- [ ] **Step 5: Flip RTL-19. SLICE CLOSE RITUAL (0.3)**
+
+Commit message: `feat(editor): translation layer - UI strings become keys (RTL-19, S7.4)`
+
+### Slice S7.5: Kurdish (Sorani) UI translation (RTL-20)
+
+- [ ] **Step 1: Translate the full catalogue** to Sorani Kurdish into `renderer/locales/ku.json`.
+- [ ] **Step 2: Native review - a HARD STOP requiring the user** (START rule 6: a person is outside
+      an agent's power). Record the reviewer's name and sign-off date in the evidence file. **Do not
+      fabricate or self-approve a translation review.**
+- [ ] **Step 3: Coverage walk** - every surface in Kurdish with zero missing-key markers; screenshots
+      of the main surfaces as evidence.
+- [ ] **Step 4: Flip RTL-20. SLICE CLOSE RITUAL (0.3)**
+
+Commit message: `feat(editor): Kurdish (Sorani) UI translation (RTL-20, S7.5)`
+
+### Slice S7.6: Arabic UI translation (RTL-21)
+
+- [ ] **Step 1: Translate the full catalogue** to Arabic into `renderer/locales/ar.json`.
+- [ ] **Step 2: Native review - HARD STOP, same rule as S7.5.**
+- [ ] **Step 3: Coverage walk + evidence.**
+- [ ] **Step 4: Flip RTL-21. SLICE CLOSE RITUAL (0.3)**
+      **Ask the user first** whether Arabic may ship post-launch (P1) if no reviewer is available.
+      Kurdish is non-negotiable; Arabic's launch status is a decision, not an assumption.
+
+Commit message: `feat(editor): Arabic UI translation (RTL-21, S7.6)`
+
+### Slice S7.7: Phase close - full-app localisation walk
+
+- [ ] **Step 1: Walk every surface in each language x each direction**, with an RTL script open in
+      an LTR UI and vice versa, and record it.
+- [ ] **Step 2: Confirm RTL-16...RTL-21 all TRUE**; reconcile the checklist totals.
+- [ ] **Step 3: SLICE CLOSE RITUAL (0.3)**
+
+Commit message: `qa(editor): full-app localisation walk - Phase 7 closed (S7.7)`
 
 ## Phase 5 — Page-geometry QA (MT-02/04/05/06/07/10, PP-01/03, SW-01)
 
