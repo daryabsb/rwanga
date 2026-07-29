@@ -4,11 +4,12 @@
 > archive to find the next action — it's here. Update this file at the end of every unit of work
 > (see `PROTOCOL.md`). Keep it short; link detail, don't inline it.
 
-- **Last updated:** 2026-07-29 · by: **PHASE 4 CLOSED** — S4.4 bidi PASSED + S4.5 SW-23 verdict
+- **Last updated:** 2026-07-29 · by: Phase 4 closed (S4.4+S4.5) · **GAP-2-1 FIXED** (S2.3F) ·
+  GAP-4-1 diagnosed + ruled ship-honest (S4.6F)
 - **Binding doctrine:** every agent MUST follow the 10-rule MASTERPLAN EXECUTION DOCTRINE in the
   root `CLAUDE.md` (one slice at a time · tick-as-you-go · §0.3 close ritual · push every slice commit).
-- **HEAD:** `6d950487` (S4.5 SW-23 verdict — **Phase 4 closed**) · **last slice-close:**
-  `6d950487` · **Branch:** `main` · pushed. *(Update both SHAs at every §0.3 close.)*
+- **HEAD:** `c6f37ad6` (S2.3F new-doc page size + S4.6F PDF diagnosis) · **last slice-close:**
+  `c6f37ad6` · **Branch:** `main` · pushed. *(Update both SHAs at every §0.3 close.)*
 - **Phase:** Stage 1 — Foundation (closing launch P0s). AI/Agent phase is **gated** (see Gates).
 
 ---
