@@ -15,9 +15,33 @@
 (function() {
   const Rga = window.Rga = window.Rga || {};
 
-  function _paperSizeNames() {
-    const sizes = (Rga.Constants && Rga.Constants.PAPER_SIZES) || { Letter: {} };
-    return Object.keys(sizes);
+  // GAP-2-3 fix (S2.4F): the dropdown's <option value> MUST be a value the
+  // settings registry's 'pageSetup.paperSize' entry accepts — the registry
+  // is the SSOT for what Store.set will actually apply (Settings
+  // Architecture Doctrine). Previously this built options from
+  // Rga.Constants.PAPER_SIZES keys ('Letter'/'A4'/'Legal'), which the
+  // registry's case-sensitive select validator rejects wholesale (the
+  // registry only accepts lowercase ['letter','a4','custom'], and never
+  // had 'legal' at all) — Apply silently did nothing, for every user.
+  //
+  // Fix, at the control end: read the registry's own option list (already
+  // the canonical lowercase form) and intersect it, case-insensitively,
+  // with Rga.Constants.PAPER_SIZES (the only table with real paper
+  // dimensions) so the dropdown offers exactly the sizes that are BOTH
+  // registry-legal AND resolvable to real dims. This also drops 'custom'
+  // (registry-legal but no dims table entry / no custom-size UI here) and
+  // 'Legal' (has dims but was never registry-legal) rather than inventing
+  // new behavior for either. One canonical form (the registry's), read at
+  // the boundary — no .toLowerCase() sprinkled at the Apply call site.
+  function _paperSizeOptions() {
+    const entry = Rga.Settings && Rga.Settings.Registry && Rga.Settings.Registry.get('pageSetup.paperSize');
+    const registryOptions = (entry && Array.isArray(entry.options)) ? entry.options : ['letter', 'a4'];
+    const registryLabels  = (entry && entry.labels) || {};
+    const table = (Rga.Constants && Rga.Constants.PAPER_SIZES) || { Letter: {} };
+    const tableKeysLower = Object.keys(table).map(function(k) { return k.toLowerCase(); });
+    return registryOptions
+      .filter(function(opt) { return tableKeysLower.indexOf(opt.toLowerCase()) >= 0; })
+      .map(function(opt) { return { value: opt, label: registryLabels[opt] || opt }; });
   }
 
   // Build (once) and return the modal overlay element.
@@ -30,8 +54,8 @@
     overlay.className = 'modal-overlay';
     overlay.hidden = true;
 
-    const sizeOptions = _paperSizeNames()
-      .map(function(n) { return '<option value="' + n + '">' + n + '</option>'; })
+    const sizeOptions = _paperSizeOptions()
+      .map(function(o) { return '<option value="' + o.value + '">' + o.label + '</option>'; })
       .join('');
 
     overlay.innerHTML =
@@ -85,7 +109,10 @@
     const bottom = overlay.querySelector('#ps-bottom');
     const left   = overlay.querySelector('#ps-left');
 
-    paper.value  = ps.paperSize;
+    // Seed case-insensitively: doc.settings.pageSetup.paperSize may still be
+    // stored capitalized ('Letter', doc.js's new-doc default) while the
+    // <option value>s are now the registry's canonical lowercase form.
+    paper.value  = (typeof ps.paperSize === 'string' ? ps.paperSize.toLowerCase() : ps.paperSize);
     top.value    = ps.margins.top;
     right.value  = ps.margins.right;
     bottom.value = ps.margins.bottom;

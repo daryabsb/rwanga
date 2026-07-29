@@ -5,6 +5,52 @@ Template & rules: `PROTOCOL.md`.
 
 ---
 
+## 2026-07-29 · S2.4F CLOSED — Page Setup's paper-size dropdown actually works now; GAP-3-5 ruled
+- **Did (S2.4F — GAP-2-3):** fixed a visible control that could not do its one job. **Root cause:**
+  `page-setup-dialog.js:18-21` built the dropdown from `Constants.PAPER_SIZES` keys
+  (`'Letter'`/`'A4'`/`'Legal'`), but `settings-registry.js:283-291` accepts only lowercase
+  `['letter','a4','custom']`, and the `select` validator (`settings-validators.js:27-30`) is
+  case-sensitive — so **every Apply was silently rejected**. **Fixed at the control end:** the dropdown
+  now sources its options from the **registry entry (SSOT)**, intersected case-insensitively with
+  `Constants.PAPER_SIZES` so it only offers values that are both registry-legal and have real
+  dimensions; seed-from-doc lowercases before assigning. One canonical form, normalised at the
+  boundary — no `.toLowerCase()` sprinkled at call sites, and the Apply call site is untouched.
+- **End-to-end proof (this is the honest test, and it only became possible because S2.3F landed
+  first):** choosing A4 → Apply now **visibly resizes the Flow page to exactly 1122.52px**, and Letter
+  returns it to exactly **1056px**. Before the fix it was a total no-op — the page stayed at Letter.
+  `Store.effective('pageSetup.paperSize')` confirms the value round-trips.
+- **The class guard shipped** (the point of the slice, not the one-line fix): a test asserting **every**
+  Page Setup option is a value the registry accepts. This bug class — a case/format mismatch across the
+  control↔registry seam — will recur, and the registry is where it must be caught.
+- **Tests:** new `rwanga-editor/tests/e2e/settings/page-setup-paper-size.spec.js` **3/3** (TDD:
+  confirmed RED pre-fix, green post-fix, re-run twice for stability). Neighbours green —
+  `page-setup-ownership` 5/5, `new-doc-page-geometry` 4/4, `page-setup-preview` 7/7, RTL folder 9/9,
+  Filmustageation print/flow 56/56. **Unit suite at the campaign baseline: 1936 · 1935 pass · 0 fail ·
+  1 skip** (orchestrator-verified independently).
+- **Evidence:** `docs/plans/evidence/S2.4F-paper-size.md`.
+- **Status deltas:** **GAP-2-3 CLOSED.**
+- **Gaps surfaced — GAP-2-5, and it needs a USER DECISION, not a fix.** Making the dropdown honest
+  removed **"Legal"** from Page Setup. Legal was in `Constants.PAPER_SIZES` but the registry never
+  accepted it, so it could never be applied — it was *visibly broken* before and is now *visibly
+  absent*. Same for `custom` (registry-legal but no dimensions behind it). Either they get real
+  end-to-end support, or their absence is intentional and the dead constant should go. US Legal is a
+  real if uncommon production paper size, so this is a product call.
+- **Also ruled this session — GAP-3-5 (was waiting on the user): `Ctrl+Shift+S` belongs to SAVE AS.**
+  Rationale on record: it is the near-universal Save As binding (Word, Photoshop, VS Code) and writers
+  reach for it by muscle memory, so breaking that convention costs more than moving a Rwanga-specific
+  panel. Scene Navigator gets a new default. Fix written up as slice **S3.4F**, which also settles the
+  two lesser collisions (`Ctrl+Shift+E`, `Ctrl+Shift+F`) and ships the duplicate-defaults guard test.
+  **Two of the three items that were waiting on the user are now ruled** (GAP-4-1 earlier today,
+  GAP-3-5 now); only the **named Kurdish (Sorani) reviewer** for S7.5 remains outstanding.
+- **Process note:** the orchestrator offered the user a false either/or ("fix the dropdown **or** do
+  the font work") when both were going to be done. The user corrected it: when both tasks will happen,
+  the question is **which order first**, stated plainly with a recommended sequence. Recorded to
+  agent memory; applies to every future decision put to the user.
+- **Next action:** **S3.4F** (shortcut collisions — ruled and ready), then **S4.7F** (font track A),
+  then **S7.1** opening Phase 7.
+
+---
+
 ## 2026-07-29 · S2.3F + S4.6F CLOSED — new-doc page size FIXED; Kurdish PDF diagnosed and ruled
 - **Did (S2.3F — GAP-2-1, the oldest outstanding user complaint):** fixed it. The user re-raised it
   today ("you still owe me a fix on the page geometry on opening a new .rga document, the page is not

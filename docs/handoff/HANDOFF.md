@@ -16,14 +16,15 @@
 
 ## ⭐ NEXT ACTION
 
-**Start S4.7F — GAP-4-1 track A: repair/replace the vendored Arabic font.** The user ruled
-"do both sequentially, start with B"; **B is done** (the defect is diagnosed and honestly recorded as
-shipping PARTIAL), so track A is next. It is an **improvement, not a blocker** — worth ~half the
-damage (37.4%→20.4% measured) and it **reopens the RTL geometry verified in S4.2/S4.3**, so the slice
-is "swap the font *and re-prove the page*". After it: **S7.1**, opening Phase 7.
+**Start S3.4F — keyboard-shortcut collisions.** Unblocked by the user's ruling 2026-07-29:
+**Save As keeps `Ctrl+Shift+S`**, Scene Navigator gets a new default. Small, and it closes both a lost
+shortcut and a Settings-honesty violation (Settings displays a binding that does nothing). The real
+deliverable is the **duplicate-defaults guard test** — the registry, not the console, is where a
+collision must be caught.
 
-*(Previously queued next, still queued behind S4.7F:)*
-**S7.1 — UI-localisation architecture brief (writing only), opening Phase 7.**
+**Then, in order:** **S4.7F** (GAP-4-1 track A — repair/replace the vendored Arabic font; an
+*improvement, not a blocker*, worth ~half the damage and it **reopens the RTL geometry verified in
+S4.2/S4.3**, so the slice is "swap the font *and re-prove the page*"), then **S7.1**, opening Phase 7.
 **Phase 4 is CLOSED** (S4.1→S4.5 all ✅). Phase 7 comes next by design: it is a BUILD phase with a
 long external lead time (native reviewers), while Phase 5 (geometry QA) is a short sweep that can
 follow it. S7.1 is a design/writing slice — **no product code** — and its central rule is that
@@ -35,8 +36,9 @@ without them"). Six P0 rows added (RTL-16…RTL-21); seven slices S7.1…S7.7 in
 after Phase 4 and before Phase 5. Central rule of that phase: **UI direction and DOCUMENT direction are
 two separate axes** — an English UI must hold an RTL script and vice versa.
 ⚠ **Waiting on the user (long lead, start now):** a named **Kurdish (Sorani) native reviewer** for
-S7.5 — an external dependency that must not become the last blocker. Also open: GAP-4-1 (PDF text
-layer), GAP-3-5 (Ctrl+Shift+S owner), and whether Arabic may ship post-launch if no reviewer is found.
+S7.5 — an external dependency that must not become the last blocker; and whether Arabic may ship
+post-launch if no reviewer is found. *(Both other pending rulings were given 2026-07-29: GAP-3-5 —
+Save As keeps Ctrl+Shift+S; GAP-4-1 — ship honest now, font work after.)*
 
 **Phase 4 is COMPLETE** (S4.1 → S4.5 all closed). Its capstone finding: **the RTL layout is one
 design mirrored, not a second implementation.** Flipping a document's direction to `ltr` returns the
@@ -61,7 +63,8 @@ launch matrix **13/13** · lifecycle specs **3/3** (PF-02/03/05 **TRUE**) · con
 has its **first recorded e2e baseline: 363 tests · 357 pass · 6 fail · 11.7 min** (was 326 pass /
 37 fail / 1.2 h), zero teardown hangs, zero orphaned Electron processes.
 Two open cases came out of it: **GAP-3-4** (the 5 stable reds the baseline made visible) and
-**GAP-3-5** (Ctrl+Shift+S claimed by both Save As and Scene Navigator — **needs a user ruling**).
+**GAP-3-5** (Ctrl+Shift+S claimed by both Save As and Scene Navigator — **ruled 2026-07-29:
+Save As keeps it**; fix queued as S3.4F).
 Phases 1 & 2 COMPLETE (QG-01 TRUE, LR-01 TRUE — installer smoke 5/5).
 ⚠ A running Electron instance auto-migrates **any** fixture it opens — seen on
 `playground-the-last-light.rga` (2026-07-26, twice) and `mysterious-guest-rtl.rga` (2026-07-27).
@@ -116,14 +119,15 @@ contribution/write API. That write API is the true technical prerequisite for th
 | ID | Case | Status | Pointer |
 |---|---|---|---|
 | GAP-3-2 | Settings workspace sticky-search band layering broken (row paints above band; rows clipped) — user-reported with screenshot; needs Playwright geometry diagnostic + fix | OPEN — needs fix-slice | Masterplan §0.5 |
-| GAP-2-3 | **Page Setup's paper-size dropdown does not work, for anyone.** It emits `'A4'`/`'Letter'` but the registry only accepts lowercase, so Apply never changes the paper size. Found while fixing GAP-2-1; user-facing and total — the app ships a paper chooser that cannot choose paper | OPEN — small fix-slice + a case-mismatch guard test | Masterplan §0.5 |
+| GAP-2-5 | **"Legal" paper size is now absent from Page Setup — and never worked.** The registry only ever accepted letter/a4/custom, so Legal was always rejected; S2.4F made the dropdown honest by sourcing from the registry, so Legal stopped being advertised. Needs a **user call**: give Legal real support, or accept its absence and drop the dead entry | OPEN — user decision | Masterplan §0.5 |
+| ~~GAP-2-3~~ | ~~**Page Setup's paper-size dropdown does not work, for anyone.**~~ **CLOSED 2026-07-29 (S2.4F)** — the control emitted `'A4'`/`'Letter'` while the registry accepted only lowercase, so every Apply was silently rejected. Fixed at the control end (options now sourced from the registry as SSOT). Choosing A4 now visibly resizes the page to **1122.52px**, Letter back to **1056px** | **CLOSED** | `../plans/evidence/S2.4F-paper-size.md` |
 | GAP-2-1 | ~~Flow view: New doc opens with a dead band above the page~~ **CLOSED 2026-07-29 (S2.3F)** — the oldest outstanding user complaint. A new page painted at **227.59px against a correct 1056px** because height was content-driven and no `--page-height` token existed; now Letter **1056px** / A4 **1122.52px** exact on first paint, both directions, stable while typing | **CLOSED** | `../plans/evidence/S2.3F-new-doc-geometry.md` |
 | GAP-2-2 | Packaged app shares userData with dev app → restored dev session, auto-opened the playground fixture on first launch | OPEN — decide appId split before launch | Masterplan §0.5 |
 | GAP-3-4 | The **5 stable e2e reds** left standing by the first recorded baseline, now that no teardown noise hides them: scene-navigator marks report zero directional indent (RTL *and* LTR control); Settings tab doesn't hide the toolbar; Settings nav rail `overflow:hidden` (same family as GAP-3-2 — fix together); Settings General rows drifted from the registry. Plus 2 load-flakes recorded, not adjusted | OPEN — needs triage slice (stale-test vs real defect) | Masterplan §0.5 |
 | GAP-4-2 | **The app's own interface has no RTL and no translations.** **USER RULED 2026-07-28: launch-blocking** — checklist amended with six new P0 rows (RTL-16…RTL-21) and a new **Phase 7** in the masterplan owns the work | RULED — build queued as Phase 7 (after Phase 4) | Masterplan Phase 7 / `docs/plans/evidence/GAP-4-2-ui-localization-audit.md` |
 | GAP-4-1 (**DIAGNOSED · post-launch by ruling**) | **Root cause found (S4.6F): the vendored font, primarily — and swapping it cannot close the gap.** With *zero shaping*, 9/21 dotted/diacritic Noto Naskh letters break their own ToUnicode mapping; the same letters in Tahoma map 21/21. But Noto→Tahoma moves NUL only **37.4% → 20.4%** — the rest is Chromium dropping contextual variants regardless of font (Latin control: **0% NUL**, so export options are fine). **User ruled: ship honest now, improve after.** RTL-11 + SW-23 stay PARTIAL *by decision*. True fix = a different PDF text-layer path, post-launch. Font track queued as **S4.7F** (improvement, ~half the damage, reopens S4.2/S4.3 verification) | **OPEN — post-launch** | `../plans/evidence/S4.6F-pdf-text-layer.md` |
 | GAP-4-1 (original measurement) | **The exported PDF's Kurdish text layer is ~40% unreadable** — 40.2% of script characters extract as NUL because the embedded font subset's ToUnicode CMap misses most shaped Kurdish forms. The page DRAWS correctly; the script is not searchable, not copyable, and reaches downstream tooling as garbage. LTR exports are unaffected. **Blocks RTL-11 and therefore the launch gate** | OPEN — needs a fix-slice; isolate font-vs-pipeline first | Masterplan §0.5 / `docs/plans/evidence/S4.3-rtl-print-pdf.md` |
-| GAP-3-5 | **`Ctrl+Shift+S` is shipped as the default for BOTH "Save As" and "Scene Navigator"** — the registry is last-wins, so Scene Navigator takes the key and Save As has no working shortcut, while Settings still displays it. Two lesser collisions: Ctrl+Shift+E, Ctrl+Shift+F. Plus Electron's insecure-CSP warning to settle before launch | OPEN — needs a user ruling (which feature keeps which key) + a duplicate-defaults guard test | Masterplan §0.5 / `docs/plans/evidence/S3.3-console-audit.md` |
+| GAP-3-5 | **`Ctrl+Shift+S` is shipped as the default for BOTH "Save As" and "Scene Navigator"** — the registry is last-wins, so Scene Navigator takes the key and Save As has no working shortcut, while Settings still displays it. Two lesser collisions: Ctrl+Shift+E, Ctrl+Shift+F. Plus Electron's insecure-CSP warning to settle before launch. **✅ RULED 2026-07-29: Save As keeps `Ctrl+Shift+S`** (near-universal binding; Scene Navigator gets a new default) — no longer waiting on the user | **RULED — fix queued as S3.4F** | Masterplan slice S3.4F / `docs/plans/evidence/S3.3-console-audit.md` |
 | PF-01 (macOS) | macOS launch matrix + `pack:mac` + smoke — the only half of PF-01 still open (Decision #1: Mac arrives later) | DEFERRED — needs hardware | Masterplan §0.5 / PF-01 row |
 | SW-23 | PARTIAL — the convention IS verified (one resolver, two directions; profile-flip deltas all 0.000in). Its only remaining input is RTL-11, blocked by **GAP-4-1**; SW-23 flips TRUE the moment that PDF text layer is fixed | BLOCKED on GAP-4-1 | `../plans/evidence/S4.5-sw23-verdict.md` |
 | MT-02/04/05/06/07/10, PP-01/03, SW-01 | Page-geometry QA (sizes/margins/overflow) | OPEN — QA | GO_LIVE Part A.1 #5 |
