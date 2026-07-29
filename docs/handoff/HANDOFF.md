@@ -8,8 +8,8 @@
   GAP-4-1 diagnosed + ruled ship-honest (S4.6F)
 - **Binding doctrine:** every agent MUST follow the 10-rule MASTERPLAN EXECUTION DOCTRINE in the
   root `CLAUDE.md` (one slice at a time · tick-as-you-go · §0.3 close ritual · push every slice commit).
-- **HEAD:** `c6f37ad6` (S2.3F new-doc page size + S4.6F PDF diagnosis) · **last slice-close:**
-  `c6f37ad6` · **Branch:** `main` · pushed. *(Update both SHAs at every §0.3 close.)*
+- **HEAD:** `dcb684c5` (S2.4F paper-size fix) · **last slice-close:**
+  `dcb684c5` · **Branch:** `main` · pushed. *(Update both SHAs at every §0.3 close.)*
 - **Phase:** Stage 1 — Foundation (closing launch P0s). AI/Agent phase is **gated** (see Gates).
 
 ---
