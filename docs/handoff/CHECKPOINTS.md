@@ -5,6 +5,61 @@ Template & rules: `PROTOCOL.md`.
 
 ---
 
+## 2026-07-29 · S7.1 CLOSED — Phase 7 opened with a decided architecture (writing only, no code)
+- **Did:** produced the UI-localisation architecture brief that Phase 7 builds from —
+  `docs/plans/evidence/S7.1-ui-localisation-brief.md`. **No product code touched** (the slice is
+  design writing; writing code here would violate doctrine). It re-verified the GAP-4-2 audit's
+  claims rather than trusting them, and decides the things S7.2–S7.7 would otherwise each re-litigate.
+- **Translation layer decided:** flat dot-namespaced JSON, one file per locale
+  (`renderer/locales/{en,ku,ar}.json`), loaded eagerly at boot; synchronous `Rga.I18n.t(key, params)`
+  following the existing `Rga.*` singleton pattern; a missing key renders a **visible sentinel**
+  (`⟦missing:key⟧`) and logs — **never a silent English fallback**, because a silent fallback makes an
+  untranslated UI look finished. Rejected ICU MessageFormat / gettext `.po`: real dependency plus
+  build tooling, disproportionate to a ~60–100-string surface, and against the local-assets-only and
+  renderer-portability constraints.
+- **The two-axis rule got a named seam — the "shell-root direction boundary".** The new `language`
+  applicator becomes the **only** code allowed to write `document.documentElement.dir/lang`; the five
+  existing document-direction call sites (`tab-manager.js:110`, `print-renderer.js:103`,
+  `scene-navigator.js:150`, `tags.js:295`, `review-bar.js:599`) keep setting `dir` on their own
+  subtree roots, untouched. Explicit `dir` on a descendant overrides inherited direction, so the two
+  axes cannot structurally collide, and an **S7.3 source guard** will fail if a second
+  `documentElement.dir` writer ever appears. That is what stops the UI/document conflation returning.
+- **Audit re-verified:** every architectural claim holds. Fine counts move with counting method —
+  `shell.css` measures 25 physical / **14** logical (audit said 12; method variance, not drift);
+  `settings-workspace.css` 13/0 and `components.css` 3/4 match exactly; `overlays.css` (6/1) added,
+  in S7.3's scope but missing from the original table. String counts are quote/scope-sensitive
+  (11–68 by method), so the brief hands S7.4 an authoritative **extraction method** instead of a
+  number that would look precise and be wrong.
+- **New finding not in the audit:** `--font-ui` has **no Arabic-script member** — the vendored Arabic
+  fonts are wired for *document* text only. So a Kurdish/Arabic UI would today render in whatever the
+  OS supplies. Raised as an open question (below), not silently absorbed.
+- **Three of the brief's six open questions were RULED and recorded in its §9**, so S7.2 is not
+  blocked: **(Q4)** `language.restartRequired` flips **true → false** — live apply, per the Settings
+  Constitution's "immediate apply, no Save button"; a restart prompt would itself advertise that the
+  layer is not really live. **(Q2)** two-form plurals accepted for v1 **with conditions** — Arabic has
+  six CLDR categories, so the API must allow full categories later without touching call sites, any
+  string visibly wrong under two forms must be **rewritten to avoid the count** rather than shipped
+  wrong, and the native reviewers must be asked to flag plural phrasing. **(Q6)** the Playwright
+  "survives restart" proof is a Store round-trip + reload, which does **not** exercise a real Electron
+  relaunch — the automated guard stays, but **S7.7's walk must add a real quit-and-relaunch check**,
+  following the S2.2/S3.1 precedent of user-performed physical evidence. Doctrine forbids mocking past
+  a physical gate.
+- **Slice plan S7.2…S7.7 confirmed, no reordering.** One scope clarification: **S7.4 owns the
+  `localechange` live-re-render event** (implied by `restartRequired: false`, previously unstated),
+  and S7.3 inherits a concrete mirror / no-mirror icon-category table instead of ad hoc judgement.
+- **Status deltas:** none — S7.1 is a writing slice and flips no checklist row. Unit baseline
+  unchanged at **1942 · 0 fail · 1 skip**.
+- **Still open, and all three need the user:** (1) a **named Kurdish (Sorani) native reviewer** for
+  S7.5 — outstanding since 2026-07-28 and the likeliest final blocker; (2) **does Arabic ship at
+  launch or move to P1** if no reviewer is found — RTL-21 is currently a launch-blocking P0, so a
+  "P1" answer requires **amending the checklist**, not letting the row quietly fail at S6.1;
+  (3) **vendor a UI-weight Arabic/Kurdish font for the chrome, or accept OS fallback for v1** — not
+  blocking S7.2–S7.4, but must be answered before S7.5/S7.6 or the native reviewers will be judging
+  typography that is not the shipping typography.
+- **Next action:** **S7.2** — wire Interface Language + app-level UI direction (RTL-16, RTL-17).
+
+---
+
 ## 2026-07-29 · S3.4F CLOSED — Save As has its shortcut back; a standing guard now blocks collisions
 - **Did (S3.4F — GAP-3-5):** `Rga.KeyboardRegistry` is **last-wins**, and `settings-registry.js` gave
   `kb.saveAs` (:549) and `kb.sceneNavigator` (:585) **the same default**. Scene Navigator registered

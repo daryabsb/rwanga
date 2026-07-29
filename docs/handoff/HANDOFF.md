@@ -16,8 +16,16 @@
 
 ## ⭐ NEXT ACTION
 
-**Start S4.7F — GAP-4-1 track A: repair/replace the vendored Arabic font.** (S3.4F closed
-2026-07-29 — Save As has its shortcut back and a standing guard now fails on any duplicate default.)
+**Start S7.2 — wire Interface Language + app-level UI direction (RTL-16, RTL-17).** Build from
+`../plans/evidence/S7.1-ui-localisation-brief.md` — the architecture is decided; do not re-decide it.
+Two things it binds you to: ship `language` with **`restartRequired: false`** (live apply, Settings
+Constitution), and respect the **shell-root direction boundary** — the `language` applicator is the
+ONLY code allowed to write `documentElement.dir/lang`; the five document-direction call sites keep
+setting `dir` on their own subtree and must not be touched.
+
+**Then:** S7.3 → S7.4 → (S7.5/S7.6, gated on a reviewer) → S7.7. **S4.7F** (font track A — a
+*non-blocking improvement* that half-fixes the PDF text layer and reopens the S4.2/S4.3 geometry
+verification) can run any time; it was deliberately deprioritised behind launch-blocking Phase 7.
 
 ⚠ **Unit baseline moved: `1942 · 0 fail · 1 skip`** (was 1936; S3.4F added the 6-test shortcut guard).
 Any red is a regression; any count below 1942 means tests went missing.

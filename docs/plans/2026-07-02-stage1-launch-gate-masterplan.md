@@ -96,7 +96,7 @@ electron-builder (`npm run pack:win`), PowerShell/Windows 11.
 | S5.1 | 5 Geometry | Paper sizes + margins (MT-05, MT-06, PP-01, PP-03) | ⬜ | |
 | S5.2 | 5 Geometry | Bottom-margin overflow + empty-line budget (MT-07, MT-10) | ⬜ | |
 | S5.3 | 5 Geometry | Marker stability, heading edit, PDF page count (MT-02, SW-01, MT-04) | ⬜ | |
-| S7.1 | 7 UI L10n | UI-localisation architecture brief (writing only) | ⬜ | |
+| S7.1 | 7 UI L10n | UI-localisation architecture brief (writing only) | ✅ | `docs/plans/evidence/S7.1-ui-localisation-brief.md` |
 | S7.2 | 7 UI L10n | Wire Interface Language + app-level UI direction (RTL-16, RTL-17) | ⬜ | |
 | S7.3 | 7 UI L10n | Mirror the chrome - logical-properties sweep (RTL-18) | ⬜ | |
 | S7.4 | 7 UI L10n | Translation layer - UI strings become keys (RTL-19) | ⬜ | |
@@ -1037,18 +1037,20 @@ time while Phase 5 is a short QA sweep. S6.1 (roll-up) stays last regardless.
 
 **Files:** Create `docs/plans/evidence/S7.1-ui-localisation-brief.md`
 
-- [ ] **Step 1: Decide and record the architecture**, with a rationale per decision:
+- [x] **Step 1: Decide and record the architecture**, with a rationale per decision:
       catalogue format and where it lives; key naming convention; lookup API surface and how a
       missing key behaves (must be *visible*, never a silent English fallback that hides gaps);
       whether the language change applies live or requires restart (the registry currently says
       `restartRequired: true` - confirm or change it deliberately); who owns UI direction and how it
       stays separate from document direction; how plurals and interpolation work; how the Settings
       *registry's own* labels/descriptions get translated (they are data, not markup - a distinct
-      problem worth naming now).
-- [ ] **Step 2: Enumerate the surface.** Produce the full inventory of strings to convert
+      problem worth naming now). Recorded in `docs/plans/evidence/S7.1-ui-localisation-brief.md` §1-2, §5.
+- [x] **Step 2: Enumerate the surface.** Produce the full inventory of strings to convert
       (`renderer/js/**` literals + `index.html` markup + settings-registry labels/descriptions),
       with a count per file - the translation volume must be known before a reviewer is asked.
-- [ ] **Step 3: SLICE CLOSE RITUAL (0.3)**
+      Recorded in `docs/plans/evidence/S7.1-ui-localisation-brief.md` §0/§3 (order-of-magnitude counts
+      + the superseding extraction method S7.4 must run for the authoritative count).
+- [x] **Step 3: SLICE CLOSE RITUAL (0.3)** — done 2026-07-29; brief §9 records the rulings on Q2/Q4/Q6 and the three questions still open for the user.
 
 Commit message: `docs(editor): UI-localisation architecture brief (S7.1)`
 
