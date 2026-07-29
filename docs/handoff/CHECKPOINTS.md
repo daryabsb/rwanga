@@ -5,6 +5,64 @@ Template & rules: `PROTOCOL.md`.
 
 ---
 
+## 2026-07-29 · S2.3F + S4.6F CLOSED — new-doc page size FIXED; Kurdish PDF diagnosed and ruled
+- **Did (S2.3F — GAP-2-1, the oldest outstanding user complaint):** fixed it. The user re-raised it
+  today ("you still owe me a fix on the page geometry on opening a new .rga document, the page is not
+  created as the right A4 size"); it had been ticketed 2026-07-26 and reported verbally before that,
+  and had never been given a fix-slice. **Root cause:** `renderer/css/editor-prosemirror.css:53-54`
+  set `min-height: auto; height: auto` on the Flow surface, so page height was purely
+  **content-driven**, and **no `--page-height` token existed anywhere** — `page-surface.js` only ever
+  published `--page-width`. **Decisive measurement:** a new Letter doc painted at **227.59px on the
+  first frame against a correct 1056px** (11in × 96dpi) = **21.5% of true size**, then crept to
+  261.19px after two typed lines. **Fix:** `page-surface.js` now publishes `--page-height` alongside
+  `--page-width`; the CSS consumes it as a **floor** (`height` stays `auto`); `tokens.css` carries an
+  `11in` default for the first-paint gap. **After: Letter 1056px exact, A4 1122.52px exact, LTR and
+  RTL, stable while typing.** Flow doctrine respected — one continuous `#editor`, no seams, capsules
+  or pagination introduced (the doctrine's own regression test still green).
+  Spec `rwanga-editor/tests/e2e/flow/new-doc-page-geometry.spec.js` **4/4** (Letter+A4 × LTR+RTL).
+- **Did (S4.6F — GAP-4-1 diagnosis):** root-caused the Kurdish PDF text layer **by experiment, not by
+  reading code**. With **zero shaping involved**, 9 of 21 dotted/diacritic Noto Naskh letters break
+  their own `ToUnicode` mapping (to NUL or a wrong combining-mark codepoint) while the identical
+  characters in Tahoma/Arial map **21/21** — only the font varied, so font-vs-pipeline is settled.
+  **But a font swap cannot close it:** Noto→Tahoma on the same shaped sentence moves NUL only
+  **37.4% → 20.4%**; the residual is **Chromium's own CMap generation dropping contextual/medial
+  variants regardless of font**. A Latin control through the identical path extracts **0% NUL**,
+  clearing the `printToPDF` options.
+- **USER RULING 2026-07-29 — "do both sequentially, start with B":** ship honest now, improve after.
+  **B executed:** RTL-11 and SW-23 stay **PARTIAL at launch BY DECISION**, both rows amended to state
+  the measured number and the reason so the PARTIAL can never be mistaken for an oversight; GAP-4-1
+  stays OPEN, **re-scoped post-launch**, its true fix re-pointed at a *different PDF text-layer path*
+  rather than a different font. **A queued as slice S4.7F** (font repair — an improvement worth ~half
+  the damage, which reopens the S4.2/S4.3 geometry verification and so must re-prove the page).
+  ⚠ Recorded in HANDOFF Gates: **S6.1 must flip QG-12 as "green except this named, accepted defect",
+  never as an unqualified TRUE** — otherwise the accepted hole silently disappears at roll-up.
+- **Test-suite integrity — two latent reds found and re-pointed (no assertion weakened).** The S2.3F
+  fix turned `editor-page-color.test.js` red because that test asserted `min-height: auto` — i.e. it
+  asserted **the very defect GAP-2-1 was filed for**. Re-pointed the way S1.2 re-pointed the stale
+  shell snapshots: it now asserts the ratified invariant (`min-height: var(--page-height)` floor
+  **and** `height: auto`, so the no-growth-model property the guard exists to protect is still
+  enforced), source cited inline. Running the suite also exposed a **second, older red nobody had
+  caught**: `owned-chrome-menu-ownership.test.js` still declared exactly 8 menubar entries after slice
+  **S3.1F** (2026-07-28) legitimately added a 9th (`overflow`) to close GAP-3-1 — S3.1F shipped its
+  fix and left the suite red. Re-pointed to 9, source cited. **Unit suite restored to the S1.5
+  baseline exactly: 1936 · 1935 pass · 0 fail · 1 skip.**
+- **Evidence:** `docs/plans/evidence/S2.3F-new-doc-geometry.md`, `S4.6F-pdf-text-layer.md`.
+- **Status deltas:** **GAP-2-1 CLOSED.** GAP-2-4 opened and CLOSED in the same close. GAP-4-1 remains
+  OPEN, re-scoped post-launch by ruling. Launch-gate counts unchanged (**47 TRUE · 11 PARTIAL ·
+  1 UNKNOWN · 7 FALSE**, 19 open of 66) — S2.3F closed a gap, not a checklist row.
+- **Gaps surfaced:** **GAP-2-3 — Page Setup's paper-size dropdown does not work for anyone.** It
+  emits `'A4'`/`'Letter'` while the registry accepts only lowercase, so Apply never changes the paper
+  size. Found while fixing GAP-2-1, deliberately NOT fixed inside it (§0.2 scope freeze). Needs a
+  small fix-slice plus a guard test asserting the control's emitted value is one the registry accepts
+  — this class of case-mismatch bug will recur.
+- **Housekeeping:** a stray `rwanga-editor/repro-tmp.js` left by the diagnosis harness was deleted
+  (standing project rule: no orphaned scratch files in the tree).
+- **Next action:** **S4.7F — GAP-4-1 track A** (font repair; improvement, must re-prove S4.2/S4.3
+  geometry). Then **S7.1**, opening Phase 7. ⚠ Still waiting on the user: a named **Kurdish (Sorani)
+  native reviewer** for S7.5, and a ruling on whether Arabic may ship post-launch if none is found.
+
+---
+
 ## 2026-07-29 · S4.5 CLOSED — **PHASE 4 COMPLETE**; SW-23 verdict = PARTIAL (GAP-4-1 alone)
 - **Did:** Executed slice S4.5, the SW-23 roll-up that closes Phase 4. SW-23 asks whether the RTL
   **profile** actually drives the convention or merely sets a direction flag. New spec

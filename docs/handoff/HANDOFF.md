@@ -15,7 +15,14 @@
 
 ## ⭐ NEXT ACTION
 
-**Start S7.1 — UI-localisation architecture brief (writing only), opening Phase 7.**
+**Start S4.7F — GAP-4-1 track A: repair/replace the vendored Arabic font.** The user ruled
+"do both sequentially, start with B"; **B is done** (the defect is diagnosed and honestly recorded as
+shipping PARTIAL), so track A is next. It is an **improvement, not a blocker** — worth ~half the
+damage (37.4%→20.4% measured) and it **reopens the RTL geometry verified in S4.2/S4.3**, so the slice
+is "swap the font *and re-prove the page*". After it: **S7.1**, opening Phase 7.
+
+*(Previously queued next, still queued behind S4.7F:)*
+**S7.1 — UI-localisation architecture brief (writing only), opening Phase 7.**
 **Phase 4 is CLOSED** (S4.1→S4.5 all ✅). Phase 7 comes next by design: it is a BUILD phase with a
 long external lead time (native reviewers), while Phase 5 (geometry QA) is a short sweep that can
 follow it. S7.1 is a design/writing slice — **no product code** — and its central rule is that
@@ -88,6 +95,11 @@ contribution/write API. That write API is the true technical prerequisite for th
 ## 🚦 Gates (why the AI/Agent harness cannot start yet)
 
 1. **Launch gate** — no invention features until every launch-checklist **P0** is TRUE.
+   ⚠ **The gate now carries ONE user-accepted exception, and S6.1 must not quietly swallow it:**
+   **RTL-11 + SW-23 ship PARTIAL by explicit ruling** (2026-07-29) because the Kurdish PDF text layer
+   cannot be fixed without a different export pipeline (**GAP-4-1**, re-scoped post-launch). QG-12
+   ("no known P0/P1 bugs") must therefore be flipped as *"green except this named, accepted defect"* —
+   **never as an unqualified TRUE.**
    Status: **47 TRUE · 11 PARTIAL · 1 UNKNOWN · 7 FALSE** (19 open of **66**; QG-01 + LR-01 TRUE
    2026-07-26; PF-02/03/05 TRUE 2026-07-27; PF-13 + RTL-04…10 TRUE 2026-07-28; RTL-12 + RTL-13 TRUE
    2026-07-29). **+6 P0s added 2026-07-28**
@@ -103,11 +115,13 @@ contribution/write API. That write API is the true technical prerequisite for th
 | ID | Case | Status | Pointer |
 |---|---|---|---|
 | GAP-3-2 | Settings workspace sticky-search band layering broken (row paints above band; rows clipped) — user-reported with screenshot; needs Playwright geometry diagnostic + fix | OPEN — needs fix-slice | Masterplan §0.5 |
-| GAP-2-1 | Flow view: New doc opens with a dead band above the page that only shrinks as you type (user-reported, long-standing, finally ticketed 2026-07-26) | OPEN — needs fix-slice | Masterplan §0.5 |
+| GAP-2-3 | **Page Setup's paper-size dropdown does not work, for anyone.** It emits `'A4'`/`'Letter'` but the registry only accepts lowercase, so Apply never changes the paper size. Found while fixing GAP-2-1; user-facing and total — the app ships a paper chooser that cannot choose paper | OPEN — small fix-slice + a case-mismatch guard test | Masterplan §0.5 |
+| GAP-2-1 | ~~Flow view: New doc opens with a dead band above the page~~ **CLOSED 2026-07-29 (S2.3F)** — the oldest outstanding user complaint. A new page painted at **227.59px against a correct 1056px** because height was content-driven and no `--page-height` token existed; now Letter **1056px** / A4 **1122.52px** exact on first paint, both directions, stable while typing | **CLOSED** | `../plans/evidence/S2.3F-new-doc-geometry.md` |
 | GAP-2-2 | Packaged app shares userData with dev app → restored dev session, auto-opened the playground fixture on first launch | OPEN — decide appId split before launch | Masterplan §0.5 |
 | GAP-3-4 | The **5 stable e2e reds** left standing by the first recorded baseline, now that no teardown noise hides them: scene-navigator marks report zero directional indent (RTL *and* LTR control); Settings tab doesn't hide the toolbar; Settings nav rail `overflow:hidden` (same family as GAP-3-2 — fix together); Settings General rows drifted from the registry. Plus 2 load-flakes recorded, not adjusted | OPEN — needs triage slice (stale-test vs real defect) | Masterplan §0.5 |
 | GAP-4-2 | **The app's own interface has no RTL and no translations.** **USER RULED 2026-07-28: launch-blocking** — checklist amended with six new P0 rows (RTL-16…RTL-21) and a new **Phase 7** in the masterplan owns the work | RULED — build queued as Phase 7 (after Phase 4) | Masterplan Phase 7 / `docs/plans/evidence/GAP-4-2-ui-localization-audit.md` |
-| GAP-4-1 | **The exported PDF's Kurdish text layer is ~40% unreadable** — 40.2% of script characters extract as NUL because the embedded font subset's ToUnicode CMap misses most shaped Kurdish forms. The page DRAWS correctly; the script is not searchable, not copyable, and reaches downstream tooling as garbage. LTR exports are unaffected. **Blocks RTL-11 and therefore the launch gate** | OPEN — needs a fix-slice; isolate font-vs-pipeline first | Masterplan §0.5 / `docs/plans/evidence/S4.3-rtl-print-pdf.md` |
+| GAP-4-1 (**DIAGNOSED · post-launch by ruling**) | **Root cause found (S4.6F): the vendored font, primarily — and swapping it cannot close the gap.** With *zero shaping*, 9/21 dotted/diacritic Noto Naskh letters break their own ToUnicode mapping; the same letters in Tahoma map 21/21. But Noto→Tahoma moves NUL only **37.4% → 20.4%** — the rest is Chromium dropping contextual variants regardless of font (Latin control: **0% NUL**, so export options are fine). **User ruled: ship honest now, improve after.** RTL-11 + SW-23 stay PARTIAL *by decision*. True fix = a different PDF text-layer path, post-launch. Font track queued as **S4.7F** (improvement, ~half the damage, reopens S4.2/S4.3 verification) | **OPEN — post-launch** | `../plans/evidence/S4.6F-pdf-text-layer.md` |
+| GAP-4-1 (original measurement) | **The exported PDF's Kurdish text layer is ~40% unreadable** — 40.2% of script characters extract as NUL because the embedded font subset's ToUnicode CMap misses most shaped Kurdish forms. The page DRAWS correctly; the script is not searchable, not copyable, and reaches downstream tooling as garbage. LTR exports are unaffected. **Blocks RTL-11 and therefore the launch gate** | OPEN — needs a fix-slice; isolate font-vs-pipeline first | Masterplan §0.5 / `docs/plans/evidence/S4.3-rtl-print-pdf.md` |
 | GAP-3-5 | **`Ctrl+Shift+S` is shipped as the default for BOTH "Save As" and "Scene Navigator"** — the registry is last-wins, so Scene Navigator takes the key and Save As has no working shortcut, while Settings still displays it. Two lesser collisions: Ctrl+Shift+E, Ctrl+Shift+F. Plus Electron's insecure-CSP warning to settle before launch | OPEN — needs a user ruling (which feature keeps which key) + a duplicate-defaults guard test | Masterplan §0.5 / `docs/plans/evidence/S3.3-console-audit.md` |
 | PF-01 (macOS) | macOS launch matrix + `pack:mac` + smoke — the only half of PF-01 still open (Decision #1: Mac arrives later) | DEFERRED — needs hardware | Masterplan §0.5 / PF-01 row |
 | SW-23 | PARTIAL — the convention IS verified (one resolver, two directions; profile-flip deltas all 0.000in). Its only remaining input is RTL-11, blocked by **GAP-4-1**; SW-23 flips TRUE the moment that PDF text layer is fixed | BLOCKED on GAP-4-1 | `../plans/evidence/S4.5-sw23-verdict.md` |

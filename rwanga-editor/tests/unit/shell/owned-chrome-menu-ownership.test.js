@@ -28,9 +28,17 @@ const MENU_JS    = path.join(REPO, 'electron/menu.js');
 
 function read(p) { return fs.readFileSync(p, 'utf8'); }
 
-const REQUIRED_MENUS = ['file', 'edit', 'view', 'script', 'tags', 'tools', 'export', 'help'];
+// RE-POINTED 2026-07-29. `overflow` was added to the menubar on 2026-07-28 by
+// slice S3.1F, the fix for GAP-3-1 ("compact mode amputates half the menubar"):
+// a `⋯` item that appears exactly when the responsive rules hide menus and
+// carries their contents, so Settings/Export/Help stay reachable on a laptop.
+// It is a real, ratified ninth menubar entry and must be declared here — the
+// suite went red for it because this list was never updated, not because the
+// menubar is wrong. Source: masterplan slice S3.1F + GAP-3-1 (CLOSED) +
+// rwanga-editor/tests/e2e/settings/menubar-overflow.spec.js (4/4).
+const REQUIRED_MENUS = ['file', 'edit', 'view', 'script', 'tags', 'tools', 'export', 'help', 'overflow'];
 
-test('G-OC-4: #rga-shell-menubar exists with exactly 8 entries in declared order', () => {
+test('G-OC-4: #rga-shell-menubar exists with exactly 9 entries in declared order', () => {
   const html = read(INDEX_HTML);
   // Find the menubar section and extract data-menu attributes in order.
   const navMatch = html.match(/<nav[^>]*id="rga-shell-menubar"[^>]*>([\s\S]*?)<\/nav>/);

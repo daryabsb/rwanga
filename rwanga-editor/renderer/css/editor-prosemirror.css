@@ -50,7 +50,15 @@
    * their own shadow on a separate selector, untouched. */
   box-shadow: var(--editor-page-shadow);
   width: var(--page-width);
-  min-height: auto;
+  /* GAP-2-1 (S2.3F): min-height is a FLOOR, not a cap — the page paints at
+   * its full configured paper height from the first frame instead of
+   * collapsing to whatever a near-empty document's content happens to need.
+   * height stays auto so #editor keeps growing past one page once content
+   * overflows it. This is still a single continuous surface (no seams, no
+   * capsules, no pagination) — only the minimum size changed; Fork A's
+   * "no growth model" meant no page-break chrome, not "the page may render
+   * shorter than the paper it represents." */
+  min-height: var(--page-height);
   height: auto;
   padding: 0 0.5in;
   border-radius: 0;

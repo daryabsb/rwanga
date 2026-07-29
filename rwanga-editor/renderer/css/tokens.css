@@ -102,6 +102,12 @@
      aligns to the page column). Adding a third consumer would
      mean three consumers, one source — that's the right shape. */
   --page-width: 8.5in;
+  /* GAP-2-1 (S2.3F): default paper height (Letter), so #editor's
+     min-height floor (editor-prosemirror.css) resolves to a full page even
+     in the first-paint gap before PageSurface.apply() runs (mirrors the
+     --page-width default above). Kept in sync with Page Setup by
+     Rga.PageSurface.apply(). */
+  --page-height: 11in;
 
   /* === Background Layers (darkest → lightest surface) === */
   --bg-base: #181818;

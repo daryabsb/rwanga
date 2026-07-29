@@ -63,7 +63,19 @@ test('Fix 2 — colour-only: the Flow #editor geometry is untouched', () => {
   // growth model / paper shell (Fork A invariants).
   const body = ruleBody(readCss('editor-prosemirror.css'), '#editor-container.view-flow #editor');
   assert.match(body, /width\s*:\s*var\(--page-width\)/, 'width token must be unchanged');
-  assert.match(body, /min-height\s*:\s*auto/, 'min-height:auto (no growth model) must be unchanged');
+  // RE-POINTED 2026-07-29 (slice S2.3F, GAP-2-1 — user-ratified). This assertion
+  // used to require `min-height: auto`. That encoded the very defect GAP-2-1 was
+  // filed for: a New doc's page painted at 227.59px instead of a full 1056px page
+  // and grew as you typed. The ratified rule is that the page starts at its
+  // configured paper size, so the floor is now --page-height. The invariant this
+  // guard actually exists to protect — NO growth model, NO paper shell, Flow stays
+  // one continuous surface — is preserved by `height: auto`: the surface may still
+  // grow past one page, it simply may not start SMALLER than one.
+  // Source: masterplan slice S2.3F + docs/plans/evidence/S2.3F-new-doc-geometry.md.
+  assert.match(body, /min-height\s*:\s*var\(--page-height\)/,
+    'min-height must be the page-height floor (GAP-2-1: a page starts at full paper size)');
+  assert.match(body, /height\s*:\s*auto/,
+    'height:auto must be unchanged — Flow is a continuous surface and may grow past one page');
   // Filmustageation F2 (2026-05-31) DELIBERATELY gives the Flow page a soft
   // page shadow so it reads as a lifted sheet — the one sanctioned suspension
   // of no-shadow, because it depicts paper. The shadow comes from the
