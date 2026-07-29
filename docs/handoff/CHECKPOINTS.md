@@ -5,6 +5,56 @@ Template & rules: `PROTOCOL.md`.
 
 ---
 
+## 2026-07-29 · S4.4 CLOSED — bidi audit PASSED, RTL-12 + RTL-13 → TRUE
+- **Did:** Executed slice S4.4, the Phase-4 bidi audit, against the S4.1 protocol's measurable
+  criteria. New Playwright spec `rwanga-editor/tests/e2e/rtl/rtl-bidi.spec.js` (**2/2**, ~20 s)
+  measures both RTL-12 and RTL-13 on **both** surfaces (Flow editor + Print Preview) by DOM geometry
+  and `Range` client-rects — per the standing "Playwright > screenshots for layout work" rule.
+  Opens only a `%TEMP%` copy of the fixture; closes through `closeApp()` (S3.2F teardown law).
+- **RTL-12 (mixed English/Kurdish readable) = TRUE.** 24/24 sampled mixed-script blocks (character,
+  action, parenthetical, dialogue, spread across all 47 scenes, including the protocol's named
+  `WIDE SHOT: نالی لەسەر…`, `FRAGMENT 1، کەمتر لە ٣ چرکە:`, `باخەوان (VOICEOVER، OFF)`) hold
+  `direction: rtl` in Flow **and** Print — *including the Latin-first bait lines* (`FRAGMENT`,
+  `WIDE SHOT:`, `MONITOR POV:`, `CAMERA`), which is exactly where the classic base-direction bug
+  would surface. Every Latin run reads left-to-right *inside* the RTL line (first/last alphanumeric
+  rect ordering); zero `U+FFFD`; Print insets match the S4.1 reference table to **0.000in** delta
+  (tolerance was ±0.04in).
+- **RTL-13 (bidi punctuation stable) = TRUE.** All 8 typed battery lines — `.`, `؟`, a parenthetical
+  around mixed content, `« »`, `" "`, a bracketed Latin token, Latin-word-then-period, and a digit
+  run followed by `%` — render sentence-final punctuation at the **reading-end (left)** and mirror
+  paired delimiters open-right / close-left, identically in Flow and Print. Punctuation side was
+  **unchanged after inserting a character earlier in the line** (measured before/after), so the
+  instability the checklist row names does not occur.
+- **Evidence:** `docs/plans/evidence/S4.4-bidi-audit.md` (full `case → criterion → expected →
+  measured → verdict` table), raw `S4.4-rtl12-measurements.json` / `S4.4-rtl13-measurements.json`,
+  and 4 screenshots `S4.4-*.png`.
+- **Status deltas:** RTL-12 UNKNOWN→**TRUE**, RTL-13 UNKNOWN→**TRUE**. Launch gate
+  45→**47 TRUE** · 11 PARTIAL · 3→**1 UNKNOWN** · 7 FALSE (21→**19** open of 66).
+- **Gaps surfaced:** **none.** The one notable finding — in `(V.O.)`-style cues the trailing period
+  detaches from the `V…O` run to sit beside the closing `)` (visual order `) . V . O (`) — is
+  standard UAX#9 weak-character resolution between an LTR run and an RTL-adjacent bracket, not the
+  "whole line flips to LTR" failure signature the protocol hunts. Recorded in the evidence file,
+  deliberately not asserted and not escalated.
+- **Test-hygiene fix during orchestrator verification:** the spec was green in isolation but failed
+  `Flow: battery line "period" not found after typing` when the file ran in order. Cause was in the
+  spec, not the product: `closePreview()` ended in a fixed `waitForTimeout(150)` and asserted
+  nothing, so RTL-12 could hand RTL-13 a still-active Print Preview overlaying the editor, and the
+  typing landed nowhere. Fixed by waiting on real state (`PrintPreview.isActive() === false` plus a
+  non-zero-geometry editor) and adding a post-typing `waitForFunction` that proves every battery line
+  reached the document — so a future focus/overlay problem fails as itself instead of masquerading as
+  a bidi failure. **No assertion weakened.** Full file green on two consecutive back-to-back runs.
+- **Also handled:** a user-reported "Save failed / ENOENT rename `.rga.tmp` → `.rga`" dialog was
+  triaged as wreckage from a crash-restore, not a defect — `atomic-write.js` writes-fsyncs-closes the
+  temp before renaming, so it cannot itself lose the temp; disk showed no stray `.tmp` and the fixture
+  intact. Not ticketed. Pre-existing fixture dirt (`mysterious-guest-rtl.rga`) reverted at session
+  start per the fixture law; 7 orphaned Electron processes from an earlier session cleaned up.
+- **Next action:** **S4.5 — SW-23 roll-up + Phase 4 close.** Write the one-page verdict over
+  RTL-04…13 and run the phase's strongest single test: flip `screenplayProfile.direction` to `ltr`
+  on a copy and confirm the same magnitudes return as Hollywood-left geometry (one resolver, two
+  directions). SW-23 will land PARTIAL, not TRUE, while RTL-11 is held open by GAP-4-1.
+
+---
+
 ## 2026-07-28 · PHASE 7 OPENED — UI localisation ruled LAUNCH-BLOCKING by the user
 - **Did:** Acted on the user's ruling in response to the GAP-4-2 audit: *"yes and it is an essential
   part of the launch, this system will not be launched without them."* Amended the launch

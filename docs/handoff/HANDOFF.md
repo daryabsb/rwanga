@@ -4,19 +4,22 @@
 > archive to find the next action — it's here. Update this file at the end of every unit of work
 > (see `PROTOCOL.md`). Keep it short; link detail, don't inline it.
 
-- **Last updated:** 2026-07-28 · by: Phase 7 opened — UI localisation ruled launch-blocking
+- **Last updated:** 2026-07-29 · by: S4.4 closed — bidi audit PASSED (RTL-12 + RTL-13 TRUE)
 - **Binding doctrine:** every agent MUST follow the 10-rule MASTERPLAN EXECUTION DOCTRINE in the
   root `CLAUDE.md` (one slice at a time · tick-as-you-go · §0.3 close ritual · push every slice commit).
-- **HEAD:** `a42f8570` (Phase 7 opened — UI localisation launch-blocking) · **last slice-close:**
-  `a42f8570` · **Branch:** `main` · pushed. *(Update both SHAs at every §0.3 close.)*
+- **HEAD:** `<S4.4-close>` (S4.4 bidi audit — RTL-12/13 TRUE) · **last slice-close:**
+  `<S4.4-close>` · **Branch:** `main` · pushed. *(Update both SHAs at every §0.3 close.)*
 - **Phase:** Stage 1 — Foundation (closing launch P0s). AI/Agent phase is **gated** (see Gates).
 
 ---
 
 ## ⭐ NEXT ACTION
 
-**Start S4.4 — RTL bidi audit (RTL-12, RTL-13)**, then S4.5, then **Phase 7**.
-Criteria: `../plans/evidence/S4.1-rtl-qa-protocol.md`. Open a `%TEMP%` COPY of the fixture.
+**Start S4.5 — SW-23 roll-up + Phase 4 close**, then **Phase 7**.
+S4.5 = the one-page verdict over RTL-04…13 **plus** the strongest single test in the phase: flip
+`metadata.screenplayProfile.direction` to `ltr` on a COPY and confirm the same magnitudes come back as
+Hollywood-left geometry — proving one resolver, two directions (no forked layout model).
+Criteria: `../plans/evidence/S4.1-rtl-qa-protocol.md` §SW-23. Open a `%TEMP%` COPY of the fixture.
 
 ⚠ **NEW AND LAUNCH-BLOCKING — Phase 7: UI localisation + application RTL.** The user ruled
 2026-07-28 that a Kurdish/Arabic *interface* is essential to launch ("this system will not be launched
@@ -27,11 +30,14 @@ two separate axes** — an English UI must hold an RTL script and vice versa.
 S7.5 — an external dependency that must not become the last blocker. Also open: GAP-4-1 (PDF text
 layer), GAP-3-5 (Ctrl+Shift+S owner), and whether Arabic may ship post-launch if no reviewer is found.
 
-**Phase 4 so far:** RTL-04…RTL-09 **TRUE** (page geometry measured correct) and RTL-10 **TRUE**
+**Phase 4 so far:** RTL-04…RTL-09 **TRUE** (page geometry measured correct), RTL-10 **TRUE**
 (all 85 pages clean; the long-standing `overflow:hidden` clipping worry closed by measurement;
-leading exactly 1.30). **RTL-11 stays PARTIAL** — the PDF draws correctly but its text layer is
+leading exactly 1.30), and **RTL-12 + RTL-13 TRUE** (S4.4 bidi audit: mixed Kurdish/Latin lines keep
+their RTL base direction even when they START with a Latin token, Latin runs read LTR inside them, and
+sentence-final punctuation sits at the reading-end and stays there across an edit — the two named bugs
+do not occur; no gaps). **RTL-11 stays PARTIAL** — the PDF draws correctly but its text layer is
 40% NUL, so the exported script is not searchable or copyable (**GAP-4-1**).
-Evidence: `../plans/evidence/S4.2-rtl-alignment.md`, `S4.3-rtl-print-pdf.md`.
+Evidence: `../plans/evidence/S4.2-rtl-alignment.md`, `S4.3-rtl-print-pdf.md`, `S4.4-bidi-audit.md`.
 
 **Phase 3 is COMPLETE** (S3.1 → S3.2 → S3.2F → S3.3 all closed):
 launch matrix **13/13** · lifecycle specs **3/3** (PF-02/03/05 **TRUE**) · console audit **0 errors /
@@ -73,8 +79,9 @@ contribution/write API. That write API is the true technical prerequisite for th
 ## 🚦 Gates (why the AI/Agent harness cannot start yet)
 
 1. **Launch gate** — no invention features until every launch-checklist **P0** is TRUE.
-   Status: **45 TRUE · 11 PARTIAL · 3 UNKNOWN · 7 FALSE** (21 open of **66**; QG-01 + LR-01 TRUE
-   2026-07-26; PF-02/03/05 TRUE 2026-07-27; PF-13 + RTL-04…10 TRUE 2026-07-28). **+6 P0s added 2026-07-28**
+   Status: **47 TRUE · 11 PARTIAL · 1 UNKNOWN · 7 FALSE** (19 open of **66**; QG-01 + LR-01 TRUE
+   2026-07-26; PF-02/03/05 TRUE 2026-07-27; PF-13 + RTL-04…10 TRUE 2026-07-28; RTL-12 + RTL-13 TRUE
+   2026-07-29). **+6 P0s added 2026-07-28**
    (RTL-16…RTL-21, UI localisation — user ruled launch-blocking). See `../RWANGA_IDE_LAUNCH_CHECKLIST.md`.
 2. **Alive-App Phase 2 gate** — "No AI feature implementation may start before this phase is visually
    verified." Status: **every box unchecked.** See `../RWANGA_IDE_ALIVE_APP_CHECKLIST.md`.
@@ -94,7 +101,7 @@ contribution/write API. That write API is the true technical prerequisite for th
 | GAP-4-1 | **The exported PDF's Kurdish text layer is ~40% unreadable** — 40.2% of script characters extract as NUL because the embedded font subset's ToUnicode CMap misses most shaped Kurdish forms. The page DRAWS correctly; the script is not searchable, not copyable, and reaches downstream tooling as garbage. LTR exports are unaffected. **Blocks RTL-11 and therefore the launch gate** | OPEN — needs a fix-slice; isolate font-vs-pipeline first | Masterplan §0.5 / `docs/plans/evidence/S4.3-rtl-print-pdf.md` |
 | GAP-3-5 | **`Ctrl+Shift+S` is shipped as the default for BOTH "Save As" and "Scene Navigator"** — the registry is last-wins, so Scene Navigator takes the key and Save As has no working shortcut, while Settings still displays it. Two lesser collisions: Ctrl+Shift+E, Ctrl+Shift+F. Plus Electron's insecure-CSP warning to settle before launch | OPEN — needs a user ruling (which feature keeps which key) + a duplicate-defaults guard test | Masterplan §0.5 / `docs/plans/evidence/S3.3-console-audit.md` |
 | PF-01 (macOS) | macOS launch matrix + `pack:mac` + smoke — the only half of PF-01 still open (Decision #1: Mac arrives later) | DEFERRED — needs hardware | Masterplan §0.5 / PF-01 row |
-| RTL-12/13, SW-23 | RTL bidi QA + the profile-drives-convention roll-up. RTL-04…09 TRUE (S4.2), RTL-10 TRUE (S4.3) | OPEN — QA (S4.4→S4.5) | GO_LIVE Part A.1 #4 |
+| SW-23 | The profile-drives-convention roll-up — all its RTL inputs now measured: RTL-04…09 TRUE (S4.2), RTL-10 TRUE (S4.3), RTL-12/13 TRUE (S4.4); only RTL-11 open (GAP-4-1) | OPEN — QA (S4.5) | GO_LIVE Part A.1 #4 |
 | MT-02/04/05/06/07/10, PP-01/03, SW-01 | Page-geometry QA (sizes/margins/overflow) | OPEN — QA | GO_LIVE Part A.1 #5 |
 | QG-12 | Roll-up "no known P0/P1 bugs" — flips when the above close | OPEN (auto) | Launch checklist §15 |
 | VISION-1 | Breakdown sheets: data + UI stub exist, no JS renders them (~1–2 days) | OPEN (Stage 2) | GO_LIVE Part B.3 #1 |
@@ -114,6 +121,7 @@ contribution/write API. That write API is the true technical prerequisite for th
 | PF-13 clean console (S3.3) | **TRUE — 0 error-level console messages · 0 uncaught page errors** across 8 core flows (launch → new → all block types → save → reopen → Print Preview → Page Setup → undo/redo ×5). Typing, saving, reopening, page-setup and undo/redo are completely silent. Re-runnable audit spec, not a one-off observation | `docs/plans/evidence/S3.3-console-audit.md` + `S3.3-console-capture.json` |
 | GAP-3-3 (e2e quit-path hangs) | **CLOSED — suite 1.2 h → 11.7 min, 37 reds → 6.** Two causes, both test hygiene, no product code touched: (a) the quit guard correctly waits for a human at the unsaved-changes modal, so `app.close()` never resolved — one shared `closeApp()` teardown across 60 specs / 124 sites; (b) force-kill specs killed only the main process, leaving Windows children holding Playwright's pipe — now kills the process tree. First e2e baseline recorded | `docs/plans/evidence/S3.2F-quit-path.md` + `S3.2F-e2e-baseline.txt` |
 | PF-02/03/05 lifecycle round-trips (S3.2) | **TRUE — 3/3 specs green.** New→save→reopen proven across a second app instance; open-from-disk proven not to write the file back; Save As proven to re-point handle/name/origin/Recent | `docs/plans/evidence/S3.2-lifecycle-e2e.md` + `rwanga-editor/tests/e2e/lifecycle/*.spec.js` |
+| RTL-12/13 bidi (S4.4) | **TRUE — both.** 24/24 sampled mixed Kurdish/Latin blocks keep RTL base direction in Flow *and* Print, including Latin-first lines (the classic base-direction bug is absent); Latin runs read LTR inside the RTL line; 0 U+FFFD; Print insets match the protocol to **0.000in**. 8/8 typed punctuation battery lines put `.` `؟` at the reading-end and mirror `( )` `« »` `[ ]` correctly, **unchanged after editing earlier in the line**. No gaps found | `docs/plans/evidence/S4.4-bidi-audit.md` + raw JSON measurements; spec `rwanga-editor/tests/e2e/rtl/rtl-bidi.spec.js` **2/2** |
 | Is the launch checklist honest/current? | **Yes — verified** | 3 latest commits are checklist-only; QG-01 = 1936/1899/36 reproduces; clean-fixture rerun = 40/40 → 30 reds all non-core |
 | PP-D5 (RTL body-leading) | Closed (PP-16 TRUE) | Print-Truth-Unification; PTU-B 7/7 green (prior agent, 2026-06-10) |
 | PDF export, RTL scene-heading map, persistence/recovery | TRUE, test-backed | in the 1899-pass unit set |

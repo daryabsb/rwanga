@@ -1,0 +1,620 @@
+{
+  "flowBefore": {
+    "period": {
+      "ok": true,
+      "direction": "rtl",
+      "textAlign": "start",
+      "paddingLeft": 0,
+      "paddingRight": 0,
+      "blockRect": {
+        "left": 513.703125,
+        "right": 1211.390625,
+        "width": 697.6875
+      },
+      "lineRect": {
+        "left": 1116.515625,
+        "right": 1211.390625,
+        "width": 94.875
+      },
+      "fullText": "گەڕایەوە بۆ ماڵ.",
+      "hasReplacementChar": false,
+      "hasEasternArabicDigit": false,
+      "hasWesternDigit": false,
+      "subs": {
+        "final": {
+          "left": 1116.515625,
+          "right": 1120.96875,
+          "width": 4.453125,
+          "idx": 15
+        }
+      }
+    },
+    "question": {
+      "ok": true,
+      "direction": "rtl",
+      "textAlign": "start",
+      "paddingLeft": 0,
+      "paddingRight": 0,
+      "blockRect": {
+        "left": 513.703125,
+        "right": 1211.390625,
+        "width": 697.6875
+      },
+      "lineRect": {
+        "left": 1130.78125,
+        "right": 1211.390625,
+        "width": 80.609375
+      },
+      "fullText": "بۆچی وایکرد؟",
+      "hasReplacementChar": false,
+      "hasEasternArabicDigit": false,
+      "hasWesternDigit": false,
+      "subs": {
+        "final": {
+          "left": 1130.78125,
+          "right": 1137.59375,
+          "width": 6.8125,
+          "idx": 11
+        }
+      }
+    },
+    "parenMixed": {
+      "ok": true,
+      "direction": "rtl",
+      "textAlign": "start",
+      "paddingLeft": 0,
+      "paddingRight": 0,
+      "blockRect": {
+        "left": 513.703125,
+        "right": 1211.390625,
+        "width": 697.6875
+      },
+      "lineRect": {
+        "left": 1035.03125,
+        "right": 1211.390625,
+        "width": 176.359375
+      },
+      "fullText": "(دوو GUN لەناو جانتادا بوون)",
+      "hasReplacementChar": false,
+      "hasEasternArabicDigit": false,
+      "hasWesternDigit": false,
+      "subs": {
+        "open": {
+          "left": 1206.921875,
+          "right": 1211.390625,
+          "width": 4.46875,
+          "idx": 0
+        },
+        "close": {
+          "left": 1035.03125,
+          "right": 1039.484375,
+          "width": 4.453125,
+          "idx": 27
+        }
+      }
+    },
+    "guillemets": {
+      "ok": true,
+      "direction": "rtl",
+      "textAlign": "start",
+      "paddingLeft": 0,
+      "paddingRight": 0,
+      "blockRect": {
+        "left": 513.703125,
+        "right": 1211.390625,
+        "width": 697.6875
+      },
+      "lineRect": {
+        "left": 1110.34375,
+        "right": 1211.390625,
+        "width": 101.046875
+      },
+      "fullText": "«سڵاو» پێی گوت.",
+      "hasReplacementChar": false,
+      "hasEasternArabicDigit": false,
+      "hasWesternDigit": false,
+      "subs": {
+        "open": {
+          "left": 1204.859375,
+          "right": 1211.390625,
+          "width": 6.53125,
+          "idx": 0
+        },
+        "close": {
+          "left": 1170.578125,
+          "right": 1177.109375,
+          "width": 6.53125,
+          "idx": 5
+        },
+        "final": {
+          "left": 1110.34375,
+          "right": 1114.796875,
+          "width": 4.453125,
+          "idx": 14
+        }
+      }
+    },
+    "quotes": {
+      "ok": true,
+      "direction": "rtl",
+      "textAlign": "start",
+      "paddingLeft": 0,
+      "paddingRight": 0,
+      "blockRect": {
+        "left": 513.703125,
+        "right": 1211.390625,
+        "width": 697.6875
+      },
+      "lineRect": {
+        "left": 1058.8125,
+        "right": 1211.390625,
+        "width": 152.578125
+      },
+      "fullText": "گوتی \"چۆنیت؟\" و ڕۆیشت.",
+      "hasReplacementChar": false,
+      "hasEasternArabicDigit": false,
+      "hasWesternDigit": false,
+      "subs": {
+        "final": {
+          "left": 1058.8125,
+          "right": 1063.265625,
+          "width": 4.453125,
+          "idx": 21
+        }
+      }
+    },
+    "bracketLatin": {
+      "ok": true,
+      "direction": "rtl",
+      "textAlign": "start",
+      "paddingLeft": 0,
+      "paddingRight": 0,
+      "blockRect": {
+        "left": 513.703125,
+        "right": 1211.390625,
+        "width": 697.6875
+      },
+      "lineRect": {
+        "left": 1044.59375,
+        "right": 1211.390625,
+        "width": 166.796875
+      },
+      "fullText": "دیمانەکە [OK] بەردەوام بوو.",
+      "hasReplacementChar": false,
+      "hasEasternArabicDigit": false,
+      "hasWesternDigit": false,
+      "subs": {
+        "open": {
+          "left": 1154.75,
+          "right": 1159.578125,
+          "width": 4.828125,
+          "idx": 9
+        },
+        "close": {
+          "left": 1125.5625,
+          "right": 1130.40625,
+          "width": 4.84375,
+          "idx": 12
+        },
+        "final": {
+          "left": 1044.59375,
+          "right": 1049.046875,
+          "width": 4.453125,
+          "idx": 26
+        }
+      }
+    },
+    "latinThenPeriod": {
+      "ok": true,
+      "direction": "rtl",
+      "textAlign": "start",
+      "paddingLeft": 0,
+      "paddingRight": 0,
+      "blockRect": {
+        "left": 513.703125,
+        "right": 1211.390625,
+        "width": 697.6875
+      },
+      "lineRect": {
+        "left": 1135.875,
+        "right": 1211.390625,
+        "width": 75.515625
+      },
+      "fullText": "ئەو got OK.",
+      "hasReplacementChar": false,
+      "hasEasternArabicDigit": false,
+      "hasWesternDigit": false,
+      "subs": {
+        "final": {
+          "left": 1135.875,
+          "right": 1140.328125,
+          "width": 4.453125,
+          "idx": 10
+        }
+      }
+    },
+    "digitPercent": {
+      "ok": true,
+      "direction": "rtl",
+      "textAlign": "start",
+      "paddingLeft": 0,
+      "paddingRight": 0,
+      "blockRect": {
+        "left": 513.703125,
+        "right": 1211.390625,
+        "width": 697.6875
+      },
+      "lineRect": {
+        "left": 1090.84375,
+        "right": 1211.390625,
+        "width": 120.546875
+      },
+      "fullText": "تەنها ٥٠% ئامادە بوو.",
+      "hasReplacementChar": false,
+      "hasEasternArabicDigit": true,
+      "hasWesternDigit": false,
+      "subs": {
+        "digits": {
+          "left": 1166.203125,
+          "right": 1180.578125,
+          "width": 14.375,
+          "idx": 6
+        },
+        "percent": {
+          "left": 1154.671875,
+          "right": 1166.203125,
+          "width": 11.53125,
+          "idx": 8
+        },
+        "final": {
+          "left": 1090.84375,
+          "right": 1095.296875,
+          "width": 4.453125,
+          "idx": 20
+        }
+      }
+    }
+  },
+  "flowAfter": {
+    "period": {
+      "ok": true,
+      "direction": "rtl",
+      "textAlign": "start",
+      "paddingLeft": 0,
+      "paddingRight": 0,
+      "blockRect": {
+        "left": 513.703125,
+        "right": 1211.390625,
+        "width": 697.6875
+      },
+      "lineRect": {
+        "left": 1105.640625,
+        "right": 1211.390625,
+        "width": 105.75
+      },
+      "fullText": "خگەڕایەوە بۆ ماڵ.",
+      "hasReplacementChar": false,
+      "hasEasternArabicDigit": false,
+      "hasWesternDigit": false,
+      "subs": {
+        "final": {
+          "left": 1105.640625,
+          "right": 1110.09375,
+          "width": 4.453125,
+          "idx": 16
+        }
+      }
+    },
+    "parenMixed": {
+      "ok": true,
+      "direction": "rtl",
+      "textAlign": "start",
+      "paddingLeft": 0,
+      "paddingRight": 0,
+      "blockRect": {
+        "left": 513.703125,
+        "right": 1211.390625,
+        "width": 697.6875
+      },
+      "lineRect": {
+        "left": 1024.859375,
+        "right": 1211.390625,
+        "width": 186.53125
+      },
+      "fullText": "خ(دوو GUN لەناو جانتادا بوون)",
+      "hasReplacementChar": false,
+      "hasEasternArabicDigit": false,
+      "hasWesternDigit": false,
+      "subs": {
+        "open": {
+          "left": 1196.75,
+          "right": 1201.21875,
+          "width": 4.46875,
+          "idx": 1
+        },
+        "close": {
+          "left": 1024.859375,
+          "right": 1029.3125,
+          "width": 4.453125,
+          "idx": 28
+        }
+      }
+    }
+  },
+  "printResults": {
+    "period": {
+      "ok": true,
+      "direction": "rtl",
+      "textAlign": "start",
+      "paddingLeft": 0,
+      "paddingRight": 0,
+      "blockRect": {
+        "left": 718.6249389648438,
+        "right": 1272.3577880859375,
+        "width": 553.7328491210938
+      },
+      "lineRect": {
+        "left": 1166.611083984375,
+        "right": 1272.3577880859375,
+        "width": 105.7467041015625
+      },
+      "fullText": "خگەڕایەوە بۆ ماڵ.",
+      "hasReplacementChar": false,
+      "hasEasternArabicDigit": false,
+      "hasWesternDigit": false,
+      "subs": {
+        "final": {
+          "left": 1166.611083984375,
+          "right": 1171.0736083984375,
+          "width": 4.4625244140625,
+          "idx": 16
+        }
+      }
+    },
+    "question": {
+      "ok": true,
+      "direction": "rtl",
+      "textAlign": "start",
+      "paddingLeft": 0,
+      "paddingRight": 0,
+      "blockRect": {
+        "left": 718.6249389648438,
+        "right": 1272.3577880859375,
+        "width": 553.7328491210938
+      },
+      "lineRect": {
+        "left": 1191.743408203125,
+        "right": 1272.3577880859375,
+        "width": 80.6143798828125
+      },
+      "fullText": "بۆچی وایکرد؟",
+      "hasReplacementChar": false,
+      "hasEasternArabicDigit": false,
+      "hasWesternDigit": false,
+      "subs": {
+        "final": {
+          "left": 1191.743408203125,
+          "right": 1198.559326171875,
+          "width": 6.81591796875,
+          "idx": 11
+        }
+      }
+    },
+    "parenMixed": {
+      "ok": true,
+      "direction": "rtl",
+      "textAlign": "start",
+      "paddingLeft": 0,
+      "paddingRight": 0,
+      "blockRect": {
+        "left": 718.6249389648438,
+        "right": 1272.3577880859375,
+        "width": 553.7328491210938
+      },
+      "lineRect": {
+        "left": 1085.8189697265625,
+        "right": 1272.3577880859375,
+        "width": 186.538818359375
+      },
+      "fullText": "خ(دوو GUN لەناو جانتادا بوون)",
+      "hasReplacementChar": false,
+      "hasEasternArabicDigit": false,
+      "hasWesternDigit": false,
+      "subs": {
+        "open": {
+          "left": 1257.726806640625,
+          "right": 1262.1893310546875,
+          "width": 4.4625244140625,
+          "idx": 1
+        },
+        "close": {
+          "left": 1085.8189697265625,
+          "right": 1090.281494140625,
+          "width": 4.4625244140625,
+          "idx": 28
+        }
+      }
+    },
+    "guillemets": {
+      "ok": true,
+      "direction": "rtl",
+      "textAlign": "start",
+      "paddingLeft": 0,
+      "paddingRight": 0,
+      "blockRect": {
+        "left": 718.6249389648438,
+        "right": 1272.3577880859375,
+        "width": 553.7328491210938
+      },
+      "lineRect": {
+        "left": 1171.2955322265625,
+        "right": 1272.3577880859375,
+        "width": 101.062255859375
+      },
+      "fullText": "«سڵاو» پێی گوت.",
+      "hasReplacementChar": false,
+      "hasEasternArabicDigit": false,
+      "hasWesternDigit": false,
+      "subs": {
+        "open": {
+          "left": 1265.8082275390625,
+          "right": 1272.3577880859375,
+          "width": 6.549560546875,
+          "idx": 0
+        },
+        "close": {
+          "left": 1231.52880859375,
+          "right": 1238.05615234375,
+          "width": 6.52734375,
+          "idx": 5
+        },
+        "final": {
+          "left": 1171.2955322265625,
+          "right": 1175.7581787109375,
+          "width": 4.462646484375,
+          "idx": 14
+        }
+      }
+    },
+    "quotes": {
+      "ok": true,
+      "direction": "rtl",
+      "textAlign": "start",
+      "paddingLeft": 0,
+      "paddingRight": 0,
+      "blockRect": {
+        "left": 718.6249389648438,
+        "right": 1272.3577880859375,
+        "width": 553.7328491210938
+      },
+      "lineRect": {
+        "left": 1119.78759765625,
+        "right": 1272.3577880859375,
+        "width": 152.5701904296875
+      },
+      "fullText": "گوتی \"چۆنیت؟\" و ڕۆیشت.",
+      "hasReplacementChar": false,
+      "hasEasternArabicDigit": false,
+      "hasWesternDigit": false,
+      "subs": {
+        "final": {
+          "left": 1119.78759765625,
+          "right": 1124.2501220703125,
+          "width": 4.4625244140625,
+          "idx": 21
+        }
+      }
+    },
+    "bracketLatin": {
+      "ok": true,
+      "direction": "rtl",
+      "textAlign": "start",
+      "paddingLeft": 0,
+      "paddingRight": 0,
+      "blockRect": {
+        "left": 718.6249389648438,
+        "right": 1272.3577880859375,
+        "width": 553.7328491210938
+      },
+      "lineRect": {
+        "left": 1105.5562744140625,
+        "right": 1272.3577880859375,
+        "width": 166.801513671875
+      },
+      "fullText": "دیمانەکە [OK] بەردەوام بوو.",
+      "hasReplacementChar": false,
+      "hasEasternArabicDigit": false,
+      "hasWesternDigit": false,
+      "subs": {
+        "open": {
+          "left": 1215.72119140625,
+          "right": 1220.5611572265625,
+          "width": 4.8399658203125,
+          "idx": 9
+        },
+        "close": {
+          "left": 1186.5260009765625,
+          "right": 1191.365966796875,
+          "width": 4.8399658203125,
+          "idx": 12
+        },
+        "final": {
+          "left": 1105.5562744140625,
+          "right": 1110.0189208984375,
+          "width": 4.462646484375,
+          "idx": 26
+        }
+      }
+    },
+    "latinThenPeriod": {
+      "ok": true,
+      "direction": "rtl",
+      "textAlign": "start",
+      "paddingLeft": 0,
+      "paddingRight": 0,
+      "blockRect": {
+        "left": 718.6249389648438,
+        "right": 1272.3577880859375,
+        "width": 553.7328491210938
+      },
+      "lineRect": {
+        "left": 1196.8275146484375,
+        "right": 1272.3577880859375,
+        "width": 75.5302734375
+      },
+      "fullText": "ئەو got OK.",
+      "hasReplacementChar": false,
+      "hasEasternArabicDigit": false,
+      "hasWesternDigit": false,
+      "subs": {
+        "final": {
+          "left": 1196.8275146484375,
+          "right": 1201.2900390625,
+          "width": 4.4625244140625,
+          "idx": 10
+        }
+      }
+    },
+    "digitPercent": {
+      "ok": true,
+      "direction": "rtl",
+      "textAlign": "start",
+      "paddingLeft": 0,
+      "paddingRight": 0,
+      "blockRect": {
+        "left": 718.6249389648438,
+        "right": 1272.3577880859375,
+        "width": 553.7328491210938
+      },
+      "lineRect": {
+        "left": 1151.802490234375,
+        "right": 1272.3577880859375,
+        "width": 120.5552978515625
+      },
+      "fullText": "تەنها ٥٠% ئامادە بوو.",
+      "hasReplacementChar": false,
+      "hasEasternArabicDigit": true,
+      "hasWesternDigit": false,
+      "subs": {
+        "digits": {
+          "left": 1227.155029296875,
+          "right": 1241.541748046875,
+          "width": 14.38671875,
+          "idx": 6
+        },
+        "percent": {
+          "left": 1215.6324462890625,
+          "right": 1227.155029296875,
+          "width": 11.5225830078125,
+          "idx": 8
+        },
+        "final": {
+          "left": 1151.802490234375,
+          "right": 1156.2650146484375,
+          "width": 4.4625244140625,
+          "idx": 20
+        }
+      }
+    }
+  }
+}

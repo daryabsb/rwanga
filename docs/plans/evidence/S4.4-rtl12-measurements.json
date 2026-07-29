@@ -1,0 +1,1995 @@
+{
+  "evidence": {
+    "flow": [
+      {
+        "sample": "باخەوان (VOICEOVER، OFF)",
+        "type": "character",
+        "m": {
+          "ok": true,
+          "direction": "rtl",
+          "textAlign": "center",
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "blockRect": {
+            "left": 513.703125,
+            "right": 1211.390625,
+            "width": 697.6875
+          },
+          "lineRect": {
+            "left": 757,
+            "right": 968.078125,
+            "width": 211.078125
+          },
+          "fullText": "باخەوان (VOICEOVER، OFF)",
+          "hasReplacementChar": false,
+          "hasEasternArabicDigit": false,
+          "hasWesternDigit": false,
+          "subs": {
+            "run0": {
+              "left": 761.765625,
+              "right": 866.359375,
+              "width": 104.59375,
+              "idx": 9
+            },
+            "run1": {
+              "left": 874.703125,
+              "right": 908.203125,
+              "width": 33.5,
+              "idx": 20
+            }
+          }
+        }
+      },
+      {
+        "sample": "FRAGMENT 1، کەمتر لە ٣ چرکە:",
+        "type": "action",
+        "m": {
+          "ok": true,
+          "direction": "rtl",
+          "textAlign": "start",
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "blockRect": {
+            "left": 513.703125,
+            "right": 1211.390625,
+            "width": 697.6875
+          },
+          "lineRect": {
+            "left": 1004.28125,
+            "right": 1211.390625,
+            "width": 207.109375
+          },
+          "fullText": "FRAGMENT 1، کەمتر لە ٣ چرکە:",
+          "hasReplacementChar": false,
+          "hasEasternArabicDigit": true,
+          "hasWesternDigit": true,
+          "subs": {
+            "run0": {
+              "left": 1108,
+              "right": 1200.015625,
+              "width": 92.015625,
+              "idx": 0
+            }
+          }
+        }
+      },
+      {
+        "sample": "WIDE SHOT: نالی لەسەر کۆتەرەدارێک لە ناو",
+        "type": "action",
+        "m": {
+          "ok": true,
+          "direction": "rtl",
+          "textAlign": "start",
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "blockRect": {
+            "left": 513.703125,
+            "right": 1211.390625,
+            "width": 697.6875
+          },
+          "lineRect": {
+            "left": 530.921875,
+            "right": 1211.390625,
+            "width": 680.46875
+          },
+          "fullText": "WIDE SHOT: نالی لەسەر کۆتەرەدارێک لە ناو باخەکەیدا دانیشتووە. خۆری ئێوارەی زەردەپەڕ، هەوایەکی نەرم دارەکان ئەجوڵێنێتەوە.",
+          "hasReplacementChar": false,
+          "hasEasternArabicDigit": false,
+          "hasWesternDigit": false,
+          "subs": {
+            "run0": {
+              "left": 1120.34375,
+              "right": 1211.390625,
+              "width": 91.046875,
+              "idx": 0
+            }
+          }
+        }
+      },
+      {
+        "sample": "CLOSE ON: پەنجەبڕاوەکە، خوێن.",
+        "type": "action",
+        "m": {
+          "ok": true,
+          "direction": "rtl",
+          "textAlign": "start",
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "blockRect": {
+            "left": 513.703125,
+            "right": 1211.390625,
+            "width": 697.6875
+          },
+          "lineRect": {
+            "left": 1001.21875,
+            "right": 1211.390625,
+            "width": 210.171875
+          },
+          "fullText": "CLOSE ON: پەنجەبڕاوەکە، خوێن.",
+          "hasReplacementChar": false,
+          "hasEasternArabicDigit": false,
+          "hasWesternDigit": false,
+          "subs": {
+            "run0": {
+              "left": 1130.65625,
+              "right": 1211.390625,
+              "width": 80.734375,
+              "idx": 0
+            }
+          }
+        }
+      },
+      {
+        "sample": "(بە AI، voice mode، تەنهایە)",
+        "type": "parenthetical",
+        "m": {
+          "ok": true,
+          "direction": "rtl",
+          "textAlign": "center",
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "blockRect": {
+            "left": 667.3125,
+            "right": 1057.796875,
+            "width": 390.484375
+          },
+          "lineRect": {
+            "left": 778.734375,
+            "right": 946.359375,
+            "width": 167.625
+          },
+          "fullText": "(بە AI، voice mode، تەنهایە)",
+          "hasReplacementChar": false,
+          "hasEasternArabicDigit": false,
+          "hasWesternDigit": false,
+          "subs": {
+            "run0": {
+              "left": 830.09375,
+              "right": 846.25,
+              "width": 16.15625,
+              "idx": 4
+            },
+            "run1": {
+              "left": 853.171875,
+              "right": 926.734375,
+              "width": 73.5625,
+              "idx": 8
+            }
+          }
+        }
+      },
+      {
+        "sample": "CLOSE ON: مۆبایلەکە، شاحینەكە ئەدۆزێتەوە",
+        "type": "action",
+        "m": {
+          "ok": true,
+          "direction": "rtl",
+          "textAlign": "start",
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "blockRect": {
+            "left": 513.703125,
+            "right": 1211.390625,
+            "width": 697.6875
+          },
+          "lineRect": {
+            "left": 729.78125,
+            "right": 1211.390625,
+            "width": 481.609375
+          },
+          "fullText": "CLOSE ON: مۆبایلەکە، شاحینەكە ئەدۆزێتەوە. نالی هەناسەیەکی ئارامی ئەکێشێت.",
+          "hasReplacementChar": false,
+          "hasEasternArabicDigit": false,
+          "hasWesternDigit": false,
+          "subs": {
+            "run0": {
+              "left": 1130.65625,
+              "right": 1211.390625,
+              "width": 80.734375,
+              "idx": 0
+            }
+          }
+        }
+      },
+      {
+        "sample": "CLOSE ON: مۆبایلی نالی، سیگناڵەکە کەمتر ",
+        "type": "action",
+        "m": {
+          "ok": true,
+          "direction": "rtl",
+          "textAlign": "start",
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "blockRect": {
+            "left": 513.703125,
+            "right": 1211.390625,
+            "width": 697.6875
+          },
+          "lineRect": {
+            "left": 790.5625,
+            "right": 1211.390625,
+            "width": 420.828125
+          },
+          "fullText": "CLOSE ON: مۆبایلی نالی، سیگناڵەکە کەمتر ئەبێت: ٣ خەتەوە بۆ ٢، بۆ ١.",
+          "hasReplacementChar": false,
+          "hasEasternArabicDigit": true,
+          "hasWesternDigit": false,
+          "subs": {
+            "run0": {
+              "left": 1130.65625,
+              "right": 1211.390625,
+              "width": 80.734375,
+              "idx": 0
+            }
+          }
+        }
+      },
+      {
+        "sample": "CLOSE ON: سینیی شەربەتەکە لەسەر مێزەکە، ",
+        "type": "action",
+        "m": {
+          "ok": true,
+          "direction": "rtl",
+          "textAlign": "start",
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "blockRect": {
+            "left": 513.703125,
+            "right": 1211.390625,
+            "width": 697.6875
+          },
+          "lineRect": {
+            "left": 519.765625,
+            "right": 1211.390625,
+            "width": 691.625
+          },
+          "fullText": "CLOSE ON: سینیی شەربەتەکە لەسەر مێزەکە، هێشتا نەکراوەتەوە. کامێرا لەسەری دەمێنێتەوە، پاشان دوور دەکەوێتەوە.",
+          "hasReplacementChar": false,
+          "hasEasternArabicDigit": false,
+          "hasWesternDigit": false,
+          "subs": {
+            "run0": {
+              "left": 1130.65625,
+              "right": 1211.390625,
+              "width": 80.734375,
+              "idx": 0
+            }
+          }
+        }
+      },
+      {
+        "sample": "ئەدیب (V.O.)",
+        "type": "character",
+        "m": {
+          "ok": true,
+          "direction": "rtl",
+          "textAlign": "center",
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "blockRect": {
+            "left": 513.703125,
+            "right": 1211.390625,
+            "width": 697.6875
+          },
+          "lineRect": {
+            "left": 818.5,
+            "right": 906.578125,
+            "width": 88.078125
+          },
+          "fullText": "ئەدیب (V.O.)",
+          "hasReplacementChar": false,
+          "hasEasternArabicDigit": false,
+          "hasWesternDigit": false,
+          "subs": {
+            "run0": {
+              "left": 823.25,
+              "right": 858.96875,
+              "width": 35.71875,
+              "idx": 7
+            }
+          }
+        }
+      },
+      {
+        "sample": "WIDE SHOT: هۆڵەکە. گەشە لەسەر قەنەفەکە خ",
+        "type": "action",
+        "m": {
+          "ok": true,
+          "direction": "rtl",
+          "textAlign": "start",
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "blockRect": {
+            "left": 513.703125,
+            "right": 1211.390625,
+            "width": 697.6875
+          },
+          "lineRect": {
+            "left": 743.84375,
+            "right": 1211.390625,
+            "width": 467.546875
+          },
+          "fullText": "WIDE SHOT: هۆڵەکە. گەشە لەسەر قەنەفەکە خەوتووە. بەتانییەکە لەسەریدایە.",
+          "hasReplacementChar": false,
+          "hasEasternArabicDigit": false,
+          "hasWesternDigit": false,
+          "subs": {
+            "run0": {
+              "left": 1120.34375,
+              "right": 1211.390625,
+              "width": 91.046875,
+              "idx": 0
+            }
+          }
+        }
+      },
+      {
+        "sample": "نازێ (V.O.)",
+        "type": "dialogue",
+        "m": {
+          "ok": true,
+          "direction": "rtl",
+          "textAlign": "center",
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "blockRect": {
+            "left": 609.703125,
+            "right": 1115.390625,
+            "width": 505.6875
+          },
+          "lineRect": {
+            "left": 827.53125,
+            "right": 897.546875,
+            "width": 70.015625
+          },
+          "fullText": "نازێ (V.O.)",
+          "hasReplacementChar": false,
+          "hasEasternArabicDigit": false,
+          "hasWesternDigit": false,
+          "subs": {
+            "run0": {
+              "left": 831.96875,
+              "right": 865.046875,
+              "width": 33.078125,
+              "idx": 6
+            }
+          }
+        }
+      },
+      {
+        "sample": "CLOSE ON: چاوەکانی نالی، بەرفراوان دەبن.",
+        "type": "action",
+        "m": {
+          "ok": true,
+          "direction": "rtl",
+          "textAlign": "start",
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "blockRect": {
+            "left": 513.703125,
+            "right": 1211.390625,
+            "width": 697.6875
+          },
+          "lineRect": {
+            "left": 944.6875,
+            "right": 1211.390625,
+            "width": 266.703125
+          },
+          "fullText": "CLOSE ON: چاوەکانی نالی، بەرفراوان دەبن.",
+          "hasReplacementChar": false,
+          "hasEasternArabicDigit": false,
+          "hasWesternDigit": false,
+          "subs": {
+            "run0": {
+              "left": 1130.65625,
+              "right": 1211.390625,
+              "width": 80.734375,
+              "idx": 0
+            }
+          }
+        }
+      },
+      {
+        "sample": "كارمەندی فریاكەوتن (V.O.)",
+        "type": "character",
+        "m": {
+          "ok": true,
+          "direction": "rtl",
+          "textAlign": "center",
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "blockRect": {
+            "left": 513.703125,
+            "right": 1211.390625,
+            "width": 697.6875
+          },
+          "lineRect": {
+            "left": 775.390625,
+            "right": 949.6875,
+            "width": 174.296875
+          },
+          "fullText": "كارمەندی فریاكەوتن (V.O.)",
+          "hasReplacementChar": false,
+          "hasEasternArabicDigit": false,
+          "hasWesternDigit": false,
+          "subs": {
+            "run0": {
+              "left": 780.140625,
+              "right": 815.859375,
+              "width": 35.71875,
+              "idx": 20
+            }
+          }
+        }
+      },
+      {
+        "sample": "بەردی شەکڵدارەکە (stone sculpture) لە گۆ",
+        "type": "action",
+        "m": {
+          "ok": true,
+          "direction": "rtl",
+          "textAlign": "start",
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "blockRect": {
+            "left": 513.703125,
+            "right": 1211.390625,
+            "width": 697.6875
+          },
+          "lineRect": {
+            "left": 567.6875,
+            "right": 1211.390625,
+            "width": 643.703125
+          },
+          "fullText": "بەردی شەکڵدارەکە (stone sculpture) لە گۆشەی هۆڵەکەدا، کامێرا بۆ ساتێک لەسەری دەمێنێتەوە بەبێ هۆکار. بینەر دەیبینێت بەبێ ئەوەی بزانێت بۆچی.",
+          "hasReplacementChar": false,
+          "hasEasternArabicDigit": false,
+          "hasWesternDigit": false,
+          "subs": {
+            "run0": {
+              "left": 1005.34375,
+              "right": 1099.25,
+              "width": 93.90625,
+              "idx": 18
+            }
+          }
+        }
+      },
+      {
+        "sample": "دەنگی بزوێنەرێکی بەهێز، G-Class ێکی ڕەشی",
+        "type": "action",
+        "m": {
+          "ok": true,
+          "direction": "rtl",
+          "textAlign": "start",
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "blockRect": {
+            "left": 513.703125,
+            "right": 1211.390625,
+            "width": 697.6875
+          },
+          "lineRect": {
+            "left": 515.359375,
+            "right": 1211.390625,
+            "width": 696.03125
+          },
+          "fullText": "دەنگی بزوێنەرێکی بەهێز، G-Class ێکی ڕەشی Mercedes دێتە ناو حەوشەکە. تارا لە شوفێرییەوە دادەبەزێت، بە پێکەنین و شادی و ئامادەیی. هەوای ئێوارەکە بۆ ئەو دروست کراوە.",
+          "hasReplacementChar": false,
+          "hasEasternArabicDigit": false,
+          "hasWesternDigit": false,
+          "subs": {
+            "run0": {
+              "left": 1013.03125,
+              "right": 1063.765625,
+              "width": 50.734375,
+              "idx": 24
+            },
+            "run1": {
+              "left": 883.6875,
+              "right": 944.375,
+              "width": 60.6875,
+              "idx": 41
+            }
+          }
+        }
+      },
+      {
+        "sample": "CLOSE ON: چاوەکانی نالی، پڕ لە بێزاری و ",
+        "type": "action",
+        "m": {
+          "ok": true,
+          "direction": "rtl",
+          "textAlign": "start",
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "blockRect": {
+            "left": 513.703125,
+            "right": 1211.390625,
+            "width": 697.6875
+          },
+          "lineRect": {
+            "left": 830.21875,
+            "right": 1211.390625,
+            "width": 381.171875
+          },
+          "fullText": "CLOSE ON: چاوەکانی نالی، پڕ لە بێزاری و بێتاقەتی، ئاو بەچاویا.",
+          "hasReplacementChar": false,
+          "hasEasternArabicDigit": false,
+          "hasWesternDigit": false,
+          "subs": {
+            "run0": {
+              "left": 1130.65625,
+              "right": 1211.390625,
+              "width": 80.734375,
+              "idx": 0
+            }
+          }
+        }
+      },
+      {
+        "sample": "CLOSE ON: دەستی ئەدیب، لە ژێر قەنەفەکە ش",
+        "type": "action",
+        "m": {
+          "ok": true,
+          "direction": "rtl",
+          "textAlign": "start",
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "blockRect": {
+            "left": 513.703125,
+            "right": 1211.390625,
+            "width": 697.6875
+          },
+          "lineRect": {
+            "left": 802.921875,
+            "right": 1211.390625,
+            "width": 408.46875
+          },
+          "fullText": "CLOSE ON: دەستی ئەدیب، لە ژێر قەنەفەکە شتێکی هەست پێدەکات.",
+          "hasReplacementChar": false,
+          "hasEasternArabicDigit": false,
+          "hasWesternDigit": false,
+          "subs": {
+            "run0": {
+              "left": 1130.65625,
+              "right": 1211.390625,
+              "width": 80.734375,
+              "idx": 0
+            }
+          }
+        }
+      },
+      {
+        "sample": "WIDE SHOT: سەیارەی ئەدیب لەسەر جادەیەکی ",
+        "type": "action",
+        "m": {
+          "ok": true,
+          "direction": "rtl",
+          "textAlign": "start",
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "blockRect": {
+            "left": 513.703125,
+            "right": 1211.390625,
+            "width": 697.6875
+          },
+          "lineRect": {
+            "left": 519.71875,
+            "right": 1211.390625,
+            "width": 691.671875
+          },
+          "fullText": "WIDE SHOT: سەیارەی ئەدیب لەسەر جادەیەکی تاک. بایەکی بەقوەت لە پەنجەرەکانەوە دێتە ناوەوە. کەشەکە ماتەمینە، ئاسمان هەورەبار و سارد.",
+          "hasReplacementChar": false,
+          "hasEasternArabicDigit": false,
+          "hasWesternDigit": false,
+          "subs": {
+            "run0": {
+              "left": 1120.34375,
+              "right": 1211.390625,
+              "width": 91.046875,
+              "idx": 0
+            }
+          }
+        }
+      },
+      {
+        "sample": "MONITOR POV: مۆنیتەری کامێراکان، نالی یە",
+        "type": "action",
+        "m": {
+          "ok": true,
+          "direction": "rtl",
+          "textAlign": "start",
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "blockRect": {
+            "left": 513.703125,
+            "right": 1211.390625,
+            "width": 697.6875
+          },
+          "lineRect": {
+            "left": 724.25,
+            "right": 1211.390625,
+            "width": 487.140625
+          },
+          "fullText": "MONITOR POV: مۆنیتەری کامێراکان، نالی یەکە یەکەی کامێراکان سەیر ئەکاتەوە.",
+          "hasReplacementChar": false,
+          "hasEasternArabicDigit": false,
+          "hasWesternDigit": false,
+          "subs": {
+            "run0": {
+              "left": 1091.65625,
+              "right": 1211.390625,
+              "width": 119.734375,
+              "idx": 0
+            }
+          }
+        }
+      },
+      {
+        "sample": "CLOSE ON: دەستەکانی نالی. لەرزان.",
+        "type": "action",
+        "m": {
+          "ok": true,
+          "direction": "rtl",
+          "textAlign": "start",
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "blockRect": {
+            "left": 513.703125,
+            "right": 1211.390625,
+            "width": 697.6875
+          },
+          "lineRect": {
+            "left": 984.953125,
+            "right": 1211.390625,
+            "width": 226.4375
+          },
+          "fullText": "CLOSE ON: دەستەکانی نالی. لەرزان.",
+          "hasReplacementChar": false,
+          "hasEasternArabicDigit": false,
+          "hasWesternDigit": false,
+          "subs": {
+            "run0": {
+              "left": 1130.65625,
+              "right": 1211.390625,
+              "width": 80.734375,
+              "idx": 0
+            }
+          }
+        }
+      },
+      {
+        "sample": "EXTREME WIDE SHOT، STATIC: دەشت. ئاگرەکە",
+        "type": "action",
+        "m": {
+          "ok": true,
+          "direction": "rtl",
+          "textAlign": "start",
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "blockRect": {
+            "left": 513.703125,
+            "right": 1211.390625,
+            "width": 697.6875
+          },
+          "lineRect": {
+            "left": 552.546875,
+            "right": 1211.390625,
+            "width": 658.84375
+          },
+          "fullText": "EXTREME WIDE SHOT، STATIC: دەشت. ئاگرەکە بچوک ئەبێت. سەیارەکەی نالی دوور ئەبێت. لاشەی گەشە لەتەنیشتی ناسنامەکەیدا، تەنها.",
+          "hasReplacementChar": false,
+          "hasEasternArabicDigit": false,
+          "hasWesternDigit": false,
+          "subs": {
+            "run0": {
+              "left": 973.703125,
+              "right": 1147.140625,
+              "width": 173.4375,
+              "idx": 0
+            },
+            "run1": {
+              "left": 1154.046875,
+              "right": 1211.390625,
+              "width": 57.34375,
+              "idx": 19
+            }
+          }
+        }
+      },
+      {
+        "sample": "CLOSE ON: شاشەی مۆبایل، چەند نامەیەکی بۆ",
+        "type": "action",
+        "m": {
+          "ok": true,
+          "direction": "rtl",
+          "textAlign": "start",
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "blockRect": {
+            "left": 513.703125,
+            "right": 1211.390625,
+            "width": 697.6875
+          },
+          "lineRect": {
+            "left": 743.71875,
+            "right": 1211.390625,
+            "width": 467.671875
+          },
+          "fullText": "CLOSE ON: شاشەی مۆبایل، چەند نامەیەکی بۆ هاتووە. ناتوانێت بیکاتەوە، قفڵە.",
+          "hasReplacementChar": false,
+          "hasEasternArabicDigit": false,
+          "hasWesternDigit": false,
+          "subs": {
+            "run0": {
+              "left": 1130.65625,
+              "right": 1211.390625,
+              "width": 80.734375,
+              "idx": 0
+            }
+          }
+        }
+      },
+      {
+        "sample": "نالی مەجبور دەبێت نامەیەک بنوسێت، نە قسە",
+        "type": "action",
+        "m": {
+          "ok": true,
+          "direction": "rtl",
+          "textAlign": "start",
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "blockRect": {
+            "left": 513.703125,
+            "right": 1211.390625,
+            "width": 697.6875
+          },
+          "lineRect": {
+            "left": 528.515625,
+            "right": 1211.390625,
+            "width": 682.875
+          },
+          "fullText": "نالی مەجبور دەبێت نامەیەک بنوسێت، نە قسەکردن بەڵکو تایپکردن. ئەمە D3 text mode-ە، بەس لەمەودا نە لەبەر ئەوەی کەسی تر لەوێیە، بەڵکو لەبەر ئەوەی شەبەکە نیە و ناتوانێت بینێرێت. ئەنوسێت بۆ هیچکەس.",
+          "hasReplacementChar": false,
+          "hasEasternArabicDigit": false,
+          "hasWesternDigit": true,
+          "subs": {
+            "run0": {
+              "left": 713.5625,
+              "right": 800.859375,
+              "width": 87.296875,
+              "idx": 66
+            }
+          }
+        }
+      },
+      {
+        "sample": "CAMERA لەسەر دەستەکانی نالی، پەنجەکانی ڕ",
+        "type": "action",
+        "m": {
+          "ok": true,
+          "direction": "rtl",
+          "textAlign": "start",
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "blockRect": {
+            "left": 513.703125,
+            "right": 1211.390625,
+            "width": 697.6875
+          },
+          "lineRect": {
+            "left": 880.59375,
+            "right": 1211.390625,
+            "width": 330.796875
+          },
+          "fullText": "CAMERA لەسەر دەستەکانی نالی، پەنجەکانی ڕاوەستان.",
+          "hasReplacementChar": false,
+          "hasEasternArabicDigit": false,
+          "hasWesternDigit": false,
+          "subs": {
+            "run0": {
+              "left": 1141.0625,
+              "right": 1211.390625,
+              "width": 70.328125,
+              "idx": 0
+            }
+          }
+        }
+      }
+    ],
+    "print": [
+      {
+        "sample": "باخەوان (VOICEOVER، OFF)",
+        "type": "character",
+        "m": {
+          "ok": true,
+          "direction": "rtl",
+          "textAlign": "start",
+          "paddingLeft": 0,
+          "paddingRight": 192,
+          "blockRect": {
+            "left": 718.6249389648438,
+            "right": 1272.3577880859375,
+            "width": 553.7328491210938
+          },
+          "lineRect": {
+            "left": 887.1137084960938,
+            "right": 1080.379638671875,
+            "width": 193.26593017578125
+          },
+          "fullText": "باخەوان (VOICEOVER، OFF)",
+          "hasReplacementChar": false,
+          "hasEasternArabicDigit": false,
+          "hasWesternDigit": false,
+          "subs": {
+            "run0": {
+              "left": 891.5762329101562,
+              "right": 988.7753295898438,
+              "width": 97.1990966796875,
+              "idx": 9
+            },
+            "run1": {
+              "left": 995.6800537109375,
+              "right": 1025.8521728515625,
+              "width": 30.172119140625,
+              "idx": 20
+            }
+          }
+        }
+      },
+      {
+        "sample": "FRAGMENT 1، کەمتر لە ٣ چرکە:",
+        "type": "action",
+        "m": {
+          "ok": true,
+          "direction": "rtl",
+          "textAlign": "start",
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "blockRect": {
+            "left": 718.6249389648438,
+            "right": 1272.3577880859375,
+            "width": 553.7328491210938
+          },
+          "lineRect": {
+            "left": 1065.238037109375,
+            "right": 1272.3577880859375,
+            "width": 207.1197509765625
+          },
+          "fullText": "FRAGMENT 1، کەمتر لە ٣ چرکە:",
+          "hasReplacementChar": false,
+          "hasEasternArabicDigit": true,
+          "hasWesternDigit": true,
+          "subs": {
+            "run0": {
+              "left": 1168.96435546875,
+              "right": 1260.990478515625,
+              "width": 92.026123046875,
+              "idx": 0
+            }
+          }
+        }
+      },
+      {
+        "sample": "WIDE SHOT: نالی لەسەر کۆتەرەدارێک لە ناو",
+        "type": "action",
+        "m": {
+          "ok": true,
+          "direction": "rtl",
+          "textAlign": "start",
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "blockRect": {
+            "left": 718.6249389648438,
+            "right": 1272.3577880859375,
+            "width": 553.7328491210938
+          },
+          "lineRect": {
+            "left": 728.3270874023438,
+            "right": 1272.3577880859375,
+            "width": 544.0307006835938
+          },
+          "fullText": "WIDE SHOT: نالی لەسەر کۆتەرەدارێک لە ناو باخەکەیدا دانیشتووە. خۆری ئێوارەی زەردەپەڕ، هەوایەکی نەرم دارەکان ئەجوڵێنێتەوە.",
+          "hasReplacementChar": false,
+          "hasEasternArabicDigit": false,
+          "hasWesternDigit": false,
+          "subs": {
+            "run0": {
+              "left": 1181.30859375,
+              "right": 1272.3577880859375,
+              "width": 91.0491943359375,
+              "idx": 0
+            }
+          }
+        }
+      },
+      {
+        "sample": "CLOSE ON: پەنجەبڕاوەکە، خوێن.",
+        "type": "action",
+        "m": {
+          "ok": true,
+          "direction": "rtl",
+          "textAlign": "start",
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "blockRect": {
+            "left": 718.6249389648438,
+            "right": 1272.3577880859375,
+            "width": 553.7328491210938
+          },
+          "lineRect": {
+            "left": 1062.1741943359375,
+            "right": 1272.3577880859375,
+            "width": 210.18359375
+          },
+          "fullText": "CLOSE ON: پەنجەبڕاوەکە، خوێن.",
+          "hasReplacementChar": false,
+          "hasEasternArabicDigit": false,
+          "hasWesternDigit": false,
+          "subs": {
+            "run0": {
+              "left": 1191.610107421875,
+              "right": 1272.3577880859375,
+              "width": 80.7476806640625,
+              "idx": 0
+            }
+          }
+        }
+      },
+      {
+        "sample": "(بە AI، voice mode، تەنهایە)",
+        "type": "parenthetical",
+        "m": {
+          "ok": true,
+          "direction": "rtl",
+          "textAlign": "start",
+          "paddingLeft": 0,
+          "paddingRight": 144,
+          "blockRect": {
+            "left": 936.3792724609375,
+            "right": 1272.3577270507812,
+            "width": 335.97845458984375
+          },
+          "lineRect": {
+            "left": 960.7345581054688,
+            "right": 1128.379638671875,
+            "width": 167.64508056640625
+          },
+          "fullText": "(بە AI، voice mode، تەنهایە)",
+          "hasReplacementChar": false,
+          "hasEasternArabicDigit": false,
+          "hasWesternDigit": false,
+          "subs": {
+            "run0": {
+              "left": 1012.1093139648438,
+              "right": 1028.272216796875,
+              "width": 16.16290283203125,
+              "idx": 4
+            },
+            "run1": {
+              "left": 1035.1768798828125,
+              "right": 1108.75341796875,
+              "width": 73.5765380859375,
+              "idx": 8
+            }
+          }
+        }
+      },
+      {
+        "sample": "CLOSE ON: مۆبایلەکە، شاحینەكە ئەدۆزێتەوە",
+        "type": "action",
+        "m": {
+          "ok": true,
+          "direction": "rtl",
+          "textAlign": "start",
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "blockRect": {
+            "left": 718.6249389648438,
+            "right": 1272.3577880859375,
+            "width": 553.7328491210938
+          },
+          "lineRect": {
+            "left": 790.736083984375,
+            "right": 1272.3577880859375,
+            "width": 481.6217041015625
+          },
+          "fullText": "CLOSE ON: مۆبایلەکە، شاحینەكە ئەدۆزێتەوە. نالی هەناسەیەکی ئارامی ئەکێشێت.",
+          "hasReplacementChar": false,
+          "hasEasternArabicDigit": false,
+          "hasWesternDigit": false,
+          "subs": {
+            "run0": {
+              "left": 1191.610107421875,
+              "right": 1272.3577880859375,
+              "width": 80.7476806640625,
+              "idx": 0
+            }
+          }
+        }
+      },
+      {
+        "sample": "CLOSE ON: مۆبایلی نالی، سیگناڵەکە کەمتر ",
+        "type": "action",
+        "m": {
+          "ok": true,
+          "direction": "rtl",
+          "textAlign": "start",
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "blockRect": {
+            "left": 718.6249389648438,
+            "right": 1272.3577880859375,
+            "width": 553.7328491210938
+          },
+          "lineRect": {
+            "left": 851.5021362304688,
+            "right": 1272.3577880859375,
+            "width": 420.85565185546875
+          },
+          "fullText": "CLOSE ON: مۆبایلی نالی، سیگناڵەکە کەمتر ئەبێت: ٣ خەتەوە بۆ ٢، بۆ ١.",
+          "hasReplacementChar": false,
+          "hasEasternArabicDigit": true,
+          "hasWesternDigit": false,
+          "subs": {
+            "run0": {
+              "left": 1191.610107421875,
+              "right": 1272.3577880859375,
+              "width": 80.7476806640625,
+              "idx": 0
+            }
+          }
+        }
+      },
+      {
+        "sample": "CLOSE ON: سینیی شەربەتەکە لەسەر مێزەکە، ",
+        "type": "action",
+        "m": {
+          "ok": true,
+          "direction": "rtl",
+          "textAlign": "start",
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "blockRect": {
+            "left": 718.6249389648438,
+            "right": 1272.3577880859375,
+            "width": 553.7328491210938
+          },
+          "lineRect": {
+            "left": 720.5120849609375,
+            "right": 1272.3577880859375,
+            "width": 551.845703125
+          },
+          "fullText": "CLOSE ON: سینیی شەربەتەکە لەسەر مێزەکە، هێشتا نەکراوەتەوە. کامێرا لەسەری دەمێنێتەوە، پاشان دوور دەکەوێتەوە.",
+          "hasReplacementChar": false,
+          "hasEasternArabicDigit": false,
+          "hasWesternDigit": false,
+          "subs": {
+            "run0": {
+              "left": 1191.610107421875,
+              "right": 1272.3577880859375,
+              "width": 80.7476806640625,
+              "idx": 0
+            }
+          }
+        }
+      },
+      {
+        "sample": "ئەدیب (V.O.)",
+        "type": "character",
+        "m": {
+          "ok": true,
+          "direction": "rtl",
+          "textAlign": "start",
+          "paddingLeft": 0,
+          "paddingRight": 192,
+          "blockRect": {
+            "left": 718.6249389648438,
+            "right": 1272.3577880859375,
+            "width": 553.7328491210938
+          },
+          "lineRect": {
+            "left": 998.033447265625,
+            "right": 1080.379638671875,
+            "width": 82.34619140625
+          },
+          "fullText": "ئەدیب (V.O.)",
+          "hasReplacementChar": false,
+          "hasEasternArabicDigit": false,
+          "hasWesternDigit": false,
+          "subs": {
+            "run0": {
+              "left": 1002.4738159179688,
+              "right": 1035.5765380859375,
+              "width": 33.10272216796875,
+              "idx": 7
+            }
+          }
+        }
+      },
+      {
+        "sample": "WIDE SHOT: هۆڵەکە. گەشە لەسەر قەنەفەکە خ",
+        "type": "action",
+        "m": {
+          "ok": true,
+          "direction": "rtl",
+          "textAlign": "start",
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "blockRect": {
+            "left": 718.6249389648438,
+            "right": 1272.3577880859375,
+            "width": 553.7328491210938
+          },
+          "lineRect": {
+            "left": 804.8341674804688,
+            "right": 1272.3577880859375,
+            "width": 467.52362060546875
+          },
+          "fullText": "WIDE SHOT: هۆڵەکە. گەشە لەسەر قەنەفەکە خەوتووە. بەتانییەکە لەسەریدایە.",
+          "hasReplacementChar": false,
+          "hasEasternArabicDigit": false,
+          "hasWesternDigit": false,
+          "subs": {
+            "run0": {
+              "left": 1181.30859375,
+              "right": 1272.3577880859375,
+              "width": 91.0491943359375,
+              "idx": 0
+            }
+          }
+        }
+      },
+      {
+        "sample": "نازێ (V.O.)",
+        "type": "dialogue",
+        "m": {
+          "ok": true,
+          "direction": "rtl",
+          "textAlign": "start",
+          "paddingLeft": 0,
+          "paddingRight": 96,
+          "blockRect": {
+            "left": 936.3792724609375,
+            "right": 1272.3577270507812,
+            "width": 335.97845458984375
+          },
+          "lineRect": {
+            "left": 1106.3333740234375,
+            "right": 1176.3797607421875,
+            "width": 70.04638671875
+          },
+          "fullText": "نازێ (V.O.)",
+          "hasReplacementChar": false,
+          "hasEasternArabicDigit": false,
+          "hasWesternDigit": false,
+          "subs": {
+            "run0": {
+              "left": 1110.773681640625,
+              "right": 1143.87646484375,
+              "width": 33.102783203125,
+              "idx": 6
+            }
+          }
+        }
+      },
+      {
+        "sample": "CLOSE ON: چاوەکانی نالی، بەرفراوان دەبن.",
+        "type": "action",
+        "m": {
+          "ok": true,
+          "direction": "rtl",
+          "textAlign": "start",
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "blockRect": {
+            "left": 718.6249389648438,
+            "right": 1272.3577880859375,
+            "width": 553.7328491210938
+          },
+          "lineRect": {
+            "left": 1005.6486206054688,
+            "right": 1272.3577880859375,
+            "width": 266.70916748046875
+          },
+          "fullText": "CLOSE ON: چاوەکانی نالی، بەرفراوان دەبن.",
+          "hasReplacementChar": false,
+          "hasEasternArabicDigit": false,
+          "hasWesternDigit": false,
+          "subs": {
+            "run0": {
+              "left": 1191.610107421875,
+              "right": 1272.3577880859375,
+              "width": 80.7476806640625,
+              "idx": 0
+            }
+          }
+        }
+      },
+      {
+        "sample": "كارمەندی فریاكەوتن (V.O.)",
+        "type": "character",
+        "m": {
+          "ok": true,
+          "direction": "rtl",
+          "textAlign": "start",
+          "paddingLeft": 0,
+          "paddingRight": 192,
+          "blockRect": {
+            "left": 718.6249389648438,
+            "right": 1272.3577880859375,
+            "width": 553.7328491210938
+          },
+          "lineRect": {
+            "left": 919.1285400390625,
+            "right": 1080.379638671875,
+            "width": 161.2510986328125
+          },
+          "fullText": "كارمەندی فریاكەوتن (V.O.)",
+          "hasReplacementChar": false,
+          "hasEasternArabicDigit": false,
+          "hasWesternDigit": false,
+          "subs": {
+            "run0": {
+              "left": 923.5689086914062,
+              "right": 956.671630859375,
+              "width": 33.10272216796875,
+              "idx": 20
+            }
+          }
+        }
+      },
+      {
+        "sample": "بەردی شەکڵدارەکە (stone sculpture) لە گۆ",
+        "type": "action",
+        "m": {
+          "ok": true,
+          "direction": "rtl",
+          "textAlign": "start",
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "blockRect": {
+            "left": 718.6249389648438,
+            "right": 1272.3577880859375,
+            "width": 553.7328491210938
+          },
+          "lineRect": {
+            "left": 731.435302734375,
+            "right": 1272.3577880859375,
+            "width": 540.9224853515625
+          },
+          "fullText": "بەردی شەکڵدارەکە (stone sculpture) لە گۆشەی هۆڵەکەدا، کامێرا بۆ ساتێک لەسەری دەمێنێتەوە بەبێ هۆکار. بینەر دەیبینێت بەبێ ئەوەی بزانێت بۆچی.",
+          "hasReplacementChar": false,
+          "hasEasternArabicDigit": false,
+          "hasWesternDigit": false,
+          "subs": {
+            "run0": {
+              "left": 1066.3037109375,
+              "right": 1160.2169189453125,
+              "width": 93.9132080078125,
+              "idx": 18
+            }
+          }
+        }
+      },
+      {
+        "sample": "دەنگی بزوێنەرێکی بەهێز، G-Class ێکی ڕەشی",
+        "type": "action",
+        "m": {
+          "ok": true,
+          "direction": "rtl",
+          "textAlign": "start",
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "blockRect": {
+            "left": 718.6249389648438,
+            "right": 1272.3577880859375,
+            "width": 553.7328491210938
+          },
+          "lineRect": {
+            "left": 718.2252807617188,
+            "right": 1272.3577880859375,
+            "width": 554.1325073242188
+          },
+          "fullText": "دەنگی بزوێنەرێکی بەهێز، G-Class ێکی ڕەشی Mercedes دێتە ناو حەوشەکە. تارا لە شوفێرییەوە دادەبەزێت، بە پێکەنین و شادی و ئامادەیی. هەوای ئێوارەکە بۆ ئەو دروست کراوە.",
+          "hasReplacementChar": false,
+          "hasEasternArabicDigit": false,
+          "hasWesternDigit": false,
+          "subs": {
+            "run0": {
+              "left": 1073.9854736328125,
+              "right": 1124.7386474609375,
+              "width": 50.753173828125,
+              "idx": 24
+            },
+            "run1": {
+              "left": 944.6161499023438,
+              "right": 1005.3156127929688,
+              "width": 60.699462890625,
+              "idx": 41
+            }
+          }
+        }
+      },
+      {
+        "sample": "CLOSE ON: چاوەکانی نالی، پڕ لە بێزاری و ",
+        "type": "action",
+        "m": {
+          "ok": true,
+          "direction": "rtl",
+          "textAlign": "start",
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "blockRect": {
+            "left": 718.6249389648438,
+            "right": 1272.3577880859375,
+            "width": 553.7328491210938
+          },
+          "lineRect": {
+            "left": 891.1766357421875,
+            "right": 1272.3577880859375,
+            "width": 381.18115234375
+          },
+          "fullText": "CLOSE ON: چاوەکانی نالی، پڕ لە بێزاری و بێتاقەتی، ئاو بەچاویا.",
+          "hasReplacementChar": false,
+          "hasEasternArabicDigit": false,
+          "hasWesternDigit": false,
+          "subs": {
+            "run0": {
+              "left": 1191.610107421875,
+              "right": 1272.3577880859375,
+              "width": 80.7476806640625,
+              "idx": 0
+            }
+          }
+        }
+      },
+      {
+        "sample": "CLOSE ON: دەستی ئەدیب، لە ژێر قەنەفەکە ش",
+        "type": "action",
+        "m": {
+          "ok": true,
+          "direction": "rtl",
+          "textAlign": "start",
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "blockRect": {
+            "left": 718.6249389648438,
+            "right": 1272.3577880859375,
+            "width": 553.7328491210938
+          },
+          "lineRect": {
+            "left": 863.8906860351562,
+            "right": 1272.3577880859375,
+            "width": 408.46710205078125
+          },
+          "fullText": "CLOSE ON: دەستی ئەدیب، لە ژێر قەنەفەکە شتێکی هەست پێدەکات.",
+          "hasReplacementChar": false,
+          "hasEasternArabicDigit": false,
+          "hasWesternDigit": false,
+          "subs": {
+            "run0": {
+              "left": 1191.610107421875,
+              "right": 1272.3577880859375,
+              "width": 80.7476806640625,
+              "idx": 0
+            }
+          }
+        }
+      },
+      {
+        "sample": "WIDE SHOT: سەیارەی ئەدیب لەسەر جادەیەکی ",
+        "type": "action",
+        "m": {
+          "ok": true,
+          "direction": "rtl",
+          "textAlign": "start",
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "blockRect": {
+            "left": 718.6249389648438,
+            "right": 1272.3577880859375,
+            "width": 553.7328491210938
+          },
+          "lineRect": {
+            "left": 730.1254272460938,
+            "right": 1272.3577880859375,
+            "width": 542.2323608398438
+          },
+          "fullText": "WIDE SHOT: سەیارەی ئەدیب لەسەر جادەیەکی تاک. بایەکی بەقوەت لە پەنجەرەکانەوە دێتە ناوەوە. کەشەکە ماتەمینە، ئاسمان هەورەبار و سارد.",
+          "hasReplacementChar": false,
+          "hasEasternArabicDigit": false,
+          "hasWesternDigit": false,
+          "subs": {
+            "run0": {
+              "left": 1181.30859375,
+              "right": 1272.3577880859375,
+              "width": 91.0491943359375,
+              "idx": 0
+            }
+          }
+        }
+      },
+      {
+        "sample": "MONITOR POV: مۆنیتەری کامێراکان، نالی یە",
+        "type": "action",
+        "m": {
+          "ok": true,
+          "direction": "rtl",
+          "textAlign": "start",
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "blockRect": {
+            "left": 718.6249389648438,
+            "right": 1272.3577880859375,
+            "width": 553.7328491210938
+          },
+          "lineRect": {
+            "left": 785.2300415039062,
+            "right": 1272.3577880859375,
+            "width": 487.12774658203125
+          },
+          "fullText": "MONITOR POV: مۆنیتەری کامێراکان، نالی یەکە یەکەی کامێراکان سەیر ئەکاتەوە.",
+          "hasReplacementChar": false,
+          "hasEasternArabicDigit": false,
+          "hasWesternDigit": false,
+          "subs": {
+            "run0": {
+              "left": 1152.6239013671875,
+              "right": 1272.3577880859375,
+              "width": 119.73388671875,
+              "idx": 0
+            }
+          }
+        }
+      },
+      {
+        "sample": "CLOSE ON: دەستەکانی نالی. لەرزان.",
+        "type": "action",
+        "m": {
+          "ok": true,
+          "direction": "rtl",
+          "textAlign": "start",
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "blockRect": {
+            "left": 718.6249389648438,
+            "right": 1272.3577880859375,
+            "width": 553.7328491210938
+          },
+          "lineRect": {
+            "left": 1045.9224853515625,
+            "right": 1272.3577880859375,
+            "width": 226.435302734375
+          },
+          "fullText": "CLOSE ON: دەستەکانی نالی. لەرزان.",
+          "hasReplacementChar": false,
+          "hasEasternArabicDigit": false,
+          "hasWesternDigit": false,
+          "subs": {
+            "run0": {
+              "left": 1191.610107421875,
+              "right": 1272.3577880859375,
+              "width": 80.7476806640625,
+              "idx": 0
+            }
+          }
+        }
+      },
+      {
+        "sample": "EXTREME WIDE SHOT، STATIC: دەشت. ئاگرەکە",
+        "type": "action",
+        "m": {
+          "ok": true,
+          "direction": "rtl",
+          "textAlign": "start",
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "blockRect": {
+            "left": 718.6249389648438,
+            "right": 1272.3577880859375,
+            "width": 553.7328491210938
+          },
+          "lineRect": {
+            "left": 730.9912719726562,
+            "right": 1272.3577880859375,
+            "width": 541.3665161132812
+          },
+          "fullText": "EXTREME WIDE SHOT، STATIC: دەشت. ئاگرەکە بچوک ئەبێت. سەیارەکەی نالی دوور ئەبێت. لاشەی گەشە لەتەنیشتی ناسنامەکەیدا، تەنها.",
+          "hasReplacementChar": false,
+          "hasEasternArabicDigit": false,
+          "hasWesternDigit": false,
+          "subs": {
+            "run0": {
+              "left": 1034.666259765625,
+              "right": 1208.1060791015625,
+              "width": 173.4398193359375,
+              "idx": 0
+            },
+            "run1": {
+              "left": 1215.0107421875,
+              "right": 1272.3577880859375,
+              "width": 57.3470458984375,
+              "idx": 19
+            }
+          }
+        }
+      },
+      {
+        "sample": "CLOSE ON: شاشەی مۆبایل، چەند نامەیەکی بۆ",
+        "type": "action",
+        "m": {
+          "ok": true,
+          "direction": "rtl",
+          "textAlign": "start",
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "blockRect": {
+            "left": 718.6249389648438,
+            "right": 1272.3577880859375,
+            "width": 553.7328491210938
+          },
+          "lineRect": {
+            "left": 804.6787719726562,
+            "right": 1272.3577880859375,
+            "width": 467.67901611328125
+          },
+          "fullText": "CLOSE ON: شاشەی مۆبایل، چەند نامەیەکی بۆ هاتووە. ناتوانێت بیکاتەوە، قفڵە.",
+          "hasReplacementChar": false,
+          "hasEasternArabicDigit": false,
+          "hasWesternDigit": false,
+          "subs": {
+            "run0": {
+              "left": 1191.610107421875,
+              "right": 1272.3577880859375,
+              "width": 80.7476806640625,
+              "idx": 0
+            }
+          }
+        }
+      },
+      {
+        "sample": "نالی مەجبور دەبێت نامەیەک بنوسێت، نە قسە",
+        "type": "action",
+        "m": {
+          "ok": true,
+          "direction": "rtl",
+          "textAlign": "start",
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "blockRect": {
+            "left": 718.6249389648438,
+            "right": 1272.3577880859375,
+            "width": 553.7328491210938
+          },
+          "lineRect": {
+            "left": 722.2882080078125,
+            "right": 1272.3577880859375,
+            "width": 550.069580078125
+          },
+          "fullText": "نالی مەجبور دەبێت نامەیەک بنوسێت، نە قسەکردن بەڵکو تایپکردن. ئەمە D3 text mode-ە، بەس لەمەودا نە لەبەر ئەوەی کەسی تر لەوێیە، بەڵکو لەبەر ئەوەی شەبەکە نیە و ناتوانێت بینێرێت. ئەنوسێت بۆ هیچکەس.",
+          "hasReplacementChar": false,
+          "hasEasternArabicDigit": false,
+          "hasWesternDigit": true,
+          "subs": {
+            "run0": {
+              "left": 774.52880859375,
+              "right": 861.825927734375,
+              "width": 87.297119140625,
+              "idx": 66
+            }
+          }
+        }
+      },
+      {
+        "sample": "CAMERA لەسەر دەستەکانی نالی، پەنجەکانی ڕ",
+        "type": "action",
+        "m": {
+          "ok": true,
+          "direction": "rtl",
+          "textAlign": "start",
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "blockRect": {
+            "left": 718.6249389648438,
+            "right": 1272.3577880859375,
+            "width": 553.7328491210938
+          },
+          "lineRect": {
+            "left": 941.5523071289062,
+            "right": 1272.3577880859375,
+            "width": 330.80548095703125
+          },
+          "fullText": "CAMERA لەسەر دەستەکانی نالی، پەنجەکانی ڕاوەستان.",
+          "hasReplacementChar": false,
+          "hasEasternArabicDigit": false,
+          "hasWesternDigit": false,
+          "subs": {
+            "run0": {
+              "left": 1202.022705078125,
+              "right": 1272.3577880859375,
+              "width": 70.3350830078125,
+              "idx": 0
+            }
+          }
+        }
+      }
+    ]
+  },
+  "orderChecks": [
+    {
+      "sample": "باخەوان (VOICEOVER، OFF)",
+      "run": "VOICEOVER",
+      "firstLeft": 891.5762329101562,
+      "lastLeft": 975.9205322265625,
+      "ltr": true,
+      "rawBoundaryObservation": {
+        "rawFirstLeft": 891.5762329101562,
+        "rawLastLeft": 975.9205322265625,
+        "rawLtr": true
+      }
+    },
+    {
+      "sample": "باخەوان (VOICEOVER، OFF)",
+      "run": "OFF",
+      "firstLeft": 995.6800537109375,
+      "lastLeft": 1017.3489379882812,
+      "ltr": true,
+      "rawBoundaryObservation": {
+        "rawFirstLeft": 995.6800537109375,
+        "rawLastLeft": 1017.3489379882812,
+        "rawLtr": true
+      }
+    },
+    {
+      "sample": "FRAGMENT 1، کەمتر لە ٣ چرکە:",
+      "run": "FRAGMENT",
+      "firstLeft": 1168.96435546875,
+      "lastLeft": 1250.1339111328125,
+      "ltr": true,
+      "rawBoundaryObservation": {
+        "rawFirstLeft": 1168.96435546875,
+        "rawLastLeft": 1250.1339111328125,
+        "rawLtr": true
+      }
+    },
+    {
+      "sample": "WIDE SHOT: نالی لەسەر کۆتەرەدا",
+      "run": "WIDE SHOT",
+      "firstLeft": 1181.30859375,
+      "lastLeft": 1261.5010986328125,
+      "ltr": true,
+      "rawBoundaryObservation": {
+        "rawFirstLeft": 1181.30859375,
+        "rawLastLeft": 1261.5010986328125,
+        "rawLtr": true
+      }
+    },
+    {
+      "sample": "CLOSE ON: پەنجەبڕاوەکە، خوێن.",
+      "run": "CLOSE ON",
+      "firstLeft": 1191.610107421875,
+      "lastLeft": 1259.3253173828125,
+      "ltr": true,
+      "rawBoundaryObservation": {
+        "rawFirstLeft": 1191.610107421875,
+        "rawLastLeft": 1259.3253173828125,
+        "rawLtr": true
+      }
+    },
+    {
+      "sample": "(بە AI، voice mode، تەنهایە)",
+      "run": "AI",
+      "firstLeft": 1012.1093139648438,
+      "lastLeft": 1022.9215698242188,
+      "ltr": true,
+      "rawBoundaryObservation": {
+        "rawFirstLeft": 1012.1093139648438,
+        "rawLastLeft": 1022.9215698242188,
+        "rawLtr": true
+      }
+    },
+    {
+      "sample": "(بە AI، voice mode، تەنهایە)",
+      "run": "voice mode",
+      "firstLeft": 1035.1768798828125,
+      "lastLeft": 1101.7154541015625,
+      "ltr": true,
+      "rawBoundaryObservation": {
+        "rawFirstLeft": 1035.1768798828125,
+        "rawLastLeft": 1101.7154541015625,
+        "rawLtr": true
+      }
+    },
+    {
+      "sample": "CLOSE ON: مۆبایلەکە، شاحینەكە ",
+      "run": "CLOSE ON",
+      "firstLeft": 1191.610107421875,
+      "lastLeft": 1259.3253173828125,
+      "ltr": true,
+      "rawBoundaryObservation": {
+        "rawFirstLeft": 1191.610107421875,
+        "rawLastLeft": 1259.3253173828125,
+        "rawLtr": true
+      }
+    },
+    {
+      "sample": "CLOSE ON: مۆبایلی نالی، سیگناڵ",
+      "run": "CLOSE ON",
+      "firstLeft": 1191.610107421875,
+      "lastLeft": 1259.3253173828125,
+      "ltr": true,
+      "rawBoundaryObservation": {
+        "rawFirstLeft": 1191.610107421875,
+        "rawLastLeft": 1259.3253173828125,
+        "rawLtr": true
+      }
+    },
+    {
+      "sample": "CLOSE ON: سینیی شەربەتەکە لەسە",
+      "run": "CLOSE ON",
+      "firstLeft": 1191.610107421875,
+      "lastLeft": 1259.3253173828125,
+      "ltr": true,
+      "rawBoundaryObservation": {
+        "rawFirstLeft": 1191.610107421875,
+        "rawLastLeft": 1259.3253173828125,
+        "rawLtr": true
+      }
+    },
+    {
+      "sample": "ئەدیب (V.O.)",
+      "run": "V.O.",
+      "firstLeft": 1006.9363403320312,
+      "lastLeft": 1022.3887329101562,
+      "ltr": true,
+      "rawBoundaryObservation": {
+        "rawFirstLeft": 1006.9363403320312,
+        "rawLastLeft": 1002.4738159179688,
+        "rawLtr": false
+      }
+    },
+    {
+      "sample": "WIDE SHOT: هۆڵەکە. گەشە لەسەر ",
+      "run": "WIDE SHOT",
+      "firstLeft": 1181.30859375,
+      "lastLeft": 1261.5010986328125,
+      "ltr": true,
+      "rawBoundaryObservation": {
+        "rawFirstLeft": 1181.30859375,
+        "rawLastLeft": 1261.5010986328125,
+        "rawLtr": true
+      }
+    },
+    {
+      "sample": "نازێ (V.O.)",
+      "run": "V.O.",
+      "firstLeft": 1115.236328125,
+      "lastLeft": 1130.6885986328125,
+      "ltr": true,
+      "rawBoundaryObservation": {
+        "rawFirstLeft": 1115.236328125,
+        "rawLastLeft": 1110.773681640625,
+        "rawLtr": false
+      }
+    },
+    {
+      "sample": "CLOSE ON: چاوەکانی نالی، بەرفر",
+      "run": "CLOSE ON",
+      "firstLeft": 1191.610107421875,
+      "lastLeft": 1259.3253173828125,
+      "ltr": true,
+      "rawBoundaryObservation": {
+        "rawFirstLeft": 1191.610107421875,
+        "rawLastLeft": 1259.3253173828125,
+        "rawLtr": true
+      }
+    },
+    {
+      "sample": "كارمەندی فریاكەوتن (V.O.)",
+      "run": "V.O.",
+      "firstLeft": 928.0314331054688,
+      "lastLeft": 943.4838256835938,
+      "ltr": true,
+      "rawBoundaryObservation": {
+        "rawFirstLeft": 928.0314331054688,
+        "rawLastLeft": 923.5689086914062,
+        "rawLtr": false
+      }
+    },
+    {
+      "sample": "بەردی شەکڵدارەکە (stone sculpt",
+      "run": "stone sculpture",
+      "firstLeft": 1066.3037109375,
+      "lastLeft": 1153.178955078125,
+      "ltr": true,
+      "rawBoundaryObservation": {
+        "rawFirstLeft": 1066.3037109375,
+        "rawLastLeft": 1153.178955078125,
+        "rawLtr": true
+      }
+    },
+    {
+      "sample": "دەنگی بزوێنەرێکی بەهێز، G-Clas",
+      "run": "G-Class",
+      "firstLeft": 1073.9854736328125,
+      "lastLeft": 1119.87646484375,
+      "ltr": true,
+      "rawBoundaryObservation": {
+        "rawFirstLeft": 1073.9854736328125,
+        "rawLastLeft": 1119.87646484375,
+        "rawLtr": true
+      }
+    },
+    {
+      "sample": "دەنگی بزوێنەرێکی بەهێز، G-Clas",
+      "run": "Mercedes",
+      "firstLeft": 944.6161499023438,
+      "lastLeft": 1000.4534301757812,
+      "ltr": true,
+      "rawBoundaryObservation": {
+        "rawFirstLeft": 944.6161499023438,
+        "rawLastLeft": 1000.4534301757812,
+        "rawLtr": true
+      }
+    },
+    {
+      "sample": "CLOSE ON: چاوەکانی نالی، پڕ لە",
+      "run": "CLOSE ON",
+      "firstLeft": 1191.610107421875,
+      "lastLeft": 1259.3253173828125,
+      "ltr": true,
+      "rawBoundaryObservation": {
+        "rawFirstLeft": 1191.610107421875,
+        "rawLastLeft": 1259.3253173828125,
+        "rawLtr": true
+      }
+    },
+    {
+      "sample": "CLOSE ON: دەستی ئەدیب، لە ژێر ",
+      "run": "CLOSE ON",
+      "firstLeft": 1191.610107421875,
+      "lastLeft": 1259.3253173828125,
+      "ltr": true,
+      "rawBoundaryObservation": {
+        "rawFirstLeft": 1191.610107421875,
+        "rawLastLeft": 1259.3253173828125,
+        "rawLtr": true
+      }
+    },
+    {
+      "sample": "WIDE SHOT: سەیارەی ئەدیب لەسەر",
+      "run": "WIDE SHOT",
+      "firstLeft": 1181.30859375,
+      "lastLeft": 1261.5010986328125,
+      "ltr": true,
+      "rawBoundaryObservation": {
+        "rawFirstLeft": 1181.30859375,
+        "rawLastLeft": 1261.5010986328125,
+        "rawLtr": true
+      }
+    },
+    {
+      "sample": "MONITOR POV: مۆنیتەری کامێراکا",
+      "run": "MONITOR POV",
+      "firstLeft": 1152.6239013671875,
+      "lastLeft": 1261.323486328125,
+      "ltr": true,
+      "rawBoundaryObservation": {
+        "rawFirstLeft": 1152.6239013671875,
+        "rawLastLeft": 1261.323486328125,
+        "rawLtr": true
+      }
+    },
+    {
+      "sample": "CLOSE ON: دەستەکانی نالی. لەرز",
+      "run": "CLOSE ON",
+      "firstLeft": 1191.610107421875,
+      "lastLeft": 1259.3253173828125,
+      "ltr": true,
+      "rawBoundaryObservation": {
+        "rawFirstLeft": 1191.610107421875,
+        "rawLastLeft": 1259.3253173828125,
+        "rawLtr": true
+      }
+    },
+    {
+      "sample": "EXTREME WIDE SHOT، STATIC: دەش",
+      "run": "EXTREME WIDE SHOT",
+      "firstLeft": 1034.666259765625,
+      "lastLeft": 1197.2493896484375,
+      "ltr": true,
+      "rawBoundaryObservation": {
+        "rawFirstLeft": 1034.666259765625,
+        "rawLastLeft": 1197.2493896484375,
+        "rawLtr": true
+      }
+    },
+    {
+      "sample": "EXTREME WIDE SHOT، STATIC: دەش",
+      "run": "STATIC",
+      "firstLeft": 1215.0107421875,
+      "lastLeft": 1260.657470703125,
+      "ltr": true,
+      "rawBoundaryObservation": {
+        "rawFirstLeft": 1215.0107421875,
+        "rawLastLeft": 1260.657470703125,
+        "rawLtr": true
+      }
+    },
+    {
+      "sample": "CLOSE ON: شاشەی مۆبایل، چەند ن",
+      "run": "CLOSE ON",
+      "firstLeft": 1191.610107421875,
+      "lastLeft": 1259.3253173828125,
+      "ltr": true,
+      "rawBoundaryObservation": {
+        "rawFirstLeft": 1191.610107421875,
+        "rawLastLeft": 1259.3253173828125,
+        "rawLtr": true
+      }
+    },
+    {
+      "sample": "نالی مەجبور دەبێت نامەیەک بنوس",
+      "run": "D3 text mode",
+      "firstLeft": 774.52880859375,
+      "lastLeft": 854.7880249023438,
+      "ltr": true,
+      "rawBoundaryObservation": {
+        "rawFirstLeft": 774.52880859375,
+        "rawLastLeft": 854.7880249023438,
+        "rawLtr": true
+      }
+    },
+    {
+      "sample": "CAMERA لەسەر دەستەکانی نالی، پ",
+      "run": "CAMERA",
+      "firstLeft": 1202.022705078125,
+      "lastLeft": 1261.5010986328125,
+      "ltr": true,
+      "rawBoundaryObservation": {
+        "rawFirstLeft": 1202.022705078125,
+        "rawLastLeft": 1261.5010986328125,
+        "rawLtr": true
+      }
+    }
+  ],
+  "numeralReport": [
+    {
+      "sample": "FRAGMENT 1، کەمتر لە ٣ چرکە:",
+      "hasEasternArabicDigit": true,
+      "hasWesternDigit": true
+    },
+    {
+      "sample": "CLOSE ON: مۆبایلی نالی، سیگناڵ",
+      "hasEasternArabicDigit": true,
+      "hasWesternDigit": false
+    },
+    {
+      "sample": "نالی مەجبور دەبێت نامەیەک بنوس",
+      "hasEasternArabicDigit": false,
+      "hasWesternDigit": true
+    }
+  ]
+}
