@@ -90,9 +90,9 @@ electron-builder (`npm run pack:win`), PowerShell/Windows 11.
 | S4.5 | 4 RTL ⭐ | SW-23 profile-convention verdict + flip all RTL rows | ✅ (**PHASE 4 CLOSED**; SW-23 held at PARTIAL by GAP-4-1 alone) | `docs/plans/evidence/S4.5-sw23-verdict.md` + `S4.5-{ltr-flip,rtl-control,new-doc}-measurements.json` + 3 screenshots; spec `rwanga-editor/tests/e2e/rtl/rtl-profile-drives-convention.spec.js` **3/3**, and the whole `tests/e2e/rtl/` folder is **9/9 green in file order** (orchestrator-verified, 25.3s). **(b) the decisive test PASSES:** flipping `metadata.screenplayProfile.direction` `rtl→ltr` on a copy reproduces the **identical magnitudes mirrored to the opposite edge** — sceneHeading/action 0.000in, character 2.000in, parenthetical 1.500in (box 3.5in), dialogue 1.000in, transition flush reading-end — **every delta 0.000in** vs the RTL control; a brand-new synthetic Kurdish/RTL `.rga` (not derived from the fixture) reproduces the same numbers with zero manual tweaking. The mirror is a reflection, not a second implementation. **(c) no forked layout model:** `renderer/js/framework/layout-profile.js:64-92` (`HOLLYWOOD_DEFAULTS.blockWidthsIn`) is one direction-agnostic table and `renderer/css/editor-prosemirror.css:2484-2519` is logical-property-only with no `[dir="rtl"]` magnitude override; the two direction-keyed values found are both legitimate — `RTL_PRINT_LEADING = 1.3` (:108, the ratified PP-16 leading exception) and `_charsPerInch` (:127-131, a font-metric pagination input, not a geometry width). **(d) vocabulary observations recorded** (untranslated `CUT`; Eastern-Arabic numerals in fixture prose) as future locale-slice input, not defects. **No new gaps** |
 | S4.6F | 4 RTL ⭐ | **GAP-4-1 diagnosis** — Kurdish PDF text layer | ✅ (diagnosed; fix ruled post-launch) | `docs/plans/evidence/S4.6F-pdf-text-layer.md`. Root cause settled **by experiment, not code reading**: with *zero shaping*, **9 of 21** dotted/diacritic Noto Naskh letters break their own `ToUnicode` mapping while the identical characters in Tahoma/Arial map **21/21** — only the font varied, so font-vs-pipeline is decided. **But a font swap cannot close it:** Noto→Tahoma on the same shaped sentence moves NUL only **37.4% → 20.4%**; the residual is Chromium's CMap dropping contextual/medial variants regardless of font. Latin control **0% NUL** clears the `printToPDF` options. **USER RULING 2026-07-29: ship honest, fix after** — RTL-11 + SW-23 stay PARTIAL *by decision* (rows amended to say so), GAP-4-1 re-scoped post-launch and re-pointed at a different PDF text-layer path. Font track queued as **S4.7F** |
 | S2.4F | 2 → fix | **GAP-2-3 fix** — Page Setup's paper-size dropdown actually changes the paper size | ✅ | `docs/plans/evidence/S2.4F-paper-size.md`; spec `rwanga-editor/tests/e2e/settings/page-setup-paper-size.spec.js` **3/3**. **GAP-2-3 CLOSED.** |
-| S3.4F | 3 → fix | **GAP-3-5 fix** — keyboard-shortcut collisions (user ruled: Save As keeps Ctrl+Shift+S) | ⬜ | |
+| S3.4F | 3 → fix | **GAP-3-5 fix** — keyboard-shortcut collisions (user ruled: Save As keeps Ctrl+Shift+S) | ✅ | `docs/plans/evidence/S3.4F-shortcut-collisions.md`; guard test `rwanga-editor/tests/unit/shell/kb-shortcut-default-collisions.test.js` **6/6** (confirmed RED pre-fix, GREEN post-fix) + e2e proof `rwanga-editor/tests/e2e/settings/gap-3-5-shortcut-collisions.spec.js` **4/4**. `kb.sceneNavigator` → `Ctrl+Shift+1` (matches the shell's real binding), `kb.exportPdf` → `Ctrl+Alt+E`, search panel → `Ctrl+Shift+2`; `kb.saveAs` unchanged at `Ctrl+Shift+S` per ruling. **GAP-3-5 CLOSED.** Unit suite at exact baseline (1936 · 0 fail · 1 skip) + 6 new = 1942 · 1941 pass · 0 fail · 1 skip. Proposed gap row (not fixed): `Ctrl+Shift+T` collision (`kb.toggleTheme` vs legacy "tag as" shim) — structurally identical, out of this slice's ledger. |
 | S4.7F | 4 RTL | **GAP-4-1 track A** — repair/replace the vendored Arabic font (improvement, not a blocker) | ⬜ | |
-| S2.3F | 2 → fix | **GAP-2-1 fix** — a New doc must paint at full A4/Letter size from the first frame | ✅ | `docs/plans/evidence/S2.3F-new-doc-geometry.md`; spec `rwanga-editor/tests/e2e/flow/new-doc-page-geometry.spec.js` **4/4** (Letter+A4 × LTR+RTL). GAP-2-1 **CLOSED**; gaps GAP-2-3 (Page Setup paper-size switch silently broken) + GAP-2-4 (one unit test asserts the superseded invariant) opened, non-blocking |
+| S2.3F | 2 → fix | **GAP-2-1 fix** — a New doc starts at a MINIMUM of one page (a floor, not a fixed size) | ✅ | `docs/plans/evidence/S2.3F-new-doc-geometry.md`; spec `rwanga-editor/tests/e2e/flow/new-doc-page-geometry.spec.js` **4/4** (Letter+A4 × LTR+RTL). GAP-2-1 **CLOSED**; gaps GAP-2-3 (Page Setup paper-size switch silently broken) + GAP-2-4 (one unit test asserts the superseded invariant) opened, non-blocking |
 | S5.1 | 5 Geometry | Paper sizes + margins (MT-05, MT-06, PP-01, PP-03) | ⬜ | |
 | S5.2 | 5 Geometry | Bottom-margin overflow + empty-line budget (MT-07, MT-10) | ⬜ | |
 | S5.3 | 5 Geometry | Marker stability, heading edit, PDF page count (MT-02, SW-01, MT-04) | ⬜ | |
@@ -921,9 +921,19 @@ complaint in the campaign** — treat it as owed, not as backlog.
 the page; the page is not the configured size, and only grows toward its correct height gradually as
 content is typed.
 
-**Expected behavior (user-ratified, recorded on the GAP-2-1 row):** a New doc's page renders at its
-**FULL configured page size (A4 or Letter, per Page Setup) from the first paint** — never a shrunken
-page that grows as content arrives. The page is a sheet of paper; paper does not grow.
+**Expected behavior (user-ratified; wording clarified by the user 2026-07-29):** a New doc's Flow
+surface starts **at a MINIMUM of one configured page (A4 or Letter, per Page Setup) from the first
+paint** — never a shrunken surface that grows out of dead space as content arrives.
+
+⚠ **Read this before touching the fix — it is a FLOOR, not a page size.** The user's own words:
+*"the view is not forcing the page geometry to be A4 or by paper size by design, because the view is a
+continuous page with page breaks; only in print preview or print does the page have a real meaning.
+What I needed was to present minimum A4 on start, because the view was breaking on empty space."*
+So `min-height: var(--page-height)` with **`height: auto`** is the whole design: Flow keeps growing
+continuously past one page, it simply may not start *shorter* than one. **Do not convert this into a
+fixed height, and do not add pagination, seams or page capsules to Flow** — page truth lives in Print
+Preview (locked continuous-drafting doctrine). The unit guard in `editor-page-color.test.js` asserts
+BOTH halves (the floor *and* `height: auto`) precisely so this cannot be quietly hard-pinned later.
 
 **Method:** superpowers:systematic-debugging, then superpowers:test-driven-development. Per the
 standing project rule *"Playwright > screenshots for layout work"*, diagnose with a DOM-geometry spec
