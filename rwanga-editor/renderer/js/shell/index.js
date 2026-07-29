@@ -133,12 +133,21 @@
   // and was lost to native-menu suppression in A4). It moves to
   // Ctrl+Shift+1 — VS-Code-style numbered panel access. All other
   // panel shortcuts keep their letter mnemonic.
+  //
+  // GAP-3-5 (S3.4F): 'search' moved OFF Ctrl+Shift+F — it collided with
+  // editor/shortcuts.js's legacy "flag for revision" shim, which actually
+  // won at boot (it registers after this table), so the search panel's
+  // OWN declared shortcut never fired even before this fix. It moves to
+  // Ctrl+Shift+2, following the same VS-Code-style numbered-panel
+  // convention already established for sceneNavigator above. (search is
+  // currently `available: false` — a placeholder panel — so no working
+  // feature is disrupted by the move.)
   const _PANEL_SHORTCUTS = [
     { key: '1', panel: 'sceneNavigator' },
     { key: 'e', panel: 'scriptWorkspace' },
     { key: 'o', panel: 'outline' },
     { key: 'c', panel: 'characters' },
-    { key: 'f', panel: 'search' },
+    { key: '2', panel: 'search' },
     { key: 'r', panel: 'revisions' }
   ];
 

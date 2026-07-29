@@ -16,11 +16,11 @@
 
 ## ⭐ NEXT ACTION
 
-**Start S3.4F — keyboard-shortcut collisions.** Unblocked by the user's ruling 2026-07-29:
-**Save As keeps `Ctrl+Shift+S`**, Scene Navigator gets a new default. Small, and it closes both a lost
-shortcut and a Settings-honesty violation (Settings displays a binding that does nothing). The real
-deliverable is the **duplicate-defaults guard test** — the registry, not the console, is where a
-collision must be caught.
+**Start S4.7F — GAP-4-1 track A: repair/replace the vendored Arabic font.** (S3.4F closed
+2026-07-29 — Save As has its shortcut back and a standing guard now fails on any duplicate default.)
+
+⚠ **Unit baseline moved: `1942 · 0 fail · 1 skip`** (was 1936; S3.4F added the 6-test shortcut guard).
+Any red is a regression; any count below 1942 means tests went missing.
 
 **Then, in order:** **S4.7F** (GAP-4-1 track A — repair/replace the vendored Arabic font; an
 *improvement, not a blocker*, worth ~half the damage and it **reopens the RTL geometry verified in
@@ -127,7 +127,8 @@ contribution/write API. That write API is the true technical prerequisite for th
 | GAP-4-2 | **The app's own interface has no RTL and no translations.** **USER RULED 2026-07-28: launch-blocking** — checklist amended with six new P0 rows (RTL-16…RTL-21) and a new **Phase 7** in the masterplan owns the work | RULED — build queued as Phase 7 (after Phase 4) | Masterplan Phase 7 / `docs/plans/evidence/GAP-4-2-ui-localization-audit.md` |
 | GAP-4-1 (**DIAGNOSED · post-launch by ruling**) | **Root cause found (S4.6F): the vendored font, primarily — and swapping it cannot close the gap.** With *zero shaping*, 9/21 dotted/diacritic Noto Naskh letters break their own ToUnicode mapping; the same letters in Tahoma map 21/21. But Noto→Tahoma moves NUL only **37.4% → 20.4%** — the rest is Chromium dropping contextual variants regardless of font (Latin control: **0% NUL**, so export options are fine). **User ruled: ship honest now, improve after.** RTL-11 + SW-23 stay PARTIAL *by decision*. True fix = a different PDF text-layer path, post-launch. Font track queued as **S4.7F** (improvement, ~half the damage, reopens S4.2/S4.3 verification) | **OPEN — post-launch** | `../plans/evidence/S4.6F-pdf-text-layer.md` |
 | GAP-4-1 (original measurement) | **The exported PDF's Kurdish text layer is ~40% unreadable** — 40.2% of script characters extract as NUL because the embedded font subset's ToUnicode CMap misses most shaped Kurdish forms. The page DRAWS correctly; the script is not searchable, not copyable, and reaches downstream tooling as garbage. LTR exports are unaffected. **Blocks RTL-11 and therefore the launch gate** | OPEN — needs a fix-slice; isolate font-vs-pipeline first | Masterplan §0.5 / `docs/plans/evidence/S4.3-rtl-print-pdf.md` |
-| GAP-3-5 | **`Ctrl+Shift+S` is shipped as the default for BOTH "Save As" and "Scene Navigator"** — the registry is last-wins, so Scene Navigator takes the key and Save As has no working shortcut, while Settings still displays it. Two lesser collisions: Ctrl+Shift+E, Ctrl+Shift+F. Plus Electron's insecure-CSP warning to settle before launch. **✅ RULED 2026-07-29: Save As keeps `Ctrl+Shift+S`** (near-universal binding; Scene Navigator gets a new default) — no longer waiting on the user | **RULED — fix queued as S3.4F** | Masterplan slice S3.4F / `docs/plans/evidence/S3.3-console-audit.md` |
+| GAP-3-6 | **`Ctrl+Shift+T` is claimed by both Toggle Theme and the legacy "tag as" binding** — the same defect S3.4F fixed three times over; S3.3 had called it benign so it was outside that slice’s scope. Registry is last-wins, so one silently loses | OPEN — small, fold into the next settings slice | Masterplan §0.5 |
+| ~~GAP-3-5~~ | ~~`Ctrl+Shift+S` claimed by both Save As and Scene Navigator~~ **CLOSED 2026-07-29 (S3.4F)** — Save As has its shortcut back (user ruling), Scene Navigator now advertises `Ctrl+Shift+1` (the binding the shell *already* used — Settings had simply never been told), Export PDF moved to `Ctrl+Alt+E`, search panel to `Ctrl+Shift+2`. Proven with real keypresses in a real app, and Settings now displays the true key for each. **Standing guard `kb-shortcut-default-collisions.test.js` (6) fails on ANY duplicate default** — it was RED on exactly today’s three collisions before the fix | **CLOSED** | `../plans/evidence/S3.4F-shortcut-collisions.md` |
 | PF-01 (macOS) | macOS launch matrix + `pack:mac` + smoke — the only half of PF-01 still open (Decision #1: Mac arrives later) | DEFERRED — needs hardware | Masterplan §0.5 / PF-01 row |
 | SW-23 | PARTIAL — the convention IS verified (one resolver, two directions; profile-flip deltas all 0.000in). Its only remaining input is RTL-11, blocked by **GAP-4-1**; SW-23 flips TRUE the moment that PDF text layer is fixed | BLOCKED on GAP-4-1 | `../plans/evidence/S4.5-sw23-verdict.md` |
 | MT-02/04/05/06/07/10, PP-01/03, SW-01 | Page-geometry QA (sizes/margins/overflow) | OPEN — QA | GO_LIVE Part A.1 #5 |

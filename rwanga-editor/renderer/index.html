@@ -1231,13 +1231,15 @@
       handler: function() { if (Rga.FileManager) Rga.FileManager.saveAs(); }, source: 'A4.1 menu (File → Save As)' });
 
     // PB1.B — Export to PDF. The menu (native macOS + owned menubar) invokes
-    // file.exportPdf by id; the keyboard accelerator Ctrl+Shift+E is owned by
-    // the kb.exportPdf settings applicator, which targets the export.pdf
+    // file.exportPdf by id; the keyboard accelerator is owned by the
+    // kb.exportPdf settings applicator, which targets the export.pdf
     // command. Both route to Rga.PdfExport.run. file.exportPdf carries a
     // displayAccelerator (not a KR key binding) so the owned menubar shows the
-    // shortcut WITHOUT duplicating the Ctrl+Shift+E combo (one accelerator,
-    // one owner — the §A4.1 invariant).
-    KR.registerCommand({ command: 'file.exportPdf', label: 'Export to PDF…', displayAccelerator: 'Ctrl+Shift+E',
+    // shortcut WITHOUT duplicating the combo (one accelerator, one owner —
+    // the §A4.1 invariant). GAP-3-5 (S3.4F): kb.exportPdf's default moved
+    // from Ctrl+Shift+E (collided with the scriptWorkspace panel toggle) to
+    // Ctrl+Alt+E — this label must track that default or the menu lies.
+    KR.registerCommand({ command: 'file.exportPdf', label: 'Export to PDF…', displayAccelerator: 'Ctrl+Alt+E',
       handler: function() { if (Rga.PdfExport && Rga.PdfExport.run) Rga.PdfExport.run(); }, source: 'PB1.B menu (File → Export to PDF)' });
     KR.registerCommand({ command: 'export.pdf', label: 'Export to PDF',
       handler: function() { if (Rga.PdfExport && Rga.PdfExport.run) Rga.PdfExport.run(); }, source: 'PB1.B (kb.exportPdf target)' });

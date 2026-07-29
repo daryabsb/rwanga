@@ -576,15 +576,32 @@
       keywords: ['theme', 'dark', 'light', 'toggle']
     }),
     entry({
+      // GAP-3-5 (S3.4F): was 'Ctrl+Shift+E', which collided with the
+      // shell's hardcoded scriptWorkspace panel toggle (shell/index.js
+      // _PANEL_SHORTCUTS) — the Settings-driven kb-applicator layer
+      // registers last at boot, so Export PDF silently won and the panel
+      // toggle stopped firing (S3.3 console audit). Ctrl+Alt+E keeps the
+      // "E" mnemonic; the Alt-modifier space is unused elsewhere in the
+      // registry, so this is collision-free, and it is not a well-known
+      // OS/browser/editor binding.
       id: 'kb.exportPdf', label: 'Export PDF',
       description: 'Export the current script as PDF.',
-      type: 'shortcut', default: 'Ctrl+Shift+E', scope: 'export', owner: 'shortcuts',
+      type: 'shortcut', default: 'Ctrl+Alt+E', scope: 'export', owner: 'shortcuts',
       keywords: ['export', 'pdf']
     }),
     entry({
+      // GAP-3-5 (S3.4F): was 'Ctrl+Shift+S', identical to kb.saveAs's
+      // default — Scene Navigator registered last and silently won,
+      // leaving Save As with no working shortcut while Settings still
+      // displayed Ctrl+Shift+S next to it (S3.3 console audit). The user
+      // ruling of 2026-07-29 keeps Ctrl+Shift+S for Save As permanently,
+      // so Scene Navigator moves to Ctrl+Shift+1 — matching the real
+      // hardcoded binding shell/index.js's _PANEL_SHORTCUTS already uses
+      // (VS-Code-style numbered panel access, §A4.1), so this default is
+      // both collision-free and, for the first time, honest.
       id: 'kb.sceneNavigator', label: 'Scene Navigator',
       description: 'Toggle the scene navigator panel.',
-      type: 'shortcut', default: 'Ctrl+Shift+S', scope: 'flow', owner: 'shortcuts',
+      type: 'shortcut', default: 'Ctrl+Shift+1', scope: 'flow', owner: 'shortcuts',
       keywords: ['scene', 'navigator']
     }),
     entry({

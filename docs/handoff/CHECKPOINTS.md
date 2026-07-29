@@ -5,6 +5,51 @@ Template & rules: `PROTOCOL.md`.
 
 ---
 
+## 2026-07-29 · S3.4F CLOSED — Save As has its shortcut back; a standing guard now blocks collisions
+- **Did (S3.4F — GAP-3-5):** `Rga.KeyboardRegistry` is **last-wins**, and `settings-registry.js` gave
+  `kb.saveAs` (:549) and `kb.sceneNavigator` (:585) **the same default**. Scene Navigator registered
+  second, so out of the box **Ctrl+Shift+S opened the Scene Navigator and Save As had no working
+  shortcut at all — while Settings still displayed `Ctrl+Shift+S` next to "Save As."** Both a lost
+  shortcut and a Settings-honesty violation (Settings Constitution: every visible setting is REAL or
+  honestly disabled). Unblocked by the user's ruling that **Save As keeps the key** (near-universal
+  binding across Word/Photoshop/VS Code; muscle memory outweighs moving a Rwanga-specific panel).
+- **Final assignments:** `kb.saveAs` → **Ctrl+Shift+S** (unchanged, per ruling). `kb.sceneNavigator` →
+  **Ctrl+Shift+1** — notably *not an invention*: that is the shell's already-real hardcoded
+  `_PANEL_SHORTCUTS` binding, and Settings' displayed default had simply never been told, so this half
+  was **honesty, not a key change**. `kb.exportPdf` → **Ctrl+Alt+E**, freeing Ctrl+Shift+E for the
+  scriptWorkspace panel (the Alt-modifier space was entirely unused; keeps the "E" mnemonic). Search
+  panel → **Ctrl+Shift+2**, freeing Ctrl+Shift+F for the working "flag for revision" shortcut and
+  following the same numbered-panel convention. **Bonus catch:** `index.html`'s `file.exportPdf` menu
+  carried a stale hardcoded `displayAccelerator: 'Ctrl+Shift+E'` that would have started lying the
+  moment the default moved — corrected in the same change.
+- **The guard is the real deliverable:** `tests/unit/shell/kb-shortcut-default-collisions.test.js`
+  (**6 tests**) reads the *executed* `Settings.Registry` plus the statically-parsed `_PANEL_SHORTCUTS`
+  and legacy shim, and **fails on ANY duplicate default combo**. Confirmed **RED on exactly today's
+  three collisions** before any source change, green after, and kept standing — so the registry, not
+  a console audit or a human, is now where a collision gets caught.
+- **Proven, not asserted:** `tests/e2e/settings/gap-3-5-shortcut-collisions.spec.js` (**4/4**, real
+  Electron, real keypresses) — Ctrl+Shift+S fires the real `FileManager.saveAs` while Scene Navigator's
+  state stays untouched; Ctrl+Shift+1 really activates Scene Navigator; Ctrl+Alt+E really fires
+  `PdfExport.run` while Ctrl+Shift+E now only toggles scriptWorkspace; and **Settings renders the true
+  caps for all three** (the honesty half — a shortcut displayed but dead was the actual defect).
+- **⚠ CAMPAIGN BASELINE MOVED — record it: `1942 · 1941 pass · 0 fail · 1 skip`** (was 1936; +6 from
+  the new guard). Orchestrator-verified independently. Any red is a regression; **any count below 1942
+  now means tests went missing.** Neighbours 120/120; e2e settings+lifecycle 139/140, the single
+  failure (`page-setup-preview.spec.js` timing) proven pre-existing by `git stash` + rebuild + rerun on
+  unmodified `main`, which reproduced it identically.
+- **Evidence:** `docs/plans/evidence/S3.4F-shortcut-collisions.md`.
+- **Status deltas:** **GAP-3-5 CLOSED.**
+- **Gaps surfaced — GAP-3-6:** `Ctrl+Shift+T` is claimed by both `kb.toggleTheme` and the legacy
+  shim's "tag as" binding — structurally the identical defect fixed three times over in this slice.
+  The S3.3 audit had classified it "benign" so no ledger row named it and it fell outside S3.4F's
+  frozen scope (§0.2) — reported, not touched. It is not benign in principle: last-wins means one of
+  the two silently loses. Small; fold into the next settings slice and let the standing guard prove it.
+- **Next action:** **S4.7F** (GAP-4-1 track A — the font track the user queued), then **S7.1**,
+  opening Phase 7. ⚠ Still outstanding from the user: a named **Kurdish (Sorani) native reviewer**
+  for S7.5, and the **GAP-2-5** call on whether "Legal" paper gets real support or stays absent.
+
+---
+
 ## 2026-07-29 · S2.4F CLOSED — Page Setup's paper-size dropdown actually works now; GAP-3-5 ruled
 - **Did (S2.4F — GAP-2-3):** fixed a visible control that could not do its one job. **Root cause:**
   `page-setup-dialog.js:18-21` built the dropdown from `Constants.PAPER_SIZES` keys

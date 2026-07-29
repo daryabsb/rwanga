@@ -10,7 +10,9 @@
     id: 'search',
     label: 'Search',
     icon: 'search',
-    shortcut: 'Cmd-Shift-F',
+    // GAP-3-5 (S3.4F): moved off Cmd-Shift-F — see shell/index.js
+    // _PANEL_SHORTCUTS for the collision this display label must match.
+    shortcut: 'Cmd-Shift-2',
     available: false,
     mount: function(container) {
       if (!container) return;
