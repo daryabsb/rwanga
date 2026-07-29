@@ -7,7 +7,7 @@
 - **Last updated:** 2026-07-29 · by: **PHASE 4 CLOSED** — S4.4 bidi PASSED + S4.5 SW-23 verdict
 - **Binding doctrine:** every agent MUST follow the 10-rule MASTERPLAN EXECUTION DOCTRINE in the
   root `CLAUDE.md` (one slice at a time · tick-as-you-go · §0.3 close ritual · push every slice commit).
-- **HEAD:** `6d950487` (S4.4 bidi audit — RTL-12/13 TRUE) · **last slice-close:**
+- **HEAD:** `6d950487` (S4.5 SW-23 verdict — **Phase 4 closed**) · **last slice-close:**
   `6d950487` · **Branch:** `main` · pushed. *(Update both SHAs at every §0.3 close.)*
 - **Phase:** Stage 1 — Foundation (closing launch P0s). AI/Agent phase is **gated** (see Gates).
 
@@ -63,7 +63,8 @@ Check `git status` for fixture dirt before every commit; revert with
 The whole launch-gate campaign is now a slice-by-slice executable plan with cross-session state:
 **`../plans/2026-07-02-stage1-launch-gate-masterplan.md`** — read its §0 (survival protocol) first,
 then work the first unchecked box of the active slice. Slice order:
-S0.1 → S1.1…S1.5 (QG-01) → S2.x (LR-01 installer) → S3.x (lifecycle QA) → S4.x (RTL QA ⭐) →
+S0.1 → S1.1…S1.5 (QG-01) → S2.x (LR-01 installer) → S3.x (lifecycle QA) → S4.x (RTL QA) →
+**S7.x (UI localisation ⭐ — the build phase, placed here for its long external lead time)** →
 S5.x (geometry QA) → S6.1 (QG-12 roll-up). Track SP.1 (Contribution-API design brief, writing only)
 may interleave.
 
