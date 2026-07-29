@@ -12,15 +12,23 @@
 // case-sensitive select validator (settings-validators.js:27-30) does
 // options.indexOf(v) and silently rejects 'A4'/'Letter' — Store.set
 // returns false, console.warn only, no UI feedback — so Apply never
-// changes the paper size. 'Legal' was ALSO never valid (the registry never
-// had it), a second instance of the same control<->registry mismatch class.
+// changes the paper size.
 //
 // Fix: the dialog's dropdown now sources its options directly from the
 // settings registry entry (the SSOT, per Settings Architecture Doctrine)
 // intersected with Rga.Constants.PAPER_SIZES (case-insensitively) so it
-// offers only sizes that are BOTH registry-legal AND have real dims —
-// currently 'letter' and 'a4'. The control now emits exactly what the
-// registry accepts; no .toLowerCase() sprinkled at the Apply call site.
+// offers only sizes that are BOTH registry-legal AND have real dims. The
+// control now emits exactly what the registry accepts; no .toLowerCase()
+// sprinkled at the Apply call site.
+//
+// GAP-2-5 follow-up (user, 2026-07-29): 'Legal' was initially read as a dead
+// entry and nearly deleted. It is not — the layout/pagination engine has
+// always supported Legal end to end (dims in Constants.PAPER_SIZES,
+// LayoutProfile resolution, linesPerPage asserted in
+// tests/unit/export/pdf-export.test.js and framework/layout-profile.test.js).
+// Only the registry's options list omitted it, so Settings made a working
+// capability unreachable. 'legal' was added to that list; the test below
+// proves it produces a real 14in page rather than just a label.
 //
 // This spec proves the EFFECT, not that a handler fired: choosing a paper
 // size and clicking Apply must visibly resize the Flow page (the
@@ -38,6 +46,7 @@ const PX_PER_IN = 96;
 const TOL_PX = 2;
 const LETTER_HEIGHT_PX = 11 * PX_PER_IN;          // 1056.00
 const A4_HEIGHT_PX = 11.6929 * PX_PER_IN;          // 1122.5184
+const LEGAL_HEIGHT_PX = 14 * PX_PER_IN;            // 1344.00 (GAP-2-5)
 
 let app, page, userDataDir;
 
@@ -120,6 +129,28 @@ test('GAP-2-3 — choosing A4 in Page Setup and clicking Apply resizes the Flow 
   expect(Math.abs(after - A4_HEIGHT_PX),
     `Apply must change #editor height to A4's ${A4_HEIGHT_PX}px, was ${after}px `
     + `(unchanged from Letter ${LETTER_HEIGHT_PX}px means Apply was silently rejected)`
+  ).toBeLessThanOrEqual(TOL_PX);
+});
+
+// ---------------------------------------------------------------------
+// GAP-2-5 (user, 2026-07-29): US Legal was reachable nowhere, even though the
+// layout/pagination engine has always supported it end to end (dimensions in
+// Constants.PAPER_SIZES, resolved by LayoutProfile, linesPerPage asserted by
+// unit tests) — only the registry's options list omitted it. Adding it to that
+// list is the whole fix, and this test is the proof that it is a real,
+// applicable size rather than a label: choosing Legal must produce a 14in page.
+// ---------------------------------------------------------------------
+test('GAP-2-5 — US Legal is selectable and really applies (14in page)', async () => {
+  await openModal();
+  await selectPaperAndApply('legal');
+
+  const effective = await page.evaluate(() => window.Rga.Settings.Store.effective('pageSetup.paperSize'));
+  expect(effective, 'Legal must be accepted by the registry, not silently rejected').toBe('legal');
+
+  const after = await measureEditorHeight();
+  expect(Math.abs(after - LEGAL_HEIGHT_PX),
+    `Apply must change #editor height to Legal's ${LEGAL_HEIGHT_PX}px, was ${after}px `
+    + `(still ${LETTER_HEIGHT_PX}px means Legal is a label with no paper behind it)`
   ).toBeLessThanOrEqual(TOL_PX);
 });
 

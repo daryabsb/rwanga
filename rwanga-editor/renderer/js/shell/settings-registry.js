@@ -281,13 +281,20 @@
     // ── Page Setup (per-script) ──
     entry({
       id: 'pageSetup.paperSize', label: 'Paper Size',
-      description: 'Page dimensions for print and export. US Letter (8.5×11") or A4 (210×297mm).',
+      description: 'Page dimensions for print and export. US Letter (8.5×11"), A4 (210×297mm) or US Legal (8.5×14").',
       type: 'select', default: 'letter',
       scope: 'print', persistsTo: 'script', owner: 'pageSetup',
-      options: ['letter', 'a4', 'custom'],
-      labels:  { letter: 'US Letter', a4: 'A4', custom: 'Custom' },
+      // GAP-2-5 (user, 2026-07-29): 'legal' added. The layout/pagination engine
+      // has ALWAYS supported Legal end to end — Constants.PAPER_SIZES carries its
+      // dimensions and LayoutProfile resolves it, with unit tests asserting its
+      // linesPerPage — but this options list omitted it, so Settings never let
+      // anyone reach a capability the app already had. Letter and A4 remain the
+      // two that matter in practice (A4 across this region); Legal is simply no
+      // longer unreachable.
+      options: ['letter', 'a4', 'legal', 'custom'],
+      labels:  { letter: 'US Letter', a4: 'A4', legal: 'US Legal', custom: 'Custom' },
       previewKind: 'page',
-      keywords: ['paper', 'size', 'letter', 'a4', 'page']
+      keywords: ['paper', 'size', 'letter', 'a4', 'legal', 'page']
     }),
     entry({
       id: 'pageSetup.orientation', label: 'Orientation',
