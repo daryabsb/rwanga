@@ -7,8 +7,8 @@
 - **Last updated:** 2026-07-29 · by: **PHASE 4 CLOSED** — S4.4 bidi PASSED + S4.5 SW-23 verdict
 - **Binding doctrine:** every agent MUST follow the 10-rule MASTERPLAN EXECUTION DOCTRINE in the
   root `CLAUDE.md` (one slice at a time · tick-as-you-go · §0.3 close ritual · push every slice commit).
-- **HEAD:** `de74e57b` (S4.4 bidi audit — RTL-12/13 TRUE) · **last slice-close:**
-  `de74e57b` · **Branch:** `main` · pushed. *(Update both SHAs at every §0.3 close.)*
+- **HEAD:** `6d950487` (S4.4 bidi audit — RTL-12/13 TRUE) · **last slice-close:**
+  `6d950487` · **Branch:** `main` · pushed. *(Update both SHAs at every §0.3 close.)*
 - **Phase:** Stage 1 — Foundation (closing launch P0s). AI/Agent phase is **gated** (see Gates).
 
 ---
