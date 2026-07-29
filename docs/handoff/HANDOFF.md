@@ -30,13 +30,6 @@ verification) can run any time; it was deliberately deprioritised behind launch-
 ⚠ **Unit baseline moved: `1942 · 0 fail · 1 skip`** (was 1936; S3.4F added the 6-test shortcut guard).
 Any red is a regression; any count below 1942 means tests went missing.
 
-**Then, in order:** **S4.7F** (GAP-4-1 track A — repair/replace the vendored Arabic font; an
-*improvement, not a blocker*, worth ~half the damage and it **reopens the RTL geometry verified in
-S4.2/S4.3**, so the slice is "swap the font *and re-prove the page*"), then **S7.1**, opening Phase 7.
-**Phase 4 is CLOSED** (S4.1→S4.5 all ✅). Phase 7 comes next by design: it is a BUILD phase with a
-long external lead time (native reviewers), while Phase 5 (geometry QA) is a short sweep that can
-follow it. S7.1 is a design/writing slice — **no product code** — and its central rule is that
-**UI direction and DOCUMENT direction are two separate axes**.
 
 ⚠ **NEW AND LAUNCH-BLOCKING — Phase 7: UI localisation + application RTL.** The user ruled
 2026-07-28 that a Kurdish/Arabic *interface* is essential to launch ("this system will not be launched
