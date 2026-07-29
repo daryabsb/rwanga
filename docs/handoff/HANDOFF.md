@@ -4,7 +4,7 @@
 > archive to find the next action — it's here. Update this file at the end of every unit of work
 > (see `PROTOCOL.md`). Keep it short; link detail, don't inline it.
 
-- **Last updated:** 2026-07-29 · by: S4.4 closed — bidi audit PASSED (RTL-12 + RTL-13 TRUE)
+- **Last updated:** 2026-07-29 · by: **PHASE 4 CLOSED** — S4.4 bidi PASSED + S4.5 SW-23 verdict
 - **Binding doctrine:** every agent MUST follow the 10-rule MASTERPLAN EXECUTION DOCTRINE in the
   root `CLAUDE.md` (one slice at a time · tick-as-you-go · §0.3 close ritual · push every slice commit).
 - **HEAD:** `de74e57b` (S4.4 bidi audit — RTL-12/13 TRUE) · **last slice-close:**
@@ -15,11 +15,11 @@
 
 ## ⭐ NEXT ACTION
 
-**Start S4.5 — SW-23 roll-up + Phase 4 close**, then **Phase 7**.
-S4.5 = the one-page verdict over RTL-04…13 **plus** the strongest single test in the phase: flip
-`metadata.screenplayProfile.direction` to `ltr` on a COPY and confirm the same magnitudes come back as
-Hollywood-left geometry — proving one resolver, two directions (no forked layout model).
-Criteria: `../plans/evidence/S4.1-rtl-qa-protocol.md` §SW-23. Open a `%TEMP%` COPY of the fixture.
+**Start S7.1 — UI-localisation architecture brief (writing only), opening Phase 7.**
+**Phase 4 is CLOSED** (S4.1→S4.5 all ✅). Phase 7 comes next by design: it is a BUILD phase with a
+long external lead time (native reviewers), while Phase 5 (geometry QA) is a short sweep that can
+follow it. S7.1 is a design/writing slice — **no product code** — and its central rule is that
+**UI direction and DOCUMENT direction are two separate axes**.
 
 ⚠ **NEW AND LAUNCH-BLOCKING — Phase 7: UI localisation + application RTL.** The user ruled
 2026-07-28 that a Kurdish/Arabic *interface* is essential to launch ("this system will not be launched
@@ -30,7 +30,15 @@ two separate axes** — an English UI must hold an RTL script and vice versa.
 S7.5 — an external dependency that must not become the last blocker. Also open: GAP-4-1 (PDF text
 layer), GAP-3-5 (Ctrl+Shift+S owner), and whether Arabic may ship post-launch if no reviewer is found.
 
-**Phase 4 so far:** RTL-04…RTL-09 **TRUE** (page geometry measured correct), RTL-10 **TRUE**
+**Phase 4 is COMPLETE** (S4.1 → S4.5 all closed). Its capstone finding: **the RTL layout is one
+design mirrored, not a second implementation.** Flipping a document's direction to `ltr` returns the
+*identical* magnitudes (2.0in character / 1.5in parenthetical / 1.0in dialogue) measured from the
+other edge — every delta **0.000in** — and a brand-new Kurdish document gets the full convention with
+no manual tweaking. Source confirms it: one direction-agnostic width table, logical-property CSS, no
+RTL-only geometry constant. **SW-23 is PARTIAL, held there by GAP-4-1 alone** (the PDF text layer).
+Evidence: `../plans/evidence/S4.5-sw23-verdict.md`.
+
+**Phase 4 detail:** RTL-04…RTL-09 **TRUE** (page geometry measured correct), RTL-10 **TRUE**
 (all 85 pages clean; the long-standing `overflow:hidden` clipping worry closed by measurement;
 leading exactly 1.30), and **RTL-12 + RTL-13 TRUE** (S4.4 bidi audit: mixed Kurdish/Latin lines keep
 their RTL base direction even when they START with a Latin token, Latin runs read LTR inside them, and
@@ -101,7 +109,7 @@ contribution/write API. That write API is the true technical prerequisite for th
 | GAP-4-1 | **The exported PDF's Kurdish text layer is ~40% unreadable** — 40.2% of script characters extract as NUL because the embedded font subset's ToUnicode CMap misses most shaped Kurdish forms. The page DRAWS correctly; the script is not searchable, not copyable, and reaches downstream tooling as garbage. LTR exports are unaffected. **Blocks RTL-11 and therefore the launch gate** | OPEN — needs a fix-slice; isolate font-vs-pipeline first | Masterplan §0.5 / `docs/plans/evidence/S4.3-rtl-print-pdf.md` |
 | GAP-3-5 | **`Ctrl+Shift+S` is shipped as the default for BOTH "Save As" and "Scene Navigator"** — the registry is last-wins, so Scene Navigator takes the key and Save As has no working shortcut, while Settings still displays it. Two lesser collisions: Ctrl+Shift+E, Ctrl+Shift+F. Plus Electron's insecure-CSP warning to settle before launch | OPEN — needs a user ruling (which feature keeps which key) + a duplicate-defaults guard test | Masterplan §0.5 / `docs/plans/evidence/S3.3-console-audit.md` |
 | PF-01 (macOS) | macOS launch matrix + `pack:mac` + smoke — the only half of PF-01 still open (Decision #1: Mac arrives later) | DEFERRED — needs hardware | Masterplan §0.5 / PF-01 row |
-| SW-23 | The profile-drives-convention roll-up — all its RTL inputs now measured: RTL-04…09 TRUE (S4.2), RTL-10 TRUE (S4.3), RTL-12/13 TRUE (S4.4); only RTL-11 open (GAP-4-1) | OPEN — QA (S4.5) | GO_LIVE Part A.1 #4 |
+| SW-23 | PARTIAL — the convention IS verified (one resolver, two directions; profile-flip deltas all 0.000in). Its only remaining input is RTL-11, blocked by **GAP-4-1**; SW-23 flips TRUE the moment that PDF text layer is fixed | BLOCKED on GAP-4-1 | `../plans/evidence/S4.5-sw23-verdict.md` |
 | MT-02/04/05/06/07/10, PP-01/03, SW-01 | Page-geometry QA (sizes/margins/overflow) | OPEN — QA | GO_LIVE Part A.1 #5 |
 | QG-12 | Roll-up "no known P0/P1 bugs" — flips when the above close | OPEN (auto) | Launch checklist §15 |
 | VISION-1 | Breakdown sheets: data + UI stub exist, no JS renders them (~1–2 days) | OPEN (Stage 2) | GO_LIVE Part B.3 #1 |
@@ -121,6 +129,7 @@ contribution/write API. That write API is the true technical prerequisite for th
 | PF-13 clean console (S3.3) | **TRUE — 0 error-level console messages · 0 uncaught page errors** across 8 core flows (launch → new → all block types → save → reopen → Print Preview → Page Setup → undo/redo ×5). Typing, saving, reopening, page-setup and undo/redo are completely silent. Re-runnable audit spec, not a one-off observation | `docs/plans/evidence/S3.3-console-audit.md` + `S3.3-console-capture.json` |
 | GAP-3-3 (e2e quit-path hangs) | **CLOSED — suite 1.2 h → 11.7 min, 37 reds → 6.** Two causes, both test hygiene, no product code touched: (a) the quit guard correctly waits for a human at the unsaved-changes modal, so `app.close()` never resolved — one shared `closeApp()` teardown across 60 specs / 124 sites; (b) force-kill specs killed only the main process, leaving Windows children holding Playwright's pipe — now kills the process tree. First e2e baseline recorded | `docs/plans/evidence/S3.2F-quit-path.md` + `S3.2F-e2e-baseline.txt` |
 | PF-02/03/05 lifecycle round-trips (S3.2) | **TRUE — 3/3 specs green.** New→save→reopen proven across a second app instance; open-from-disk proven not to write the file back; Save As proven to re-point handle/name/origin/Recent | `docs/plans/evidence/S3.2-lifecycle-e2e.md` + `rwanga-editor/tests/e2e/lifecycle/*.spec.js` |
+| SW-23 / Phase 4 close (S4.5) | **The RTL layout is a reflection, not a fork — proven.** `direction: rtl→ltr` on a copy returns identical magnitudes mirrored to the other edge (all deltas **0.000in**); a brand-new RTL doc gets the convention with zero tweaking; source carries one direction-agnostic width table + logical-property CSS and no RTL-only geometry constant. SW-23 PARTIAL, blocked only by GAP-4-1 | `docs/plans/evidence/S4.5-sw23-verdict.md`; spec `rtl-profile-drives-convention.spec.js` **3/3**, whole RTL folder **9/9** |
 | RTL-12/13 bidi (S4.4) | **TRUE — both.** 24/24 sampled mixed Kurdish/Latin blocks keep RTL base direction in Flow *and* Print, including Latin-first lines (the classic base-direction bug is absent); Latin runs read LTR inside the RTL line; 0 U+FFFD; Print insets match the protocol to **0.000in**. 8/8 typed punctuation battery lines put `.` `؟` at the reading-end and mirror `( )` `« »` `[ ]` correctly, **unchanged after editing earlier in the line**. No gaps found | `docs/plans/evidence/S4.4-bidi-audit.md` + raw JSON measurements; spec `rwanga-editor/tests/e2e/rtl/rtl-bidi.spec.js` **2/2** |
 | Is the launch checklist honest/current? | **Yes — verified** | 3 latest commits are checklist-only; QG-01 = 1936/1899/36 reproduces; clean-fixture rerun = 40/40 → 30 reds all non-core |
 | PP-D5 (RTL body-leading) | Closed (PP-16 TRUE) | Print-Truth-Unification; PTU-B 7/7 green (prior agent, 2026-06-10) |

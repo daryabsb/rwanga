@@ -1,0 +1,1246 @@
+{
+  "m": {
+    "direction": "ltr",
+    "sheets": 75,
+    "blocks": {
+      "sceneHeading": [
+        {
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "maxWidth": "none",
+          "fontWeight": "700",
+          "gapLeft": 0,
+          "gapRight": 307,
+          "sample": "1ناوەوە ژووری نالی — رۆژ"
+        },
+        {
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "maxWidth": "none",
+          "fontWeight": "700",
+          "gapLeft": 0,
+          "gapRight": 269,
+          "sample": "2دەرەوە زەردەپەڕ . باخ — رۆژ"
+        },
+        {
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "maxWidth": "none",
+          "fontWeight": "700",
+          "gapLeft": 0,
+          "gapRight": 317,
+          "sample": "3ناوەوە باخەکە — ئێوارە"
+        },
+        {
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "maxWidth": "none",
+          "fontWeight": "700",
+          "gapLeft": 0,
+          "gapRight": 173,
+          "sample": "4دەرەوە شەقام . ناو سەیارەی نالی — رۆژ"
+        },
+        {
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "maxWidth": "none",
+          "fontWeight": "700",
+          "gapLeft": 0,
+          "gapRight": 221,
+          "sample": "5دەرەوە شەقام . خاڵی پشکنین — رۆژ"
+        },
+        {
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "maxWidth": "none",
+          "fontWeight": "700",
+          "gapLeft": 0,
+          "gapRight": 221,
+          "sample": "6دەرەوە ڕۆژ . شەقامی شار، سلێمانی"
+        },
+        {
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "maxWidth": "none",
+          "fontWeight": "700",
+          "gapLeft": 0,
+          "gapRight": 144,
+          "sample": "7دەرەوە ناو سەیارەکەی نالی . ناوشار — رۆ"
+        },
+        {
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "maxWidth": "none",
+          "fontWeight": "700",
+          "gapLeft": 0,
+          "gapRight": 202,
+          "sample": "8دەرەوە سەرجادە . دەرەوەی شار — رۆژ"
+        },
+        {
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "maxWidth": "none",
+          "fontWeight": "700",
+          "gapLeft": 0,
+          "gapRight": 298,
+          "sample": "9دەرەوە خاڵی پشکنین — رۆژ"
+        },
+        {
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "maxWidth": "none",
+          "fontWeight": "700",
+          "gapLeft": 0,
+          "gapRight": 29,
+          "sample": "10دەرەوە ناو سەیارەکە . جادەی سیتەک نزیک"
+        },
+        {
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "maxWidth": "none",
+          "fontWeight": "700",
+          "gapLeft": 0,
+          "gapRight": 221,
+          "sample": "11دەرەوە زەردەپەڕ . ناو باخ — رۆژ"
+        },
+        {
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "maxWidth": "none",
+          "fontWeight": "700",
+          "gapLeft": 0,
+          "gapRight": 202,
+          "sample": "12ناوەوە دەمەوئێوارە . باخەکە — رۆژ"
+        }
+      ],
+      "action": [
+        {
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "maxWidth": "none",
+          "fontWeight": "400",
+          "gapLeft": 0,
+          "gapRight": 54,
+          "sample": "دەنگی باخەوانەکە لەسەر ڕەشییەوە، پێش ئەو"
+        },
+        {
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "maxWidth": "none",
+          "fontWeight": "400",
+          "gapLeft": 0,
+          "gapRight": 285,
+          "sample": "FRAGMENT 1، کەمتر لە ٣ چرکە:"
+        },
+        {
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "maxWidth": "none",
+          "fontWeight": "400",
+          "gapLeft": 0,
+          "gapRight": 54,
+          "sample": "دیمەنی باخێک لە دوورەوە. کامێرا وردە ورد"
+        },
+        {
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "maxWidth": "none",
+          "fontWeight": "400",
+          "gapLeft": -767,
+          "gapRight": 1320,
+          "sample": ""
+        },
+        {
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "maxWidth": "none",
+          "fontWeight": "400",
+          "gapLeft": 0,
+          "gapRight": 285,
+          "sample": "FRAGMENT 2، کەمتر لە ٣ چرکە:"
+        },
+        {
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "maxWidth": "none",
+          "fontWeight": "400",
+          "gapLeft": 0,
+          "gapRight": 54,
+          "sample": "دیواری ماڵەکە، سەری ئاژەڵی کێوی و باڵندە"
+        },
+        {
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "maxWidth": "none",
+          "fontWeight": "400",
+          "gapLeft": 0,
+          "gapRight": 285,
+          "sample": "FRAGMENT 3، کەمتر لە ٣ چرکە:"
+        },
+        {
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "maxWidth": "none",
+          "fontWeight": "400",
+          "gapLeft": 0,
+          "gapRight": 35,
+          "sample": "ڕووناکیی نەرم لە درزی پەردەی پەنجەرەکەوە"
+        },
+        {
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "maxWidth": "none",
+          "fontWeight": "400",
+          "gapLeft": 0,
+          "gapRight": 54,
+          "sample": "نالی، پیاوێکی ٣٨ ساڵە، باڵابەرز، لەشباری"
+        },
+        {
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "maxWidth": "none",
+          "fontWeight": "400",
+          "gapLeft": 0,
+          "gapRight": 26,
+          "sample": "نالی لەسەر جێگاکەی بە قووڵی خەوتووە، وەک"
+        },
+        {
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "maxWidth": "none",
+          "fontWeight": "400",
+          "gapLeft": 0,
+          "gapRight": 45,
+          "sample": "دەنگی جەڕەسی تەلەفۆنەکەی دێت. نالی بەخەب"
+        },
+        {
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "maxWidth": "none",
+          "fontWeight": "400",
+          "gapLeft": 0,
+          "gapRight": 275,
+          "sample": "ناوی نازی، بەڕێوەبەری هونەری."
+        }
+      ],
+      "character": [
+        {
+          "paddingLeft": 192,
+          "paddingRight": 0,
+          "maxWidth": "none",
+          "fontWeight": "400",
+          "gapLeft": 192,
+          "gapRight": 131,
+          "sample": "باخەوان (VOICEOVER، OFF)"
+        },
+        {
+          "paddingLeft": 192,
+          "paddingRight": 0,
+          "maxWidth": "none",
+          "fontWeight": "400",
+          "gapLeft": 192,
+          "gapRight": 323,
+          "sample": "نالی"
+        },
+        {
+          "paddingLeft": 192,
+          "paddingRight": 0,
+          "maxWidth": "none",
+          "fontWeight": "400",
+          "gapLeft": 192,
+          "gapRight": 323,
+          "sample": "نازی"
+        },
+        {
+          "paddingLeft": 192,
+          "paddingRight": 0,
+          "maxWidth": "none",
+          "fontWeight": "400",
+          "gapLeft": 192,
+          "gapRight": 323,
+          "sample": "نالی"
+        },
+        {
+          "paddingLeft": 192,
+          "paddingRight": 0,
+          "maxWidth": "none",
+          "fontWeight": "400",
+          "gapLeft": 192,
+          "gapRight": 323,
+          "sample": "نازی"
+        },
+        {
+          "paddingLeft": 192,
+          "paddingRight": 0,
+          "maxWidth": "none",
+          "fontWeight": "400",
+          "gapLeft": 192,
+          "gapRight": 323,
+          "sample": "نالی"
+        },
+        {
+          "paddingLeft": 192,
+          "paddingRight": 0,
+          "maxWidth": "none",
+          "fontWeight": "400",
+          "gapLeft": 192,
+          "gapRight": 323,
+          "sample": "نازی"
+        },
+        {
+          "paddingLeft": 192,
+          "paddingRight": 0,
+          "maxWidth": "none",
+          "fontWeight": "400",
+          "gapLeft": 192,
+          "gapRight": 323,
+          "sample": "نالی"
+        },
+        {
+          "paddingLeft": 192,
+          "paddingRight": 0,
+          "maxWidth": "none",
+          "fontWeight": "400",
+          "gapLeft": 192,
+          "gapRight": 295,
+          "sample": "باخەوان"
+        },
+        {
+          "paddingLeft": 192,
+          "paddingRight": 0,
+          "maxWidth": "none",
+          "fontWeight": "400",
+          "gapLeft": 192,
+          "gapRight": 323,
+          "sample": "نالی"
+        },
+        {
+          "paddingLeft": 192,
+          "paddingRight": 0,
+          "maxWidth": "none",
+          "fontWeight": "400",
+          "gapLeft": 192,
+          "gapRight": 295,
+          "sample": "باخەوان"
+        },
+        {
+          "paddingLeft": 192,
+          "paddingRight": 0,
+          "maxWidth": "none",
+          "fontWeight": "400",
+          "gapLeft": 192,
+          "gapRight": 323,
+          "sample": "نالی"
+        }
+      ],
+      "parenthetical": [
+        {
+          "paddingLeft": 144,
+          "paddingRight": 0,
+          "maxWidth": "336px",
+          "fontWeight": "400",
+          "gapLeft": 144,
+          "gapRight": 77,
+          "sample": "(کەمێک گێژە)"
+        },
+        {
+          "paddingLeft": 144,
+          "paddingRight": 0,
+          "maxWidth": "336px",
+          "fontWeight": "400",
+          "gapLeft": 144,
+          "gapRight": 58,
+          "sample": "(دەستی پەنجەبڕاوەکەی دەگرێت)"
+        },
+        {
+          "paddingLeft": 144,
+          "paddingRight": 0,
+          "maxWidth": "336px",
+          "fontWeight": "400",
+          "gapLeft": 144,
+          "gapRight": 0,
+          "sample": "(بە AI، voice mode، تەنهایە)"
+        },
+        {
+          "paddingLeft": 144,
+          "paddingRight": 0,
+          "maxWidth": "336px",
+          "fontWeight": "400",
+          "gapLeft": 144,
+          "gapRight": 38,
+          "sample": "(بە بێتاقەتیەوە)"
+        },
+        {
+          "paddingLeft": 144,
+          "paddingRight": 0,
+          "maxWidth": "336px",
+          "fontWeight": "400",
+          "gapLeft": 144,
+          "gapRight": 0,
+          "sample": "(بە تۆنێکی دەستکردی ئاسایی، زەردەخەنە بۆ"
+        },
+        {
+          "paddingLeft": 144,
+          "paddingRight": 0,
+          "maxWidth": "336px",
+          "fontWeight": "400",
+          "gapLeft": 144,
+          "gapRight": 29,
+          "sample": "(هێشتا زەردەخەنە دەکات، دووبارەی دەکاتەو"
+        },
+        {
+          "paddingLeft": 144,
+          "paddingRight": 0,
+          "maxWidth": "336px",
+          "fontWeight": "400",
+          "gapLeft": 144,
+          "gapRight": 86,
+          "sample": "(بە ئاسایی)"
+        },
+        {
+          "paddingLeft": 144,
+          "paddingRight": 0,
+          "maxWidth": "336px",
+          "fontWeight": "400",
+          "gapLeft": 144,
+          "gapRight": 48,
+          "sample": "(بە ئاژاوەیەکی نابەجێ)"
+        },
+        {
+          "paddingLeft": 144,
+          "paddingRight": 0,
+          "maxWidth": "336px",
+          "fontWeight": "400",
+          "gapLeft": 144,
+          "gapRight": 96,
+          "sample": "(بە سووکی)"
+        },
+        {
+          "paddingLeft": 144,
+          "paddingRight": 0,
+          "maxWidth": "336px",
+          "fontWeight": "400",
+          "gapLeft": 144,
+          "gapRight": 38,
+          "sample": "(بە چرپە، لەگەڵ خۆی، بە زەحمەت دەبیسترێت"
+        },
+        {
+          "paddingLeft": 144,
+          "paddingRight": 0,
+          "maxWidth": "336px",
+          "fontWeight": "400",
+          "gapLeft": 144,
+          "gapRight": 19,
+          "sample": "(بە هێمنی، لە پەنجەرەکەوە سەیری دواوە دە"
+        },
+        {
+          "paddingLeft": 144,
+          "paddingRight": 0,
+          "maxWidth": "336px",
+          "fontWeight": "400",
+          "gapLeft": 144,
+          "gapRight": 86,
+          "sample": "(بە لاچاوێک)"
+        }
+      ],
+      "dialogue": [
+        {
+          "paddingLeft": 96,
+          "paddingRight": 0,
+          "maxWidth": "336px",
+          "fontWeight": "400",
+          "gapLeft": 96,
+          "gapRight": 96,
+          "sample": "سڵاو کاک نالی..."
+        },
+        {
+          "paddingLeft": 96,
+          "paddingRight": 0,
+          "maxWidth": "336px",
+          "fontWeight": "400",
+          "gapLeft": 96,
+          "gapRight": 29,
+          "sample": "سڵاو نازی، بەیانیت باش."
+        },
+        {
+          "paddingLeft": 96,
+          "paddingRight": 0,
+          "maxWidth": "336px",
+          "fontWeight": "400",
+          "gapLeft": 96,
+          "gapRight": 29,
+          "sample": "سڵاو نالی. ئەبێت بڵێیت دوای نیوەڕۆت باش."
+        },
+        {
+          "paddingLeft": 96,
+          "paddingRight": 0,
+          "maxWidth": "336px",
+          "fontWeight": "400",
+          "gapLeft": 96,
+          "gapRight": 115,
+          "sample": "باشە دەی بڵێ."
+        },
+        {
+          "paddingLeft": 96,
+          "paddingRight": 0,
+          "maxWidth": "336px",
+          "fontWeight": "400",
+          "gapLeft": 96,
+          "gapRight": 19,
+          "sample": "مادەم تا ئێستا خەوتوی، كەواتە لەباخەکەیت"
+        },
+        {
+          "paddingLeft": 96,
+          "paddingRight": 0,
+          "maxWidth": "336px",
+          "fontWeight": "400",
+          "gapLeft": 96,
+          "gapRight": 115,
+          "sample": "بەڵێ لە باخم."
+        },
+        {
+          "paddingLeft": 96,
+          "paddingRight": 0,
+          "maxWidth": "336px",
+          "fontWeight": "400",
+          "gapLeft": 96,
+          "gapRight": 10,
+          "sample": "من و ئەدیب وایەین، هیچت پێویست نیە بۆت ب"
+        },
+        {
+          "paddingLeft": 96,
+          "paddingRight": 0,
+          "maxWidth": "336px",
+          "fontWeight": "400",
+          "gapLeft": 96,
+          "gapRight": 10,
+          "sample": "نا نا، هیچم ناوێ. سوپاس."
+        },
+        {
+          "paddingLeft": 96,
+          "paddingRight": 0,
+          "maxWidth": "336px",
+          "fontWeight": "400",
+          "gapLeft": 96,
+          "gapRight": 115,
+          "sample": "سڵاو کاک نالی."
+        },
+        {
+          "paddingLeft": 96,
+          "paddingRight": 0,
+          "maxWidth": "336px",
+          "fontWeight": "400",
+          "gapLeft": 96,
+          "gapRight": 38,
+          "sample": "سڵاو سەرچاو. ئەمە هەر لێرەماون؟"
+        },
+        {
+          "paddingLeft": 96,
+          "paddingRight": 0,
+          "maxWidth": "336px",
+          "fontWeight": "400",
+          "gapLeft": 96,
+          "gapRight": 58,
+          "sample": "بەڵێ. قەرارە هەموو کامێراکانی ئەمناوە سە"
+        },
+        {
+          "paddingLeft": 96,
+          "paddingRight": 0,
+          "maxWidth": "336px",
+          "fontWeight": "400",
+          "gapLeft": 96,
+          "gapRight": 0,
+          "sample": "بۆچی؟ ئەی نەیانووت بەغاز مردوون لە خەوا؟"
+        }
+      ],
+      "transition": [
+        {
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "maxWidth": "none",
+          "fontWeight": "400",
+          "gapLeft": 525,
+          "gapRight": 0,
+          "sample": "CUT"
+        },
+        {
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "maxWidth": "none",
+          "fontWeight": "400",
+          "gapLeft": 525,
+          "gapRight": 0,
+          "sample": "CUT"
+        },
+        {
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "maxWidth": "none",
+          "fontWeight": "400",
+          "gapLeft": 525,
+          "gapRight": 0,
+          "sample": "CUT"
+        },
+        {
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "maxWidth": "none",
+          "fontWeight": "400",
+          "gapLeft": 525,
+          "gapRight": 0,
+          "sample": "CUT"
+        },
+        {
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "maxWidth": "none",
+          "fontWeight": "400",
+          "gapLeft": 525,
+          "gapRight": 0,
+          "sample": "CUT"
+        },
+        {
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "maxWidth": "none",
+          "fontWeight": "400",
+          "gapLeft": 525,
+          "gapRight": 0,
+          "sample": "CUT"
+        },
+        {
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "maxWidth": "none",
+          "fontWeight": "400",
+          "gapLeft": 525,
+          "gapRight": 0,
+          "sample": "CUT"
+        },
+        {
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "maxWidth": "none",
+          "fontWeight": "400",
+          "gapLeft": 525,
+          "gapRight": 0,
+          "sample": "CUT"
+        },
+        {
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "maxWidth": "none",
+          "fontWeight": "400",
+          "gapLeft": 525,
+          "gapRight": 0,
+          "sample": "CUT"
+        },
+        {
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "maxWidth": "none",
+          "fontWeight": "400",
+          "gapLeft": 525,
+          "gapRight": 0,
+          "sample": "CUT"
+        },
+        {
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "maxWidth": "none",
+          "fontWeight": "400",
+          "gapLeft": 525,
+          "gapRight": 0,
+          "sample": "CUT"
+        },
+        {
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "maxWidth": "none",
+          "fontWeight": "400",
+          "gapLeft": 525,
+          "gapRight": 0,
+          "sample": "CUT"
+        }
+      ]
+    }
+  },
+  "table": [
+    {
+      "direction": "ltr",
+      "type": "sceneHeading",
+      "index": 0,
+      "expectedIn": "0.00",
+      "measuredIn": "0.000",
+      "deltaIn": 0
+    },
+    {
+      "direction": "ltr",
+      "type": "sceneHeading",
+      "index": 1,
+      "expectedIn": "0.00",
+      "measuredIn": "0.000",
+      "deltaIn": 0
+    },
+    {
+      "direction": "ltr",
+      "type": "sceneHeading",
+      "index": 2,
+      "expectedIn": "0.00",
+      "measuredIn": "0.000",
+      "deltaIn": 0
+    },
+    {
+      "direction": "ltr",
+      "type": "sceneHeading",
+      "index": 3,
+      "expectedIn": "0.00",
+      "measuredIn": "0.000",
+      "deltaIn": 0
+    },
+    {
+      "direction": "ltr",
+      "type": "sceneHeading",
+      "index": 4,
+      "expectedIn": "0.00",
+      "measuredIn": "0.000",
+      "deltaIn": 0
+    },
+    {
+      "direction": "ltr",
+      "type": "sceneHeading",
+      "index": 5,
+      "expectedIn": "0.00",
+      "measuredIn": "0.000",
+      "deltaIn": 0
+    },
+    {
+      "direction": "ltr",
+      "type": "sceneHeading",
+      "index": 6,
+      "expectedIn": "0.00",
+      "measuredIn": "0.000",
+      "deltaIn": 0
+    },
+    {
+      "direction": "ltr",
+      "type": "sceneHeading",
+      "index": 7,
+      "expectedIn": "0.00",
+      "measuredIn": "0.000",
+      "deltaIn": 0
+    },
+    {
+      "direction": "ltr",
+      "type": "sceneHeading",
+      "index": 8,
+      "expectedIn": "0.00",
+      "measuredIn": "0.000",
+      "deltaIn": 0
+    },
+    {
+      "direction": "ltr",
+      "type": "sceneHeading",
+      "index": 9,
+      "expectedIn": "0.00",
+      "measuredIn": "0.000",
+      "deltaIn": 0
+    },
+    {
+      "direction": "ltr",
+      "type": "sceneHeading",
+      "index": 10,
+      "expectedIn": "0.00",
+      "measuredIn": "0.000",
+      "deltaIn": 0
+    },
+    {
+      "direction": "ltr",
+      "type": "sceneHeading",
+      "index": 11,
+      "expectedIn": "0.00",
+      "measuredIn": "0.000",
+      "deltaIn": 0
+    },
+    {
+      "direction": "ltr",
+      "type": "action",
+      "index": 0,
+      "expectedIn": "0.00",
+      "measuredIn": "0.000",
+      "deltaIn": 0
+    },
+    {
+      "direction": "ltr",
+      "type": "action",
+      "index": 1,
+      "expectedIn": "0.00",
+      "measuredIn": "0.000",
+      "deltaIn": 0
+    },
+    {
+      "direction": "ltr",
+      "type": "action",
+      "index": 2,
+      "expectedIn": "0.00",
+      "measuredIn": "0.000",
+      "deltaIn": 0
+    },
+    {
+      "direction": "ltr",
+      "type": "action",
+      "index": 3,
+      "expectedIn": "0.00",
+      "measuredIn": "0.000",
+      "deltaIn": 0
+    },
+    {
+      "direction": "ltr",
+      "type": "action",
+      "index": 4,
+      "expectedIn": "0.00",
+      "measuredIn": "0.000",
+      "deltaIn": 0
+    },
+    {
+      "direction": "ltr",
+      "type": "action",
+      "index": 5,
+      "expectedIn": "0.00",
+      "measuredIn": "0.000",
+      "deltaIn": 0
+    },
+    {
+      "direction": "ltr",
+      "type": "action",
+      "index": 6,
+      "expectedIn": "0.00",
+      "measuredIn": "0.000",
+      "deltaIn": 0
+    },
+    {
+      "direction": "ltr",
+      "type": "action",
+      "index": 7,
+      "expectedIn": "0.00",
+      "measuredIn": "0.000",
+      "deltaIn": 0
+    },
+    {
+      "direction": "ltr",
+      "type": "action",
+      "index": 8,
+      "expectedIn": "0.00",
+      "measuredIn": "0.000",
+      "deltaIn": 0
+    },
+    {
+      "direction": "ltr",
+      "type": "action",
+      "index": 9,
+      "expectedIn": "0.00",
+      "measuredIn": "0.000",
+      "deltaIn": 0
+    },
+    {
+      "direction": "ltr",
+      "type": "action",
+      "index": 10,
+      "expectedIn": "0.00",
+      "measuredIn": "0.000",
+      "deltaIn": 0
+    },
+    {
+      "direction": "ltr",
+      "type": "action",
+      "index": 11,
+      "expectedIn": "0.00",
+      "measuredIn": "0.000",
+      "deltaIn": 0
+    },
+    {
+      "direction": "ltr",
+      "type": "character",
+      "index": 0,
+      "expectedIn": "2.00",
+      "measuredIn": "2.000",
+      "deltaIn": 0
+    },
+    {
+      "direction": "ltr",
+      "type": "character",
+      "index": 1,
+      "expectedIn": "2.00",
+      "measuredIn": "2.000",
+      "deltaIn": 0
+    },
+    {
+      "direction": "ltr",
+      "type": "character",
+      "index": 2,
+      "expectedIn": "2.00",
+      "measuredIn": "2.000",
+      "deltaIn": 0
+    },
+    {
+      "direction": "ltr",
+      "type": "character",
+      "index": 3,
+      "expectedIn": "2.00",
+      "measuredIn": "2.000",
+      "deltaIn": 0
+    },
+    {
+      "direction": "ltr",
+      "type": "character",
+      "index": 4,
+      "expectedIn": "2.00",
+      "measuredIn": "2.000",
+      "deltaIn": 0
+    },
+    {
+      "direction": "ltr",
+      "type": "character",
+      "index": 5,
+      "expectedIn": "2.00",
+      "measuredIn": "2.000",
+      "deltaIn": 0
+    },
+    {
+      "direction": "ltr",
+      "type": "character",
+      "index": 6,
+      "expectedIn": "2.00",
+      "measuredIn": "2.000",
+      "deltaIn": 0
+    },
+    {
+      "direction": "ltr",
+      "type": "character",
+      "index": 7,
+      "expectedIn": "2.00",
+      "measuredIn": "2.000",
+      "deltaIn": 0
+    },
+    {
+      "direction": "ltr",
+      "type": "character",
+      "index": 8,
+      "expectedIn": "2.00",
+      "measuredIn": "2.000",
+      "deltaIn": 0
+    },
+    {
+      "direction": "ltr",
+      "type": "character",
+      "index": 9,
+      "expectedIn": "2.00",
+      "measuredIn": "2.000",
+      "deltaIn": 0
+    },
+    {
+      "direction": "ltr",
+      "type": "character",
+      "index": 10,
+      "expectedIn": "2.00",
+      "measuredIn": "2.000",
+      "deltaIn": 0
+    },
+    {
+      "direction": "ltr",
+      "type": "character",
+      "index": 11,
+      "expectedIn": "2.00",
+      "measuredIn": "2.000",
+      "deltaIn": 0
+    },
+    {
+      "direction": "ltr",
+      "type": "parenthetical",
+      "index": 0,
+      "expectedIn": "1.50",
+      "measuredIn": "1.500",
+      "deltaIn": 0
+    },
+    {
+      "direction": "ltr",
+      "type": "parenthetical",
+      "index": 1,
+      "expectedIn": "1.50",
+      "measuredIn": "1.500",
+      "deltaIn": 0
+    },
+    {
+      "direction": "ltr",
+      "type": "parenthetical",
+      "index": 2,
+      "expectedIn": "1.50",
+      "measuredIn": "1.500",
+      "deltaIn": 0
+    },
+    {
+      "direction": "ltr",
+      "type": "parenthetical",
+      "index": 3,
+      "expectedIn": "1.50",
+      "measuredIn": "1.500",
+      "deltaIn": 0
+    },
+    {
+      "direction": "ltr",
+      "type": "parenthetical",
+      "index": 4,
+      "expectedIn": "1.50",
+      "measuredIn": "1.500",
+      "deltaIn": 0
+    },
+    {
+      "direction": "ltr",
+      "type": "parenthetical",
+      "index": 5,
+      "expectedIn": "1.50",
+      "measuredIn": "1.500",
+      "deltaIn": 0
+    },
+    {
+      "direction": "ltr",
+      "type": "parenthetical",
+      "index": 6,
+      "expectedIn": "1.50",
+      "measuredIn": "1.500",
+      "deltaIn": 0
+    },
+    {
+      "direction": "ltr",
+      "type": "parenthetical",
+      "index": 7,
+      "expectedIn": "1.50",
+      "measuredIn": "1.500",
+      "deltaIn": 0
+    },
+    {
+      "direction": "ltr",
+      "type": "parenthetical",
+      "index": 8,
+      "expectedIn": "1.50",
+      "measuredIn": "1.500",
+      "deltaIn": 0
+    },
+    {
+      "direction": "ltr",
+      "type": "parenthetical",
+      "index": 9,
+      "expectedIn": "1.50",
+      "measuredIn": "1.500",
+      "deltaIn": 0
+    },
+    {
+      "direction": "ltr",
+      "type": "parenthetical",
+      "index": 10,
+      "expectedIn": "1.50",
+      "measuredIn": "1.500",
+      "deltaIn": 0
+    },
+    {
+      "direction": "ltr",
+      "type": "parenthetical",
+      "index": 11,
+      "expectedIn": "1.50",
+      "measuredIn": "1.500",
+      "deltaIn": 0
+    },
+    {
+      "direction": "ltr",
+      "type": "dialogue",
+      "index": 0,
+      "expectedIn": "1.00",
+      "measuredIn": "1.000",
+      "deltaIn": 0
+    },
+    {
+      "direction": "ltr",
+      "type": "dialogue",
+      "index": 1,
+      "expectedIn": "1.00",
+      "measuredIn": "1.000",
+      "deltaIn": 0
+    },
+    {
+      "direction": "ltr",
+      "type": "dialogue",
+      "index": 2,
+      "expectedIn": "1.00",
+      "measuredIn": "1.000",
+      "deltaIn": 0
+    },
+    {
+      "direction": "ltr",
+      "type": "dialogue",
+      "index": 3,
+      "expectedIn": "1.00",
+      "measuredIn": "1.000",
+      "deltaIn": 0
+    },
+    {
+      "direction": "ltr",
+      "type": "dialogue",
+      "index": 4,
+      "expectedIn": "1.00",
+      "measuredIn": "1.000",
+      "deltaIn": 0
+    },
+    {
+      "direction": "ltr",
+      "type": "dialogue",
+      "index": 5,
+      "expectedIn": "1.00",
+      "measuredIn": "1.000",
+      "deltaIn": 0
+    },
+    {
+      "direction": "ltr",
+      "type": "dialogue",
+      "index": 6,
+      "expectedIn": "1.00",
+      "measuredIn": "1.000",
+      "deltaIn": 0
+    },
+    {
+      "direction": "ltr",
+      "type": "dialogue",
+      "index": 7,
+      "expectedIn": "1.00",
+      "measuredIn": "1.000",
+      "deltaIn": 0
+    },
+    {
+      "direction": "ltr",
+      "type": "dialogue",
+      "index": 8,
+      "expectedIn": "1.00",
+      "measuredIn": "1.000",
+      "deltaIn": 0
+    },
+    {
+      "direction": "ltr",
+      "type": "dialogue",
+      "index": 9,
+      "expectedIn": "1.00",
+      "measuredIn": "1.000",
+      "deltaIn": 0
+    },
+    {
+      "direction": "ltr",
+      "type": "dialogue",
+      "index": 10,
+      "expectedIn": "1.00",
+      "measuredIn": "1.000",
+      "deltaIn": 0
+    },
+    {
+      "direction": "ltr",
+      "type": "dialogue",
+      "index": 11,
+      "expectedIn": "1.00",
+      "measuredIn": "1.000",
+      "deltaIn": 0
+    },
+    {
+      "direction": "ltr",
+      "type": "transition",
+      "index": 0,
+      "expectedIn": "flush-end",
+      "measuredIn": "endGap=0px",
+      "deltaIn": null
+    },
+    {
+      "direction": "ltr",
+      "type": "transition",
+      "index": 1,
+      "expectedIn": "flush-end",
+      "measuredIn": "endGap=0px",
+      "deltaIn": null
+    },
+    {
+      "direction": "ltr",
+      "type": "transition",
+      "index": 2,
+      "expectedIn": "flush-end",
+      "measuredIn": "endGap=0px",
+      "deltaIn": null
+    },
+    {
+      "direction": "ltr",
+      "type": "transition",
+      "index": 3,
+      "expectedIn": "flush-end",
+      "measuredIn": "endGap=0px",
+      "deltaIn": null
+    },
+    {
+      "direction": "ltr",
+      "type": "transition",
+      "index": 4,
+      "expectedIn": "flush-end",
+      "measuredIn": "endGap=0px",
+      "deltaIn": null
+    },
+    {
+      "direction": "ltr",
+      "type": "transition",
+      "index": 5,
+      "expectedIn": "flush-end",
+      "measuredIn": "endGap=0px",
+      "deltaIn": null
+    },
+    {
+      "direction": "ltr",
+      "type": "transition",
+      "index": 6,
+      "expectedIn": "flush-end",
+      "measuredIn": "endGap=0px",
+      "deltaIn": null
+    },
+    {
+      "direction": "ltr",
+      "type": "transition",
+      "index": 7,
+      "expectedIn": "flush-end",
+      "measuredIn": "endGap=0px",
+      "deltaIn": null
+    },
+    {
+      "direction": "ltr",
+      "type": "transition",
+      "index": 8,
+      "expectedIn": "flush-end",
+      "measuredIn": "endGap=0px",
+      "deltaIn": null
+    },
+    {
+      "direction": "ltr",
+      "type": "transition",
+      "index": 9,
+      "expectedIn": "flush-end",
+      "measuredIn": "endGap=0px",
+      "deltaIn": null
+    },
+    {
+      "direction": "ltr",
+      "type": "transition",
+      "index": 10,
+      "expectedIn": "flush-end",
+      "measuredIn": "endGap=0px",
+      "deltaIn": null
+    },
+    {
+      "direction": "ltr",
+      "type": "transition",
+      "index": 11,
+      "expectedIn": "flush-end",
+      "measuredIn": "endGap=0px",
+      "deltaIn": null
+    }
+  ]
+}

@@ -366,7 +366,7 @@ dismissed — once measured.
 | SW-20 | Structure | Scene navigator sync | PARTIAL | P1 | Test: navigator tracks document edits | Editor — test | Navigator panel + `scrollToScene` test exist |
 | SW-21 | Structure | Scene reorder rules | UNKNOWN | P2 | Confirm reorder support + rules | Editor — confirm | Not found |
 | SW-22 | Profiles | Screenplay conventions / profile support | PARTIAL | P1 | Test: profile selection drives layout | Editor — verify | Profile metadata structure defined; placeholders |
-| SW-23 | Profiles | RTL screenplay convention support | PARTIAL | P0 | RTL profile drives correct RTL conventions | Manuscript — verify RTL profile | RTL profile drives direction; full conventions unverified |
+| SW-23 | Profiles | RTL screenplay convention support | PARTIAL | P0 | RTL profile drives correct RTL conventions | Manuscript — verify RTL profile | S4.5 (2026-07-29): the conventions ARE now verified — the profile drives them through **one direction-agnostic resolver, no forked layout model** (`renderer/js/framework/layout-profile.js:64-92` is a single width table; `renderer/css/editor-prosemirror.css:2484-2519` is logical-property-only with no `[dir="rtl"]` magnitude override). Decisive test: flipping `screenplayProfile.direction` to `ltr` on a copy reproduces the **identical** 2.0in / 1.5in / 1.0in magnitudes mirrored to the opposite edge (all deltas **0.000in**), and a brand-new RTL doc reproduces them with zero manual tweaking. Inputs RTL-04…10, 12, 13 all TRUE. **Held at PARTIAL solely by RTL-11** (PDF text layer ~40% NUL — GAP-4-1). Spec `tests/e2e/rtl/rtl-profile-drives-convention.spec.js` 3/3; `docs/plans/evidence/S4.5-sw23-verdict.md` |
 
 ## Section 6 — Review toolbox
 

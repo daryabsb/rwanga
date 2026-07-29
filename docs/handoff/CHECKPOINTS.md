@@ -5,6 +5,53 @@ Template & rules: `PROTOCOL.md`.
 
 ---
 
+## 2026-07-29 · S4.5 CLOSED — **PHASE 4 COMPLETE**; SW-23 verdict = PARTIAL (GAP-4-1 alone)
+- **Did:** Executed slice S4.5, the SW-23 roll-up that closes Phase 4. SW-23 asks whether the RTL
+  **profile** actually drives the convention or merely sets a direction flag. New spec
+  `rwanga-editor/tests/e2e/rtl/rtl-profile-drives-convention.spec.js` (**3/3**) answers it by
+  measurement, and the whole `tests/e2e/rtl/` folder was re-run **9/9 green in file order**
+  (orchestrator-verified, 25.3 s, no orphaned Electron processes).
+- **(b) THE DECISIVE TEST — PASSES.** Flipping `metadata.screenplayProfile.direction` from `rtl` to
+  `ltr` on a fixture COPY reproduces the **identical magnitudes mirrored to the opposite edge**:
+  sceneHeading/action 0.000in, character **2.000in**, parenthetical **1.500in** (box 3.5in), dialogue
+  **1.000in** (box 3.5in), transition flush to the reading-end — **every delta 0.000in** against the
+  RTL control. A brand-new *synthetic* Kurdish/RTL `.rga` (authored in the test, not derived from the
+  fixture) reproduces the same numbers with **zero manual tweaking**. S4.1 called this "the strongest
+  single test in Phase 4"; it confirms the mirror is a **reflection, not a second implementation**.
+- **(c) No forked layout model.** `renderer/js/framework/layout-profile.js:64-92`
+  (`HOLLYWOOD_DEFAULTS.blockWidthsIn`) is a single direction-agnostic width table;
+  `renderer/css/editor-prosemirror.css:2484-2519` uses logical properties
+  (`padding-inline-start`, `text-align: end`) with **no `[dir="rtl"]` override carrying a different
+  magnitude**. Two direction-keyed values exist and neither is a violation:
+  `RTL_PRINT_LEADING = 1.3` (:108 — the ratified PP-16 leading exception, convention §6) and
+  `_charsPerInch` (:127-131 — a font-metric input to pagination wrap, not a geometry width).
+- **(d) Vocabulary observations recorded, not ticketed:** transitions still render the untranslated
+  `CUT`, and the fixture's prose carries Eastern-Arabic numerals while the convention defaults to
+  Western-Arabic 0–9. Both are locale/vocabulary inputs for a future slice (Phase 7 territory), not
+  launch-blocking geometry defects — recorded per protocol rather than silently accepted.
+- **Verdict — SW-23 = PARTIAL** (unchanged status, but for a completely different and much narrower
+  reason). It was PARTIAL because "full conventions unverified"; the conventions are now **verified**,
+  and it is held at PARTIAL **solely by RTL-11**, itself PARTIAL under **GAP-4-1** (exported PDF text
+  layer ~40.2% NUL). SW-23 flips TRUE the moment GAP-4-1 is fixed — nothing else stands in its way.
+  The checklist row was rewritten to say exactly that, so the PARTIAL is no longer ambiguous.
+- **Evidence:** `docs/plans/evidence/S4.5-sw23-verdict.md` (RTL-04…13 outcome table + side-by-side
+  RTL/LTR magnitude tables + the source-level finding with file:line), raw
+  `S4.5-{ltr-flip,rtl-control,new-doc}-measurements.json`, and 3 screenshots `S4.5-*.png`.
+- **Status deltas:** SW-23 row rewritten (PARTIAL → PARTIAL, blocker narrowed to GAP-4-1 alone).
+  Launch-gate counts unchanged at **47 TRUE · 11 PARTIAL · 1 UNKNOWN · 7 FALSE** (19 open of 66).
+  **Phase 4 (RTL QA) is COMPLETE** — S4.1 → S4.5 all ✅.
+- **Gaps surfaced:** **none new.** GAP-4-1 remains the sole open item from Phase 4, and this slice
+  re-confirms it is the only thing blocking SW-23 rather than widening its scope.
+- **Process note (orchestrator):** an apparent "spec fails to collect" result during verification was
+  traced to the orchestrator's own shell running `npx` from the repo root instead of
+  `rwanga-editor/` — not a defect in the spec. Recorded so a later reader does not re-chase it.
+- **Next action:** **S7.1 — UI-localisation architecture brief (writing only)**, opening **Phase 7**.
+  Phase 7 precedes Phase 5 by design: it is a BUILD phase with a long external lead time (native
+  Kurdish/Arabic reviewers), while Phase 5 geometry QA is a short sweep. ⚠ Still waiting on the user:
+  a named **Kurdish (Sorani) native reviewer** for S7.5.
+
+---
+
 ## 2026-07-29 · S4.4 CLOSED — bidi audit PASSED, RTL-12 + RTL-13 → TRUE
 - **Did:** Executed slice S4.4, the Phase-4 bidi audit, against the S4.1 protocol's measurable
   criteria. New Playwright spec `rwanga-editor/tests/e2e/rtl/rtl-bidi.spec.js` (**2/2**, ~20 s)

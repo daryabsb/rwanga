@@ -1,0 +1,124 @@
+{
+  "m": {
+    "direction": "rtl",
+    "sheets": 1,
+    "blocks": {
+      "sceneHeading": [
+        {
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "maxWidth": "none",
+          "fontWeight": "700",
+          "gapLeft": 379,
+          "gapRight": 0,
+          "sample": "1ناوەوە ماڵێکی نوێ — رۆژ"
+        }
+      ],
+      "action": [
+        {
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "maxWidth": "none",
+          "fontWeight": "400",
+          "gapLeft": 269,
+          "gapRight": 0,
+          "sample": "ئەمە دیمەنێکی نوێیە کە بۆ تاقیکردنەوە نو"
+        }
+      ],
+      "character": [
+        {
+          "paddingLeft": 0,
+          "paddingRight": 192,
+          "maxWidth": "none",
+          "fontWeight": "400",
+          "gapLeft": 338,
+          "gapRight": 192,
+          "sample": "نوێژ"
+        }
+      ],
+      "parenthetical": [
+        {
+          "paddingLeft": 0,
+          "paddingRight": 144,
+          "maxWidth": "336px",
+          "fontWeight": "400",
+          "gapLeft": 132,
+          "gapRight": 144,
+          "sample": "(بە هێمنی)"
+        }
+      ],
+      "dialogue": [
+        {
+          "paddingLeft": 0,
+          "paddingRight": 96,
+          "maxWidth": "336px",
+          "fontWeight": "400",
+          "gapLeft": 67,
+          "gapRight": 96,
+          "sample": "ئەمە قسەیەکی تاقیکارییە بۆ پشتڕاستکردنەو"
+        }
+      ],
+      "transition": [
+        {
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "maxWidth": "none",
+          "fontWeight": "400",
+          "gapLeft": 0,
+          "gapRight": 531,
+          "sample": "کات"
+        }
+      ]
+    }
+  },
+  "table": [
+    {
+      "direction": "rtl",
+      "type": "sceneHeading",
+      "index": 0,
+      "expectedIn": "0.00",
+      "measuredIn": "0.000",
+      "deltaIn": 0
+    },
+    {
+      "direction": "rtl",
+      "type": "action",
+      "index": 0,
+      "expectedIn": "0.00",
+      "measuredIn": "0.000",
+      "deltaIn": 0
+    },
+    {
+      "direction": "rtl",
+      "type": "character",
+      "index": 0,
+      "expectedIn": "2.00",
+      "measuredIn": "2.000",
+      "deltaIn": 0
+    },
+    {
+      "direction": "rtl",
+      "type": "parenthetical",
+      "index": 0,
+      "expectedIn": "1.50",
+      "measuredIn": "1.500",
+      "deltaIn": 0
+    },
+    {
+      "direction": "rtl",
+      "type": "dialogue",
+      "index": 0,
+      "expectedIn": "1.00",
+      "measuredIn": "1.000",
+      "deltaIn": 0
+    },
+    {
+      "direction": "rtl",
+      "type": "transition",
+      "index": 0,
+      "expectedIn": "flush-end",
+      "measuredIn": "endGap=0px",
+      "deltaIn": null
+    }
+  ]
+}
